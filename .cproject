@@ -23,6 +23,9 @@
 							<builder id="org.omnetpp.cdt.gnu.builder.debug.1100965696" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="OMNeT++ Make Builder (opp_makemake)" superClass="org.omnetpp.cdt.gnu.builder.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1442658178" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.897499997" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+								<option id="gnu.cpp.compiler.option.include.paths.1293207798" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ARA-Simulation/include}&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1712969498" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.130537886" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
@@ -37,22 +40,6 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1881320024" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.628213403" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-						</toolChain>
-					</folderInfo>
-					<folderInfo id="org.omnetpp.cdt.gnu.config.debug.2003942416.1886541883" name="/" resourcePath="src">
-						<toolChain id="org.omnetpp.cdt.gnu.toolchain.debug.637576815" name="GCC for OMNeT++" superClass="org.omnetpp.cdt.gnu.toolchain.debug" unusedChildren="">
-							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1322114091" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.1442658178"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.507276544" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base.897499997">
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.513991204" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1246826868" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base.130537886">
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.522344301" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1927904536" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base.375672675"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1326049410" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base.979128767"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1216946711" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base.1881320024">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1069725851" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
@@ -107,6 +94,7 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="simulations"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="tests"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -1,12 +1,13 @@
 CXX = g++
-INCLUDES= -I./
-CXXFLAGS = -g $(INCLUDES)
+INCLUDES= -I../include
+CFLAGS = -g $(INCLUDES)
 LINKFLAGS= -lcppunit
-COMPILED_SRC = ../out/$(CONFIGNAME)/src/*.o
+COMPILED_SRC = $(shell find ../out/$(CONFIGNAME)/src/ -type f -name '*.o')
 TEST_SRC = ./*.cpp
+INCLUDE_PATH = -I../include
 
 all: $(TEST_SRC)
-	$(CXX) $(CXXFLAGS) -o runAllTests TestRunner.cpp $(COMPILED_SRC) $(LINKFLAGS) $(LINKFLAGSLOG4) $(LIBLOG)
+	$(CXX) $(CFLAGS) -o runAllTests TestRunner.cpp $(COMPILED_SRC) $(LINKFLAGS) $(LINKFLAGSLOG4) $(LIBLOG)
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@

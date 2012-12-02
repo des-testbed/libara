@@ -9,10 +9,12 @@
 
 using namespace CppUnit;
 
+#include "./OMNeTPacketTest.h"
 
-#include "./TestBasicMath.cpp"
+using namespace ARA;
+using namespace std;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( TestBasicMath );
+CPPUNIT_TEST_SUITE_REGISTRATION( OMNeTPacketTest );
 
 
 int main(int argc, char* argv[])
