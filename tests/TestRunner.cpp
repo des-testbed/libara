@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     testrunner.run(testresult);
 
     // output results in compiler-format
-    CPPUNIT_NS::CompilerOutputter compileroutputter(&collectedresults, std::cerr);
+    CPPUNIT_NS::CompilerOutputter compileroutputter(&collectedresults, std::cout);
     compileroutputter.write ();
 
     // Output XML for Jenkins CPPunit plugin
