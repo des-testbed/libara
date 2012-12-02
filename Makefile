@@ -1,10 +1,19 @@
 all: checkmakefiles
 	cd src && $(MAKE)
 
+test: all
+	cd tests && $(MAKE)
+	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
+	./tests/runAllTests
+
+testclean:
+	cd tests && $(MAKE) clean	
+
 clean: checkmakefiles
 	cd src && $(MAKE) clean
 
-cleanall: checkmakefiles
+cleanall:
+	checkmakefiles
 	cd src && $(MAKE) MODE=release clean
 	cd src && $(MAKE) MODE=debug clean
 	rm -f src/Makefile
