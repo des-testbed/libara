@@ -1,16 +1,34 @@
 CXX = g++
-INCLUDES= -I../include
-CFLAGS = -g $(INCLUDES)
+INCLUDE_PATH= -I../include
+CFLAGS = -g $(INCLUDE_PATH)
 LINKFLAGS= -lcppunit
-COMPILED_SRC = $(shell find ../out/$(CONFIGNAME)/src/ -type f -name '*.o')
-TEST_SRC = ./*.cpp
-INCLUDE_PATH = -I../include
 
-all: $(TEST_SRC)
+# Output directory
+ifeq ("$(CONFIGNAME)","")
+CONFIGNAME = 'gcc-debug'
+endif
+PROJECT_OUTPUT_DIR = ../out
+PROJECTRELATIVE_PATH = src
+OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
+
+TEST_SRC = ./*.cpp
+COMPILED_SRC = $(shell find $(OUTPUT_DIR) -type f -name '*.o')
+
+all: $(TEST_SRC)	
 	$(CXX) $(CFLAGS) -o runAllTests TestRunner.cpp $(COMPILED_SRC) $(LINKFLAGS) $(LINKFLAGSLOG4) $(LIBLOG)
 
-.cpp.o:
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+.cpp.o: checkcppunit
+	$(CXX) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f *.o TestResults.xml runAllTests
+	
+checkcppunit:
+	@if ! command -v cppunit-config >/dev/null ; then \
+	echo >&2; \
+	echo '======================================================================='>&2; \
+	echo 'ERROR: It seems like CppUnit is not installed on this system.'>&2; \
+	echo '======================================================================='>&2; \
+	echo>&2; \
+	exit 1; \
+	fi
