@@ -1,25 +1,23 @@
 all: checkmakefiles
-	cd src && $(MAKE)
+	@echo -e "\n~~~ BUILDING SOURCE ~~~~~~~~~~~~~~~~~\n"
+	@cd src && $(MAKE)
 
 test: all
-	cd tests && $(MAKE)
+	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
+	@cd tests && $(MAKE)
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
 	@if ./tests/runAllTests; then \
      echo -e "\n~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi
-	
-testclean:
-	cd tests && $(MAKE) clean	
+    fi	
 
 clean: checkmakefiles
-	cd src && $(MAKE) clean
-	cd tests && $(MAKE) clean
+	@cd src && $(MAKE) clean
+	@cd tests && $(MAKE) clean
 
-cleanall:
-	checkmakefiles
-	cd src && $(MAKE) MODE=release clean
-	cd src && $(MAKE) MODE=debug clean
-	cd tests && $(MAKE) clean
+cleanall: checkmakefiles
+	@cd src && $(MAKE) MODE=release clean
+	@cd src && $(MAKE) MODE=debug clean
+	@cd tests && $(MAKE) clean
 	rm -f src/Makefile
 
 makefiles:
