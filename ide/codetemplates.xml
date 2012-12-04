@@ -46,9 +46,16 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
+SUITE(${file_base}) {
 
-// TODO write the first test of ${file_base}
-TEST(Succeed) {
-    CHECK(true);
-}
+    TEST(YourTestName) {
+        //TODO write the first test of ${file_base}
+        CHECK(true);
+    }
+
+    TEST(YourOtherTestName) {
+        //TODO write the first test of
+        CHECK(true);
+    }
+  }
 </template></templates>

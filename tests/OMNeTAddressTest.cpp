@@ -23,8 +23,15 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
+SUITE(OMNeTAddressTest) {
 
-// TODO write the first test of OMNeTAddressTest2
-TEST(Succeed) {
-    CHECK(true);
-}
+    TEST(YourTestName) {
+        //TODO write the first test of OMNeTAddressTest
+        CHECK(true);
+    }
+
+    TEST(YourOtherTestName) {
+        //TODO write the first test of
+        CHECK(true);
+    }
+  }
