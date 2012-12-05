@@ -24,7 +24,7 @@ clean:
 	rm -f *.o TestResults.xml runAllTests
 	
 check_if_unittest_is_installed:
-	@if ! [ -e "/usr/include/libUnitTest++.a" ]; then \
+	@if ! [ -e "/lib/libUnitTest++.a" ]; then \
 	echo >&2; \
 	echo '======================================================================='>&2; \
 	echo 'ERROR: It seems like UnitTest++ library is not installed on this system'>&2; \
