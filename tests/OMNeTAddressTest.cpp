@@ -23,6 +23,7 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
+#include <UnitTest++.h>
 #include "OMNeTAddress.h"
 
 using namespace ARA;
