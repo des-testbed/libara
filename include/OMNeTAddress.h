@@ -23,31 +23,23 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "OMNeTAddress.h"
+#ifndef OMNETADDRESS_H_
+#define OMNETADDRESS_H_
 
-using namespace ARA;
+#include "Address.h"
 
-SUITE(OMNeTAddressTest) {
+namespace ARA {
 
-    TEST(testGetAddress) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.getAddress() == 123);
-    }
+class OMNeTAddress : public Address {
+public:
+    OMNeTAddress(int address);
+    int getAddress();
+    bool equals(Address* otherAddress);
 
-    TEST(testEquality) {
-        OMNeTAddress address1 = OMNeTAddress(123);
-        CHECK(address1.equals(&address1));
+private:
+    int address;
 
-        OMNeTAddress sameAddress = OMNeTAddress(123);
-        CHECK(address1.equals(&sameAddress));
+};
 
-        OMNeTAddress address2 = OMNeTAddress(456);
-        CHECK(address1.equals(&address2) == false);
-    }
-
-    TEST(testEqualityWithNull) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.equals(0) == false);
-    }
-
-}
+} /* namespace ARA */
+#endif /* OMNETADDRESS_H_ */

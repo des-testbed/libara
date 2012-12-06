@@ -23,31 +23,28 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
+#include <cstddef>
 #include "OMNeTAddress.h"
 
-using namespace ARA;
+namespace ARA {
 
-SUITE(OMNeTAddressTest) {
-
-    TEST(testGetAddress) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.getAddress() == 123);
-    }
-
-    TEST(testEquality) {
-        OMNeTAddress address1 = OMNeTAddress(123);
-        CHECK(address1.equals(&address1));
-
-        OMNeTAddress sameAddress = OMNeTAddress(123);
-        CHECK(address1.equals(&sameAddress));
-
-        OMNeTAddress address2 = OMNeTAddress(456);
-        CHECK(address1.equals(&address2) == false);
-    }
-
-    TEST(testEqualityWithNull) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.equals(0) == false);
-    }
-
+OMNeTAddress::OMNeTAddress(int address) {
+    this->address = address;
 }
+
+int OMNeTAddress::getAddress() {
+    return this->address;
+}
+
+bool OMNeTAddress::equals(Address* otherAddress) {
+    // TODO review this solution and check whether dynamic_cast is a good solution to this
+    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
+    if(otherOMNeTAddress == NULL) {
+        return false;
+    }
+    else {
+        return otherOMNeTAddress->address == this->address;
+    }
+}
+
+} /* namespace ARA */

@@ -23,31 +23,22 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "OMNeTAddress.h"
+#ifndef ADDRESS_H_
+#define ADDRESS_H_
 
-using namespace ARA;
+namespace ARA {
 
-SUITE(OMNeTAddressTest) {
+/**
+ * TODO write Interface description
+ */
+class Address {
+public:
+    virtual ~Address() {}
 
-    TEST(testGetAddress) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.getAddress() == 123);
-    }
+    virtual bool equals(Address* otherAddress) = 0;
 
-    TEST(testEquality) {
-        OMNeTAddress address1 = OMNeTAddress(123);
-        CHECK(address1.equals(&address1));
+    //TODO may overloading operator= would be a better solution?
+};
 
-        OMNeTAddress sameAddress = OMNeTAddress(123);
-        CHECK(address1.equals(&sameAddress));
-
-        OMNeTAddress address2 = OMNeTAddress(456);
-        CHECK(address1.equals(&address2) == false);
-    }
-
-    TEST(testEqualityWithNull) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.equals(0) == false);
-    }
-
-}
+} /* namespace ARA */
+#endif /* ADDRESS_H_ */
