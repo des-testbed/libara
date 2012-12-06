@@ -21,7 +21,7 @@ cleanall: checkmakefiles
 	rm -f src/Makefile
 
 makefiles:
-	cd src && opp_makemake -f --deep
+	cd src && opp_makemake -f --deep -I ../include
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
