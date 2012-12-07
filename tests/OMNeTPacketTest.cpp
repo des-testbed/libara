@@ -39,9 +39,6 @@ SUITE(OMNeTPacketTest) {
 
         OMNeTPacket packet = OMNeTPacket(&source, &destination, type, seqNr, payload, sizeof(payload));
 
-        // TODO: Why does the next line not work?
-        // Address foo = packet.getSource();
-
         CHECK(packet.getSource()->equals(&source));
         CHECK(packet.getDestination()->equals(&destination));
         CHECK(packet.getType() == type);

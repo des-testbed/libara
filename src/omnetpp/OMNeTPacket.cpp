@@ -19,6 +19,10 @@ OMNeTPacket::OMNeTPacket(OMNeTAddress* source, OMNeTAddress* destination, unsign
     this->hopCount = hopCount;
 }
 
+OMNeTPacket::~OMNeTPacket() {
+
+}
+
 Address* OMNeTPacket::getSource() {
     return source;
 }

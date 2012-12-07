@@ -42,7 +42,7 @@ public:
 	virtual unsigned int getType() = 0;
 	virtual unsigned int getSequenceNumber() = 0;
 	virtual unsigned int getHopCount() = 0;
-	virtual char* getPayload() = 0;
+	virtual const char* getPayload() = 0;
 	virtual unsigned int getPayloadLength() = 0;
 };
 

@@ -13,10 +13,11 @@
 
 namespace ARA {
 
-class OMNeTPacket {
+class OMNeTPacket : public Packet {
 public:
     //TODO We do not need all the size of an unsigned int to store the type (one byte would be sufficient)
     OMNeTPacket(OMNeTAddress* source, OMNeTAddress* destination, unsigned int type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount = 0);
+    ~OMNeTPacket();
 
     Address* getSource();
     Address* getDestination();
