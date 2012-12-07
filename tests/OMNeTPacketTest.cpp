@@ -23,24 +23,30 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef OMNETADDRESS_H_
-#define OMNETADDRESS_H_
+#include <UnitTest++.h>
+#include "OMNeTPacket.h"
 
-#include "Address.h"
+using namespace ARA;
 
-namespace ARA {
+SUITE(OMNeTPacketTest) {
 
-class OMNeTAddress : public Address {
-public:
-    OMNeTAddress(int address);
-    bool equals(Address* otherAddress);
+    TEST(testCreate) {
+        OMNeTAddress source = OMNeTAddress(1);
+        OMNeTAddress destination = OMNeTAddress(2);
+        unsigned int type = PacketType::DATA;
+        int seqNr = 1;
+        const char* payload = "Hello ARA World";
 
-    int getAddress();
+        //OMNeTPacket packet = OMNeTPacket(&source, &destination, type, seqNr, payload, sizeof(payload));
+    //    Address foo = packet.getSource();
+//CHECK(foo == source);
+//        CHECK(packet.getDestination() == destination);
+        //CHECK(packet.getType() == type);
+        //CHECK(packet.getSequenceNumber() == seqNr);
 
-private:
-    int address;
+        // TODO howto check payload?
 
-};
+       // CHECK(packet.getHopCount() == 0);
+    }
 
-} /* namespace ARA */
-#endif /* OMNETADDRESS_H_ */
+  }
