@@ -37,16 +37,19 @@ SUITE(OMNeTPacketTest) {
         int seqNr = 1;
         const char* payload = "Hello ARA World";
 
-        //OMNeTPacket packet = OMNeTPacket(&source, &destination, type, seqNr, payload, sizeof(payload));
-    //    Address foo = packet.getSource();
-//CHECK(foo == source);
-//        CHECK(packet.getDestination() == destination);
-        //CHECK(packet.getType() == type);
-        //CHECK(packet.getSequenceNumber() == seqNr);
+        OMNeTPacket packet = OMNeTPacket(&source, &destination, type, seqNr, payload, sizeof(payload));
 
-        // TODO howto check payload?
+        // TODO: Why does the next line not work?
+        // Address foo = packet.getSource();
 
-       // CHECK(packet.getHopCount() == 0);
+        CHECK(packet.getSource()->equals(&source));
+        CHECK(packet.getDestination()->equals(&destination));
+        CHECK(packet.getType() == type);
+        CHECK(packet.getSequenceNumber() == seqNr);
+        CHECK(packet.getHopCount() == 0);
+
+        CHECK(packet.getPayloadLength() == sizeof(payload));
+        CHECK_EQUAL(packet.getPayload(), payload);
     }
 
   }
