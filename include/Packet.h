@@ -23,24 +23,28 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef OMNETADDRESS_H_
-#define OMNETADDRESS_H_
+#ifndef PACKET_H_
+#define PACKET_H_
 
 #include "Address.h"
 
 namespace ARA {
 
-class OMNeTAddress : public Address {
+/**
+ * TODO write Interface description
+ */
+class Packet {
 public:
-    OMNeTAddress(int address);
-    bool equals(Address* otherAddress);
+    virtual ~Packet() {}
 
-    int getAddress();
-
-private:
-    int address;
-
+	virtual Address* getSource() = 0;
+	virtual Address* getDestination() = 0;
+	virtual unsigned int getType() = 0;
+	virtual unsigned int getSequenceNumber() = 0;
+	virtual unsigned int getHopCount() = 0;
+	virtual char* getPayload() = 0;
+	virtual unsigned int getPayloadLength() = 0;
 };
 
 } /* namespace ARA */
-#endif /* OMNETADDRESS_H_ */
+#endif // PACKET_H_
