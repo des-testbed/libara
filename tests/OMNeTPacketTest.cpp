@@ -41,12 +41,30 @@ SUITE(OMNeTPacketTest) {
 
         CHECK(packet.getSource()->equals(&source));
         CHECK(packet.getDestination()->equals(&destination));
-        CHECK(packet.getType() == type);
-        CHECK(packet.getSequenceNumber() == seqNr);
-        CHECK(packet.getHopCount() == 0);
+        CHECK_EQUAL(type, packet.getType());
+        CHECK_EQUAL(seqNr, packet.getSequenceNumber());
+        CHECK_EQUAL(0, packet.getHopCount());
 
-        CHECK(packet.getPayloadLength() == sizeof(payload));
-        CHECK_EQUAL(packet.getPayload(), payload);
+        CHECK_EQUAL(sizeof(payload), packet.getPayloadLength());
+        CHECK_EQUAL(payload, packet.getPayload());
     }
 
+    TEST(testCreateWithHopCount) {
+        OMNeTAddress source = OMNeTAddress(1);
+        OMNeTAddress destination = OMNeTAddress(2);
+        unsigned int type = PacketType::DATA;
+        int seqNr = 1;
+        const char* payload = "Hello ARA World";
+        unsigned int hopCount = 123;
+
+        OMNeTPacket packet = OMNeTPacket(&source, &destination, type, seqNr, payload, sizeof(payload), hopCount);
+
+        CHECK(packet.getSource()->equals(&source));
+        CHECK(packet.getDestination()->equals(&destination));
+        CHECK_EQUAL(type, packet.getType());
+        CHECK_EQUAL(seqNr, packet.getSequenceNumber());
+        CHECK_EQUAL(sizeof(payload), packet.getPayloadLength());
+        CHECK_EQUAL(packet.getPayload(), payload);
+        CHECK_EQUAL(hopCount, packet.getHopCount());
+    }
   }
