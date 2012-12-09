@@ -25,6 +25,7 @@
 
 #include <UnitTest++.h>
 #include "OMNeTPacket.h"
+#include "PacketType.h"
 
 using namespace ARA;
 

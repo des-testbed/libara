@@ -26,6 +26,8 @@
 #include <UnitTest++.h>
 #include "PacketType.h"
 
+using namespace ARA;
+
 SUITE(PacketTypeTest) {
 
     TEST(testIsAntPacket) {
