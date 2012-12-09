@@ -8,5 +8,7 @@ src/ARA-Simulation
 src/Makefile
 
 # Test output files #
+tests/*.o
 tests/TestResults.xml
 tests/runAllTests
+
