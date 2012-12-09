@@ -23,27 +23,52 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include "PacketMock.h"
+#include "PacketType.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(int address) {
-    this->address = address;
+PacketMock::PacketMock() {
+    this->source = new AddressMock("Source");
+    this->destination = new AddressMock("Destination");
+    this->type = PacketType::FANT;
+    this->seqNr = 123;
+    this->payload = "Hello World";
+    this->payloadSize = sizeof("Hello World");
+    this->hopCount = 3;
 }
 
-int OMNeTAddress::getAddress() {
-    return this->address;
+PacketMock::~PacketMock() {
+    delete this->source;
+    delete this->destination;
 }
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
+Address* PacketMock::getSource() {
+    return source;
+}
+
+Address* PacketMock::getDestination() {
+    return destination;
+}
+
+unsigned int PacketMock::getType() {
+    return type;
+}
+
+unsigned int PacketMock::getSequenceNumber() {
+    return seqNr;
+}
+
+unsigned int PacketMock::getHopCount() {
+    return hopCount;
+}
+
+const char* PacketMock::getPayload() {
+    return payload;
+}
+
+unsigned int PacketMock::getPayloadLength() {
+    return payloadSize;
 }
 
 } /* namespace ARA */

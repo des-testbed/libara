@@ -23,27 +23,42 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include <UnitTest++.h>
+#include "mocks/AddressMock.h"
 
-namespace ARA {
+using namespace ARA;
 
-OMNeTAddress::OMNeTAddress(int address) {
-    this->address = address;
-}
+SUITE(AddressMockTest) {
 
-int OMNeTAddress::getAddress() {
-    return this->address;
-}
-
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+    TEST(testCreateWithoutName) {
+        AddressMock mock = AddressMock();
+        CHECK_EQUAL("Foo", mock.getAddress());
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
 
-} /* namespace ARA */
+    TEST(testCreateWithName) {
+            AddressMock mock = AddressMock("Hello");
+            CHECK_EQUAL("Hello", mock.getAddress());
+        }
+
+    TEST(testEqualsToItself) {
+        AddressMock mock = AddressMock();
+        CHECK(mock.equals(&mock));
+
+        mock = AddressMock("Test");
+        CHECK(mock.equals(&mock));
+    }
+
+    TEST(testEqualsToSameMock) {
+        AddressMock mock1 = AddressMock("Foo");
+        AddressMock mock2 = AddressMock("Foo");
+        CHECK(mock1.equals(&mock2));
+        CHECK(mock2.equals(&mock1));
+    }
+
+    TEST(testNotEqualsToOtherMock) {
+        AddressMock mock1 = AddressMock("Foo");
+        AddressMock mock2 = AddressMock("Bar");
+        CHECK(mock1.equals(&mock2) == false);
+        CHECK(mock2.equals(&mock1) == false);
+    }
+  }

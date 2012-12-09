@@ -23,27 +23,32 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include "AddressMock.h"
+
+using namespace std;
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(int address) {
-    this->address = address;
+AddressMock::AddressMock() {
+    this->address = string("Foo");
 }
 
-int OMNeTAddress::getAddress() {
-    return this->address;
+AddressMock::AddressMock(const std::string name) {
+    this->address = name;
 }
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
+bool AddressMock::equals(Address* otherAddress) {
+    AddressMock* otherAddressMock = dynamic_cast<AddressMock*>(otherAddress);
+    if(otherAddressMock == NULL) {
         return false;
     }
     else {
-        return otherOMNeTAddress->address == this->address;
+        return this->address.compare(otherAddressMock->address) == 0;
     }
+}
+
+string AddressMock::getAddress() {
+    return address;
 }
 
 } /* namespace ARA */

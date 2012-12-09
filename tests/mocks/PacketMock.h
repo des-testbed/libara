@@ -23,27 +23,37 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef PACKETMOCK_H_
+#define PACKETMOCK_H_
+
+#include "Packet.h"
+#include "AddressMock.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(int address) {
-    this->address = address;
-}
+class PacketMock: public Packet {
+public:
 
-int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    PacketMock(void);
+    ~PacketMock(void);
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
+    Address* getSource();
+    Address* getDestination();
+    unsigned int getType();
+    unsigned int getSequenceNumber();
+    unsigned int getHopCount();
+    const char* getPayload();
+    unsigned int getPayloadLength();
+
+private:
+    AddressMock* source;
+    AddressMock* destination;
+    unsigned int type;
+    unsigned int seqNr;
+    const char* payload;
+    unsigned int payloadSize;
+    unsigned int hopCount;
+};
 
 } /* namespace ARA */
+#endif /* PACKETMOCK_H_ */
