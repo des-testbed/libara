@@ -24,49 +24,25 @@
  *******************************************************************************/
 
 #include <UnitTest++.h>
-#include "mocks/AddressMock.h"
+#include "testAPI/mocks/PacketMock.h"
+#include "testAPI/mocks/AddressMock.h"
+#include "PacketType.h"
 
 using namespace ARA;
 
-SUITE(AddressMockTest) {
+SUITE(PacketMockTest) {
 
-    TEST(testCreateWithoutName) {
-        AddressMock mock = AddressMock();
-        CHECK_EQUAL("Foo", mock.getAddress());
+    TEST(testCreate) {
+        AddressMock source = AddressMock("Source");
+        AddressMock destination = AddressMock("Destination");
+        PacketMock mock = PacketMock();
+        CHECK(mock.getSource()->equals(&source));
+        CHECK(mock.getDestination()->equals(&destination));
+        CHECK_EQUAL(PacketType::FANT, mock.getType());
+        CHECK_EQUAL(3, mock.getHopCount());
+        CHECK_EQUAL(123, mock.getSequenceNumber());
+        CHECK_EQUAL("Hello World", mock.getPayload());
+        CHECK_EQUAL(sizeof("Hello World"), mock.getPayloadLength());
     }
 
-    TEST(testCreateWithName) {
-            AddressMock mock = AddressMock("Hello");
-            CHECK_EQUAL("Hello", mock.getAddress());
-        }
-
-    TEST(testEqualsToItself) {
-        AddressMock mock = AddressMock();
-        CHECK(mock.equals(&mock));
-
-        mock = AddressMock("Test");
-        CHECK(mock.equals(&mock));
-    }
-
-    TEST(testEqualsToSameMock) {
-        AddressMock mock1 = AddressMock("Foo");
-        AddressMock mock2 = AddressMock("Foo");
-        CHECK(mock1.equals(&mock2));
-        CHECK(mock2.equals(&mock1));
-    }
-
-    TEST(testNotEqualsToOtherMock) {
-        AddressMock mock1 = AddressMock("Foo");
-        AddressMock mock2 = AddressMock("Bar");
-        CHECK(mock1.equals(&mock2) == false);
-        CHECK(mock2.equals(&mock1) == false);
-    }
-
-    TEST(testGetHashValue) {
-        AddressMock mock1 = AddressMock("Foo");
-        AddressMock mock2 = AddressMock("Bar");
-        AddressMock mock3 = AddressMock("Foo");
-        CHECK(mock1.getHashValue() != mock2.getHashValue());
-        CHECK(mock1.getHashValue() == mock3.getHashValue());
-    }
   }

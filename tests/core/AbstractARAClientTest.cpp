@@ -25,26 +25,40 @@
 
 #include <UnitTest++.h>
 #include "PacketTrap.h"
+#include "RoutingTable.h"
 #include "Packet.h"
-#include "Address.h"
-#include "mocks/PacketMock.h"
+
+#include "testAPI/mocks/ARAClientMock.h"
+#include "testAPI/mocks/PacketMock.h"
 
 using namespace ARA;
 
-SUITE(PacketTrapTest) {
+SUITE(AbstractARAClientTest) {
 
-    TEST(testTrapPacket) {
-        PacketTrap packetTrap = PacketTrap();
+    TEST(testGetPacketTrap){
+        ARAClientMock client = ARAClientMock();
+        PacketTrap* packetTrap = client.getPacketTrap();
+        CHECK(packetTrap != NULL);
+    }
+
+    TEST(testGetRoutingTable){
+        ARAClientMock client = ARAClientMock();
+        RoutingTable* routingTable = client.getRoutingTable();
+        CHECK(routingTable != NULL);
+    }
+
+    TEST(testPacketGetsTrappedIfNotDeliverable) {
+        ARAClientMock client = ARAClientMock();
+        PacketTrap* packetTrap = client.getPacketTrap();
+
+        RoutingTable* routingTable = client.getRoutingTable();
+
         Packet* packet = new PacketMock();
-
-        // Check that there is no trapped packet for the packets destination
-        CHECK(packetTrap.contains(packet) == false);
-
-        packetTrap.trapPacket(packet);
-
-        // Now there must be a trapped packet for the packets destination
-        CHECK(packetTrap.contains(packet) == true);
-
+/* FIXME finish this test
+        CHECK(routingTable->isDeliverable(packet) == false);
+        client.sendPacket(packet);
+        CHECK(packetTrap->contains(packet));
+*/
         delete packet;
     }
 

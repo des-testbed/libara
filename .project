@@ -111,12 +111,21 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1355041665969</id>
+			<id>1355154473558</id>
 			<name>tests</name>
 			<type>22</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-false-false-*.o</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1355154473564</id>
+			<name>tests</name>
+			<type>6</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-runAllTests</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>

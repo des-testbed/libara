@@ -24,25 +24,28 @@
  *******************************************************************************/
 
 #include <UnitTest++.h>
-#include "mocks/PacketMock.h"
-#include "mocks/AddressMock.h"
-#include "PacketType.h"
+#include "PacketTrap.h"
+#include "Packet.h"
+#include "Address.h"
+#include "testAPI/mocks/PacketMock.h"
 
 using namespace ARA;
 
-SUITE(PacketMockTest) {
+SUITE(PacketTrapTest) {
 
-    TEST(testCreate) {
-        AddressMock source = AddressMock("Source");
-        AddressMock destination = AddressMock("Destination");
-        PacketMock mock = PacketMock();
-        CHECK(mock.getSource()->equals(&source));
-        CHECK(mock.getDestination()->equals(&destination));
-        CHECK_EQUAL(PacketType::FANT, mock.getType());
-        CHECK_EQUAL(3, mock.getHopCount());
-        CHECK_EQUAL(123, mock.getSequenceNumber());
-        CHECK_EQUAL("Hello World", mock.getPayload());
-        CHECK_EQUAL(sizeof("Hello World"), mock.getPayloadLength());
+    TEST(testTrapPacket) {
+        PacketTrap packetTrap = PacketTrap();
+        Packet* packet = new PacketMock();
+
+        // Check that there is no trapped packet for the packets destination
+        CHECK(packetTrap.contains(packet) == false);
+
+        packetTrap.trapPacket(packet);
+
+        // Now there must be a trapped packet for the packets destination
+        CHECK(packetTrap.contains(packet) == true);
+
+        delete packet;
     }
 
   }

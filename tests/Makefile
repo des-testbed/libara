@@ -15,12 +15,14 @@ endif
 
 include $(CONFIGFILE)
 
+CFLAGS += -std=c++11
+
 # Simulation kernel and user interface libraries
 OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
 OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INCLUDE_PATH= -I../include -I$(OMNETPP_INCL_DIR)
+INCLUDE_PATH= -I../include -I./ -I$(OMNETPP_INCL_DIR)
 LINKFLAGS= -lUnitTest++ $(OMNETPP_LIBS)
 
 # Output directory ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,8 +32,10 @@ OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Test sources ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COMPILED_SRC = $(shell find $(OUTPUT_DIR) -type f -name '*.o')
-TEST_SOURCES = $(shell find ./ -type f -name '*.cpp')
+TEST_SOURCES = $(shell find ./ -name testAPI -prune -o -type f -name '*.cpp' -print)
 TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
+TESTAPI_TESTS = $(shell find ./testAPI/tests/ -type f -name '*.cpp')
+TESTAPI_OBJECTS = $(shell find ./testAPI/ -type f -name '*.cpp')
 TEST_EXECUTABLE = runAllTests
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,9 +47,9 @@ runTests: all
 
 all: check_if_unittest_is_installed $(TEST_SOURCES) $(TEST_EXECUTABLE)	
 
-$(TEST_EXECUTABLE): $(TEST_OBJECTS)
+$(TEST_EXECUTABLE): $(TEST_OBJECTS) $(TESTAPI_TESTS)
 	@echo "Building executable test suit.." 
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $@ $(COMPILED_SRC) $(TEST_OBJECTS) $(LINKFLAGS)	
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $@ $(COMPILED_SRC) $(TEST_OBJECTS) $(TESTAPI_OBJECTS) $(LINKFLAGS)	
 
 .cpp.o:
 	@echo "Compiling $<.."

@@ -9,8 +9,7 @@ src/ara-sim
 src/Makefile
 
 # Test output files #
-tests/*.o
-tests/mocks/*.o
+*.o
 tests/TestResults.xml
 tests/runAllTests
 
