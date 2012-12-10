@@ -33,6 +33,8 @@ namespace ARA {
 class ARAClientMock: public AbstractARAClient {
 public:
 
+    PacketTrap* getPacketTrap();
+
 };
 
 } /* namespace ARA */

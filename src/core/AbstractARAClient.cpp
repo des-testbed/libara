@@ -27,6 +27,14 @@
 
 namespace ARA {
 
+AbstractARAClient::AbstractARAClient() {
+    packetTrap = new PacketTrap();
+}
+
+AbstractARAClient::~AbstractARAClient() {
+    delete packetTrap;
+}
+
 void AbstractARAClient::sendPacket(Packet* packet) {
 
 }

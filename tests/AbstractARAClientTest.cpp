@@ -33,16 +33,24 @@ using namespace ARA;
 
 SUITE(AbstractARAClientTest) {
 
-/*    TEST(testPacketGetsTrappedIfNotDeliverable) {
-        AbstractARAClient client = ARAClientMock();
+    TEST(testGetPacketTrap){
+        ARAClientMock client = ARAClientMock();
+        PacketTrap* packetTrap = client.getPacketTrap();
+        CHECK(packetTrap != NULL);
+    }
+
+    TEST(testPacketGetsTrappedIfNotDeliverable) {
+        ARAClientMock client = ARAClientMock();
+        PacketTrap* packetTrap = client.getPacketTrap();
+/* FIXME finish this test
+        RoutingTable* routingTable = client.getRoutingTable();
 
         Packet* packet = new PacketMock();
+        CHECK(routingTable->isDeliverable(packet) == false);
         client.sendPacket(packet);
-
-        PacketTrap* packetTrap = client->getPacketTrap();
         CHECK(packetTrap->contains(packet));
 
-        delete packet;
+        delete packet;*/
     }
-*/
+
   }

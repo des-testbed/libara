@@ -27,4 +27,8 @@
 
 namespace ARA {
 
+PacketTrap* ARAClientMock::getPacketTrap() {
+    return packetTrap;
+}
+
 } /* namespace ARA */

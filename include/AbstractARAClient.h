@@ -26,15 +26,21 @@
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "PacketTrap.h"
 #include "Packet.h"
 
 namespace ARA {
 
 class AbstractARAClient {
 public:
-    virtual ~AbstractARAClient();
+    AbstractARAClient();
+    ~AbstractARAClient();
 
     void sendPacket(Packet* packet);
+
+protected:
+    PacketTrap* packetTrap;
+
 };
 
 } /* namespace ARA */
