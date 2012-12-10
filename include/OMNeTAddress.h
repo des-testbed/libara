@@ -34,6 +34,7 @@ class OMNeTAddress : public Address {
 public:
     OMNeTAddress(int address);
     bool equals(Address* otherAddress);
+    size_t getHashValue() const;
 
     int getAddress();
 

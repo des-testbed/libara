@@ -26,6 +26,8 @@
 #ifndef ADDRESS_H_
 #define ADDRESS_H_
 
+#include <stddef.h>
+
 namespace ARA {
 
 /**
@@ -35,9 +37,15 @@ class Address {
 public:
     virtual ~Address() {}
 
-    virtual bool equals(Address* otherAddress) = 0;
-
     //TODO may overloading operator= would be a better solution?
+    virtual bool equals(Address* otherAddress) = 0;
+    virtual size_t getHashValue() const = 0;
+};
+
+struct AddressHash {
+    size_t operator()(const Address& address) const {
+        return address.getHashValue();
+    }
 };
 
 } /* namespace ARA */

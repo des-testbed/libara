@@ -24,6 +24,7 @@
  *******************************************************************************/
 
 #include "AddressMock.h"
+#include <hash_fun.h>
 
 using namespace std;
 
@@ -45,6 +46,11 @@ bool AddressMock::equals(Address* otherAddress) {
     else {
         return this->address.compare(otherAddressMock->address) == 0;
     }
+}
+
+size_t AddressMock::getHashValue() const {
+    __gnu_cxx::hash<const char*> hashFunction;
+    return hashFunction(address.c_str());
 }
 
 string AddressMock::getAddress() {

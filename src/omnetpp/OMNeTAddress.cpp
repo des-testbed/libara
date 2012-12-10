@@ -46,4 +46,8 @@ bool OMNeTAddress::equals(Address* otherAddress) {
     }
 }
 
+size_t OMNeTAddress::getHashValue() const {
+    return address;
+}
+
 } /* namespace ARA */

@@ -34,9 +34,10 @@ namespace ARA {
 class AddressMock: public Address {
 public:
     AddressMock();
-    AddressMock(const std::string name);
+    AddressMock(std::string name);
 
     bool equals(Address* otherAddress);
+    size_t getHashValue() const;
 
     std::string getAddress();
 

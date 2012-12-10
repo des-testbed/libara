@@ -51,4 +51,8 @@ SUITE(OMNeTAddressTest) {
         CHECK(address.equals(0) == false);
     }
 
+    TEST(testGetHashValue) {
+        OMNeTAddress address = OMNeTAddress(123);
+        CHECK_EQUAL(123, address.getHashValue());
+    }
 }
