@@ -27,4 +27,14 @@
 
 namespace ARA {
 
+void PacketTrap::trapPacket(Packet* packet) {
+    Address* destination = packet->getDestination();
+    trappedPackets[destination] = packet;
+}
+
+bool PacketTrap::isTrapped(Packet* packet) {
+    Address* packetDestination = packet->getDestination();
+    return trappedPackets.find(packetDestination) != trappedPackets.end();
+}
+
 } /* namespace ARA */

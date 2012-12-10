@@ -49,7 +49,7 @@ $(TEST_EXECUTABLE): $(TEST_OBJECTS)
 
 .cpp.o:
 	@echo "Compiling $<.."
-	@$(CXX) -Wall -c -g $(INCLUDE_PATH) $< -o $@
+	@$(CXX) -Wall -c -g -std=c++11 $(INCLUDE_PATH) $< -o $@
 
 clean:
 	rm -f *.o TestResults.xml runAllTests

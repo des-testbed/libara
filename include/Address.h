@@ -42,9 +42,21 @@ public:
     virtual size_t getHashValue() const = 0;
 };
 
+/**
+ * This Functor is needed for std::unordered_map (hashmap implementation)
+ */
 struct AddressHash {
-    size_t operator()(const Address& address) const {
-        return address.getHashValue();
+    size_t operator()(Address* address) const {
+        return address->getHashValue();
+    }
+};
+
+/**
+ * This Functor is needed for std::unordered_map (hashmap implementation)
+ */
+struct AddressPredicate {
+    size_t operator()(Address* address1, Address* address2) const {
+        return address1->equals(address2);
     }
 };
 

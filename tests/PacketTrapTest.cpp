@@ -26,6 +26,7 @@
 #include <UnitTest++.h>
 #include "PacketTrap.h"
 #include "Packet.h"
+#include "Address.h"
 #include "mocks/PacketMock.h"
 
 using namespace ARA;
@@ -35,9 +36,14 @@ SUITE(PacketTrapTest) {
     TEST(testTrapPacket) {
         PacketTrap packetTrap = PacketTrap();
         Packet* packet = new PacketMock();
-        //TODO packetTrap.trapPacket(packet);
 
-        //TODO CHECK(packetTrap.trappedPackets.contains(packet));
+        // Check that there is no trapped packet for the packets destination
+        CHECK(packetTrap.isTrapped(packet) == false);
+
+        packetTrap.trapPacket(packet);
+
+        // Now there must be a trapped packet for the packets destination
+        CHECK(packetTrap.isTrapped(packet) == true);
 
         delete packet;
     }

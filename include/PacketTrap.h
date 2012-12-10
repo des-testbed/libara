@@ -26,7 +26,7 @@
 #ifndef PACKETTRAP_H_
 #define PACKETTRAP_H_
 
-#include <ext/hash_map>
+#include <unordered_map>
 #include "Packet.h"
 #include "Address.h"
 
@@ -35,9 +35,11 @@ namespace ARA {
 class PacketTrap {
 public:
     void trapPacket(Packet* packet);
+    bool isTrapped(Packet* packet);
 
 private:
-    //FIXME __gnu_cxx::hash_map<Address, Packet, AddressHash> trappedPackets;
+    std::unordered_map<Address*, Packet*, AddressHash, AddressPredicate> trappedPackets;
+
 };
 
 } /* namespace ARA */
