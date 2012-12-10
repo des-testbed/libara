@@ -38,12 +38,12 @@ SUITE(PacketTrapTest) {
         Packet* packet = new PacketMock();
 
         // Check that there is no trapped packet for the packets destination
-        CHECK(packetTrap.isTrapped(packet) == false);
+        CHECK(packetTrap.contains(packet) == false);
 
         packetTrap.trapPacket(packet);
 
         // Now there must be a trapped packet for the packets destination
-        CHECK(packetTrap.isTrapped(packet) == true);
+        CHECK(packetTrap.contains(packet) == true);
 
         delete packet;
     }

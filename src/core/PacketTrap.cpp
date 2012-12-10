@@ -32,7 +32,7 @@ void PacketTrap::trapPacket(Packet* packet) {
     trappedPackets[destination] = packet;
 }
 
-bool PacketTrap::isTrapped(Packet* packet) {
+bool PacketTrap::contains(Packet* packet) {
     Address* packetDestination = packet->getDestination();
     return trappedPackets.find(packetDestination) != trappedPackets.end();
 }

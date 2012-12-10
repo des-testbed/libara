@@ -35,7 +35,7 @@ namespace ARA {
 class PacketTrap {
 public:
     void trapPacket(Packet* packet);
-    bool isTrapped(Packet* packet);
+    bool contains(Packet* packet);
 
 private:
     std::unordered_map<Address*, Packet*, AddressHash, AddressPredicate> trappedPackets;
