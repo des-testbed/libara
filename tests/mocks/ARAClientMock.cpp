@@ -31,4 +31,8 @@ PacketTrap* ARAClientMock::getPacketTrap() {
     return packetTrap;
 }
 
+RoutingTable* ARAClientMock::getRoutingTable() {
+    return routingTable;
+}
+
 } /* namespace ARA */

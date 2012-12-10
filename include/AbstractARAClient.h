@@ -27,6 +27,7 @@
 #define ABSTRACTARACLIENT_H_
 
 #include "PacketTrap.h"
+#include "RoutingTable.h"
 #include "Packet.h"
 
 namespace ARA {
@@ -40,6 +41,7 @@ public:
 
 protected:
     PacketTrap* packetTrap;
+    RoutingTable* routingTable;
 
 };
 

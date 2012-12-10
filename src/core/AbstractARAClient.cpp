@@ -29,10 +29,12 @@ namespace ARA {
 
 AbstractARAClient::AbstractARAClient() {
     packetTrap = new PacketTrap();
+    routingTable = new RoutingTable();
 }
 
 AbstractARAClient::~AbstractARAClient() {
     delete packetTrap;
+    delete routingTable;
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {

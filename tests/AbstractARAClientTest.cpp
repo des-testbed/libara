@@ -24,6 +24,8 @@
  *******************************************************************************/
 
 #include <UnitTest++.h>
+#include "PacketTrap.h"
+#include "RoutingTable.h"
 #include "Packet.h"
 
 #include "mocks/ARAClientMock.h"
@@ -39,18 +41,25 @@ SUITE(AbstractARAClientTest) {
         CHECK(packetTrap != NULL);
     }
 
+    TEST(testGetRoutingTable){
+        ARAClientMock client = ARAClientMock();
+        RoutingTable* routingTable = client.getRoutingTable();
+        CHECK(routingTable != NULL);
+    }
+
     TEST(testPacketGetsTrappedIfNotDeliverable) {
         ARAClientMock client = ARAClientMock();
         PacketTrap* packetTrap = client.getPacketTrap();
-/* FIXME finish this test
+
         RoutingTable* routingTable = client.getRoutingTable();
 
         Packet* packet = new PacketMock();
+/* FIXME finish this test
         CHECK(routingTable->isDeliverable(packet) == false);
         client.sendPacket(packet);
         CHECK(packetTrap->contains(packet));
-
-        delete packet;*/
+*/
+        delete packet;
     }
 
   }

@@ -23,20 +23,15 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef ARACLIENTMOCK_H_
-#define ARACLIENTMOCK_H_
+#include <UnitTest++.h>
+#include "RoutingTable.h"
 
-#include "AbstractARAClient.h"
+using namespace ARA;
 
-namespace ARA {
+SUITE(RoutingTableTest) {
 
-class ARAClientMock: public AbstractARAClient {
-public:
+    TEST(testCreate) {
+        RoutingTable();
+    }
 
-    PacketTrap* getPacketTrap();
-    RoutingTable* getRoutingTable();
-
-};
-
-} /* namespace ARA */
-#endif /* ARACLIENTMOCK_H_ */
+  }
