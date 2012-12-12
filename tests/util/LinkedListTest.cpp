@@ -101,4 +101,48 @@ SUITE(LinkedListTest) {
         CHECK(list.isEmpty() == true);
     }
 
+    TEST(testSize) {
+        LinkedList<string> list = LinkedList<string>();
+        string foo = string("Foo");
+        string bar = string("Bar");
+
+        CHECK_EQUAL(0, list.size());
+
+        list.add(&foo);
+        CHECK_EQUAL(1, list.size());
+
+        list.add(&bar);
+        CHECK_EQUAL(2, list.size());
+
+        list.remove();
+        CHECK_EQUAL(1, list.size());
+
+        list.remove();
+        CHECK_EQUAL(0, list.size());
+    }
+
+    TEST(testContains) {
+        LinkedList<string> list = LinkedList<string>();
+        string foo = string("Foo");
+        string bar = string("Bar");
+
+        CHECK(list.contains(&foo) == false);
+        CHECK(list.contains(&bar) == false);
+
+        list.add(&foo);
+        CHECK(list.contains(&foo) == true);
+        CHECK(list.contains(&bar) == false);
+
+        list.add(&bar);
+        CHECK(list.contains(&foo) == true);
+        CHECK(list.contains(&bar) == true);
+
+        list.remove();
+        CHECK(list.contains(&foo) == false);
+        CHECK(list.contains(&bar) == true);
+
+        list.remove();
+        CHECK(list.contains(&foo) == false);
+        CHECK(list.contains(&bar) == false);
+    }
 }

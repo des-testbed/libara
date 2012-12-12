@@ -63,9 +63,25 @@ public:
      */
     bool isEmpty();
 
+    /**
+     * Returns the number of elements in this list.
+     */
+    unsigned int size();
+
+    /**
+     * Returns true if this list contains the specified element.
+     * To accomplish this each element of this list is compared to the
+     * searched element by using the operator==.
+     *
+     * This means that the class T *has to implement* operator==
+     */
+    bool contains(T* searchedElement);
+
 private:
     ListElement* firstElement = NULL;
     ListElement* lastElement = NULL;
+
+    unsigned int numberOfElements = 0;
 };
 
 } /* namespace ARA */

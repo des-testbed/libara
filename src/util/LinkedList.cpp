@@ -58,6 +58,8 @@ void LinkedList<T>::add(T* newElement) {
         lastElement->next = newListElement;
         lastElement = newListElement;
     }
+
+    numberOfElements++;
 }
 
 template<class T>
@@ -100,12 +102,32 @@ T* LinkedList<T>::remove() {
     }
 
     delete removedListElement;
+    numberOfElements--;
     return removedElement;
 }
 
 template<class T>
 bool LinkedList<T>::isEmpty() {
     return lastElement == NULL;
+}
+
+template<class T>
+unsigned int LinkedList<T>::size() {
+    return numberOfElements;
+}
+
+template<class T>
+bool LinkedList<T>::contains(T* searchedElement) {
+    ListElement* currentElement = firstElement;
+    while(currentElement != NULL) {
+        if(*currentElement->data == *searchedElement) {
+            return true;
+        }
+        else {
+            currentElement = currentElement->next;
+        }
+    }
+    return false;
 }
 
 } /* namespace ARA */
