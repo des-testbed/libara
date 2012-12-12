@@ -69,4 +69,12 @@ SUITE(AddressMockTest) {
         CHECK(mock1.getHashValue() != mock2.getHashValue());
         CHECK(mock1.getHashValue() == mock3.getHashValue());
     }
+
+    TEST(testOperatorEquals) {
+        AddressMock mock1 = AddressMock("Foo");
+        AddressMock mock2 = AddressMock("Bar");
+        AddressMock mock3 = AddressMock("Foo");
+        CHECK((mock1 == mock3) == true);
+        CHECK((mock2 == mock1) == false);
+    }
   }
