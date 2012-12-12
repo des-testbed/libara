@@ -25,13 +25,52 @@
 
 #include <UnitTest++.h>
 #include "RoutingTable.h"
+#include "RoutingTableEntry.h"
+#include "LinkedList.h"
+#include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/PacketMock.h"
 
 using namespace ARA;
 
 SUITE(RoutingTableTest) {
 
-    TEST(testCreate) {
-        RoutingTable();
+    TEST(testGetPossibleNextHopsReturnsEmptyList) {
+        RoutingTable routingTable = RoutingTable();
+        AddressMock destination = AddressMock();
+
+        LinkedList<RoutingTableEntry>* list = routingTable.getPossibleNextHops(&destination);
+        CHECK(list->isEmpty());
+
+        delete list;
     }
 
+    TEST(testUnregisteredAddressIsNotDeliverable) {
+        RoutingTable routingTable = RoutingTable();
+        AddressMock destinationAddress = AddressMock();
+
+        CHECK(routingTable.isDeliverable(&destinationAddress) == false);
+    }
+
+    TEST(testPacketWithUnregisteredAddressIsNotDeliverable) {
+        RoutingTable routingTable = RoutingTable();
+        PacketMock packet = PacketMock();
+
+        CHECK(routingTable.isDeliverable(&packet) == false);
+    }
+
+    TEST(testUdateRoutingTable) {
+        RoutingTable routingTable = RoutingTable();
+        PacketMock packet = PacketMock();
+        Address* destination = packet.getDestination();
+        AddressMock nextHop = AddressMock("nextHop");
+        float pheromoneValue = 123.456;
+
+        routingTable.update(destination, &nextHop, pheromoneValue);
+
+        CHECK(routingTable.isDeliverable(&packet));
+        LinkedList<RoutingTableEntry>* nextHops = routingTable.getPossibleNextHops(&packet);
+        CHECK(nextHops->isEmpty() == false);
+        CHECK(nextHops->size() == 1);
+        CHECK_EQUAL(&nextHop, nextHops->getFirst()->getNextHop());
+    }
   }

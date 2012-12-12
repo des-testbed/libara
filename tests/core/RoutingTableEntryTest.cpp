@@ -31,11 +31,13 @@ using namespace ARA;
 
 SUITE(RoutingTableEntryTest) {
 
-    TEST(testCreate) {
-        Address* nextHop = new AddressMock();
+    TEST(testGetters) {
+        AddressMock nextHop = AddressMock();
         float pheromoneValue = 1.234;
-        RoutingTableEntry(nextHop, pheromoneValue);
-        delete nextHop;
+        RoutingTableEntry entry = RoutingTableEntry(&nextHop, pheromoneValue);
+
+        CHECK_EQUAL(&nextHop, entry.getNextHop());
+        CHECK_EQUAL(pheromoneValue, entry.getPheromoneValue());
     }
 
-  }
+}

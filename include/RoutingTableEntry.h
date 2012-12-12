@@ -33,6 +33,8 @@ namespace ARA {
 class RoutingTableEntry {
 public:
     RoutingTableEntry(Address* nextHop, float pheromoneValue);
+    Address* getNextHop();
+    float getPheromoneValue();
 
 private:
     Address* nextHop;

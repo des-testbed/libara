@@ -26,10 +26,25 @@
 #ifndef ROUTINGTABLE_H_
 #define ROUTINGTABLE_H_
 
+#include "Address.h"
+#include "Packet.h"
+#include "LinkedList.h"
+#include "RoutingTableEntry.h"
+#include <unordered_map>
+
 namespace ARA {
 
 class RoutingTable {
 
+public:
+    void update(Address* destination, Address* nextHop, float pheromoneValue);
+    LinkedList<RoutingTableEntry>* getPossibleNextHops(Address* destination);
+    LinkedList<RoutingTableEntry>* getPossibleNextHops(Packet* packet);
+    bool isDeliverable(Address* destination);
+    bool isDeliverable(Packet* packet);
+
+private:
+    std::unordered_map<Address*, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate> table;
 
 };
 

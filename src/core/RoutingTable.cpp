@@ -27,4 +27,38 @@
 
 namespace ARA {
 
+//FIXME Write a destructor and clean up the memory of the table
+
+void RoutingTable::update(Address* destination, Address* nextHop, float pheromoneValue) {
+    RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, pheromoneValue);
+
+    if(isDeliverable(destination) == false) {
+        // this destination is not yet registered
+        LinkedList<RoutingTableEntry>* entryList = new LinkedList<RoutingTableEntry>();
+        entryList->add(newEntry);
+        table[destination] = entryList;
+    }
+}
+
+LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(Address* destination) {
+    if(isDeliverable(destination)) {
+        return table[destination];
+    }
+    else {
+        return new LinkedList<RoutingTableEntry>();
+    }
+}
+
+LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(Packet* packet) {
+    return getPossibleNextHops(packet->getDestination());
+}
+
+bool RoutingTable::isDeliverable(Address* destination) {
+    return table.find(destination) != table.end();
+}
+
+bool RoutingTable::isDeliverable(Packet* packet) {
+    return isDeliverable(packet->getDestination());
+}
+
 } /* namespace ARA */

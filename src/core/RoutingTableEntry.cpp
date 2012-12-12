@@ -32,4 +32,12 @@ RoutingTableEntry::RoutingTableEntry(Address* nextHop, float pheromoneValue) {
     this->pheromoneValue = pheromoneValue;
 }
 
+Address* RoutingTableEntry::getNextHop() {
+    return nextHop;
+}
+
+float RoutingTableEntry::getPheromoneValue() {
+    return pheromoneValue;
+}
+
 } /* namespace ARA */
