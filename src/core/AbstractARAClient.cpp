@@ -38,7 +38,9 @@ AbstractARAClient::~AbstractARAClient() {
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
-
+    if(routingTable->isDeliverable(packet) == false) {
+        packetTrap->trapPacket(packet);
+    }
 }
 
 } /* namespace ARA */

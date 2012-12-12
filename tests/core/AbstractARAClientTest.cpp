@@ -53,13 +53,11 @@ SUITE(AbstractARAClientTest) {
 
         RoutingTable* routingTable = client.getRoutingTable();
 
-        Packet* packet = new PacketMock();
-/* FIXME finish this test
-        CHECK(routingTable->isDeliverable(packet) == false);
-        client.sendPacket(packet);
-        CHECK(packetTrap->contains(packet));
-*/
-        delete packet;
+        PacketMock packet = PacketMock();
+
+        CHECK(routingTable->isDeliverable(&packet) == false);
+        client.sendPacket(&packet);
+        CHECK(packetTrap->contains(&packet));
     }
 
   }
