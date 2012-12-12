@@ -27,11 +27,10 @@ LINKFLAGS= -lUnitTest++ $(OMNETPP_LIBS)
 
 # Output directory ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out
-PROJECTRELATIVE_PATH = src
-OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
+SRC_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/src
 
 # Test sources ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-COMPILED_SRC = $(shell find $(OUTPUT_DIR) -type f -name '*.o')
+COMPILED_SRC = $(shell find $(SRC_OUTPUT_DIR) -type f -name '*.o')
 TEST_SOURCES = $(shell find ./ -name testAPI -prune -o -type f -name '*.cpp' -print)
 TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
 TESTAPI_TESTS = $(shell find ./testAPI/tests/ -type f -name '*.cpp')
@@ -53,10 +52,10 @@ $(TEST_EXECUTABLE): $(TEST_OBJECTS) $(TESTAPI_TESTS)
 
 .cpp.o:
 	@echo "Compiling $<.."
-	@$(CXX) -Wall -c -g -std=c++11 $(INCLUDE_PATH) $< -o $@
+	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $< -o $@
 
 clean:
-	rm -f *.o TestResults.xml runAllTests
+	rm -f $(TEST_OBJECTS) $(TESTAPI_OBJECTS:.cpp=.o) TestResults.xml runAllTests
 	
 check_if_unittest_is_installed:
 	@if ! [ -e "/lib/libUnitTest++.a" ]; then \
