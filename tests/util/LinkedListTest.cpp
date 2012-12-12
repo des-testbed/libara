@@ -145,4 +145,15 @@ SUITE(LinkedListTest) {
         CHECK(list.contains(&foo) == false);
         CHECK(list.contains(&bar) == false);
     }
+
+    TEST(testGetFirst) {
+        LinkedList<string> list = LinkedList<string>();
+        string foo = string("Foo");
+        string bar = string("Bar");
+
+        list.add(&foo);
+        list.add(&bar);
+
+        CHECK_EQUAL(list.get(0), list.getFirst());
+    }
 }

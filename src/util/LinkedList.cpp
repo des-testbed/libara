@@ -130,4 +130,9 @@ bool LinkedList<T>::contains(T* searchedElement) {
     return false;
 }
 
+template<class T>
+T* LinkedList<T>::getFirst() {
+    return get(0);
+}
+
 } /* namespace ARA */

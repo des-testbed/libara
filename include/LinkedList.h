@@ -50,8 +50,15 @@ public:
     /**
      * Returns the element at the specified position in this list.
      * Note that the index is always zero based. The first valid index is zero (0).
+     * This method may throw an exception if there is no such index.
      */
     T* get(unsigned int index);
+
+    /**
+     * Returns the first element in this list.
+     * This method may throw an exception if the list is empty.
+     */
+    T* getFirst();
 
     /**
      * Retrieves and removes the head (first element) of this list.
