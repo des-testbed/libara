@@ -42,6 +42,7 @@ public:
     void broadcast(Packet* packet);
 
     LinkedList<Pair<Packet, Address>>* getSentPackets();
+    bool hasPacketBeenBroadCasted(Packet* packet);
 
 private:
     LinkedList<Pair<Packet, Address>>* sentPackets;

@@ -25,50 +25,12 @@
 
 #include "PacketMock.h"
 #include "PacketType.h"
+#include "AddressMock.h"
 
 namespace ARA {
 
-PacketMock::PacketMock() {
-    this->source = new AddressMock("Source");
-    this->destination = new AddressMock("Destination");
-    this->type = PacketType::FANT;
-    this->seqNr = 123;
-    this->payload = "Hello World";
-    this->payloadSize = sizeof("Hello World");
-    this->hopCount = 3;
-}
-
-PacketMock::~PacketMock() {
-    delete this->source;
-    delete this->destination;
-}
-
-Address* PacketMock::getSource() {
-    return source;
-}
-
-Address* PacketMock::getDestination() {
-    return destination;
-}
-
-unsigned int PacketMock::getType() {
-    return type;
-}
-
-unsigned int PacketMock::getSequenceNumber() {
-    return seqNr;
-}
-
-unsigned int PacketMock::getHopCount() {
-    return hopCount;
-}
-
-const char* PacketMock::getPayload() {
-    return payload;
-}
-
-unsigned int PacketMock::getPayloadLength() {
-    return payloadSize;
+PacketMock::PacketMock() : Packet(new AddressMock("Source"), new AddressMock("Destination"), PacketType::DATA, 123, "Hello World", sizeof("Hello World"), 3){
+    // This class is just here to call the super constructor
 }
 
 } /* namespace ARA */

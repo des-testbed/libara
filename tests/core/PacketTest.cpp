@@ -24,24 +24,43 @@
  *******************************************************************************/
 
 #include <UnitTest++.h>
-#include "OMNeTPacket.h"
+#include "testAPI/mocks/AddressMock.h"
+#include "Packet.h"
 #include "PacketType.h"
 
 using namespace ARA;
 
-SUITE(OMNeTPacketTest) {
+SUITE(PacketTest) {
 
     TEST(testCreate) {
-        OMNeTAddress source = OMNeTAddress(1);
-        OMNeTAddress destination = OMNeTAddress(2);
-        unsigned int type = PacketType::DATA;
+        AddressMock* source = new AddressMock("source");
+        AddressMock* destination = new AddressMock("destination");
+        unsigned int type = PacketType::FANT;
         int seqNr = 1;
-        const char* payload = "Hello ARA World";
 
-        OMNeTPacket packet = OMNeTPacket(&source, &destination, type, seqNr, payload, sizeof(payload));
+        Packet packet = Packet(source, destination, type, seqNr);
 
-        CHECK(packet.getSource()->equals(&source));
-        CHECK(packet.getDestination()->equals(&destination));
+        CHECK(packet.getSource()->equals(source));
+        CHECK(packet.getDestination()->equals(destination));
+        CHECK_EQUAL(type, packet.getType());
+        CHECK_EQUAL(seqNr, packet.getSequenceNumber());
+        CHECK_EQUAL(0, packet.getHopCount());
+
+        CHECK_EQUAL(0, packet.getPayloadLength());
+        CHECK(packet.getPayload() == false);
+    }
+
+    TEST(testCreateWithPayload) {
+        AddressMock* source = new AddressMock("source");
+        AddressMock* destination = new AddressMock("destination");
+        unsigned int type = PacketType::DATA;
+        int seqNr = 2;
+        const char* payload = "Hello World!";
+
+        Packet packet = Packet(source, destination, type, seqNr, payload, sizeof(payload));
+
+        CHECK(packet.getSource()->equals(source));
+        CHECK(packet.getDestination()->equals(destination));
         CHECK_EQUAL(type, packet.getType());
         CHECK_EQUAL(seqNr, packet.getSequenceNumber());
         CHECK_EQUAL(0, packet.getHopCount());
@@ -50,18 +69,18 @@ SUITE(OMNeTPacketTest) {
         CHECK_EQUAL(payload, packet.getPayload());
     }
 
-    TEST(testCreateWithHopCount) {
-        OMNeTAddress source = OMNeTAddress(1);
-        OMNeTAddress destination = OMNeTAddress(2);
+    TEST(testCreateWithPayloadAndHopCount) {
+        Address* source = new AddressMock("source");
+        Address* destination = new AddressMock("destination");
         unsigned int type = PacketType::DATA;
-        int seqNr = 1;
-        const char* payload = "Hello ARA World";
+        int seqNr = 3;
+        const char* payload = "Hello World";
         unsigned int hopCount = 123;
 
-        OMNeTPacket packet = OMNeTPacket(&source, &destination, type, seqNr, payload, sizeof(payload), hopCount);
+        Packet packet = Packet(source, destination, type, seqNr, payload, sizeof(payload), hopCount);
 
-        CHECK(packet.getSource()->equals(&source));
-        CHECK(packet.getDestination()->equals(&destination));
+        CHECK(packet.getSource()->equals(source));
+        CHECK(packet.getDestination()->equals(destination));
         CHECK_EQUAL(type, packet.getType());
         CHECK_EQUAL(seqNr, packet.getSequenceNumber());
         CHECK_EQUAL(sizeof(payload), packet.getPayloadLength());

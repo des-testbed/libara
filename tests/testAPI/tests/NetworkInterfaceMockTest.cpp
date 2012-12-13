@@ -58,4 +58,19 @@ SUITE(NetworkInterfaceMockTest) {
         CHECK(sendPackets->get(2)->getRight() == &recipient1);
     }
 
+    TEST(testHasPacketBeenBroadCasted) {
+        NetworkInterfaceMock interface = NetworkInterfaceMock();
+        PacketMock packet1 = PacketMock();
+        PacketMock packet2 = PacketMock();
+        PacketMock packet3 = PacketMock();
+        AddressMock address = AddressMock();
+
+        interface.send(&packet1, &address);
+        interface.broadcast(&packet2);
+        interface.send(&packet3, &address);
+
+        CHECK(interface.hasPacketBeenBroadCasted(&packet1) == false);
+        CHECK(interface.hasPacketBeenBroadCasted(&packet2) == true);
+        CHECK(interface.hasPacketBeenBroadCasted(&packet3) == false);
+    }
   }

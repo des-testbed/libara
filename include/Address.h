@@ -41,6 +41,7 @@ public:
     virtual bool equals(Address* otherAddress) = 0;
     virtual size_t getHashValue() const = 0;
     virtual bool isBroadCast() = 0;
+    virtual Address* clone() = 0;
 
     bool operator==(Address& other) {
         return this->equals(&other);

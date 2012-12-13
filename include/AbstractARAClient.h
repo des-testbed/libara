@@ -26,9 +26,11 @@
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "NetworkInterface.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "Packet.h"
+#include "LinkedList.h"
 
 namespace ARA {
 
@@ -37,12 +39,21 @@ public:
     AbstractARAClient();
     ~AbstractARAClient();
 
+    void addNetworkInterface(NetworkInterface* newInterface);
     void sendPacket(Packet* packet);
+    //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
+    void broadCast(Packet* packet);
+    //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
+    unsigned int getNextSequenceNumber();
 
 protected:
-    PacketTrap* packetTrap;
-    RoutingTable* routingTable;
 
+    LinkedList<NetworkInterface> interfaces;
+    PacketTrap packetTrap;
+    RoutingTable routingTable;
+
+private:
+    unsigned int nextSequenceNumber = 1;
 };
 
 } /* namespace ARA */

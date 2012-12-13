@@ -61,4 +61,9 @@ bool AddressMock::isBroadCast() {
     return address == "BROADCAST";
 }
 
+Address* AddressMock::clone() {
+    AddressMock* clone = new AddressMock(this->address);
+    return clone;
+}
+
 } /* namespace ARA */

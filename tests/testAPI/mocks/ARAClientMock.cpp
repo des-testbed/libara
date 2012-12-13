@@ -28,11 +28,11 @@
 namespace ARA {
 
 PacketTrap* ARAClientMock::getPacketTrap() {
-    return packetTrap;
+    return &packetTrap;
 }
 
 RoutingTable* ARAClientMock::getRoutingTable() {
-    return routingTable;
+    return &routingTable;
 }
 
 } /* namespace ARA */

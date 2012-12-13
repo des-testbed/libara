@@ -54,4 +54,9 @@ bool OMNeTAddress::isBroadCast() {
     return address == BROADCAST;
 }
 
+Address* OMNeTAddress::clone() {
+    OMNeTAddress* clone = new OMNeTAddress(this->address);
+    return clone;
+}
+
 } /* namespace ARA */

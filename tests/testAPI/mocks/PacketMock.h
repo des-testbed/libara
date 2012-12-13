@@ -27,32 +27,13 @@
 #define PACKETMOCK_H_
 
 #include "Packet.h"
-#include "AddressMock.h"
 
 namespace ARA {
 
 class PacketMock: public Packet {
 public:
-
     PacketMock(void);
-    ~PacketMock(void);
 
-    Address* getSource();
-    Address* getDestination();
-    unsigned int getType();
-    unsigned int getSequenceNumber();
-    unsigned int getHopCount();
-    const char* getPayload();
-    unsigned int getPayloadLength();
-
-private:
-    AddressMock* source;
-    AddressMock* destination;
-    unsigned int type;
-    unsigned int seqNr;
-    const char* payload;
-    unsigned int payloadSize;
-    unsigned int hopCount;
 };
 
 } /* namespace ARA */

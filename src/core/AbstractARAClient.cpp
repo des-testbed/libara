@@ -28,19 +28,37 @@
 namespace ARA {
 
 AbstractARAClient::AbstractARAClient() {
-    packetTrap = new PacketTrap();
-    routingTable = new RoutingTable();
+
 }
 
 AbstractARAClient::~AbstractARAClient() {
-    delete packetTrap;
-    delete routingTable;
+
+}
+
+void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
+    interfaces.add(newInterface);
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
-    if(routingTable->isDeliverable(packet) == false) {
-        packetTrap->trapPacket(packet);
+    if(routingTable.isDeliverable(packet) == false) {
+        packetTrap.trapPacket(packet);
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* fant = packet->createFANT(sequenceNr);
+        broadCast(fant);
     }
+}
+
+void AbstractARAClient::broadCast(Packet* packet) {
+    //TODO replace this with iterator which should be faster
+    unsigned int nrOfInterfaces = interfaces.size();
+    for(unsigned int i=0; i<nrOfInterfaces; i++) {
+        NetworkInterface* interface = interfaces.get(i);
+        interface->broadcast(packet);
+    }
+}
+
+unsigned int AbstractARAClient::getNextSequenceNumber() {
+    return nextSequenceNumber++;
 }
 
 } /* namespace ARA */

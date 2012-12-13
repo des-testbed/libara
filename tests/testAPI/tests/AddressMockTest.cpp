@@ -85,4 +85,12 @@ SUITE(AddressMockTest) {
         CHECK(broadCastAddress.isBroadCast() == true);
         CHECK(nonBroadCastAddress.isBroadCast() == false);
     }
+
+    TEST(testCloneAddress) {
+        AddressMock original = AddressMock("Foo");
+        Address* clone = original.clone();
+
+        CHECK(original.equals(clone));
+        delete clone;
+    }
   }

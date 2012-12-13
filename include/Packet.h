@@ -31,19 +31,32 @@
 namespace ARA {
 
 /**
- * TODO write Interface description
+ * Packets encapsulate a payload that has to be transmitted from
+ * a source node to a destination node.
  */
 class Packet {
 public:
-    virtual ~Packet() {}
+    Packet(Address* source, Address* destination, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 0);
+    ~Packet();
 
-	virtual Address* getSource() = 0;
-	virtual Address* getDestination() = 0;
-	virtual unsigned int getType() = 0;
-	virtual unsigned int getSequenceNumber() = 0;
-	virtual unsigned int getHopCount() = 0;
-	virtual const char* getPayload() = 0;
-	virtual unsigned int getPayloadLength() = 0;
+    Address* getSource();
+    Address* getDestination();
+    char getType();
+    unsigned int getSequenceNumber();
+    unsigned int getHopCount();
+    const char* getPayload();
+    unsigned int getPayloadLength();
+
+	Packet* createFANT(unsigned int sequenceNumber);
+
+protected:
+    Address* source;
+    Address* destination;
+    char type;
+    unsigned int seqNr;
+    const char* payload;
+    unsigned int payloadSize;
+    unsigned int hopCount;
 };
 
 } /* namespace ARA */

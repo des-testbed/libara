@@ -60,4 +60,12 @@ SUITE(OMNeTAddressTest) {
         OMNeTAddress broadCastAddress = OMNeTAddress(OMNeTAddress::BROADCAST);
         OMNeTAddress normalAddress = OMNeTAddress(123);
     }
+
+    TEST(testCloneAddress) {
+        OMNeTAddress original = OMNeTAddress(123);
+        Address* clone = original.clone();
+
+        CHECK(original.equals(clone));
+        delete clone;
+    }
 }

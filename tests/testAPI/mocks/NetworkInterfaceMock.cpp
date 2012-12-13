@@ -24,6 +24,7 @@
  *******************************************************************************/
 
 #include "NetworkInterfaceMock.h"
+#include "AddressMock.h"    // TODO this NetworkInterface implementation should not need to know AddressMock
 
 namespace ARA {
 
@@ -49,7 +50,27 @@ void NetworkInterfaceMock::send(Packet* packet, Address* recipient) {
 }
 
 void NetworkInterfaceMock::broadcast(Packet* packet) {
+    // TODO when is the memory to broadcastAddress going to be released?
+    Address* broadCastAddress = new AddressMock("BROADCAST");
+    send(packet, broadCastAddress);
+}
 
+bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
+    // TODO replace this with an iterator
+    unsigned int numberOfSentPackets = sentPackets->size();
+    for (unsigned int i = 0; i < numberOfSentPackets; i++) {
+        Pair<Packet, Address>* pair = sentPackets->get(i);
+        Packet* currentPacket = pair->getLeft();
+        Address* recipient = pair->getRight();
+
+        if(currentPacket == packet) {
+            if(recipient->isBroadCast() == true) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 } /* namespace ARA */
