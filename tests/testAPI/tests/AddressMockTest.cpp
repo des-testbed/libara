@@ -77,4 +77,12 @@ SUITE(AddressMockTest) {
         CHECK((mock1 == mock3) == true);
         CHECK((mock2 == mock1) == false);
     }
+
+    TEST(testISBroadCast) {
+        AddressMock broadCastAddress = AddressMock("BROADCAST");
+        AddressMock nonBroadCastAddress = AddressMock("Foobar");
+
+        CHECK(broadCastAddress.isBroadCast() == true);
+        CHECK(nonBroadCastAddress.isBroadCast() == false);
+    }
   }

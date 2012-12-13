@@ -28,11 +28,11 @@
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(int address) {
+OMNeTAddress::OMNeTAddress(unsigned int address) {
     this->address = address;
 }
 
-int OMNeTAddress::getAddress() {
+unsigned int OMNeTAddress::getAddress() {
     return this->address;
 }
 
@@ -48,6 +48,10 @@ bool OMNeTAddress::equals(Address* otherAddress) {
 
 size_t OMNeTAddress::getHashValue() const {
     return address;
+}
+
+bool OMNeTAddress::isBroadCast() {
+    return address == BROADCAST;
 }
 
 } /* namespace ARA */

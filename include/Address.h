@@ -31,7 +31,7 @@
 namespace ARA {
 
 /**
- * TODO write Interface description
+ * This represents an arbitrary network address.
  */
 class Address {
 public:
@@ -40,6 +40,7 @@ public:
     //TODO do we need the equals method if we support operator== overloading now?
     virtual bool equals(Address* otherAddress) = 0;
     virtual size_t getHashValue() const = 0;
+    virtual bool isBroadCast() = 0;
 
     bool operator==(Address& other) {
         return this->equals(&other);

@@ -55,4 +55,9 @@ SUITE(OMNeTAddressTest) {
         OMNeTAddress address = OMNeTAddress(123);
         CHECK_EQUAL(123, address.getHashValue());
     }
+
+    TEST(testIsBroadCast) {
+        OMNeTAddress broadCastAddress = OMNeTAddress(OMNeTAddress::BROADCAST);
+        OMNeTAddress normalAddress = OMNeTAddress(123);
+    }
 }

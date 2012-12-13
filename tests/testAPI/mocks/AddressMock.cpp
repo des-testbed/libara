@@ -57,4 +57,8 @@ string AddressMock::getAddress() {
     return address;
 }
 
+bool AddressMock::isBroadCast() {
+    return address == "BROADCAST";
+}
+
 } /* namespace ARA */

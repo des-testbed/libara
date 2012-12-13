@@ -38,6 +38,7 @@ public:
 
     bool equals(Address* otherAddress);
     size_t getHashValue() const;
+    bool isBroadCast();
 
     std::string getAddress();
 
