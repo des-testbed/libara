@@ -24,28 +24,24 @@
  *******************************************************************************/
 
 #include <UnitTest++.h>
+#include "testAPI/mocks/ARAClientMock.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
-#include "Packet.h"
-
-#include "testAPI/mocks/ARAClientMock.h"
-#include "testAPI/mocks/PacketMock.h"
 
 using namespace ARA;
 
-SUITE(AbstractARAClientTest) {
+SUITE(ARAClientMockTest) {
 
-    TEST(testPacketGetsTrappedIfNotDeliverable) {
+    TEST(testGetPacketTrap){
         ARAClientMock client = ARAClientMock();
         PacketTrap* packetTrap = client.getPacketTrap();
+        CHECK(packetTrap != NULL);
+    }
 
+    TEST(testGetRoutingTable){
+        ARAClientMock client = ARAClientMock();
         RoutingTable* routingTable = client.getRoutingTable();
-
-        PacketMock packet = PacketMock();
-
-        CHECK(routingTable->isDeliverable(&packet) == false);
-        client.sendPacket(&packet);
-        CHECK(packetTrap->contains(&packet));
+        CHECK(routingTable != NULL);
     }
 
   }
