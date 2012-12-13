@@ -36,7 +36,8 @@ class OMNeTGate: public NetworkInterface {
 public:
     OMNeTGate(const cSimpleModule* module, std::string gateName);
 
-    void send(Packet* packet);
+    void send(Packet* packet, Address* recipient);
+    void broadcast(Packet* packet);
 
 private:
     const cSimpleModule* module;

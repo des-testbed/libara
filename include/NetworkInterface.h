@@ -27,6 +27,7 @@
 #define NETWORKINTERFACE_H_
 
 #include "Packet.h"
+#include "Address.h"
 
 namespace ARA {
 
@@ -37,7 +38,8 @@ class NetworkInterface {
 public:
     virtual ~NetworkInterface() {}
     
-	virtual void send(Packet* packet) = 0;
+	virtual void send(Packet* packet, Address* recipient) = 0;
+	virtual void broadcast(Packet* packet) = 0;
 };
 
 } /* namespace ARA */

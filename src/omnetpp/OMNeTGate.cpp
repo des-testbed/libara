@@ -32,9 +32,13 @@ OMNeTGate::OMNeTGate(const cSimpleModule* module, std::string gateName) {
     this->gateName = gateName;
 }
 
-void OMNeTGate::send(Packet* packet) {
+void OMNeTGate::send(Packet* packet, Address* recipient) {
     //TODO implement OMNeTGate->send()
     //module->send(packet, gateName);
+}
+
+void OMNeTGate::broadcast(Packet* packet) {
+    //TODO implement OMNeTGate->send()
 }
 
 } /* namespace ARA */
