@@ -37,6 +37,8 @@ namespace ARA {
 class RoutingTable {
 
 public:
+    ~RoutingTable();
+
     void update(Address* destination, Address* nextHop, float pheromoneValue);
     LinkedList<RoutingTableEntry>* getPossibleNextHops(Address* destination);
     LinkedList<RoutingTableEntry>* getPossibleNextHops(Packet* packet);

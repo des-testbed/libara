@@ -24,10 +24,20 @@
  *******************************************************************************/
 
 #include "RoutingTable.h"
+#include <utility>
 
 namespace ARA {
 
-//FIXME Write a destructor and clean up the memory of the table
+// TODO needs short review and confirmation I deleted everything properly
+RoutingTable::~RoutingTable() {
+    std::unordered_map<Address*, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate>::iterator iterator;
+    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+        std::pair<Address* const, LinkedList<RoutingTableEntry>*> entryPair = *iterator;
+        LinkedList<RoutingTableEntry>* entryList = entryPair.second;
+        delete entryList;
+    }
+    table.clear();
+}
 
 void RoutingTable::update(Address* destination, Address* nextHop, float pheromoneValue) {
     RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, pheromoneValue);
