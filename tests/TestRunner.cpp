@@ -25,10 +25,6 @@
 
 #include <UnitTest++.h>
 
-#include "OMNeTAddressTest.cpp"
-#include "PacketTypeTest.cpp"
-#include "OMNeTPacketTest.cpp"
-
 /**
  * This file will run all tests that are linked together in the makefile.
  * You should never have to add anything here.
