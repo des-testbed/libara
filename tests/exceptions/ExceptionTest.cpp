@@ -23,40 +23,17 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include <UnitTest++.h>
+#include "Exception.h"
 
-namespace ARA {
+using namespace ARA;
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+SUITE(ExceptionTest) {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
-
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+    TEST(testGetMessage) {
+        const char* message = "Something went horribly wrong";
+        Exception exception = Exception(message);
+        CHECK_EQUAL(message, exception.getMessage());
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
-} /* namespace ARA */
+  }

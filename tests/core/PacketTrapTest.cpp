@@ -23,40 +23,29 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include <UnitTest++.h>
+#include "PacketTrap.h"
+#include "Packet.h"
+#include "Address.h"
+#include "testAPI/mocks/PacketMock.h"
 
-namespace ARA {
+using namespace ARA;
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+SUITE(PacketTrapTest) {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    TEST(testTrapPacket) {
+        PacketTrap packetTrap = PacketTrap();
+        Packet* packet = new PacketMock();
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+        // Check that there is no trapped packet for the packets destination
+        CHECK(packetTrap.contains(packet) == false);
+
+        packetTrap.trapPacket(packet);
+
+        // Now there must be a trapped packet for the packets destination
+        CHECK(packetTrap.contains(packet) == true);
+
+        delete packet;
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
-} /* namespace ARA */
+  }

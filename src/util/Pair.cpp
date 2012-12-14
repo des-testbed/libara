@@ -23,40 +23,25 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#define PAIR_H_CPP_
+#include "Pair.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
+template<class Left, class Right>
+Pair<Left, Right>::Pair(Left* left, Right* right) {
+    this->left = left;
+    this->right = right;
 }
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
+template<class Left, class Right>
+Left* Pair<Left, Right>::getLeft() {
+    return left;
 }
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
+template<class Left, class Right>
+Right* Pair<Left, Right>::getRight() {
+    return right;
 }
 
 } /* namespace ARA */

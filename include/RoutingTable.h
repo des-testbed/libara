@@ -23,40 +23,32 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef ROUTINGTABLE_H_
+#define ROUTINGTABLE_H_
+
+#include "Address.h"
+#include "Packet.h"
+#include "LinkedList.h"
+#include "RoutingTableEntry.h"
+#include <unordered_map>
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+class RoutingTable {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+public:
+    ~RoutingTable();
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
+    void update(Address* destination, Address* nextHop, float pheromoneValue);
+    LinkedList<RoutingTableEntry>* getPossibleNextHops(Address* destination);
+    LinkedList<RoutingTableEntry>* getPossibleNextHops(Packet* packet);
+    bool isDeliverable(Address* destination);
+    bool isDeliverable(Packet* packet);
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
+private:
+    std::unordered_map<Address*, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate> table;
 
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+};
 
 } /* namespace ARA */
+#endif /* ROUTINGTABLE_H_ */

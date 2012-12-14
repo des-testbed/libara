@@ -4,3 +4,12 @@ friedrich
 telematics
 große
 namespace
+enum
+int
+foo
+std
+hashmap
+cpp
+destructor
+foobar
+payload

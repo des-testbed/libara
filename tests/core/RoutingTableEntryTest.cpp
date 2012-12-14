@@ -23,40 +23,21 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include <UnitTest++.h>
+#include "RoutingTableEntry.h"
+#include "testAPI/mocks/AddressMock.h"
 
-namespace ARA {
+using namespace ARA;
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+SUITE(RoutingTableEntryTest) {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    TEST(testGetters) {
+        AddressMock nextHop = AddressMock();
+        float pheromoneValue = 1.234;
+        RoutingTableEntry entry = RoutingTableEntry(&nextHop, pheromoneValue);
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+        CHECK_EQUAL(&nextHop, entry.getNextHop());
+        CHECK_EQUAL(pheromoneValue, entry.getPheromoneValue());
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
 }
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
-} /* namespace ARA */

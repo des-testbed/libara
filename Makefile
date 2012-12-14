@@ -4,11 +4,7 @@ all: checkmakefiles
 
 test: all
 	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
-	@cd tests && $(MAKE)
-	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
-	@if ./tests/runAllTests; then \
-     echo -e "\n~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi	
+	@cd tests && $(MAKE) runTests	
 
 clean: checkmakefiles
 	@cd src && $(MAKE) clean
@@ -21,7 +17,7 @@ cleanall: checkmakefiles
 	rm -f src/Makefile
 
 makefiles:
-	cd src && opp_makemake -f --deep
+	cd src && opp_makemake -f --deep -I ../include
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

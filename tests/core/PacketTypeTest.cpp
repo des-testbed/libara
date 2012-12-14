@@ -23,40 +23,24 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include <UnitTest++.h>
+#include "PacketType.h"
 
-namespace ARA {
+using namespace ARA;
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+SUITE(PacketTypeTest) {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
-
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+    TEST(testIsAntPacket) {
+        CHECK(PacketType::isAntPacket(PacketType::FANT) == true);
+        CHECK(PacketType::isAntPacket(PacketType::BANT) == true);
+        CHECK(PacketType::isAntPacket(PacketType::PANT) == true);
+        CHECK(PacketType::isAntPacket(PacketType::DATA) == false);
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
+
+    TEST(testIsDataPacket) {
+        CHECK(PacketType::isDataPacket(PacketType::FANT) == false);
+        CHECK(PacketType::isDataPacket(PacketType::BANT) == false);
+        CHECK(PacketType::isDataPacket(PacketType::PANT) == false);
+        CHECK(PacketType::isDataPacket(PacketType::DATA) == true);
     }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
-} /* namespace ARA */
+  }

@@ -23,40 +23,25 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include <UnitTest++.h>
+#include "testAPI/mocks/ARAClientMock.h"
+#include "PacketTrap.h"
+#include "RoutingTable.h"
 
-namespace ARA {
+using namespace ARA;
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+SUITE(ARAClientMockTest) {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
-
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+    TEST(testGetPacketTrap){
+        ARAClientMock client = ARAClientMock();
+        PacketTrap* packetTrap = client.getPacketTrap();
+        CHECK(packetTrap != NULL);
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
+
+    TEST(testGetRoutingTable){
+        ARAClientMock client = ARAClientMock();
+        RoutingTable* routingTable = client.getRoutingTable();
+        CHECK(routingTable != NULL);
     }
-}
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
-} /* namespace ARA */
+  }

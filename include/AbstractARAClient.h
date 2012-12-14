@@ -23,40 +23,38 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef ABSTRACTARACLIENT_H_
+#define ABSTRACTARACLIENT_H_
+
+#include "NetworkInterface.h"
+#include "PacketTrap.h"
+#include "RoutingTable.h"
+#include "Packet.h"
+#include "LinkedList.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+class AbstractARAClient {
+public:
+    AbstractARAClient();
+    ~AbstractARAClient();
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    void addNetworkInterface(NetworkInterface* newInterface);
+    void sendPacket(Packet* packet);
+    //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
+    void broadCast(Packet* packet);
+    //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
+    unsigned int getNextSequenceNumber();
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
+protected:
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
+    LinkedList<NetworkInterface> interfaces;
+    PacketTrap packetTrap;
+    RoutingTable routingTable;
 
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+private:
+    unsigned int nextSequenceNumber = 1;
+};
 
 } /* namespace ARA */
+#endif /* ABSTRACTARACLIENT_H_ */

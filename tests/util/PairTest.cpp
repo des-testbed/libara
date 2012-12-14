@@ -23,40 +23,22 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include <UnitTest++.h>
+#include <string>
+#include "Pair.h"
 
-namespace ARA {
+using namespace ARA;
+using namespace std;
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+SUITE(PairTest) {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    TEST(testPair) {
+        string string1 = string("Foo");
+        string string2 = string("Bar");
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+        Pair<string, string> pair = Pair<string, string>(&string1, &string2);
+        CHECK(pair.getLeft()  == &string1);
+        CHECK(pair.getRight() == &string2);
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
-} /* namespace ARA */
+  }

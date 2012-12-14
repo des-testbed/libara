@@ -23,40 +23,24 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef NETWORKINTERFACE_H_
+#define NETWORKINTERFACE_H_
+
+#include "Packet.h"
+#include "Address.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
-
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
-
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+/**
+ * Network interface are used by the ARA clients to send Packets to other clients.
+ */
+class NetworkInterface {
+public:
+    virtual ~NetworkInterface() {}
+    
+	virtual void send(Packet* packet, Address* recipient) = 0;
+	virtual void broadcast(Packet* packet) = 0;
+};
 
 } /* namespace ARA */
+#endif // NETWORKINTERFACE_H_

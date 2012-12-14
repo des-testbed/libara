@@ -23,40 +23,26 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef OMNETGATE_H_
+#define OMNETGATE_H_
+
+#include <omnetpp.h>
+#include <string>
+#include "NetworkInterface.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+class OMNeTGate: public NetworkInterface {
+public:
+    OMNeTGate(const cSimpleModule* module, std::string gateName);
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    void send(Packet* packet, Address* recipient);
+    void broadcast(Packet* packet);
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+private:
+    const cSimpleModule* module;
+    std::string gateName;
+};
 
 } /* namespace ARA */
+#endif /* OMNETGATE_H_ */

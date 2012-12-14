@@ -23,22 +23,47 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
-#include "PacketType.h"
+#include "AddressMock.h"
+#include <hash_fun.h>
 
-SUITE(PacketTypeTest) {
+using namespace std;
 
-    TEST(testIsAntPacket) {
-        CHECK(PacketType::isAntPacket(PacketType::FANT) == true);
-        CHECK(PacketType::isAntPacket(PacketType::BANT) == true);
-        CHECK(PacketType::isAntPacket(PacketType::PANT) == true);
-        CHECK(PacketType::isAntPacket(PacketType::DATA) == false);
+namespace ARA {
+
+AddressMock::AddressMock() {
+    this->address = string("Foo");
+}
+
+AddressMock::AddressMock(const std::string name) {
+    this->address = name;
+}
+
+bool AddressMock::equals(Address* otherAddress) {
+    AddressMock* otherAddressMock = dynamic_cast<AddressMock*>(otherAddress);
+    if(otherAddressMock == NULL) {
+        return false;
     }
-
-    TEST(testIsDataPacket) {
-        CHECK(PacketType::isDataPacket(PacketType::FANT) == false);
-        CHECK(PacketType::isDataPacket(PacketType::BANT) == false);
-        CHECK(PacketType::isDataPacket(PacketType::PANT) == false);
-        CHECK(PacketType::isDataPacket(PacketType::DATA) == true);
+    else {
+        return this->address.compare(otherAddressMock->address) == 0;
     }
-  }
+}
+
+size_t AddressMock::getHashValue() const {
+    __gnu_cxx::hash<const char*> hashFunction;
+    return hashFunction(address.c_str());
+}
+
+string AddressMock::getAddress() {
+    return address;
+}
+
+bool AddressMock::isBroadCast() {
+    return address == "BROADCAST";
+}
+
+Address* AddressMock::clone() {
+    AddressMock* clone = new AddressMock(this->address);
+    return clone;
+}
+
+} /* namespace ARA */

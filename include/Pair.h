@@ -23,40 +23,32 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef PAIR_H_
+#define PAIR_H_
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+template<class Left, class Right>
+class Pair {
+public:
+    Pair(Left* left, Right* right);
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    Left* getLeft();
+    Right* getRight();
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+private:
+    Left* left;
+    Right* right;
+};
 
 } /* namespace ARA */
+
+/**
+ * Declaration and implementation of a template class have to be in the same file so
+ * the corresponding cpp file is included here if it has not been included earlier.
+ */
+#ifndef PAIR_H_CPP_
+#include "../src/util/Pair.cpp"
+#endif /* PAIR_H_CPP_ */
+
+#endif /* PAIR_H_ */

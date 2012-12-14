@@ -32,13 +32,20 @@ namespace ARA {
 
 class OMNeTAddress : public Address {
 public:
-    OMNeTAddress(int address);
+    OMNeTAddress(unsigned int address);
     bool equals(Address* otherAddress);
+    size_t getHashValue() const;
+    bool isBroadCast();
+    Address* clone();
+
+    unsigned int getAddress();
+
+    static const unsigned int BROADCAST = 0;
 
     int getAddress();
 
 private:
-    int address;
+    unsigned int address;
 
 };
 

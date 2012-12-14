@@ -29,7 +29,11 @@
 namespace ARA {
 
 /**
- * TODO write Interface description
+ * The PacketType is an abstract class that encapsulates the PacketTypeEnum and
+ * some utility functions for checking the packet type.
+ *
+ * The enum can be used like this:
+ * <code>int i = PacketType::FANT</code>
  */
 class PacketType {
 public:
@@ -46,6 +50,9 @@ public:
     static bool isDataPacket(PacketTypeEnum type);
 };
 
+/**
+ * Returns TRUE if the given type is a FANT, BANT or PANT and FALSE otherwise.
+ */
 inline bool PacketType::isAntPacket(PacketTypeEnum type) {
     switch (type) {
         case PacketType::FANT:
@@ -53,20 +60,19 @@ inline bool PacketType::isAntPacket(PacketTypeEnum type) {
         case PacketType::PANT:
             return true;
         default:
-        case PacketType::DATA:
             return false;
     }
 }
 
+/**
+ * Returns TRUE if the given type is a DATA packet and FALSE otherwise.
+ */
 inline bool PacketType::isDataPacket(PacketTypeEnum type) {
     switch (type) {
-        case PacketType::FANT:
-        case PacketType::BANT:
-        case PacketType::PANT:
-            return false;
-        default:
         case PacketType::DATA:
             return true;
+        default:
+            return false;
     }
 }
 

@@ -23,40 +23,23 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef EXCEPTION_H_
+#define EXCEPTION_H_
+
+//TODO this class could inherit from std::exception
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+class Exception {
+public:
+    Exception();
+    Exception(const char* message);
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    const char* getMessage();
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+private:
+    const char* message;
+};
 
 } /* namespace ARA */
+#endif /* EXCEPTION_H_ */

@@ -23,40 +23,23 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef ROUTINGTABLEENTRY_H_
+#define ROUTINGTABLEENTRY_H_
+
+#include "Address.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+class RoutingTableEntry {
+public:
+    RoutingTableEntry(Address* nextHop, float pheromoneValue);
+    Address* getNextHop();
+    float getPheromoneValue();
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
-
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+private:
+    Address* nextHop;
+    float pheromoneValue;
+};
 
 } /* namespace ARA */
+#endif /* ROUTINGTABLEENTRY_H_ */

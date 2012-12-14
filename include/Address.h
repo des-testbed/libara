@@ -26,18 +26,44 @@
 #ifndef ADDRESS_H_
 #define ADDRESS_H_
 
+#include <stddef.h>
+
 namespace ARA {
 
 /**
- * TODO write Interface description
+ * This represents an arbitrary network address.
  */
 class Address {
 public:
     virtual ~Address() {}
 
+    //TODO do we need the equals method if we support operator== overloading now?
     virtual bool equals(Address* otherAddress) = 0;
+    virtual size_t getHashValue() const = 0;
+    virtual bool isBroadCast() = 0;
+    virtual Address* clone() = 0;
 
-    //TODO may overloading operator= would be a better solution?
+    bool operator==(Address& other) {
+        return this->equals(&other);
+    }
+};
+
+/**
+ * This Functor is needed for std::unordered_map (hashmap implementation)
+ */
+struct AddressHash {
+    size_t operator()(Address* address) const {
+        return address->getHashValue();
+    }
+};
+
+/**
+ * This Functor is needed for std::unordered_map (hashmap implementation)
+ */
+struct AddressPredicate {
+    size_t operator()(Address* address1, Address* address2) const {
+        return address1->equals(address2);
+    }
 };
 
 } /* namespace ARA */

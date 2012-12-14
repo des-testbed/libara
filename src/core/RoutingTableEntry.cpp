@@ -23,32 +23,21 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
-#include "OMNeTAddress.h"
+#include "RoutingTableEntry.h"
 
-using namespace ARA;
+namespace ARA {
 
-SUITE(OMNeTAddressTest) {
-
-    TEST(testGetAddress) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.getAddress() == 123);
-    }
-
-    TEST(testEquality) {
-        OMNeTAddress address1 = OMNeTAddress(123);
-        CHECK(address1.equals(&address1));
-
-        OMNeTAddress sameAddress = OMNeTAddress(123);
-        CHECK(address1.equals(&sameAddress));
-
-        OMNeTAddress address2 = OMNeTAddress(456);
-        CHECK(address1.equals(&address2) == false);
-    }
-
-    TEST(testEqualityWithNull) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.equals(0) == false);
-    }
-
+RoutingTableEntry::RoutingTableEntry(Address* nextHop, float pheromoneValue) {
+    this->nextHop = nextHop;
+    this->pheromoneValue = pheromoneValue;
 }
+
+Address* RoutingTableEntry::getNextHop() {
+    return nextHop;
+}
+
+float RoutingTableEntry::getPheromoneValue() {
+    return pheromoneValue;
+}
+
+} /* namespace ARA */

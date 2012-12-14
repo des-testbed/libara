@@ -23,40 +23,19 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include <UnitTest++.h>
+#include <omnetpp.h>
+#include "OMNeTGate.h"
 
-namespace ARA {
+using namespace ARA;
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+SUITE(OMNeTGateTest) {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    /* FIXME: Make this test work (i.e. check back with OMNeT++ API on how to create single simpleModule instances
+    TEST(testCreate) {
+        cSimpleModule* module = new cSimpleModule();
+        OMNeTGate(module, "testGate");
+        delete module;
+    }*/
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
-} /* namespace ARA */
+  }

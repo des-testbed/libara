@@ -23,40 +23,49 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
+#include <UnitTest++.h>
 #include "OMNeTAddress.h"
 
-namespace ARA {
+using namespace ARA;
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+SUITE(OMNeTAddressTest) {
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
-
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+    TEST(testGetAddress) {
+        OMNeTAddress address = OMNeTAddress(123);
+        CHECK(address.getAddress() == 123);
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
+
+    TEST(testEquality) {
+        OMNeTAddress address1 = OMNeTAddress(123);
+        CHECK(address1.equals(&address1));
+
+        OMNeTAddress sameAddress = OMNeTAddress(123);
+        CHECK(address1.equals(&sameAddress));
+
+        OMNeTAddress address2 = OMNeTAddress(456);
+        CHECK(address1.equals(&address2) == false);
+    }
+
+    TEST(testEqualityWithNull) {
+        OMNeTAddress address = OMNeTAddress(123);
+        CHECK(address.equals(0) == false);
+    }
+
+    TEST(testGetHashValue) {
+        OMNeTAddress address = OMNeTAddress(123);
+        CHECK_EQUAL(123, address.getHashValue());
+    }
+
+    TEST(testIsBroadCast) {
+        OMNeTAddress broadCastAddress = OMNeTAddress(OMNeTAddress::BROADCAST);
+        OMNeTAddress normalAddress = OMNeTAddress(123);
+    }
+
+    TEST(testCloneAddress) {
+        OMNeTAddress original = OMNeTAddress(123);
+        Address* clone = original.clone();
+
+        CHECK(original.equals(clone));
+        delete clone;
     }
 }
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
-} /* namespace ARA */

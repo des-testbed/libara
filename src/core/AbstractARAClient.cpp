@@ -23,40 +23,42 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#include "AbstractARAClient.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
+AbstractARAClient::AbstractARAClient() {
+
 }
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
+AbstractARAClient::~AbstractARAClient() {
+
 }
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
+void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
+    interfaces.add(newInterface);
+}
+
+void AbstractARAClient::sendPacket(Packet* packet) {
+    if(routingTable.isDeliverable(packet) == false) {
+        packetTrap.trapPacket(packet);
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* fant = packet->createFANT(sequenceNr);
+        broadCast(fant);
     }
-    else {
-        return otherOMNeTAddress->address == this->address;
+}
+
+void AbstractARAClient::broadCast(Packet* packet) {
+    //TODO replace this with iterator which should be faster
+    unsigned int nrOfInterfaces = interfaces.size();
+    for(unsigned int i=0; i<nrOfInterfaces; i++) {
+        NetworkInterface* interface = interfaces.get(i);
+        interface->broadcast(packet);
     }
 }
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
+unsigned int AbstractARAClient::getNextSequenceNumber() {
+    return nextSequenceNumber++;
 }
 
 } /* namespace ARA */

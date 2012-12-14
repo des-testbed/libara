@@ -23,40 +23,24 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef PACKETTRAP_H_
+#define PACKETTRAP_H_
+
+#include <unordered_map>
+#include "Packet.h"
+#include "Address.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+class PacketTrap {
+public:
+    void trapPacket(Packet* packet);
+    bool contains(Packet* packet);
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+private:
+    std::unordered_map<Address*, Packet*, AddressHash, AddressPredicate> trappedPackets;
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
-
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+};
 
 } /* namespace ARA */
+#endif /* PACKETTRAP_H_ */

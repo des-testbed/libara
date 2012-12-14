@@ -23,40 +23,30 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
-#include "OMNeTAddress.h"
+#ifndef NETWORKINTERFACEMOCK_H_
+#define NETWORKINTERFACEMOCK_H_
+
+#include "NetworkInterface.h"
+#include "Packet.h"
+#include "LinkedList.h"
+#include "Pair.h"
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
+class NetworkInterfaceMock: public ARA::NetworkInterface {
+public:
+    NetworkInterfaceMock();
+    ~NetworkInterfaceMock();
 
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
-}
+    void send(Packet* packet, Address* recipient);
+    void broadcast(Packet* packet);
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
-        return false;
-    }
-    else {
-        return otherOMNeTAddress->address == this->address;
-    }
-}
+    LinkedList<Pair<Packet, Address>>* getSentPackets();
+    bool hasPacketBeenBroadCasted(Packet* packet);
 
-size_t OMNeTAddress::getHashValue() const {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
+private:
+    LinkedList<Pair<Packet, Address>>* sentPackets;
+};
 
 } /* namespace ARA */
+#endif /* NETWORKINTERFACEMOCK_H_ */
