@@ -36,16 +36,21 @@ namespace ARA {
 class NetworkInterfaceMock: public ARA::NetworkInterface {
 public:
     NetworkInterfaceMock();
+    NetworkInterfaceMock(const std::string interfaceName);
     ~NetworkInterfaceMock();
 
     void send(Packet* packet, Address* recipient);
     void broadcast(Packet* packet);
+    bool equals(NetworkInterface* otherInterface);
 
+    std::string getName();
     LinkedList<Pair<Packet, Address>>* getSentPackets();
+    bool hasPacketBeenSend(Packet* packet);
     bool hasPacketBeenBroadCasted(Packet* packet);
 
 private:
-    LinkedList<Pair<Packet, Address>>* sentPackets;
+    std::string name;
+    LinkedList<Pair<Packet, Address>> sentPackets;
 };
 
 } /* namespace ARA */

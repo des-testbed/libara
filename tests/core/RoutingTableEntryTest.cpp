@@ -26,18 +26,32 @@
 #include <UnitTest++.h>
 #include "RoutingTableEntry.h"
 #include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/NetworkInterfaceMock.h"
 
 using namespace ARA;
 
 SUITE(RoutingTableEntryTest) {
 
     TEST(testGetters) {
+        NetworkInterfaceMock interface = NetworkInterfaceMock();
         AddressMock nextHop = AddressMock();
         float pheromoneValue = 1.234;
-        RoutingTableEntry entry = RoutingTableEntry(&nextHop, pheromoneValue);
+        RoutingTableEntry entry = RoutingTableEntry(&nextHop, &interface, pheromoneValue);
 
-        CHECK_EQUAL(&nextHop, entry.getNextHop());
+        CHECK_EQUAL(&nextHop, entry.getAddress());
+        CHECK_EQUAL(&interface, entry.getNetworkInterface());
         CHECK_EQUAL(pheromoneValue, entry.getPheromoneValue());
     }
 
+    TEST(testSetPheromoneValue) {
+        NetworkInterfaceMock interface = NetworkInterfaceMock();
+        AddressMock nextHop = AddressMock();
+        float pheromoneValue = 1.234;
+        RoutingTableEntry entry = RoutingTableEntry(&nextHop, &interface, pheromoneValue);
+
+        entry.setPheromoneValue(42);
+        CHECK_EQUAL(&nextHop, entry.getAddress());
+        CHECK_EQUAL(&interface, entry.getNetworkInterface());
+        CHECK_EQUAL(42, entry.getPheromoneValue());
+    }
 }

@@ -27,17 +27,26 @@
 
 namespace ARA {
 
-RoutingTableEntry::RoutingTableEntry(Address* nextHop, float pheromoneValue) {
-    this->nextHop = nextHop;
+RoutingTableEntry::RoutingTableEntry(Address* nextHop, NetworkInterface* interface, float pheromoneValue) {
+    this->address = nextHop;
+    this->interface = interface;
     this->pheromoneValue = pheromoneValue;
 }
 
-Address* RoutingTableEntry::getNextHop() {
-    return nextHop;
+Address* RoutingTableEntry::getAddress() {
+    return address;
+}
+
+NetworkInterface* RoutingTableEntry::getNetworkInterface() {
+    return interface;
 }
 
 float RoutingTableEntry::getPheromoneValue() {
     return pheromoneValue;
+}
+
+void RoutingTableEntry::setPheromoneValue(float newPheromoneValue) {
+    this->pheromoneValue = newPheromoneValue;
 }
 
 } /* namespace ARA */

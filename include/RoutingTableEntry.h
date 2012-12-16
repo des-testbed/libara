@@ -27,17 +27,22 @@
 #define ROUTINGTABLEENTRY_H_
 
 #include "Address.h"
+#include "NetworkInterface.h"
 
 namespace ARA {
 
 class RoutingTableEntry {
 public:
-    RoutingTableEntry(Address* nextHop, float pheromoneValue);
-    Address* getNextHop();
+    RoutingTableEntry(Address* nextHop, NetworkInterface* interface, float pheromoneValue);
+
+    Address* getAddress();
+    NetworkInterface* getNetworkInterface();
     float getPheromoneValue();
+    void setPheromoneValue(float newPheromoneValue);
 
 private:
-    Address* nextHop;
+    Address* address;
+    NetworkInterface* interface;
     float pheromoneValue;
 };
 

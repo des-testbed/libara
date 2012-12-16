@@ -29,24 +29,31 @@
 namespace ARA {
 
 NetworkInterfaceMock::NetworkInterfaceMock() {
-    sentPackets = new LinkedList<Pair<Packet, Address>>;
+    this->name = "NetworkInterfaceMock";
+}
+
+NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName) {
+    this->name = interfaceName;
 }
 
 NetworkInterfaceMock::~NetworkInterfaceMock() {
-    while(sentPackets->isEmpty() == false) {
-        Pair<Packet, Address>* removedPair = sentPackets->remove();
+    while(sentPackets.isEmpty() == false) {
+        Pair<Packet, Address>* removedPair = sentPackets.remove();
         delete removedPair;
     }
-    delete sentPackets;
+}
+
+std::string NetworkInterfaceMock::getName() {
+    return this->name;
 }
 
 LinkedList<Pair<Packet, Address>>* NetworkInterfaceMock::getSentPackets() {
-    return sentPackets;
+    return &sentPackets;
 }
 
 void NetworkInterfaceMock::send(Packet* packet, Address* recipient) {
     Pair<Packet, Address>* pair = new Pair<Packet, Address>(packet, recipient);
-    sentPackets->add(pair);
+    sentPackets.add(pair);
 }
 
 void NetworkInterfaceMock::broadcast(Packet* packet) {
@@ -57,9 +64,9 @@ void NetworkInterfaceMock::broadcast(Packet* packet) {
 
 bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
     // TODO replace this with an iterator
-    unsigned int numberOfSentPackets = sentPackets->size();
+    unsigned int numberOfSentPackets = sentPackets.size();
     for (unsigned int i = 0; i < numberOfSentPackets; i++) {
-        Pair<Packet, Address>* pair = sentPackets->get(i);
+        Pair<Packet, Address>* pair = sentPackets.get(i);
         Packet* currentPacket = pair->getLeft();
         Address* recipient = pair->getRight();
 
@@ -71,6 +78,31 @@ bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
     }
 
     return false;
+}
+
+bool NetworkInterfaceMock::hasPacketBeenSend(Packet* packet) {
+    // TODO replace this with an iterator
+    unsigned int numberOfSentPackets = sentPackets.size();
+    for (unsigned int i = 0; i < numberOfSentPackets; i++) {
+        Pair<Packet, Address>* pair = sentPackets.get(i);
+        Packet* currentPacket = pair->getLeft();
+
+        if(currentPacket == packet) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool NetworkInterfaceMock::equals(NetworkInterface* otherInterface) {
+    NetworkInterfaceMock* otherInterfaceMock = dynamic_cast<NetworkInterfaceMock*>(otherInterface);
+    if(otherInterfaceMock == NULL) {
+        return false;
+    }
+    else {
+        return this->name.compare(otherInterfaceMock->name) == 0;
+    }
 }
 
 } /* namespace ARA */

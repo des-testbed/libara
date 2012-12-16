@@ -27,6 +27,7 @@
 #define ROUTINGTABLE_H_
 
 #include "Address.h"
+#include "NetworkInterface.h"
 #include "Packet.h"
 #include "LinkedList.h"
 #include "RoutingTableEntry.h"
@@ -39,7 +40,7 @@ class RoutingTable {
 public:
     ~RoutingTable();
 
-    void update(Address* destination, Address* nextHop, float pheromoneValue);
+    void update(Address* destination, Address* nextHop, NetworkInterface* interface, float pheromoneValue);
     LinkedList<RoutingTableEntry>* getPossibleNextHops(Address* destination);
     LinkedList<RoutingTableEntry>* getPossibleNextHops(Packet* packet);
     bool isDeliverable(Address* destination);

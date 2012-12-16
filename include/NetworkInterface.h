@@ -40,6 +40,7 @@ public:
     
 	virtual void send(Packet* packet, Address* recipient) = 0;
 	virtual void broadcast(Packet* packet) = 0;
+	virtual bool equals(NetworkInterface* interface) = 0;
 };
 
 } /* namespace ARA */

@@ -39,19 +39,38 @@ RoutingTable::~RoutingTable() {
     table.clear();
 }
 
-void RoutingTable::update(Address* destination, Address* nextHop, float pheromoneValue) {
-    RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, pheromoneValue);
-
+void RoutingTable::update(Address* destination, Address* nextHop, NetworkInterface* interface, float pheromoneValue) {
     if(isDeliverable(destination) == false) {
         // this destination is not yet registered
+        RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
         LinkedList<RoutingTableEntry>* entryList = new LinkedList<RoutingTableEntry>();
-        entryList->add(newEntry);
         table[destination] = entryList;
+        entryList->add(newEntry);
+    }
+    else {
+        // there is at least one registered route for this destination
+        LinkedList<RoutingTableEntry>* entryList = table[destination];
+        bool entryHasBeenUpdated = false;
+        // TODO replace this with an iterator
+        unsigned int nrOfEntries = entryList->size();
+        for (unsigned int i = 0; i < nrOfEntries; ++i) {
+            RoutingTableEntry* entry = entryList->get(i);
+            if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+                entry->setPheromoneValue(pheromoneValue);
+                entryHasBeenUpdated = true;
+            }
+        }
+
+        if(entryHasBeenUpdated == false) {
+            RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
+            entryList->add(newEntry);
+        }
     }
 }
 
 LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(Address* destination) {
     if(isDeliverable(destination)) {
+        // FIXME this should return a copy of this list (to avoid that entries in this list are accidentally removed from or added)
         return table[destination];
     }
     else {

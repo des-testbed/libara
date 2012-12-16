@@ -73,4 +73,32 @@ SUITE(NetworkInterfaceMockTest) {
         CHECK(interface.hasPacketBeenBroadCasted(&packet2) == true);
         CHECK(interface.hasPacketBeenBroadCasted(&packet3) == false);
     }
+
+    TEST(testHasPacketBeenSend) {
+        NetworkInterfaceMock interface = NetworkInterfaceMock();
+        PacketMock packet1 = PacketMock();
+        PacketMock packet2 = PacketMock();
+        PacketMock packet3 = PacketMock();
+        AddressMock address = AddressMock();
+
+        interface.send(&packet1, &address);
+        interface.broadcast(&packet2);
+
+        CHECK(interface.hasPacketBeenSend(&packet1) == true);
+        CHECK(interface.hasPacketBeenSend(&packet2) == true);
+        CHECK(interface.hasPacketBeenSend(&packet3) == false);
+    }
+
+    TEST(testEquals) {
+        NetworkInterfaceMock interface = NetworkInterfaceMock("eth1");
+        NetworkInterfaceMock sameInterface = NetworkInterfaceMock("eth1");
+        NetworkInterfaceMock otherInterface = NetworkInterfaceMock("eth2");
+
+        CHECK(interface.equals(&interface));
+        CHECK(interface.equals(&sameInterface));
+        CHECK(sameInterface.equals(&interface));
+
+        CHECK(interface.equals(&otherInterface) == false);
+        CHECK(sameInterface.equals(&otherInterface) == false);
+    }
   }
