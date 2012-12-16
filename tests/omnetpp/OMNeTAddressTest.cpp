@@ -59,6 +59,9 @@ SUITE(OMNeTAddressTest) {
     TEST(testIsBroadCast) {
         OMNeTAddress broadCastAddress = OMNeTAddress(OMNeTAddress::BROADCAST);
         OMNeTAddress normalAddress = OMNeTAddress(123);
+
+        CHECK(broadCastAddress.isBroadCast() == true);
+        CHECK(normalAddress.isBroadCast() == false);
     }
 
     TEST(testCloneAddress) {
