@@ -27,6 +27,20 @@
 
 namespace ARA {
 
+ARAClientMock::ARAClientMock() {
+    NetworkInterfaceMock* defaultInterface = new NetworkInterfaceMock();
+    addNetworkInterface(defaultInterface);
+}
+
+ARAClientMock::~ARAClientMock() {
+    NetworkInterface* defaultInterface = interfaces.remove();
+    delete defaultInterface;
+}
+
+NetworkInterfaceMock* ARAClientMock::getDefaultNetworkInterface() {
+    return (NetworkInterfaceMock*) interfaces.getFirst();
+}
+
 PacketTrap* ARAClientMock::getPacketTrap() {
     return &packetTrap;
 }

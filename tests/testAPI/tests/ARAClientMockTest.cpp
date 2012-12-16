@@ -27,6 +27,7 @@
 #include "testAPI/mocks/ARAClientMock.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
+#include "NetworkInterface.h"
 
 using namespace ARA;
 
@@ -44,4 +45,9 @@ SUITE(ARAClientMockTest) {
         CHECK(routingTable != NULL);
     }
 
+    TEST(testGetDefaultNetworkInterface) {
+        ARAClientMock client = ARAClientMock();
+        NetworkInterface* interface = client.getDefaultNetworkInterface();
+        CHECK(interface != NULL);
+    }
   }

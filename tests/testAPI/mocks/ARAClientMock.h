@@ -27,14 +27,22 @@
 #define ARACLIENTMOCK_H_
 
 #include "AbstractARAClient.h"
+#include "NetworkInterfaceMock.h"
 
 namespace ARA {
 
+/**
+ * A ARAClientMock implements the abstract ARA Client and holds references to
+ * other mocks for testing the routing table, packet trap and network interfaces.
+ */
 class ARAClientMock: public AbstractARAClient {
 public:
+    ARAClientMock();
+    ~ARAClientMock();
 
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
+    NetworkInterfaceMock* getDefaultNetworkInterface();
 
 };
 

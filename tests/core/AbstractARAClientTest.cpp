@@ -78,13 +78,12 @@ SUITE(AbstractARAClientTest) {
     TEST(testBroadcastFANTIfPacketNotDeliverable) {
         ARAClientMock client = ARAClientMock();
         RoutingTable* routingTable = client.getRoutingTable();
-        NetworkInterfaceMock interface = NetworkInterfaceMock();
-        client.addNetworkInterface(&interface);
+        NetworkInterfaceMock* interface = client.getDefaultNetworkInterface();
         PacketMock packet = PacketMock();
 
         CHECK(routingTable->isDeliverable(&packet) == false);
         client.sendPacket(&packet);
-        LinkedList<Pair<Packet, Address>>* sentPackets = interface.getSentPackets();
+        LinkedList<Pair<Packet, Address>>* sentPackets = interface->getSentPackets();
         CHECK_EQUAL(1, sentPackets->size());
 
         Packet* sentPacket = sentPackets->getFirst()->getLeft();
