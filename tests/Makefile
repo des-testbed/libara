@@ -28,34 +28,36 @@ LINKFLAGS= -lUnitTest++ $(OMNETPP_LIBS)
 # Output directory ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out
 SRC_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/src
+TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/tests
 
 # Test sources ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COMPILED_SRC = $(shell find $(SRC_OUTPUT_DIR) -type f -name '*.o')
-TEST_SOURCES = $(shell find ./ -name testAPI -prune -o -type f -name '*.cpp' -print)
-TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
-TESTAPI_TESTS = $(shell find ./testAPI/tests/ -type f -name '*.cpp')
-TESTAPI_OBJECTS = $(shell find ./testAPI/ -type f -name '*.cpp')
+TEST_SOURCES = $(shell find ./ -type f -name '*Test.cpp' -o -name 'Test*.cpp')
+COMPILED_TESTS = $(TEST_SOURCES:.cpp=.o)
+TESTAPI_SOURCES = $(shell find ./testAPI/ -name tests -prune -o -type f -name '*.cpp' -print)
+COMPILED_TESTAPI = $(TESTAPI_SOURCES:.cpp=.o)
 TEST_EXECUTABLE = runAllTests
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 runTests: all
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
-	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_DIR):$$LD_LIBRARY_PATH ./runAllTests; then \
+	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_DIR):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE); then \
 		echo -e "\n~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
 all: check_if_unittest_is_installed $(TEST_SOURCES) $(TEST_EXECUTABLE)	
+	@echo 'All tests have been compiled'	
 
-$(TEST_EXECUTABLE): $(TEST_OBJECTS) $(TESTAPI_TESTS)
-	@echo "Building executable test suit.." 
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $@ $(COMPILED_SRC) $(TEST_OBJECTS) $(TESTAPI_OBJECTS) $(LINKFLAGS)	
+$(TEST_EXECUTABLE): $(COMPILED_TESTAPI) $(COMPILED_TESTS)
+	@echo "Building executable test suit ./$(TEST_EXECUTABLE)" 
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $@ $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	
 
 .cpp.o:
-	@echo "Compiling $<.."
+	@echo "Compiling $<"
 	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $< -o $@
 
 clean:
-	rm -f $(TEST_OBJECTS) $(TESTAPI_OBJECTS:.cpp=.o) TestResults.xml runAllTests
+	rm -f $(TEST_EXECUTABLE) $(COMPILED_TESTS) $(COMPILED_TESTAPI)
 	
 check_if_unittest_is_installed:
 	@if ! [ -e "/lib/libUnitTest++.a" ]; then \
