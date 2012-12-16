@@ -49,13 +49,13 @@ SUITE(NetworkInterfaceMockTest) {
         LinkedList<Pair<Packet, Address>>* sendPackets = mock.getSentPackets();
 
         CHECK(sendPackets->get(0)->getLeft()->equals(&packet1));
-        CHECK(sendPackets->get(0)->getRight() == &recipient1);
+        CHECK(sendPackets->get(0)->getRight()->equals(&recipient1));
 
         CHECK(sendPackets->get(1)->getLeft()->equals(&packet2));
-        CHECK(sendPackets->get(1)->getRight() == &recipient2);
+        CHECK(sendPackets->get(1)->getRight()->equals(&recipient2));
 
         CHECK(sendPackets->get(2)->getLeft()->equals(&packet3));
-        CHECK(sendPackets->get(2)->getRight() == &recipient1);
+        CHECK(sendPackets->get(2)->getRight()->equals(&recipient1));
     }
 
     TEST(testHasPacketBeenBroadCasted) {

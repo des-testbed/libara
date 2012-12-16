@@ -40,6 +40,7 @@ NetworkInterfaceMock::~NetworkInterfaceMock() {
     while(sentPackets.isEmpty() == false) {
         Pair<Packet, Address>* removedPair = sentPackets.remove();
         delete removedPair->getLeft();  // this packet has been cloned in the send method
+        delete removedPair->getRight();  // the address has also been cloned in the send method
         delete removedPair;
     }
 }
@@ -53,13 +54,13 @@ LinkedList<Pair<Packet, Address>>* NetworkInterfaceMock::getSentPackets() {
 }
 
 void NetworkInterfaceMock::send(Packet* packet, Address* recipient) {
-    Packet* copy = packet->clone();
-    Pair<Packet, Address>* pair = new Pair<Packet, Address>(copy, recipient);
+    Packet* copyOfPacket = packet->clone();
+    Address* copyOfAddress = recipient->clone();
+    Pair<Packet, Address>* pair = new Pair<Packet, Address>(copyOfPacket, copyOfAddress);
     sentPackets.add(pair);
 }
 
 void NetworkInterfaceMock::broadcast(Packet* packet) {
-    // TODO when is the memory to broadcastAddress going to be released?
     Address* broadCastAddress = new AddressMock("BROADCAST");
     send(packet, broadCastAddress);
 }
