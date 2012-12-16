@@ -25,9 +25,13 @@
 
 #include <UnitTest++.h>
 #include "testAPI/mocks/ARAClientMock.h"
+#include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/PacketMock.h"
+#include "testAPI/mocks/AddressMock.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "NetworkInterface.h"
+#include "NextHop.h"
 
 using namespace ARA;
 
@@ -45,9 +49,35 @@ SUITE(ARAClientMockTest) {
         CHECK(routingTable != NULL);
     }
 
-    TEST(testGetDefaultNetworkInterface) {
+    TEST(testGetNetworkInterfaceMock) {
         ARAClientMock client = ARAClientMock();
-        NetworkInterface* interface = client.getDefaultNetworkInterface();
-        CHECK(interface != NULL);
+        CHECK_EQUAL(0, client.getNumberOfNetworkInterfaces());
+
+        NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock();
+        CHECK_EQUAL(1, client.getNumberOfNetworkInterfaces());
+
+        CHECK_EQUAL("InterfaceMock1", interface->getName());
+
+        interface = client.getNewNetworkInterfaceMock();
+        CHECK_EQUAL("InterfaceMock2", interface->getName());
     }
-  }
+
+    TEST(testGetNextHop) {
+        // this is just an example implementation because the mock simply needs something to be implemented here
+        ARAClientMock client = ARAClientMock();
+        PacketMock packet = PacketMock();
+        RoutingTable* routingTable = client.getRoutingTable();
+        Address* destination = packet.getDestination();
+        AddressMock node1 = AddressMock("Node 1");
+        AddressMock node2 = AddressMock("Node 2");
+        NetworkInterfaceMock interface = NetworkInterfaceMock();
+
+        routingTable->update(destination, &node1, &interface, 10);
+        routingTable->update(destination, &node2, &interface, 20);
+
+        NextHop* nextHop = client.getNextHop(&packet);
+        CHECK(nextHop->getAddress()->equals(&node2));
+        CHECK(nextHop->getInterface()->equals(&interface));
+    }
+
+}

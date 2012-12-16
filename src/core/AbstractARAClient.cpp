@@ -39,8 +39,24 @@ void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
     interfaces.add(newInterface);
 }
 
+NetworkInterface* AbstractARAClient::getNetworkInterface(unsigned int index) {
+    return interfaces.get(index);
+}
+
+unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
+    return interfaces.size();
+}
+
 void AbstractARAClient::sendPacket(Packet* packet) {
-    if(routingTable.isDeliverable(packet) == false) {
+    if(routingTable.isDeliverable(packet)) {
+        NextHop* nextHop = getNextHop(packet);
+        NetworkInterface* interface = nextHop->getInterface();
+        Packet* newPacket = packet->clone();
+        newPacket->setHopCount(packet->getHopCount() + 1);
+        interface->send(newPacket, nextHop->getAddress());
+        delete newPacket;
+    }
+    else {
         packetTrap.trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);

@@ -48,26 +48,26 @@ SUITE(NetworkInterfaceMockTest) {
 
         LinkedList<Pair<Packet, Address>>* sendPackets = mock.getSentPackets();
 
-        CHECK(sendPackets->get(0)->getLeft() == &packet1);
+        CHECK(sendPackets->get(0)->getLeft()->equals(&packet1));
         CHECK(sendPackets->get(0)->getRight() == &recipient1);
 
-        CHECK(sendPackets->get(1)->getLeft() == &packet2);
+        CHECK(sendPackets->get(1)->getLeft()->equals(&packet2));
         CHECK(sendPackets->get(1)->getRight() == &recipient2);
 
-        CHECK(sendPackets->get(2)->getLeft() == &packet3);
+        CHECK(sendPackets->get(2)->getLeft()->equals(&packet3));
         CHECK(sendPackets->get(2)->getRight() == &recipient1);
     }
 
     TEST(testHasPacketBeenBroadCasted) {
         NetworkInterfaceMock interface = NetworkInterfaceMock();
-        PacketMock packet1 = PacketMock();
-        PacketMock packet2 = PacketMock();
-        PacketMock packet3 = PacketMock();
-        AddressMock address = AddressMock();
+        PacketMock packet1 = PacketMock("Source", "Destination", 1);
+        PacketMock packet2 = PacketMock("Earth", "Moon", 1234);
+        PacketMock packet3 = PacketMock("Source", "Destination", 2);
+        AddressMock viaAddress = AddressMock();
 
-        interface.send(&packet1, &address);
+        interface.send(&packet1, &viaAddress);
         interface.broadcast(&packet2);
-        interface.send(&packet3, &address);
+        interface.send(&packet3, &viaAddress);
 
         CHECK(interface.hasPacketBeenBroadCasted(&packet1) == false);
         CHECK(interface.hasPacketBeenBroadCasted(&packet2) == true);
@@ -76,9 +76,9 @@ SUITE(NetworkInterfaceMockTest) {
 
     TEST(testHasPacketBeenSend) {
         NetworkInterfaceMock interface = NetworkInterfaceMock();
-        PacketMock packet1 = PacketMock();
-        PacketMock packet2 = PacketMock();
-        PacketMock packet3 = PacketMock();
+        PacketMock packet1 = PacketMock("Source", "Destination", 1);
+        PacketMock packet2 = PacketMock("Source", "Destination", 2);
+        PacketMock packet3 = PacketMock("Source", "Destination", 3);
         AddressMock address = AddressMock();
 
         interface.send(&packet1, &address);

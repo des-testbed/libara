@@ -53,8 +53,21 @@ unsigned int Packet::getPayloadLength() {
     return payloadSize;
 }
 
+void Packet::setHopCount(unsigned int newValue) {
+    hopCount = newValue;
+}
+
+bool Packet::equals(Packet* otherPacket) {
+    return this->seqNr == otherPacket->getSequenceNumber() && this->source->equals(otherPacket->getSource());
+}
+
+Packet* Packet::clone() {
+    return new Packet(source->clone(), destination->clone(), type, seqNr, payload, payloadSize, hopCount);
+}
+
 Packet* Packet::createFANT(unsigned int sequenceNumber) {
     Packet* fant = new Packet(source->clone(), destination->clone(), PacketType::FANT, sequenceNumber);
+    fant->setHopCount(this->hopCount);
     return fant;
 }
 

@@ -23,37 +23,22 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "RoutingTableEntry.h"
+#include <UnitTest++.h>
+#include "NextHop.h"
+#include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/NetworkInterfaceMock.h"
 
-namespace ARA {
+using namespace ARA;
 
-RoutingTableEntry::RoutingTableEntry(Address* address, NetworkInterface* interface, float pheromoneValue) {
-    nextHop = new NextHop(address, interface);
-    this->pheromoneValue = pheromoneValue;
+SUITE(NextHopTest) {
+
+    TEST(testGetters) {
+        AddressMock address = AddressMock();
+        NetworkInterfaceMock interface = NetworkInterfaceMock();
+        NextHop nextHop = NextHop(&address, &interface);
+
+        CHECK(nextHop.getAddress()->equals(&address));
+        CHECK(nextHop.getInterface()->equals(&interface));
+    }
+
 }
-
-RoutingTableEntry::~RoutingTableEntry() {
-    delete nextHop;
-}
-
-NextHop* RoutingTableEntry::getNextHop() {
-    return nextHop;
-}
-
-Address* RoutingTableEntry::getAddress() {
-    return nextHop->getAddress();
-}
-
-NetworkInterface* RoutingTableEntry::getNetworkInterface() {
-    return nextHop->getInterface();
-}
-
-float RoutingTableEntry::getPheromoneValue() {
-    return pheromoneValue;
-}
-
-void RoutingTableEntry::setPheromoneValue(float newPheromoneValue) {
-    this->pheromoneValue = newPheromoneValue;
-}
-
-} /* namespace ARA */

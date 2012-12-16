@@ -47,6 +47,15 @@ public:
     const char* getPayload();
     unsigned int getPayloadLength();
 
+    /**
+     * Two packets are defined to be equal if they have the same source and sequence number
+     * TODO is it really okay to define equality this way? What about the payload, destination and type?
+     */
+    bool equals(Packet* otherPacket);
+
+    void setHopCount(unsigned int newValue);
+
+    Packet* clone();
 	Packet* createFANT(unsigned int sequenceNumber);
 
 protected:

@@ -35,6 +35,7 @@
 #include "testAPI/mocks/ARAClientMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/AddressMock.h"
 
 using namespace ARA;
 
@@ -53,19 +54,16 @@ SUITE(AbstractARAClientTest) {
 
     TEST(testGeneralBroadCast) {
         ARAClientMock client = ARAClientMock();
-        NetworkInterfaceMock interface1 = NetworkInterfaceMock();
-        NetworkInterfaceMock interface2 = NetworkInterfaceMock();
-        NetworkInterfaceMock interface3 = NetworkInterfaceMock();
-        client.addNetworkInterface(&interface1);
-        client.addNetworkInterface(&interface2);
-        client.addNetworkInterface(&interface3);
+        NetworkInterfaceMock* interface1 = client.getNewNetworkInterfaceMock();
+        NetworkInterfaceMock* interface2 = client.getNewNetworkInterfaceMock();
+        NetworkInterfaceMock* interface3 = client.getNewNetworkInterfaceMock();
 
         PacketMock packet = PacketMock();
         client.broadCast(&packet);
 
-        CHECK(interface1.hasPacketBeenBroadCasted(&packet) == true);
-        CHECK(interface2.hasPacketBeenBroadCasted(&packet) == true);
-        CHECK(interface3.hasPacketBeenBroadCasted(&packet) == true);
+        CHECK(interface1->hasPacketBeenBroadCasted(&packet) == true);
+        CHECK(interface2->hasPacketBeenBroadCasted(&packet) == true);
+        CHECK(interface3->hasPacketBeenBroadCasted(&packet) == true);
     }
 
     TEST(testGetNextSequenceNumber) {
@@ -78,7 +76,7 @@ SUITE(AbstractARAClientTest) {
     TEST(testBroadcastFANTIfPacketNotDeliverable) {
         ARAClientMock client = ARAClientMock();
         RoutingTable* routingTable = client.getRoutingTable();
-        NetworkInterfaceMock* interface = client.getDefaultNetworkInterface();
+        NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock();
         PacketMock packet = PacketMock();
 
         CHECK(routingTable->isDeliverable(&packet) == false);
@@ -93,4 +91,73 @@ SUITE(AbstractARAClientTest) {
         CHECK(recipientOfSentPacket->isBroadCast());
     }
 
-  }
+    TEST(testSendPacketToNextHopIfRouteIsKnown) {
+        ARAClientMock client = ARAClientMock();
+        RoutingTable* routingTable = client.getRoutingTable();
+        NetworkInterfaceMock* interface1 = client.getNewNetworkInterfaceMock();
+        NetworkInterfaceMock* interface2 = client.getNewNetworkInterfaceMock();
+        NetworkInterfaceMock* interface3 = client.getNewNetworkInterfaceMock();
+        PacketMock originalPacket = PacketMock();
+        AddressMock nextHop = AddressMock("nextHop");
+
+        // make sure that a route to the packet destination is available
+        routingTable->update(originalPacket.getDestination(), &nextHop, interface2, 1.0);
+        CHECK(routingTable->isDeliverable(&originalPacket) == true);
+
+        client.sendPacket(&originalPacket);
+
+        // check if packet has been send over the correct interface
+        CHECK(interface1->hasPacketBeenSend(&originalPacket) == false);
+        CHECK(interface2->hasPacketBeenSend(&originalPacket) == true);
+        CHECK(interface3->hasPacketBeenSend(&originalPacket) == false);
+
+        // check if packet has been send via interface2 to nextHop
+        LinkedList<Pair<Packet, Address>>* sentPackets = interface2->getSentPackets();
+        Packet* sentPacket = sentPackets->getFirst()->getLeft();
+        Address* recipientOfSentPacket = sentPackets->getFirst()->getRight();
+        CHECK(recipientOfSentPacket->equals(&nextHop));
+
+        // Check that packet content is basically the same
+        CHECK_EQUAL(originalPacket.getType(), sentPacket->getType());
+        CHECK(sentPacket->getSource()->equals(originalPacket.getSource()));
+        CHECK(sentPacket->getDestination()->equals(originalPacket.getDestination()));
+        CHECK_EQUAL(originalPacket.getSequenceNumber(), sentPacket->getSequenceNumber());
+        CHECK_EQUAL(originalPacket.getPayload(), sentPacket->getPayload());
+        CHECK_EQUAL(originalPacket.getPayloadLength(), sentPacket->getPayloadLength());
+
+        // only the hop count needs to be incremented by 1
+        CHECK_EQUAL(originalPacket.getHopCount() + 1, sentPacket->getHopCount());
+    }
+
+    TEST(testGetNumberOfNetworkInterfaces) {
+        ARAClientMock client = ARAClientMock();
+        NetworkInterfaceMock interface1 = NetworkInterfaceMock();
+        NetworkInterfaceMock interface2 = NetworkInterfaceMock();
+        NetworkInterfaceMock interface3 = NetworkInterfaceMock();
+        CHECK_EQUAL(0, client.getNumberOfNetworkInterfaces());
+
+        client.addNetworkInterface(&interface1);
+        CHECK_EQUAL(1, client.getNumberOfNetworkInterfaces());
+
+        client.addNetworkInterface(&interface2);
+        CHECK_EQUAL(2, client.getNumberOfNetworkInterfaces());
+
+        client.addNetworkInterface(&interface3);
+        CHECK_EQUAL(3, client.getNumberOfNetworkInterfaces());
+    }
+
+    TEST(testGetNetworkInterface) {
+        ARAClientMock client = ARAClientMock();
+        NetworkInterfaceMock interface1 = NetworkInterfaceMock();
+        NetworkInterfaceMock interface2 = NetworkInterfaceMock();
+        NetworkInterfaceMock interface3 = NetworkInterfaceMock();
+        client.addNetworkInterface(&interface1);
+        client.addNetworkInterface(&interface2);
+        client.addNetworkInterface(&interface3);
+
+        CHECK(client.getNetworkInterface(0) == &interface1);
+        CHECK(client.getNetworkInterface(1) == &interface2);
+        CHECK(client.getNetworkInterface(2) == &interface3);
+    }
+
+}

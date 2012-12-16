@@ -26,11 +26,14 @@
 #include "PacketMock.h"
 #include "PacketType.h"
 #include "AddressMock.h"
+#include <sstream>
+#include <cstring>
 
 namespace ARA {
 
-PacketMock::PacketMock() : Packet(new AddressMock("Source"), new AddressMock("Destination"), PacketType::DATA, 123, "Hello World", sizeof("Hello World"), 3){
-    // This class is just here to call the super constructor
+PacketMock::PacketMock(const char* sourceName, const char* destinationName, unsigned int sequenceNumber, unsigned int hopCount, char packetType)
+ : Packet(new AddressMock(sourceName), new AddressMock(destinationName), packetType, sequenceNumber, "Hello World", 11, hopCount){
+
 }
 
 } /* namespace ARA */

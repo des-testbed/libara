@@ -26,6 +26,7 @@
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "NextHop.h"
 #include "NetworkInterface.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
@@ -37,9 +38,14 @@ namespace ARA {
 class AbstractARAClient {
 public:
     AbstractARAClient();
-    ~AbstractARAClient();
+    virtual ~AbstractARAClient();
+
+    virtual NextHop* getNextHop(Packet* packet) = 0;
 
     void addNetworkInterface(NetworkInterface* newInterface);
+    NetworkInterface* getNetworkInterface(unsigned int index);
+    unsigned int getNumberOfNetworkInterfaces();
+
     void sendPacket(Packet* packet);
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     void broadCast(Packet* packet);

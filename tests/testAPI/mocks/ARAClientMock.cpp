@@ -24,21 +24,49 @@
  *******************************************************************************/
 
 #include "ARAClientMock.h"
+#include "LinkedList.h"
+#include "RoutingTableEntry.h"
+#include <sstream>
 
 namespace ARA {
 
-ARAClientMock::ARAClientMock() {
-    NetworkInterfaceMock* defaultInterface = new NetworkInterfaceMock();
-    addNetworkInterface(defaultInterface);
-}
-
 ARAClientMock::~ARAClientMock() {
-    NetworkInterface* defaultInterface = interfaces.remove();
-    delete defaultInterface;
+    while(interfaceMocks.isEmpty() == false) {
+        NetworkInterfaceMock* mock = interfaceMocks.remove();
+        delete mock;
+    }
 }
 
-NetworkInterfaceMock* ARAClientMock::getDefaultNetworkInterface() {
-    return (NetworkInterfaceMock*) interfaces.getFirst();
+NextHop* ARAClientMock::getNextHop(Packet* packet) {
+    if(routingTable.isDeliverable(packet)) {
+        LinkedList<RoutingTableEntry>* possibleHops = routingTable.getPossibleNextHops(packet);
+        // search for the best value
+        // TODO this can be replaced as soon as Michael is ready with the corresponding class
+        RoutingTableEntry* bestHop = NULL;
+
+        unsigned int nrOfPossibleRoutes = possibleHops->size();
+        for (unsigned int i = 0; i < nrOfPossibleRoutes; ++i) {
+            RoutingTableEntry* currentHop = possibleHops->get(i);
+            if(bestHop == NULL || currentHop->getPheromoneValue() > bestHop->getPheromoneValue()) {
+                bestHop = currentHop;
+            }
+        }
+
+        return bestHop->getNextHop();
+    }
+    else {
+        // TODO maybe it would be better to return a NULL Object (Pattern) instead of returning a NULL pointer
+        return NULL;
+    }
+}
+
+NetworkInterfaceMock* ARAClientMock::getNewNetworkInterfaceMock() {
+    std::stringstream mockName;
+    mockName << "InterfaceMock" << (interfaceMocks.size()+1);
+    NetworkInterfaceMock* mock = new NetworkInterfaceMock(mockName.str().c_str());
+    interfaceMocks.add(mock);
+    addNetworkInterface(mock);
+    return mock;
 }
 
 PacketTrap* ARAClientMock::getPacketTrap() {

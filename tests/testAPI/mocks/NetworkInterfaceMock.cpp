@@ -39,6 +39,7 @@ NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName) {
 NetworkInterfaceMock::~NetworkInterfaceMock() {
     while(sentPackets.isEmpty() == false) {
         Pair<Packet, Address>* removedPair = sentPackets.remove();
+        delete removedPair->getLeft();  // this packet has been cloned in the send method
         delete removedPair;
     }
 }
@@ -52,7 +53,8 @@ LinkedList<Pair<Packet, Address>>* NetworkInterfaceMock::getSentPackets() {
 }
 
 void NetworkInterfaceMock::send(Packet* packet, Address* recipient) {
-    Pair<Packet, Address>* pair = new Pair<Packet, Address>(packet, recipient);
+    Packet* copy = packet->clone();
+    Pair<Packet, Address>* pair = new Pair<Packet, Address>(copy, recipient);
     sentPackets.add(pair);
 }
 
@@ -70,7 +72,7 @@ bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
         Packet* currentPacket = pair->getLeft();
         Address* recipient = pair->getRight();
 
-        if(currentPacket == packet) {
+        if(currentPacket->equals(packet)) {
             if(recipient->isBroadCast() == true) {
                 return true;
             }
@@ -87,7 +89,7 @@ bool NetworkInterfaceMock::hasPacketBeenSend(Packet* packet) {
         Pair<Packet, Address>* pair = sentPackets.get(i);
         Packet* currentPacket = pair->getLeft();
 
-        if(currentPacket == packet) {
+        if(currentPacket->equals(packet)) {
             return true;
         }
     }

@@ -23,37 +23,27 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "RoutingTableEntry.h"
+#include <UnitTest++.h>
+#include <cstring>
+#include "testAPI/mocks/PacketMock.h"
+#include "testAPI/mocks/AddressMock.h"
 
-namespace ARA {
+using namespace ARA;
 
-RoutingTableEntry::RoutingTableEntry(Address* address, NetworkInterface* interface, float pheromoneValue) {
-    nextHop = new NextHop(address, interface);
-    this->pheromoneValue = pheromoneValue;
+SUITE(PacketMockTest) {
+
+    TEST(testConstructor) {
+        PacketMock mock = PacketMock("Source", "Destination", 123, 0);
+
+        AddressMock wantedSource = AddressMock("Source");
+        AddressMock wantedDestination = AddressMock("Destination");
+
+        CHECK(mock.getSource()->equals(&wantedSource));
+        CHECK(mock.getDestination()->equals(&wantedDestination));
+        CHECK_EQUAL(123, mock.getSequenceNumber());
+        CHECK_EQUAL(0, mock.getHopCount());
+        CHECK_EQUAL("Hello World", mock.getPayload());
+        CHECK_EQUAL(strlen("Hello World"), mock.getPayloadLength());
+    }
+
 }
-
-RoutingTableEntry::~RoutingTableEntry() {
-    delete nextHop;
-}
-
-NextHop* RoutingTableEntry::getNextHop() {
-    return nextHop;
-}
-
-Address* RoutingTableEntry::getAddress() {
-    return nextHop->getAddress();
-}
-
-NetworkInterface* RoutingTableEntry::getNetworkInterface() {
-    return nextHop->getInterface();
-}
-
-float RoutingTableEntry::getPheromoneValue() {
-    return pheromoneValue;
-}
-
-void RoutingTableEntry::setPheromoneValue(float newPheromoneValue) {
-    this->pheromoneValue = newPheromoneValue;
-}
-
-} /* namespace ARA */

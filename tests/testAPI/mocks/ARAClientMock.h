@@ -28,6 +28,7 @@
 
 #include "AbstractARAClient.h"
 #include "NetworkInterfaceMock.h"
+#include "LinkedList.h"
 
 namespace ARA {
 
@@ -37,12 +38,16 @@ namespace ARA {
  */
 class ARAClientMock: public AbstractARAClient {
 public:
-    ARAClientMock();
     ~ARAClientMock();
+
+    NextHop* getNextHop(Packet* packet);
 
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
-    NetworkInterfaceMock* getDefaultNetworkInterface();
+    NetworkInterfaceMock* getNewNetworkInterfaceMock();
+
+private:
+    LinkedList<NetworkInterfaceMock> interfaceMocks;
 
 };
 

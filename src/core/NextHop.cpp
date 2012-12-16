@@ -23,37 +23,21 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "RoutingTableEntry.h"
+#include "NextHop.h"
 
 namespace ARA {
 
-RoutingTableEntry::RoutingTableEntry(Address* address, NetworkInterface* interface, float pheromoneValue) {
-    nextHop = new NextHop(address, interface);
-    this->pheromoneValue = pheromoneValue;
+NextHop::NextHop(Address* address, NetworkInterface* interface) {
+    this->address = address;
+    this->interface = interface;
 }
 
-RoutingTableEntry::~RoutingTableEntry() {
-    delete nextHop;
+Address* NextHop::getAddress() {
+    return address;
 }
 
-NextHop* RoutingTableEntry::getNextHop() {
-    return nextHop;
-}
-
-Address* RoutingTableEntry::getAddress() {
-    return nextHop->getAddress();
-}
-
-NetworkInterface* RoutingTableEntry::getNetworkInterface() {
-    return nextHop->getInterface();
-}
-
-float RoutingTableEntry::getPheromoneValue() {
-    return pheromoneValue;
-}
-
-void RoutingTableEntry::setPheromoneValue(float newPheromoneValue) {
-    this->pheromoneValue = newPheromoneValue;
+NetworkInterface* NextHop::getInterface() {
+    return interface;
 }
 
 } /* namespace ARA */
