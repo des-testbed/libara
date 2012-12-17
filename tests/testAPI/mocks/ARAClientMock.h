@@ -44,7 +44,7 @@ public:
 
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
-    NetworkInterfaceMock* getNewNetworkInterfaceMock();
+    NetworkInterfaceMock* getNewNetworkInterfaceMock(); // TODO rename this to createNewNetworkInterfaceMock()
 
 private:
     LinkedList<NetworkInterfaceMock> interfaceMocks;

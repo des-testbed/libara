@@ -160,4 +160,32 @@ SUITE(AbstractARAClientTest) {
         CHECK(client.getNetworkInterface(2) == &interface3);
     }
 
+    /**
+     * In this test we simulate that the same packet has been received
+     * twice at node x. It has been send from node A to node B via node C.
+     * Node x must respond to node C with a DUPLICATE_WARNING packet.
+     */
+    TEST(testRememberLastRecievedPackets) {
+        ARAClientMock client = ARAClientMock();
+        PacketMock packet = PacketMock("A", "B", 123);
+        AddressMock sender = AddressMock("C");
+        packet->setSender(&sender);
+
+        NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock();
+        interface->receivePacket(&packet);
+        interface->receivePacket(&packet);
+
+        CHECK_EQUAL(1, interface->getNumberOfSentPackets());
+
+        Pair<Packet, Address>* sentPacketInfo = interface->getSentPackets()->getFirst();
+        Packet* sentPacket = sentPacketInfo->getLeft();
+        Address* recipientOfSentPacket = sentPacketInfo->getRight();
+
+        CHECK(recipientOfSentPacket->equals(&sender));
+        CHECK(sentPacket->getType() == PacketType::DUPLICATE_WARNING);
+        CHECK(sentPacket->getSource()->equals(???));
+        CHECK(sentPacket->getDestination()->equals(&sender));
+        CHECK_EQUAL(1, sentPacket->getHopCount());
+        CHECK_EQUAL(0, sentPacket->getPayloadLength());
+    }
 }
