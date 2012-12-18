@@ -43,7 +43,8 @@ public:
         DATA,
         FANT,
         BANT,
-        PANT
+        PANT,
+        DUPLICATE_WARNING
     };
 
     static bool isAntPacket(PacketTypeEnum type);

@@ -35,6 +35,7 @@ SUITE(PacketTypeTest) {
         CHECK(PacketType::isAntPacket(PacketType::BANT) == true);
         CHECK(PacketType::isAntPacket(PacketType::PANT) == true);
         CHECK(PacketType::isAntPacket(PacketType::DATA) == false);
+        CHECK(PacketType::isAntPacket(PacketType::DUPLICATE_WARNING) == false);
     }
 
     TEST(testIsDataPacket) {
@@ -42,5 +43,6 @@ SUITE(PacketTypeTest) {
         CHECK(PacketType::isDataPacket(PacketType::BANT) == false);
         CHECK(PacketType::isDataPacket(PacketType::PANT) == false);
         CHECK(PacketType::isDataPacket(PacketType::DATA) == true);
+        CHECK(PacketType::isDataPacket(PacketType::DUPLICATE_WARNING) == false);
     }
   }
