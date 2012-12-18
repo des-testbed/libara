@@ -30,9 +30,7 @@
 
 using namespace ARA;
 
-TEST_GROUP(NextHopTest) {
-
-};
+TEST_GROUP(NextHopTest) {};
 
 TEST(NextHopTest, testGetters) {
     AddressMock address = AddressMock();

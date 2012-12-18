@@ -27,8 +27,8 @@ INCLUDE_PATH= -I../include -I./ -I$(OMNETPP_INCL_DIR) -I$(CPPUTEST_HOME)/include
 LINKFLAGS= $(OMNETPP_LIBS) -L$(CPPUTEST_HOME)/lib -lCppUTest
 
 # Enable CppUTest memory leak detection
-CXXFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
-CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
+CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
+#CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
 
 # Output directory ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out
@@ -37,8 +37,7 @@ TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/tests
 
 # Test sources ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COMPILED_SRC = $(shell find $(SRC_OUTPUT_DIR) -type f -name '*.o')
-#TEST_SOURCES = $(shell find ./ -type f -name '*Test.cpp' -o -name 'Test*.cpp')
-TEST_SOURCES = core/NextHopTest.cpp TestRunner.cpp
+TEST_SOURCES = $(shell find ./ -type f -name '*Test.cpp' -o -name 'Test*.cpp')
 COMPILED_TESTS = $(TEST_SOURCES:.cpp=.o)
 TESTAPI_SOURCES = $(shell find ./testAPI/ -name tests -prune -o -type f -name '*.cpp' -print)
 COMPILED_TESTAPI = $(TESTAPI_SOURCES:.cpp=.o)

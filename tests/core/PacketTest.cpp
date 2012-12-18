@@ -23,7 +23,7 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include <cstring>
 #include "testAPI/mocks/AddressMock.h"
 #include "Packet.h"
@@ -31,150 +31,150 @@
 
 using namespace ARA;
 
-SUITE(PacketTest) {
+TEST_GROUP(PacketTest) {};
 
-    TEST(testCreate) {
-        AddressMock* source = new AddressMock("source");
-        AddressMock* destination = new AddressMock("destination");
-        AddressMock* sender = new AddressMock("sender");    // This is the node from which the packet has actually been received
-        unsigned int type = PacketType::FANT;
-        int seqNr = 1;
+TEST(PacketTest, testCreate) {
+    AddressMock* source = new AddressMock("source");
 
-        Packet packet = Packet(source, destination, sender, type, seqNr);
+    AddressMock* destination = new AddressMock("destination");
+    AddressMock* sender = new AddressMock("sender");    // This is the node from which the packet has actually been received
+    char type = PacketType::FANT;
+    unsigned int seqNr = 1;
 
-        CHECK(packet.getSource()->equals(source));
-        CHECK(packet.getDestination()->equals(destination));
-        CHECK(packet.getSender()->equals(sender));
-        CHECK_EQUAL(type, packet.getType());
-        CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-        CHECK_EQUAL(0, packet.getHopCount());
+    Packet packet = Packet(source, destination, sender, type, seqNr);
 
-        CHECK_EQUAL(0, packet.getPayloadLength());
-        CHECK(packet.getPayload() == false);
-    }
+    CHECK(packet.getSource()->equals(source));
+    CHECK(packet.getDestination()->equals(destination));
+    CHECK(packet.getSender()->equals(sender));
+    CHECK_EQUAL(type, packet.getType());
+    CHECK_EQUAL(seqNr, packet.getSequenceNumber());
+    CHECK_EQUAL(0, packet.getHopCount());
 
-    TEST(testCreateWithPayload) {
-        AddressMock* source = new AddressMock("source");
-        AddressMock* destination = new AddressMock("destination");
-        AddressMock* sender = new AddressMock("sender");
-        unsigned int type = PacketType::DATA;
-        int seqNr = 2;
-        const char* payload = "Hello World!";
+    CHECK_EQUAL(0, packet.getPayloadLength());
+    CHECK(packet.getPayload() == false);
+}
 
-        Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload));
+TEST(PacketTest, testCreateWithPayload) {
+    AddressMock* source = new AddressMock("source");
+    AddressMock* destination = new AddressMock("destination");
+    AddressMock* sender = new AddressMock("sender");
+    char type = PacketType::DATA;
+    unsigned int seqNr = 2;
+    const char* payload = "Hello World!";
 
-        CHECK(packet.getSource()->equals(source));
-        CHECK(packet.getDestination()->equals(destination));
-        CHECK(packet.getSender()->equals(sender));
-        CHECK_EQUAL(type, packet.getType());
-        CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-        CHECK_EQUAL(0, packet.getHopCount());
+    Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload));
 
-        CHECK_EQUAL(strlen(payload), packet.getPayloadLength());
-        CHECK_EQUAL(payload, packet.getPayload());
-    }
+    CHECK(packet.getSource()->equals(source));
+    CHECK(packet.getDestination()->equals(destination));
+    CHECK(packet.getSender()->equals(sender));
+    CHECK_EQUAL(type, packet.getType());
+    CHECK_EQUAL(seqNr, packet.getSequenceNumber());
+    CHECK_EQUAL(0, packet.getHopCount());
 
-    TEST(testCreateWithPayloadAndHopCount) {
-        Address* source = new AddressMock("source");
-        Address* destination = new AddressMock("destination");
-        AddressMock* sender = new AddressMock("sender");
-        unsigned int type = PacketType::DATA;
-        int seqNr = 3;
-        const char* payload = "Hello World";
-        unsigned int hopCount = 123;
+    CHECK_EQUAL(strlen(payload), packet.getPayloadLength());
+    CHECK_EQUAL(payload, packet.getPayload());
+}
 
-        Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
+TEST(PacketTest, testCreateWithPayloadAndHopCount) {
+    Address* source = new AddressMock("source");
+    Address* destination = new AddressMock("destination");
+    AddressMock* sender = new AddressMock("sender");
+    char type = PacketType::DATA;
+    unsigned int seqNr = 3;
+    const char* payload = "Hello World";
+    unsigned int hopCount = 123;
 
-        CHECK(packet.getSource()->equals(source));
-        CHECK(packet.getDestination()->equals(destination));
-        CHECK(packet.getSender()->equals(sender));
-        CHECK_EQUAL(type, packet.getType());
-        CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-        CHECK_EQUAL(strlen(payload), packet.getPayloadLength());
-        CHECK_EQUAL(payload, packet.getPayload());
-        CHECK_EQUAL(hopCount, packet.getHopCount());
-    }
+    Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
 
-    TEST(testCreateFANT) {
-       Address* source = new AddressMock("source");
-       Address* destination = new AddressMock("destination");
-       AddressMock* sender = new AddressMock("sender");
-       unsigned int type = PacketType::DATA;
-       int seqNr = 3;
-       const char* payload = "Hello World";
-       unsigned int hopCount = 123;
+    CHECK(packet.getSource()->equals(source));
+    CHECK(packet.getDestination()->equals(destination));
+    CHECK(packet.getSender()->equals(sender));
+    CHECK_EQUAL(type, packet.getType());
+    CHECK_EQUAL(seqNr, packet.getSequenceNumber());
+    CHECK_EQUAL(strlen(payload), packet.getPayloadLength());
+    CHECK_EQUAL(payload, packet.getPayload());
+    CHECK_EQUAL(hopCount, packet.getHopCount());
+}
 
-       Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
-       unsigned int newSequenceNumber = 242342;
-       Packet* fant = packet.createFANT(newSequenceNumber);
+TEST(PacketTest, testCreateFANT) {
+   Address* source = new AddressMock("source");
+   Address* destination = new AddressMock("destination");
+   AddressMock* sender = new AddressMock("sender");
+   unsigned int type = PacketType::DATA;
+   int seqNr = 3;
+   const char* payload = "Hello World";
+   unsigned int hopCount = 123;
 
-       CHECK(fant->getSource()->equals(source));
-       CHECK(fant->getDestination()->equals(destination));
-       // The sender of a FANT will be determined when it is actually send over a network interface
-       CHECK_EQUAL(PacketType::FANT, fant->getType());
-       CHECK_EQUAL(newSequenceNumber, fant->getSequenceNumber());
-       CHECK_EQUAL(0, fant->getPayloadLength());
-       CHECK_EQUAL(hopCount, fant->getHopCount());
+   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
+   unsigned int newSequenceNumber = 242342;
+   Packet* fant = packet.createFANT(newSequenceNumber);
 
-       delete fant;
-    }
+   CHECK(fant->getSource()->equals(source));
+   CHECK(fant->getDestination()->equals(destination));
+   // The sender of a FANT will be determined when it is actually send over a network interface
+   CHECK_EQUAL(PacketType::FANT, fant->getType());
+   CHECK_EQUAL(newSequenceNumber, fant->getSequenceNumber());
+   CHECK_EQUAL(0, fant->getPayloadLength());
+   CHECK_EQUAL(hopCount, fant->getHopCount());
 
-    TEST(testClone) {
-       Address* source = new AddressMock("source");
-       Address* destination = new AddressMock("destination");
-       AddressMock* sender = new AddressMock("sender");
-       unsigned int type = PacketType::DATA;
-       int seqNr = 3;
-       const char* payload = "Hello World";
-       unsigned int hopCount = 123;
+   delete fant;
+}
 
-       Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
-       Packet* clone = packet.clone();
+TEST(PacketTest, testClone) {
+   Address* source = new AddressMock("source");
+   Address* destination = new AddressMock("destination");
+   AddressMock* sender = new AddressMock("sender");
+   char type = PacketType::DATA;
+   unsigned int seqNr = 3;
+   const char* payload = "Hello World";
+   unsigned int hopCount = 123;
 
-       CHECK(clone->getSource()->equals(source));
-       CHECK(clone->getDestination()->equals(destination));
-       CHECK(clone->getSender()->equals(sender));
-       CHECK_EQUAL(type, clone->getType());
-       CHECK_EQUAL(seqNr, clone->getSequenceNumber());
-       CHECK_EQUAL(strlen(payload), clone->getPayloadLength());
-       CHECK_EQUAL(payload, clone->getPayload());
-       CHECK_EQUAL(hopCount, clone->getHopCount());
-       CHECK(packet.equals(clone));
+   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
+   Packet* clone = packet.clone();
 
-       delete clone;
-    }
+   CHECK(clone->getSource()->equals(source));
+   CHECK(clone->getDestination()->equals(destination));
+   CHECK(clone->getSender()->equals(sender));
+   CHECK_EQUAL(type, clone->getType());
+   CHECK_EQUAL(seqNr, clone->getSequenceNumber());
+   CHECK_EQUAL(strlen(payload), clone->getPayloadLength());
+   CHECK_EQUAL(payload, clone->getPayload());
+   CHECK_EQUAL(hopCount, clone->getHopCount());
+   CHECK(packet.equals(clone));
 
-    TEST(testSetHopCount) {
-       Address* source = new AddressMock("source");
-       Address* destination = new AddressMock("destination");
-       Address* sender = new AddressMock("sender");
-       unsigned int type = PacketType::DATA;
-       int seqNr = 3;
-       const char* payload = "Hello World";
-       unsigned int hopCount = 123;
+   delete clone;
+}
 
-       Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
-       CHECK_EQUAL(hopCount, packet.getHopCount());
+TEST(PacketTest, testSetHopCount) {
+   Address* source = new AddressMock("source");
+   Address* destination = new AddressMock("destination");
+   Address* sender = new AddressMock("sender");
+   unsigned int type = PacketType::DATA;
+   int seqNr = 3;
+   const char* payload = "Hello World";
+   unsigned int hopCount = 123;
 
-       unsigned int newHopCount = 124;
-       packet.setHopCount(newHopCount);
-       CHECK_EQUAL(newHopCount, packet.getHopCount());
-    }
+   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
+   CHECK_EQUAL(hopCount, packet.getHopCount());
 
-    TEST(testEquals) {
-       unsigned int dataPacket = PacketType::DATA;
-       const char* payload = "Hello World";
+   unsigned int newHopCount = 124;
+   packet.setHopCount(newHopCount);
+   CHECK_EQUAL(newHopCount, packet.getHopCount());
+}
 
-       Packet packet            = Packet(new AddressMock("Source1"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 1, payload, strlen(payload));
-       Packet samePacket        = Packet(new AddressMock("Source1"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 1, payload, strlen(payload));
-       Packet nextSeqPacket     = Packet(new AddressMock("Source2"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 2, payload, strlen(payload));
-       Packet otherSourcePacket = Packet(new AddressMock("Source2"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 1, payload, strlen(payload));
-       Packet otherPacket       = Packet(new AddressMock("Source2"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 3, payload, strlen(payload));
+TEST(PacketTest, testEquals) {
+   unsigned int dataPacket = PacketType::DATA;
+   const char* payload = "Hello World";
 
-       CHECK(packet.equals(&packet));
-       CHECK(packet.equals(&samePacket));
-       CHECK(packet.equals(&nextSeqPacket) == false);
-       CHECK(packet.equals(&otherSourcePacket) == false);
-       CHECK(packet.equals(&otherPacket) == false);
-    }
+   Packet packet            = Packet(new AddressMock("Source1"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 1, payload, strlen(payload));
+   Packet samePacket        = Packet(new AddressMock("Source1"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 1, payload, strlen(payload));
+   Packet nextSeqPacket     = Packet(new AddressMock("Source2"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 2, payload, strlen(payload));
+   Packet otherSourcePacket = Packet(new AddressMock("Source2"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 1, payload, strlen(payload));
+   Packet otherPacket       = Packet(new AddressMock("Source2"), new AddressMock("Destination"), new AddressMock("Sender"), dataPacket, 3, payload, strlen(payload));
+
+   CHECK(packet.equals(&packet));
+   CHECK(packet.equals(&samePacket));
+   CHECK(packet.equals(&nextSeqPacket) == false);
+   CHECK(packet.equals(&otherSourcePacket) == false);
+   CHECK(packet.equals(&otherPacket) == false);
 }

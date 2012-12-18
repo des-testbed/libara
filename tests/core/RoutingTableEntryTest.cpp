@@ -23,7 +23,7 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include "RoutingTableEntry.h"
 #include "NextHop.h"
 #include "testAPI/mocks/AddressMock.h"
@@ -31,39 +31,38 @@
 
 using namespace ARA;
 
-SUITE(RoutingTableEntryTest) {
+TEST_GROUP(RoutingTableEntryTest) {};
 
-    TEST(testGetters) {
-        NetworkInterfaceMock interface = NetworkInterfaceMock();
-        AddressMock nextHop = AddressMock();
-        float pheromoneValue = 1.234;
-        RoutingTableEntry entry = RoutingTableEntry(&nextHop, &interface, pheromoneValue);
+TEST(RoutingTableEntryTest, testGetters) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressMock nextHop = AddressMock();
+    float pheromoneValue = 1.234;
+    RoutingTableEntry entry = RoutingTableEntry(&nextHop, &interface, pheromoneValue);
 
-        CHECK_EQUAL(&nextHop, entry.getAddress());
-        CHECK_EQUAL(&interface, entry.getNetworkInterface());
-        CHECK_EQUAL(pheromoneValue, entry.getPheromoneValue());
-    }
+    CHECK_EQUAL(&nextHop, entry.getAddress());
+    CHECK_EQUAL(&interface, entry.getNetworkInterface());
+    CHECK_EQUAL(pheromoneValue, entry.getPheromoneValue());
+}
 
-    TEST(testSetPheromoneValue) {
-        NetworkInterfaceMock interface = NetworkInterfaceMock();
-        AddressMock address = AddressMock();
-        float pheromoneValue = 1.234;
-        RoutingTableEntry entry = RoutingTableEntry(&address, &interface, pheromoneValue);
+TEST(RoutingTableEntryTest, testSetPheromoneValue) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressMock address = AddressMock();
+    float pheromoneValue = 1.234;
+    RoutingTableEntry entry = RoutingTableEntry(&address, &interface, pheromoneValue);
 
-        entry.setPheromoneValue(42);
-        CHECK_EQUAL(&address, entry.getAddress());
-        CHECK_EQUAL(&interface, entry.getNetworkInterface());
-        CHECK_EQUAL(42, entry.getPheromoneValue());
-    }
+    entry.setPheromoneValue(42);
+    CHECK_EQUAL(&address, entry.getAddress());
+    CHECK_EQUAL(&interface, entry.getNetworkInterface());
+    CHECK_EQUAL(42, entry.getPheromoneValue());
+}
 
-    TEST(testGetNextHop) {
-        NetworkInterfaceMock interface = NetworkInterfaceMock();
-        AddressMock address = AddressMock();
-        float pheromoneValue = 1.234;
-        RoutingTableEntry entry = RoutingTableEntry(&address, &interface, pheromoneValue);
+TEST(RoutingTableEntryTest, testGetNextHop) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressMock address = AddressMock();
+    float pheromoneValue = 1.234;
+    RoutingTableEntry entry = RoutingTableEntry(&address, &interface, pheromoneValue);
 
-        NextHop* nextHop = entry.getNextHop();
-        CHECK(nextHop->getAddress()->equals(&address));
-        CHECK(nextHop->getInterface()->equals(&interface));
-    }
+    NextHop* nextHop = entry.getNextHop();
+    CHECK(nextHop->getAddress()->equals(&address));
+    CHECK(nextHop->getInterface()->equals(&interface));
 }

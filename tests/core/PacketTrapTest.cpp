@@ -23,7 +23,7 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include "PacketTrap.h"
 #include "Packet.h"
 #include "Address.h"
@@ -31,21 +31,19 @@
 
 using namespace ARA;
 
-SUITE(PacketTrapTest) {
+TEST_GROUP(PacketTrapTest) {};
 
-    TEST(testTrapPacket) {
-        PacketTrap packetTrap = PacketTrap();
-        Packet* packet = new PacketMock();
+TEST(PacketTrapTest, testTrapPacket) {
+    PacketTrap packetTrap = PacketTrap();
+    Packet* packet = new PacketMock();
 
-        // Check that there is no trapped packet for the packets destination
-        CHECK(packetTrap.contains(packet) == false);
+    // Check that there is no trapped packet for the packets destination
+    CHECK(packetTrap.contains(packet) == false);
 
-        packetTrap.trapPacket(packet);
+    packetTrap.trapPacket(packet);
 
-        // Now there must be a trapped packet for the packets destination
-        CHECK(packetTrap.contains(packet) == true);
+    // Now there must be a trapped packet for the packets destination
+    CHECK(packetTrap.contains(packet) == true);
 
-        delete packet;
-    }
-
-  }
+    delete packet;
+}
