@@ -49,11 +49,16 @@ all: check_if_unittest_is_installed $(TEST_SOURCES) $(TEST_EXECUTABLE)
 	@echo 'All tests have been compiled'	
 
 $(TEST_EXECUTABLE): $(COMPILED_TESTAPI) $(COMPILED_TESTS)
-	@echo "Building executable test suit ./$(TEST_EXECUTABLE)" 
+	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $@ $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	
 
 .cpp.o:
-	@echo "Compiling $<"
+	@if [[ $< == *Test.cpp ]]; then \
+		nrOfTests=$$(grep -c "TEST(" $<); \
+		echo "Compiling $< ($$nrOfTests tests)"; \
+	else  \
+		echo "Compiling $<"; \
+	fi
 	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $< -o $@
 
 clean:
