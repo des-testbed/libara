@@ -23,7 +23,7 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include <string>
 #include "LinkedList.h"
 #include "NoSuchElementException.h"
@@ -31,129 +31,128 @@
 using namespace ARA;
 using namespace std;
 
-SUITE(LinkedListTest) {
+TEST_GROUP(LinkedListTest) {};
 
-    TEST(testCreate) {
-        LinkedList<string> list = LinkedList<string>();
-        CHECK(list.isEmpty() == true);
-    }
+TEST(LinkedListTest, testCreate) {
+    LinkedList<string> list = LinkedList<string>();
+    CHECK(list.isEmpty() == true);
+}
 
-    TEST(testAddAndGet) {
-        LinkedList<string> list = LinkedList<string>();
-        string foo = string("Hello Foo World");
-        string bar = string("Hello Bar World");
-        string fooBar = string("Hello FooBar World");
+TEST(LinkedListTest, testAddAndGet) {
+    LinkedList<string> list = LinkedList<string>();
+    string foo = string("Hello Foo World");
+    string bar = string("Hello Bar World");
+    string fooBar = string("Hello FooBar World");
 
-        list.add(&foo);
-        list.add(&bar);
-        list.add(&fooBar);
+    list.add(&foo);
+    list.add(&bar);
+    list.add(&fooBar);
 
-        CHECK_EQUAL(foo, *list.get(0));
-        CHECK_EQUAL(fooBar, *list.get(2));
-        CHECK_EQUAL(bar, *list.get(1));
-    }
+    CHECK_EQUAL(foo, *list.get(0));
+    CHECK_EQUAL(fooBar, *list.get(2));
+    CHECK_EQUAL(bar, *list.get(1));
+}
 
-    TEST(testGetThrowsExceptionIfIndexIsOutOfBounds) {
-        LinkedList<string> list = LinkedList<string>();
-        CHECK_THROW(list.get(0), ARA::Exception);
+TEST(LinkedListTest, testGetThrowsExceptionIfIndexIsOutOfBounds) {
+    LinkedList<string> list = LinkedList<string>();
+    CHECK_THROW(list.get(0), ARA::Exception);
 
-        string foo = string("Hello Foo World");
-        list.add(&foo);
-        list.get(0);    // This should now work
+    string foo = string("Hello Foo World");
+    list.add(&foo);
+    list.get(0);    // This should now work
 
-        string bar = string("Hello Bar World");
-        list.add(&bar);
-        list.get(1);    // This should now work
+    string bar = string("Hello Bar World");
+    list.add(&bar);
+    list.get(1);    // This should now work
 
-        CHECK_THROW(list.get(2), Exception);
-    }
+    CHECK_THROW(list.get(2), Exception);
+}
 
-    TEST(testIsEmpty) {
-        LinkedList<string> list = LinkedList<string>();
-        string test = string("Hello World");
+TEST(LinkedListTest, testIsEmpty) {
+    LinkedList<string> list = LinkedList<string>();
+    string test = string("Hello World");
 
-        CHECK(list.isEmpty() == true);
-        list.add(&test);
-        CHECK(list.isEmpty() == false);
-    }
+    CHECK(list.isEmpty() == true);
+    list.add(&test);
+    CHECK(list.isEmpty() == false);
+}
 
-    TEST(DeletingFromEmtyListthrowsException) {
-        LinkedList<string> list = LinkedList<string>();
-        CHECK_THROW(list.remove(), NoSuchElementException);
-    }
+TEST(LinkedListTest, DeletingFromEmtyListthrowsException) {
+    LinkedList<string> list = LinkedList<string>();
+    CHECK_THROW(list.remove(), NoSuchElementException);
+}
 
-    TEST(testRemove) {
-        LinkedList<string> list = LinkedList<string>();
-        string foo = string("Foo");
-        string bar = string("Bar");
-        string hello = string("Hello World");
+TEST(LinkedListTest, testRemove) {
+    LinkedList<string> list = LinkedList<string>();
+    string foo = string("Foo");
+    string bar = string("Bar");
+    string hello = string("Hello World");
 
-        list.add(&foo);
-        list.add(&bar);
-        list.add(&hello);
+    list.add(&foo);
+    list.add(&bar);
+    list.add(&hello);
 
-        CHECK(list.isEmpty() == false);
+    CHECK(list.isEmpty() == false);
 
-        CHECK_EQUAL(foo, *list.remove());
-        CHECK_EQUAL(bar, *list.remove());
-        CHECK_EQUAL(hello, *list.remove());
+    CHECK_EQUAL(foo, *list.remove());
+    CHECK_EQUAL(bar, *list.remove());
+    CHECK_EQUAL(hello, *list.remove());
 
-        CHECK(list.isEmpty() == true);
-    }
+    CHECK(list.isEmpty() == true);
+}
 
-    TEST(testSize) {
-        LinkedList<string> list = LinkedList<string>();
-        string foo = string("Foo");
-        string bar = string("Bar");
+TEST(LinkedListTest, testSize) {
+    LinkedList<string> list = LinkedList<string>();
+    string foo = string("Foo");
+    string bar = string("Bar");
 
-        CHECK_EQUAL(0, list.size());
+    CHECK_EQUAL(0, list.size());
 
-        list.add(&foo);
-        CHECK_EQUAL(1, list.size());
+    list.add(&foo);
+    CHECK_EQUAL(1, list.size());
 
-        list.add(&bar);
-        CHECK_EQUAL(2, list.size());
+    list.add(&bar);
+    CHECK_EQUAL(2, list.size());
 
-        list.remove();
-        CHECK_EQUAL(1, list.size());
+    list.remove();
+    CHECK_EQUAL(1, list.size());
 
-        list.remove();
-        CHECK_EQUAL(0, list.size());
-    }
+    list.remove();
+    CHECK_EQUAL(0, list.size());
+}
 
-    TEST(testContains) {
-        LinkedList<string> list = LinkedList<string>();
-        string foo = string("Foo");
-        string bar = string("Bar");
+TEST(LinkedListTest, testContains) {
+    LinkedList<string> list = LinkedList<string>();
+    string foo = string("Foo");
+    string bar = string("Bar");
 
-        CHECK(list.contains(&foo) == false);
-        CHECK(list.contains(&bar) == false);
+    CHECK(list.contains(&foo) == false);
+    CHECK(list.contains(&bar) == false);
 
-        list.add(&foo);
-        CHECK(list.contains(&foo) == true);
-        CHECK(list.contains(&bar) == false);
+    list.add(&foo);
+    CHECK(list.contains(&foo) == true);
+    CHECK(list.contains(&bar) == false);
 
-        list.add(&bar);
-        CHECK(list.contains(&foo) == true);
-        CHECK(list.contains(&bar) == true);
+    list.add(&bar);
+    CHECK(list.contains(&foo) == true);
+    CHECK(list.contains(&bar) == true);
 
-        list.remove();
-        CHECK(list.contains(&foo) == false);
-        CHECK(list.contains(&bar) == true);
+    list.remove();
+    CHECK(list.contains(&foo) == false);
+    CHECK(list.contains(&bar) == true);
 
-        list.remove();
-        CHECK(list.contains(&foo) == false);
-        CHECK(list.contains(&bar) == false);
-    }
+    list.remove();
+    CHECK(list.contains(&foo) == false);
+    CHECK(list.contains(&bar) == false);
+}
 
-    TEST(testGetFirst) {
-        LinkedList<string> list = LinkedList<string>();
-        string foo = string("Foo");
-        string bar = string("Bar");
+TEST(LinkedListTest, testGetFirst) {
+    LinkedList<string> list = LinkedList<string>();
+    string foo = string("Foo");
+    string bar = string("Bar");
 
-        list.add(&foo);
-        list.add(&bar);
+    list.add(&foo);
+    list.add(&bar);
 
-        CHECK_EQUAL(list.get(0), list.getFirst());
-    }
+    CHECK_EQUAL(list.get(0), list.getFirst());
 }

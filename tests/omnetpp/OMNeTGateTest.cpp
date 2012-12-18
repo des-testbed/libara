@@ -23,19 +23,17 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include <omnetpp.h>
 #include "OMNeTGate.h"
 
 using namespace ARA;
 
-SUITE(OMNeTGateTest) {
+TEST_GROUP(OMNeTGateTest) {};
 
-    /* FIXME: Make this test work (i.e. check back with OMNeT++ API on how to create single simpleModule instances
-    TEST(testCreate) {
-        cSimpleModule* module = new cSimpleModule();
-        OMNeTGate(module, "testGate");
-        delete module;
-    }*/
-
-  }
+/* FIXME: Make this test work (i.e. check back with OMNeT++ API on how to create single simpleModule instances
+TEST(OMNeTGateTest, testCreate) {
+    cSimpleModule* module = new cSimpleModule();
+    OMNeTGate(module, "testGate");
+    delete module;
+}*/

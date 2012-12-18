@@ -23,17 +23,15 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include "Exception.h"
 
 using namespace ARA;
 
-SUITE(ExceptionTest) {
+TEST_GROUP(ExceptionTest) {};
 
-    TEST(testGetMessage) {
-        const char* message = "Something went horribly wrong";
-        Exception exception = Exception(message);
-        CHECK_EQUAL(message, exception.getMessage());
-    }
-
-  }
+TEST(ExceptionTest, testGetMessage) {
+    const char* message = "Something went horribly wrong";
+    Exception exception = Exception(message);
+    CHECK_EQUAL(message, exception.getMessage());
+}

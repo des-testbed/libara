@@ -23,26 +23,25 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include "PacketType.h"
 
 using namespace ARA;
 
-SUITE(PacketTypeTest) {
+TEST_GROUP(PacketTypeTest) {};
 
-    TEST(testIsAntPacket) {
-        CHECK(PacketType::isAntPacket(PacketType::FANT) == true);
-        CHECK(PacketType::isAntPacket(PacketType::BANT) == true);
-        CHECK(PacketType::isAntPacket(PacketType::PANT) == true);
-        CHECK(PacketType::isAntPacket(PacketType::DATA) == false);
-        CHECK(PacketType::isAntPacket(PacketType::DUPLICATE_WARNING) == false);
-    }
+TEST(PacketTypeTest, testIsAntPacket) {
+    CHECK(PacketType::isAntPacket(PacketType::FANT) == true);
+    CHECK(PacketType::isAntPacket(PacketType::BANT) == true);
+    CHECK(PacketType::isAntPacket(PacketType::PANT) == true);
+    CHECK(PacketType::isAntPacket(PacketType::DATA) == false);
+    CHECK(PacketType::isAntPacket(PacketType::DUPLICATE_WARNING) == false);
+}
 
-    TEST(testIsDataPacket) {
-        CHECK(PacketType::isDataPacket(PacketType::FANT) == false);
-        CHECK(PacketType::isDataPacket(PacketType::BANT) == false);
-        CHECK(PacketType::isDataPacket(PacketType::PANT) == false);
-        CHECK(PacketType::isDataPacket(PacketType::DATA) == true);
-        CHECK(PacketType::isDataPacket(PacketType::DUPLICATE_WARNING) == false);
-    }
-  }
+TEST(PacketTypeTest, testIsDataPacket) {
+    CHECK(PacketType::isDataPacket(PacketType::FANT) == false);
+    CHECK(PacketType::isDataPacket(PacketType::BANT) == false);
+    CHECK(PacketType::isDataPacket(PacketType::PANT) == false);
+    CHECK(PacketType::isDataPacket(PacketType::DATA) == true);
+    CHECK(PacketType::isDataPacket(PacketType::DUPLICATE_WARNING) == false);
+}

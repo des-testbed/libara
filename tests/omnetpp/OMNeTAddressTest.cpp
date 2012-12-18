@@ -23,52 +23,51 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include "OMNeTAddress.h"
 
 using namespace ARA;
 
-SUITE(OMNeTAddressTest) {
+TEST_GROUP(OMNeTAddressTest) {};
 
-    TEST(testGetAddress) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.getAddress() == 123);
-    }
+TEST(OMNeTAddressTest, testGetAddress) {
+    OMNeTAddress address = OMNeTAddress(123);
+    CHECK(address.getAddress() == 123);
+}
 
-    TEST(testEquality) {
-        OMNeTAddress address1 = OMNeTAddress(123);
-        CHECK(address1.equals(&address1));
+TEST(OMNeTAddressTest, testEquality) {
+    OMNeTAddress address1 = OMNeTAddress(123);
+    CHECK(address1.equals(&address1));
 
-        OMNeTAddress sameAddress = OMNeTAddress(123);
-        CHECK(address1.equals(&sameAddress));
+    OMNeTAddress sameAddress = OMNeTAddress(123);
+    CHECK(address1.equals(&sameAddress));
 
-        OMNeTAddress address2 = OMNeTAddress(456);
-        CHECK(address1.equals(&address2) == false);
-    }
+    OMNeTAddress address2 = OMNeTAddress(456);
+    CHECK(address1.equals(&address2) == false);
+}
 
-    TEST(testEqualityWithNull) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK(address.equals(0) == false);
-    }
+TEST(OMNeTAddressTest, testEqualityWithNull) {
+    OMNeTAddress address = OMNeTAddress(123);
+    CHECK(address.equals(0) == false);
+}
 
-    TEST(testGetHashValue) {
-        OMNeTAddress address = OMNeTAddress(123);
-        CHECK_EQUAL(123, address.getHashValue());
-    }
+TEST(OMNeTAddressTest, testGetHashValue) {
+    OMNeTAddress address = OMNeTAddress(123);
+    CHECK_EQUAL(123, address.getHashValue());
+}
 
-    TEST(testIsBroadCast) {
-        OMNeTAddress broadCastAddress = OMNeTAddress(OMNeTAddress::BROADCAST);
-        OMNeTAddress normalAddress = OMNeTAddress(123);
+TEST(OMNeTAddressTest, testIsBroadCast) {
+    OMNeTAddress broadCastAddress = OMNeTAddress(OMNeTAddress::BROADCAST);
+    OMNeTAddress normalAddress = OMNeTAddress(123);
 
-        CHECK(broadCastAddress.isBroadCast() == true);
-        CHECK(normalAddress.isBroadCast() == false);
-    }
+    CHECK(broadCastAddress.isBroadCast() == true);
+    CHECK(normalAddress.isBroadCast() == false);
+}
 
-    TEST(testCloneAddress) {
-        OMNeTAddress original = OMNeTAddress(123);
-        Address* clone = original.clone();
+TEST(OMNeTAddressTest, testCloneAddress) {
+    OMNeTAddress original = OMNeTAddress(123);
+    Address* clone = original.clone();
 
-        CHECK(original.equals(clone));
-        delete clone;
-    }
+    CHECK(original.equals(clone));
+    delete clone;
 }

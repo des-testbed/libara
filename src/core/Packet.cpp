@@ -22,12 +22,9 @@ Packet::Packet(Address* source, Address* destination, Address* sender, char type
 }
 
 Packet::~Packet() {
-    //delete this->source;
-    //delete this->destination;
-
-    if(this->sender != NULL) {
-        //delete this->sender;
-    }
+    delete this->source;
+    delete this->destination;
+    delete this->sender;
 }
 
 Address* Packet::getSource() {
