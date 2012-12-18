@@ -108,4 +108,8 @@ bool NetworkInterfaceMock::equals(NetworkInterface* otherInterface) {
     }
 }
 
+unsigned int NetworkInterfaceMock::getNumberOfSentPackets() {
+    return sentPackets.size();
+}
+
 } /* namespace ARA */

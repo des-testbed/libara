@@ -101,4 +101,23 @@ SUITE(NetworkInterfaceMockTest) {
         CHECK(interface.equals(&otherInterface) == false);
         CHECK(sameInterface.equals(&otherInterface) == false);
     }
-  }
+
+    TEST(testGetNumberOfSentPackets) {
+        NetworkInterfaceMock interface = NetworkInterfaceMock();
+        PacketMock packet1 = PacketMock("Source", "Destination", 1);
+        PacketMock packet2 = PacketMock("Source", "Destination", 2);
+        AddressMock address1 = AddressMock("A");
+        AddressMock address2 = AddressMock("B");
+
+        CHECK_EQUAL(0, interface.getNumberOfSentPackets());
+
+        interface.send(&packet1, &address1);
+        CHECK_EQUAL(1, interface.getNumberOfSentPackets());
+
+        interface.send(&packet1, &address2);
+        CHECK_EQUAL(2, interface.getNumberOfSentPackets());
+
+        interface.send(&packet2, &address1);
+        CHECK_EQUAL(3, interface.getNumberOfSentPackets());
+    }
+}

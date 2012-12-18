@@ -45,6 +45,7 @@ public:
 
     std::string getName();
     LinkedList<Pair<Packet, Address>>* getSentPackets();
+    unsigned int getNumberOfSentPackets();
     bool hasPacketBeenSend(Packet* packet);
     bool hasPacketBeenBroadCasted(Packet* packet);
 
