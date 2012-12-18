@@ -81,6 +81,7 @@ check_if_cpputest_is_installed:
 	fi
 	
 installCppUTest:
+	@echo -e "\n~~~ INSTALLING CppUTest FRAMEWORK FROM SOURCE ~~~~~~~~~~~~~~~~~~~\n"
 	@if ! [ -d "../extern" ]; then \
 	mkdir "../extern"; \
 	fi
@@ -88,7 +89,7 @@ installCppUTest:
 	cd $(CPPUTEST_HOME) && $(MAKE)
 	@echo; \
 	echo '======================================================================='; \
-	echo 'CppUTest framework has been installed successfully in extern/cpputest!'; \
+	echo 'CppUTest framework has been installed successfully in ./extern/cpputest'; \
 	echo '======================================================================='; \
 	echo; \
 
