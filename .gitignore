@@ -13,3 +13,6 @@ src/Makefile
 tests/TestResults.xml
 tests/runAllTests
 
+# CppUTest
+extern/cpputest
+
