@@ -36,6 +36,7 @@ PacketMock::PacketMock(const char* sourceName, const char* destinationName, unsi
 }
 
 void PacketMock::setSender(Address* newSenderAddress) {
+    delete sender;
     sender = newSenderAddress;
 }
 

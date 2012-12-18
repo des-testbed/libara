@@ -58,7 +58,7 @@ TEST(NetworkInterfaceMockTest, testMockRemembersSentPackets) {
     CHECK(sendPackets->get(2)->getRight()->equals(&recipient1));
 }
 
-IGNORE_TEST(NetworkInterfaceMockTest, testHasPacketBeenBroadCasted) {
+TEST(NetworkInterfaceMockTest, testHasPacketBeenBroadCasted) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     PacketMock packet1 = PacketMock("Source", "Destination", 1);
     PacketMock packet2 = PacketMock("Earth", "Moon", 1234);
@@ -74,7 +74,7 @@ IGNORE_TEST(NetworkInterfaceMockTest, testHasPacketBeenBroadCasted) {
     CHECK(interface.hasPacketBeenBroadCasted(&packet3) == false);
 }
 
-IGNORE_TEST(NetworkInterfaceMockTest, testHasPacketBeenSend) {
+TEST(NetworkInterfaceMockTest, testHasPacketBeenSend) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     PacketMock packet1 = PacketMock("Source", "Destination", 1);
     PacketMock packet2 = PacketMock("Source", "Destination", 2);

@@ -48,12 +48,12 @@ TEST(PacketMockTest, testConstructor) {
     CHECK_EQUAL(strlen("Hello World"), mock.getPayloadLength());
 }
 
-IGNORE_TEST(PacketMockTest, testSetSender) {
+TEST(PacketMockTest, testSetSender) {
     PacketMock mock = PacketMock("A", "B");
     CHECK(mock.getSender()->equals(mock.getSource()));
 
-    AddressMock newSender = AddressMock("C");
-    mock.setSender(&newSender);
+    AddressMock* newSender = new AddressMock("C");  // the PacketMock will take care of deleting this object
+    mock.setSender(newSender);
 
-    CHECK(mock.getSender()->equals(&newSender));
+    CHECK(mock.getSender()->equals(newSender));
 }
