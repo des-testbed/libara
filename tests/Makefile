@@ -79,3 +79,14 @@ check_if_cpputest_is_installed:
 	echo>&2; \
 	exit 1; \
 	fi
+	
+installCppUTest:
+	cd ../extern
+	git clone git://github.com/FGrosse/cpputest.git cpputest
+	cd cpputest
+	make
+	echo; \
+	echo '======================================================================='; \
+	echo 'CppUTest framework has been installed successfully in extern/cpputest!'; \
+	echo '======================================================================='; \
+	echo; \
