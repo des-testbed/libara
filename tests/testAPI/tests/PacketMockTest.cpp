@@ -37,13 +37,24 @@ SUITE(PacketMockTest) {
 
         AddressMock wantedSource = AddressMock("Source");
         AddressMock wantedDestination = AddressMock("Destination");
+        AddressMock wantedSender = wantedSource;
 
         CHECK(mock.getSource()->equals(&wantedSource));
         CHECK(mock.getDestination()->equals(&wantedDestination));
+        CHECK(mock.getSender()->equals(&wantedSender));
         CHECK_EQUAL(123, mock.getSequenceNumber());
         CHECK_EQUAL(0, mock.getHopCount());
         CHECK_EQUAL("Hello World", mock.getPayload());
         CHECK_EQUAL(strlen("Hello World"), mock.getPayloadLength());
     }
 
+    TEST(testSetSender) {
+        PacketMock mock = PacketMock("A", "B");
+        CHECK(mock.getSender()->equals(mock.getSource()));
+
+        AddressMock newSender = AddressMock("C");
+        mock.setSender(&newSender);
+
+        CHECK(mock.getSender()->equals(&newSender));
+    }
 }

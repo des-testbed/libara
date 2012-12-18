@@ -80,12 +80,12 @@ SUITE(AbstractARAClientTest) {
         PacketMock packet = PacketMock();
 
         CHECK(routingTable->isDeliverable(&packet) == false);
-        client.sendPacket(&packet);
-        LinkedList<Pair<Packet, Address>>* sentPackets = interface->getSentPackets();
-        CHECK_EQUAL(1, sentPackets->size());
+        client.sendPacket(&packet); // FIXME crashes here since Packet::getSender has been implemented
 
-        Packet* sentPacket = sentPackets->getFirst()->getLeft();
-        Address* recipientOfSentPacket = sentPackets->getFirst()->getRight();
+        CHECK_EQUAL(1, interface->getNumberOfSentPackets());
+        Pair<Packet, Address>* sentPacketInfo = interface->getSentPackets()->getFirst();
+        Packet* sentPacket = sentPacketInfo->getLeft();
+        Address* recipientOfSentPacket = sentPacketInfo->getRight();
 
         CHECK(sentPacket->getType() == PacketType::FANT);
         CHECK(recipientOfSentPacket->isBroadCast());
@@ -112,9 +112,9 @@ SUITE(AbstractARAClientTest) {
         CHECK(interface3->hasPacketBeenSend(&originalPacket) == false);
 
         // check if packet has been send via interface2 to nextHop
-        LinkedList<Pair<Packet, Address>>* sentPackets = interface2->getSentPackets();
-        Packet* sentPacket = sentPackets->getFirst()->getLeft();
-        Address* recipientOfSentPacket = sentPackets->getFirst()->getRight();
+        Pair<Packet, Address>* sentPacketInfo = interface2->getSentPackets()->getFirst();
+        Packet* sentPacket = sentPacketInfo->getLeft();
+        Address* recipientOfSentPacket = sentPacketInfo->getRight();
         CHECK(recipientOfSentPacket->equals(&nextHop));
 
         // Check that packet content is basically the same
@@ -162,30 +162,35 @@ SUITE(AbstractARAClientTest) {
 
     /**
      * In this test we simulate that the same packet has been received
-     * twice at node x. It has been send from node A to node B via node C.
+     * twice at node x. The packet is directed from node A to node B and
+     * has been relayed via node C to node x.
      * Node x must respond to node C with a DUPLICATE_WARNING packet.
      */
-    TEST(testRememberLastRecievedPackets) {
+/*    TEST(testRememberLastRecievedPackets) {
         ARAClientMock client = ARAClientMock();
         PacketMock packet = PacketMock("A", "B", 123);
-        AddressMock sender = AddressMock("C");
-        packet->setSender(&sender);
+        AddressMock nodeC = AddressMock("C");
+        packet->setSender(&nodeC);
 
         NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock();
         interface->receivePacket(&packet);
         interface->receivePacket(&packet);
 
+        // the client should now have sent a duplicate warning back over the interface
         CHECK_EQUAL(1, interface->getNumberOfSentPackets());
 
         Pair<Packet, Address>* sentPacketInfo = interface->getSentPackets()->getFirst();
         Packet* sentPacket = sentPacketInfo->getLeft();
         Address* recipientOfSentPacket = sentPacketInfo->getRight();
 
-        CHECK(recipientOfSentPacket->equals(&sender));
+        // check the contents of the duplicate warning packet
+        CHECK(recipientOfSentPacket->equals(&nodeC));
         CHECK(sentPacket->getType() == PacketType::DUPLICATE_WARNING);
-        CHECK(sentPacket->getSource()->equals(???));
-        CHECK(sentPacket->getDestination()->equals(&sender));
         CHECK_EQUAL(1, sentPacket->getHopCount());
         CHECK_EQUAL(0, sentPacket->getPayloadLength());
-    }
+
+        // source and destination have no meaning in DUPLICATE_WARNING packets
+        // because they are only exchanged between directly connected neighbors, so
+        // only the MAC Layer addresses are used for this kind of packet.
+    }*/
 }

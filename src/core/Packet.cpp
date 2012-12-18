@@ -10,9 +10,10 @@
 
 namespace ARA {
 
-Packet::Packet(Address* source, Address* destination, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) {
+Packet::Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) {
     this->source = source;
     this->destination = destination;
+    this->sender = sender;
     this->type = type;
     this->seqNr = seqNr;
     this->payload = payload;
@@ -21,8 +22,12 @@ Packet::Packet(Address* source, Address* destination, char type, unsigned int se
 }
 
 Packet::~Packet() {
-    delete this->source;
-    delete this->destination;
+    //delete this->source;
+    //delete this->destination;
+
+    if(this->sender != NULL) {
+        //delete this->sender;
+    }
 }
 
 Address* Packet::getSource() {
@@ -31,6 +36,10 @@ Address* Packet::getSource() {
 
 Address* Packet::getDestination() {
     return destination;
+}
+
+Address* Packet::getSender() {
+    return sender;
 }
 
 char Packet::getType() {
@@ -62,11 +71,11 @@ bool Packet::equals(Packet* otherPacket) {
 }
 
 Packet* Packet::clone() {
-    return new Packet(source->clone(), destination->clone(), type, seqNr, payload, payloadSize, hopCount);
+    return new Packet(source->clone(), destination->clone(), sender->clone(), type, seqNr, payload, payloadSize, hopCount);
 }
 
 Packet* Packet::createFANT(unsigned int sequenceNumber) {
-    Packet* fant = new Packet(source->clone(), destination->clone(), PacketType::FANT, sequenceNumber);
+    Packet* fant = new Packet(source->clone(), destination->clone(), NULL, PacketType::FANT, sequenceNumber);
     fant->setHopCount(this->hopCount);
     return fant;
 }

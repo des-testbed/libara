@@ -32,8 +32,11 @@
 namespace ARA {
 
 PacketMock::PacketMock(const char* sourceName, const char* destinationName, unsigned int sequenceNumber, unsigned int hopCount, char packetType)
- : Packet(new AddressMock(sourceName), new AddressMock(destinationName), packetType, sequenceNumber, "Hello World", 11, hopCount){
+ : Packet(new AddressMock(sourceName), new AddressMock(destinationName), new AddressMock(sourceName), packetType, sequenceNumber, "Hello World", 11, hopCount){
+}
 
+void PacketMock::setSender(Address* newSenderAddress) {
+    sender = newSenderAddress;
 }
 
 } /* namespace ARA */
