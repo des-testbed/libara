@@ -23,22 +23,22 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/TestHarness.h"
 #include "NextHop.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 
 using namespace ARA;
 
-SUITE(NextHopTest) {
+TEST_GROUP(NextHopTest) {
 
-    TEST(testGetters) {
-        AddressMock address = AddressMock();
-        NetworkInterfaceMock interface = NetworkInterfaceMock();
-        NextHop nextHop = NextHop(&address, &interface);
+};
 
-        CHECK(nextHop.getAddress()->equals(&address));
-        CHECK(nextHop.getInterface()->equals(&interface));
-    }
+TEST(NextHopTest, testGetters) {
+    AddressMock address = AddressMock();
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    NextHop nextHop = NextHop(&address, &interface);
 
+    CHECK(nextHop.getAddress()->equals(&address));
+    CHECK(nextHop.getInterface()->equals(&interface));
 }

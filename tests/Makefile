@@ -22,8 +22,13 @@ OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
 OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INCLUDE_PATH= -I../include -I./ -I$(OMNETPP_INCL_DIR)
-LINKFLAGS= -lUnitTest++ $(OMNETPP_LIBS)
+CPPUTEST_HOME = ../extern/cpputest
+INCLUDE_PATH= -I../include -I./ -I$(OMNETPP_INCL_DIR) -I$(CPPUTEST_HOME)/include
+LINKFLAGS= $(OMNETPP_LIBS) -L$(CPPUTEST_HOME)/lib -lCppUTest
+
+# Enable CppUTest memory leak detection
+CXXFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
+CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
 
 # Output directory ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out
@@ -32,7 +37,8 @@ TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/tests
 
 # Test sources ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COMPILED_SRC = $(shell find $(SRC_OUTPUT_DIR) -type f -name '*.o')
-TEST_SOURCES = $(shell find ./ -type f -name '*Test.cpp' -o -name 'Test*.cpp')
+#TEST_SOURCES = $(shell find ./ -type f -name '*Test.cpp' -o -name 'Test*.cpp')
+TEST_SOURCES = core/NextHopTest.cpp TestRunner.cpp
 COMPILED_TESTS = $(TEST_SOURCES:.cpp=.o)
 TESTAPI_SOURCES = $(shell find ./testAPI/ -name tests -prune -o -type f -name '*.cpp' -print)
 COMPILED_TESTAPI = $(TESTAPI_SOURCES:.cpp=.o)
@@ -42,10 +48,10 @@ TEST_EXECUTABLE = runAllTests
 runTests: all
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
 	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_DIR):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE); then \
-		echo -e "\n~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
-all: check_if_unittest_is_installed $(TEST_SOURCES) $(TEST_EXECUTABLE)	
+all: check_if_cpputest_is_installed $(TEST_SOURCES) $(TEST_EXECUTABLE)	
 	@echo 'All tests have been compiled'	
 
 $(TEST_EXECUTABLE): $(COMPILED_TESTAPI) $(COMPILED_TESTS)
@@ -63,12 +69,13 @@ $(TEST_EXECUTABLE): $(COMPILED_TESTAPI) $(COMPILED_TESTS)
 
 clean:
 	rm -f $(TEST_EXECUTABLE) $(COMPILED_TESTS) $(COMPILED_TESTAPI)
-	
-check_if_unittest_is_installed:
-	@if ! [ -e "/lib/libUnitTest++.a" ]; then \
+
+check_if_cpputest_is_installed:
+	@if ! [ -d "$(CPPUTEST_HOME)" ]; then \
 	echo >&2; \
 	echo '======================================================================='>&2; \
-	echo 'ERROR: It seems like UnitTest++ library is not installed on this system'>&2; \
+	echo 'ERROR: It seems like CppUTest is not correctly installed. '>&2; \
+	echo '       Please run make installCppUTest and try again'>&2; \
 	echo '======================================================================='>&2; \
 	echo>&2; \
 	exit 1; \

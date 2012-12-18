@@ -23,12 +23,9 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <UnitTest++.h>
+#include "CppUTest/CommandLineTestRunner.h"
 
-/**
- * This file will run all tests that are linked together in the makefile.
- * You should never have to add anything here.
- */
-int main() {
-    return UnitTest::RunAllTests();
+int main(int ac, char** av)
+{
+   return CommandLineTestRunner::RunAllTests(ac, av);
 }
