@@ -60,7 +60,7 @@ TEST(RoutingTableTest, testPacketWithUnregisteredAddressIsNotDeliverable) {
     CHECK(routingTable.isDeliverable(&packet) == false);
 }
 
-IGNORE_TEST(RoutingTableTest, testUdateRoutingTable) {
+TEST(RoutingTableTest, testUdateRoutingTable) {
     RoutingTable routingTable = RoutingTable();
     PacketMock packet = PacketMock();
     Address* destination = packet.getDestination();
@@ -68,6 +68,7 @@ IGNORE_TEST(RoutingTableTest, testUdateRoutingTable) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     float pheromoneValue = 123.456;
 
+    CHECK(routingTable.isDeliverable(&packet) == false);
     routingTable.update(destination, &nextHop, &interface, pheromoneValue);
 
     CHECK(routingTable.isDeliverable(&packet));
@@ -79,7 +80,7 @@ IGNORE_TEST(RoutingTableTest, testUdateRoutingTable) {
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
 }
 
-IGNORE_TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
+TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     RoutingTable routingTable = RoutingTable();
     PacketMock packet = PacketMock();
     Address* destination = packet.getDestination();
@@ -108,7 +109,7 @@ IGNORE_TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     CHECK_EQUAL(42, possibleHop->getPheromoneValue());
 }
 
-IGNORE_TEST(RoutingTableTest, testGetPossibleNextHops) {
+TEST(RoutingTableTest, testGetPossibleNextHops) {
     RoutingTable routingTable = RoutingTable();
     AddressMock sourceAddress = AddressMock("Source");
     AddressMock destination1 = AddressMock("Destination1");

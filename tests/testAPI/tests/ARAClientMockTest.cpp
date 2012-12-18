@@ -43,13 +43,13 @@ TEST(ARAClientMockTest, testGetPacketTrap){
     CHECK(packetTrap != NULL);
 }
 
-IGNORE_TEST(ARAClientMockTest, testGetRoutingTable){
+TEST(ARAClientMockTest, testGetRoutingTable){
     ARAClientMock client = ARAClientMock();
     RoutingTable* routingTable = client.getRoutingTable();
     CHECK(routingTable != NULL);
 }
 
-IGNORE_TEST(ARAClientMockTest, testGetNetworkInterfaceMock) {
+TEST(ARAClientMockTest, testGetNetworkInterfaceMock) {
     ARAClientMock client = ARAClientMock();
     CHECK_EQUAL(0, client.getNumberOfNetworkInterfaces());
 
@@ -62,7 +62,7 @@ IGNORE_TEST(ARAClientMockTest, testGetNetworkInterfaceMock) {
     CHECK_EQUAL("InterfaceMock2", interface->getName());
 }
 
-IGNORE_TEST(ARAClientMockTest, testGetNextHop) {
+TEST(ARAClientMockTest, testGetNextHop) {
     // this is just an example implementation because the mock simply needs something to be implemented here
     ARAClientMock client = ARAClientMock();
     PacketMock packet = PacketMock();

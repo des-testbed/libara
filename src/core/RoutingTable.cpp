@@ -34,6 +34,12 @@ RoutingTable::~RoutingTable() {
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
         std::pair<Address* const, LinkedList<RoutingTableEntry>*> entryPair = *iterator;
         LinkedList<RoutingTableEntry>* entryList = entryPair.second;
+
+        // delete all RoutingTableEntries in the List
+        while(entryList->isEmpty() == false) {
+            RoutingTableEntry* entry = entryList->remove();
+            delete entry;
+        }
         delete entryList;
     }
     table.clear();
