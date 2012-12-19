@@ -38,8 +38,26 @@ class NetworkInterface {
 public:
     virtual ~NetworkInterface() {}
     
+    /**
+     * Sends the packet over this interface to the given recipient.
+     */
 	virtual void send(Packet* packet, Address* recipient) = 0;
+
+	/**
+	 * Broadcasts the given packet over this interface.
+	 *
+	 * Note: After this method returns, the packet object may be deleted at
+	 * any point so if this NetworkInterface needs access to this object any
+	 * longer it needs to clone the packet.
+	 */
 	virtual void broadcast(Packet* packet) = 0;
+
+	/**
+	 * Compares this interface to another interface.
+	 *
+	 * This is needed to find the right interface to send over if an ARA client
+	 * has more than one registered network interface.
+	 */
 	virtual bool equals(NetworkInterface* interface) = 0;
 };
 

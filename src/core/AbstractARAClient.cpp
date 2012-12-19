@@ -61,6 +61,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
         broadCast(fant);
+        delete fant;
     }
 }
 

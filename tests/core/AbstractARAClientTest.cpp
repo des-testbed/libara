@@ -41,7 +41,7 @@ using namespace ARA;
 
 TEST_GROUP(AbstractARAClientTest) {};
 
-IGNORE_TEST(AbstractARAClientTest, testPacketGetsTrappedIfNotDeliverable) {
+TEST(AbstractARAClientTest, testPacketGetsTrappedIfNotDeliverable) {
     ARAClientMock client = ARAClientMock();
     PacketTrap* packetTrap = client.getPacketTrap();
     RoutingTable* routingTable = client.getRoutingTable();
@@ -52,7 +52,7 @@ IGNORE_TEST(AbstractARAClientTest, testPacketGetsTrappedIfNotDeliverable) {
     CHECK(packetTrap->contains(&packet));
 }
 
-IGNORE_TEST(AbstractARAClientTest, testGeneralBroadCast) {
+TEST(AbstractARAClientTest, testGeneralBroadCast) {
     ARAClientMock client = ARAClientMock();
     NetworkInterfaceMock* interface1 = client.getNewNetworkInterfaceMock();
     NetworkInterfaceMock* interface2 = client.getNewNetworkInterfaceMock();
@@ -91,7 +91,7 @@ IGNORE_TEST(AbstractARAClientTest, testBroadcastFANTIfPacketNotDeliverable) {
     CHECK(recipientOfSentPacket->isBroadCast());
 }
 
-IGNORE_TEST(AbstractARAClientTest, testSendPacketToNextHopIfRouteIsKnown) {
+TEST(AbstractARAClientTest, testSendPacketToNextHopIfRouteIsKnown) {
     ARAClientMock client = ARAClientMock();
     RoutingTable* routingTable = client.getRoutingTable();
     NetworkInterfaceMock* interface1 = client.getNewNetworkInterfaceMock();
