@@ -6,6 +6,10 @@ test: all
 	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runTests	
 
+runSingleTest: all
+	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"
+	@cd tests && $(MAKE) runSingleTest
+
 clean: checkmakefiles
 	@cd src && $(MAKE) clean
 	@cd tests && $(MAKE) clean

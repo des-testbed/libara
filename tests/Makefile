@@ -44,6 +44,14 @@ COMPILED_TESTAPI = $(TESTAPI_SOURCES:.cpp=.o)
 TEST_EXECUTABLE = runAllTests
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+runSingleTest: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TESTS)
+	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)
+	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
+	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_DIR):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testClone; then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+    fi	
+
 searchMemoryLeak: check_if_cpputest_is_installed
 	@echo "Building complete executable test suit in single compile (This might take some while))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(TEST_SOURCES) $(TESTAPI_SOURCES) $(LINKFLAGS)
@@ -58,12 +66,12 @@ runTests: all
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
-all: check_if_cpputest_is_installed $(TEST_SOURCES) $(TEST_EXECUTABLE)	
+all: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TESTS) $(TEST_EXECUTABLE)	
 	@echo 'All tests have been compiled'	
 
 $(TEST_EXECUTABLE): $(COMPILED_TESTAPI) $(COMPILED_TESTS)
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $@ $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	
 
 .cpp.o:
 	@if [[ $< == *Test.cpp ]]; then \
