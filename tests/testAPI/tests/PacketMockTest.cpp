@@ -57,3 +57,20 @@ TEST(PacketMockTest, testSetSender) {
 
     CHECK(mock.getSender()->equals(newSender));
 }
+
+TEST(PacketMockTest, testClone) {
+    PacketMock packet = PacketMock();
+    Packet* clone = packet.clone();
+
+   CHECK(clone->getSource()->equals(packet.getSource()));
+   CHECK(clone->getDestination()->equals(packet.getDestination()));
+   CHECK(clone->getSender()->equals(packet.getSender()));
+   CHECK_EQUAL(packet.getType(), clone->getType());
+   CHECK_EQUAL(packet.getSequenceNumber(), clone->getSequenceNumber());
+   CHECK_EQUAL(packet.getPayloadLength(), clone->getPayloadLength());
+   CHECK_EQUAL(packet.getPayload(), clone->getPayload());
+   CHECK_EQUAL(packet.getHopCount(), clone->getHopCount());
+   CHECK(packet.equals(clone));
+
+   delete clone;
+}

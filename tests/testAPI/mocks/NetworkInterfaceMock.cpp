@@ -63,7 +63,7 @@ void NetworkInterfaceMock::send(Packet* packet, Address* recipient) {
 void NetworkInterfaceMock::broadcast(Packet* packet) {
     Address* broadCastAddress = new AddressMock("BROADCAST");
     send(packet, broadCastAddress);
-    delete broadCastAddress;    // the address has been cloned on the send Method
+    delete broadCastAddress;    // the address has been cloned on the send Method, so this instance can be deleted
 }
 
 bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {

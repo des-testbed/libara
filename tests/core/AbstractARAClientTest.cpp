@@ -73,16 +73,16 @@ TEST(AbstractARAClientTest, testGetNextSequenceNumber) {
     }
 }
 
-IGNORE_TEST(AbstractARAClientTest, testBroadcastFANTIfPacketNotDeliverable) {
+TEST(AbstractARAClientTest, testBroadcastFANTIfPacketNotDeliverable) {
     ARAClientMock client = ARAClientMock();
     RoutingTable* routingTable = client.getRoutingTable();
     NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock();
     PacketMock packet = PacketMock();
 
     CHECK(routingTable->isDeliverable(&packet) == false);
-    client.sendPacket(&packet); // FIXME crashes here since Packet::getSender has been implemented
+    client.sendPacket(&packet);
 
-    CHECK_EQUAL(1, interface->getNumberOfSentPackets());
+    LONGS_EQUAL(1, interface->getNumberOfSentPackets());
     Pair<Packet, Address>* sentPacketInfo = interface->getSentPackets()->getFirst();
     Packet* sentPacket = sentPacketInfo->getLeft();
     Address* recipientOfSentPacket = sentPacketInfo->getRight();

@@ -72,7 +72,7 @@ Packet* Packet::clone() {
 }
 
 Packet* Packet::createFANT(unsigned int sequenceNumber) {
-    Packet* fant = new Packet(source->clone(), destination->clone(), NULL, PacketType::FANT, sequenceNumber);
+    Packet* fant = new Packet(source->clone(), destination->clone(), sender->clone(), PacketType::FANT, sequenceNumber);
     fant->setHopCount(this->hopCount);
     return fant;
 }
