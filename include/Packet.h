@@ -27,6 +27,7 @@
 #define PACKET_H_
 
 #include "Address.h"
+#include "PacketType.h"
 
 namespace ARA {
 
@@ -96,6 +97,14 @@ public:
      * TODO is it really okay to define equality this way? What about the payload, destination and type?
      */
     bool equals(const Packet* otherPacket) const;
+
+    bool operator==(Packet& other) {
+        return this->equals(&other);
+    }
+
+    bool isDataPacket() const {
+        return PacketType::isDataPacket(this->type);
+    }
 
     void setHopCount(unsigned int newValue);
 

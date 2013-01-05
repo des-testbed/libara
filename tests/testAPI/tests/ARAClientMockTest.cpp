@@ -83,3 +83,25 @@ TEST(ARAClientMockTest, testGetNextHop) {
     CHECK(nextHop->getAddress()->equals(&node2));
     CHECK(nextHop->getInterface()->equals(&interface));
 }
+
+TEST(ARAClientMockTest, testRememberPacketsThatHaveBeenDeliveredToTheSystem) {
+    ARAClientMock client = ARAClientMock();
+    PacketMock packet1 = PacketMock("A", "B");
+    PacketMock packet2 = PacketMock("B", "C");
+    PacketMock packet3 = PacketMock("B", "C");
+
+    LinkedList<const Packet>* deliveredPackets = client.getDeliveredPackets();
+    CHECK(deliveredPackets->isEmpty());
+
+    client.deliverToSystem(&packet1);
+    LONGS_EQUAL(1, deliveredPackets->size());
+    CHECK(deliveredPackets->get(0)->equals(&packet1));
+
+    client.deliverToSystem(&packet2);
+    LONGS_EQUAL(2, deliveredPackets->size());
+    CHECK(deliveredPackets->get(1)->equals(&packet2));
+
+    client.deliverToSystem(&packet3);
+    LONGS_EQUAL(3, deliveredPackets->size());
+    CHECK(deliveredPackets->get(2)->equals(&packet3));
+}

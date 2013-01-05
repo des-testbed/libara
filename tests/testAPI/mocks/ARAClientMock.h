@@ -43,13 +43,16 @@ public:
 
     NextHop* getNextHop(const Packet* packet);
     void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
+    void deliverToSystem(const Packet* packet);
 
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
+    LinkedList<const Packet>* getDeliveredPackets();
 
 private:
     LinkedList<NetworkInterfaceMock> interfaceMocks;
+    LinkedList<const Packet> deliveredPackets;
 
 };
 

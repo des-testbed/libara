@@ -38,6 +38,8 @@
 
 namespace ARA {
 
+//TODO fix the visibility: most of the methods should be protected instead of public
+
 class AbstractARAClient {
 public:
     AbstractARAClient();
@@ -57,6 +59,11 @@ public:
      * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_WARNING).
      */
     virtual void updateRoutingTable(const Packet* packet, NetworkInterface* interface) = 0;
+
+    /**
+     * The packet should be directed to this node and must be delivered to the local system.
+     */
+    virtual void deliverToSystem(const Packet* packet) = 0;
 
     /**
      * Registers a new NetworkInterface at this client.
@@ -111,6 +118,9 @@ private:
     std::unordered_map<Address*, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 
     void sendDuplicateWarning(Address* recipient, NetworkInterface* interface);
+    void handlePacket(const Packet* packet);
+    void handleDataPacket(const Packet* packet);
+    bool isDirectedToThisNode(const Packet* packet);
 };
 
 } /* namespace ARA */

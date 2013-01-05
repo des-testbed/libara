@@ -65,6 +65,10 @@ void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* i
     routingTable.update(packet->getSource(), packet->getSender(), interface, 10);
 }
 
+void ARAClientMock::deliverToSystem(const Packet* packet) {
+    deliveredPackets.add(packet);
+}
+
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
     std::stringstream mockName;
     mockName << "InterfaceMock" << (interfaceMocks.size()+1);
@@ -80,6 +84,10 @@ PacketTrap* ARAClientMock::getPacketTrap() {
 
 RoutingTable* ARAClientMock::getRoutingTable() {
     return &routingTable;
+}
+
+LinkedList<const Packet>* ARAClientMock::getDeliveredPackets() {
+    return &deliveredPackets;
 }
 
 } /* namespace ARA */

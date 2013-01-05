@@ -243,3 +243,25 @@ TEST(AbstractARAClientTest, testRoutingTableIsUpdated) {
     CHECK(possibleHops->getFirst()->getAddress()->equals(nodeC));
     CHECK(possibleHops->getFirst()->getNetworkInterface()->equals(interface));
 }
+
+/**
+ * This test checks if a data packet that is received at the current node
+ * (with address 192.168.0.1) is delivered to the system if it is directed
+ * to the current node.
+ */
+TEST(AbstractARAClientTest, testDataPacketIsDeliveredToSystem) {
+    ARAClientMock client = ARAClientMock();
+    LinkedList<const Packet>* deliveredPackets = client.getDeliveredPackets();
+    NetworkInterface* interface = client.createNewNetworkInterfaceMock("192.168.0.1");
+    PacketMock packet1 = PacketMock("192.168.0.4", "192.168.0.123", 123, 1, PacketType::DATA);// directed to some other node
+    PacketMock packet2 = PacketMock("192.168.0.4", "192.168.0.1",   124);  // directed to this node
+
+    CHECK(deliveredPackets->isEmpty())
+
+    client.receivePacket(&packet1, interface);
+    CHECK(deliveredPackets->isEmpty())
+
+    client.receivePacket(&packet2, interface);
+    LONGS_EQUAL(1, deliveredPackets->size());
+    CHECK(deliveredPackets->getFirst()->equals(&packet2));
+}
