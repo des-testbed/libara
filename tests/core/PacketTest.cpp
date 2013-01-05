@@ -48,7 +48,7 @@ TEST(PacketTest, testCreate) {
     CHECK(packet.getSender()->equals(sender));
     CHECK_EQUAL(type, packet.getType());
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    CHECK_EQUAL(0, packet.getHopCount());
+    CHECK_EQUAL(1, packet.getHopCount());
 
     CHECK_EQUAL(0, packet.getPayloadLength());
     CHECK(packet.getPayload() == false);
@@ -69,7 +69,7 @@ TEST(PacketTest, testCreateWithPayload) {
     CHECK(packet.getSender()->equals(sender));
     CHECK_EQUAL(type, packet.getType());
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    CHECK_EQUAL(0, packet.getHopCount());
+    CHECK_EQUAL(1, packet.getHopCount());
 
     CHECK_EQUAL(strlen(payload), packet.getPayloadLength());
     CHECK_EQUAL(payload, packet.getPayload());

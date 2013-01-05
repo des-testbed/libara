@@ -25,6 +25,7 @@
 
 #include "AbstractARAClient.h"
 #include "PacketType.h"
+#include <iostream>
 
 using namespace std;
 
@@ -87,7 +88,7 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
 void AbstractARAClient::sendDuplicateWarning(Address* recipient, NetworkInterface* interface) {
     Address* localAddress = interface->getLocalAddress()->clone();
     unsigned int sequenceNumber = getNextSequenceNumber();
-    Packet duplicateWarningPacket = Packet(localAddress, recipient, localAddress, PacketType::DUPLICATE_WARNING, sequenceNumber);
+    Packet duplicateWarningPacket = Packet(localAddress, recipient->clone(), localAddress, PacketType::DUPLICATE_WARNING, sequenceNumber);
     interface->send(&duplicateWarningPacket, recipient);
 }
 

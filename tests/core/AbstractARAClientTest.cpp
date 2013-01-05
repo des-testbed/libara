@@ -185,19 +185,19 @@ TEST(AbstractARAClientTest, testRegisterReceivedPacket) {
  * has been relayed via node C to node X.
  * Node x must respond to node C with a DUPLICATE_WARNING packet.
  */
-/* FIXME make this test work next (Friedrich)
-TEST(AbstractARAClientTest, testRememberLastRecievedPackets) {
+TEST(AbstractARAClientTest, testRespondWithDuplicateWarning) {
     // prepare a packet
     ARAClientMock client = ARAClientMock();
     PacketMock packet = PacketMock("A", "B", 123);
-    AddressMock nodeC = AddressMock("C");
+    Address* nodeC = new AddressMock("C");  // is deleted by the Packet destructor
     AddressMock localNode = AddressMock("X");
-    //packet.setSender(&nodeC);
+    packet.setSender(nodeC);
 
     // let client receive the packet over the same interface twice
-    NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock("X");
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("X");
     client.receivePacket(&packet, interface);
     client.receivePacket(&packet, interface);
+
 
     // the client should now have sent a duplicate warning back over the interface
     LONGS_EQUAL(1, interface->getNumberOfSentPackets());
@@ -207,10 +207,10 @@ TEST(AbstractARAClientTest, testRememberLastRecievedPackets) {
     Address* recipientOfSentPacket = sentPacketInfo->getRight();
 
     // check the contents of the duplicate warning packet
-    CHECK(recipientOfSentPacket->equals(&nodeC));
+    CHECK(recipientOfSentPacket->equals(nodeC));
     CHECK(sentPacket->getSender()->equals(&localNode));
     CHECK(sentPacket->getSource()->equals(&localNode));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_WARNING);
-    CHECK_EQUAL(1, sentPacket->getHopCount());
+    LONGS_EQUAL(1, sentPacket->getHopCount());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
-}*/
+}
