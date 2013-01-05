@@ -43,8 +43,24 @@ public:
     AbstractARAClient();
     virtual ~AbstractARAClient();
 
-    virtual NextHop* getNextHop(Packet* packet) = 0;
+    /**
+     * TODO write some documentation
+     */
+    virtual NextHop* getNextHop(const Packet* packet) = 0;
 
+    /**
+     * This method is called each a time a new packet is received over the
+     * given interface.
+     * It's is responsible for updating the routing table so a route to the
+     * packets source is known in the future.
+     *
+     * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_WARNING).
+     */
+    virtual void updateRoutingTable(const Packet* packet, NetworkInterface* interface) = 0;
+
+    /**
+     * Registers a new NetworkInterface at this client.
+     */
     void addNetworkInterface(NetworkInterface* newInterface);
 
     /**
@@ -57,22 +73,32 @@ public:
      */
     unsigned int getNumberOfNetworkInterfaces();
 
+    /**
+     * Sends the packet to the packets destination.
+     *
+     * If the packet is deliverable (e.g there is at least one route known
+     * in the routing table), the next hop is calculated in AbstractARAClient::getNextHop()
+     * If there is no known route to the packet destination a FANT is generated and send
+     * according to the ARA algorithm.
+     */
     void sendPacket(Packet* packet);
 
     /**
      * Receive a Packet over the given NetworkInterface. The packet will be
      * processed according to the Ant Routing Algorithm (ARA).
+     *
+     * TODO write some more documentation
      */
-    void receivePacket(Packet* packet, NetworkInterface* interface);
+    void receivePacket(const Packet* packet, NetworkInterface* interface);
 
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     void broadCast(Packet* packet);
     //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     unsigned int getNextSequenceNumber();
     //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
-    bool hasBeenReceivedEarlier(Packet* packet);
+    bool hasBeenReceivedEarlier(const Packet* packet);
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
-    void registerReceivedPacket(Packet* packet);
+    void registerReceivedPacket(const Packet* packet);
 
 protected:
 

@@ -214,3 +214,32 @@ TEST(AbstractARAClientTest, testRespondWithDuplicateWarning) {
     LONGS_EQUAL(1, sentPacket->getHopCount());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
 }
+
+/**
+ * This test checks whether the routing table is updated if a new packet has been received.
+ * The packet will be send from node A to node B via node C and the current node D.
+ * After the packet has been processed at node D a route to node A (back via node C) must be
+ * known to node D.
+ *
+ * (A)-->(C)-->(D)-->(B)
+ *
+ * Note that we do not check how the table is updated at this point because this depends
+ * on the concrete implementation of the AbstractARAClient.
+ */
+TEST(AbstractARAClientTest, testRoutingTableIsUpdated) {
+    ARAClientMock client = ARAClientMock();
+    NetworkInterface* interface = client.createNewNetworkInterfaceMock();
+    RoutingTable* routingTable = client.getRoutingTable();
+    Address* nodeA = new AddressMock("A");
+    Address* nodeB = new AddressMock("B");
+    Address* nodeC = new AddressMock("C");
+    Packet packet = Packet(nodeA, nodeB, nodeC, PacketType::DATA, 123);
+
+    CHECK(routingTable->isDeliverable(nodeA) == false);
+    client.receivePacket(&packet, interface);
+    CHECK(routingTable->isDeliverable(nodeA) == true);
+    LinkedList<RoutingTableEntry>* possibleHops = routingTable->getPossibleNextHops(nodeA);
+    LONGS_EQUAL(1, possibleHops->size());
+    CHECK(possibleHops->getFirst()->getAddress()->equals(nodeC));
+    CHECK(possibleHops->getFirst()->getNetworkInterface()->equals(interface));
+}

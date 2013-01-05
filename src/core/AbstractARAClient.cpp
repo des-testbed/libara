@@ -25,7 +25,6 @@
 
 #include "AbstractARAClient.h"
 #include "PacketType.h"
-#include <iostream>
 
 using namespace std;
 
@@ -76,13 +75,14 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     }
 }
 
-void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
+void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
     if(hasBeenReceivedEarlier(packet)) {
         sendDuplicateWarning(packet->getSender(), interface);
+        return;
     }
-    else {
-        registerReceivedPacket(packet);
-    }
+
+    registerReceivedPacket(packet);
+    updateRoutingTable(packet, interface);
 }
 
 void AbstractARAClient::sendDuplicateWarning(Address* recipient, NetworkInterface* interface) {
@@ -105,7 +105,7 @@ unsigned int AbstractARAClient::getNextSequenceNumber() {
     return nextSequenceNumber++;
 }
 
-bool AbstractARAClient::hasBeenReceivedEarlier(Packet* packet) {
+bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
     Address* source = packet->getSource();
     unsigned int sequenceNumber = packet->getSequenceNumber();
 
@@ -120,7 +120,7 @@ bool AbstractARAClient::hasBeenReceivedEarlier(Packet* packet) {
     return false;
 }
 
-void AbstractARAClient::registerReceivedPacket(Packet* packet) {
+void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     Address* source = packet->getSource()->clone();
     unordered_map<Address*, unordered_set<unsigned int>*>::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
 

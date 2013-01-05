@@ -41,7 +41,8 @@ class ARAClientMock: public AbstractARAClient {
 public:
     ~ARAClientMock();
 
-    NextHop* getNextHop(Packet* packet);
+    NextHop* getNextHop(const Packet* packet);
+    void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
 
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();

@@ -38,7 +38,7 @@ ARAClientMock::~ARAClientMock() {
     }
 }
 
-NextHop* ARAClientMock::getNextHop(Packet* packet) {
+NextHop* ARAClientMock::getNextHop(const Packet* packet) {
     if(routingTable.isDeliverable(packet)) {
         LinkedList<RoutingTableEntry>* possibleHops = routingTable.getPossibleNextHops(packet);
         // search for the best value
@@ -59,6 +59,10 @@ NextHop* ARAClientMock::getNextHop(Packet* packet) {
         // TODO maybe it would be better to return a NULL Object (Pattern) instead of returning a NULL pointer
         return NULL;
     }
+}
+
+void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
+    routingTable.update(packet->getSource(), packet->getSender(), interface, 10);
 }
 
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
