@@ -48,7 +48,7 @@ runSingleTest: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TES
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
-	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_DIR):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testClone; then \
+	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_DIR):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testRespondWithDuplicateWarning; then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi	
 
@@ -66,10 +66,7 @@ runTests: all
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
-all: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TESTS) $(TEST_EXECUTABLE)	
-	@echo 'All tests have been compiled'	
-
-$(TEST_EXECUTABLE): $(COMPILED_TESTAPI) $(COMPILED_TESTS)
+all: $(COMPILED_TESTAPI) $(COMPILED_TESTS)
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	
 
