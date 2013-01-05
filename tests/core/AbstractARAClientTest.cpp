@@ -54,9 +54,9 @@ TEST(AbstractARAClientTest, testPacketGetsTrappedIfNotDeliverable) {
 
 TEST(AbstractARAClientTest, testGeneralBroadCast) {
     ARAClientMock client = ARAClientMock();
-    NetworkInterfaceMock* interface1 = client.getNewNetworkInterfaceMock();
-    NetworkInterfaceMock* interface2 = client.getNewNetworkInterfaceMock();
-    NetworkInterfaceMock* interface3 = client.getNewNetworkInterfaceMock();
+    NetworkInterfaceMock* interface1 = client.createNewNetworkInterfaceMock();
+    NetworkInterfaceMock* interface2 = client.createNewNetworkInterfaceMock();
+    NetworkInterfaceMock* interface3 = client.createNewNetworkInterfaceMock();
 
     PacketMock packet = PacketMock();
     client.broadCast(&packet);
@@ -76,7 +76,7 @@ TEST(AbstractARAClientTest, testGetNextSequenceNumber) {
 TEST(AbstractARAClientTest, testBroadcastFANTIfPacketNotDeliverable) {
     ARAClientMock client = ARAClientMock();
     RoutingTable* routingTable = client.getRoutingTable();
-    NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock();
     PacketMock packet = PacketMock();
 
     CHECK(routingTable->isDeliverable(&packet) == false);
@@ -94,9 +94,9 @@ TEST(AbstractARAClientTest, testBroadcastFANTIfPacketNotDeliverable) {
 TEST(AbstractARAClientTest, testSendPacketToNextHopIfRouteIsKnown) {
     ARAClientMock client = ARAClientMock();
     RoutingTable* routingTable = client.getRoutingTable();
-    NetworkInterfaceMock* interface1 = client.getNewNetworkInterfaceMock();
-    NetworkInterfaceMock* interface2 = client.getNewNetworkInterfaceMock();
-    NetworkInterfaceMock* interface3 = client.getNewNetworkInterfaceMock();
+    NetworkInterfaceMock* interface1 = client.createNewNetworkInterfaceMock();
+    NetworkInterfaceMock* interface2 = client.createNewNetworkInterfaceMock();
+    NetworkInterfaceMock* interface3 = client.createNewNetworkInterfaceMock();
     PacketMock originalPacket = PacketMock();
     AddressMock nextHop = AddressMock("nextHop");
 

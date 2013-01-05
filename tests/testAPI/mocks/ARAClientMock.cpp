@@ -31,6 +31,7 @@
 namespace ARA {
 
 ARAClientMock::~ARAClientMock() {
+    // delete the NetworkInterfaceMocks that have been created via createNewNetworkInterfaceMock
     while(interfaceMocks.isEmpty() == false) {
         NetworkInterfaceMock* mock = interfaceMocks.remove();
         delete mock;
@@ -60,7 +61,7 @@ NextHop* ARAClientMock::getNextHop(Packet* packet) {
     }
 }
 
-NetworkInterfaceMock* ARAClientMock::getNewNetworkInterfaceMock(const std::string localAddressName) {
+NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
     std::stringstream mockName;
     mockName << "InterfaceMock" << (interfaceMocks.size()+1);
     NetworkInterfaceMock* mock = new NetworkInterfaceMock(mockName.str().c_str(), localAddressName);

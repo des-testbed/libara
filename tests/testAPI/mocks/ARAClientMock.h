@@ -45,7 +45,7 @@ public:
 
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
-    NetworkInterfaceMock* getNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT"); // TODO rename this to createNewNetworkInterfaceMock()
+    NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
 
 private:
     LinkedList<NetworkInterfaceMock> interfaceMocks;

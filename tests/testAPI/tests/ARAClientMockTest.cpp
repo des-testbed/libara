@@ -53,13 +53,13 @@ TEST(ARAClientMockTest, testGetNetworkInterfaceMock) {
     ARAClientMock client = ARAClientMock();
     CHECK_EQUAL(0, client.getNumberOfNetworkInterfaces());
 
-    NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock();
     AddressMock defaultLocalAddress = AddressMock("DEFAULT");
     CHECK_EQUAL(1, client.getNumberOfNetworkInterfaces());
     CHECK_EQUAL("InterfaceMock1", interface->getName());
     CHECK(interface->getLocalAddress()->equals(&defaultLocalAddress));
 
-    interface = client.getNewNetworkInterfaceMock("192.168.0.1");
+    interface = client.createNewNetworkInterfaceMock("192.168.0.1");
     AddressMock expectedLocalAddress = AddressMock("192.168.0.1");
     CHECK_EQUAL(2, client.getNumberOfNetworkInterfaces());
     CHECK_EQUAL("InterfaceMock2", interface->getName());
