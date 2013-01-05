@@ -42,9 +42,9 @@ public:
 
     void update(Address* destination, Address* nextHop, NetworkInterface* interface, float pheromoneValue);
     LinkedList<RoutingTableEntry>* getPossibleNextHops(Address* destination);
-    LinkedList<RoutingTableEntry>* getPossibleNextHops(Packet* packet);
+    LinkedList<RoutingTableEntry>* getPossibleNextHops(const Packet* packet);
     bool isDeliverable(Address* destination);
-    bool isDeliverable(Packet* packet);
+    bool isDeliverable(const Packet* packet);
 
 private:
     std::unordered_map<Address*, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate> table;

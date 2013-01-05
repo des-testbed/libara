@@ -29,35 +29,35 @@ Packet::~Packet() {
     delete this->destination;
 }
 
-Address* Packet::getSource() {
+Address* Packet::getSource() const {
     return source;
 }
 
-Address* Packet::getDestination() {
+Address* Packet::getDestination() const {
     return destination;
 }
 
-Address* Packet::getSender() {
+Address* Packet::getSender() const {
     return sender;
 }
 
-char Packet::getType() {
+char Packet::getType() const {
     return type;
 }
 
-unsigned int Packet::getSequenceNumber() {
+unsigned int Packet::getSequenceNumber() const {
     return seqNr;
 }
 
-unsigned int Packet::getHopCount() {
+unsigned int Packet::getHopCount() const {
     return hopCount;
 }
 
-const char* Packet::getPayload() {
+const char* Packet::getPayload() const {
     return payload;
 }
 
-unsigned int Packet::getPayloadLength() {
+unsigned int Packet::getPayloadLength() const {
     return payloadSize;
 }
 
@@ -65,15 +65,15 @@ void Packet::setHopCount(unsigned int newValue) {
     hopCount = newValue;
 }
 
-bool Packet::equals(Packet* otherPacket) {
+bool Packet::equals(const Packet* otherPacket) const {
     return this->seqNr == otherPacket->getSequenceNumber() && this->source->equals(otherPacket->getSource());
 }
 
-Packet* Packet::clone() {
+Packet* Packet::clone() const {
     return new Packet(source->clone(), destination->clone(), sender->clone(), type, seqNr, payload, payloadSize, hopCount);
 }
 
-Packet* Packet::createFANT(unsigned int sequenceNumber) {
+Packet* Packet::createFANT(unsigned int sequenceNumber) const {
     Packet* fant = new Packet(source->clone(), destination->clone(), sender->clone(), PacketType::FANT, sequenceNumber);
     fant->setHopCount(this->hopCount);
     return fant;

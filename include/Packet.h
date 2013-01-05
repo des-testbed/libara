@@ -48,7 +48,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getSender()
      */
-    Address* getSource();
+    Address* getSource() const;
 
     /**
      * Returns the address of the node to whom the payload of this packet is directed.
@@ -58,7 +58,7 @@ public:
      * @see Packet::getSource()
      * @see Packet::getSender()
      */
-    Address* getDestination();
+    Address* getDestination() const;
 
     /**
      * Returns the address of the node from which this packet has been received (layer 2).
@@ -68,39 +68,39 @@ public:
      * @see Packet::getSource()
      * @see Packet::getDestination()
      */
-    Address* getSender();
+    Address* getSender() const;
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
      * the PacketType enum class.
      */
-    char getType();
+    char getType() const;
 
     /**
      * Returns the sequence number of this packet. It has been set once by the packets
      * source and will not be modified on the packets path through the network.
      */
-    unsigned int getSequenceNumber();
+    unsigned int getSequenceNumber() const;
 
     /**
      * Returns the number of links this packet has been send over or respectively
      * the number of nodes this packet has been send by to arrive at the current node.
      * Note: After a packet has been received from another node this will be at least 1.
      */
-    unsigned int getHopCount();
-    const char* getPayload();
-    unsigned int getPayloadLength();
+    unsigned int getHopCount() const;
+    const char* getPayload() const;
+    unsigned int getPayloadLength() const;
 
     /**
      * Two packets are defined to be equal if they have the same source and sequence number
      * TODO is it really okay to define equality this way? What about the payload, destination and type?
      */
-    bool equals(Packet* otherPacket);
+    bool equals(const Packet* otherPacket) const;
 
     void setHopCount(unsigned int newValue);
 
-    Packet* clone();
-	Packet* createFANT(unsigned int sequenceNumber);
+    Packet* clone() const;
+	Packet* createFANT(unsigned int sequenceNumber) const;
 
 protected:
     Address* source;

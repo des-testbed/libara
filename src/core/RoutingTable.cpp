@@ -83,7 +83,7 @@ LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(Address* destin
     }
 }
 
-LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(Packet* packet) {
+LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(const Packet* packet) {
     return getPossibleNextHops(packet->getDestination());
 }
 
@@ -91,7 +91,7 @@ bool RoutingTable::isDeliverable(Address* destination) {
     return table.find(destination) != table.end();
 }
 
-bool RoutingTable::isDeliverable(Packet* packet) {
+bool RoutingTable::isDeliverable(const Packet* packet) {
     return isDeliverable(packet->getDestination());
 }
 
