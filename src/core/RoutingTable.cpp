@@ -28,7 +28,6 @@
 
 namespace ARA {
 
-// TODO needs short review and confirmation I deleted everything properly
 RoutingTable::~RoutingTable() {
     std::unordered_map<Address*, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate>::iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {

@@ -29,6 +29,7 @@
 #include "AbstractARAClient.h"
 #include "NetworkInterfaceMock.h"
 #include "LinkedList.h"
+#include <string>
 
 namespace ARA {
 
@@ -44,7 +45,7 @@ public:
 
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
-    NetworkInterfaceMock* getNewNetworkInterfaceMock(); // TODO rename this to createNewNetworkInterfaceMock()
+    NetworkInterfaceMock* getNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT"); // TODO rename this to createNewNetworkInterfaceMock()
 
 private:
     LinkedList<NetworkInterfaceMock> interfaceMocks;

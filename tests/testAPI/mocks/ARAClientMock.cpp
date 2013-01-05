@@ -60,10 +60,10 @@ NextHop* ARAClientMock::getNextHop(Packet* packet) {
     }
 }
 
-NetworkInterfaceMock* ARAClientMock::getNewNetworkInterfaceMock() {
+NetworkInterfaceMock* ARAClientMock::getNewNetworkInterfaceMock(const std::string localAddressName) {
     std::stringstream mockName;
     mockName << "InterfaceMock" << (interfaceMocks.size()+1);
-    NetworkInterfaceMock* mock = new NetworkInterfaceMock(mockName.str().c_str());
+    NetworkInterfaceMock* mock = new NetworkInterfaceMock(mockName.str().c_str(), localAddressName);
     interfaceMocks.add(mock);
     addNetworkInterface(mock);
     return mock;

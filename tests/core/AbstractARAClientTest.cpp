@@ -160,24 +160,47 @@ TEST(AbstractARAClientTest, testGetNetworkInterface) {
     CHECK(client.getNetworkInterface(2) == &interface3);
 }
 
+TEST(AbstractARAClientTest, testRegisterReceivedPacket) {
+    ARAClientMock client = ARAClientMock();
+    PacketMock packet1 = PacketMock("A", "B", 123);
+    PacketMock packet2 = PacketMock("A", "B", 124);  // same source but different seqNr
+    PacketMock packet3 = PacketMock("C", "A", 123);  // same seqNr but different source
+    PacketMock packet4 = PacketMock("A", "C", 123);  // the source and seqNr are equal to packet1
+
+    CHECK_FALSE(client.hasBeenReceivedEarlier(&packet1));
+    CHECK_FALSE(client.hasBeenReceivedEarlier(&packet2));
+    CHECK_FALSE(client.hasBeenReceivedEarlier(&packet3));
+    CHECK_FALSE(client.hasBeenReceivedEarlier(&packet4));
+
+    client.registerReceivedPacket(&packet1);
+    CHECK_TRUE(client.hasBeenReceivedEarlier(&packet1));
+    CHECK_FALSE(client.hasBeenReceivedEarlier(&packet2));
+    CHECK_FALSE(client.hasBeenReceivedEarlier(&packet3));
+    CHECK_TRUE(client.hasBeenReceivedEarlier(&packet4));
+}
+
 /**
  * In this test we simulate that the same packet has been received
  * twice at node x. The packet is directed from node A to node B and
- * has been relayed via node C to node x.
+ * has been relayed via node C to node X.
  * Node x must respond to node C with a DUPLICATE_WARNING packet.
  */
-/*    TEST(AbstractARAClientTest, testRememberLastRecievedPackets) {
+/* FIXME make this test work next (Friedrich)
+TEST(AbstractARAClientTest, testRememberLastRecievedPackets) {
+    // prepare a packet
     ARAClientMock client = ARAClientMock();
     PacketMock packet = PacketMock("A", "B", 123);
     AddressMock nodeC = AddressMock("C");
-    packet->setSender(&nodeC);
+    AddressMock localNode = AddressMock("X");
+    //packet.setSender(&nodeC);
 
-    NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock();
-    interface->receivePacket(&packet);
-    interface->receivePacket(&packet);
+    // let client receive the packet over the same interface twice
+    NetworkInterfaceMock* interface = client.getNewNetworkInterfaceMock("X");
+    client.receivePacket(&packet, interface);
+    client.receivePacket(&packet, interface);
 
     // the client should now have sent a duplicate warning back over the interface
-    CHECK_EQUAL(1, interface->getNumberOfSentPackets());
+    LONGS_EQUAL(1, interface->getNumberOfSentPackets());
 
     Pair<Packet, Address>* sentPacketInfo = interface->getSentPackets()->getFirst();
     Packet* sentPacket = sentPacketInfo->getLeft();
@@ -185,12 +208,9 @@ TEST(AbstractARAClientTest, testGetNetworkInterface) {
 
     // check the contents of the duplicate warning packet
     CHECK(recipientOfSentPacket->equals(&nodeC));
+    CHECK(sentPacket->getSender()->equals(&localNode));
+    CHECK(sentPacket->getSource()->equals(&localNode));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_WARNING);
     CHECK_EQUAL(1, sentPacket->getHopCount());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
-
-    // source and destination have no meaning in DUPLICATE_WARNING packets
-    // because they are only exchanged between directly connected neighbors, so
-    // only the MAC Layer addresses are used for this kind of packet.
 }*/
-

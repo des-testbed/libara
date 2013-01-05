@@ -27,6 +27,7 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/ARAClientMock.h"
 #include "LinkedList.h"
 #include "Pair.h"
 
@@ -119,4 +120,16 @@ TEST(NetworkInterfaceMockTest, testGetNumberOfSentPackets) {
 
     interface.send(&packet2, &address1);
     CHECK_EQUAL(3, interface.getNumberOfSentPackets());
+}
+
+TEST(NetworkInterfaceMockTest, testGetLocalAddress) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressMock expectedLocalAddress = AddressMock("DEFAULT");
+    Address* defaultLocalAddress = interface.getLocalAddress();
+    CHECK(defaultLocalAddress->equals(&expectedLocalAddress));
+
+    interface = NetworkInterfaceMock("eth0", "192.168.0.1");
+    expectedLocalAddress = AddressMock("192.168.0.1");
+    defaultLocalAddress = interface.getLocalAddress();
+    CHECK(defaultLocalAddress->equals(&expectedLocalAddress));
 }

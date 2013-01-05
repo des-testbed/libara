@@ -24,15 +24,22 @@
  *******************************************************************************/
 
 #include "NetworkInterfaceMock.h"
-#include "AddressMock.h"    // TODO this NetworkInterface implementation should not need to know AddressMock
+#include "AddressMock.h"
 
 namespace ARA {
 
 NetworkInterfaceMock::NetworkInterfaceMock() {
+    localAddress = AddressMock("DEFAULT");
     this->name = "NetworkInterfaceMock";
 }
 
 NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName) {
+    localAddress = AddressMock("DEFAULT");
+    this->name = interfaceName;
+}
+
+NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName) {
+    localAddress = AddressMock(localAddressName);
     this->name = interfaceName;
 }
 
@@ -111,6 +118,10 @@ bool NetworkInterfaceMock::equals(NetworkInterface* otherInterface) {
 
 unsigned int NetworkInterfaceMock::getNumberOfSentPackets() {
     return sentPackets.size();
+}
+
+Address* NetworkInterfaceMock::getLocalAddress() {
+    return &localAddress;
 }
 
 } /* namespace ARA */

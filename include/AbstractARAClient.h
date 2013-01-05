@@ -26,12 +26,15 @@
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "Address.h"
 #include "NextHop.h"
 #include "NetworkInterface.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "LinkedList.h"
+#include <unordered_map>
+#include <unordered_set>
 
 namespace ARA {
 
@@ -43,14 +46,33 @@ public:
     virtual NextHop* getNextHop(Packet* packet) = 0;
 
     void addNetworkInterface(NetworkInterface* newInterface);
+
+    /**
+     * Returns a specific NetworkInterface by index.
+     */
     NetworkInterface* getNetworkInterface(unsigned int index);
+
+    /**
+     * Returns the amount of registered network interfaces of this client.
+     */
     unsigned int getNumberOfNetworkInterfaces();
 
     void sendPacket(Packet* packet);
+
+    /**
+     * Receive a Packet over the given NetworkInterface. The packet will be
+     * processed according to the Ant Routing Algorithm (ARA).
+     */
+    void receivePacket(Packet* packet, NetworkInterface* interface);
+
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     void broadCast(Packet* packet);
     //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     unsigned int getNextSequenceNumber();
+    //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
+    bool hasBeenReceivedEarlier(Packet* packet);
+    //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
+    void registerReceivedPacket(Packet* packet);
 
 protected:
 
@@ -60,6 +82,9 @@ protected:
 
 private:
     unsigned int nextSequenceNumber = 1;
+    std::unordered_map<Address*, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
+
+    void sendDuplicateWarning(Address* recipient, NetworkInterface* interface);
 };
 
 } /* namespace ARA */

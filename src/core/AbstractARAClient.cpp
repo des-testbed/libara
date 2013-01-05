@@ -24,6 +24,9 @@
  *******************************************************************************/
 
 #include "AbstractARAClient.h"
+#include "PacketType.h"
+
+using namespace std;
 
 namespace ARA {
 
@@ -32,7 +35,14 @@ AbstractARAClient::AbstractARAClient() {
 }
 
 AbstractARAClient::~AbstractARAClient() {
-
+    // delete the addresses and sequence number lists of the last received packets
+    unordered_map<Address*, unordered_set<unsigned int>*>::iterator iterator;
+    for (iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
+        std::pair<Address* const, unordered_set<unsigned int>*> entryPair = *iterator;
+        delete entryPair.first;
+        delete entryPair.second;
+    }
+    lastReceivedPackets.clear();
 }
 
 void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
@@ -65,6 +75,22 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     }
 }
 
+void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
+    if(hasBeenReceivedEarlier(packet)) {
+        sendDuplicateWarning(packet->getSender(), interface);
+    }
+    else {
+        registerReceivedPacket(packet);
+    }
+}
+
+void AbstractARAClient::sendDuplicateWarning(Address* recipient, NetworkInterface* interface) {
+    Address* localAddress = interface->getLocalAddress()->clone();
+    unsigned int sequenceNumber = getNextSequenceNumber();
+    Packet duplicateWarningPacket = Packet(localAddress, recipient, localAddress, PacketType::DUPLICATE_WARNING, sequenceNumber);
+    interface->send(&duplicateWarningPacket, recipient);
+}
+
 void AbstractARAClient::broadCast(Packet* packet) {
     //TODO replace this with iterator which should be faster
     unsigned int nrOfInterfaces = interfaces.size();
@@ -76,6 +102,38 @@ void AbstractARAClient::broadCast(Packet* packet) {
 
 unsigned int AbstractARAClient::getNextSequenceNumber() {
     return nextSequenceNumber++;
+}
+
+bool AbstractARAClient::hasBeenReceivedEarlier(Packet* packet) {
+    Address* source = packet->getSource();
+    unsigned int sequenceNumber = packet->getSequenceNumber();
+
+    unordered_map<Address*, unordered_set<unsigned int>*>::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
+    if(receivedPacketSeqNumbersFromSource != lastReceivedPackets.end()) {
+        unordered_set<unsigned int>* sequenceNumbers = receivedPacketSeqNumbersFromSource->second;
+        unordered_set<unsigned int>::const_iterator got = sequenceNumbers->find(sequenceNumber);
+        if(got != sequenceNumbers->end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void AbstractARAClient::registerReceivedPacket(Packet* packet) {
+    Address* source = packet->getSource()->clone();
+    unordered_map<Address*, unordered_set<unsigned int>*>::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
+
+    unordered_set<unsigned int>* listOfSequenceNumbers;
+    if(receivedPacketSeqNumbersFromSource == lastReceivedPackets.end()) {
+        // There is no record of any received packet from this source address ~> create new
+        listOfSequenceNumbers = new unordered_set<unsigned int>();
+        lastReceivedPackets[source] = listOfSequenceNumbers;
+    }
+    else {
+        listOfSequenceNumbers = receivedPacketSeqNumbersFromSource->second;
+    }
+
+    listOfSequenceNumbers->insert(packet->getSequenceNumber());
 }
 
 } /* namespace ARA */

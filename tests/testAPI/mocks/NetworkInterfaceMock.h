@@ -30,6 +30,7 @@
 #include "Packet.h"
 #include "LinkedList.h"
 #include "Pair.h"
+#include "AddressMock.h"
 
 namespace ARA {
 
@@ -37,11 +38,13 @@ class NetworkInterfaceMock: public ARA::NetworkInterface {
 public:
     NetworkInterfaceMock();
     NetworkInterfaceMock(const std::string interfaceName);
+    NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName);
     ~NetworkInterfaceMock();
 
     void send(Packet* packet, Address* recipient);
     void broadcast(Packet* packet);
     bool equals(NetworkInterface* otherInterface);
+    Address* getLocalAddress();
 
     std::string getName();
     LinkedList<Pair<Packet, Address>>* getSentPackets();
@@ -52,6 +55,7 @@ public:
 private:
     std::string name;
     LinkedList<Pair<Packet, Address>> sentPackets;
+    AddressMock localAddress;
 };
 
 } /* namespace ARA */

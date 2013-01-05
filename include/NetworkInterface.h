@@ -48,7 +48,7 @@ public:
 	 *
 	 * Note: After this method returns, the packet object may be deleted at
 	 * any point so if this NetworkInterface needs access to this object any
-	 * longer it needs to clone the packet.
+	 * longer it needs to clone the packet itself.
 	 */
 	virtual void broadcast(Packet* packet) = 0;
 
@@ -59,6 +59,13 @@ public:
 	 * has more than one registered network interface.
 	 */
 	virtual bool equals(NetworkInterface* interface) = 0;
+
+	/**
+	 * Returns the address over which this network interface is reachable by other clients.
+	 *
+	 * This method is used to determine the sender address each time a a new packet is created.
+	 */
+	virtual Address* getLocalAddress() = 0;
 };
 
 } /* namespace ARA */
