@@ -41,7 +41,7 @@ public:
     /**
      * Sends the packet over this interface to the given recipient.
      */
-	virtual void send(Packet* packet, Address* recipient) = 0;
+	virtual void send(const Packet* packet, Address* recipient) = 0;
 
 	/**
 	 * Broadcasts the given packet over this interface.
@@ -50,7 +50,7 @@ public:
 	 * any point so if this NetworkInterface needs access to this object any
 	 * longer it needs to clone the packet itself.
 	 */
-	virtual void broadcast(Packet* packet) = 0;
+	virtual void broadcast(const Packet* packet) = 0;
 
 	/**
 	 * Compares this interface to another interface.

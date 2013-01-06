@@ -71,6 +71,10 @@ void Packet::setHopCount(unsigned int newValue) {
     hopCount = newValue;
 }
 
+void Packet::increaseHopCount() {
+    hopCount++;
+}
+
 void Packet::setSender(Address* newSender) {
     if(sender != source) {
         delete sender;

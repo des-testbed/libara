@@ -99,7 +99,7 @@ public:
     void receivePacket(const Packet* packet, NetworkInterface* interface);
 
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
-    void broadCast(Packet* packet);
+    void broadCast(const Packet* packet);
     //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     unsigned int getNextSequenceNumber();
     //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
@@ -120,6 +120,8 @@ private:
     void sendDuplicateWarning(Address* recipient, NetworkInterface* interface);
     void handlePacket(const Packet* packet);
     void handleDataPacket(const Packet* packet);
+    void handleAntPacket(const Packet* packet);
+    void handleFANT(const Packet* packet);
     bool isDirectedToThisNode(const Packet* packet);
 };
 

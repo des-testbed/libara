@@ -41,8 +41,8 @@ public:
     NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName);
     ~NetworkInterfaceMock();
 
-    void send(Packet* packet, Address* recipient);
-    void broadcast(Packet* packet);
+    void send(const Packet* packet, Address* recipient);
+    void broadcast(const Packet* packet);
     bool equals(NetworkInterface* otherInterface);
     Address* getLocalAddress();
 

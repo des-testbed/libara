@@ -64,7 +64,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         NetworkInterface* interface = nextHop->getInterface();
         Packet* newPacket = packet->clone();
         newPacket->setSender(interface->getLocalAddress()->clone());
-        newPacket->setHopCount(packet->getHopCount() + 1);
+        newPacket->increaseHopCount();
         interface->send(newPacket, nextHop->getAddress());
         delete newPacket;
     }
@@ -99,6 +99,9 @@ void AbstractARAClient::handlePacket(const Packet* packet) {
     if(packet->isDataPacket()) {
         handleDataPacket(packet);
     }
+    else if(packet->isAntPacket()) {
+        handleAntPacket(packet);
+    }
     // TODO throw exception if we can not handle this packet
 }
 
@@ -108,6 +111,26 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
     }
     else {
         sendPacket(packet);
+    }
+}
+
+void AbstractARAClient::handleAntPacket(const Packet* packet) {
+    switch(packet->getType()) {
+    case PacketType::FANT:
+        handleFANT(packet);
+        break;
+    default:
+        // TODO throw exception if we can not handle this packet
+        break;
+    }
+}
+
+void AbstractARAClient::handleFANT(const Packet* packet) {
+    if(isDirectedToThisNode(packet)) {
+        // TODO
+    }
+    else {
+        broadCast(packet);
     }
 }
 
@@ -125,13 +148,19 @@ bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
     return false;
 }
 
-void AbstractARAClient::broadCast(Packet* packet) {
+void AbstractARAClient::broadCast(const Packet* packet) {
+    Packet* newPacket = packet->clone();
+    newPacket->increaseHopCount();
+
     //TODO replace this with iterator which should be faster
     unsigned int nrOfInterfaces = interfaces.size();
     for(unsigned int i=0; i<nrOfInterfaces; i++) {
         NetworkInterface* interface = interfaces.get(i);
-        interface->broadcast(packet);
+        newPacket->setSender(interface->getLocalAddress()->clone());
+        interface->broadcast(newPacket);
     }
+
+    delete newPacket;
 }
 
 unsigned int AbstractARAClient::getNextSequenceNumber() {

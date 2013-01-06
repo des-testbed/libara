@@ -95,7 +95,9 @@ public:
      * Note: After a packet has been received from another node this will be at least 1.
      */
     unsigned int getHopCount() const;
+
     const char* getPayload() const;
+
     unsigned int getPayloadLength() const;
 
     /**
@@ -112,7 +114,23 @@ public:
         return PacketType::isDataPacket(this->type);
     }
 
+    bool isAntPacket() const {
+        return PacketType::isAntPacket((this->type));
+    }
+
+    /**
+     * Sets the hop count of this packet to a specific value.
+     *
+     * @see Packet::increaseHopCount()
+     */
     void setHopCount(unsigned int newValue);
+
+    /**
+     * Increases the hop count of this packet by one.
+     *
+     * @see Packet::setHopCount()
+     */
+    void increaseHopCount();
 
     Packet* clone() const;
 	Packet* createFANT(unsigned int sequenceNumber) const;

@@ -210,3 +210,22 @@ TEST(PacketTest, testSetSender) {
     CHECK(packet.getSender()->equals(sender2));
     CHECK(packet.getSource()->equals(source));
 }
+
+TEST(PacketTest, testIncreaseHopCount) {
+    AddressMock* source = new AddressMock("source");
+    AddressMock* destination = new AddressMock("destination");
+    AddressMock* sender = new AddressMock("originalSender");
+    char type = PacketType::DATA;
+    unsigned int seqNr = 1;
+    const char* payload = "Hello World";
+    unsigned int hopCount = 5;
+
+    Packet packet = Packet(source, destination, sender, type, seqNr, payload, 11, hopCount);
+    LONGS_EQUAL(hopCount, packet.getHopCount());
+
+    packet.increaseHopCount();
+    LONGS_EQUAL(hopCount+1, packet.getHopCount());
+
+    packet.increaseHopCount();
+    LONGS_EQUAL(hopCount+2, packet.getHopCount());
+}

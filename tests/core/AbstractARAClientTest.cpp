@@ -302,3 +302,33 @@ TEST(AbstractARAClientTest, testDataPacketIsRelayedIfRouteIsKnown) {
     LONGS_EQUAL(123, sentPacket->getSequenceNumber());
     LONGS_EQUAL(2, sentPacket->getHopCount());
 }
+
+/**
+ * In this test node A receives a FANT from node B which is directed to
+ * node C. The FANT is expected to be broadcast over all interfaces.
+ */
+TEST(AbstractARAClientTest, testReceivedFANTIsBroadcasted) {
+    // initial test setup
+    ARAClientMock client = ARAClientMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    LinkedList<Pair<Packet, Address>>* sentPackets = interface->getSentPackets();
+
+    Address* source = new AddressMock("B");
+    Address* destination = new AddressMock("C");
+    Address* sender = source;
+    Packet packet = Packet(source, destination, sender, PacketType::FANT, 123);
+
+    // start the test
+    client.receivePacket(&packet, interface);
+    CHECK(sentPackets->size() == 1);
+    Pair<Packet, Address>* sentPacketInfo = sentPackets->getFirst();
+    CHECK(sentPacketInfo->getRight()->isBroadCast());
+
+    // check the sent packet
+    Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getDestination()->equals(destination));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    CHECK_EQUAL(PacketType::FANT, sentPacket->getType());
+    LONGS_EQUAL(2, sentPacket->getHopCount());
+}

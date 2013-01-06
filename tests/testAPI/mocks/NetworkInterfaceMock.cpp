@@ -60,14 +60,14 @@ LinkedList<Pair<Packet, Address>>* NetworkInterfaceMock::getSentPackets() {
     return &sentPackets;
 }
 
-void NetworkInterfaceMock::send(Packet* packet, Address* recipient) {
+void NetworkInterfaceMock::send(const Packet* packet, Address* recipient) {
     Packet* copyOfPacket = packet->clone();
     Address* copyOfAddress = recipient->clone();
     Pair<Packet, Address>* pair = new Pair<Packet, Address>(copyOfPacket, copyOfAddress);
     sentPackets.add(pair);
 }
 
-void NetworkInterfaceMock::broadcast(Packet* packet) {
+void NetworkInterfaceMock::broadcast(const Packet* packet) {
     Address* broadCastAddress = new AddressMock("BROADCAST");
     send(packet, broadCastAddress);
     delete broadCastAddress;    // the address has been cloned on the send Method, so this instance can be deleted
