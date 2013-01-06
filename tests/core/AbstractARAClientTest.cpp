@@ -199,10 +199,10 @@ TEST(AbstractARAClientTest, testRespondWithDuplicateWarning) {
     client.receivePacket(&packet, interface);
 
 
-    // the client should now have sent a duplicate warning back over the interface
-    LONGS_EQUAL(1, interface->getNumberOfSentPackets());
+    // the client should have relayed the first packet and sent a duplicate warning back for the second packet
+    LONGS_EQUAL(2, interface->getNumberOfSentPackets());
 
-    Pair<Packet, Address>* sentPacketInfo = interface->getSentPackets()->getFirst();
+    Pair<Packet, Address>* sentPacketInfo = interface->getSentPackets()->get(1); // we only check the warning
     Packet* sentPacket = sentPacketInfo->getLeft();
     Address* recipientOfSentPacket = sentPacketInfo->getRight();
 
@@ -264,4 +264,41 @@ TEST(AbstractARAClientTest, testDataPacketIsDeliveredToSystem) {
     client.receivePacket(&packet2, interface);
     LONGS_EQUAL(1, deliveredPackets->size());
     CHECK(deliveredPackets->getFirst()->equals(&packet2));
+}
+
+/**
+ * In this test a node A receives a data packet from node B which is
+ * directed to another node C. The route to that node is known.
+ * It is expected that the packet is relayed through the known route.
+ */
+TEST(AbstractARAClientTest, testDataPacketIsRelayedIfRouteIsKnown) {
+    // initial test setup
+    ARAClientMock client = ARAClientMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    LinkedList<Pair<Packet, Address>>* sentPackets = interface->getSentPackets();
+    RoutingTable* routingTable = client.getRoutingTable();
+
+    Address* source = new AddressMock("B");
+    Address* destination = new AddressMock("C");
+    Address* sender = source;
+    Packet packet = Packet(source, destination, sender, PacketType::DATA, 123, "Hello World");
+
+    // create a route to the destination
+    routingTable->update(destination, destination, interface, 10);
+
+    // start the test
+    client.receivePacket(&packet, interface);
+    CHECK(sentPackets->size() == 1);
+    Pair<Packet, Address>* sentPacketInfo = sentPackets->getFirst();
+    CHECK(sentPacketInfo->getRight()->equals(destination)); // packet has been sent to destination
+
+    // check the sent packet
+    Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getDestination()->equals(destination));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
+    STRCMP_EQUAL("Hello World", sentPacket->getPayload());
+    LONGS_EQUAL(123, sentPacket->getSequenceNumber());
+    LONGS_EQUAL(2, sentPacket->getHopCount());
 }

@@ -88,7 +88,7 @@ public:
      * If there is no known route to the packet destination a FANT is generated and send
      * according to the ARA algorithm.
      */
-    void sendPacket(Packet* packet);
+    void sendPacket(const Packet* packet);
 
     /**
      * Receive a Packet over the given NetworkInterface. The packet will be

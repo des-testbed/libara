@@ -35,7 +35,6 @@ TEST_GROUP(PacketTest) {};
 
 TEST(PacketTest, testCreate) {
     AddressMock* source = new AddressMock("source");
-
     AddressMock* destination = new AddressMock("destination");
     AddressMock* sender = new AddressMock("sender");    // This is the node from which the packet has actually been received
     char type = PacketType::FANT;
@@ -177,4 +176,37 @@ TEST(PacketTest, testEquals) {
    CHECK(packet.equals(&nextSeqPacket) == false);
    CHECK(packet.equals(&otherSourcePacket) == false);
    CHECK(packet.equals(&otherPacket) == false);
+}
+
+TEST(PacketTest, testCalculatePayloadLength) {
+    AddressMock* source = new AddressMock("source");
+    AddressMock* destination = new AddressMock("destination");
+    AddressMock* sender = new AddressMock("sender");
+    char type = PacketType::DATA;
+    unsigned int seqNr = 1;
+    const char* payload = "Hello World";
+
+    Packet packet = Packet(source, destination, sender, type, seqNr, payload);
+    LONGS_EQUAL(11, packet.getPayloadLength())
+}
+
+TEST(PacketTest, testSetSender) {
+    AddressMock* source = new AddressMock("source");
+    AddressMock* destination = new AddressMock("destination");
+    AddressMock* sender1 = new AddressMock("originalSender");
+    AddressMock* sender2 = new AddressMock("originalSender");
+    char type = PacketType::DATA;
+    unsigned int seqNr = 1;
+    const char* payload = "Hello World";
+
+    Packet packet = Packet(source, destination, sender1, type, seqNr, payload);
+    CHECK(packet.getSender()->equals(sender1));
+
+    packet.setSender(source);   // will delete sender1
+    CHECK(packet.getSender()->equals(source));
+
+    // now we test what happens if the original sender has been the source
+    packet.setSender(sender2);  // should NOT delete source
+    CHECK(packet.getSender()->equals(sender2));
+    CHECK(packet.getSource()->equals(source));
 }

@@ -72,6 +72,12 @@ public:
     Address* getSender() const;
 
     /**
+     * Assigns a new sender to this packet. If the original sender is not the source it
+     * will be deleted
+     */
+    void setSender(Address* newSender);
+
+    /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
      * the PacketType enum class.
      */

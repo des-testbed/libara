@@ -7,6 +7,7 @@
 
 #include "Packet.h"
 #include "PacketType.h"
+#include <cstring>
 
 namespace ARA {
 
@@ -16,17 +17,22 @@ Packet::Packet(Address* source, Address* destination, Address* sender, char type
     this->sender = sender;
     this->type = type;
     this->seqNr = seqNr;
+
+    if(payload != NULL && payloadSize == 0) {
+        payloadSize = std::strlen(payload);
+    }
+
     this->payload = payload;
     this->payloadSize = payloadSize;
     this->hopCount = hopCount;
 }
 
 Packet::~Packet() {
-    if(this->sender != this->source) {
-        delete this->sender;
+    if(sender != source) {
+        delete sender;
     }
-    delete this->source;
-    delete this->destination;
+    delete source;
+    delete destination;
 }
 
 Address* Packet::getSource() const {
@@ -63,6 +69,13 @@ unsigned int Packet::getPayloadLength() const {
 
 void Packet::setHopCount(unsigned int newValue) {
     hopCount = newValue;
+}
+
+void Packet::setSender(Address* newSender) {
+    if(sender != source) {
+        delete sender;
+    }
+    sender = newSender;
 }
 
 bool Packet::equals(const Packet* otherPacket) const {

@@ -34,11 +34,11 @@ namespace ARA {
 
 class PacketTrap {
 public:
-    void trapPacket(Packet* packet);
+    void trapPacket(const Packet* packet);
     bool contains(Packet* packet);
 
 private:
-    std::unordered_map<Address*, Packet*, AddressHash, AddressPredicate> trappedPackets;
+    std::unordered_map<Address*, const Packet*, AddressHash, AddressPredicate> trappedPackets;
 
 };
 

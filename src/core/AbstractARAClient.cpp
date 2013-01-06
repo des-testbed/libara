@@ -58,11 +58,12 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
     return interfaces.size();
 }
 
-void AbstractARAClient::sendPacket(Packet* packet) {
+void AbstractARAClient::sendPacket(const Packet* packet) {
     if(routingTable.isDeliverable(packet)) {
         NextHop* nextHop = getNextHop(packet);
         NetworkInterface* interface = nextHop->getInterface();
         Packet* newPacket = packet->clone();
+        newPacket->setSender(interface->getLocalAddress()->clone());
         newPacket->setHopCount(packet->getHopCount() + 1);
         interface->send(newPacket, nextHop->getAddress());
         delete newPacket;
@@ -106,7 +107,7 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
         deliverToSystem(packet);
     }
     else {
-        //TODO
+        sendPacket(packet);
     }
 }
 

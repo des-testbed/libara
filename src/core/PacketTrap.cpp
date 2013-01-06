@@ -27,7 +27,7 @@
 
 namespace ARA {
 
-void PacketTrap::trapPacket(Packet* packet) {
+void PacketTrap::trapPacket(const Packet* packet) {
     Address* destination = packet->getDestination();
     trappedPackets[destination] = packet;
 }
