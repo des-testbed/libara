@@ -306,29 +306,40 @@ TEST(AbstractARAClientTest, testDataPacketIsRelayedIfRouteIsKnown) {
 /**
  * In this test node A receives a FANT from node B which is directed to
  * node C. The FANT is expected to be broadcast over all interfaces.
+ * Node A does also receive a BANT back from C directed to node B which
+ * is also expected to be broadcast.
  */
-TEST(AbstractARAClientTest, testReceivedFANTIsBroadcasted) {
+TEST(AbstractARAClientTest, testReceivedAntPacketsAreBroadcasted) {
     // initial test setup
     ARAClientMock client = ARAClientMock();
     NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
     LinkedList<Pair<Packet, Address>>* sentPackets = interface->getSentPackets();
 
-    Address* source = new AddressMock("B");
-    Address* destination = new AddressMock("C");
-    Address* sender = source;
-    Packet packet = Packet(source, destination, sender, PacketType::FANT, 123);
+    PacketMock packet1 = PacketMock("B", "C", 123, 1, PacketType::FANT);
+    PacketMock packet2 = PacketMock("C", "B", 345, 1, PacketType::BANT);
 
     // start the test
-    client.receivePacket(&packet, interface);
-    CHECK(sentPackets->size() == 1);
-    Pair<Packet, Address>* sentPacketInfo = sentPackets->getFirst();
-    CHECK(sentPacketInfo->getRight()->isBroadCast());
+    client.receivePacket(&packet1, interface);
+    client.receivePacket(&packet2, interface);
 
-    // check the sent packet
-    Packet* sentPacket = sentPacketInfo->getLeft();
-    CHECK(sentPacket->getSource()->equals(source));
-    CHECK(sentPacket->getDestination()->equals(destination));
-    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
-    CHECK_EQUAL(PacketType::FANT, sentPacket->getType());
-    LONGS_EQUAL(2, sentPacket->getHopCount());
+    CHECK(sentPackets->size() == 2);
+    Pair<Packet, Address>* sentPacketInfo1 = sentPackets->get(0);
+    Pair<Packet, Address>* sentPacketInfo2 = sentPackets->get(1);
+
+    // check the first sent packet
+    CHECK(sentPacketInfo1->getRight()->isBroadCast());
+    Packet* sentPacket1 = sentPacketInfo1->getLeft();
+    CHECK(sentPacket1->getSource()->equals(packet1.getSource()));
+    CHECK(sentPacket1->getDestination()->equals(packet1.getDestination()));
+    CHECK(sentPacket1->getSender()->equals(interface->getLocalAddress()));
+    CHECK_EQUAL(PacketType::FANT, sentPacket1->getType());
+    LONGS_EQUAL(2, sentPacket1->getHopCount());
+
+    // check the first sent packet
+    Packet* sentPacket2 = sentPacketInfo2->getLeft();
+    CHECK(sentPacket2->getSource()->equals(packet2.getSource()));
+    CHECK(sentPacket2->getDestination()->equals(packet2.getDestination()));
+    CHECK(sentPacket2->getSender()->equals(interface->getLocalAddress()));
+    CHECK_EQUAL(PacketType::BANT, sentPacket2->getType());
+    LONGS_EQUAL(2, sentPacket2->getHopCount());
 }

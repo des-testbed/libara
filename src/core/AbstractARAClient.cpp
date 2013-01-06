@@ -115,23 +115,13 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
 }
 
 void AbstractARAClient::handleAntPacket(const Packet* packet) {
-    switch(packet->getType()) {
-    case PacketType::FANT:
-        handleFANT(packet);
-        break;
-    default:
-        // TODO throw exception if we can not handle this packet
-        break;
+    if(isDirectedToThisNode(packet) == false) {
+        broadCast(packet);
     }
 }
 
 void AbstractARAClient::handleFANT(const Packet* packet) {
-    if(isDirectedToThisNode(packet)) {
-        // TODO
-    }
-    else {
-        broadCast(packet);
-    }
+
 }
 
 bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
