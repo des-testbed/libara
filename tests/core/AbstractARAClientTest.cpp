@@ -343,3 +343,39 @@ TEST(AbstractARAClientTest, testReceivedAntPacketsAreBroadcasted) {
     CHECK_EQUAL(PacketType::BANT, sentPacket2->getType());
     LONGS_EQUAL(2, sentPacket2->getHopCount());
 }
+
+/**
+ * In this test node A receives a FANT directed from node B via node C
+ * to node A itself. It is expected to broadcast a new BANT directed to
+ * the FANts source.
+ *
+ * (B)--FANT->(C)--FANT->(A)
+ *  └-<-BANT--(C)<-BANT---┘
+ */
+TEST(AbstractARAClientTest, testReceivedFANTTriggersNewBANT) {
+    // initial test setup
+    ARAClientMock client = ARAClientMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    LinkedList<Pair<Packet, Address>>* sentPackets = interface->getSentPackets();
+    unsigned int lastSequenceNumber = client.getNextSequenceNumber();
+
+    Address* nodeB = new AddressMock("B");
+    Address* nodeA = new AddressMock("A");
+    Address* nodeC = new AddressMock("C");
+    Packet packet = Packet(nodeB, nodeA, nodeC, PacketType::FANT, 123);
+
+    // start the test
+    client.receivePacket(&packet, interface);
+    CHECK(sentPackets->size() == 1);
+    Pair<Packet, Address>* sentPacketInfo = sentPackets->getFirst();
+
+    // check the sent packet
+    CHECK(sentPacketInfo->getRight()->isBroadCast());
+    Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(sentPacket->getSource()->equals(nodeA));
+    CHECK(sentPacket->getDestination()->equals(nodeB));
+    CHECK(sentPacket->getSender()->equals(nodeA));
+    CHECK_EQUAL(PacketType::BANT, sentPacket->getType());
+    LONGS_EQUAL(1, sentPacket->getHopCount());
+    LONGS_EQUAL(lastSequenceNumber+1, sentPacket->getSequenceNumber());
+}

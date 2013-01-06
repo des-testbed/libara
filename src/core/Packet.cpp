@@ -27,6 +27,18 @@ Packet::Packet(Address* source, Address* destination, Address* sender, char type
     this->hopCount = hopCount;
 }
 
+Packet::Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, unsigned int hopCount) {
+    this->source = source;
+    this->destination = destination;
+    this->sender = sender;
+    this->type = type;
+    this->seqNr = seqNr;
+    this->hopCount = hopCount;
+
+    this->payload = NULL;
+    this->payloadSize = 0;
+}
+
 Packet::~Packet() {
     if(sender != source) {
         delete sender;
@@ -94,6 +106,12 @@ Packet* Packet::createFANT(unsigned int sequenceNumber) const {
     Packet* fant = new Packet(source->clone(), destination->clone(), sender->clone(), PacketType::FANT, sequenceNumber);
     fant->setHopCount(this->hopCount);
     return fant;
+}
+
+Packet* Packet::createBANT(unsigned int sequenceNumber) const {
+    unsigned int hopCount = 0;
+    Packet* bant = new Packet(destination->clone(), source->clone(), sender->clone(), PacketType::BANT, sequenceNumber, hopCount);
+    return bant;
 }
 
 } /* namespace ARA */

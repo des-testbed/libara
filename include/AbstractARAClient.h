@@ -121,7 +121,7 @@ private:
     void handlePacket(const Packet* packet);
     void handleDataPacket(const Packet* packet);
     void handleAntPacket(const Packet* packet);
-    void handleFANT(const Packet* packet);
+    void handleAntPacketForThisNode(const Packet* packet);
     bool isDirectedToThisNode(const Packet* packet);
 };
 

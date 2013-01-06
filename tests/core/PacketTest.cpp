@@ -95,6 +95,27 @@ TEST(PacketTest, testCreateWithPayloadAndHopCount) {
     CHECK_EQUAL(hopCount, packet.getHopCount());
 }
 
+TEST(PacketTest, testCreateWithoutPayloadButWithHopCount) {
+    AddressMock* source = new AddressMock("source");
+    AddressMock* destination = new AddressMock("destination");
+    AddressMock* sender = new AddressMock("sender");
+    char type = PacketType::FANT;
+    unsigned int seqNr = 1;
+    unsigned int hopCount = 7;
+
+    Packet packet = Packet(source, destination, sender, type, seqNr, hopCount);
+
+    CHECK(packet.getSource()->equals(source));
+    CHECK(packet.getDestination()->equals(destination));
+    CHECK(packet.getSender()->equals(sender));
+    CHECK_EQUAL(type, packet.getType());
+    CHECK_EQUAL(seqNr, packet.getSequenceNumber());
+    CHECK_EQUAL(hopCount, packet.getHopCount());
+
+    CHECK_EQUAL(0, packet.getPayloadLength());
+    CHECK(packet.getPayload() == false);
+}
+
 TEST(PacketTest, testCreateFANT) {
    Address* source = new AddressMock("source");
    Address* destination = new AddressMock("destination");
@@ -110,7 +131,7 @@ TEST(PacketTest, testCreateFANT) {
 
    CHECK(fant->getSource()->equals(source));
    CHECK(fant->getDestination()->equals(destination));
-   // The sender of a FANT will be determined when it is actually send over a network interface
+   // The sender of a FANT will be determined when it is actually send by the ARA client
    CHECK_EQUAL(PacketType::FANT, fant->getType());
    CHECK_EQUAL(newSequenceNumber, fant->getSequenceNumber());
    CHECK_EQUAL(0, fant->getPayloadLength());
@@ -228,4 +249,27 @@ TEST(PacketTest, testIncreaseHopCount) {
 
     packet.increaseHopCount();
     LONGS_EQUAL(hopCount+2, packet.getHopCount());
+}
+
+TEST(PacketTest, testCreateBANT) {
+    Address* originalSource = new AddressMock("source");
+    Address* originalDestination = new AddressMock("destination");
+    AddressMock* originalSender = new AddressMock("sender");
+    unsigned int type = PacketType::FANT;
+    int seqNr = 3;
+    unsigned int hopCount = 123;
+
+    Packet packet = Packet(originalSource, originalDestination, originalSender, type, seqNr, hopCount);
+    unsigned int newSequenceNumber = 12345;
+    Packet* bant = packet.createBANT(newSequenceNumber);
+
+    CHECK(bant->getSource()->equals(originalDestination));
+    CHECK(bant->getDestination()->equals(originalSource));
+    // The sender of the BANT will be determined when it is actually send by the ARA client
+    CHECK_EQUAL(PacketType::BANT, bant->getType());
+    CHECK_EQUAL(newSequenceNumber, bant->getSequenceNumber());
+    CHECK_EQUAL(0, bant->getPayloadLength());
+    CHECK_EQUAL(0, bant->getHopCount());
+
+    delete bant;
 }

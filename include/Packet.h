@@ -38,6 +38,7 @@ namespace ARA {
 class Packet {
 public:
     Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 1);
+    Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, unsigned int hopCount);
     ~Packet();
 
     /**
@@ -134,6 +135,17 @@ public:
 
     Packet* clone() const;
 	Packet* createFANT(unsigned int sequenceNumber) const;
+
+	/**
+	 * Creates a new BANT from this packet. This BANT has the destination of
+	 * this packet as its source and the destination of this as its source.
+	 * The hop count will be set to 0. The sequence number of the BANT is
+	 * given as argument of this method.
+	 *
+	 * Note: The result of this method is a newly created object which must be
+	 * deleted later by the calling class.
+	 */
+	Packet* createBANT(unsigned int sequenceNumber) const;
 
 protected:
     Address* source;

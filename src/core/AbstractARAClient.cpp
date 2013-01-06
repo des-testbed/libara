@@ -118,10 +118,22 @@ void AbstractARAClient::handleAntPacket(const Packet* packet) {
     if(isDirectedToThisNode(packet) == false) {
         broadCast(packet);
     }
+    else {
+        handleAntPacketForThisNode(packet);
+    }
 }
 
-void AbstractARAClient::handleFANT(const Packet* packet) {
+void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
+    char packetType = packet->getType();
 
+    if(packetType == PacketType::FANT) {
+        Packet* bant = packet->createBANT(getNextSequenceNumber());
+        broadCast(bant);
+        delete bant;
+    }
+    else {
+        // TODO throw exception if we can not handle this packet
+    }
 }
 
 bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
