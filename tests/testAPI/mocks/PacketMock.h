@@ -35,6 +35,7 @@ namespace ARA {
 class PacketMock: public Packet {
 public:
     PacketMock(const char* sourceName = "Source", const char* destinationName = "Destination", unsigned int sequenceNumber = 1, unsigned int hopCount = 0, char packetType = PacketType::DATA);
+    PacketMock(const char* sourceName, const char* destinationName, const char* senderName, unsigned int sequenceNumber = 1, unsigned int hopCount = 0, char packetType = PacketType::DATA);
 
     bool operator==(PacketMock& other) {
         return this->equals(&other);

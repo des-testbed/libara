@@ -31,10 +31,12 @@ using namespace std;
 namespace ARA {
 
 AbstractARAClient::AbstractARAClient() {
-
+    packetTrap = new PacketTrap(&routingTable);
 }
 
 AbstractARAClient::~AbstractARAClient() {
+    delete packetTrap; //TODO we must check for and delete all packets that might still be trapped
+
     // delete the addresses and sequence number lists of the last received packets
     unordered_map<Address*, unordered_set<unsigned int>*>::iterator iterator;
     for (iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
@@ -69,7 +71,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         delete newPacket;
     }
     else {
-        packetTrap.trapPacket(packet);
+        packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
         broadCast(fant);
@@ -79,6 +81,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
 
 void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
     if(hasBeenReceivedEarlier(packet)) {
+        //TODO what if the route over which we have received this packet earlier is shorter?
         sendDuplicateWarning(packet->getSender(), interface);
         return;
     }
@@ -130,6 +133,17 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
         Packet* bant = packet->createBANT(getNextSequenceNumber());
         broadCast(bant);
         delete bant;
+    }
+    else if(packetType == PacketType::BANT) {
+        LinkedList<const Packet>* deliverablePackets = packetTrap->getDeliverablePackets();
+        //TODO replace this with an iterator
+        unsigned int nrOfDeliverablePackets = deliverablePackets->size();
+        for (unsigned int i = 0; i < nrOfDeliverablePackets; i++) {
+            const Packet* deliverablePacket = deliverablePackets->get(i);
+            sendPacket(deliverablePacket);
+            packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
+        }
+        delete deliverablePackets;
     }
     else {
         // TODO throw exception if we can not handle this packet

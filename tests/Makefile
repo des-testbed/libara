@@ -48,7 +48,7 @@ runSingleTest: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TES
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
-	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_DIR):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testRespondWithDuplicateWarning; then \
+	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_DIR):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testTrapPacket; then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi	
 

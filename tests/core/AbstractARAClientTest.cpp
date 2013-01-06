@@ -366,10 +366,10 @@ TEST(AbstractARAClientTest, testReceivedFANTTriggersNewBANT) {
 
     // start the test
     client.receivePacket(&packet, interface);
-    CHECK(sentPackets->size() == 1);
-    Pair<Packet, Address>* sentPacketInfo = sentPackets->getFirst();
 
     // check the sent packet
+    CHECK(sentPackets->size() == 1);
+    Pair<Packet, Address>* sentPacketInfo = sentPackets->getFirst();
     CHECK(sentPacketInfo->getRight()->isBroadCast());
     Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getSource()->equals(nodeA));
@@ -378,4 +378,41 @@ TEST(AbstractARAClientTest, testReceivedFANTTriggersNewBANT) {
     CHECK_EQUAL(PacketType::BANT, sentPacket->getType());
     LONGS_EQUAL(1, sentPacket->getHopCount());
     LONGS_EQUAL(lastSequenceNumber+1, sentPacket->getSequenceNumber());
+}
+
+/**
+ * In this test node A has initiated a route discovery for a trapped data packet
+ * Now it has received a BANT that has come back from the data packets destination.
+ * It is expected that the trapped packet is send over the discovered route and is
+ * no longer trapped in the PacketTrap.
+ *
+ */
+TEST(AbstractARAClientTest, testReceivedBANTTriggersSendingOfTrappedPackets) {
+    // initial test setup
+    ARAClientMock client = ARAClientMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    LinkedList<Pair<Packet, Address>>* sentPackets = interface->getSentPackets();
+    PacketTrap* packetTrap = client.getPacketTrap();
+
+    PacketMock dataPacket = PacketMock("A", "C");
+    packetTrap->trapPacket(&dataPacket);
+
+    PacketMock bant = PacketMock("C", "A", "B", 123, 2, PacketType::BANT);
+
+    // start the test
+    client.receivePacket(&bant, interface);
+
+    // check the sent packet
+    LONGS_EQUAL(1, sentPackets->size());
+    Pair<Packet, Address>* sentPacketInfo = sentPackets->getFirst();
+    CHECK(sentPacketInfo->getRight()->equals(bant.getSender()));
+    Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(sentPacket->getSource()->equals(dataPacket.getSource()));
+    CHECK(sentPacket->getDestination()->equals(dataPacket.getDestination()));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
+    LONGS_EQUAL(1, sentPacket->getHopCount());
+
+    // packet trap must now be empty
+    CHECK(packetTrap->isEmpty());
 }

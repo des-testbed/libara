@@ -79,7 +79,7 @@ NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::st
 }
 
 PacketTrap* ARAClientMock::getPacketTrap() {
-    return &packetTrap;
+    return packetTrap;
 }
 
 RoutingTable* ARAClientMock::getRoutingTable() {

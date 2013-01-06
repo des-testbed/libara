@@ -25,25 +25,84 @@
 
 #include "CppUTest/TestHarness.h"
 #include "PacketTrap.h"
-#include "Packet.h"
-#include "Address.h"
+#include "LinkedList.h"
+#include "RoutingTable.h"
 #include "testAPI/mocks/PacketMock.h"
+#include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/NetworkInterfaceMock.h"
 
 using namespace ARA;
 
 TEST_GROUP(PacketTrapTest) {};
 
 TEST(PacketTrapTest, testTrapPacket) {
-    PacketTrap packetTrap = PacketTrap();
-    Packet* packet = new PacketMock();
+    RoutingTable routingTable = RoutingTable();
+    PacketTrap packetTrap = PacketTrap(&routingTable);
+    PacketMock packet = PacketMock();
 
     // Check that there is no trapped packet for the packets destination
-    CHECK(packetTrap.contains(packet) == false);
+    CHECK(packetTrap.contains(&packet) == false);
 
-    packetTrap.trapPacket(packet);
+    packetTrap.trapPacket(&packet);
 
     // Now there must be a trapped packet for the packets destination
-    CHECK(packetTrap.contains(packet) == true);
+    CHECK(packetTrap.contains(&packet) == true);
+}
 
-    delete packet;
+TEST(PacketTrapTest, testGetDeliverablePacket) {
+    // Test setup
+    RoutingTable routingTable = RoutingTable();
+    PacketTrap packetTrap = PacketTrap(&routingTable);
+    PacketMock trappedPacket = PacketMock();
+    AddressMock someAddress = AddressMock();
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+
+    // Start the test
+    LinkedList<const Packet>* deliverablePackets = packetTrap.getDeliverablePackets();
+    CHECK(deliverablePackets->isEmpty());   // there is no trapped packet so none can be deliverable
+    delete deliverablePackets;
+
+    packetTrap.trapPacket(&trappedPacket);
+    deliverablePackets = packetTrap.getDeliverablePackets();
+    CHECK(deliverablePackets->isEmpty());   // packet is still not deliverable
+    delete deliverablePackets;
+
+    routingTable.update(trappedPacket.getDestination(), &someAddress, &interface, 10);
+    deliverablePackets = packetTrap.getDeliverablePackets();
+    CHECK(deliverablePackets->size() == 1);
+
+    const Packet* deliverablePacket = deliverablePackets->getFirst();
+    delete deliverablePackets;
+
+    CHECK(deliverablePacket->getSource()->equals(trappedPacket.getSource()));
+    CHECK(deliverablePacket->getDestination()->equals(trappedPacket.getDestination()));
+    CHECK_EQUAL(trappedPacket.getType(), deliverablePacket->getType());
+    LONGS_EQUAL(trappedPacket.getHopCount(), deliverablePacket->getHopCount());
+    LONGS_EQUAL(trappedPacket.getSequenceNumber(), deliverablePacket->getSequenceNumber());
+}
+
+TEST(PacketTrapTest, testUntrap) {
+    RoutingTable routingTable = RoutingTable();
+    PacketTrap packetTrap = PacketTrap(&routingTable);
+    PacketMock packet = PacketMock();
+
+    CHECK(packetTrap.contains(&packet) == false);
+    packetTrap.trapPacket(&packet);
+    CHECK(packetTrap.contains(&packet) == true);
+    packetTrap.untrapPacket(&packet);
+    CHECK(packetTrap.contains(&packet) == false);
+}
+
+TEST(PacketTrapTest, testIsEmpty) {
+    RoutingTable routingTable = RoutingTable();
+    PacketTrap packetTrap = PacketTrap(&routingTable);
+    PacketMock packet = PacketMock();
+
+    CHECK(packetTrap.isEmpty());
+
+    packetTrap.trapPacket(&packet);
+    CHECK(packetTrap.isEmpty() == false);
+
+    packetTrap.untrapPacket(&packet);
+    CHECK(packetTrap.isEmpty());
 }

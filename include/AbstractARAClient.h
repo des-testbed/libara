@@ -110,8 +110,8 @@ public:
 protected:
 
     LinkedList<NetworkInterface> interfaces;
-    PacketTrap packetTrap;
     RoutingTable routingTable;
+    PacketTrap* packetTrap;
 
 private:
     unsigned int nextSequenceNumber = 1;

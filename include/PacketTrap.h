@@ -26,19 +26,43 @@
 #ifndef PACKETTRAP_H_
 #define PACKETTRAP_H_
 
+#include "RoutingTable.h"
 #include <unordered_map>
 #include "Packet.h"
 #include "Address.h"
+#include "LinkedList.h"
 
 namespace ARA {
 
 class PacketTrap {
 public:
+    PacketTrap(RoutingTable* routingTable);
+
+    /**
+     * Stores a packet within the packet trap until it is removed.
+     */
     void trapPacket(const Packet* packet);
+
+    /**
+     * Removes the given packet from this packet trap.
+     */
+    void untrapPacket(const Packet* packet);
+
     bool contains(Packet* packet);
+    bool isEmpty();
+
+    /**
+     * Returns a new list of packets that are deliverable according to the
+     * routing table associated with this packet trap.
+     *
+     * Note: The LinkedList must be deleted by the caller of this method
+     */
+    LinkedList<const Packet>* getDeliverablePackets();
 
 private:
     std::unordered_map<Address*, const Packet*, AddressHash, AddressPredicate> trappedPackets;
+
+    RoutingTable* routingTable;
 
 };
 

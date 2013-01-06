@@ -27,14 +27,44 @@
 
 namespace ARA {
 
+PacketTrap::PacketTrap(RoutingTable* routingTable) {
+    this->routingTable = routingTable;
+}
+
 void PacketTrap::trapPacket(const Packet* packet) {
+    // FIXME we need to store more than one packet for a specific destination
     Address* destination = packet->getDestination();
     trappedPackets[destination] = packet;
+}
+
+void PacketTrap::untrapPacket(const Packet* packet) {
+    // FIXME we just want to remove a specific packet and not all packets for one destination
+    Address* destination = packet->getDestination();
+    trappedPackets.erase(destination);
 }
 
 bool PacketTrap::contains(Packet* packet) {
     Address* packetDestination = packet->getDestination();
     return trappedPackets.find(packetDestination) != trappedPackets.end();
+}
+
+bool PacketTrap::isEmpty() {
+    return trappedPackets.size() == 0;
+}
+
+LinkedList<const Packet>* PacketTrap::getDeliverablePackets() {
+    LinkedList<const Packet>* deliverablePackets = new LinkedList<const Packet>();
+
+    std::unordered_map<Address*, const Packet*>::iterator iterator;
+    for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
+        std::pair<Address*, const Packet*> entryPair = *iterator;
+        const Packet* trappedPacket = entryPair.second;
+        if(routingTable->isDeliverable(trappedPacket)) {
+            deliverablePackets->add(trappedPacket);
+        }
+    }
+
+    return deliverablePackets;
 }
 
 } /* namespace ARA */
