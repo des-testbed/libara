@@ -39,6 +39,18 @@ Packet::Packet(Address* source, Address* destination, Address* sender, char type
     this->payloadSize = 0;
 }
 
+Packet::Packet(Address* source, Address* destination, char type, unsigned int seqNr) {
+    this->source = source;
+    this->destination = destination;
+    this->sender = source;
+    this->type = type;
+    this->seqNr = seqNr;
+
+    this->hopCount = 1;
+    this->payload = NULL;
+    this->payloadSize = 0;
+}
+
 Packet::~Packet() {
     if(sender != source) {
         delete sender;
@@ -103,6 +115,7 @@ Packet* Packet::clone() const {
 }
 
 Packet* Packet::createFANT(unsigned int sequenceNumber) const {
+    // TODO cloning the sender here has no real meaning. Couldn't we just set the sender to NULL? (beware of resulting segfaults in the destructor!!!)
     Packet* fant = new Packet(source->clone(), destination->clone(), sender->clone(), PacketType::FANT, sequenceNumber);
     fant->setHopCount(this->hopCount);
     return fant;
@@ -112,6 +125,12 @@ Packet* Packet::createBANT(unsigned int sequenceNumber) const {
     unsigned int hopCount = 0;
     Packet* bant = new Packet(destination->clone(), source->clone(), sender->clone(), PacketType::BANT, sequenceNumber, hopCount);
     return bant;
+}
+
+size_t Packet::getHashValue() const {
+    // TODO Review and tweak this hash value generation (naiv implementation)
+    size_t sourceHash = source->getHashValue();
+    return sourceHash + seqNr;
 }
 
 } /* namespace ARA */

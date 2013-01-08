@@ -97,7 +97,7 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
 void AbstractARAClient::sendDuplicateWarning(Address* recipient, NetworkInterface* interface) {
     Address* localAddress = interface->getLocalAddress()->clone();
     unsigned int sequenceNumber = getNextSequenceNumber();
-    Packet duplicateWarningPacket = Packet(localAddress, recipient->clone(), localAddress, PacketType::DUPLICATE_ERROR, sequenceNumber);
+    Packet duplicateWarningPacket = Packet(localAddress, recipient->clone(), localAddress, PacketType::DUPLICATE_ERROR, sequenceNumber, 1);
     interface->send(&duplicateWarningPacket, recipient);
 }
 

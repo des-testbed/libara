@@ -273,3 +273,16 @@ TEST(PacketTest, testCreateBANT) {
 
     delete bant;
 }
+
+TEST(PacketTest, testGetHashValue) {
+    Packet packet1 = Packet(new AddressMock("A"), new AddressMock("B"), PacketType::DATA, 1);
+    Packet packet2 = Packet(new AddressMock("A"), new AddressMock("B"), PacketType::DATA, 2);
+    Packet packet3 = Packet(new AddressMock("A"), new AddressMock("B"), PacketType::DATA, 3);
+    Packet packet4 = Packet(new AddressMock("B"), new AddressMock("A"), PacketType::DATA, 1);
+    Packet packet5 = Packet(new AddressMock("B"), new AddressMock("A"), PacketType::DATA, 1);
+
+    CHECK(packet1.getHashValue() != packet2.getHashValue()); // same source - different seqNr
+    CHECK(packet2.getHashValue() != packet3.getHashValue()); // same source - different seqNr
+    CHECK(packet1.getHashValue() != packet4.getHashValue()); // different source - same seqNr
+    CHECK(packet4.getHashValue() == packet5.getHashValue()); // same source - same seqNr
+}

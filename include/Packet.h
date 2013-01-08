@@ -28,6 +28,7 @@
 
 #include "Address.h"
 #include "PacketType.h"
+#include <stddef.h>
 
 namespace ARA {
 
@@ -39,6 +40,7 @@ class Packet {
 public:
     Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 1);
     Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, unsigned int hopCount);
+    Packet(Address* source, Address* destination, char type, unsigned int seqNr);
     ~Packet();
 
     /**
@@ -89,6 +91,14 @@ public:
      * source and will not be modified on the packets path through the network.
      */
     unsigned int getSequenceNumber() const;
+
+    /**
+     * Calculates and returns the has value of this object based on the hash value
+     * of its source address and the sequence number.
+     * This method is used to put packets in HashSets from where they can be retrieved
+     * in O(1) time like in the packet trap.
+     */
+    size_t getHashValue() const;
 
     /**
      * Returns the number of links this packet has been send over or respectively
@@ -156,6 +166,27 @@ protected:
     const char* payload;
     unsigned int payloadSize;
     unsigned int hopCount;
+
+friend class PacketPredicate;
+};
+
+/**
+ * This Functor is needed for std::unordered_map (hashset implementation)
+ */
+struct PacketHash {
+    size_t operator()(Packet* packet) const {
+        return packet->getHashValue();
+    }
+};
+
+/**
+ * This Functor is needed for std::unordered_set (hashset implementation)
+ */
+struct PacketPredicate {
+    size_t operator()(Packet* packet1, Packet* packet2) const {
+        return packet1->seqNr == packet2->seqNr &&
+               packet1->source->equals(packet2->source);
+    }
 };
 
 } /* namespace ARA */
