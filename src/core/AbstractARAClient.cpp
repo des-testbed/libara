@@ -81,12 +81,15 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
 
 void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
     if(hasBeenReceivedEarlier(packet)) {
-        //TODO what if the route over which we have received this packet earlier is shorter?
-        sendDuplicateWarning(packet->getSender(), interface);
+        if(packet->isDataPacket()) {
+            sendDuplicateWarning(packet->getSender(), interface);
+        }
         return;
     }
+    else {
+        registerReceivedPacket(packet);
+    }
 
-    registerReceivedPacket(packet);
     updateRoutingTable(packet, interface);
     handlePacket(packet);
 }

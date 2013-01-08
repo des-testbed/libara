@@ -189,7 +189,6 @@ TEST(AbstractARAClientTest, testRespondWithDuplicateError) {
     // prepare a packet
     ARAClientMock client = ARAClientMock();
     PacketMock packet = PacketMock("A", "B", "C", 123, 1, PacketType::DATA);
-    AddressMock localNode = AddressMock("X");
 
     // let client receive the packet over the same interface twice
     NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("X");
@@ -205,11 +204,36 @@ TEST(AbstractARAClientTest, testRespondWithDuplicateError) {
 
     // check the contents of the duplicate warning packet
     CHECK(recipientOfSentPacket->equals(packet.getSender()));
-    CHECK(sentPacket->getSender()->equals(&localNode));
-    CHECK(sentPacket->getSource()->equals(&localNode));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_ERROR);
     LONGS_EQUAL(1, sentPacket->getHopCount());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
+}
+
+/**
+ * In this test we simulate that a FANT or a BANT have been received
+ * twice at node x. This kind of duplication must simply be ignored
+ * by node x (no further broadcasting of the ant packet).
+ */
+TEST(AbstractARAClientTest, testIgnoreDuplicateAntPackets) {
+    // prepare the ant packets
+    ARAClientMock client = ARAClientMock();
+    PacketMock fant = PacketMock("A", "B", "C", 123, 1, PacketType::FANT);
+    PacketMock bant = PacketMock("B", "A", "C", 456, 4, PacketType::BANT);
+
+    // let client receive the packets over the same interface twice or more
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("X");
+    client.receivePacket(&fant, interface);
+    client.receivePacket(&fant, interface);
+    client.receivePacket(&bant, interface);
+    client.receivePacket(&bant, interface);
+    client.receivePacket(&bant, interface);
+
+    LONGS_EQUAL(2, interface->getNumberOfSentPackets()); // only two broadcasts of the ANT packets and nothing more
+    LinkedList<Pair<Packet, Address>>* sendPackets = interface->getSentPackets();
+    CHECK_EQUAL(PacketType::FANT, sendPackets->get(0)->getLeft()->getType());
+    CHECK_EQUAL(PacketType::BANT, sendPackets->get(1)->getLeft()->getType());
 }
 
 /**
