@@ -49,7 +49,7 @@ TEST(PacketTrapTest, testTrapPacket) {
     CHECK(packetTrap.contains(&packet) == true);
 }
 
-IGNORE_TEST(PacketTrapTest, testTrapMultiplePackets) {
+TEST(PacketTrapTest, testTrapMultiplePackets) {
     RoutingTable routingTable = RoutingTable();
     PacketTrap packetTrap = PacketTrap(&routingTable);
     PacketMock packet1 = PacketMock("A", "B", 1);
