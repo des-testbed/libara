@@ -53,7 +53,7 @@ TEST(OMNeTAddressTest, testEqualityWithNull) {
 
 TEST(OMNeTAddressTest, testGetHashValue) {
     OMNeTAddress address = OMNeTAddress(123);
-    CHECK_EQUAL(123, address.getHashValue());
+    LONGS_EQUAL(123, address.getHashValue());
 }
 
 TEST(OMNeTAddressTest, testIsBroadCast) {

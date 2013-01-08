@@ -70,7 +70,7 @@ TEST(PacketTest, testCreateWithPayload) {
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
     CHECK_EQUAL(1, packet.getHopCount());
 
-    CHECK_EQUAL(strlen(payload), packet.getPayloadLength());
+    LONGS_EQUAL(strlen(payload), packet.getPayloadLength());
     CHECK_EQUAL(payload, packet.getPayload());
 }
 
@@ -90,7 +90,7 @@ TEST(PacketTest, testCreateWithPayloadAndHopCount) {
     CHECK(packet.getSender()->equals(sender));
     CHECK_EQUAL(type, packet.getType());
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    CHECK_EQUAL(strlen(payload), packet.getPayloadLength());
+    LONGS_EQUAL(strlen(payload), packet.getPayloadLength());
     CHECK_EQUAL(payload, packet.getPayload());
     CHECK_EQUAL(hopCount, packet.getHopCount());
 }
@@ -157,7 +157,7 @@ TEST(PacketTest, testClone) {
    CHECK(clone->getSender()->equals(sender));
    CHECK_EQUAL(type, clone->getType());
    CHECK_EQUAL(seqNr, clone->getSequenceNumber());
-   CHECK_EQUAL(strlen(payload), clone->getPayloadLength());
+   LONGS_EQUAL(strlen(payload), clone->getPayloadLength());
    CHECK_EQUAL(payload, clone->getPayload());
    CHECK_EQUAL(hopCount, clone->getHopCount());
    CHECK(packet.equals(clone));

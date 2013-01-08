@@ -45,7 +45,7 @@ TEST(PacketMockTest, testConstructor) {
     CHECK_EQUAL(123, mock.getSequenceNumber());
     CHECK_EQUAL(0, mock.getHopCount());
     STRCMP_EQUAL("Hello World", mock.getPayload());
-    CHECK_EQUAL(strlen("Hello World"), mock.getPayloadLength());
+    LONGS_EQUAL(strlen("Hello World"), mock.getPayloadLength());
 }
 
 TEST(PacketMockTest, testSetSender) {
