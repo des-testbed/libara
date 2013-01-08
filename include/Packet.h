@@ -174,7 +174,7 @@ friend class PacketPredicate;
  * This Functor is needed for std::unordered_map (hashset implementation)
  */
 struct PacketHash {
-    size_t operator()(Packet* packet) const {
+    size_t operator()(const Packet* packet) const {
         return packet->getHashValue();
     }
 };
@@ -183,7 +183,7 @@ struct PacketHash {
  * This Functor is needed for std::unordered_set (hashset implementation)
  */
 struct PacketPredicate {
-    size_t operator()(Packet* packet1, Packet* packet2) const {
+    size_t operator()(const Packet* packet1, const Packet* packet2) const {
         return packet1->seqNr == packet2->seqNr &&
                packet1->source->equals(packet2->source);
     }

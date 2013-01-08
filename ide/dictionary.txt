@@ -15,3 +15,6 @@ foobar
 payload
 pheromone
 hashset
+untrap
+everytime
+hashsets

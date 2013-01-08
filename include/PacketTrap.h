@@ -27,16 +27,18 @@
 #define PACKETTRAP_H_
 
 #include "RoutingTable.h"
-#include <unordered_map>
 #include "Packet.h"
 #include "Address.h"
 #include "LinkedList.h"
+#include <unordered_map>
+#include <unordered_set>
 
 namespace ARA {
 
 class PacketTrap {
 public:
     PacketTrap(RoutingTable* routingTable);
+    ~PacketTrap();
 
     /**
      * Stores a packet within the packet trap until it is removed.
@@ -60,7 +62,21 @@ public:
     LinkedList<const Packet>* getDeliverablePackets();
 
 private:
-    std::unordered_map<Address*, const Packet*, AddressHash, AddressPredicate> trappedPackets;
+
+    bool thereIsAHashSetFor(Address* destination);
+
+    /**
+     * This hashmap stores all trapped packets.
+     * In Java we would write: HashMap<Address, HashSet<Packet>>
+     * The keys are the packet destinations and the values are a
+     * set of packets.
+     *
+     * This is a Hashmap because everytime PacketTrap::getDeliverablePackets()
+     * is called we want to find all packets for a specific destination fast.
+     * The Values are hashsets themselves because we also have to find individual
+     * packets everytime we want to untrap a packet (i.e. after acknowledgment).
+     */
+    std::unordered_map<Address*, std::unordered_set<const Packet*, PacketHash, PacketPredicate>*, AddressHash, AddressPredicate> trappedPackets;
 
     RoutingTable* routingTable;
 

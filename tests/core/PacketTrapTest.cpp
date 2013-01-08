@@ -49,6 +49,41 @@ TEST(PacketTrapTest, testTrapPacket) {
     CHECK(packetTrap.contains(&packet) == true);
 }
 
+IGNORE_TEST(PacketTrapTest, testTrapMultiplePackets) {
+    RoutingTable routingTable = RoutingTable();
+    PacketTrap packetTrap = PacketTrap(&routingTable);
+    PacketMock packet1 = PacketMock("A", "B", 1);
+    PacketMock packet2 = PacketMock("A", "B", 2);
+    PacketMock packet3 = PacketMock("X", "Y", 1);
+    PacketMock packet4 = PacketMock("A", "C", 3);
+
+    // start the test
+    CHECK(packetTrap.isEmpty());
+    packetTrap.trapPacket(&packet1);
+    CHECK(packetTrap.contains(&packet1) == true);
+    CHECK(packetTrap.contains(&packet2) == false);
+    CHECK(packetTrap.contains(&packet3) == false);
+    CHECK(packetTrap.contains(&packet4) == false);
+
+    packetTrap.trapPacket(&packet2);
+    CHECK(packetTrap.contains(&packet1) == true);
+    CHECK(packetTrap.contains(&packet2) == true);
+    CHECK(packetTrap.contains(&packet3) == false);
+    CHECK(packetTrap.contains(&packet4) == false);
+
+    packetTrap.trapPacket(&packet3);
+    CHECK(packetTrap.contains(&packet1) == true);
+    CHECK(packetTrap.contains(&packet2) == true);
+    CHECK(packetTrap.contains(&packet3) == true);
+    CHECK(packetTrap.contains(&packet4) == false);
+
+    packetTrap.trapPacket(&packet4);
+    CHECK(packetTrap.contains(&packet1) == true);
+    CHECK(packetTrap.contains(&packet2) == true);
+    CHECK(packetTrap.contains(&packet3) == true);
+    CHECK(packetTrap.contains(&packet4) == true);
+}
+
 TEST(PacketTrapTest, testGetDeliverablePacket) {
     // Test setup
     RoutingTable routingTable = RoutingTable();
