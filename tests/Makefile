@@ -44,7 +44,7 @@ COMPILED_TESTAPI = $(TESTAPI_SOURCES:.cpp=.o)
 TEST_EXECUTABLE = runAllTests
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-runSingleTest: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TESTS)
+runSingleTest: $(COMPILED_TESTAPI) $(COMPILED_TESTS)
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
@@ -52,7 +52,7 @@ runSingleTest: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TES
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi	
 
-searchMemoryLeak: check_if_cpputest_is_installed
+searchMemoryLeak:
 	@echo "Building complete executable test suit in single compile (This might take some while))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(TEST_SOURCES) $(TESTAPI_SOURCES) $(LINKFLAGS)
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
@@ -66,11 +66,11 @@ runTests: all
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
-all: $(COMPILED_TESTAPI) $(COMPILED_TESTS)
+all: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TESTS)
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	
 
-.cpp.o:
+.cpp.o: check_if_cpputest_is_installed # TODO why is this dependency not checked? if you remove this from all you see what I mean
 	@if [[ $< == *Test.cpp ]]; then \
 		nrOfTests=$$(grep -c "TEST(" $<); \
 		echo "Compiling $< ($$nrOfTests tests)"; \
