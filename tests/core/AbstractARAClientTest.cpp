@@ -180,24 +180,21 @@ TEST(AbstractARAClientTest, testRegisterReceivedPacket) {
 }
 
 /**
- * In this test we simulate that the same packet has been received
+ * In this test we simulate that the same data packet has been received
  * twice at node x. The packet is directed from node A to node B and
  * has been relayed via node C to node X.
- * Node x must respond to node C with a DUPLICATE_WARNING packet.
+ * Node x must respond to node C with a DUPLICATE_ERROR packet.
  */
-TEST(AbstractARAClientTest, testRespondWithDuplicateWarning) {
+TEST(AbstractARAClientTest, testRespondWithDuplicateError) {
     // prepare a packet
     ARAClientMock client = ARAClientMock();
-    PacketMock packet = PacketMock("A", "B", 123);
-    Address* nodeC = new AddressMock("C");  // is deleted by the Packet destructor
+    PacketMock packet = PacketMock("A", "B", "C", 123, 1, PacketType::DATA);
     AddressMock localNode = AddressMock("X");
-    packet.setSender(nodeC);
 
     // let client receive the packet over the same interface twice
     NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("X");
     client.receivePacket(&packet, interface);
     client.receivePacket(&packet, interface);
-
 
     // the client should have relayed the first packet and sent a duplicate warning back for the second packet
     LONGS_EQUAL(2, interface->getNumberOfSentPackets());
@@ -207,10 +204,10 @@ TEST(AbstractARAClientTest, testRespondWithDuplicateWarning) {
     Address* recipientOfSentPacket = sentPacketInfo->getRight();
 
     // check the contents of the duplicate warning packet
-    CHECK(recipientOfSentPacket->equals(nodeC));
+    CHECK(recipientOfSentPacket->equals(packet.getSender()));
     CHECK(sentPacket->getSender()->equals(&localNode));
     CHECK(sentPacket->getSource()->equals(&localNode));
-    CHECK(sentPacket->getType() == PacketType::DUPLICATE_WARNING);
+    CHECK(sentPacket->getType() == PacketType::DUPLICATE_ERROR);
     LONGS_EQUAL(1, sentPacket->getHopCount());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
 }

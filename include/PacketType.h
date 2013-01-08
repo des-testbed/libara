@@ -44,7 +44,7 @@ public:
         FANT,
         BANT,
         PANT,
-        DUPLICATE_WARNING
+        DUPLICATE_ERROR
     };
 
     static bool isAntPacket(char type);

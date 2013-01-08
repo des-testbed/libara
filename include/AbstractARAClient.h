@@ -56,7 +56,7 @@ public:
      * It's is responsible for updating the routing table so a route to the
      * packets source is known in the future.
      *
-     * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_WARNING).
+     * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_ERROR).
      */
     virtual void updateRoutingTable(const Packet* packet, NetworkInterface* interface) = 0;
 
