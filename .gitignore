@@ -16,3 +16,6 @@ tests/runAllTests
 # CppUTest
 extern/cpputest
 
+# Versatile configuration
+simulations/.tkenvrc
+
