@@ -23,35 +23,38 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
 #include "OMNeTAddress.h"
+#include <hash_fun.h>
+
+using namespace std;
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(unsigned int address) {
-    this->address = address;
-}
-
-unsigned int OMNeTAddress::getAddress() {
-    return this->address;
+OMNeTAddress::OMNeTAddress(const std::string name) {
+    this->address = name;
 }
 
 bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
+    OMNeTAddress* otherAddressMock = dynamic_cast<OMNeTAddress*>(otherAddress);
+    if(otherAddressMock == NULL) {
         return false;
     }
     else {
-        return otherOMNeTAddress->address == this->address;
+        return this->address.compare(otherAddressMock->address) == 0;
     }
 }
 
 size_t OMNeTAddress::getHashValue() const {
+    __gnu_cxx::hash<const char*> hashFunction;
+    return hashFunction(address.c_str());
+}
+
+string OMNeTAddress::getAddress() {
     return address;
 }
 
 bool OMNeTAddress::isBroadCast() {
-    return address == BROADCAST;
+    return address == "BROADCAST";
 }
 
 Address* OMNeTAddress::clone() {
