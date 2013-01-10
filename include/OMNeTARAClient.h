@@ -35,6 +35,9 @@ protected:
     NextHop* getNextHop(const Packet* packet);
     void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
     void deliverToSystem(const Packet* packet);
+
+private:
+    void sendInitialPacket();
 };
 
 } /* namespace ARA */

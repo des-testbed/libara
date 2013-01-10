@@ -17,6 +17,7 @@
 #include <omnetpp.h>
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
+#include "OMNeTGate.h"
 
 using namespace ARA;
 
@@ -24,16 +25,29 @@ using namespace ARA;
 Define_Module(OMNeTARAClient);
 
 void OMNeTARAClient::initialize() {
+    for (cModule::GateIterator i(this); !i.end(); i++) {
+        cGate* gate = i();
+        if(gate->getType() == cGate::OUTPUT) {
+            addNetworkInterface(new OMNeTGate(this, gate));
+        }
+    }
+
     if (strcmp("source", getName()) == 0) {
-        OMNeTAddress* source = new OMNeTAddress("source");
-        OMNeTAddress* destination = new OMNeTAddress("destination");
-        cMessage* msg = new OMNeTPacket(source, destination);
-        send(msg, "g$o", 0);
+        sendInitialPacket();
     }
 }
 
+void OMNeTARAClient::sendInitialPacket() {
+    OMNeTAddress* source = new OMNeTAddress("source");
+    OMNeTAddress* destination = new OMNeTAddress("destination");
+    OMNeTPacket* msg = new OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
+    sendPacket(msg);
+}
+
 void OMNeTARAClient::handleMessage(cMessage *msg) {
-    send(msg, "g$o", 0);
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) msg;
+    //send(msg, "g$o", 0);
+    receivePacket(omnetPacket, getNetworkInterface(0));
 }
 
 NextHop* OMNeTARAClient::getNextHop(const Packet* packet) {

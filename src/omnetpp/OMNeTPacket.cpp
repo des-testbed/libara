@@ -22,12 +22,12 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTPacket);
 
-OMNeTPacket::OMNeTPacket(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) : ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
+OMNeTPacket::OMNeTPacket(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) : cPacket(), ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
 
 }
 
-OMNeTPacket::OMNeTPacket(const OMNeTPacket& other) : ARA::Packet(other.source, other.destination, other.sender, other.type, other.seqNr, other.payload, other.payloadSize, other.hopCount) {
-    copy(other);
+OMNeTPacket::OMNeTPacket(const OMNeTPacket& other) : cPacket(other), ARA::Packet(other.source, other.destination, other.sender, other.type, other.seqNr, other.payload, other.payloadSize, other.hopCount) {
+
 }
 
 OMNeTPacket& OMNeTPacket::operator=(const OMNeTPacket& other) {
@@ -42,8 +42,10 @@ void OMNeTPacket::copy(const OMNeTPacket& other) {
 }
 
 void OMNeTPacket::parsimPack(cCommBuffer *b) {
+    throw cRuntimeError("Parsim error: OMNeTPacket::parsimPack is not yet implemented");
+
     //TODO implement OMNeTPacket::parsimPack
-    cPacket::parsimPack(b);
+   // cPacket::parsimPack(b);
     /*doPacking(b,this->someField_var);
     doPacking(b,this->anotherField_var);
     b->pack(arrayField1_arraysize);
@@ -52,8 +54,10 @@ void OMNeTPacket::parsimPack(cCommBuffer *b) {
 }
 
 void OMNeTPacket::parsimUnpack(cCommBuffer *b) {
+    throw cRuntimeError("Parsim error: OMNeTPacket::parsimUnpack is not yet implemented");
+
     //TODO implement OMNeTPacket::parsimUnpack
-    cPacket::parsimUnpack(b);
+  //  cPacket::parsimUnpack(b);
     /*doUnpacking(b,this->someField_var);
     doUnpacking(b,this->anotherField_var);
     delete [] this->arrayField1_var;
@@ -127,11 +131,11 @@ unsigned int OMNeTPacketDescriptor::getFieldTypeFlags(void *object, int field) c
         FD_ISCOMPOUND | FD_ISPOINTER,   // Address* source
         FD_ISCOMPOUND | FD_ISPOINTER,   // Address* destination
         FD_ISCOMPOUND | FD_ISPOINTER,   // Address* sender
-        FD_ISEDITABLE,                  // char type;
-        FD_ISEDITABLE,                  // unsigned int seqNr;
-        FD_ISEDITABLE,                  // const char* payload;
-        FD_ISEDITABLE,                  // unsigned int payloadSize;
-        FD_ISEDITABLE                   // unsigned int hopCount;
+        FD_NONE,                        // char type;
+        FD_NONE,                        // unsigned int seqNr;
+        FD_NONE,                        // const char* payload;
+        FD_NONE,                        // unsigned int payloadSize;
+        FD_NONE                         // unsigned int hopCount;
     };
     return (field>=0 && field<nrOfFields) ? fieldTypeFlags[field] : 0;
 }
@@ -262,11 +266,7 @@ bool OMNeTPacketDescriptor::setFieldAsString(void *object, int field, int i, con
     }
     OMNeTPacket *pp = (OMNeTPacket *)object; (void)pp;
     switch (field) {
-        //TODO implement this
-        /*case 0: pp->setSomeField(string2long(value)); return true;
-        case 1: pp->setAnotherField((value)); return true;
-        case 2: pp->setArrayField1(i,string2double(value)); return true;
-        case 3: pp->setArrayField2(i,string2double(value)); return true;*/
+        // nothing is editable yet
         default: return false;
     }
 }
@@ -302,10 +302,9 @@ void *OMNeTPacketDescriptor::getFieldStructPointer(void *object, int field, int 
     }
     OMNeTPacket* pp = (OMNeTPacket *)object; (void)pp;
     switch (field) {
-        //TODO imlement this
-        /*case 0: return pp->getSource();
+        case 0: return pp->getSource();
         case 1: return pp->getDestination();
-        case 2: return pp->getSender();*/
+        case 2: return pp->getSender();
         default: return NULL;
     }
 }

@@ -24,22 +24,38 @@
  *******************************************************************************/
 
 #include "OMNeTGate.h"
+#include "OMNeTPacket.h"
+#include "OMNeTAddress.h"
 
 namespace ARA {
 
-//TODO implement missing OMNeTGate methods
-
-OMNeTGate::OMNeTGate(const cSimpleModule* module, std::string gateName) {
+OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
     this->module = module;
-    this->gateName = gateName;
+    this->gate = gate;
 }
 
-void OMNeTGate::send(Packet* packet, Address* recipient) {
-
+void OMNeTGate::send(const Packet* packet, Address* recipient) {
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet;
+    module->send(omnetPacket, gate);
 }
 
-void OMNeTGate::broadcast(Packet* packet) {
+void OMNeTGate::broadcast(const Packet* packet) {
+    module->send((OMNeTPacket*) packet, gate);
+}
 
+bool OMNeTGate::equals(NetworkInterface* otherInterface) {
+    OMNeTGate* otherOMNeTInterface = dynamic_cast<OMNeTGate*>(otherInterface);
+    if(otherOMNeTInterface == NULL) {
+        return false;
+    }
+    else {
+        return strcmp(module->getFullName(), otherOMNeTInterface->module->getFullName()) == 0
+            && strcmp(gate->getFullName(), otherOMNeTInterface->gate->getFullName()) == 0;
+    }
+}
+
+Address* OMNeTGate::getLocalAddress() {
+    return new OMNeTAddress(module->getName());
 }
 
 } /* namespace ARA */
