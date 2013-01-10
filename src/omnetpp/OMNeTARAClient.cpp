@@ -15,6 +15,8 @@
 
 #include "OMNeTARAClient.h"
 #include <omnetpp.h>
+#include "OMNeTPacket.h"
+#include "OMNeTAddress.h"
 
 using namespace ARA;
 
@@ -23,7 +25,9 @@ Define_Module(OMNeTARAClient);
 
 void OMNeTARAClient::initialize() {
     if (strcmp("source", getName()) == 0) {
-        cMessage* msg = new cMessage("Foo");
+        OMNeTAddress* source = new OMNeTAddress("source");
+        OMNeTAddress* destination = new OMNeTAddress("destination");
+        cMessage* msg = new OMNeTPacket(source, destination);
         send(msg, "g$o", 0);
     }
 }

@@ -24,7 +24,7 @@
 
 namespace ARA {
 
-class OMNeTARAClient: public cSimpleModule, AbstractARAClient {
+class OMNeTARAClient: public cSimpleModule, public AbstractARAClient {
 
 protected:
     //~~~ INHERITED FROM cSimpleModule ~~~~~~~
