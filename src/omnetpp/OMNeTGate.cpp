@@ -26,6 +26,7 @@
 #include "OMNeTGate.h"
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
+#include "OMNeTPacket.h" //FIXME Another Test
 
 namespace ARA {
 
@@ -40,7 +41,9 @@ void OMNeTGate::send(const Packet* packet, Address* recipient) {
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
-    module->send((OMNeTPacket*) packet, gate);
+    //TODO does OMNeT++ ever delete this clone?
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+    module->send(omnetPacket, gate);
 }
 
 bool OMNeTGate::equals(NetworkInterface* otherInterface) {
