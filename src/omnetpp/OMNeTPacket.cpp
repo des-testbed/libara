@@ -71,6 +71,25 @@ void OMNeTPacket::parsimUnpack(cCommBuffer *b) {
     doUnpacking(b,this->arrayField2_var,10);*/
 }
 
+Packet* OMNeTPacket::clone() const {
+    return new OMNeTPacket(source->clone(), destination->clone(), sender->clone(), type, seqNr, payload, payloadSize, hopCount);
+}
+
+Packet* OMNeTPacket::createFANT(unsigned int sequenceNumber) const {
+    const char* payload = NULL;
+    unsigned int hopCount = 0; // FIXME should this be 1?
+    // TODO cloning the sender here has no real meaning. Couldn't we just set the sender to NULL? (beware of resulting segfaults in the destructor!!!)
+    OMNeTPacket* fant = new OMNeTPacket(source->clone(), destination->clone(), sender->clone(), PacketType::FANT, sequenceNumber, payload, 0, hopCount);
+    return fant;
+}
+
+Packet* OMNeTPacket::createBANT(unsigned int sequenceNumber) const {
+    const char* payload = NULL;
+    unsigned int hopCount = 0; // FIXME should this be 1?
+    OMNeTPacket* bant = new OMNeTPacket(destination->clone(), source->clone(), sender->clone(), PacketType::BANT, sequenceNumber, payload, 0, hopCount);
+    return bant;
+}
+
 class OMNeTPacketDescriptor : public cClassDescriptor {
 public:
     OMNeTPacketDescriptor();

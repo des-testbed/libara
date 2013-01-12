@@ -28,6 +28,10 @@ class OMNeTPacket : public ::cPacket, public ARA::Packet
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
+    virtual Packet* clone() const;
+    virtual Packet* createFANT(unsigned int sequenceNumber) const;
+    virtual Packet* createBANT(unsigned int sequenceNumber) const;
+
 };
 
 inline void doPacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimPack(b);}
