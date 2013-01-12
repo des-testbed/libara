@@ -41,7 +41,7 @@ public:
     Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 1);
     Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, unsigned int hopCount);
     Packet(Address* source, Address* destination, char type, unsigned int seqNr);
-    ~Packet();
+    virtual ~Packet();
 
     /**
      * Returns the address of the node that has initially created and send a packet
@@ -115,9 +115,9 @@ public:
      * Two packets are defined to be equal if they have the same source and sequence number
      * TODO is it really okay to define equality this way? What about the payload, destination and type?
      */
-    bool equals(const Packet* otherPacket) const;
+    virtual bool equals(const Packet* otherPacket) const;
 
-    bool operator==(Packet& other) {
+    virtual bool operator==(Packet& other) {
         return this->equals(&other);
     }
 
@@ -143,8 +143,8 @@ public:
      */
     void increaseHopCount();
 
-    Packet* clone() const;
-	Packet* createFANT(unsigned int sequenceNumber) const;
+    virtual Packet* clone() const;
+	virtual Packet* createFANT(unsigned int sequenceNumber) const;
 
 	/**
 	 * Creates a new BANT from this packet. This BANT has the destination of
@@ -155,7 +155,7 @@ public:
 	 * Note: The result of this method is a newly created object which must be
 	 * deleted later by the calling class.
 	 */
-	Packet* createBANT(unsigned int sequenceNumber) const;
+	virtual Packet* createBANT(unsigned int sequenceNumber) const;
 
 protected:
     Address* source;

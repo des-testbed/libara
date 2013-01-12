@@ -122,7 +122,7 @@ Packet* Packet::createFANT(unsigned int sequenceNumber) const {
 }
 
 Packet* Packet::createBANT(unsigned int sequenceNumber) const {
-    unsigned int hopCount = 0;
+    unsigned int hopCount = 0; // FIXME should this be 1?
     Packet* bant = new Packet(destination->clone(), source->clone(), sender->clone(), PacketType::BANT, sequenceNumber, hopCount);
     return bant;
 }

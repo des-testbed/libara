@@ -45,3 +45,12 @@ TEST(PacketTypeTest, testIsDataPacket) {
     CHECK(PacketType::isDataPacket(PacketType::DATA) == true);
     CHECK(PacketType::isDataPacket(PacketType::DUPLICATE_ERROR) == false);
 }
+
+TEST(PacketTypeTest, testGetAsString) {
+    CHECK_EQUAL("FANT", PacketType::getAsString(PacketType::FANT));
+    CHECK_EQUAL("BANT", PacketType::getAsString(PacketType::BANT));
+    CHECK_EQUAL("PANT", PacketType::getAsString(PacketType::PANT));
+    CHECK_EQUAL("DATA", PacketType::getAsString(PacketType::DATA));
+    CHECK_EQUAL("DUPLICATE_ERROR", PacketType::getAsString(PacketType::DUPLICATE_ERROR));
+    CHECK_EQUAL("UNKOWN", PacketType::getAsString(5));
+}

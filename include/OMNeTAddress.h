@@ -27,23 +27,23 @@
 #define OMNETADDRESS_H_
 
 #include "Address.h"
+#include <string>
 
 namespace ARA {
 
 class OMNeTAddress : public Address {
 public:
-    OMNeTAddress(unsigned int address);
+    OMNeTAddress(std::string name);
+
     bool equals(Address* otherAddress);
     size_t getHashValue() const;
     bool isBroadCast();
     Address* clone();
 
-    unsigned int getAddress();
-
-    static const unsigned int BROADCAST = 0;
+    std::string getAddress();
 
 private:
-    unsigned int address;
+    std::string address;
 
 };
 

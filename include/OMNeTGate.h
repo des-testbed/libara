@@ -27,21 +27,22 @@
 #define OMNETGATE_H_
 
 #include <omnetpp.h>
-#include <string>
 #include "NetworkInterface.h"
 
 namespace ARA {
 
 class OMNeTGate: public NetworkInterface {
 public:
-    OMNeTGate(const cSimpleModule* module, std::string gateName);
+    OMNeTGate(cSimpleModule* module, cGate* gate);
 
-    void send(Packet* packet, Address* recipient);
-    void broadcast(Packet* packet);
+    void send(const Packet* packet, Address* recipient);
+    void broadcast(const Packet* packet);
+    bool equals(NetworkInterface* interface);
+    Address* getLocalAddress();
 
 private:
-    const cSimpleModule* module;
-    std::string gateName;
+    cSimpleModule* module;
+    cGate* gate;
 };
 
 } /* namespace ARA */
