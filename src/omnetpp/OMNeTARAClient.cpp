@@ -46,8 +46,8 @@ void OMNeTARAClient::sendInitialPacket() {
 
 void OMNeTARAClient::handleMessage(cMessage *msg) {
     OMNeTPacket* omnetPacket = (OMNeTPacket*) msg;
-    //send(msg, "g$o", 0);
     receivePacket(omnetPacket, getNetworkInterface(0));
+    delete msg;
 }
 
 NextHop* OMNeTARAClient::getNextHop(const Packet* packet) {
