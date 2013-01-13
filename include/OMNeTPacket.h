@@ -11,8 +11,7 @@
 
 namespace ARA {
 
-class OMNeTPacket : public ::cPacket, public ARA::Packet
-{
+class OMNeTPacket : public ::cPacket, public ARA::Packet {
   private:
     void copy(const OMNeTPacket& other);
 
@@ -31,7 +30,6 @@ class OMNeTPacket : public ::cPacket, public ARA::Packet
     virtual Packet* clone() const;
     virtual Packet* createFANT(unsigned int sequenceNumber) const;
     virtual Packet* createBANT(unsigned int sequenceNumber) const;
-
 };
 
 inline void doPacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimPack(b);}

@@ -22,7 +22,7 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTPacket);
 
-OMNeTPacket::OMNeTPacket(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) : cPacket(), ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
+OMNeTPacket::OMNeTPacket(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
 
 }
 
