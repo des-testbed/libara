@@ -7,23 +7,27 @@ An enhanceable framework for developing and testing the Ant Routing Algorithm (A
 Installation
 ============
 
-After gut git checkout you may run first
+After the checkout you should run the following make target which will create src/Makefile and prepare the OMNeT++build.
 ```
 make makefiles
 ```
 
-This will automagically create the Makefile for the src folder and prepare the OMNeT++ build.
 
-After that you should install the [CppUTest Framework][1].
+Now you should be able to build the sources and simulation via 
+```
+make all
+```
+
+Ara-Sim is developed with a test driven approach. 
+You should install the [CppUTest Framework][1] to run the unit tests.
 There is also a Makefile target to do that.
-
+This will clone [a fork of CppUTest][2] into a subfolder of your Ara-Sim working copy, build it and run some tests on it.
 ```
 make installCppUTest
 ```
 
-This will clone [a fork of CppUTest][2] into a subfolder of your Ara-Sim working copy, build it and run some tests on it.
-After you have completetd this step you can run the whole Ara-Sim regression test suit via
 
+After you have completetd this step you can run the whole Ara-Sim regression test suit via
 ```
 make test
 ```
