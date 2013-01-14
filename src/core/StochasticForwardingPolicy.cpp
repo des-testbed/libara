@@ -63,9 +63,11 @@ NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket){
   // pick a random number, TODO: check how to generate random numbers in omnet++
   //q = genk_dblrand(0);
   //
+  float q = this->getRandomNumber();
   
-  //while q > c_sum[node]:
-  //  node += 1
+  while(q > c_sum[node]){
+    node += 1;
+  }
 
   // fixme
   int index = 0;
@@ -78,4 +80,11 @@ NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket){
   return result;
 }
 
+void StochasticForwardingPolicy::initializeRandomNumberGenerator(){
+  srand((unsigned)time(0));
+}
 
+float StochasticForwardingPolicy::getRandomNumber(){
+  // not sure if this really works
+  return ((float)rand()/(float)RAND_MAX);
+}

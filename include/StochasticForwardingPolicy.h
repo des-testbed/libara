@@ -27,7 +27,9 @@
 #define STOCHASTIC_FORWARDING_POLICY_H_
 
 #include <deque>
+#include <ctime>
 #include <numeric>
+#include <stdlib.h>
 
 #include "Packet.h"
 #include "NextHop.h"
@@ -42,6 +44,12 @@ namespace ARA {
       StochasticForwardingPolicy(RoutingTable*);
       ~StochasticForwardingPolicy();
       NextHop getNextHop(Packet*);
+
+    private:
+      void initializeRandomNumberGenerator();
+      // this method needs to be overwritten for omnet client since
+      // we are going to use the built-in random number generator in omnet++
+      float getRandomNumber();
   };
 } 
 
