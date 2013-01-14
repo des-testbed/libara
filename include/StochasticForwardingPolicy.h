@@ -39,9 +39,9 @@
 namespace ARA { 
   class StochasticForwardingPolicy : public AbstractForwardingPolicy {
     public:
-      StochasticForwardingPolicy(RoutingTable&);
+      StochasticForwardingPolicy(RoutingTable*);
       ~StochasticForwardingPolicy();
-      NextHop getNextHop(Packet&);
+      NextHop getNextHop(Packet*);
   };
 } 
 

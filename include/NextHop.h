@@ -33,6 +33,7 @@ namespace ARA {
 
 class NextHop {
 public:
+    NextHop();
     NextHop(Address* address, NetworkInterface* interface);
 
     Address* getAddress();

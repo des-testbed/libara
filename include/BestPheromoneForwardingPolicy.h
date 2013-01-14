@@ -40,9 +40,9 @@
 namespace ARA { 
   class BestPheromoneForwardingPolicy : public AbstractForwardingPolicy {
     public:
-      BestPheromoneForwardingPolicy(RoutingTable&);
+      BestPheromoneForwardingPolicy(RoutingTable*);
       ~BestPheromoneForwardingPolicy();
-      NextHop getNextHop(Packet&);
+      NextHop getNextHop(Packet*);
   };
 } 
 

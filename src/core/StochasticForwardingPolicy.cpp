@@ -27,15 +27,15 @@
 
 using namespace ARA;
 
-StochasticForwardingPolicy::StochasticForwardingPolicy(RoutingTable& pRoutingTable):AbstractForwardingPolicy(pRoutingTable){}
+StochasticForwardingPolicy::StochasticForwardingPolicy(RoutingTable* pRoutingTable):AbstractForwardingPolicy(pRoutingTable){}
 
 StochasticForwardingPolicy::~StochasticForwardingPolicy(){}
 
 // todo: add exception for "no hop available", are not yet interfaces are not yet considered
-NextHop StochasticForwardingPolicy::getNextHop(Packet& pPacket){
+NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket){
   int node = 0;
   /// get a list of possible nodes towards a destination
-  LinkedList<RoutingTableEntry> *list = this->mRoutingTable.getPossibleNextHops(&pPacket);
+  LinkedList<RoutingTableEntry> *list = this->mRoutingTable->getPossibleNextHops(pPacket);
   /// store the size of the possible node list
   unsigned int size = list->size();
   /// the sum in the probablity function

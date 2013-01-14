@@ -27,21 +27,23 @@
 
 using namespace ARA;
 
-BestPheromoneForwardingPolicy::BestPheromoneForwardingPolicy(RoutingTable& pRoutingTable):AbstractForwardingPolicy(pRoutingTable){}
+BestPheromoneForwardingPolicy::BestPheromoneForwardingPolicy(RoutingTable* pRoutingTable):AbstractForwardingPolicy(pRoutingTable){}
 
-BestPheromoneForwardingPolicy::~BestPheromoneForwardingPolicy(){ }
+BestPheromoneForwardingPolicy::~BestPheromoneForwardingPolicy(){ 
+ // delete this->mRoutingTable;
+}
 
 // todo: add exception for "no hop available", are not yet interfaces are not yet considered
-NextHop BestPheromoneForwardingPolicy::getNextHop(Packet& pPacket){
+NextHop BestPheromoneForwardingPolicy::getNextHop(Packet* pPacket){
   /// get a list of possible nodes towards a destination
-  LinkedList<RoutingTableEntry>* list = this->mRoutingTable.getPossibleNextHops(&pPacket);
+  LinkedList<RoutingTableEntry>* list = this->mRoutingTable->getPossibleNextHops(pPacket);
   /// a value to compare
   float compare, phi = 0.0;
   /// the index of the element containing the highest pheromone value
-  unsigned int index = -1;
+  int index = -1;
 
   /// TODO: That is rather ugly, since we have to iterate over the whole routing table 
-  for(unsigned int i = 0; i <- list->size(); i++){
+  for(unsigned int i = 0; i < list->size(); i++){
     phi = list->get(i)->getPheromoneValue();
     //phi = entry.getPheromoneValue();
     if(compare < phi){
@@ -56,9 +58,11 @@ NextHop BestPheromoneForwardingPolicy::getNextHop(Packet& pPacket){
   //}
 
   // create the result 
-  NextHop result = NextHop(list->get(index)->getNextHop()->getAddress(), list->get(index)->getNextHop()->getInterface());
+  //NextHop result = NextHop();
+//NextHop(list->get(index)->getNextHop()->getAddress(), list->get(index)->getNextHop()->getInterface());
   // delete the list
   delete list;
   // todo: check ob mir das um die ohren fliegt, mehr als wahrscheinlich
-  return result;
+  //return result;
+  return NextHop();
 }

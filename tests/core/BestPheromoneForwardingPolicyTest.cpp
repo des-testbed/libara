@@ -30,9 +30,12 @@
 #include "LinkedList.h"
 #include "NextHop.h"
 #include "PacketType.h"
+#include "Exception.h" 
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+
+#include <iostream>
 
 using namespace ARA;
 
@@ -57,8 +60,9 @@ TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
     routingTable.update(&destination, &nextHopB, &interface, 2.1);
     routingTable.update(&destination, &nextHopC, &interface, 2.3);
 
+
     // set the routing table
-    BestPheromoneForwardingPolicy policy(routingTable);
+    BestPheromoneForwardingPolicy policy(&routingTable);
     // get next hop
-    policy.getNextHop(packet);
+    NextHop node = policy.getNextHop(&packet);
 }

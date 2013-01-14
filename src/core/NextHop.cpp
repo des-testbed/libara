@@ -27,6 +27,10 @@
 
 namespace ARA {
 
+NextHop::NextHop(){
+
+}
+
 NextHop::NextHop(Address* address, NetworkInterface* interface) {
     this->address = address;
     this->interface = interface;

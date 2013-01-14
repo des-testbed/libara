@@ -33,11 +33,11 @@
 namespace ARA { 
   class AbstractForwardingPolicy {
     public:
-      AbstractForwardingPolicy(RoutingTable& pRoutingTable) : mRoutingTable(pRoutingTable){}
-      virtual NextHop getNextHop(Packet&) = 0;
+      AbstractForwardingPolicy(RoutingTable* pRoutingTable) : mRoutingTable(pRoutingTable){}
+      virtual NextHop getNextHop(Packet*) = 0;
 
     protected:
-      RoutingTable mRoutingTable;
+      RoutingTable* mRoutingTable;
   };
 } 
 
