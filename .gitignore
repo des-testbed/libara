@@ -20,3 +20,5 @@ extern/cpputest
 simulations/.tkenvrc
 simulations/.tkenvlog
 
+# valgrind core dumps
+*vgcore*
