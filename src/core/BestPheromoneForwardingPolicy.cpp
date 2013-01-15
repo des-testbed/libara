@@ -59,8 +59,6 @@ NextHop BestPheromoneForwardingPolicy::getNextHop(Packet* pPacket){
 
   // create the result 
   NextHop result = NextHop(list->get(index)->getNextHop()->getAddress(), list->get(index)->getNextHop()->getInterface());
-
   // todo: check ob mir das um die ohren fliegt, mehr als wahrscheinlich
-  //return result;
   return result;
 }

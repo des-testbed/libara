@@ -69,13 +69,8 @@ NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket){
     node += 1;
   }
 
-  // fixme
-  int index = 0;
-
   // create the result 
-  NextHop result = NextHop(list->get(index)->getNextHop()->getAddress(), list->get(index)->getNextHop()->getInterface());
-  // delete the list
-  delete list;
+  NextHop result = NextHop(list->get(node)->getNextHop()->getAddress(), list->get(node)->getNextHop()->getInterface());
   // todo: check ob mir das um die ohren fliegt, mehr als wahrscheinlich
   return result;
 }
