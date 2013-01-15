@@ -60,9 +60,10 @@ TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
     routingTable.update(&destination, &nextHopB, &interface, 2.1);
     routingTable.update(&destination, &nextHopC, &interface, 2.3);
 
-
     // set the routing table
     BestPheromoneForwardingPolicy policy(&routingTable);
     // get next hop
     NextHop node = policy.getNextHop(&packet);
+
+    CHECK_EQUAL(&nextHopC, node.getAddress());
 }
