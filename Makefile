@@ -20,6 +20,8 @@ cleanall: checkmakefiles
 	@cd tests && $(MAKE) clean
 	rm -f src/Makefile
 
+release: cleanall makefiles test	
+
 makefiles:
 	cd src && opp_makemake -f --deep -I ../include
 
