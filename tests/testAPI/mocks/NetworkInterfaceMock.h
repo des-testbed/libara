@@ -26,6 +26,7 @@
 #ifndef NETWORKINTERFACEMOCK_H_
 #define NETWORKINTERFACEMOCK_H_
 
+#include <memory>
 #include "NetworkInterface.h"
 #include "Packet.h"
 #include "LinkedList.h"
@@ -44,7 +45,7 @@ public:
     void send(const Packet* packet, Address* recipient);
     void broadcast(const Packet* packet);
     bool equals(NetworkInterface* otherInterface);
-    Address* getLocalAddress();
+    std::shared_ptr<Address> getLocalAddress();
 
     std::string getName();
     LinkedList<Pair<Packet, Address>>* getSentPackets();
@@ -55,7 +56,7 @@ public:
 private:
     std::string name;
     LinkedList<Pair<Packet, Address>> sentPackets;
-    AddressMock localAddress;
+    std::shared_ptr<Address> localAddress;
 };
 
 } /* namespace ARA */

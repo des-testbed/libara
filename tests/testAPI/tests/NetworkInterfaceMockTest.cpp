@@ -32,6 +32,7 @@
 #include "Pair.h"
 
 using namespace ARA;
+using namespace std;
 
 TEST_GROUP(NetworkInterfaceMockTest) {};
 
@@ -125,7 +126,7 @@ TEST(NetworkInterfaceMockTest, testGetNumberOfSentPackets) {
 TEST(NetworkInterfaceMockTest, testGetLocalAddress) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressMock expectedLocalAddress = AddressMock("DEFAULT");
-    Address* defaultLocalAddress = interface.getLocalAddress();
+    shared_ptr<Address> defaultLocalAddress = interface.getLocalAddress();
     CHECK(defaultLocalAddress->equals(&expectedLocalAddress));
 
     interface = NetworkInterfaceMock("eth0", "192.168.0.1");

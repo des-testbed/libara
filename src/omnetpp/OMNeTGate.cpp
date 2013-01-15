@@ -28,6 +28,8 @@
 #include "OMNeTAddress.h"
 #include "OMNeTPacket.h" //FIXME Another Test
 
+using namespace std;
+
 namespace ARA {
 
 OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
@@ -57,8 +59,8 @@ bool OMNeTGate::equals(NetworkInterface* otherInterface) {
     }
 }
 
-Address* OMNeTGate::getLocalAddress() {
-    return new OMNeTAddress(module->getName());
+shared_ptr<Address> OMNeTGate::getLocalAddress() {
+    return shared_ptr<Address>(new OMNeTAddress(module->getName()));
 }
 
 } /* namespace ARA */

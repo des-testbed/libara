@@ -26,20 +26,22 @@
 #include "NetworkInterfaceMock.h"
 #include "AddressMock.h"
 
+using namespace std;
+
 namespace ARA {
 
 NetworkInterfaceMock::NetworkInterfaceMock() {
-    localAddress = AddressMock("DEFAULT");
+    localAddress = shared_ptr<Address>(new AddressMock("DEFAULT"));
     this->name = "NetworkInterfaceMock";
 }
 
 NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName) {
-    localAddress = AddressMock("DEFAULT");
+    localAddress = shared_ptr<Address>(new AddressMock("DEFAULT"));
     this->name = interfaceName;
 }
 
 NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName) {
-    localAddress = AddressMock(localAddressName);
+    localAddress = shared_ptr<Address>(new AddressMock(localAddressName));
     this->name = interfaceName;
 }
 
@@ -120,8 +122,8 @@ unsigned int NetworkInterfaceMock::getNumberOfSentPackets() {
     return sentPackets.size();
 }
 
-Address* NetworkInterfaceMock::getLocalAddress() {
-    return &localAddress;
+shared_ptr<Address> NetworkInterfaceMock::getLocalAddress() {
+    return shared_ptr<Address>(localAddress);
 }
 
 } /* namespace ARA */
