@@ -204,8 +204,8 @@ TEST(AbstractARAClientTest, testRespondWithDuplicateError) {
 
     // check the contents of the duplicate warning packet
     CHECK(recipientOfSentPacket->equals(packet.getSender()));
-//FIXME shared_ptr reinclude    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
-    //FIXME shared_ptr reinclude    CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_ERROR);
     LONGS_EQUAL(1, sentPacket->getHopCount());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
@@ -317,7 +317,7 @@ TEST(AbstractARAClientTest, testDataPacketIsRelayedIfRouteIsKnown) {
     Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getSource()->equals(source));
     CHECK(sentPacket->getDestination()->equals(destination));
-    //FIXME shared_ptr reinclude    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
     STRCMP_EQUAL("Hello World", sentPacket->getPayload());
     LONGS_EQUAL(123, sentPacket->getSequenceNumber());
@@ -352,7 +352,7 @@ TEST(AbstractARAClientTest, testReceivedAntPacketsAreBroadcasted) {
     Packet* sentPacket1 = sentPacketInfo1->getLeft();
     CHECK(sentPacket1->getSource()->equals(packet1.getSource()));
     CHECK(sentPacket1->getDestination()->equals(packet1.getDestination()));
-    //FIXME shared_ptr reinclude    CHECK(sentPacket1->getSender()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket1->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::FANT, sentPacket1->getType());
     LONGS_EQUAL(2, sentPacket1->getHopCount());
 
@@ -360,7 +360,7 @@ TEST(AbstractARAClientTest, testReceivedAntPacketsAreBroadcasted) {
     Packet* sentPacket2 = sentPacketInfo2->getLeft();
     CHECK(sentPacket2->getSource()->equals(packet2.getSource()));
     CHECK(sentPacket2->getDestination()->equals(packet2.getDestination()));
-    //FIXME shared_ptr reinclude    CHECK(sentPacket2->getSender()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket2->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::BANT, sentPacket2->getType());
     LONGS_EQUAL(2, sentPacket2->getHopCount());
 }
@@ -430,7 +430,7 @@ TEST(AbstractARAClientTest, testReceivedBANTTriggersSendingOfTrappedPackets) {
     Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getSource()->equals(dataPacket.getSource()));
     CHECK(sentPacket->getDestination()->equals(dataPacket.getDestination()));
-    //FIXME shared_ptr reinclude    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
     LONGS_EQUAL(1, sentPacket->getHopCount());
 

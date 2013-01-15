@@ -27,6 +27,7 @@
 #define ADDRESS_H_
 
 #include <stddef.h>
+#include <memory>
 
 namespace ARA {
 
@@ -39,6 +40,7 @@ public:
 
     //TODO do we need the equals method if we support operator== overloading now?
     virtual bool equals(Address* otherAddress) = 0;
+    virtual bool equals(std::shared_ptr<Address> otherAddress) = 0;
     virtual size_t getHashValue() const = 0;
     virtual bool isBroadCast() = 0;
     virtual Address* clone() = 0;

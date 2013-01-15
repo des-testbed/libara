@@ -44,6 +44,16 @@ bool OMNeTAddress::equals(Address* otherAddress) {
     }
 }
 
+bool OMNeTAddress::equals(std::shared_ptr<Address> otherAddress) {
+    shared_ptr<OMNeTAddress> otherOmnetMock (dynamic_pointer_cast<OMNeTAddress>(otherAddress));
+    if(otherOmnetMock == NULL) {
+        return false;
+    }
+    else {
+        return this->address.compare(otherOmnetMock->address) == 0;
+    }
+}
+
 size_t OMNeTAddress::getHashValue() const {
     __gnu_cxx::hash<const char*> hashFunction;
     return hashFunction(address.c_str());

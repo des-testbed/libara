@@ -48,6 +48,16 @@ bool AddressMock::equals(Address* otherAddress) {
     }
 }
 
+bool AddressMock::equals(shared_ptr<Address> otherAddress) {
+    shared_ptr<AddressMock> otherAddressMock (dynamic_pointer_cast<AddressMock>(otherAddress));
+    if(otherAddressMock == NULL) {
+        return false;
+    }
+    else {
+        return this->address.compare(otherAddressMock->address) == 0;
+    }
+}
+
 size_t AddressMock::getHashValue() const {
     __gnu_cxx::hash<const char*> hashFunction;
     return hashFunction(address.c_str());
