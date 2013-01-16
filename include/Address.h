@@ -45,8 +45,12 @@ public:
     virtual bool isBroadCast() = 0;
     virtual Address* clone() = 0;
 
-    bool operator==(Address& other) {
-        return this->equals(&other);
+    bool operator==(const Address& otherAddress) const {
+            return this->equals(&otherAddress);
+        }
+
+    bool operator==(const std::shared_ptr<Address> otherAddress) const {
+        return this->equals(otherAddress);
     }
 };
 
