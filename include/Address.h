@@ -27,6 +27,7 @@
 #define ADDRESS_H_
 
 #include <stddef.h>
+#include <memory>
 
 namespace ARA {
 
@@ -38,13 +39,18 @@ public:
     virtual ~Address() {}
 
     //TODO do we need the equals method if we support operator== overloading now?
-    virtual bool equals(Address* otherAddress) = 0;
+    virtual bool equals(const Address* otherAddress) const = 0;
+    virtual bool equals(const std::shared_ptr<Address> otherAddress) const = 0;
     virtual size_t getHashValue() const = 0;
     virtual bool isBroadCast() = 0;
     virtual Address* clone() = 0;
 
-    bool operator==(Address& other) {
-        return this->equals(&other);
+    bool operator==(const Address& otherAddress) const {
+            return this->equals(&otherAddress);
+        }
+
+    bool operator==(const std::shared_ptr<Address> otherAddress) const {
+        return this->equals(otherAddress);
     }
 };
 
@@ -52,7 +58,7 @@ public:
  * This Functor is needed for std::unordered_map (hashmap implementation)
  */
 struct AddressHash {
-    size_t operator()(Address* address) const {
+    size_t operator()(std::shared_ptr<Address> address) const {
         return address->getHashValue();
     }
 };
@@ -61,7 +67,7 @@ struct AddressHash {
  * This Functor is needed for std::unordered_map (hashmap implementation)
  */
 struct AddressPredicate {
-    size_t operator()(Address* address1, Address* address2) const {
+    size_t operator()(std::shared_ptr<Address> address1, std::shared_ptr<Address> address2) const {
         return address1->equals(address2);
     }
 };

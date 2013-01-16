@@ -26,6 +26,7 @@
 #ifndef ROUTINGTABLEENTRY_H_
 #define ROUTINGTABLEENTRY_H_
 
+#include <memory>
 #include "NextHop.h"
 #include "Address.h"
 #include "NetworkInterface.h"
@@ -34,11 +35,11 @@ namespace ARA {
 
 class RoutingTableEntry {
 public:
-    RoutingTableEntry(Address* address, NetworkInterface* interface, float pheromoneValue);
+    RoutingTableEntry(std::shared_ptr<Address> address, NetworkInterface* interface, float pheromoneValue);
     ~RoutingTableEntry();
 
     NextHop* getNextHop();
-    Address* getAddress();
+    std::shared_ptr<Address> getAddress();
     NetworkInterface* getNetworkInterface();
     float getPheromoneValue();
     void setPheromoneValue(float newPheromoneValue);

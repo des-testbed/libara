@@ -38,8 +38,18 @@ AddressMock::AddressMock(const std::string name) {
     this->address = name;
 }
 
-bool AddressMock::equals(Address* otherAddress) {
-    AddressMock* otherAddressMock = dynamic_cast<AddressMock*>(otherAddress);
+bool AddressMock::equals(const Address* otherAddress) const {
+    const AddressMock* otherAddressMock = dynamic_cast<const AddressMock*>(otherAddress);
+    if(otherAddressMock == NULL) {
+        return false;
+    }
+    else {
+        return this->address.compare(otherAddressMock->address) == 0;
+    }
+}
+
+bool AddressMock::equals(const shared_ptr<Address> otherAddress) const {
+    shared_ptr<AddressMock> otherAddressMock (dynamic_pointer_cast<AddressMock>(otherAddress));
     if(otherAddressMock == NULL) {
         return false;
     }

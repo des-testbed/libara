@@ -31,6 +31,8 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 
+#include <memory>
+
 using namespace ARA;
 
 TEST_GROUP(PacketTrapTest) {};
@@ -89,7 +91,7 @@ TEST(PacketTrapTest, testGetDeliverablePacket) {
     RoutingTable routingTable = RoutingTable();
     PacketTrap packetTrap = PacketTrap(&routingTable);
     PacketMock trappedPacket = PacketMock();
-    AddressMock someAddress = AddressMock();
+    std::shared_ptr<Address> someAddress (new AddressMock());
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     // Start the test
@@ -102,7 +104,7 @@ TEST(PacketTrapTest, testGetDeliverablePacket) {
     CHECK(deliverablePackets->isEmpty());   // packet is still not deliverable
     delete deliverablePackets;
 
-    routingTable.update(trappedPacket.getDestination(), &someAddress, &interface, 10);
+    routingTable.update(trappedPacket.getDestination(), someAddress, &interface, 10);
     deliverablePackets = packetTrap.getDeliverablePackets();
     CHECK(deliverablePackets->size() == 1);
 

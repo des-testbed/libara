@@ -31,14 +31,14 @@ namespace ARA {
 template<class Left, class Right>
 class Pair {
 public:
-    Pair(Left* left, Right* right);
+    Pair(Left left, Right right);
 
-    Left* getLeft();
-    Right* getRight();
+    Left getLeft();
+    Right getRight();
 
 private:
-    Left* left;
-    Right* right;
+    Left left;
+    Right right;
 };
 
 } /* namespace ARA */

@@ -27,6 +27,7 @@
 #define OMNETGATE_H_
 
 #include <omnetpp.h>
+#include <memory>
 #include "NetworkInterface.h"
 
 namespace ARA {
@@ -35,10 +36,10 @@ class OMNeTGate: public NetworkInterface {
 public:
     OMNeTGate(cSimpleModule* module, cGate* gate);
 
-    void send(const Packet* packet, Address* recipient);
+    void send(const Packet* packet, std::shared_ptr<Address> recipient);
     void broadcast(const Packet* packet);
     bool equals(NetworkInterface* interface);
-    Address* getLocalAddress();
+    std::shared_ptr<Address> getLocalAddress();
 
 private:
     cSimpleModule* module;

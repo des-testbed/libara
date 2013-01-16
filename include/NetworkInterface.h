@@ -26,6 +26,7 @@
 #ifndef NETWORKINTERFACE_H_
 #define NETWORKINTERFACE_H_
 
+#include <memory>
 #include "Packet.h"
 #include "Address.h"
 
@@ -41,7 +42,7 @@ public:
     /**
      * Sends the packet over this interface to the given recipient.
      */
-	virtual void send(const Packet* packet, Address* recipient) = 0;
+	virtual void send(const Packet* packet, std::shared_ptr<Address> recipient) = 0;
 
 	/**
 	 * Broadcasts the given packet over this interface.
@@ -65,7 +66,7 @@ public:
 	 *
 	 * This method is used to determine the sender address each time a a new packet is created.
 	 */
-	virtual Address* getLocalAddress() = 0;
+	virtual std::shared_ptr<Address> getLocalAddress() = 0;
 };
 
 } /* namespace ARA */

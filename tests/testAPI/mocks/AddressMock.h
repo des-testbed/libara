@@ -36,7 +36,8 @@ public:
     AddressMock();
     AddressMock(std::string name);
 
-    bool equals(Address* otherAddress);
+    bool equals(const Address* otherAddress) const;
+    bool equals(const std::shared_ptr<Address> otherAddress) const;
     size_t getHashValue() const;
     bool isBroadCast();
     Address* clone();

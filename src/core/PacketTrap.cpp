@@ -29,24 +29,26 @@ using namespace std;
 
 namespace ARA {
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 PacketTrap::PacketTrap(RoutingTable* routingTable) {
     this->routingTable = routingTable;
 }
 PacketTrap::~PacketTrap() {
-    unordered_map<Address*, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::iterator iterator;
+    unordered_map<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
-        pair<Address*, unordered_set<const Packet*, PacketHash, PacketPredicate>*> entryPair = *iterator;
+        pair<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*> entryPair = *iterator;
         delete entryPair.second;
     }
     trappedPackets.clear();
 }
 
-bool PacketTrap::thereIsAHashSetFor(Address* destination) {
+bool PacketTrap::thereIsAHashSetFor(AddressPtr destination) {
     return trappedPackets.find(destination) != trappedPackets.end();
 }
 
 void PacketTrap::trapPacket(const Packet* packet) {
-    Address* destination = packet->getDestination();
+    AddressPtr destination = packet->getDestination();
     if(thereIsAHashSetFor(destination) == false) {
         unordered_set<const Packet*, PacketHash, PacketPredicate>* newHashSet = new unordered_set<const Packet*, PacketHash, PacketPredicate>();
         trappedPackets[destination] = newHashSet;
@@ -56,8 +58,8 @@ void PacketTrap::trapPacket(const Packet* packet) {
 }
 
 void PacketTrap::untrapPacket(const Packet* packet) {
-    Address* packetDestination = packet->getDestination();
-    unordered_map<Address*, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::const_iterator found = trappedPackets.find(packetDestination);
+    AddressPtr packetDestination = packet->getDestination();
+    unordered_map<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::const_iterator found = trappedPackets.find(packetDestination);
     if(found != trappedPackets.end()) {
         unordered_set<const Packet*, PacketHash, PacketPredicate>* packetSet = found->second;
         packetSet->erase(packet);
@@ -72,8 +74,8 @@ void PacketTrap::untrapPacket(const Packet* packet) {
 }
 
 bool PacketTrap::contains(Packet* packet) {
-    Address* packetDestination = packet->getDestination();
-    unordered_map<Address*, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::const_iterator found = trappedPackets.find(packetDestination);
+    AddressPtr packetDestination = packet->getDestination();
+    unordered_map<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::const_iterator found = trappedPackets.find(packetDestination);
     if(found != trappedPackets.end()) {
         unordered_set<const Packet*, PacketHash, PacketPredicate>* packetSet = found->second;
         return packetSet->find(packet) != packetSet->end();
@@ -90,10 +92,10 @@ bool PacketTrap::isEmpty() {
 LinkedList<const Packet>* PacketTrap::getDeliverablePackets() {
     LinkedList<const Packet>* deliverablePackets = new LinkedList<const Packet>();
 
-    unordered_map<Address*, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::iterator iterator;
+    unordered_map<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
-        pair<Address*, unordered_set<const Packet*, PacketHash, PacketPredicate>*> entryPair = *iterator;
-        Address* address = entryPair.first;
+        pair<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*> entryPair = *iterator;
+        AddressPtr address = entryPair.first;
 
         if(routingTable->isDeliverable(address)) {
             // Add all packets for this destination

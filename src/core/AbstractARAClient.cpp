@@ -30,6 +30,8 @@ using namespace std;
 
 namespace ARA {
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 AbstractARAClient::AbstractARAClient() {
     packetTrap = new PacketTrap(&routingTable);
 }
@@ -37,12 +39,12 @@ AbstractARAClient::AbstractARAClient() {
 AbstractARAClient::~AbstractARAClient() {
     delete packetTrap; //TODO we must check for and delete all packets that might still be trapped
 
-    // delete the addresses and sequence number lists of the last received packets
-    unordered_map<Address*, unordered_set<unsigned int>*>::iterator iterator;
+    // delete the sequence number lists of the last received packets
+    unordered_map<AddressPtr, unordered_set<unsigned int>*>::iterator iterator;
     for (iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
-        std::pair<Address* const, unordered_set<unsigned int>*> entryPair = *iterator;
+        pair<AddressPtr, unordered_set<unsigned int>*> entryPair = *iterator;
 
-        delete entryPair.first;
+        // the addresses are disposed of automatically by shared_ptr
         delete entryPair.second;
     }
     lastReceivedPackets.clear();
@@ -65,7 +67,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         NextHop* nextHop = getNextHop(packet);
         NetworkInterface* interface = nextHop->getInterface();
         Packet* newPacket = packet->clone();
-        newPacket->setSender(interface->getLocalAddress()->clone());
+        newPacket->setSender(interface->getLocalAddress());
         newPacket->increaseHopCount();
         interface->send(newPacket, nextHop->getAddress());
         delete newPacket;
@@ -94,10 +96,11 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
     handlePacket(packet);
 }
 
-void AbstractARAClient::sendDuplicateWarning(Address* recipient, NetworkInterface* interface) {
-    Address* localAddress = interface->getLocalAddress()->clone();
+void AbstractARAClient::sendDuplicateWarning(AddressPtr recipient, NetworkInterface* interface) {
+    AddressPtr localAddress = interface->getLocalAddress();
     unsigned int sequenceNumber = getNextSequenceNumber();
-    Packet duplicateWarningPacket = Packet(localAddress, recipient->clone(), localAddress, PacketType::DUPLICATE_ERROR, sequenceNumber, 1);
+    unsigned int hopCount = 1;
+    Packet duplicateWarningPacket = Packet(localAddress, recipient, localAddress, PacketType::DUPLICATE_ERROR, sequenceNumber, hopCount);
     interface->send(&duplicateWarningPacket, recipient);
 }
 
@@ -154,7 +157,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
 }
 
 bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
-    Address* destination = packet->getDestination();
+    AddressPtr destination = packet->getDestination();
     //TODO replace this with an iterator
     unsigned int numberOfInterfaces = interfaces.size();
     for (unsigned int i = 0; i < numberOfInterfaces; i++) {
@@ -163,7 +166,6 @@ bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
             return true;
         }
     }
-
     return false;
 }
 
@@ -175,7 +177,7 @@ void AbstractARAClient::broadCast(const Packet* packet) {
     unsigned int nrOfInterfaces = interfaces.size();
     for(unsigned int i=0; i<nrOfInterfaces; i++) {
         NetworkInterface* interface = interfaces.get(i);
-        newPacket->setSender(interface->getLocalAddress()->clone());
+        newPacket->setSender(interface->getLocalAddress());
         interface->broadcast(newPacket);
     }
 
@@ -187,10 +189,10 @@ unsigned int AbstractARAClient::getNextSequenceNumber() {
 }
 
 bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
-    Address* source = packet->getSource();
+    AddressPtr source = packet->getSource();
     unsigned int sequenceNumber = packet->getSequenceNumber();
 
-    unordered_map<Address*, unordered_set<unsigned int>*>::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
+    unordered_map<AddressPtr, unordered_set<unsigned int>*>::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
     if(receivedPacketSeqNumbersFromSource != lastReceivedPackets.end()) {
         unordered_set<unsigned int>* sequenceNumbers = receivedPacketSeqNumbersFromSource->second;
         unordered_set<unsigned int>::const_iterator got = sequenceNumbers->find(sequenceNumber);
@@ -202,15 +204,15 @@ bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 }
 
 void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
-    Address* source = packet->getSource();
-    unordered_map<Address*, unordered_set<unsigned int>*>::const_iterator foundPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
+    AddressPtr source = packet->getSource();
+    unordered_map<AddressPtr, unordered_set<unsigned int>*>::const_iterator foundPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
 
     unordered_set<unsigned int>* listOfSequenceNumbers;
     if(foundPacketSeqNumbersFromSource == lastReceivedPackets.end()) {
         // There is no record of any received packet from this source address ~> create new
         listOfSequenceNumbers = new unordered_set<unsigned int>();
         listOfSequenceNumbers->insert(packet->getSequenceNumber());
-        lastReceivedPackets[source->clone()] = listOfSequenceNumbers;
+        lastReceivedPackets[source] = listOfSequenceNumbers;
     }
     else {
         listOfSequenceNumbers = foundPacketSeqNumbersFromSource->second;

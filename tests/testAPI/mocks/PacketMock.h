@@ -29,6 +29,7 @@
 #include "Packet.h"
 #include "PacketType.h"
 #include "Address.h"
+#include <memory>
 
 namespace ARA {
 
@@ -41,7 +42,7 @@ public:
         return this->equals(&other);
     }
 
-    void setSender(Address* newSenderAddress);
+    void setSender(std::shared_ptr<Address> newSenderAddress);
 };
 
 } /* namespace ARA */

@@ -27,7 +27,7 @@
 
 namespace ARA {
 
-RoutingTableEntry::RoutingTableEntry(Address* address, NetworkInterface* interface, float pheromoneValue) {
+RoutingTableEntry::RoutingTableEntry(std::shared_ptr<Address> address, NetworkInterface* interface, float pheromoneValue) {
     nextHop = new NextHop(address, interface);
     this->pheromoneValue = pheromoneValue;
 }
@@ -40,7 +40,7 @@ NextHop* RoutingTableEntry::getNextHop() {
     return nextHop;
 }
 
-Address* RoutingTableEntry::getAddress() {
+std::shared_ptr<Address> RoutingTableEntry::getAddress() {
     return nextHop->getAddress();
 }
 

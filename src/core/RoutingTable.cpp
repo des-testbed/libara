@@ -28,10 +28,12 @@
 
 namespace ARA {
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 RoutingTable::~RoutingTable() {
-    std::unordered_map<Address*, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate>::iterator iterator;
+    std::unordered_map<AddressPtr, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate>::iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-        std::pair<Address* const, LinkedList<RoutingTableEntry>*> entryPair = *iterator;
+        std::pair<AddressPtr const, LinkedList<RoutingTableEntry>*> entryPair = *iterator;
         LinkedList<RoutingTableEntry>* entryList = entryPair.second;
 
         // delete all RoutingTableEntries in the List
@@ -44,7 +46,7 @@ RoutingTable::~RoutingTable() {
     table.clear();
 }
 
-void RoutingTable::update(Address* destination, Address* nextHop, NetworkInterface* interface, float pheromoneValue) {
+void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
     if(isDeliverable(destination) == false) {
         // this destination is not yet registered
         RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
@@ -73,7 +75,7 @@ void RoutingTable::update(Address* destination, Address* nextHop, NetworkInterfa
     }
 }
 
-LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(Address* destination) {
+LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(AddressPtr destination) {
     if(isDeliverable(destination)) {
         // FIXME this should return a copy of this list (to avoid that entries in this list are accidentally removed from or added)
         return table[destination];
@@ -87,7 +89,7 @@ LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(const Packet* p
     return getPossibleNextHops(packet->getDestination());
 }
 
-bool RoutingTable::isDeliverable(Address* destination) {
+bool RoutingTable::isDeliverable(AddressPtr destination) {
     return table.find(destination) != table.end();
 }
 

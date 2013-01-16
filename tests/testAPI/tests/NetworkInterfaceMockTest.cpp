@@ -33,30 +33,32 @@
 
 using namespace ARA;
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 TEST_GROUP(NetworkInterfaceMockTest) {};
 
 TEST(NetworkInterfaceMockTest, testMockRemembersSentPackets) {
     NetworkInterfaceMock mock = NetworkInterfaceMock();
-    AddressMock recipient1 = AddressMock();
-    AddressMock recipient2 = AddressMock();
+    AddressPtr recipient1 (new AddressMock());
+    AddressPtr recipient2 (new AddressMock());
     PacketMock packet1 = PacketMock();
     PacketMock packet2 = PacketMock();
     PacketMock packet3 = PacketMock();
 
-    mock.send(&packet1, &recipient1);
-    mock.send(&packet2, &recipient2);
-    mock.send(&packet3, &recipient1);
+    mock.send(&packet1, recipient1);
+    mock.send(&packet2, recipient2);
+    mock.send(&packet3, recipient1);
 
-    LinkedList<Pair<Packet, Address>>* sendPackets = mock.getSentPackets();
+    LinkedList<Pair<Packet*, AddressPtr>>* sendPackets = mock.getSentPackets();
 
     CHECK(sendPackets->get(0)->getLeft()->equals(&packet1));
-    CHECK(sendPackets->get(0)->getRight()->equals(&recipient1));
+    CHECK(sendPackets->get(0)->getRight()->equals(recipient1));
 
     CHECK(sendPackets->get(1)->getLeft()->equals(&packet2));
-    CHECK(sendPackets->get(1)->getRight()->equals(&recipient2));
+    CHECK(sendPackets->get(1)->getRight()->equals(recipient2));
 
     CHECK(sendPackets->get(2)->getLeft()->equals(&packet3));
-    CHECK(sendPackets->get(2)->getRight()->equals(&recipient1));
+    CHECK(sendPackets->get(2)->getRight()->equals(recipient1));
 }
 
 TEST(NetworkInterfaceMockTest, testHasPacketBeenBroadCasted) {
@@ -64,11 +66,11 @@ TEST(NetworkInterfaceMockTest, testHasPacketBeenBroadCasted) {
     PacketMock packet1 = PacketMock("Source", "Destination", 1);
     PacketMock packet2 = PacketMock("Earth", "Moon", 1234);
     PacketMock packet3 = PacketMock("Source", "Destination", 2);
-    AddressMock viaAddress = AddressMock();
+    AddressPtr viaAddress (new AddressMock());
 
-    interface.send(&packet1, &viaAddress);
+    interface.send(&packet1, viaAddress);
     interface.broadcast(&packet2);
-    interface.send(&packet3, &viaAddress);
+    interface.send(&packet3, viaAddress);
 
     CHECK(interface.hasPacketBeenBroadCasted(&packet1) == false);
     CHECK(interface.hasPacketBeenBroadCasted(&packet2) == true);
@@ -80,9 +82,9 @@ TEST(NetworkInterfaceMockTest, testHasPacketBeenSend) {
     PacketMock packet1 = PacketMock("Source", "Destination", 1);
     PacketMock packet2 = PacketMock("Source", "Destination", 2);
     PacketMock packet3 = PacketMock("Source", "Destination", 3);
-    AddressMock address = AddressMock();
+    AddressPtr address (new AddressMock());
 
-    interface.send(&packet1, &address);
+    interface.send(&packet1, address);
     interface.broadcast(&packet2);
 
     CHECK(interface.hasPacketBeenSend(&packet1) == true);
@@ -107,29 +109,28 @@ TEST(NetworkInterfaceMockTest, testGetNumberOfSentPackets) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     PacketMock packet1 = PacketMock("Source", "Destination", 1);
     PacketMock packet2 = PacketMock("Source", "Destination", 2);
-    AddressMock address1 = AddressMock("A");
-    AddressMock address2 = AddressMock("B");
+    AddressPtr address1 (new AddressMock("A"));
+    AddressPtr address2 (new AddressMock("B"));
 
     CHECK_EQUAL(0, interface.getNumberOfSentPackets());
 
-    interface.send(&packet1, &address1);
+    interface.send(&packet1, address1);
     CHECK_EQUAL(1, interface.getNumberOfSentPackets());
 
-    interface.send(&packet1, &address2);
+    interface.send(&packet1, address2);
     CHECK_EQUAL(2, interface.getNumberOfSentPackets());
 
-    interface.send(&packet2, &address1);
+    interface.send(&packet2, address1);
     CHECK_EQUAL(3, interface.getNumberOfSentPackets());
 }
 
 TEST(NetworkInterfaceMockTest, testGetLocalAddress) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-    AddressMock expectedLocalAddress = AddressMock("DEFAULT");
-    Address* defaultLocalAddress = interface.getLocalAddress();
-    CHECK(defaultLocalAddress->equals(&expectedLocalAddress));
+    AddressPtr expectedLocalAddress (new AddressMock("DEFAULT"));
+    AddressPtr defaultLocalAddress = interface.getLocalAddress();
+    CHECK(defaultLocalAddress->equals(expectedLocalAddress));
 
     interface = NetworkInterfaceMock("eth0", "192.168.0.1");
-    expectedLocalAddress = AddressMock("192.168.0.1");
+    expectedLocalAddress.reset(new AddressMock("192.168.0.1"));
     defaultLocalAddress = interface.getLocalAddress();
-    CHECK(defaultLocalAddress->equals(&expectedLocalAddress));
-}
+    CHECK(defaultLocalAddress->equals(expectedLocalAddress));}

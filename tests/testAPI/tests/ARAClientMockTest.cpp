@@ -34,6 +34,7 @@
 #include "NextHop.h"
 
 using namespace ARA;
+using namespace std;
 
 TEST_GROUP(ARAClientMockTest) {};
 
@@ -71,16 +72,16 @@ TEST(ARAClientMockTest, testGetNextHop) {
     ARAClientMock client = ARAClientMock();
     PacketMock packet = PacketMock();
     RoutingTable* routingTable = client.getRoutingTable();
-    Address* destination = packet.getDestination();
-    AddressMock node1 = AddressMock("Node 1");
-    AddressMock node2 = AddressMock("Node 2");
+    shared_ptr<Address> destination = packet.getDestination();
+    shared_ptr<Address> node1 (new AddressMock("Node 1"));
+    shared_ptr<Address> node2 (new AddressMock("Node 2"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
-    routingTable->update(destination, &node1, &interface, 10);
-    routingTable->update(destination, &node2, &interface, 20);
+    routingTable->update(destination, node1, &interface, 10);
+    routingTable->update(destination, node2, &interface, 20);
 
     NextHop* nextHop = client.getNextHop(&packet);
-    CHECK(nextHop->getAddress()->equals(&node2));
+    CHECK(nextHop->getAddress()->equals(node2));
     CHECK(nextHop->getInterface()->equals(&interface));
 }
 

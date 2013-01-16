@@ -26,6 +26,7 @@
 #ifndef NEXTHOP_H_
 #define NEXTHOP_H_
 
+#include <memory>
 #include "Address.h"
 #include "NetworkInterface.h"
 
@@ -34,13 +35,13 @@ namespace ARA {
 class NextHop {
 public:
     NextHop();
-    NextHop(Address* address, NetworkInterface* interface);
+    NextHop(std::shared_ptr<Address> address, NetworkInterface* interface);
 
-    Address* getAddress();
+    std::shared_ptr<Address> getAddress();
     NetworkInterface* getInterface();
 
 private:
-    Address* address;
+    std::shared_ptr<Address> address;
     NetworkInterface* interface;
 };
 

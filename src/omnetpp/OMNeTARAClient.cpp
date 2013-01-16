@@ -21,6 +21,8 @@
 
 using namespace ARA;
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 // The module class needs to be registered with OMNeT++
 Define_Module(OMNeTARAClient);
 
@@ -38,8 +40,8 @@ void OMNeTARAClient::initialize() {
 }
 
 void OMNeTARAClient::sendInitialPacket() {
-    OMNeTAddress* source = new OMNeTAddress("source");
-    OMNeTAddress* destination = new OMNeTAddress("destination");
+    AddressPtr source = AddressPtr(new OMNeTAddress("source"));
+    AddressPtr destination = AddressPtr(new OMNeTAddress("destination"));
     OMNeTPacket* msg = new OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
     sendPacket(msg);
 }

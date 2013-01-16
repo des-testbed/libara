@@ -25,18 +25,20 @@
 
 #include "NextHop.h"
 
+using namespace std;
+
 namespace ARA {
 
 NextHop::NextHop(){
 
 }
 
-NextHop::NextHop(Address* address, NetworkInterface* interface) {
-    this->address = address;
+NextHop::NextHop(shared_ptr<Address> address, NetworkInterface* interface) {
+    this->address = shared_ptr<Address>(address);
     this->interface = interface;
 }
 
-Address* NextHop::getAddress() {
+shared_ptr<Address> NextHop::getAddress() {
     return address;
 }
 

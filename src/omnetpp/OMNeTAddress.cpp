@@ -34,13 +34,23 @@ OMNeTAddress::OMNeTAddress(const std::string name) {
     this->address = name;
 }
 
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherAddressMock = dynamic_cast<OMNeTAddress*>(otherAddress);
+bool OMNeTAddress::equals(const Address* otherAddress) const {
+    const OMNeTAddress* otherAddressMock = dynamic_cast<const OMNeTAddress*>(otherAddress);
     if(otherAddressMock == NULL) {
         return false;
     }
     else {
         return this->address.compare(otherAddressMock->address) == 0;
+    }
+}
+
+bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
+    shared_ptr<OMNeTAddress> otherOmnetMock (dynamic_pointer_cast<OMNeTAddress>(otherAddress));
+    if(otherOmnetMock == NULL) {
+        return false;
+    }
+    else {
+        return this->address.compare(otherOmnetMock->address) == 0;
     }
 }
 

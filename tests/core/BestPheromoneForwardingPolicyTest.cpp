@@ -36,34 +36,34 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 
 #include <iostream>
+#include <memory>
 
 using namespace ARA;
+
+typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(BestPheromoneForwardingPolicyTest) {};
 
 TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
-    // create a routing table
+    // prepare the test
     RoutingTable routingTable = RoutingTable();
-    // create a destination address
-    AddressMock destination = AddressMock("Destination");
-    // create a network interface mock
+    AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
+
     // create multiple next hops
-    AddressMock nextHopA = AddressMock("nextHopA");
-    AddressMock nextHopB = AddressMock("nextHopB");
-    AddressMock nextHopC = AddressMock("nextHopC");
-    // create a packet mock 
+    AddressPtr nextHopA (new AddressMock("nextHopA"));
+    AddressPtr nextHopB (new AddressMock("nextHopB"));
+    AddressPtr nextHopC (new AddressMock("nextHopC"));
+
     PacketMock packet = PacketMock();
 
-    // set the routing table entries
-    routingTable.update(&destination, &nextHopA, &interface, 1.2);
-    routingTable.update(&destination, &nextHopB, &interface, 2.1);
-    routingTable.update(&destination, &nextHopC, &interface, 2.3);
+    // start the test
+    routingTable.update(destination, nextHopA, &interface, 1.2);
+    routingTable.update(destination, nextHopB, &interface, 2.1);
+    routingTable.update(destination, nextHopC, &interface, 2.3);
 
-    // set the routing table
     BestPheromoneForwardingPolicy policy(&routingTable);
-    // get next hop
     NextHop node = policy.getNextHop(&packet);
 
-    CHECK_EQUAL(&nextHopC, node.getAddress());
+    CHECK(nextHopC->equals(node.getAddress()));
 }
