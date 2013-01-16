@@ -9,9 +9,11 @@
 #include "PacketType.h"
 #include <cstring>
 
+typedef std::shared_ptr<ARA::Address> AddressPtr;
+
 namespace ARA {
 
-Packet::Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) {
+Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) {
     this->source = source;
     this->destination = destination;
     this->sender = sender;
@@ -27,7 +29,7 @@ Packet::Packet(Address* source, Address* destination, Address* sender, char type
     this->hopCount = hopCount;
 }
 
-Packet::Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, unsigned int hopCount) {
+Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, unsigned int hopCount) {
     this->source = source;
     this->destination = destination;
     this->sender = sender;
@@ -39,7 +41,7 @@ Packet::Packet(Address* source, Address* destination, Address* sender, char type
     this->payloadSize = 0;
 }
 
-Packet::Packet(Address* source, Address* destination, char type, unsigned int seqNr) {
+Packet::Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr) {
     this->source = source;
     this->destination = destination;
     this->sender = source;
@@ -52,22 +54,18 @@ Packet::Packet(Address* source, Address* destination, char type, unsigned int se
 }
 
 Packet::~Packet() {
-    if(sender != source) {
-        delete sender;
-    }
-    delete source;
-    delete destination;
+    // Address cleanup is done by the shared_ptrs
 }
 
-Address* Packet::getSource() const {
+AddressPtr Packet::getSource() const {
     return source;
 }
 
-Address* Packet::getDestination() const {
+AddressPtr Packet::getDestination() const {
     return destination;
 }
 
-Address* Packet::getSender() const {
+AddressPtr Packet::getSender() const {
     return sender;
 }
 
@@ -99,10 +97,7 @@ void Packet::increaseHopCount() {
     hopCount++;
 }
 
-void Packet::setSender(Address* newSender) {
-    if(sender != source) {
-        delete sender;
-    }
+void Packet::setSender(AddressPtr newSender) {
     sender = newSender;
 }
 
@@ -111,19 +106,18 @@ bool Packet::equals(const Packet* otherPacket) const {
 }
 
 Packet* Packet::clone() const {
-    return new Packet(source->clone(), destination->clone(), sender->clone(), type, seqNr, payload, payloadSize, hopCount);
+    return new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
 }
 
 Packet* Packet::createFANT(unsigned int sequenceNumber) const {
-    // TODO cloning the sender here has no real meaning. Couldn't we just set the sender to NULL? (beware of resulting segfaults in the destructor!!!)
-    Packet* fant = new Packet(source->clone(), destination->clone(), sender->clone(), PacketType::FANT, sequenceNumber);
+    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, sequenceNumber);
     fant->setHopCount(this->hopCount);
     return fant;
 }
 
 Packet* Packet::createBANT(unsigned int sequenceNumber) const {
     unsigned int hopCount = 0; // FIXME should this be 1?
-    Packet* bant = new Packet(destination->clone(), source->clone(), sender->clone(), PacketType::BANT, sequenceNumber, hopCount);
+    Packet* bant = new Packet(destination, source, sender, PacketType::BANT, sequenceNumber, hopCount);
     return bant;
 }
 

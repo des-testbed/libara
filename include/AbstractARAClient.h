@@ -115,9 +115,9 @@ protected:
 
 private:
     unsigned int nextSequenceNumber = 1;
-    std::unordered_map<Address*, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
+    std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 
-    void sendDuplicateWarning(Address* recipient, NetworkInterface* interface);
+    void sendDuplicateWarning(std::shared_ptr<Address> recipient, NetworkInterface* interface);
     void handlePacket(const Packet* packet);
     void handleDataPacket(const Packet* packet);
     void handleAntPacket(const Packet* packet);

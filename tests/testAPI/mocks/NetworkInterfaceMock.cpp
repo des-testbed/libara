@@ -30,6 +30,8 @@ using namespace std;
 
 namespace ARA {
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 NetworkInterfaceMock::NetworkInterfaceMock() {
     localAddress = shared_ptr<Address>(new AddressMock("DEFAULT"));
     this->name = "NetworkInterfaceMock";
@@ -47,9 +49,8 @@ NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName, cons
 
 NetworkInterfaceMock::~NetworkInterfaceMock() {
     while(sentPackets.isEmpty() == false) {
-        Pair<Packet, Address>* removedPair = sentPackets.remove();
+        Pair<Packet*, AddressPtr>* removedPair = sentPackets.remove();
         delete removedPair->getLeft();  // this packet has been cloned in the send method
-        delete removedPair->getRight();  // the address has also been cloned in the send method
         delete removedPair;
     }
 }
@@ -58,30 +59,29 @@ std::string NetworkInterfaceMock::getName() {
     return this->name;
 }
 
-LinkedList<Pair<Packet, Address>>* NetworkInterfaceMock::getSentPackets() {
+LinkedList<Pair<Packet*, AddressPtr>>* NetworkInterfaceMock::getSentPackets() {
     return &sentPackets;
 }
 
-void NetworkInterfaceMock::send(const Packet* packet, Address* recipient) {
+void NetworkInterfaceMock::send(const Packet* packet, std::shared_ptr<Address> recipient) {
     Packet* copyOfPacket = packet->clone();
-    Address* copyOfAddress = recipient->clone();
-    Pair<Packet, Address>* pair = new Pair<Packet, Address>(copyOfPacket, copyOfAddress);
+    std::shared_ptr<Address> copyOfAddress = std::shared_ptr<Address>(recipient);
+    Pair<Packet*, AddressPtr>* pair = new Pair<Packet*, AddressPtr>(copyOfPacket, copyOfAddress);
     sentPackets.add(pair);
 }
 
 void NetworkInterfaceMock::broadcast(const Packet* packet) {
-    Address* broadCastAddress = new AddressMock("BROADCAST");
+    std::shared_ptr<Address> broadCastAddress (new AddressMock("BROADCAST"));
     send(packet, broadCastAddress);
-    delete broadCastAddress;    // the address has been cloned on the send Method, so this instance can be deleted
 }
 
 bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
     // TODO replace this with an iterator
     unsigned int numberOfSentPackets = sentPackets.size();
     for (unsigned int i = 0; i < numberOfSentPackets; i++) {
-        Pair<Packet, Address>* pair = sentPackets.get(i);
+        Pair<Packet*, AddressPtr>* pair = sentPackets.get(i);
         Packet* currentPacket = pair->getLeft();
-        Address* recipient = pair->getRight();
+        AddressPtr recipient = pair->getRight();
 
         if(currentPacket->equals(packet)) {
             if(recipient->isBroadCast() == true) {
@@ -97,7 +97,7 @@ bool NetworkInterfaceMock::hasPacketBeenSend(Packet* packet) {
     // TODO replace this with an iterator
     unsigned int numberOfSentPackets = sentPackets.size();
     for (unsigned int i = 0; i < numberOfSentPackets; i++) {
-        Pair<Packet, Address>* pair = sentPackets.get(i);
+        Pair<Packet*, AddressPtr>* pair = sentPackets.get(i);
         Packet* currentPacket = pair->getLeft();
 
         if(currentPacket->equals(packet)) {

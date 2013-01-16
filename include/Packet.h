@@ -29,6 +29,7 @@
 #include "Address.h"
 #include "PacketType.h"
 #include <stddef.h>
+#include <memory>
 
 namespace ARA {
 
@@ -38,9 +39,9 @@ namespace ARA {
  */
 class Packet {
 public:
-    Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 1);
-    Packet(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, unsigned int hopCount);
-    Packet(Address* source, Address* destination, char type, unsigned int seqNr);
+    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 1);
+    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, unsigned int hopCount);
+    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, char type, unsigned int seqNr);
     virtual ~Packet();
 
     /**
@@ -52,7 +53,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getSender()
      */
-    Address* getSource() const;
+    std::shared_ptr<Address> getSource() const;
 
     /**
      * Returns the address of the node to whom the payload of this packet is directed.
@@ -62,7 +63,7 @@ public:
      * @see Packet::getSource()
      * @see Packet::getSender()
      */
-    Address* getDestination() const;
+    std::shared_ptr<Address> getDestination() const;
 
     /**
      * Returns the address of the node from which this packet has been received (layer 2).
@@ -72,13 +73,12 @@ public:
      * @see Packet::getSource()
      * @see Packet::getDestination()
      */
-    Address* getSender() const;
+    std::shared_ptr<Address> getSender() const;
 
     /**
-     * Assigns a new sender to this packet. If the original sender is not the source it
-     * will be deleted
+     * Assigns a new sender to this packet.
      */
-    void setSender(Address* newSender);
+    void setSender(std::shared_ptr<Address> newSender);
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
@@ -158,9 +158,9 @@ public:
 	virtual Packet* createBANT(unsigned int sequenceNumber) const;
 
 protected:
-    Address* source;
-    Address* destination;
-    Address* sender;
+    std::shared_ptr<Address> source;
+    std::shared_ptr<Address> destination;
+    std::shared_ptr<Address> sender;
     char type;
     unsigned int seqNr;
     const char* payload;

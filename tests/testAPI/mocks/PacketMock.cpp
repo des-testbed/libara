@@ -31,16 +31,17 @@
 
 namespace ARA {
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 PacketMock::PacketMock(const char* sourceName, const char* destinationName, unsigned int sequenceNumber, unsigned int hopCount, char packetType)
- : Packet(new AddressMock(sourceName), new AddressMock(destinationName), new AddressMock(sourceName), packetType, sequenceNumber, "Hello World", 11, hopCount){
+ : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(sourceName)), packetType, sequenceNumber, "Hello World", 11, hopCount){
 }
 
 PacketMock::PacketMock(const char* sourceName, const char* destinationName, const char* senderName, unsigned int sequenceNumber, unsigned int hopCount, char packetType)
- : Packet(new AddressMock(sourceName), new AddressMock(destinationName), new AddressMock(senderName), packetType, sequenceNumber, "Hello World", 11, hopCount){
+ : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(senderName)), packetType, sequenceNumber, "Hello World", 11, hopCount){
 }
 
-void PacketMock::setSender(Address* newSenderAddress) {
-    delete sender;
+void PacketMock::setSender(std::shared_ptr<Address> newSenderAddress) {
     sender = newSenderAddress;
 }
 

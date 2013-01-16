@@ -54,7 +54,7 @@ public:
  * This Functor is needed for std::unordered_map (hashmap implementation)
  */
 struct AddressHash {
-    size_t operator()(Address* address) const {
+    size_t operator()(std::shared_ptr<Address> address) const {
         return address->getHashValue();
     }
 };
@@ -63,7 +63,7 @@ struct AddressHash {
  * This Functor is needed for std::unordered_map (hashmap implementation)
  */
 struct AddressPredicate {
-    size_t operator()(Address* address1, Address* address2) const {
+    size_t operator()(std::shared_ptr<Address> address1, std::shared_ptr<Address> address2) const {
         return address1->equals(address2);
     }
 };

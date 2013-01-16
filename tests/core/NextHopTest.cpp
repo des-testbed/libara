@@ -27,16 +27,17 @@
 #include "NextHop.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+#include <memory>
 
 using namespace ARA;
 
 TEST_GROUP(NextHopTest) {};
 
 TEST(NextHopTest, testGetters) {
-    AddressMock address = AddressMock();
+    std::shared_ptr<Address> address (new AddressMock());
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-    NextHop nextHop = NextHop(&address, &interface);
+    NextHop nextHop = NextHop(address, &interface);
 
-    CHECK(nextHop.getAddress()->equals(&address));
+    CHECK(nextHop.getAddress()->equals(address));
     CHECK(nextHop.getInterface()->equals(&interface));
 }

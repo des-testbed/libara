@@ -52,7 +52,7 @@ TEST(PacketMockTest, testSetSender) {
     PacketMock mock = PacketMock("A", "B");
     CHECK(mock.getSender()->equals(mock.getSource()));
 
-    AddressMock* newSender = new AddressMock("C");  // the PacketMock will take care of deleting this object
+    std::shared_ptr<Address> newSender (new AddressMock("C"));
     mock.setSender(newSender);
 
     CHECK(mock.getSender()->equals(newSender));

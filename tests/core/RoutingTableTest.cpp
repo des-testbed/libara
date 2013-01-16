@@ -34,13 +34,15 @@
 
 using namespace ARA;
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 TEST_GROUP(RoutingTableTest) {};
 
 TEST(RoutingTableTest, testGetPossibleNextHopsReturnsEmptyList) {
     RoutingTable routingTable = RoutingTable();
-    AddressMock destination = AddressMock();
+    AddressPtr destination (new AddressMock());
 
-    LinkedList<RoutingTableEntry>* list = routingTable.getPossibleNextHops(&destination);
+    LinkedList<RoutingTableEntry>* list = routingTable.getPossibleNextHops(destination);
     CHECK(list->isEmpty());
 
     delete list;
@@ -48,9 +50,9 @@ TEST(RoutingTableTest, testGetPossibleNextHopsReturnsEmptyList) {
 
 TEST(RoutingTableTest, testUnregisteredAddressIsNotDeliverable) {
     RoutingTable routingTable = RoutingTable();
-    AddressMock destinationAddress = AddressMock();
+    AddressPtr destinationAddress (new AddressMock());
 
-    CHECK(routingTable.isDeliverable(&destinationAddress) == false);
+    CHECK(routingTable.isDeliverable(destinationAddress) == false);
 }
 
 TEST(RoutingTableTest, testPacketWithUnregisteredAddressIsNotDeliverable) {
@@ -63,19 +65,19 @@ TEST(RoutingTableTest, testPacketWithUnregisteredAddressIsNotDeliverable) {
 TEST(RoutingTableTest, testUdateRoutingTable) {
     RoutingTable routingTable = RoutingTable();
     PacketMock packet = PacketMock();
-    Address* destination = packet.getDestination();
-    AddressMock nextHop = AddressMock("nextHop");
+    AddressPtr destination = packet.getDestination();
+    AddressPtr nextHop (new AddressMock("nextHop"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     float pheromoneValue = 123.456;
 
     CHECK(routingTable.isDeliverable(&packet) == false);
-    routingTable.update(destination, &nextHop, &interface, pheromoneValue);
+    routingTable.update(destination, nextHop, &interface, pheromoneValue);
 
     CHECK(routingTable.isDeliverable(&packet));
     LinkedList<RoutingTableEntry>* nextHops = routingTable.getPossibleNextHops(&packet);
     CHECK(nextHops->size() == 1);
     RoutingTableEntry* possibleHop = nextHops->getFirst();
-    CHECK_EQUAL(&nextHop, possibleHop->getAddress());
+    CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
 }
@@ -83,43 +85,43 @@ TEST(RoutingTableTest, testUdateRoutingTable) {
 TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     RoutingTable routingTable = RoutingTable();
     PacketMock packet = PacketMock();
-    Address* destination = packet.getDestination();
-    AddressMock nextHop = AddressMock("nextHop");
+    AddressPtr destination = packet.getDestination();
+    AddressPtr nextHop (new AddressMock("nextHop"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     float pheromoneValue = 123.456;
 
     // first we register a route to a destination the first time
-    routingTable.update(destination, &nextHop, &interface, pheromoneValue);
+    routingTable.update(destination, nextHop, &interface, pheromoneValue);
 
     CHECK(routingTable.isDeliverable(&packet));
     LinkedList<RoutingTableEntry>* nextHops = routingTable.getPossibleNextHops(&packet);
     CHECK_EQUAL(1, nextHops->size());
     RoutingTableEntry* possibleHop = nextHops->getFirst();
-    CHECK_EQUAL(&nextHop, possibleHop->getAddress());
+    CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
 
     // now we want to update the pheromone value of this route
-    routingTable.update(destination, &nextHop, &interface, 42);
+    routingTable.update(destination, nextHop, &interface, 42);
     nextHops = routingTable.getPossibleNextHops(&packet);
     CHECK_EQUAL(1, nextHops->size());
     possibleHop = nextHops->getFirst();
-    CHECK_EQUAL(&nextHop, possibleHop->getAddress());
+    CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(42, possibleHop->getPheromoneValue());
 }
 
 TEST(RoutingTableTest, testGetPossibleNextHops) {
     RoutingTable routingTable = RoutingTable();
-    AddressMock sourceAddress = AddressMock("Source");
-    AddressMock destination1 = AddressMock("Destination1");
-    AddressMock destination2 = AddressMock("Destination2");
+    AddressPtr sourceAddress (new AddressMock("Source"));
+    AddressPtr destination1 (new AddressMock("Destination1"));
+    AddressPtr destination2 (new AddressMock("Destination2"));
 
-    AddressMock nextHop1a = AddressMock("nextHop1a");
-    AddressMock nextHop1b = AddressMock("nextHop1b");
-    AddressMock nextHop2 = AddressMock("nextHop2");
-    AddressMock nextHop3 = AddressMock("nextHop3");
-    AddressMock nextHop4 = AddressMock("nextHop4");
+    AddressPtr nextHop1a (new AddressMock("nextHop1a"));
+    AddressPtr nextHop1b (new AddressMock("nextHop1b"));
+    AddressPtr nextHop2 (new AddressMock("nextHop2"));
+    AddressPtr nextHop3 (new AddressMock("nextHop3"));
+    AddressPtr nextHop4 (new AddressMock("nextHop4"));
     NetworkInterfaceMock interface1 = NetworkInterfaceMock();
     NetworkInterfaceMock interface2 = NetworkInterfaceMock();
     NetworkInterfaceMock interface3 = NetworkInterfaceMock();
@@ -130,27 +132,27 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
     float pheromoneValue3 = 4;
     float pheromoneValue4 = 2;
 
-    routingTable.update(&destination1, &nextHop1a, &interface1, pheromoneValue1a);
-    routingTable.update(&destination1, &nextHop1b, &interface1, pheromoneValue1b);
-    routingTable.update(&destination1, &nextHop2, &interface2, pheromoneValue2);
+    routingTable.update(destination1, nextHop1a, &interface1, pheromoneValue1a);
+    routingTable.update(destination1, nextHop1b, &interface1, pheromoneValue1b);
+    routingTable.update(destination1, nextHop2, &interface2, pheromoneValue2);
 
-    routingTable.update(&destination2, &nextHop3, &interface3, pheromoneValue3);
-    routingTable.update(&destination2, &nextHop4, &interface1, pheromoneValue4);
+    routingTable.update(destination2, nextHop3, &interface3, pheromoneValue3);
+    routingTable.update(destination2, nextHop4, &interface1, pheromoneValue4);
 
-    LinkedList<RoutingTableEntry>* nextHopsForDestination1 = routingTable.getPossibleNextHops(&destination1);
+    LinkedList<RoutingTableEntry>* nextHopsForDestination1 = routingTable.getPossibleNextHops(destination1);
     CHECK_EQUAL(3, nextHopsForDestination1->size());
     for (unsigned int i = 0; i < nextHopsForDestination1->size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination1->get(i);
-        Address* hopAddress = possibleHop->getAddress();
-        if(hopAddress == &nextHop1a) {
+        AddressPtr hopAddress = possibleHop->getAddress();
+        if(hopAddress->equals(nextHop1a)) {
             CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
             CHECK_EQUAL(pheromoneValue1a, possibleHop->getPheromoneValue());
         }
-        else if(hopAddress == &nextHop1b) {
+        else if(hopAddress->equals(nextHop1b)) {
             CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
             CHECK_EQUAL(pheromoneValue1b, possibleHop->getPheromoneValue());
         }
-        else if(hopAddress == &nextHop2) {
+        else if(hopAddress->equals(nextHop2)) {
             CHECK_EQUAL(&interface2, possibleHop->getNetworkInterface());
             CHECK_EQUAL(pheromoneValue2, possibleHop->getPheromoneValue());
         }
@@ -159,16 +161,16 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
         }
     }
 
-    LinkedList<RoutingTableEntry>* nextHopsForDestination2 = routingTable.getPossibleNextHops(&destination2);
+    LinkedList<RoutingTableEntry>* nextHopsForDestination2 = routingTable.getPossibleNextHops(destination2);
     CHECK_EQUAL(2, nextHopsForDestination2->size());
     for (unsigned int i = 0; i < nextHopsForDestination2->size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination2->get(i);
-        Address* hopAddress = possibleHop->getAddress();
-        if(hopAddress == &nextHop3) {
+        AddressPtr hopAddress = possibleHop->getAddress();
+        if(hopAddress->equals(nextHop3)) {
             CHECK_EQUAL(&interface3, possibleHop->getNetworkInterface());
             CHECK_EQUAL(pheromoneValue3, possibleHop->getPheromoneValue());
         }
-        else if(hopAddress == &nextHop4) {
+        else if(hopAddress->equals(nextHop4)) {
             CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
             CHECK_EQUAL(pheromoneValue4, possibleHop->getPheromoneValue());
         }

@@ -5,6 +5,8 @@
 
 using namespace ARA;
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 // Template rule which fires if a struct or class doesn't have operator<<
 template<typename T>
 std::ostream& operator<<(std::ostream& out,const T&) {return out;}
@@ -22,7 +24,7 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTPacket);
 
-OMNeTPacket::OMNeTPacket(Address* source, Address* destination, Address* sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
+OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
 
 }
 
@@ -72,21 +74,20 @@ void OMNeTPacket::parsimUnpack(cCommBuffer *b) {
 }
 
 Packet* OMNeTPacket::clone() const {
-    return new OMNeTPacket(source->clone(), destination->clone(), sender->clone(), type, seqNr, payload, payloadSize, hopCount);
+    return new OMNeTPacket(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
 }
 
 Packet* OMNeTPacket::createFANT(unsigned int sequenceNumber) const {
     const char* payload = NULL;
     unsigned int hopCount = 0; // FIXME should this be 1?
-    // TODO cloning the sender here has no real meaning. Couldn't we just set the sender to NULL? (beware of resulting segfaults in the destructor!!!)
-    OMNeTPacket* fant = new OMNeTPacket(source->clone(), destination->clone(), sender->clone(), PacketType::FANT, sequenceNumber, payload, 0, hopCount);
+    OMNeTPacket* fant = new OMNeTPacket(source, destination, sender, PacketType::FANT, sequenceNumber, payload, 0, hopCount);
     return fant;
 }
 
 Packet* OMNeTPacket::createBANT(unsigned int sequenceNumber) const {
     const char* payload = NULL;
     unsigned int hopCount = 0; // FIXME should this be 1?
-    OMNeTPacket* bant = new OMNeTPacket(destination->clone(), source->clone(), sender->clone(), PacketType::BANT, sequenceNumber, payload, 0, hopCount);
+    OMNeTPacket* bant = new OMNeTPacket(destination, source, sender, PacketType::BANT, sequenceNumber, payload, 0, hopCount);
     return bant;
 }
 
@@ -250,11 +251,11 @@ std::string OMNeTPacketDescriptor::getFieldAsString(void *object, int field, int
     OMNeTPacket *pp = (OMNeTPacket *)object; (void)pp;
 
     if(field >= 0 && field < 3) {
-        OMNeTAddress* address;
+        std::shared_ptr<OMNeTAddress> address;
         switch (field) {
-            case 0: address = (OMNeTAddress*) pp->getSource(); break;
-            case 1: address = (OMNeTAddress*) pp->getDestination(); break;
-            case 2: address = (OMNeTAddress*) pp->getSender(); break;
+            case 0: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getSource())); break;
+            case 1: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getDestination())); break;
+            case 2: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getSender())); break;
         }
 
         if(address == NULL) {
@@ -321,9 +322,9 @@ void *OMNeTPacketDescriptor::getFieldStructPointer(void *object, int field, int 
     }
     OMNeTPacket* pp = (OMNeTPacket *)object; (void)pp;
     switch (field) {
-        case 0: return pp->getSource();
-        case 1: return pp->getDestination();
-        case 2: return pp->getSender();
+        case 0: return pp->getSource().get();
+        case 1: return pp->getDestination().get();
+        case 2: return pp->getSender().get();
         default: return NULL;
     }
 }

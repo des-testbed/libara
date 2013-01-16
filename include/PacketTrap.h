@@ -30,6 +30,7 @@
 #include "Packet.h"
 #include "Address.h"
 #include "LinkedList.h"
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -63,7 +64,7 @@ public:
 
 private:
 
-    bool thereIsAHashSetFor(Address* destination);
+    bool thereIsAHashSetFor(std::shared_ptr<Address> destination);
 
     /**
      * This hashmap stores all trapped packets.
@@ -76,7 +77,7 @@ private:
      * The Values are hashsets themselves because we also have to find individual
      * packets everytime we want to untrap a packet (i.e. after acknowledgment).
      */
-    std::unordered_map<Address*, std::unordered_set<const Packet*, PacketHash, PacketPredicate>*, AddressHash, AddressPredicate> trappedPackets;
+    std::unordered_map<std::shared_ptr<Address>, std::unordered_set<const Packet*, PacketHash, PacketPredicate>*, AddressHash, AddressPredicate> trappedPackets;
 
     RoutingTable* routingTable;
 

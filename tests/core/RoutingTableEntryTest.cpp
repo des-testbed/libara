@@ -31,38 +31,40 @@
 
 using namespace ARA;
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 TEST_GROUP(RoutingTableEntryTest) {};
 
 TEST(RoutingTableEntryTest, testGetters) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-    AddressMock nextHop = AddressMock();
+    AddressPtr nextHop (new AddressMock());
     float pheromoneValue = 1.234;
-    RoutingTableEntry entry = RoutingTableEntry(&nextHop, &interface, pheromoneValue);
+    RoutingTableEntry entry = RoutingTableEntry(nextHop, &interface, pheromoneValue);
 
-    CHECK_EQUAL(&nextHop, entry.getAddress());
+    CHECK(nextHop->equals(entry.getAddress()));
     CHECK_EQUAL(&interface, entry.getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, entry.getPheromoneValue());
 }
 
 TEST(RoutingTableEntryTest, testSetPheromoneValue) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-    AddressMock address = AddressMock();
+    AddressPtr address (new AddressMock());
     float pheromoneValue = 1.234;
-    RoutingTableEntry entry = RoutingTableEntry(&address, &interface, pheromoneValue);
+    RoutingTableEntry entry = RoutingTableEntry(address, &interface, pheromoneValue);
 
     entry.setPheromoneValue(42);
-    CHECK_EQUAL(&address, entry.getAddress());
+    CHECK(address->equals(entry.getAddress()));
     CHECK_EQUAL(&interface, entry.getNetworkInterface());
     CHECK_EQUAL(42, entry.getPheromoneValue());
 }
 
 TEST(RoutingTableEntryTest, testGetNextHop) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-    AddressMock address = AddressMock();
+    AddressPtr address (new AddressMock());
     float pheromoneValue = 1.234;
-    RoutingTableEntry entry = RoutingTableEntry(&address, &interface, pheromoneValue);
+    RoutingTableEntry entry = RoutingTableEntry(address, &interface, pheromoneValue);
 
     NextHop* nextHop = entry.getNextHop();
-    CHECK(nextHop->getAddress()->equals(&address));
+    CHECK(nextHop->getAddress()->equals(address));
     CHECK(nextHop->getInterface()->equals(&interface));
 }

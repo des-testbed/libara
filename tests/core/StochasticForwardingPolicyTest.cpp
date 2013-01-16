@@ -39,30 +39,29 @@
 
 using namespace ARA;
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 TEST_GROUP(StochasticForwardingPolicyTest) {};
 
 TEST(StochasticForwardingPolicyTest, testGetNextHop) {
-    // create a routing table
+    // Prepare the test
     RoutingTable routingTable = RoutingTable();
-    // create a destination address
-    AddressMock destination = AddressMock("Destination");
-    // create a network interface mock
+    AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
+
     // create multiple next hops
-    AddressMock nextHopA = AddressMock("nextHopA");
-    AddressMock nextHopB = AddressMock("nextHopB");
-    AddressMock nextHopC = AddressMock("nextHopC");
-    // create a packet mock 
+    AddressPtr nextHopA (new AddressMock("nextHopA"));
+    AddressPtr nextHopB (new AddressMock("nextHopB"));
+    AddressPtr nextHopC (new AddressMock("nextHopC"));
+
     PacketMock packet = PacketMock();
 
-    // set the routing table entries
-    routingTable.update(&destination, &nextHopA, &interface, 1.2);
-    routingTable.update(&destination, &nextHopB, &interface, 2.1);
-    routingTable.update(&destination, &nextHopC, &interface, 2.3);
+    // Start the test
+    routingTable.update(destination, nextHopA, &interface, 1.2);
+    routingTable.update(destination, nextHopB, &interface, 2.1);
+    routingTable.update(destination, nextHopC, &interface, 2.3);
 
-    // set the routing table
     StochasticForwardingPolicy policy(&routingTable);
-    // get next hop
     NextHop node = policy.getNextHop(&packet);
 
 }

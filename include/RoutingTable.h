@@ -40,14 +40,14 @@ class RoutingTable {
 public:
     ~RoutingTable();
 
-    void update(Address* destination, Address* nextHop, NetworkInterface* interface, float pheromoneValue);
-    LinkedList<RoutingTableEntry>* getPossibleNextHops(Address* destination);
+    void update(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface, float pheromoneValue);
+    LinkedList<RoutingTableEntry>* getPossibleNextHops(std::shared_ptr<Address> destination);
     LinkedList<RoutingTableEntry>* getPossibleNextHops(const Packet* packet);
-    bool isDeliverable(Address* destination);
+    bool isDeliverable(std::shared_ptr<Address> destination);
     bool isDeliverable(const Packet* packet);
 
 private:
-    std::unordered_map<Address*, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate> table;
+    std::unordered_map<std::shared_ptr<Address>, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate> table;
 
 };
 

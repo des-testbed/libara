@@ -36,7 +36,7 @@ class OMNeTGate: public NetworkInterface {
 public:
     OMNeTGate(cSimpleModule* module, cGate* gate);
 
-    void send(const Packet* packet, Address* recipient);
+    void send(const Packet* packet, std::shared_ptr<Address> recipient);
     void broadcast(const Packet* packet);
     bool equals(NetworkInterface* interface);
     std::shared_ptr<Address> getLocalAddress();
