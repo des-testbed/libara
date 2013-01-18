@@ -60,10 +60,7 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
         // there is at least one registered route for this destination
         std::deque<RoutingTableEntry*>* entryList = table[destination];
         bool entryHasBeenUpdated = false;
-        // TODO replace this with an iterator
-        unsigned int nrOfEntries = entryList->size();
-        for (unsigned int i = 0; i < nrOfEntries; ++i) {
-            RoutingTableEntry* entry = entryList->at(i);
+        for (auto& entry: *entryList) {
             if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
                 entry->setPheromoneValue(pheromoneValue);
                 entryHasBeenUpdated = true;

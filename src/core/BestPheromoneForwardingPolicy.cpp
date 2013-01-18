@@ -35,30 +35,18 @@ BestPheromoneForwardingPolicy::~BestPheromoneForwardingPolicy(){
 
 // todo: add exception for "no hop available", are not yet interfaces are not yet considered
 NextHop BestPheromoneForwardingPolicy::getNextHop(Packet* pPacket){
-  /// get a list of possible nodes towards a destination
-  std::deque<RoutingTableEntry*>* list = this->mRoutingTable->getPossibleNextHops(pPacket);
-  /// a value to compare
-  float compare, phi = 0.0;
-  /// the index of the element containing the highest pheromone value
-  int index = -1;
+    std::deque<RoutingTableEntry*>* possibleNextHops = this->mRoutingTable->getPossibleNextHops(pPacket);
 
-  /// TODO: That is rather ugly, since we have to iterate over the whole routing table 
-  for(unsigned int i = 0; i < list->size(); i++){
-    phi = list->at(i)->getPheromoneValue();
-    //phi = entry.getPheromoneValue();
-    if(compare < phi){
-      compare = phi;
-      index = i;
-    }  
-  }
+    RoutingTableEntry* bestEntry = NULL;
+    float globalMaximum = 0;
+    for(auto& possibleNextHop: *possibleNextHops) {
+        if(possibleNextHop->getPheromoneValue() > globalMaximum) {
+            bestEntry = possibleNextHop;
+            globalMaximum = bestEntry->getPheromoneValue();
+        }
+    }
 
-  // todo throw exception
-  //if(index < 0){
-  //  return NULL; 
-  //}
-
-  // create the result 
-  NextHop result = NextHop(list->at(index)->getNextHop()->getAddress(), list->at(index)->getNextHop()->getInterface());
-  // todo: check ob mir das um die ohren fliegt, mehr als wahrscheinlich
-  return result;
+    NextHop result = *(bestEntry->getNextHop());
+    //FIXME possibleNextHops muss noch gelöscht werden!
+    return result;
 }

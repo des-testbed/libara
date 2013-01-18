@@ -32,47 +32,43 @@ StochasticForwardingPolicy::StochasticForwardingPolicy(RoutingTable* pRoutingTab
 StochasticForwardingPolicy::~StochasticForwardingPolicy(){}
 
 // todo: add exception for "no hop available", are not yet interfaces are not yet considered
-NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket){
-  int node = 0;
-  /// get a list of possible nodes towards a destination
-  std::deque<RoutingTableEntry*>* list = this->mRoutingTable->getPossibleNextHops(pPacket);
-  /// store the size of the possible node list
-  unsigned int size = list->size();
-  /// the sum in the probablity function
-  float sum = .0;
-  /// the cumulated sum of the probablities 
-  float probabilities[size];
-  /// the cumulated sum of the probablities 
-  float c_sum[size];
-  /// the pheromone values of the 
-  float pheromones[size];
-  // iterate over the pherome values
-  for(unsigned int i = 0; i < size; i++){
-    pheromones[i] = list->at(i)->getPheromoneValue();
-    sum += pheromones[i];
-  }
+NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket) {
+    std::deque<RoutingTableEntry*>* possibleNextHops = this->mRoutingTable->getPossibleNextHops(pPacket);
+    unsigned int nrOfPossibleNextHops = possibleNextHops->size();
 
-  // determine the probabilities
-  for(unsigned int i = 0; i < size; i++){
-	probabilities[i] = pheromones[i]/sum;
-  }
+    float sumOfPheromoneValues = .0;
+    float cumulativeSum[nrOfPossibleNextHops];
+    float probabilities[nrOfPossibleNextHops];
+    float pheromoneValues[nrOfPossibleNextHops];
 
-  // compute the cumulated sum
-  std::partial_sum(probabilities, probabilities + size, c_sum);
+    // create the sumOfPheromoneValues of pheromone values
+    for(unsigned int i = 0; i < nrOfPossibleNextHops; i++){
+        pheromoneValues[i] = possibleNextHops->at(i)->getPheromoneValue();
+        sumOfPheromoneValues += pheromoneValues[i];
+    }
 
-  // pick a random number, TODO: check how to generate random numbers in omnet++
-  //q = genk_dblrand(0);
-  //
-  float q = this->getRandomNumber();
-  
-  while(q > c_sum[node]){
-    node += 1;
-  }
+    // determine the probabilities
+    for(unsigned int i = 0; i < nrOfPossibleNextHops; i++){
+        probabilities[i] = pheromoneValues[i] / sumOfPheromoneValues;
+    }
 
-  // create the result 
-  NextHop result = NextHop(list->at(node)->getNextHop()->getAddress(), list->at(node)->getNextHop()->getInterface());
-  // todo: check ob mir das um die ohren fliegt, mehr als wahrscheinlich
-  return result;
+    // compute the cumulative sum
+    std::partial_sum(probabilities, probabilities + nrOfPossibleNextHops, cumulativeSum);
+
+    // pick a random number, TODO: check how to generate random numbers in omnet++
+    // q = genk_dblrand(0);
+
+    // get a random number between 0.0 and 1.0
+    float randomNumber = this->getRandomNumber();
+
+    int nodeIndex = 0;
+    while(randomNumber > cumulativeSum[nodeIndex]){
+        nodeIndex += 1;
+    }
+
+    NextHop result = *(possibleNextHops->at(nodeIndex)->getNextHop());
+    //FIXME possibleNextHops muss noch gelöscht werden!
+    return result;
 }
 
 void StochasticForwardingPolicy::initializeRandomNumberGenerator(){

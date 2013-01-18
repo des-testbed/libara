@@ -142,10 +142,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     }
     else if(packetType == PacketType::BANT) {
         deque<const Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
-        //TODO replace this with an iterator
-        unsigned int nrOfDeliverablePackets = deliverablePackets->size();
-        for (unsigned int i = 0; i < nrOfDeliverablePackets; i++) {
-            const Packet* deliverablePacket = deliverablePackets->at(i);
+        for(auto& deliverablePacket : *deliverablePackets) {
             sendPacket(deliverablePacket);
             packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
         }
@@ -158,10 +155,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
 
 bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
     AddressPtr destination = packet->getDestination();
-    //TODO replace this with an iterator
-    unsigned int numberOfInterfaces = interfaces.size();
-    for (unsigned int i = 0; i < numberOfInterfaces; i++) {
-        NetworkInterface* interface = interfaces.at(i);
+    for(auto& interface: interfaces) {
         if(interface->getLocalAddress()->equals(destination)) {
             return true;
         }
@@ -173,10 +167,7 @@ void AbstractARAClient::broadCast(const Packet* packet) {
     Packet* newPacket = packet->clone();
     newPacket->increaseHopCount();
 
-    //TODO replace this with iterator which should be faster
-    unsigned int nrOfInterfaces = interfaces.size();
-    for(unsigned int i=0; i<nrOfInterfaces; i++) {
-        NetworkInterface* interface = interfaces.at(i);
+    for(auto& interface: interfaces) {
         newPacket->setSender(interface->getLocalAddress());
         interface->broadcast(newPacket);
     }

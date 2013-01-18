@@ -31,7 +31,7 @@ using namespace ARA;
 
 TEST_GROUP(OMNeTGateTest) {};
 
-/* FIXME: Make this test work (i.e. check back with OMNeT++ API on how to create single simpleModule instances
+/* TODO: Make this test work (i.e. check back with OMNeT++ API on how to create single simpleModule instances
 TEST(OMNeTGateTest, testCreate) {
     cSimpleModule* module = new cSimpleModule();
     OMNeTGate(module, "testGate");

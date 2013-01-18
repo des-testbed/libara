@@ -77,10 +77,7 @@ void NetworkInterfaceMock::broadcast(const Packet* packet) {
 }
 
 bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
-    // TODO replace this with an iterator
-    unsigned int numberOfSentPackets = sentPackets.size();
-    for (unsigned int i = 0; i < numberOfSentPackets; i++) {
-        Pair<Packet*, AddressPtr>* pair = sentPackets.at(i);
+    for (auto& pair: sentPackets) {
         Packet* currentPacket = pair->getLeft();
         AddressPtr recipient = pair->getRight();
 
@@ -95,10 +92,7 @@ bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
 }
 
 bool NetworkInterfaceMock::hasPacketBeenSend(Packet* packet) {
-    // TODO replace this with an iterator
-    unsigned int numberOfSentPackets = sentPackets.size();
-    for (unsigned int i = 0; i < numberOfSentPackets; i++) {
-        Pair<Packet*, AddressPtr>* pair = sentPackets.at(i);
+    for (auto& pair: sentPackets) {
         Packet* currentPacket = pair->getLeft();
 
         if(currentPacket->equals(packet)) {
