@@ -35,7 +35,7 @@ StochasticForwardingPolicy::~StochasticForwardingPolicy(){}
 NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket){
   int node = 0;
   /// get a list of possible nodes towards a destination
-  LinkedList<RoutingTableEntry> *list = this->mRoutingTable->getPossibleNextHops(pPacket);
+  std::deque<RoutingTableEntry*>* list = this->mRoutingTable->getPossibleNextHops(pPacket);
   /// store the size of the possible node list
   unsigned int size = list->size();
   /// the sum in the probablity function
@@ -48,7 +48,7 @@ NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket){
   float pheromones[size];
   // iterate over the pherome values
   for(unsigned int i = 0; i < size; i++){
-    pheromones[i] = list->get(i)->getPheromoneValue();
+    pheromones[i] = list->at(i)->getPheromoneValue();
     sum += pheromones[i];
   }
 
@@ -70,7 +70,7 @@ NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket){
   }
 
   // create the result 
-  NextHop result = NextHop(list->get(node)->getNextHop()->getAddress(), list->get(node)->getNextHop()->getInterface());
+  NextHop result = NextHop(list->at(node)->getNextHop()->getAddress(), list->at(node)->getNextHop()->getInterface());
   // todo: check ob mir das um die ohren fliegt, mehr als wahrscheinlich
   return result;
 }

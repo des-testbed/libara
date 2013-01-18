@@ -28,8 +28,9 @@
 
 #include "AbstractARAClient.h"
 #include "NetworkInterfaceMock.h"
-#include "LinkedList.h"
+
 #include <string>
+#include <deque>
 
 namespace ARA {
 
@@ -48,11 +49,11 @@ public:
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
-    LinkedList<const Packet>* getDeliveredPackets();
+    std::deque<const Packet*>* getDeliveredPackets();
 
 private:
-    LinkedList<NetworkInterfaceMock> interfaceMocks;
-    LinkedList<const Packet> deliveredPackets;
+    std::deque<NetworkInterfaceMock*> interfaceMocks;
+    std::deque<const Packet*> deliveredPackets;
 
 };
 

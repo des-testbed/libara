@@ -33,7 +33,6 @@
 
 #include "Packet.h"
 #include "NextHop.h"
-#include "LinkedList.h"
 #include "RoutingTable.h"
 #include "RoutingTableEntry.h"
 #include "AbstractForwardingPolicy.h"

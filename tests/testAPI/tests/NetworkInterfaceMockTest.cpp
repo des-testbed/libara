@@ -28,8 +28,9 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/ARAClientMock.h"
-#include "LinkedList.h"
 #include "Pair.h"
+
+#include <deque>
 
 using namespace ARA;
 
@@ -49,16 +50,16 @@ TEST(NetworkInterfaceMockTest, testMockRemembersSentPackets) {
     mock.send(&packet2, recipient2);
     mock.send(&packet3, recipient1);
 
-    LinkedList<Pair<Packet*, AddressPtr>>* sendPackets = mock.getSentPackets();
+    std::deque<Pair<Packet*, AddressPtr>*>* sendPackets = mock.getSentPackets();
 
-    CHECK(sendPackets->get(0)->getLeft()->equals(&packet1));
-    CHECK(sendPackets->get(0)->getRight()->equals(recipient1));
+    CHECK(sendPackets->at(0)->getLeft()->equals(&packet1));
+    CHECK(sendPackets->at(0)->getRight()->equals(recipient1));
 
-    CHECK(sendPackets->get(1)->getLeft()->equals(&packet2));
-    CHECK(sendPackets->get(1)->getRight()->equals(recipient2));
+    CHECK(sendPackets->at(1)->getLeft()->equals(&packet2));
+    CHECK(sendPackets->at(1)->getRight()->equals(recipient2));
 
-    CHECK(sendPackets->get(2)->getLeft()->equals(&packet3));
-    CHECK(sendPackets->get(2)->getRight()->equals(recipient1));
+    CHECK(sendPackets->at(2)->getLeft()->equals(&packet3));
+    CHECK(sendPackets->at(2)->getRight()->equals(recipient1));
 }
 
 TEST(NetworkInterfaceMockTest, testHasPacketBeenBroadCasted) {

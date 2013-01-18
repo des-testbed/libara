@@ -29,7 +29,6 @@
 #include "Packet.h"
 #include "PacketType.h"
 #include "Address.h"
-#include "LinkedList.h"
 #include "Pair.h"
 
 #include "testAPI/mocks/ARAClientMock.h"
@@ -85,7 +84,7 @@ TEST(AbstractARAClientTest, testBroadcastFANTIfPacketNotDeliverable) {
     client.sendPacket(&packet);
 
     LONGS_EQUAL(1, interface->getNumberOfSentPackets());
-    Pair<Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->getFirst();
+    Pair<Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->front();
     Packet* sentPacket = sentPacketInfo->getLeft();
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
@@ -114,7 +113,7 @@ TEST(AbstractARAClientTest, testSendPacketToNextHopIfRouteIsKnown) {
     CHECK(interface3->hasPacketBeenSend(&originalPacket) == false);
 
     // check if packet has been send via interface2 to nextHop
-    Pair<Packet*, AddressPtr>* sentPacketInfo = interface2->getSentPackets()->getFirst();
+    Pair<Packet*, AddressPtr>* sentPacketInfo = interface2->getSentPackets()->front();
     Packet* sentPacket = sentPacketInfo->getLeft();
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
     CHECK(recipientOfSentPacket->equals(nextHop));
@@ -200,7 +199,7 @@ TEST(AbstractARAClientTest, testRespondWithDuplicateError) {
     // the client should have relayed the first packet and sent a duplicate warning back for the second packet
     LONGS_EQUAL(2, interface->getNumberOfSentPackets());
 
-    Pair<Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->get(1); // we only check the warning
+    Pair<Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->at(1); // we only check the warning
     Packet* sentPacket = sentPacketInfo->getLeft();
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
@@ -233,9 +232,9 @@ TEST(AbstractARAClientTest, testIgnoreDuplicateAntPackets) {
     client.receivePacket(&bant, interface);
 
     LONGS_EQUAL(2, interface->getNumberOfSentPackets()); // only two broadcasts of the ANT packets and nothing more
-    LinkedList<Pair<Packet*, AddressPtr>>* sendPackets = interface->getSentPackets();
-    CHECK_EQUAL(PacketType::FANT, sendPackets->get(0)->getLeft()->getType());
-    CHECK_EQUAL(PacketType::BANT, sendPackets->get(1)->getLeft()->getType());
+    std::deque<Pair<Packet*, AddressPtr>*>* sendPackets = interface->getSentPackets();
+    CHECK_EQUAL(PacketType::FANT, sendPackets->at(0)->getLeft()->getType());
+    CHECK_EQUAL(PacketType::BANT, sendPackets->at(1)->getLeft()->getType());
 }
 
 /**
@@ -261,10 +260,10 @@ TEST(AbstractARAClientTest, testRoutingTableIsUpdated) {
     CHECK(routingTable->isDeliverable(nodeA) == false);
     client.receivePacket(&packet, interface);
     CHECK(routingTable->isDeliverable(nodeA) == true);
-    LinkedList<RoutingTableEntry>* possibleHops = routingTable->getPossibleNextHops(nodeA);
+    std::deque<RoutingTableEntry*>* possibleHops = routingTable->getPossibleNextHops(nodeA);
     LONGS_EQUAL(1, possibleHops->size());
-    CHECK(possibleHops->getFirst()->getAddress()->equals(nodeC));
-    CHECK(possibleHops->getFirst()->getNetworkInterface()->equals(interface));
+    CHECK(possibleHops->front()->getAddress()->equals(nodeC));
+    CHECK(possibleHops->front()->getNetworkInterface()->equals(interface));
 }
 
 /**
@@ -274,19 +273,19 @@ TEST(AbstractARAClientTest, testRoutingTableIsUpdated) {
  */
 TEST(AbstractARAClientTest, testDataPacketIsDeliveredToSystem) {
     ARAClientMock client = ARAClientMock();
-    LinkedList<const Packet>* deliveredPackets = client.getDeliveredPackets();
+    std::deque<const Packet*>* deliveredPackets = client.getDeliveredPackets();
     NetworkInterface* interface = client.createNewNetworkInterfaceMock("192.168.0.1");
     PacketMock packet1 = PacketMock("192.168.0.4", "192.168.0.123", 123, 1, PacketType::DATA);// directed to some other node
     PacketMock packet2 = PacketMock("192.168.0.4", "192.168.0.1",   124);  // directed to this node
 
-    CHECK(deliveredPackets->isEmpty())
+    CHECK(deliveredPackets->empty())
 
     client.receivePacket(&packet1, interface);
-    CHECK(deliveredPackets->isEmpty())
+    CHECK(deliveredPackets->empty())
 
     client.receivePacket(&packet2, interface);
     LONGS_EQUAL(1, deliveredPackets->size());
-    CHECK(deliveredPackets->getFirst()->equals(&packet2));
+    CHECK(deliveredPackets->front()->equals(&packet2));
 }
 
 /**
@@ -298,7 +297,7 @@ TEST(AbstractARAClientTest, testDataPacketIsRelayedIfRouteIsKnown) {
     // initial test setup
     ARAClientMock client = ARAClientMock();
     NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
-    LinkedList<Pair<Packet*, AddressPtr>>* sentPackets = interface->getSentPackets();
+    std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
     RoutingTable* routingTable = client.getRoutingTable();
 
     AddressPtr source (new AddressMock("B"));
@@ -312,7 +311,7 @@ TEST(AbstractARAClientTest, testDataPacketIsRelayedIfRouteIsKnown) {
     // start the test
     client.receivePacket(&packet, interface);
     CHECK(sentPackets->size() == 1);
-    Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->getFirst();
+    Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     CHECK(sentPacketInfo->getRight()->equals(destination)); // packet has been sent to destination
 
     // check the sent packet
@@ -336,7 +335,7 @@ TEST(AbstractARAClientTest, testReceivedAntPacketsAreBroadcasted) {
     // initial test setup
     ARAClientMock client = ARAClientMock();
     NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
-    LinkedList<Pair<Packet*, AddressPtr>>* sentPackets = interface->getSentPackets();
+    std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
 
     PacketMock packet1 = PacketMock("B", "C", 123, 1, PacketType::FANT);
     PacketMock packet2 = PacketMock("C", "B", 345, 1, PacketType::BANT);
@@ -346,8 +345,8 @@ TEST(AbstractARAClientTest, testReceivedAntPacketsAreBroadcasted) {
     client.receivePacket(&packet2, interface);
 
     CHECK(sentPackets->size() == 2);
-    Pair<Packet*, AddressPtr>* sentPacketInfo1 = sentPackets->get(0);
-    Pair<Packet*, AddressPtr>* sentPacketInfo2 = sentPackets->get(1);
+    Pair<Packet*, AddressPtr>* sentPacketInfo1 = sentPackets->at(0);
+    Pair<Packet*, AddressPtr>* sentPacketInfo2 = sentPackets->at(1);
 
     // check the first sent packet
     CHECK(sentPacketInfo1->getRight()->isBroadCast());
@@ -379,7 +378,7 @@ TEST(AbstractARAClientTest, testReceivedFANTTriggersNewBANT) {
     // initial test setup
     ARAClientMock client = ARAClientMock();
     NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
-    LinkedList<Pair<Packet*, AddressPtr>>* sentPackets = interface->getSentPackets();
+    std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
     unsigned int lastSequenceNumber = client.getNextSequenceNumber();
 
     AddressPtr nodeB (new AddressMock("B"));
@@ -392,7 +391,7 @@ TEST(AbstractARAClientTest, testReceivedFANTTriggersNewBANT) {
 
     // check the sent packet
     CHECK(sentPackets->size() == 1);
-    Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->getFirst();
+    Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     CHECK(sentPacketInfo->getRight()->isBroadCast());
     Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getSource()->equals(nodeA));
@@ -414,7 +413,7 @@ TEST(AbstractARAClientTest, testReceivedBANTTriggersSendingOfTrappedPackets) {
     // initial test setup
     ARAClientMock client = ARAClientMock();
     NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
-    LinkedList<Pair<Packet*, AddressPtr>>* sentPackets = interface->getSentPackets();
+    std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
     PacketTrap* packetTrap = client.getPacketTrap();
 
     PacketMock dataPacket = PacketMock("A", "C");
@@ -427,7 +426,7 @@ TEST(AbstractARAClientTest, testReceivedBANTTriggersSendingOfTrappedPackets) {
 
     // check the sent packet
     LONGS_EQUAL(1, sentPackets->size());
-    Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->getFirst();
+    Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     CHECK(sentPacketInfo->getRight()->equals(bant.getSender()));
     Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getSource()->equals(dataPacket.getSource()));

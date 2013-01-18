@@ -25,13 +25,13 @@
 
 #include "CppUTest/TestHarness.h"
 #include "PacketTrap.h"
-#include "LinkedList.h"
 #include "RoutingTable.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 
 #include <memory>
+#include <deque>
 
 using namespace ARA;
 
@@ -95,20 +95,20 @@ TEST(PacketTrapTest, testGetDeliverablePacket) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     // Start the test
-    LinkedList<const Packet>* deliverablePackets = packetTrap.getDeliverablePackets();
-    CHECK(deliverablePackets->isEmpty());   // there is no trapped packet so none can be deliverable
+    std::deque<const Packet*>* deliverablePackets = packetTrap.getDeliverablePackets();
+    CHECK(deliverablePackets->empty());   // there is no trapped packet so none can be deliverable
     delete deliverablePackets;
 
     packetTrap.trapPacket(&trappedPacket);
     deliverablePackets = packetTrap.getDeliverablePackets();
-    CHECK(deliverablePackets->isEmpty());   // packet is still not deliverable
+    CHECK(deliverablePackets->empty());   // packet is still not deliverable
     delete deliverablePackets;
 
     routingTable.update(trappedPacket.getDestination(), someAddress, &interface, 10);
     deliverablePackets = packetTrap.getDeliverablePackets();
     CHECK(deliverablePackets->size() == 1);
 
-    const Packet* deliverablePacket = deliverablePackets->getFirst();
+    const Packet* deliverablePacket = deliverablePackets->front();
     delete deliverablePackets;
 
     CHECK(deliverablePacket->getSource()->equals(trappedPacket.getSource()));

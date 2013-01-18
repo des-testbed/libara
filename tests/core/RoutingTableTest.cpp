@@ -26,11 +26,12 @@
 #include "CppUTest/TestHarness.h"
 #include "RoutingTable.h"
 #include "RoutingTableEntry.h"
-#include "LinkedList.h"
 #include "PacketType.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+
+#include <deque>
 
 using namespace ARA;
 
@@ -42,8 +43,8 @@ TEST(RoutingTableTest, testGetPossibleNextHopsReturnsEmptyList) {
     RoutingTable routingTable = RoutingTable();
     AddressPtr destination (new AddressMock());
 
-    LinkedList<RoutingTableEntry>* list = routingTable.getPossibleNextHops(destination);
-    CHECK(list->isEmpty());
+    std::deque<RoutingTableEntry*>* list = routingTable.getPossibleNextHops(destination);
+    CHECK(list->empty());
 
     delete list;
 }
@@ -74,9 +75,9 @@ TEST(RoutingTableTest, testUdateRoutingTable) {
     routingTable.update(destination, nextHop, &interface, pheromoneValue);
 
     CHECK(routingTable.isDeliverable(&packet));
-    LinkedList<RoutingTableEntry>* nextHops = routingTable.getPossibleNextHops(&packet);
+    std::deque<RoutingTableEntry*>* nextHops = routingTable.getPossibleNextHops(&packet);
     CHECK(nextHops->size() == 1);
-    RoutingTableEntry* possibleHop = nextHops->getFirst();
+    RoutingTableEntry* possibleHop = nextHops->front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
@@ -94,9 +95,9 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     routingTable.update(destination, nextHop, &interface, pheromoneValue);
 
     CHECK(routingTable.isDeliverable(&packet));
-    LinkedList<RoutingTableEntry>* nextHops = routingTable.getPossibleNextHops(&packet);
+    std::deque<RoutingTableEntry*>* nextHops = routingTable.getPossibleNextHops(&packet);
     CHECK_EQUAL(1, nextHops->size());
-    RoutingTableEntry* possibleHop = nextHops->getFirst();
+    RoutingTableEntry* possibleHop = nextHops->front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
@@ -105,7 +106,7 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     routingTable.update(destination, nextHop, &interface, 42);
     nextHops = routingTable.getPossibleNextHops(&packet);
     CHECK_EQUAL(1, nextHops->size());
-    possibleHop = nextHops->getFirst();
+    possibleHop = nextHops->front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(42, possibleHop->getPheromoneValue());
@@ -139,10 +140,10 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
     routingTable.update(destination2, nextHop3, &interface3, pheromoneValue3);
     routingTable.update(destination2, nextHop4, &interface1, pheromoneValue4);
 
-    LinkedList<RoutingTableEntry>* nextHopsForDestination1 = routingTable.getPossibleNextHops(destination1);
+    std::deque<RoutingTableEntry*>* nextHopsForDestination1 = routingTable.getPossibleNextHops(destination1);
     CHECK_EQUAL(3, nextHopsForDestination1->size());
     for (unsigned int i = 0; i < nextHopsForDestination1->size(); i++) {
-        RoutingTableEntry* possibleHop = nextHopsForDestination1->get(i);
+        RoutingTableEntry* possibleHop = nextHopsForDestination1->at(i);
         AddressPtr hopAddress = possibleHop->getAddress();
         if(hopAddress->equals(nextHop1a)) {
             CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
@@ -161,10 +162,10 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
         }
     }
 
-    LinkedList<RoutingTableEntry>* nextHopsForDestination2 = routingTable.getPossibleNextHops(destination2);
+    std::deque<RoutingTableEntry*>* nextHopsForDestination2 = routingTable.getPossibleNextHops(destination2);
     CHECK_EQUAL(2, nextHopsForDestination2->size());
     for (unsigned int i = 0; i < nextHopsForDestination2->size(); i++) {
-        RoutingTableEntry* possibleHop = nextHopsForDestination2->get(i);
+        RoutingTableEntry* possibleHop = nextHopsForDestination2->at(i);
         AddressPtr hopAddress = possibleHop->getAddress();
         if(hopAddress->equals(nextHop3)) {
             CHECK_EQUAL(&interface3, possibleHop->getNetworkInterface());

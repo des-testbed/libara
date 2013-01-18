@@ -31,16 +31,13 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 RoutingTable::~RoutingTable() {
-    std::unordered_map<AddressPtr, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate>::iterator iterator;
+    std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-        std::pair<AddressPtr const, LinkedList<RoutingTableEntry>*> entryPair = *iterator;
-        LinkedList<RoutingTableEntry>* entryList = entryPair.second;
+        std::pair<AddressPtr const, std::deque<RoutingTableEntry*>*> entryPair = *iterator;
+        std::deque<RoutingTableEntry*>* entryList = entryPair.second;
 
         // delete all RoutingTableEntries in the List
-        while(entryList->isEmpty() == false) {
-            RoutingTableEntry* entry = entryList->remove();
-            delete entry;
-        }
+        entryList->erase (entryList->begin(),entryList->end());
         delete entryList;
     }
     table.clear();
@@ -50,18 +47,18 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
     if(isDeliverable(destination) == false) {
         // this destination is not yet registered
         RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
-        LinkedList<RoutingTableEntry>* entryList = new LinkedList<RoutingTableEntry>();
+        std::deque<RoutingTableEntry*>* entryList = new std::deque<RoutingTableEntry*>();
         table[destination] = entryList;
-        entryList->add(newEntry);
+        entryList->push_back(newEntry);
     }
     else {
         // there is at least one registered route for this destination
-        LinkedList<RoutingTableEntry>* entryList = table[destination];
+        std::deque<RoutingTableEntry*>* entryList = table[destination];
         bool entryHasBeenUpdated = false;
         // TODO replace this with an iterator
         unsigned int nrOfEntries = entryList->size();
         for (unsigned int i = 0; i < nrOfEntries; ++i) {
-            RoutingTableEntry* entry = entryList->get(i);
+            RoutingTableEntry* entry = entryList->at(i);
             if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
                 entry->setPheromoneValue(pheromoneValue);
                 entryHasBeenUpdated = true;
@@ -70,22 +67,22 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
 
         if(entryHasBeenUpdated == false) {
             RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
-            entryList->add(newEntry);
+            entryList->push_back(newEntry);
         }
     }
 }
 
-LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(AddressPtr destination) {
+std::deque<RoutingTableEntry*>* RoutingTable::getPossibleNextHops(AddressPtr destination) {
     if(isDeliverable(destination)) {
         // FIXME this should return a copy of this list (to avoid that entries in this list are accidentally removed from or added)
         return table[destination];
     }
     else {
-        return new LinkedList<RoutingTableEntry>();
+        return new std::deque<RoutingTableEntry*>();
     }
 }
 
-LinkedList<RoutingTableEntry>* RoutingTable::getPossibleNextHops(const Packet* packet) {
+std::deque<RoutingTableEntry*>* RoutingTable::getPossibleNextHops(const Packet* packet) {
     return getPossibleNextHops(packet->getDestination());
 }
 
