@@ -26,16 +26,15 @@
 #ifndef BEST_FORWARDING_POLICY_H_
 #define BEST_FORWARDING_POLICY_H_
 
-#include <deque>
-
 #include "Packet.h"
 #include "Address.h"
 #include "NextHop.h"
-#include "LinkedList.h"
 #include "RoutingTable.h"
 #include "NetworkInterface.h"
 #include "RoutingTableEntry.h"
 #include "AbstractForwardingPolicy.h"
+
+#include <deque>
 
 namespace ARA { 
   class BestPheromoneForwardingPolicy : public AbstractForwardingPolicy {

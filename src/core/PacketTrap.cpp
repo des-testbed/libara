@@ -89,8 +89,8 @@ bool PacketTrap::isEmpty() {
     return trappedPackets.size() == 0;
 }
 
-LinkedList<const Packet>* PacketTrap::getDeliverablePackets() {
-    LinkedList<const Packet>* deliverablePackets = new LinkedList<const Packet>();
+deque<const Packet*>* PacketTrap::getDeliverablePackets() {
+    deque<const Packet*>* deliverablePackets = new deque<const Packet*>();
 
     unordered_map<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
@@ -103,7 +103,7 @@ LinkedList<const Packet>* PacketTrap::getDeliverablePackets() {
             unordered_set<const Packet*>::iterator packetIterator;
             for (packetIterator=packets->begin(); packetIterator!=packets->end(); packetIterator++) {
                 const Packet* trappedPacket = *packetIterator;
-                deliverablePackets->add(trappedPacket);
+                deliverablePackets->push_back(trappedPacket);
             }
         }
     }

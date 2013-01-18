@@ -28,11 +28,11 @@
 
 #include "NetworkInterface.h"
 #include "Packet.h"
-#include "LinkedList.h"
 #include "Pair.h"
 #include "AddressMock.h"
 
 #include <memory>
+#include <deque>
 
 namespace ARA {
 
@@ -49,14 +49,14 @@ public:
     std::shared_ptr<Address> getLocalAddress();
 
     std::string getName();
-    LinkedList<Pair<Packet*, std::shared_ptr<Address> >>* getSentPackets();
+    std::deque<Pair<Packet*, std::shared_ptr<Address>>*>* getSentPackets();
     unsigned int getNumberOfSentPackets();
     bool hasPacketBeenSend(Packet* packet);
     bool hasPacketBeenBroadCasted(Packet* packet);
 
 private:
     std::string name;
-    LinkedList<Pair<Packet*, std::shared_ptr<Address> >> sentPackets;
+    std::deque<Pair<Packet*, std::shared_ptr<Address>>*> sentPackets;
     std::shared_ptr<Address> localAddress;
 };
 

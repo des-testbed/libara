@@ -29,9 +29,10 @@
 #include "Address.h"
 #include "NetworkInterface.h"
 #include "Packet.h"
-#include "LinkedList.h"
 #include "RoutingTableEntry.h"
+
 #include <unordered_map>
+#include <deque>
 
 namespace ARA {
 
@@ -41,13 +42,13 @@ public:
     ~RoutingTable();
 
     void update(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface, float pheromoneValue);
-    LinkedList<RoutingTableEntry>* getPossibleNextHops(std::shared_ptr<Address> destination);
-    LinkedList<RoutingTableEntry>* getPossibleNextHops(const Packet* packet);
+    std::deque<RoutingTableEntry*>* getPossibleNextHops(std::shared_ptr<Address> destination);
+    std::deque<RoutingTableEntry*>* getPossibleNextHops(const Packet* packet);
     bool isDeliverable(std::shared_ptr<Address> destination);
     bool isDeliverable(const Packet* packet);
 
 private:
-    std::unordered_map<std::shared_ptr<Address>, LinkedList<RoutingTableEntry>*, AddressHash, AddressPredicate> table;
+    std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table;
 
 };
 

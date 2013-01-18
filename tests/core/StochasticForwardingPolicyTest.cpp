@@ -27,7 +27,6 @@
 #include "RoutingTable.h"
 #include "StochasticForwardingPolicy.h"
 #include "RoutingTableEntry.h"
-#include "LinkedList.h"
 #include "NextHop.h"
 #include "PacketType.h"
 #include "Exception.h" 

@@ -32,9 +32,10 @@
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "Packet.h"
-#include "LinkedList.h"
+
 #include <unordered_map>
 #include <unordered_set>
+#include <deque>
 
 namespace ARA {
 
@@ -109,7 +110,7 @@ public:
 
 protected:
 
-    LinkedList<NetworkInterface> interfaces;
+    std::deque<NetworkInterface*> interfaces;
     RoutingTable routingTable;
     PacketTrap* packetTrap;
 

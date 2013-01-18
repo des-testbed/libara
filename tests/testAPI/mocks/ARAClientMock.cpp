@@ -24,30 +24,31 @@
  *******************************************************************************/
 
 #include "ARAClientMock.h"
-#include "LinkedList.h"
 #include "RoutingTableEntry.h"
+
 #include <sstream>
 
 namespace ARA {
 
 ARAClientMock::~ARAClientMock() {
     // delete the NetworkInterfaceMocks that have been created via createNewNetworkInterfaceMock
-    while(interfaceMocks.isEmpty() == false) {
-        NetworkInterfaceMock* mock = interfaceMocks.remove();
+    while(interfaceMocks.empty() == false) {
+        NetworkInterfaceMock* mock = interfaceMocks.back();
+        interfaceMocks.pop_back();
         delete mock;
     }
 }
 
 NextHop* ARAClientMock::getNextHop(const Packet* packet) {
     if(routingTable.isDeliverable(packet)) {
-        LinkedList<RoutingTableEntry>* possibleHops = routingTable.getPossibleNextHops(packet);
+        std::deque<RoutingTableEntry*>* possibleHops = routingTable.getPossibleNextHops(packet);
         // search for the best value
         // TODO this can be replaced as soon as Michael is ready with the corresponding class
         RoutingTableEntry* bestHop = NULL;
 
         unsigned int nrOfPossibleRoutes = possibleHops->size();
         for (unsigned int i = 0; i < nrOfPossibleRoutes; ++i) {
-            RoutingTableEntry* currentHop = possibleHops->get(i);
+            RoutingTableEntry* currentHop = possibleHops->at(i);
             if(bestHop == NULL || currentHop->getPheromoneValue() > bestHop->getPheromoneValue()) {
                 bestHop = currentHop;
             }
@@ -66,14 +67,14 @@ void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* i
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
-    deliveredPackets.add(packet);
+    deliveredPackets.push_back(packet);
 }
 
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
     std::stringstream mockName;
     mockName << "InterfaceMock" << (interfaceMocks.size()+1);
     NetworkInterfaceMock* mock = new NetworkInterfaceMock(mockName.str().c_str(), localAddressName);
-    interfaceMocks.add(mock);
+    interfaceMocks.push_back(mock);
     addNetworkInterface(mock);
     return mock;
 }
@@ -86,7 +87,7 @@ RoutingTable* ARAClientMock::getRoutingTable() {
     return &routingTable;
 }
 
-LinkedList<const Packet>* ARAClientMock::getDeliveredPackets() {
+std::deque<const Packet*>* ARAClientMock::getDeliveredPackets() {
     return &deliveredPackets;
 }
 

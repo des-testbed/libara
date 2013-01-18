@@ -29,10 +29,11 @@
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "Address.h"
-#include "LinkedList.h"
+
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <deque>
 
 namespace ARA {
 
@@ -60,7 +61,7 @@ public:
      *
      * Note: The LinkedList must be deleted by the caller of this method
      */
-    LinkedList<const Packet>* getDeliverablePackets();
+    std::deque<const Packet*>* getDeliverablePackets();
 
 private:
 

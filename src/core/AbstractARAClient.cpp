@@ -51,11 +51,11 @@ AbstractARAClient::~AbstractARAClient() {
 }
 
 void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
-    interfaces.add(newInterface);
+    interfaces.push_back(newInterface);
 }
 
 NetworkInterface* AbstractARAClient::getNetworkInterface(unsigned int index) {
-    return interfaces.get(index);
+    return interfaces.at(index);
 }
 
 unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
@@ -141,11 +141,11 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
         delete bant;
     }
     else if(packetType == PacketType::BANT) {
-        LinkedList<const Packet>* deliverablePackets = packetTrap->getDeliverablePackets();
+        deque<const Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
         //TODO replace this with an iterator
         unsigned int nrOfDeliverablePackets = deliverablePackets->size();
         for (unsigned int i = 0; i < nrOfDeliverablePackets; i++) {
-            const Packet* deliverablePacket = deliverablePackets->get(i);
+            const Packet* deliverablePacket = deliverablePackets->at(i);
             sendPacket(deliverablePacket);
             packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
         }
@@ -161,7 +161,7 @@ bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
     //TODO replace this with an iterator
     unsigned int numberOfInterfaces = interfaces.size();
     for (unsigned int i = 0; i < numberOfInterfaces; i++) {
-        NetworkInterface* interface = interfaces.get(i);
+        NetworkInterface* interface = interfaces.at(i);
         if(interface->getLocalAddress()->equals(destination)) {
             return true;
         }
@@ -176,7 +176,7 @@ void AbstractARAClient::broadCast(const Packet* packet) {
     //TODO replace this with iterator which should be faster
     unsigned int nrOfInterfaces = interfaces.size();
     for(unsigned int i=0; i<nrOfInterfaces; i++) {
-        NetworkInterface* interface = interfaces.get(i);
+        NetworkInterface* interface = interfaces.at(i);
         newPacket->setSender(interface->getLocalAddress());
         interface->broadcast(newPacket);
     }

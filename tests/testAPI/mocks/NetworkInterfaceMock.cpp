@@ -48,8 +48,9 @@ NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName, cons
 }
 
 NetworkInterfaceMock::~NetworkInterfaceMock() {
-    while(sentPackets.isEmpty() == false) {
-        Pair<Packet*, AddressPtr>* removedPair = sentPackets.remove();
+    while(sentPackets.empty() == false) {
+        Pair<Packet*, AddressPtr>* removedPair = sentPackets.back();
+        sentPackets.pop_back();
         delete removedPair->getLeft();  // this packet has been cloned in the send method
         delete removedPair;
     }
@@ -59,7 +60,7 @@ std::string NetworkInterfaceMock::getName() {
     return this->name;
 }
 
-LinkedList<Pair<Packet*, AddressPtr>>* NetworkInterfaceMock::getSentPackets() {
+std::deque<Pair<Packet*, AddressPtr>*>* NetworkInterfaceMock::getSentPackets() {
     return &sentPackets;
 }
 
@@ -67,7 +68,7 @@ void NetworkInterfaceMock::send(const Packet* packet, std::shared_ptr<Address> r
     Packet* copyOfPacket = packet->clone();
     std::shared_ptr<Address> copyOfAddress = std::shared_ptr<Address>(recipient);
     Pair<Packet*, AddressPtr>* pair = new Pair<Packet*, AddressPtr>(copyOfPacket, copyOfAddress);
-    sentPackets.add(pair);
+    sentPackets.push_back(pair);
 }
 
 void NetworkInterfaceMock::broadcast(const Packet* packet) {
@@ -79,7 +80,7 @@ bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
     // TODO replace this with an iterator
     unsigned int numberOfSentPackets = sentPackets.size();
     for (unsigned int i = 0; i < numberOfSentPackets; i++) {
-        Pair<Packet*, AddressPtr>* pair = sentPackets.get(i);
+        Pair<Packet*, AddressPtr>* pair = sentPackets.at(i);
         Packet* currentPacket = pair->getLeft();
         AddressPtr recipient = pair->getRight();
 
@@ -97,7 +98,7 @@ bool NetworkInterfaceMock::hasPacketBeenSend(Packet* packet) {
     // TODO replace this with an iterator
     unsigned int numberOfSentPackets = sentPackets.size();
     for (unsigned int i = 0; i < numberOfSentPackets; i++) {
-        Pair<Packet*, AddressPtr>* pair = sentPackets.get(i);
+        Pair<Packet*, AddressPtr>* pair = sentPackets.at(i);
         Packet* currentPacket = pair->getLeft();
 
         if(currentPacket->equals(packet)) {
