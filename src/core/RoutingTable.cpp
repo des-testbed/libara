@@ -26,6 +26,8 @@
 #include "RoutingTable.h"
 #include <utility>
 
+#include <iostream>
+
 namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
@@ -35,9 +37,12 @@ RoutingTable::~RoutingTable() {
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
         std::pair<AddressPtr const, std::deque<RoutingTableEntry*>*> entryPair = *iterator;
         std::deque<RoutingTableEntry*>* entryList = entryPair.second;
-
         // delete all RoutingTableEntries in the List
-        entryList->erase (entryList->begin(),entryList->end());
+        while(entryList->empty() == false) {
+            RoutingTableEntry* entry = entryList->back();
+            entryList->pop_back();
+            delete entry;
+        }
         delete entryList;
     }
     table.clear();
@@ -48,8 +53,8 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
         // this destination is not yet registered
         RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
         std::deque<RoutingTableEntry*>* entryList = new std::deque<RoutingTableEntry*>();
-        table[destination] = entryList;
         entryList->push_back(newEntry);
+        table[destination] = entryList;
     }
     else {
         // there is at least one registered route for this destination
