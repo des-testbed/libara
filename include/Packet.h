@@ -144,10 +144,18 @@ public:
     void increaseHopCount();
 
     virtual Packet* clone() const;
+
+    /**
+     * Creates a new FANT based on this packet. The FANT inherits all the
+     * addresses of this packet. The hop count is also replicated.
+     *
+     * Note: The result of this method is a newly created object which must be
+     * deleted later by the calling class.
+     */
 	virtual Packet* createFANT(unsigned int sequenceNumber) const;
 
 	/**
-	 * Creates a new BANT from this packet. This BANT has the destination of
+	 * Creates a new BANT based on this packet. This BANT has the destination of
 	 * this packet as its source and the destination of this as its source.
 	 * The hop count will be set to 0. The sequence number of the BANT is
 	 * given as argument of this method.
@@ -156,6 +164,16 @@ public:
 	 * deleted later by the calling class.
 	 */
 	virtual Packet* createBANT(unsigned int sequenceNumber) const;
+
+	/**
+     * Creates a new DUPLICATE_WARNING packet based on the information in this
+     * packet. The DUPLICATE_WARNING inherits all the addresses of this packet.
+     * The hop count is incremented.
+     *
+     * Note: The result of this method is a newly created object which must be
+     * deleted later by the calling class.
+     */
+    virtual Packet* createDuplicateWarning() const;
 
 protected:
     std::shared_ptr<Address> source;

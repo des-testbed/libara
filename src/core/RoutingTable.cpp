@@ -96,4 +96,17 @@ bool RoutingTable::isDeliverable(const Packet* packet) {
     return isDeliverable(packet->getDestination());
 }
 
+float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+    if(isDeliverable(destination)) {
+        std::deque<RoutingTableEntry*>* entryList = table[destination];
+        for (auto& entry: *entryList) {
+            if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+                return entry->getPheromoneValue();
+            }
+        }
+    }
+
+    return 0;
+}
+
 } /* namespace ARA */

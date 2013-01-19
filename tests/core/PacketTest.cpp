@@ -295,3 +295,25 @@ TEST(PacketTest, testGetHashValue) {
     CHECK(packet1.getHashValue() != packet4.getHashValue()); // different source - same seqNr
     CHECK(packet4.getHashValue() == packet5.getHashValue()); // same source - same seqNr
 }
+
+TEST(PacketTest, testCreateDulicatePacket) {
+    AddressPtr originalSource (new AddressMock("source"));
+    AddressPtr originalDestination (new AddressMock("destination"));
+    AddressPtr originalSender (new AddressMock("sender"));
+    unsigned int type = PacketType::DATA;
+    unsigned int originalseqenceNumber = 3;
+    unsigned int originalHopCount = 123;
+
+    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalHopCount);
+    Packet* duplicateWarning = packet.createDuplicateWarning();
+
+    CHECK(duplicateWarning->getSource()->equals(originalSource));
+    CHECK(duplicateWarning->getDestination()->equals(originalDestination));
+    // The sender of the packet will be determined when it is actually send by the ARA client
+    CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
+    CHECK_EQUAL(originalseqenceNumber, duplicateWarning->getSequenceNumber());
+    CHECK_EQUAL(0, duplicateWarning->getPayloadLength());
+    CHECK_EQUAL(originalHopCount+1, duplicateWarning->getHopCount());
+
+    delete duplicateWarning;
+}

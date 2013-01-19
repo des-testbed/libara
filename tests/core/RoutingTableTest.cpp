@@ -180,3 +180,20 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
         }
     }
 }
+
+TEST(RoutingTableTest, testGetPheromoneValue) {
+    // prepare the test
+    RoutingTable routingTable = RoutingTable();
+    AddressPtr sourceAddress (new AddressMock("Source"));
+    AddressPtr destination (new AddressMock("Destination"));
+    AddressPtr nextHopAddress (new AddressMock("nextHop"));
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+
+    // start the test
+
+    // Should be zero because there is no known route to this destination
+    LONGS_EQUAL(0, routingTable.getPheromoneValue(destination, nextHopAddress, &interface));
+
+    routingTable.update(destination, nextHopAddress, &interface, 123);
+    LONGS_EQUAL(123, routingTable.getPheromoneValue(destination, nextHopAddress, &interface));
+}

@@ -206,9 +206,9 @@ TEST(AbstractARAClientTest, testRespondWithDuplicateError) {
     // check the contents of the duplicate warning packet
     CHECK(recipientOfSentPacket->equals(packet.getSender()));
     CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
-    CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getSource()->equals(packet.getSource()));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_ERROR);
-    LONGS_EQUAL(1, sentPacket->getHopCount());
+    LONGS_EQUAL(packet.getHopCount()+1, sentPacket->getHopCount());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
 }
 

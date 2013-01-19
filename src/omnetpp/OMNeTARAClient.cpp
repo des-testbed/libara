@@ -76,7 +76,12 @@ NextHop* OMNeTARAClient::getNextHop(const Packet* packet) {
 }
 
 void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
-    // TODO implement OMNeTARAClient::updateRoutingTable
+    AddressPtr source = packet->getSource();
+    AddressPtr sender = packet->getSender();
+    float currentPheromoneValue = routingTable.getPheromoneValue(source, sender, interface);
+
+    float deltaPhi = 1; // TODO make this a NED parameter
+    routingTable.update(source, sender, interface, currentPheromoneValue + deltaPhi);
 }
 
 void OMNeTARAClient::deliverToSystem(const Packet* packet) {

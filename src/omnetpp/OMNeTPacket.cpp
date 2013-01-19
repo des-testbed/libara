@@ -91,6 +91,10 @@ Packet* OMNeTPacket::createBANT(unsigned int sequenceNumber) const {
     return bant;
 }
 
+Packet* OMNeTPacket::createDuplicateWarning() const {
+    return new OMNeTPacket(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, NULL, 0, hopCount+1);
+}
+
 class OMNeTPacketDescriptor : public cClassDescriptor {
 public:
     OMNeTPacketDescriptor();

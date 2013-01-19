@@ -84,7 +84,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
 void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
     if(hasBeenReceivedEarlier(packet)) {
         if(packet->isDataPacket()) {
-            sendDuplicateWarning(packet->getSender(), interface);
+            sendDuplicateWarning(packet, interface);
         }
         return;
     }
@@ -96,12 +96,11 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
     handlePacket(packet);
 }
 
-void AbstractARAClient::sendDuplicateWarning(AddressPtr recipient, NetworkInterface* interface) {
-    AddressPtr localAddress = interface->getLocalAddress();
-    unsigned int sequenceNumber = getNextSequenceNumber();
-    unsigned int hopCount = 1;
-    Packet duplicateWarningPacket = Packet(localAddress, recipient, localAddress, PacketType::DUPLICATE_ERROR, sequenceNumber, hopCount);
-    interface->send(&duplicateWarningPacket, recipient);
+void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterface* interface) {
+    Packet* duplicateWarningPacket = packet->createDuplicateWarning();
+    duplicateWarningPacket->setSender(interface->getLocalAddress());
+    interface->send(duplicateWarningPacket, packet->getSender());
+    delete duplicateWarningPacket;
 }
 
 void AbstractARAClient::handlePacket(const Packet* packet) {

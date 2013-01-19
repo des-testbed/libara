@@ -37,12 +37,11 @@ OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet;
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
     module->send(omnetPacket, gate);
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
-    //TODO does OMNeT++ ever delete this clone?
     OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
     module->send(omnetPacket, gate);
 }
