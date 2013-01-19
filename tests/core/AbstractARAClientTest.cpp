@@ -438,3 +438,72 @@ TEST(AbstractARAClientTest, testReceivedBANTTriggersSendingOfTrappedPackets) {
     // packet trap must now be empty
     CHECK(packetTrap->isEmpty());
 }
+
+/**
+ * In this test we check if a client broadcasts a FANT again that he has
+ * initially created and sent in the first place.
+ */
+TEST(AbstractARAClientTest, testDoNotReBroadcastFANT) {
+    // initial test setup
+    ARAClientMock client = ARAClientMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    PacketMock data = PacketMock("A", "Z", "A", 123, 1, PacketType::DATA);
+
+    // sending the initial packet should trigger a FANT broadcast
+    client.sendPacket(&data);
+    CHECK(sentPackets->size() == 1);
+    Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->at(0);
+    Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    sentPackets->clear();
+    delete sentPacketInfo;
+
+    // emulate that the neighbor does also broadcast the FANT and this client receives it
+    AddressPtr neighborAddress (new AddressMock("B"));
+    Packet* answer = sentPacket->clone();
+    answer->increaseHopCount();
+    answer->setSender(neighborAddress);
+    client.receivePacket(answer, interface);
+
+    // the client should not broadcast the FANT again
+    CHECK(sentPackets->empty())
+
+    // cleanup
+    delete answer;
+    delete sentPacket;
+}
+
+/**
+ *
+ */
+TEST(AbstractARAClientTest, testDoNotReBroadcastBANT) {
+    // initial test setup
+    ARAClientMock client = ARAClientMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("Z");
+    std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    PacketMock fant = PacketMock("A", "Z", "A", 123, 1, PacketType::FANT);
+
+    // client receives the FANT that is directed to him (should trigger BANt broadcast)
+    client.receivePacket(&fant, interface);
+    CHECK(sentPackets->size() == 1);
+    Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->at(0);
+    Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(sentPacket->getType() == PacketType::BANT);
+    sentPackets->clear();
+    delete sentPacketInfo;
+
+    // emulate that the neighbor does also broadcast the BANT and this client receives it back
+    AddressPtr neighborAddress (new AddressMock("Y"));
+    Packet* answer = sentPacket->clone();
+    answer->increaseHopCount();
+    answer->setSender(neighborAddress);
+    client.receivePacket(answer, interface);
+
+    // the client should not broadcast the BANT again
+    CHECK(sentPackets->empty())
+
+    // cleanup
+    delete answer;
+    delete sentPacket;
+}

@@ -76,6 +76,10 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
+
+        // remember packet so we do not broadcast this again if we receive the FANT back from a neighbor
+        registerReceivedPacket(fant);
+
         broadCast(fant);
         delete fant;
     }
@@ -136,6 +140,10 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         Packet* bant = packet->createBANT(getNextSequenceNumber());
+
+        // remember packet so we do not broadcast this again if we receive the BANT back from a neighbor
+        registerReceivedPacket(bant);
+
         broadCast(bant);
         delete bant;
     }

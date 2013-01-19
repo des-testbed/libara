@@ -37,8 +37,8 @@ PacketMock::PacketMock(const char* sourceName, const char* destinationName, unsi
  : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(sourceName)), packetType, sequenceNumber, "Hello World", 11, hopCount){
 }
 
-PacketMock::PacketMock(const char* sourceName, const char* destinationName, const char* senderName, unsigned int sequenceNumber, unsigned int hopCount, char packetType)
- : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(senderName)), packetType, sequenceNumber, "Hello World", 11, hopCount){
+PacketMock::PacketMock(const char* sourceName, const char* destinationName, const char* senderName, unsigned int sequenceNumber, unsigned int hopCount, char packetType, const char* payload)
+ : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(senderName)), packetType, sequenceNumber, payload, std::strlen(payload), hopCount){
 }
 
 void PacketMock::setSender(std::shared_ptr<Address> newSenderAddress) {
