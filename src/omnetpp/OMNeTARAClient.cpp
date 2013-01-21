@@ -48,7 +48,7 @@ void OMNeTARAClient::sendInitialPacket() {
 
 void OMNeTARAClient::handleMessage(cMessage *msg) {
     OMNeTPacket* omnetPacket = (OMNeTPacket*) msg;
-    receivePacket(omnetPacket, getNetworkInterface(0));
+    receivePacket(omnetPacket, getNetworkInterface(msg->getArrivalGate()->getIndex()));
     delete msg;
 }
 
