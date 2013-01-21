@@ -44,6 +44,7 @@ public:
 private:
     cSimpleModule* module;
     cGate* gate;
+    std::shared_ptr<Address> localAddress;
 };
 
 } /* namespace ARA */

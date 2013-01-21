@@ -34,6 +34,7 @@ namespace ARA {
 OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
     this->module = module;
     this->gate = gate;
+    this->localAddress = shared_ptr<Address>(new OMNeTAddress(module->getName()));
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
@@ -58,7 +59,7 @@ bool OMNeTGate::equals(NetworkInterface* otherInterface) {
 }
 
 shared_ptr<Address> OMNeTGate::getLocalAddress() {
-    return shared_ptr<Address>(new OMNeTAddress(module->getName()));
+    return localAddress;
 }
 
 } /* namespace ARA */
