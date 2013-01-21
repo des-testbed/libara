@@ -76,16 +76,15 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
-
-        // remember packet so we do not broadcast this again if we receive the FANT back from a neighbor
-        registerReceivedPacket(fant);
-
+        registerSentPacket(fant);
         broadCast(fant);
         delete fant;
     }
 }
 
 void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
+    updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
+
     if(hasBeenReceivedEarlier(packet)) {
         if(packet->isDataPacket()) {
             sendDuplicateWarning(packet, interface);
@@ -96,8 +95,12 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
         registerReceivedPacket(packet);
     }
 
-    updateRoutingTable(packet, interface);
     handlePacket(packet);
+}
+
+void AbstractARAClient::registerSentPacket(const Packet* packet) {
+    // TODO send packets should be stored in a separate list
+    registerReceivedPacket(packet);
 }
 
 void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterface* interface) {
@@ -140,10 +143,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         Packet* bant = packet->createBANT(getNextSequenceNumber());
-
-        // remember packet so we do not broadcast this again if we receive the BANT back from a neighbor
-        registerReceivedPacket(bant);
-
+        registerSentPacket(bant);
         broadCast(bant);
         delete bant;
     }

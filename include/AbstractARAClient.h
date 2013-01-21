@@ -114,6 +114,13 @@ protected:
     RoutingTable routingTable;
     PacketTrap* packetTrap;
 
+    /**
+     * Remember this packet in the list of sent packets.
+     * This is used to prevent rebroadcasting ant packets that have been initially
+     * created and broadcasted by this node.
+     */
+    void registerSentPacket(const Packet* packet);
+
 private:
     unsigned int nextSequenceNumber = 1;
     std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
