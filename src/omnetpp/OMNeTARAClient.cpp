@@ -80,8 +80,11 @@ void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* 
     AddressPtr sender = packet->getSender();
     float currentPheromoneValue = routingTable.getPheromoneValue(source, sender, interface);
 
-    float deltaPhi = 1; // TODO make this a NED parameter
-    routingTable.update(source, sender, interface, currentPheromoneValue + deltaPhi);
+    float deltaPhi = 10; // TODO make this a NED parameter
+    float hopCountMalus = 1 / (float) packet->getHopCount();
+    float newPheromoneValue = currentPheromoneValue + deltaPhi * hopCountMalus;
+
+    routingTable.update(source, sender, interface, newPheromoneValue);
 }
 
 void OMNeTARAClient::deliverToSystem(const Packet* packet) {
