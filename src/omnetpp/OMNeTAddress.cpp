@@ -23,31 +23,53 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <cstddef>
 #include "OMNeTAddress.h"
+#include <hash_fun.h>
+
+using namespace std;
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(int address) {
-    this->address = address;
+OMNeTAddress::OMNeTAddress(const std::string name) {
+    this->address = name;
 }
 
-int OMNeTAddress::getAddress() {
-    return this->address;
-}
-
-bool OMNeTAddress::equals(Address* otherAddress) {
-    OMNeTAddress* otherOMNeTAddress = dynamic_cast<OMNeTAddress*>(otherAddress);
-    if(otherOMNeTAddress == NULL) {
+bool OMNeTAddress::equals(const Address* otherAddress) const {
+    const OMNeTAddress* otherAddressMock = dynamic_cast<const OMNeTAddress*>(otherAddress);
+    if(otherAddressMock == NULL) {
         return false;
     }
     else {
-        return otherOMNeTAddress->address == this->address;
+        return this->address.compare(otherAddressMock->address) == 0;
+    }
+}
+
+bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
+    shared_ptr<OMNeTAddress> otherOmnetMock (dynamic_pointer_cast<OMNeTAddress>(otherAddress));
+    if(otherOmnetMock == NULL) {
+        return false;
+    }
+    else {
+        return this->address.compare(otherOmnetMock->address) == 0;
     }
 }
 
 size_t OMNeTAddress::getHashValue() const {
+    __gnu_cxx::hash<const char*> hashFunction;
+    return hashFunction(address.c_str());
+}
+
+string OMNeTAddress::getAddress() {
     return address;
+}
+
+bool OMNeTAddress::isBroadCast() {
+    return address == "BROADCAST";
+}
+
+Address* OMNeTAddress::clone() {
+    OMNeTAddress* clone = new OMNeTAddress(this->address);
+    return clone;
 }
 
 } /* namespace ARA */

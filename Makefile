@@ -6,6 +6,10 @@ test: all
 	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runTests	
 
+runSingleTest: all
+	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"
+	@cd tests && $(MAKE) runSingleTest
+
 clean: checkmakefiles
 	@cd src && $(MAKE) clean
 	@cd tests && $(MAKE) clean
@@ -15,6 +19,8 @@ cleanall: checkmakefiles
 	@cd src && $(MAKE) MODE=debug clean
 	@cd tests && $(MAKE) clean
 	rm -f src/Makefile
+
+release: cleanall makefiles test	
 
 makefiles:
 	cd src && opp_makemake -f --deep -I ../include
@@ -28,3 +34,7 @@ checkmakefiles:
 	echo; \
 	exit 1; \
 	fi
+
+installCppUTest:
+	@cd tests && $(MAKE) installCppUTest
+		

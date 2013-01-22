@@ -24,17 +24,42 @@
  *******************************************************************************/
 
 #include "OMNeTGate.h"
+#include "OMNeTPacket.h"
+#include "OMNeTAddress.h"
+
+using namespace std;
 
 namespace ARA {
 
-OMNeTGate::OMNeTGate(const cSimpleModule* module, std::string gateName) {
+OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
     this->module = module;
-    this->gateName = gateName;
+    this->gate = gate;
+    this->localAddress = shared_ptr<Address>(new OMNeTAddress(module->getName()));
 }
 
-void OMNeTGate::send(Packet* packet) {
-    //TODO implement OMNeTGate->send()
-    //module->send(packet, gateName);
+void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+    module->send(omnetPacket, gate);
+}
+
+void OMNeTGate::broadcast(const Packet* packet) {
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+    module->send(omnetPacket, gate);
+}
+
+bool OMNeTGate::equals(NetworkInterface* otherInterface) {
+    OMNeTGate* otherOMNeTInterface = dynamic_cast<OMNeTGate*>(otherInterface);
+    if(otherOMNeTInterface == NULL) {
+        return false;
+    }
+    else {
+        return strcmp(module->getFullName(), otherOMNeTInterface->module->getFullName()) == 0
+            && strcmp(gate->getFullName(), otherOMNeTInterface->gate->getFullName()) == 0;
+    }
+}
+
+shared_ptr<Address> OMNeTGate::getLocalAddress() {
+    return localAddress;
 }
 
 } /* namespace ARA */

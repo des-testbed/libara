@@ -26,6 +26,8 @@
 #ifndef PACKETTYPE_H_
 #define PACKETTYPE_H_
 
+#include <string>
+
 namespace ARA {
 
 /**
@@ -43,17 +45,29 @@ public:
         DATA,
         FANT,
         BANT,
-        PANT
+        PANT,
+        DUPLICATE_ERROR
     };
 
-    static bool isAntPacket(PacketTypeEnum type);
-    static bool isDataPacket(PacketTypeEnum type);
+    static bool isAntPacket(char type);
+    static bool isDataPacket(char type);
+
+    static std::string getAsString(char type) {
+        switch (type) {
+            case PacketType::FANT: return "FANT";
+            case PacketType::BANT: return "BANT";
+            case PacketType::PANT: return "PANT";
+            case PacketType::DATA: return "DATA";
+            case PacketType::DUPLICATE_ERROR: return "DUPLICATE_ERROR";
+            default: return "UNKOWN";
+        }
+    }
 };
 
 /**
  * Returns TRUE if the given type is a FANT, BANT or PANT and FALSE otherwise.
  */
-inline bool PacketType::isAntPacket(PacketTypeEnum type) {
+inline bool PacketType::isAntPacket(char type) {
     switch (type) {
         case PacketType::FANT:
         case PacketType::BANT:
@@ -67,7 +81,7 @@ inline bool PacketType::isAntPacket(PacketTypeEnum type) {
 /**
  * Returns TRUE if the given type is a DATA packet and FALSE otherwise.
  */
-inline bool PacketType::isDataPacket(PacketTypeEnum type) {
+inline bool PacketType::isDataPacket(char type) {
     switch (type) {
         case PacketType::DATA:
             return true;

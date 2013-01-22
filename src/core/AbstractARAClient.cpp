@@ -24,11 +24,198 @@
  *******************************************************************************/
 
 #include "AbstractARAClient.h"
+#include "PacketType.h"
+
+using namespace std;
 
 namespace ARA {
 
-void AbstractARAClient::sendPacket(Packet* packet) {
+typedef std::shared_ptr<Address> AddressPtr;
 
+AbstractARAClient::AbstractARAClient() {
+    packetTrap = new PacketTrap(&routingTable);
+}
+
+AbstractARAClient::~AbstractARAClient() {
+    delete packetTrap; //TODO we must check for and delete all packets that might still be trapped
+
+    // delete the sequence number lists of the last received packets
+    unordered_map<AddressPtr, unordered_set<unsigned int>*>::iterator iterator;
+    for (iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
+        pair<AddressPtr, unordered_set<unsigned int>*> entryPair = *iterator;
+
+        // the addresses are disposed of automatically by shared_ptr
+        delete entryPair.second;
+    }
+    lastReceivedPackets.clear();
+}
+
+void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
+    interfaces.push_back(newInterface);
+}
+
+NetworkInterface* AbstractARAClient::getNetworkInterface(unsigned int index) {
+    return interfaces.at(index);
+}
+
+unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
+    return interfaces.size();
+}
+
+void AbstractARAClient::sendPacket(const Packet* packet) {
+    if(routingTable.isDeliverable(packet)) {
+        NextHop* nextHop = getNextHop(packet);
+        NetworkInterface* interface = nextHop->getInterface();
+        Packet* newPacket = packet->clone();
+        newPacket->setSender(interface->getLocalAddress());
+        newPacket->increaseHopCount();
+        interface->send(newPacket, nextHop->getAddress());
+        delete newPacket;
+    }
+    else {
+        packetTrap->trapPacket(packet);
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* fant = packet->createFANT(sequenceNr);
+        registerSentPacket(fant);
+        broadCast(fant);
+        delete fant;
+    }
+}
+
+void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
+    updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
+
+    if(hasBeenReceivedEarlier(packet)) {
+        if(packet->isDataPacket()) {
+            sendDuplicateWarning(packet, interface);
+        }
+        return;
+    }
+    else {
+        registerReceivedPacket(packet);
+    }
+
+    handlePacket(packet);
+}
+
+void AbstractARAClient::registerSentPacket(const Packet* packet) {
+    // TODO send packets should be stored in a separate list
+    registerReceivedPacket(packet);
+}
+
+void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterface* interface) {
+    Packet* duplicateWarningPacket = packet->createDuplicateWarning();
+    duplicateWarningPacket->setSender(interface->getLocalAddress());
+    interface->send(duplicateWarningPacket, packet->getSender());
+    delete duplicateWarningPacket;
+}
+
+void AbstractARAClient::handlePacket(const Packet* packet) {
+    if(packet->isDataPacket()) {
+        handleDataPacket(packet);
+    }
+    else if(packet->isAntPacket()) {
+        handleAntPacket(packet);
+    }
+    // TODO throw exception if we can not handle this packet
+}
+
+void AbstractARAClient::handleDataPacket(const Packet* packet) {
+    if(isDirectedToThisNode(packet)) {
+        deliverToSystem(packet);
+    }
+    else {
+        sendPacket(packet);
+    }
+}
+
+void AbstractARAClient::handleAntPacket(const Packet* packet) {
+    if(isDirectedToThisNode(packet) == false) {
+        broadCast(packet);
+    }
+    else {
+        handleAntPacketForThisNode(packet);
+    }
+}
+
+void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
+    char packetType = packet->getType();
+
+    if(packetType == PacketType::FANT) {
+        Packet* bant = packet->createBANT(getNextSequenceNumber());
+        registerSentPacket(bant);
+        broadCast(bant);
+        delete bant;
+    }
+    else if(packetType == PacketType::BANT) {
+        deque<const Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
+        for(auto& deliverablePacket : *deliverablePackets) {
+            sendPacket(deliverablePacket);
+            packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
+        }
+        delete deliverablePackets;
+    }
+    else {
+        // TODO throw exception if we can not handle this packet
+    }
+}
+
+bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
+    AddressPtr destination = packet->getDestination();
+    for(auto& interface: interfaces) {
+        if(interface->getLocalAddress()->equals(destination)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void AbstractARAClient::broadCast(const Packet* packet) {
+    Packet* newPacket = packet->clone();
+    newPacket->increaseHopCount();
+
+    for(auto& interface: interfaces) {
+        newPacket->setSender(interface->getLocalAddress());
+        interface->broadcast(newPacket);
+    }
+
+    delete newPacket;
+}
+
+unsigned int AbstractARAClient::getNextSequenceNumber() {
+    return nextSequenceNumber++;
+}
+
+bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
+    AddressPtr source = packet->getSource();
+    unsigned int sequenceNumber = packet->getSequenceNumber();
+
+    unordered_map<AddressPtr, unordered_set<unsigned int>*>::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
+    if(receivedPacketSeqNumbersFromSource != lastReceivedPackets.end()) {
+        unordered_set<unsigned int>* sequenceNumbers = receivedPacketSeqNumbersFromSource->second;
+        unordered_set<unsigned int>::const_iterator got = sequenceNumbers->find(sequenceNumber);
+        if(got != sequenceNumbers->end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
+    AddressPtr source = packet->getSource();
+    unordered_map<AddressPtr, unordered_set<unsigned int>*>::const_iterator foundPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
+
+    unordered_set<unsigned int>* listOfSequenceNumbers;
+    if(foundPacketSeqNumbersFromSource == lastReceivedPackets.end()) {
+        // There is no record of any received packet from this source address ~> create new
+        listOfSequenceNumbers = new unordered_set<unsigned int>();
+        listOfSequenceNumbers->insert(packet->getSequenceNumber());
+        lastReceivedPackets[source] = listOfSequenceNumbers;
+    }
+    else {
+        listOfSequenceNumbers = foundPacketSeqNumbersFromSource->second;
+        listOfSequenceNumbers->insert(packet->getSequenceNumber());
+    }
 }
 
 } /* namespace ARA */

@@ -1,41 +1,40 @@
-/*
- * OMNeTPacket.h
- *
- *  Created on: Dec 2, 2012
- *      Author: Friedrich Große
- */
+//
+// Generated file, do not edit! Created by opp_msgc 4.2 from OMNeTPacket.msg.
+//
 
-#ifndef OMNETPACKET_H_
-#define OMNETPACKET_H_
+#ifndef _OMNETPACKET_H_
+#define _OMNETPACKET_H_
 
+#include <omnetpp.h>
 #include "Packet.h"
-#include "OMNeTAddress.h"
+#include "Address.h"
 
 namespace ARA {
 
-class OMNeTPacket : public Packet {
-public:
-    //TODO We do not need all the size of an unsigned int to store the type (one byte would be sufficient)
-    OMNeTPacket(OMNeTAddress* source, OMNeTAddress* destination, unsigned int type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount = 0);
-    ~OMNeTPacket();
+class OMNeTPacket : public ::cPacket, public ARA::Packet {
+  private:
+    void copy(const OMNeTPacket& other);
 
-    Address* getSource();
-    Address* getDestination();
-    unsigned int getType();
-    unsigned int getSequenceNumber();
-    unsigned int getHopCount();
-    const char* getPayload();
-    unsigned int getPayloadLength();
+  protected:
+    // protected and unimplemented operator==(), to prevent accidental usage
+    bool operator==(const OMNeTPacket&);
 
-private:
-    OMNeTAddress* source;
-    OMNeTAddress* destination;
-    unsigned int type;
-    unsigned int seqNr;
-    const char* payload;
-    unsigned int payloadSize;
-    unsigned int hopCount;
+  public:
+    OMNeTPacket(std::shared_ptr<Address> source=NULL, std::shared_ptr<Address> destination=NULL, std::shared_ptr<Address> sender=NULL, char type=0, unsigned int seqNr=0, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 0);
+    OMNeTPacket(const OMNeTPacket& other);
+    OMNeTPacket& operator=(const OMNeTPacket& other);
+    virtual OMNeTPacket *dup() const {return new OMNeTPacket(*this);}
+    virtual void parsimPack(cCommBuffer *b);
+    virtual void parsimUnpack(cCommBuffer *b);
+
+    virtual Packet* clone() const;
+    virtual Packet* createFANT(unsigned int sequenceNumber) const;
+    virtual Packet* createBANT(unsigned int sequenceNumber) const;
+    virtual Packet* createDuplicateWarning() const;
 };
 
+inline void doPacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimPack(b);}
+inline void doUnpacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimUnpack(b);}
+
 } /* namespace ARA */
-#endif /* OMNETPACKET_H_ */
+#endif // _OMNETPACKET_H_

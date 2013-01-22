@@ -7,3 +7,16 @@ namespace
 enum
 int
 foo
+std
+hashmap
+cpp
+destructor
+foobar
+payload
+pheromone
+hashset
+untrap
+everytime
+hashsets
+const
+editable
