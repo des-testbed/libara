@@ -304,6 +304,7 @@ TEST(AbstractARAClientTest, testDataPacketIsRelayedIfRouteIsKnown) {
     AddressPtr destination (new AddressMock("C"));
     AddressPtr sender = source;
     Packet packet = Packet(source, destination, sender, PacketType::DATA, 123, "Hello World");
+    packet.increaseHopCount();
 
     // create a route to the destination
     routingTable->update(destination, destination, interface, 10);

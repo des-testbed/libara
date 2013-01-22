@@ -49,7 +49,7 @@ TEST(PacketTest, testCreate) {
     CHECK(packet.getSender()->equals(sender));
     CHECK_EQUAL(type, packet.getType());
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    CHECK_EQUAL(1, packet.getHopCount());
+    LONGS_EQUAL(0, packet.getHopCount());
 
     CHECK_EQUAL(0, packet.getPayloadLength());
     CHECK(packet.getPayload() == false);
@@ -70,10 +70,10 @@ TEST(PacketTest, testCreateWithPayload) {
     CHECK(packet.getSender()->equals(sender));
     CHECK_EQUAL(type, packet.getType());
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    CHECK_EQUAL(1, packet.getHopCount());
+    LONGS_EQUAL(0, packet.getHopCount());
 
     LONGS_EQUAL(strlen(payload), packet.getPayloadLength());
-    CHECK_EQUAL(payload, packet.getPayload());
+    LONGS_EQUAL(payload, packet.getPayload());
 }
 
 TEST(PacketTest, testCreateWithPayloadAndHopCount) {
@@ -125,9 +125,8 @@ TEST(PacketTest, testCreateFANT) {
    unsigned int type = PacketType::DATA;
    int seqNr = 3;
    const char* payload = "Hello World";
-   unsigned int hopCount = 123;
 
-   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
+   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), 123);
    unsigned int newSequenceNumber = 242342;
    Packet* fant = packet.createFANT(newSequenceNumber);
 
@@ -135,9 +134,9 @@ TEST(PacketTest, testCreateFANT) {
    CHECK(fant->getDestination()->equals(destination));
    // The sender of a FANT will be determined when it is actually send by the ARA client
    CHECK_EQUAL(PacketType::FANT, fant->getType());
-   CHECK_EQUAL(newSequenceNumber, fant->getSequenceNumber());
-   CHECK_EQUAL(0, fant->getPayloadLength());
-   CHECK_EQUAL(hopCount, fant->getHopCount());
+   LONGS_EQUAL(newSequenceNumber, fant->getSequenceNumber());
+   LONGS_EQUAL(0, fant->getPayloadLength());
+   LONGS_EQUAL(0, fant->getHopCount());
 
    delete fant;
 }
@@ -274,9 +273,9 @@ TEST(PacketTest, testCreateBANT) {
     CHECK(bant->getDestination()->equals(originalSource));
     // The sender of the BANT will be determined when it is actually send by the ARA client
     CHECK_EQUAL(PacketType::BANT, bant->getType());
-    CHECK_EQUAL(newSequenceNumber, bant->getSequenceNumber());
-    CHECK_EQUAL(0, bant->getPayloadLength());
-    CHECK_EQUAL(0, bant->getHopCount());
+    LONGS_EQUAL(newSequenceNumber, bant->getSequenceNumber());
+    LONGS_EQUAL(0, bant->getPayloadLength());
+    LONGS_EQUAL(0, bant->getHopCount());
 
     delete bant;
 }
