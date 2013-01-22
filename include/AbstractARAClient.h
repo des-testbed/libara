@@ -130,10 +130,11 @@ private:
 
     NextHop* getNextHop(const Packet* packet);
     void sendDuplicateWarning(const Packet* packet, NetworkInterface* interface);
-    void handlePacket(const Packet* packet);
+    void handlePacket(const Packet* packet, NetworkInterface* interface);
     void handleDataPacket(const Packet* packet);
     void handleAntPacket(const Packet* packet);
     void handleAntPacketForThisNode(const Packet* packet);
+    void handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
 

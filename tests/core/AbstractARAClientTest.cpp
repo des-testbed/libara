@@ -508,3 +508,54 @@ TEST(AbstractARAClientTest, testDoNotReBroadcastBANT) {
     delete answer;
     delete sentPacket;
 }
+
+/**
+ * In this test we check if a client deletes the routing table entry to
+ * another note if he receives a duplicate warning from this node.
+ *
+ * Test setup
+ * Before test:        After test:
+ *
+ *    /--> (B)            /--> (B)
+ *  (A)--> (C)          (A)
+ *    \--> (D)            \--> (D)
+ */
+TEST(AbstractARAClientTest, testReceiveDuplicateErrorPacket) {
+    // initial test setup
+    ARAClientMock client = ARAClientMock();
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    RoutingTable* routingTable = client.getRoutingTable();
+
+    PacketMock duplicateErrorPacket = PacketMock("A", "X", "C", 123, 1, PacketType::DUPLICATE_ERROR);
+
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr nodeD (new AddressMock("D"));
+    AddressPtr destination (new AddressMock("X"));
+    routingTable->update(destination, nodeB, interface, 1.1);
+    routingTable->update(destination, nodeC, interface, 2.2);
+    routingTable->update(destination, nodeD, interface, 3.3);
+
+    // Check some basic assumptions about this test setup
+    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(destination);
+    bool someNextHopIsNodeC;
+    for(auto& possibleHop: *possibleNextHops) {
+        if(possibleHop->getAddress()->equals(nodeC) && possibleHop->getNetworkInterface()->equals(interface)) {
+            someNextHopIsNodeC = true;
+        }
+    }
+
+    CHECK(someNextHopIsNodeC);
+
+    // start the test
+    client.receivePacket(&duplicateErrorPacket, interface);
+    possibleNextHops = routingTable->getPossibleNextHops(destination);
+    bool nextHopIsNoLongerInRoutingTable = true;
+    for(auto& possibleHop: *possibleNextHops) {
+        if(possibleHop->getAddress()->equals(nodeC) && possibleHop->getNetworkInterface()->equals(interface)) {
+            nextHopIsNoLongerInRoutingTable = false;
+        }
+    }
+
+    CHECK(nextHopIsNoLongerInRoutingTable);
+}

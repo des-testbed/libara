@@ -94,7 +94,7 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
         registerReceivedPacket(packet);
     }
 
-    handlePacket(packet);
+    handlePacket(packet, interface);
 }
 
 NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
@@ -109,12 +109,15 @@ void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterf
     delete duplicateWarningPacket;
 }
 
-void AbstractARAClient::handlePacket(const Packet* packet) {
+void AbstractARAClient::handlePacket(const Packet* packet, NetworkInterface* interface) {
     if(packet->isDataPacket()) {
         handleDataPacket(packet);
     }
     else if(packet->isAntPacket()) {
         handleAntPacket(packet);
+    }
+    else if(packet->getType() == PacketType::DUPLICATE_ERROR) {
+        handleDuplicateErrorPacket(packet, interface);
     }
     // TODO throw exception if we can not handle this packet
 }
@@ -158,6 +161,11 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     else {
         // TODO throw exception if we can not handle this packet
     }
+}
+
+void AbstractARAClient::handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface) {
+    routingTable.removeEntry(packet->getDestination(), packet->getSender(), interface);
+    // TODO we can also invalidate the ack timer for the packet
 }
 
 bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) const {

@@ -197,3 +197,28 @@ TEST(RoutingTableTest, testGetPheromoneValue) {
     routingTable.update(destination, nextHopAddress, &interface, 123);
     LONGS_EQUAL(123, routingTable.getPheromoneValue(destination, nextHopAddress, &interface));
 }
+
+TEST(RoutingTableTest, removeEntry) {
+    // prepare the test
+    RoutingTable routingTable = RoutingTable();
+    AddressPtr destination (new AddressMock("Destination"));
+
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("A"));
+    AddressPtr nodeC (new AddressMock("A"));
+
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+
+    routingTable.update(destination, nodeA, &interface, 2.5);
+    routingTable.update(destination, nodeB, &interface, 2.5);
+    routingTable.update(destination, nodeC, &interface, 2.5);
+
+    // start the test
+    routingTable.removeEntry(destination, nodeB, &interface);
+    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable.getPossibleNextHops(destination);
+    for(auto& entry: *possibleNextHops) {
+        if(entry->getAddress()->equals(nodeB)) {
+            FAIL("The deleted hop should not longer be in the list of possible next hops");
+        }
+    }
+}

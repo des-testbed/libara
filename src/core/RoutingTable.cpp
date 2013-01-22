@@ -74,6 +74,22 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
     }
 }
 
+void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    if(isDeliverable(destination)) {
+        std::deque<RoutingTableEntry*>* entryList = table[destination];
+        std::deque<RoutingTableEntry*>::iterator iterator = entryList->begin();
+        while(iterator != entryList->end()) {
+            RoutingTableEntry* entry = *iterator;
+            if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+                entryList->erase(iterator);
+                delete entry;
+                return;
+            }
+            iterator++;
+        }
+    }
+}
+
 std::deque<RoutingTableEntry*>* RoutingTable::getPossibleNextHops(AddressPtr destination) {
     if(isDeliverable(destination)) {
         // FIXME this should return a copy of this list (to avoid that entries in this list are accidentally removed from or added)
