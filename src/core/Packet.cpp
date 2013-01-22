@@ -110,15 +110,11 @@ Packet* Packet::clone() const {
 }
 
 Packet* Packet::createFANT(unsigned int sequenceNumber) const {
-    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, sequenceNumber);
-    fant->setHopCount(this->hopCount);
-    return fant;
+    return new Packet(source, destination, sender, PacketType::FANT, sequenceNumber);
 }
 
 Packet* Packet::createBANT(unsigned int sequenceNumber) const {
-    unsigned int hopCount = 0; // FIXME should this be 1?
-    Packet* bant = new Packet(destination, source, sender, PacketType::BANT, sequenceNumber, hopCount);
-    return bant;
+    return new Packet(destination, source, sender, PacketType::BANT, sequenceNumber);
 }
 
 Packet* Packet::createDuplicateWarning() const {

@@ -5,9 +5,10 @@
 #ifndef _OMNETPACKET_H_
 #define _OMNETPACKET_H_
 
-#include <omnetpp.h>
 #include "Packet.h"
 #include "Address.h"
+
+#include <omnetpp.h>
 
 namespace ARA {
 
@@ -20,7 +21,7 @@ class OMNeTPacket : public ::cPacket, public ARA::Packet {
     bool operator==(const OMNeTPacket&);
 
   public:
-    OMNeTPacket(std::shared_ptr<Address> source=NULL, std::shared_ptr<Address> destination=NULL, std::shared_ptr<Address> sender=NULL, char type=0, unsigned int seqNr=0, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 0);
+    OMNeTPacket(std::shared_ptr<Address> source=NULL, std::shared_ptr<Address> destination=NULL, std::shared_ptr<Address> sender=NULL, char type=0, unsigned int seqNr=0, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 1);
     OMNeTPacket(const OMNeTPacket& other);
     OMNeTPacket& operator=(const OMNeTPacket& other);
     virtual OMNeTPacket *dup() const {return new OMNeTPacket(*this);}

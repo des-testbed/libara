@@ -40,37 +40,22 @@ OMNeTPacket& OMNeTPacket::operator=(const OMNeTPacket& other) {
 }
 
 void OMNeTPacket::copy(const OMNeTPacket& other) {
-    //TODO implement OMNeTPacket::copy
+    this->source = other.source;
+    this->destination = other.destination;
+    this->sender = other.sender;
+    this->type = other.type;
+    this->seqNr = other.seqNr;
+    this->payload = other.payload;
+    this->payloadSize = other.payloadSize;
+    this->hopCount = other.hopCount;
 }
 
 void OMNeTPacket::parsimPack(cCommBuffer *b) {
     throw cRuntimeError("Parsim error: OMNeTPacket::parsimPack is not yet implemented");
-
-    //TODO implement OMNeTPacket::parsimPack
-   // cPacket::parsimPack(b);
-    /*doPacking(b,this->someField_var);
-    doPacking(b,this->anotherField_var);
-    b->pack(arrayField1_arraysize);
-    doPacking(b,this->arrayField1_var,arrayField1_arraysize);
-    doPacking(b,this->arrayField2_var,10);*/
 }
 
 void OMNeTPacket::parsimUnpack(cCommBuffer *b) {
     throw cRuntimeError("Parsim error: OMNeTPacket::parsimUnpack is not yet implemented");
-
-    //TODO implement OMNeTPacket::parsimUnpack
-  //  cPacket::parsimUnpack(b);
-    /*doUnpacking(b,this->someField_var);
-    doUnpacking(b,this->anotherField_var);
-    delete [] this->arrayField1_var;
-    b->unpack(arrayField1_arraysize);
-    if (arrayField1_arraysize==0) {
-        this->arrayField1_var = 0;
-    } else {
-        this->arrayField1_var = new double[arrayField1_arraysize];
-        doUnpacking(b,this->arrayField1_var,arrayField1_arraysize);
-    }
-    doUnpacking(b,this->arrayField2_var,10);*/
 }
 
 Packet* OMNeTPacket::clone() const {
@@ -78,17 +63,11 @@ Packet* OMNeTPacket::clone() const {
 }
 
 Packet* OMNeTPacket::createFANT(unsigned int sequenceNumber) const {
-    const char* payload = NULL;
-    unsigned int hopCount = 0; // FIXME should this be 1?
-    OMNeTPacket* fant = new OMNeTPacket(source, destination, sender, PacketType::FANT, sequenceNumber, payload, 0, hopCount);
-    return fant;
+    return new OMNeTPacket(source, destination, sender, PacketType::FANT, sequenceNumber);
 }
 
 Packet* OMNeTPacket::createBANT(unsigned int sequenceNumber) const {
-    const char* payload = NULL;
-    unsigned int hopCount = 0; // FIXME should this be 1?
-    OMNeTPacket* bant = new OMNeTPacket(destination, source, sender, PacketType::BANT, sequenceNumber, payload, 0, hopCount);
-    return bant;
+    return new OMNeTPacket(destination, source, sender, PacketType::BANT, sequenceNumber);
 }
 
 Packet* OMNeTPacket::createDuplicateWarning() const {
