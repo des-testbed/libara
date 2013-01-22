@@ -31,6 +31,7 @@ Define_Module(OMNeTARAClient);
 void OMNeTARAClient::initialize() {
     // TODO make this a simulation parameter
     forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
+    //forwardingPolicy = new StochasticForwardingPolicy(&routingTable);
 
     for (cModule::GateIterator i(this); !i.end(); i++) {
         cGate* gate = i();
@@ -75,4 +76,7 @@ void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* 
 
 void OMNeTARAClient::deliverToSystem(const Packet* packet) {
     EV << getName() << " delivered a packet to the system\n";
+
+    OMNeTPacket* answer = new OMNeTPacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
+    sendPacket(answer);
 }
