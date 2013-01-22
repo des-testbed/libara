@@ -81,9 +81,12 @@ public:
      * Sends the packet to the packets destination.
      *
      * If the packet is deliverable (e.g there is at least one route known
-     * in the routing table), the next hop is calculated in AbstractARAClient::getNextHop()
+     * in the routing table), the next hop is calculated via the current forwarding policy.
      * If there is no known route to the packet destination a FANT is generated and send
      * according to the ARA algorithm.
+     *
+     * Note: The packet instance may be deleted after this method so we need to
+     * clone the packet if we want to persist it in memory.
      */
     void sendPacket(const Packet* packet);
 

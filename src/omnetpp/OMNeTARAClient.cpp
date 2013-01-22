@@ -48,8 +48,8 @@ void OMNeTARAClient::initialize() {
 void OMNeTARAClient::sendInitialPacket() {
     AddressPtr source = AddressPtr(new OMNeTAddress("source"));
     AddressPtr destination = AddressPtr(new OMNeTAddress("destination"));
-    OMNeTPacket* msg = new OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
-    sendPacket(msg);
+    OMNeTPacket initialPacket = OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
+    sendPacket(&initialPacket);
 }
 
 void OMNeTARAClient::handleMessage(cMessage *msg) {
@@ -77,6 +77,6 @@ void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* 
 void OMNeTARAClient::deliverToSystem(const Packet* packet) {
     EV << getName() << " delivered a packet to the system\n";
 
-    OMNeTPacket* answer = new OMNeTPacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
-    sendPacket(answer);
+    OMNeTPacket answer = OMNeTPacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
+    sendPacket(&answer);
 }

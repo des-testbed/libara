@@ -38,7 +38,12 @@ PacketTrap::~PacketTrap() {
     unordered_map<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
         pair<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*> entryPair = *iterator;
-        delete entryPair.second;
+        unordered_set<const Packet*, PacketHash, PacketPredicate>* packetSet = entryPair.second;
+
+        for(auto& packet: *packetSet) {
+            delete packet;
+        }
+        delete packetSet;
     }
     trappedPackets.clear();
 }
@@ -54,7 +59,7 @@ void PacketTrap::trapPacket(const Packet* packet) {
         trappedPackets[destination] = newHashSet;
     }
 
-    trappedPackets[destination]->insert(packet);
+    trappedPackets[destination]->insert(packet->clone());
 }
 
 void PacketTrap::untrapPacket(const Packet* packet) {
@@ -62,10 +67,21 @@ void PacketTrap::untrapPacket(const Packet* packet) {
     unordered_map<AddressPtr, unordered_set<const Packet*, PacketHash, PacketPredicate>*>::const_iterator found = trappedPackets.find(packetDestination);
     if(found != trappedPackets.end()) {
         unordered_set<const Packet*, PacketHash, PacketPredicate>* packetSet = found->second;
-        packetSet->erase(packet);
-        if(packetSet->size() == 0) {
-            trappedPackets.erase(packetDestination);
-            delete packetSet;
+
+        unordered_set<const Packet*, PacketHash, PacketPredicate>::const_iterator storedPacketIterator = packetSet->find(packet);
+        if(storedPacketIterator != packetSet->end()) {
+            const Packet* storedPacket = *storedPacketIterator;
+            packetSet->erase(storedPacket);
+            delete storedPacket;
+
+            // if this was the last packet for this destination we need to delete the set
+            if(packetSet->size() == 0) {
+                trappedPackets.erase(packetDestination);
+                delete packetSet;
+            }
+        }
+        else {
+            //TODO throw Exception if there is no such trapped packet
         }
     }
     else {
