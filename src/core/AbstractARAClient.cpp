@@ -76,7 +76,6 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
-        registerSentPacket(fant);
         broadCast(fant);
         delete fant;
     }
@@ -101,11 +100,6 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
 NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
     ForwardingPolicy* forwardingPolicy = getForwardingPolicy();
     return forwardingPolicy->getNextHop(packet);
-}
-
-void AbstractARAClient::registerSentPacket(const Packet* packet) {
-    // TODO send packets should be stored in a separate list
-    registerReceivedPacket(packet);
 }
 
 void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterface* interface) {
@@ -135,11 +129,13 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
 }
 
 void AbstractARAClient::handleAntPacket(const Packet* packet) {
-    if(isDirectedToThisNode(packet) == false) {
-        broadCast(packet);
-    }
-    else {
-        handleAntPacketForThisNode(packet);
+    if(hasBeenSentByThisNode(packet) == false) {
+        if(isDirectedToThisNode(packet) == false) {
+            broadCast(packet);
+        }
+        else {
+            handleAntPacketForThisNode(packet);
+        }
     }
 }
 
@@ -148,7 +144,6 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         Packet* bant = packet->createBANT(getNextSequenceNumber());
-        registerSentPacket(bant);
         broadCast(bant);
         delete bant;
     }
@@ -165,10 +160,20 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     }
 }
 
-bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
+bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) const {
     AddressPtr destination = packet->getDestination();
     for(auto& interface: interfaces) {
         if(interface->getLocalAddress()->equals(destination)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
+    AddressPtr source = packet->getSource();
+    for(auto& interface: interfaces) {
+        if(interface->getLocalAddress()->equals(source)) {
             return true;
         }
     }
