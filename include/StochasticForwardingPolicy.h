@@ -37,19 +37,18 @@
 #include "RoutingTableEntry.h"
 #include "AbstractForwardingPolicy.h"
 
-namespace ARA { 
-  class StochasticForwardingPolicy : public AbstractForwardingPolicy {
-    public:
-      StochasticForwardingPolicy(RoutingTable*);
-      ~StochasticForwardingPolicy();
-      NextHop getNextHop(Packet*);
+namespace ARA {
 
-    private:
-      void initializeRandomNumberGenerator();
-      // this method needs to be overwritten for omnet client since
-      // we are going to use the built-in random number generator in omnet++
-      float getRandomNumber();
-  };
-} 
+class StochasticForwardingPolicy : public AbstractForwardingPolicy {
+public:
+    StochasticForwardingPolicy(RoutingTable* routingTable) : AbstractForwardingPolicy(routingTable) {};
+    NextHop* getNextHop(const Packet*);
+
+protected:
+    void initializeRandomNumberGenerator();
+    float getRandomNumber();
+};
+
+} /* namespace ARA */
 
 #endif

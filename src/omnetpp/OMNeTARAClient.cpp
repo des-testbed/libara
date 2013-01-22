@@ -18,6 +18,8 @@
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
 #include "OMNeTGate.h"
+#include "BestPheromoneForwardingPolicy.h"
+#include "StochasticForwardingPolicy.h"
 
 using namespace ARA;
 
@@ -27,6 +29,9 @@ typedef std::shared_ptr<Address> AddressPtr;
 Define_Module(OMNeTARAClient);
 
 void OMNeTARAClient::initialize() {
+    // TODO make this a simulation parameter
+    forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
+
     for (cModule::GateIterator i(this); !i.end(); i++) {
         cGate* gate = i();
         if(gate->getType() == cGate::OUTPUT) {
@@ -52,27 +57,8 @@ void OMNeTARAClient::handleMessage(cMessage *msg) {
     delete msg;
 }
 
-NextHop* OMNeTARAClient::getNextHop(const Packet* packet) {
-    if(routingTable.isDeliverable(packet)) {
-        std::deque<RoutingTableEntry*>* possibleHops = routingTable.getPossibleNextHops(packet);
-        // search for the best value
-        // TODO this can be replaced as soon as Michael is ready with the corresponding class
-        RoutingTableEntry* bestHop = NULL;
-
-        unsigned int nrOfPossibleRoutes = possibleHops->size();
-        for (unsigned int i = 0; i < nrOfPossibleRoutes; ++i) {
-            RoutingTableEntry* currentHop = possibleHops->at(i);
-            if(bestHop == NULL || currentHop->getPheromoneValue() > bestHop->getPheromoneValue()) {
-                bestHop = currentHop;
-            }
-        }
-
-        return bestHop->getNextHop();
-    }
-    else {
-        // TODO maybe it would be better to return a NULL Object (Pattern) instead of returning a NULL pointer
-        return NULL;
-    }
+AbstractForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
+    return forwardingPolicy;
 }
 
 void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {

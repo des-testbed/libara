@@ -24,21 +24,27 @@
  *******************************************************************************/
 
 #ifndef ABSTRACT_FORWARDING_POLICY_H_
-#define  ABSTRACT_FORWARDING_POLICY_H_
+#define ABSTRACT_FORWARDING_POLICY_H_
 
 #include "Packet.h"
 #include "NextHop.h"
 #include "RoutingTable.h"
 
 namespace ARA { 
-  class AbstractForwardingPolicy {
-    public:
-      AbstractForwardingPolicy(RoutingTable* pRoutingTable) : mRoutingTable(pRoutingTable){}
-      virtual NextHop getNextHop(Packet*) = 0;
 
-    protected:
-      RoutingTable* mRoutingTable;
-  };
-} 
+class AbstractForwardingPolicy {
+public:
+    AbstractForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable){}
+    virtual ~AbstractForwardingPolicy() {};
+    /**
+     * TODO write documentation
+     */
+    virtual NextHop* getNextHop(const Packet*) = 0;
+
+protected:
+    RoutingTable* routingTable;
+};
+
+} /* namespace ARA */
 
 #endif 

@@ -27,15 +27,9 @@
 
 using namespace ARA;
 
-BestPheromoneForwardingPolicy::BestPheromoneForwardingPolicy(RoutingTable* pRoutingTable):AbstractForwardingPolicy(pRoutingTable){}
-
-BestPheromoneForwardingPolicy::~BestPheromoneForwardingPolicy(){ 
- // delete this->mRoutingTable;
-}
-
 // todo: add exception for "no hop available", are not yet interfaces are not yet considered
-NextHop BestPheromoneForwardingPolicy::getNextHop(Packet* pPacket){
-    std::deque<RoutingTableEntry*>* possibleNextHops = this->mRoutingTable->getPossibleNextHops(pPacket);
+NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet){
+    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(packet);
 
     RoutingTableEntry* bestEntry = NULL;
     float globalMaximum = 0;
@@ -46,7 +40,7 @@ NextHop BestPheromoneForwardingPolicy::getNextHop(Packet* pPacket){
         }
     }
 
-    NextHop result = *(bestEntry->getNextHop());
+    NextHop* result = bestEntry->getNextHop();
     //FIXME possibleNextHops muss noch gelöscht werden!
     return result;
 }

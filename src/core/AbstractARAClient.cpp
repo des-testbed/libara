@@ -98,6 +98,11 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
     handlePacket(packet);
 }
 
+NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
+    AbstractForwardingPolicy* forwardingPolicy = getForwardingPolicy();
+    return forwardingPolicy->getNextHop(packet);
+}
+
 void AbstractARAClient::registerSentPacket(const Packet* packet) {
     // TODO send packets should be stored in a separate list
     registerReceivedPacket(packet);

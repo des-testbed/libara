@@ -18,6 +18,7 @@
 
 #include <csimplemodule.h>
 #include "AbstractARAClient.h"
+#include "AbstractForwardingPolicy.h"
 #include "NetworkInterface.h"
 #include "NextHop.h"
 #include "Packet.h"
@@ -32,11 +33,13 @@ protected:
     virtual void handleMessage(cMessage *msg);
 
     //~~~ INHERITED FROM AbstractARAClient ~~~
-    NextHop* getNextHop(const Packet* packet);
+    AbstractForwardingPolicy* getForwardingPolicy();
     void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
     void deliverToSystem(const Packet* packet);
 
 private:
+    AbstractForwardingPolicy* forwardingPolicy;
+
     void sendInitialPacket();
 };
 

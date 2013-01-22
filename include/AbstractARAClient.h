@@ -32,6 +32,7 @@
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "Packet.h"
+#include "AbstractForwardingPolicy.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -45,11 +46,6 @@ class AbstractARAClient {
 public:
     AbstractARAClient();
     virtual ~AbstractARAClient();
-
-    /**
-     * TODO write some documentation
-     */
-    virtual NextHop* getNextHop(const Packet* packet) = 0;
 
     /**
      * This method is called each a time a new packet is received over the
@@ -115,6 +111,17 @@ protected:
     PacketTrap* packetTrap;
 
     /**
+     * This method is called to retrieve an instance of AbstractForwardingPolicy
+     * each time the next hop for a given destination has to be determined.
+     *
+     * Note: If the forwarding policy is static (i.e. does never change), the
+     * implementation should store the forwarding policy as a member and just
+     * return a pointer to it instead of creating a new instance each time
+     * this method is called.
+     */
+    virtual AbstractForwardingPolicy* getForwardingPolicy() = 0;
+
+    /**
      * Remember this packet in the list of sent packets.
      * This is used to prevent rebroadcasting ant packets that have been initially
      * created and broadcasted by this node.
@@ -125,12 +132,14 @@ private:
     unsigned int nextSequenceNumber = 1;
     std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 
+    NextHop* getNextHop(const Packet* packet);
     void sendDuplicateWarning(const Packet* packet, NetworkInterface* interface);
     void handlePacket(const Packet* packet);
     void handleDataPacket(const Packet* packet);
     void handleAntPacket(const Packet* packet);
     void handleAntPacketForThisNode(const Packet* packet);
     bool isDirectedToThisNode(const Packet* packet);
+
 };
 
 } /* namespace ARA */

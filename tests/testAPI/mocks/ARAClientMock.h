@@ -27,7 +27,11 @@
 #define ARACLIENTMOCK_H_
 
 #include "AbstractARAClient.h"
+#include "AbstractForwardingPolicy.h"
+#include "Packet.h"
 #include "NetworkInterfaceMock.h"
+#include "PacketTrap.h"
+#include "RoutingTable.h"
 
 #include <string>
 #include <deque>
@@ -40,9 +44,10 @@ namespace ARA {
  */
 class ARAClientMock: public AbstractARAClient {
 public:
+    ARAClientMock();
     ~ARAClientMock();
 
-    NextHop* getNextHop(const Packet* packet);
+    AbstractForwardingPolicy* getForwardingPolicy();
     void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
     void deliverToSystem(const Packet* packet);
 
@@ -55,6 +60,7 @@ private:
     std::deque<NetworkInterfaceMock*> interfaceMocks;
     std::deque<const Packet*> deliveredPackets;
 
+    AbstractForwardingPolicy* forwardingPolicy;
 };
 
 } /* namespace ARA */

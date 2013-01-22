@@ -37,12 +37,13 @@
 #include <deque>
 
 namespace ARA { 
-  class BestPheromoneForwardingPolicy : public AbstractForwardingPolicy {
-    public:
-      BestPheromoneForwardingPolicy(RoutingTable*);
-      ~BestPheromoneForwardingPolicy();
-      NextHop getNextHop(Packet*);
-  };
-} 
+
+class BestPheromoneForwardingPolicy : public AbstractForwardingPolicy {
+public:
+    BestPheromoneForwardingPolicy(RoutingTable* routingTable) : AbstractForwardingPolicy(routingTable) {}
+    NextHop* getNextHop(const Packet*);
+};
+
+} /* namespace ARA */
 
 #endif

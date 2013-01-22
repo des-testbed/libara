@@ -69,24 +69,6 @@ TEST(ARAClientMockTest, testGetNetworkInterfaceMock) {
     CHECK(interface->getLocalAddress()->equals(&expectedLocalAddress));
 }
 
-TEST(ARAClientMockTest, testGetNextHop) {
-    // this is just an example implementation because the mock simply needs something to be implemented here
-    ARAClientMock client = ARAClientMock();
-    PacketMock packet = PacketMock();
-    RoutingTable* routingTable = client.getRoutingTable();
-    shared_ptr<Address> destination = packet.getDestination();
-    shared_ptr<Address> node1 (new AddressMock("Node 1"));
-    shared_ptr<Address> node2 (new AddressMock("Node 2"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
-
-    routingTable->update(destination, node1, &interface, 10);
-    routingTable->update(destination, node2, &interface, 20);
-
-    NextHop* nextHop = client.getNextHop(&packet);
-    CHECK(nextHop->getAddress()->equals(node2));
-    CHECK(nextHop->getInterface()->equals(&interface));
-}
-
 TEST(ARAClientMockTest, testRememberPacketsThatHaveBeenDeliveredToTheSystem) {
     ARAClientMock client = ARAClientMock();
     PacketMock packet1 = PacketMock("A", "B");
