@@ -46,7 +46,7 @@ ARAClientMock::~ARAClientMock() {
     }
 }
 
-AbstractForwardingPolicy* ARAClientMock::getForwardingPolicy() {
+ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
     return forwardingPolicy;
 }
 

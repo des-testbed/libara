@@ -99,7 +99,7 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
 }
 
 NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
-    AbstractForwardingPolicy* forwardingPolicy = getForwardingPolicy();
+    ForwardingPolicy* forwardingPolicy = getForwardingPolicy();
     return forwardingPolicy->getNextHop(packet);
 }
 

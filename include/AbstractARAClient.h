@@ -32,7 +32,7 @@
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "Packet.h"
-#include "AbstractForwardingPolicy.h"
+#include "ForwardingPolicy.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -111,7 +111,7 @@ protected:
     PacketTrap* packetTrap;
 
     /**
-     * This method is called to retrieve an instance of AbstractForwardingPolicy
+     * This method is called to retrieve an instance of ForwardingPolicy
      * each time the next hop for a given destination has to be determined.
      *
      * Note: If the forwarding policy is static (i.e. does never change), the
@@ -119,7 +119,7 @@ protected:
      * return a pointer to it instead of creating a new instance each time
      * this method is called.
      */
-    virtual AbstractForwardingPolicy* getForwardingPolicy() = 0;
+    virtual ForwardingPolicy* getForwardingPolicy() = 0;
 
     /**
      * Remember this packet in the list of sent packets.

@@ -23,26 +23,28 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef ABSTRACT_FORWARDING_POLICY_H_
-#define ABSTRACT_FORWARDING_POLICY_H_
+#ifndef FORWARDING_POLICY_H_
+#define FORWARDING_POLICY_H_
 
 #include "Packet.h"
 #include "NextHop.h"
-#include "RoutingTable.h"
 
 namespace ARA { 
 
-class AbstractForwardingPolicy {
+/**
+ * This purely virtual interface is used by the AbstractARAClient to determine
+ * the next hop for a given packet.
+ */
+class ForwardingPolicy {
 public:
-    AbstractForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable){}
-    virtual ~AbstractForwardingPolicy() {};
+    virtual ~ForwardingPolicy() {};
+
     /**
-     * TODO write documentation
+     * Return the NextHop for the given packet according to this packet forwarding
+     * policy.
      */
     virtual NextHop* getNextHop(const Packet*) = 0;
 
-protected:
-    RoutingTable* routingTable;
 };
 
 } /* namespace ARA */

@@ -57,7 +57,7 @@ void OMNeTARAClient::handleMessage(cMessage *msg) {
     delete msg;
 }
 
-AbstractForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
+ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
     return forwardingPolicy;
 }
 

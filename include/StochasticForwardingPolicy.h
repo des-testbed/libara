@@ -35,18 +35,20 @@
 #include "NextHop.h"
 #include "RoutingTable.h"
 #include "RoutingTableEntry.h"
-#include "AbstractForwardingPolicy.h"
+#include "ForwardingPolicy.h"
 
 namespace ARA {
 
-class StochasticForwardingPolicy : public AbstractForwardingPolicy {
+class StochasticForwardingPolicy : public ForwardingPolicy {
 public:
-    StochasticForwardingPolicy(RoutingTable* routingTable) : AbstractForwardingPolicy(routingTable) {};
+    StochasticForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {};
     NextHop* getNextHop(const Packet*);
 
 protected:
     void initializeRandomNumberGenerator();
     float getRandomNumber();
+
+    RoutingTable* routingTable;
 };
 
 } /* namespace ARA */

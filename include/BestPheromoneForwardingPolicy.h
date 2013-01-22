@@ -26,22 +26,20 @@
 #ifndef BEST_FORWARDING_POLICY_H_
 #define BEST_FORWARDING_POLICY_H_
 
-#include "Packet.h"
-#include "Address.h"
-#include "NextHop.h"
+#include "ForwardingPolicy.h"
 #include "RoutingTable.h"
-#include "NetworkInterface.h"
-#include "RoutingTableEntry.h"
-#include "AbstractForwardingPolicy.h"
-
-#include <deque>
+#include "NextHop.h"
+#include "Packet.h"
 
 namespace ARA { 
 
-class BestPheromoneForwardingPolicy : public AbstractForwardingPolicy {
+class BestPheromoneForwardingPolicy : public ForwardingPolicy {
 public:
-    BestPheromoneForwardingPolicy(RoutingTable* routingTable) : AbstractForwardingPolicy(routingTable) {}
+    BestPheromoneForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {}
     NextHop* getNextHop(const Packet*);
+
+protected:
+    RoutingTable* routingTable;
 };
 
 } /* namespace ARA */

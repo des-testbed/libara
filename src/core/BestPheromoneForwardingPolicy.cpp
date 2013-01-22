@@ -25,6 +25,8 @@
 
 #include "BestPheromoneForwardingPolicy.h"
 
+#include <deque>
+
 using namespace ARA;
 
 // todo: add exception for "no hop available", are not yet interfaces are not yet considered
