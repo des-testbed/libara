@@ -38,6 +38,6 @@ checkmakefiles:
 installCppUTest:
 	@cd tests && $(MAKE) installCppUTest
 		
-doc:
-	echo 'building doxygen-based documentation in doc/html'; \
-	doxygen config.doxygen
+#doc: all
+#	echo 'building doxygen-based documentation in doc/html'; \
+#	@cd doc/doxygen && $(MAKE) doc
