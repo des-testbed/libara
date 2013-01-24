@@ -60,9 +60,10 @@ TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
     routingTable.update(destination, nextHopA, &interface, 1.2);
     routingTable.update(destination, nextHopB, &interface, 2.1);
     routingTable.update(destination, nextHopC, &interface, 2.3);
-
+    
     BestPheromoneForwardingPolicy policy(&routingTable);
     NextHop* node = policy.getNextHop(&packet);
 
-    CHECK(nextHopC->equals(node->getAddress()));
+    // check if the chosen node matches the node with the highest pheromone value
+    CHECK(nextHopC->equals(node.getAddress()));
 }
