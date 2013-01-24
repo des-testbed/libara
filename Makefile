@@ -38,6 +38,25 @@ checkmakefiles:
 installCppUTest:
 	@cd tests && $(MAKE) installCppUTest
 		
-#doc: all
-#	echo 'building doxygen-based documentation in doc/html'; \
-#	@cd doc/doxygen && $(MAKE) doc
+doc: all 
+	@if type doxygen >/dev/null 2>&1; then \
+	if type dot >/dev/null 2>&1; then \
+	echo; \
+	echo '======================================================================='; \
+	echo 'building doxygen-based documentation in doc/html'; \
+	echo '======================================================================='; \
+	echo; \
+	doxygen doc/doxygen/config.doxyfile; \
+	else \
+	echo '======================================================================='; \
+	echo 'please check if dot (graphviz) is installed'; \
+	echo '======================================================================='; \
+   	exit 1; \
+	fi \
+	else \
+	echo '======================================================================='; \
+	echo 'please check if doxygen is installed'; \
+	echo '======================================================================='; \
+	exit 1; \
+	fi
+     
