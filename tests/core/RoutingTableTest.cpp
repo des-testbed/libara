@@ -96,7 +96,7 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
 
     CHECK(routingTable.isDeliverable(&packet));
     std::deque<RoutingTableEntry*>* nextHops = routingTable.getPossibleNextHops(&packet);
-    LONGS_EQUAL(1, nextHops->size());
+    BYTES_EQUAL(1, nextHops->size());
     RoutingTableEntry* possibleHop = nextHops->front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
@@ -105,7 +105,7 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     // now we want to update the pheromone value of this route
     routingTable.update(destination, nextHop, &interface, 42);
     nextHops = routingTable.getPossibleNextHops(&packet);
-    LONGS_EQUAL(1, nextHops->size());
+    BYTES_EQUAL(1, nextHops->size());
     possibleHop = nextHops->front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
@@ -141,7 +141,7 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
     routingTable.update(destination2, nextHop4, &interface1, pheromoneValue4);
 
     std::deque<RoutingTableEntry*>* nextHopsForDestination1 = routingTable.getPossibleNextHops(destination1);
-    LONGS_EQUAL(3, nextHopsForDestination1->size());
+    BYTES_EQUAL(3, nextHopsForDestination1->size());
     for (unsigned int i = 0; i < nextHopsForDestination1->size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination1->at(i);
         AddressPtr hopAddress = possibleHop->getAddress();
@@ -163,7 +163,7 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
     }
 
     std::deque<RoutingTableEntry*>* nextHopsForDestination2 = routingTable.getPossibleNextHops(destination2);
-    LONGS_EQUAL(2, nextHopsForDestination2->size());
+    BYTES_EQUAL(2, nextHopsForDestination2->size());
     for (unsigned int i = 0; i < nextHopsForDestination2->size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination2->at(i);
         AddressPtr hopAddress = possibleHop->getAddress();

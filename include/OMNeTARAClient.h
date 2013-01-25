@@ -16,32 +16,53 @@
 #ifndef OMNETARACLIENT_H_
 #define OMNETARACLIENT_H_
 
+#include <omnetpp.h>
+#include <algorithm>
 #include <csimplemodule.h>
-#include "AbstractARAClient.h"
+
+#include "Packet.h"
+#include "NextHop.h"
+#include "OMNeTGate.h"
+#include "OMNeTPacket.h"
+#include "OMNeTAddress.h"
 #include "ForwardingPolicy.h"
 #include "NetworkInterface.h"
-#include "NextHop.h"
-#include "Packet.h"
+#include "AbstractARAClient.h"
+#include "BestPheromoneForwardingPolicy.h"
+#include "OMNeTStochasticForwardingPolicy.h"
+
 
 namespace ARA {
+    /**
+     * The class represents the implementation of the ant routing algorithm (ARA)
+     * for the OMNeT++ simulation framework. 
+     *
+     * The algorithm was first published in:
+     *
+     *  Gunes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs." 
+     *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
+     *
+     */
+    class OMNeTARAClient: public cSimpleModule, public AbstractARAClient {
+        protected:
+            //~~~ INHERITED FROM cSimpleModule ~~~~~~~
+            virtual void initialize();
+            virtual void handleMessage(cMessage *msg);
 
-class OMNeTARAClient: public cSimpleModule, public AbstractARAClient {
+            //~~~ INHERITED FROM AbstractARAClient ~~~
+            ForwardingPolicy* getForwardingPolicy();
+            void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
+            void deliverToSystem(const Packet* packet);
 
-protected:
-    //~~~ INHERITED FROM cSimpleModule ~~~~~~~
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-
-    //~~~ INHERITED FROM AbstractARAClient ~~~
-    ForwardingPolicy* getForwardingPolicy();
-    void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
-    void deliverToSystem(const Packet* packet);
-
-private:
-    ForwardingPolicy* forwardingPolicy;
-
-    void sendInitialPacket();
-};
-
+        private:
+            /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
+            ForwardingPolicy* forwardingPolicy;
+            ///
+            void sendInitialPacket();
+            /// The method checks if the in NED file given policy exists and initializes the policy
+            void initializeForwardingPolicy(std::string policy);
+            /// The member denotes the constant which is used in the pheromone reinforcement of a path
+            double deltaPhi;
+    };
 } /* namespace ARA */
-#endif /* OMNETARACLIENT_H_ */
+#endif 
