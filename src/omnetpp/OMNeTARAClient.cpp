@@ -27,12 +27,12 @@ Define_Module(OMNeTARAClient);
  * 
  */
 void OMNeTARAClient::initialize() {
-    // TODO make this a simulation parameter
-    //forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
-    //forwardingPolicy = new StochasticForwardingPolicy(&routingTable);
-
-    std::string policy = par("policy");
-    this->initializePolicy(policy);
+    /// parse the policy parameter from the NED file
+    std::string policy = par("policy").stringValue();
+    /// check and initialize the forwarding policy
+    this->initializeForwardingPolicy(policy);
+    /// parse the delta phi parameter from the NED file
+    this->deltaPhi = par("policy").doubleValue();
 
     for (cModule::GateIterator i(this); !i.end(); i++) {
         cGate* gate = i();
@@ -72,7 +72,7 @@ ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
  *
  * @param policy in The name of the policy which should be checked.
  */
-void OMNeTARAClient::initializePolicy(std::string policy){
+void OMNeTARAClient::initializeForwardingPolicy(std::string policy){
     /// we lower case each character, thus accepting strings written in camel case, only first letter upper, etc.
     std::transform(policy.begin(), policy.end(), policy.begin(), ::tolower);
 
@@ -99,7 +99,6 @@ void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* 
     AddressPtr sender = packet->getSender();
     float currentPheromoneValue = routingTable.getPheromoneValue(source, sender, interface);
 
-    float deltaPhi = 10; // TODO make this a NED parameter
     float hopCountMalus = 1 / (float) packet->getHopCount();
     float newPheromoneValue = currentPheromoneValue + deltaPhi * hopCountMalus;
 
