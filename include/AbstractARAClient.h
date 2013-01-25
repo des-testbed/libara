@@ -37,6 +37,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
+#include <memory>
 
 namespace ARA {
 
