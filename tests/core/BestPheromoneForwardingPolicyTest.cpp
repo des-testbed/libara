@@ -65,5 +65,5 @@ TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
     NextHop* node = policy.getNextHop(&packet);
 
     // check if the chosen node matches the node with the highest pheromone value
-    CHECK(nextHopC->equals(node.getAddress()));
+    CHECK(nextHopC->equals(node->getAddress()));
 }
