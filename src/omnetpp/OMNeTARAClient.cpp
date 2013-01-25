@@ -79,7 +79,7 @@ void OMNeTARAClient::initializeForwardingPolicy(std::string policy){
     /// check if its the best pheromone forwarding policy 
     if(policy.compare("bestpheromoneforwardingpolicy") == 0){
         this->forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
-
+        EV << " set policy to BestPheromoneForwardingPolicy\n";
     /// check if it is the stochastic forwarding policy
     }else if((policy.compare("stochasticforwardingpolicy") == 0) || (policy.compare("omnetstochasticforwardingpolicy") == 0)){
         /**
@@ -87,10 +87,10 @@ void OMNeTARAClient::initializeForwardingPolicy(std::string policy){
          * pseudo random number generators provided by the OMNeT++ simulation framework.
          */
         this->forwardingPolicy = new OMNeTStochasticForwardingPolicy(&routingTable);
+        EV << " set policy to StochasticPheromoneForwardingPolicy\n";
     }else{
         this->forwardingPolicy = nullptr;
-        /// throw exception
-        /// TODO: check if we should throw a OMNeTException
+        throw cRuntimeError("unknown forwarding policy %s; forwarding policy must be BestPheromoneForwardingPolicy or OMNeTStochasticForwardingPolicy", policy.c_str());
     }
 }
 
