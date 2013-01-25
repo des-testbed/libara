@@ -14,12 +14,6 @@
 // 
 
 #include "OMNeTARAClient.h"
-#include <omnetpp.h>
-#include "OMNeTPacket.h"
-#include "OMNeTAddress.h"
-#include "OMNeTGate.h"
-#include "BestPheromoneForwardingPolicy.h"
-#include "StochasticForwardingPolicy.h"
 
 using namespace ARA;
 
@@ -28,10 +22,17 @@ typedef std::shared_ptr<Address> AddressPtr;
 // The module class needs to be registered with OMNeT++
 Define_Module(OMNeTARAClient);
 
+
+/**
+ * 
+ */
 void OMNeTARAClient::initialize() {
     // TODO make this a simulation parameter
-    forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
+    //forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
     //forwardingPolicy = new StochasticForwardingPolicy(&routingTable);
+
+    std::string policy = par("policy");
+    this->initializePolicy(policy);
 
     for (cModule::GateIterator i(this); !i.end(); i++) {
         cGate* gate = i();
@@ -60,6 +61,37 @@ void OMNeTARAClient::handleMessage(cMessage *msg) {
 
 ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
     return forwardingPolicy;
+}
+
+/**
+ * The method initializes the forwarding policy of the ant routing algorithm. It checks 
+ * if the policy name is a valid policy name and initializes the corresponding policy. 
+ * If no policy can be found by a given name, the function sets the policy to nullptr 
+ * and throws an exception. If a developer defines a new forwarding policy, the method
+ * needs to be extended by means of an additional name check and object creation.
+ *
+ * @param policy in The name of the policy which should be checked.
+ */
+void OMNeTARAClient::initializePolicy(std::string policy){
+    /// we lower case each character, thus accepting strings written in camel case, only first letter upper, etc.
+    std::transform(policy.begin(), policy.end(), policy.begin(), ::tolower);
+
+    /// check if its the best pheromone forwarding policy 
+    if(policy.compare("bestpheromoneforwardingpolicy") == 0){
+        this->forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
+
+    /// check if it is the stochastic forwarding policy
+    }else if((policy.compare("stochasticforwardingpolicy") == 0) || (policy.compare("omnetstochasticforwardingpolicy") == 0)){
+        /**
+         * The stochastic forwarding policy is never be instantiated since it does not use
+         * pseudo random number generators provided by the OMNeT++ simulation framework.
+         */
+        this->forwardingPolicy = new OMNeTStochasticForwardingPolicy(&routingTable);
+    }else{
+        this->forwardingPolicy = nullptr;
+        /// throw exception
+        /// TODO: check if we should throw a OMNeTException
+    }
 }
 
 void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
