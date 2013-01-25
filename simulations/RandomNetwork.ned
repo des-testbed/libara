@@ -17,6 +17,10 @@ package ara_simulation.simulations;
 
 simple OMNeTARAClient
 {
+    parameters:
+        string policy;
+        double deltaPhi;
+
     gates:
         inout g[];
 }
@@ -32,48 +36,93 @@ network RandomNetwork
     @display("bgb=852,419");
     submodules:
         node0: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=347,247");
         }
         node1: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=464,268");
         }
         node2: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=299,114");
         }
         source: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=45,363");
         }
         node4: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=55,91");
         }
         node5: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=637,137");
         }
         node6: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=386,363");
         }
         node7: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=148,278");
         }
         node8: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=399,29");
         }
         node9: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=102,192");
         }
         node10: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=624,257");
         }
         node11: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=242,229");
         }
         node12: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=464,107");
         }
         node13: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=523,363");
         }
         destination: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
+              deltaPhi = 2.0;
             @display("p=776,153");
         }
     connections:

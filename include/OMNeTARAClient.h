@@ -60,7 +60,9 @@ namespace ARA {
             ///
             void sendInitialPacket();
             /// The method checks if the in NED file given policy exists and initializes the policy
-            void initializePolicy(std::string policy);
+            void initializeForwardingPolicy(std::string policy);
+            /// The member denotes the constant which is used in the pheromone reinforcement of a path
+            double deltaPhi;
     };
 } /* namespace ARA */
 #endif 

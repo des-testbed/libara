@@ -26,27 +26,43 @@ network Line
     @display("bgb=900,327;bgl=2");
     submodules:
         node0: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
             @display("p=689,132");
         }
         node1: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
             @display("p=217,132");
         }
         node2: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
             @display("p=122,131");
         }
         node3: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
             @display("p=322,131");
         }
         source: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
             @display("p=42,132");
         }
         node5: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
             @display("p=574,132");
         }
         destination: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
             @display("p=787,131");
         }
         node7: OMNeTARAClient {
+            parameters:
+              policy = "BestPheromoneForwardingPolicy";
             @display("p=466,132");
         }
     connections:
