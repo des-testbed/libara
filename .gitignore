@@ -8,6 +8,7 @@ out/*
 src/ARA-Simulation
 src/ara-sim
 src/Makefile
+doc/doxygen/html
 
 # Test output files #
 tests/TestResults.xml
