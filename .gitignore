@@ -18,9 +18,8 @@ tests/runAllTests
 extern/cpputest
 
 # Versatile configuration & simulation stuff
-simulations/.tkenvrc
-simulations/.tkenvlog
-src/.tkenvrc
+*.tkenvrc
+*.tkenvlog
 
 # valgrind core dumps
 *vgcore*
