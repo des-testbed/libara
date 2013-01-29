@@ -44,6 +44,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1881320024" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
 								<option id="gnu.both.asm.option.include.paths.1457539917" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ARA-Simulation/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ARA-Simulation/include/inetmanet}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.628213403" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
