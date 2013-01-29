@@ -9,6 +9,7 @@ src/ARA-Simulation
 src/ara-sim
 src/Makefile
 doc/doxygen/html
+include/inetmanet/*
 
 # Test output files #
 tests/TestResults.xml
