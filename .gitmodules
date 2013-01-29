@@ -1,0 +1,3 @@
+[submodule "inetmanet"]
+	path = inetmanet
+	url = git@github.com:FGrosse/inetmanet.git
