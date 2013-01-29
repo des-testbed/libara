@@ -1,6 +1,31 @@
-all: checkmakefiles
+WORKING_DIR = $(shell basename `pwd`)
+TARGET = src/$(WORKING_DIR)
+
+all: checkmakefiles inetmanet_headers $(TARGET)	
+
+$(TARGET): 
 	@echo -e "\n~~~ BUILDING SOURCE ~~~~~~~~~~~~~~~~~\n"
 	@cd src && $(MAKE)
+
+inetmanet_headers: inetmanet/src/libinet.so
+	@if [ ! -d include/inetmanet ]; then \
+		echo -e "\n~~~ UPDATING INETMANET HEADERS ~~~"; \
+		mkdir include/inetmanet; \
+		for i in `find inetmanet/src/ -type f -name "*.h"`; do ln -s ../../$$i include/inetmanet/$${i##*/}; done; \
+		echo "updating include/inetmanet/........done"; \
+	fi
+
+inetmanet/src/libinet.so: inetmanet/.git
+	@echo -e "\n~~~ BUILDING INET/MANET FRAMEWORK ~~~\n"
+	@cd inetmanet && $(MAKE) makefiles;
+	@cd inetmanet && $(MAKE)
+
+inetmanet/.git:
+	@if [ ! -d inetmanet/src ]; then \
+	echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n"; \
+	git submodule init inetmanet; \
+	git submodule update inetmanet; \
+    fi
 
 test: all
 	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
@@ -11,19 +36,18 @@ runSingleTest: all
 	@cd tests && $(MAKE) runSingleTest
 
 clean: checkmakefiles
-	@cd src && $(MAKE) clean
-	@cd tests && $(MAKE) clean
-
-cleanall: checkmakefiles
 	@cd src && $(MAKE) MODE=release clean
 	@cd src && $(MAKE) MODE=debug clean
 	@cd tests && $(MAKE) clean
+	rm -R -f include/inetmanet
+
+cleanall: clean	
 	rm -f src/Makefile
 
 release: cleanall makefiles test	
 
 makefiles:
-	cd src && opp_makemake -f --deep -I ../include
+	cd src && opp_makemake -f --deep -I ../include -I ../include/inetmanet -L"../inetmanet/src" -linet
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

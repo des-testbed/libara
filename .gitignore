@@ -9,6 +9,7 @@ src/ARA-Simulation
 src/ara-sim
 src/Makefile
 doc/doxygen/html
+include/inetmanet/*
 
 # Test output files #
 tests/TestResults.xml
@@ -18,6 +19,7 @@ tests/runAllTests
 extern/cpputest
 
 # Versatile configuration & simulation stuff
+.settings/*
 *.tkenvrc
 *.tkenvlog
 
