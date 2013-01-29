@@ -19,6 +19,7 @@ tests/runAllTests
 extern/cpputest
 
 # Versatile configuration & simulation stuff
+.settings/*
 *.tkenvrc
 *.tkenvlog
 
