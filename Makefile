@@ -1,6 +1,19 @@
-all: checkmakefiles
+all: checkmakefiles inetmanet
 	@echo -e "\n~~~ BUILDING SOURCE ~~~~~~~~~~~~~~~~~\n"
 	@cd src && $(MAKE)
+
+inetmanet: inetmanet/src/libinet.so
+
+inetmanet/src/libinet.so:
+	@echo -e "\n~~~ BUILDING INET/MANET FRAMEWORK ~~~\n"
+	@cd inetmanet && $(MAKE) makefiles;
+	@cd inetmanet && $(MAKE)
+	echo "Updating header symlinks";
+	@if [ ! -d include/inetmanet ]; then \
+	mkdir include/inetmanet; \
+	fi
+	@rm -f include/inetmanet/*	
+	@for i in `find inetmanet/src/ -type f -name "*.h"`; do ln -s ../../$$i include/inetmanet/$${i##*/}; done	
 
 test: all
 	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
@@ -23,7 +36,7 @@ cleanall: checkmakefiles
 release: cleanall makefiles test	
 
 makefiles:
-	cd src && opp_makemake -f --deep -I ../include
+	cd src && opp_makemake -f --deep -I ../include -I ../include/inetmanet -L"../inetmanet/src" -linet
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
