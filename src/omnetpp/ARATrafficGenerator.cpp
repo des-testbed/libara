@@ -42,6 +42,10 @@ void ARATrafficGenerator::readDestinationAddresses(const char* destinationAddres
     while ((token = tokenizer.nextToken()) != NULL) {
         destinationAddresses.push_back(IPAddressResolver().resolve(token));
     }
+
+    if(destinationAddresses.empty()) {
+        throw cRuntimeError("The traffic generators need at least one destination address");
+    }
 }
 
 void ARATrafficGenerator::handleMessage(cMessage *msg) {

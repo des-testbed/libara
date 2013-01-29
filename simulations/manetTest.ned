@@ -18,6 +18,7 @@ package ara_simulation.simulations;
 // Imports for the ARAClient
 import inet.base.NotificationBoard;
 import ara_simulation.omnetpp.ARATrafficGenerator;
+import ara_simulation.omnetpp.Debugger;
 import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
 import inet.mobility.NullMobility;
 
@@ -39,6 +40,10 @@ module ARAClient
             parameters:
                 @display("b=40,24;p=180,60,col");
         }
+		debugger: Debugger {
+		    
+		}
+	
 
 //        wlan: Ieee80211NicSTASimplified {
 //            parameters:
@@ -53,6 +58,7 @@ module ARAClient
     connections allowunconnected:
 //        wlan.radioIn <-- radioIn;
 //        app.out --> wlan.uppergateIn;
+		app.out --> debugger.in;
 }
 
 network ManetTest
