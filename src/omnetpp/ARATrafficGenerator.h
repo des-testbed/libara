@@ -16,6 +16,8 @@
 #ifndef __ARA_SIMULATION_ARATRAFFICGENERATOR_H_
 #define __ARA_SIMULATION_ARATRAFFICGENERATOR_H_
 
+#include "IPvXAddress.h"
+
 #include <omnetpp.h>
 #include <vector>
 
@@ -32,7 +34,7 @@ namespace ARA {
         unsigned int numberOfSentPackets = 0;
         unsigned int defaultBroadCastAddressInterface;
 
-        std::vector destinationAddresses;
+        std::vector<IPvXAddress> destinationAddresses;
 
         void readDestinationAddresses(const char* destinationAddressesParameter);
         void sendPacket();
