@@ -2,18 +2,20 @@ all: checkmakefiles inetmanet
 	@echo -e "\n~~~ BUILDING SOURCE ~~~~~~~~~~~~~~~~~\n"
 	@cd src && $(MAKE)
 
-inetmanet: inetmanet/src/libinet.so
+inetmanet: inetmanet_headers	
+
+inetmanet_headers: inetmanet/src/libinet.so
+	@echo "Updating INET/MANET header symlinks in include/inetmanet";
+	@if [ ! -d include/inetmanet ]; then \
+	mkdir include/inetmanet; \
+	fi
+	@rm -f include/inetmanet/*	
+	@for i in `find inetmanet/src/ -type f -name "*.h"`; do ln -s ../../$$i include/inetmanet/$${i##*/}; done
 
 inetmanet/src/libinet.so:
 	@echo -e "\n~~~ BUILDING INET/MANET FRAMEWORK ~~~\n"
 	@cd inetmanet && $(MAKE) makefiles;
 	@cd inetmanet && $(MAKE)
-	echo "Updating header symlinks";
-	@if [ ! -d include/inetmanet ]; then \
-	mkdir include/inetmanet; \
-	fi
-	@rm -f include/inetmanet/*	
-	@for i in `find inetmanet/src/ -type f -name "*.h"`; do ln -s ../../$$i include/inetmanet/$${i##*/}; done	
 
 test: all
 	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
