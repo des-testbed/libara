@@ -1,8 +1,6 @@
-all: checkmakefiles inetmanet
+all: checkmakefiles inetmanet_headers
 	@echo -e "\n~~~ BUILDING SOURCE ~~~~~~~~~~~~~~~~~\n"
 	@cd src && $(MAKE)
-
-inetmanet: inetmanet_headers	
 
 inetmanet_headers: inetmanet/src/libinet.so
 	@echo "Updating INET/MANET header symlinks in include/inetmanet";
@@ -12,10 +10,17 @@ inetmanet_headers: inetmanet/src/libinet.so
 	@rm -f include/inetmanet/*	
 	@for i in `find inetmanet/src/ -type f -name "*.h"`; do ln -s ../../$$i include/inetmanet/$${i##*/}; done
 
-inetmanet/src/libinet.so:
+inetmanet/src/libinet.so: inetmanet_source
 	@echo -e "\n~~~ BUILDING INET/MANET FRAMEWORK ~~~\n"
 	@cd inetmanet && $(MAKE) makefiles;
 	@cd inetmanet && $(MAKE)
+
+inetmanet_source:
+	@if [ ! -d inetmanet/src ]; then \
+	echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n"; \
+	git submodule init inetmanet; \
+	git submodule update inetmanet; \
+    fi
 
 test: all
 	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
