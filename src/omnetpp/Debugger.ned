@@ -15,17 +15,8 @@
 @namespace(ARA);
 package ara_simulation.omnetpp;
 
-
-simple ARATrafficGenerator
+simple Debugger
 {
-    parameters:
-        string destAddresses; // list of IP addresses, separated by spaces
-        int numberOfPackets = default(50);
-        double packetInterval @unit("s") = default(10ms);
-        int packetLength @unit("B");
-        int protocol = default(4); // value for IPDatagram protocol field
-        int defaultBroadCastAddressInterface=default(101);
-        @display("i=block/app");
     gates:
         input in;
         output out;

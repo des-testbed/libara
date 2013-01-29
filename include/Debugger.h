@@ -12,21 +12,20 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
-@namespace(ARA);
-package ara_simulation.omnetpp;
 
+#ifndef __ARA_SIMULATION_DEBUGGER_H_
+#define __ARA_SIMULATION_DEBUGGER_H_
 
-simple ARATrafficGenerator
-{
-    parameters:
-        string destAddresses; // list of IP addresses, separated by spaces
-        int numberOfPackets = default(50);
-        double packetInterval @unit("s") = default(10ms);
-        int packetLength @unit("B");
-        int protocol = default(4); // value for IPDatagram protocol field
-        int defaultBroadCastAddressInterface=default(101);
-        @display("i=block/app");
-    gates:
-        input in;
-        output out;
+#include <omnetpp.h>
+
+namespace ARA {
+
+    class Debugger : public cSimpleModule {
+    protected:
+        virtual void initialize();
+        virtual void handleMessage(cMessage *msg);
+    };
+
 }
+
+#endif
