@@ -27,12 +27,9 @@ Define_Module(OMNeTARAClient);
  * 
  */
 void OMNeTARAClient::initialize() {
-    /// parse the policy parameter from the NED file
-    std::string policy = par("policy").stringValue();
-    /// check and initialize the forwarding policy
-    this->initializeForwardingPolicy(policy);
-    /// parse the delta phi parameter from the NED file
-    this->deltaPhi = par("policy").doubleValue();
+    std::string policy = par("forwardingPolicy").stringValue();
+    initializeForwardingPolicy(policy);
+    deltaPhi = par("deltaPhi").doubleValue();
 
     for (cModule::GateIterator i(this); !i.end(); i++) {
         cGate* gate = i();
@@ -53,10 +50,33 @@ void OMNeTARAClient::sendInitialPacket() {
     sendPacket(&initialPacket);
 }
 
-void OMNeTARAClient::handleMessage(cMessage *msg) {
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) msg;
-    receivePacket(omnetPacket, getNetworkInterface(msg->getArrivalGate()->getIndex()));
+void OMNeTARAClient::handleMessage(cMessage* msg) {
+    printPacket(msg);
+    if(isFromUpperLayer(msg)) {
+        //IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
+        //controlInfo->getSrcAddr()
+        //AddressPtr source = AddressPtr(new OMNeTAddress("source"));
+        //AddressPtr destination = AddressPtr(new OMNeTAddress("destination"));
+        //OMNeTPacket initialPacket = OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
+    }
+    else {
+        EV << "Message from lower layer";
+    }
+
+    //OMNeTPacket* omnetPacket = (OMNeTPacket*) msg;
+    //receivePacket(omnetPacket, getNetworkInterface(msg->getArrivalGate()->getIndex()));
     delete msg;
+}
+
+bool OMNeTARAClient::isFromUpperLayer(cMessage* msg) {
+    std::string nameOfUpperLayergate = "upperLayerGate$i";
+    std::string gateName = std::string(msg->getArrivalGate()->getName());
+    return gateName.length() <= nameOfUpperLayergate.length()
+        && std::equal(gateName.begin(), gateName.end(), nameOfUpperLayergate.begin());
+}
+
+void OMNeTARAClient::printPacket(cMessage* msg) {
+    EV << "Message: " << msg;
 }
 
 ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
@@ -76,21 +96,17 @@ void OMNeTARAClient::initializeForwardingPolicy(std::string policy){
     /// we lower case each character, thus accepting strings written in camel case, only first letter upper, etc.
     std::transform(policy.begin(), policy.end(), policy.begin(), ::tolower);
 
-    /// check if its the best pheromone forwarding policy 
-    if(policy.compare("bestpheromoneforwardingpolicy") == 0){
+    if(policy.compare("best") == 0) {
         this->forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
         EV << " set policy to BestPheromoneForwardingPolicy\n";
-    /// check if it is the stochastic forwarding policy
-    }else if((policy.compare("stochasticforwardingpolicy") == 0) || (policy.compare("omnetstochasticforwardingpolicy") == 0)){
-        /**
-         * The stochastic forwarding policy is never be instantiated since it does not use
-         * pseudo random number generators provided by the OMNeT++ simulation framework.
-         */
+    }
+    else if(policy.compare("stochastic") == 0) {
         this->forwardingPolicy = new OMNeTStochasticForwardingPolicy(&routingTable);
         EV << " set policy to StochasticPheromoneForwardingPolicy\n";
-    }else{
+    }
+    else {
         this->forwardingPolicy = nullptr;
-        throw cRuntimeError("unknown forwarding policy %s; forwarding policy must be BestPheromoneForwardingPolicy or OMNeTStochasticForwardingPolicy", policy.c_str());
+        throw cRuntimeError("Unknown forwarding policy %s; Parameter forwardingPolicy must be 'best' or 'stochastic'", policy.c_str());
     }
 }
 

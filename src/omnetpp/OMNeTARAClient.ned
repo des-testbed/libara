@@ -15,17 +15,15 @@
 @namespace(ARA);
 package ara_simulation.omnetpp;
 
-
-simple ARATrafficGenerator
+simple OMNeTARAClient
 {
     parameters:
-        string destAddresses; // list of IP addresses, separated by spaces
-        int numberOfPackets = default(50);
-        double packetInterval @unit("s") = default(10ms);
-        int packetLength @unit("B");
-        int protocol = default(4); // value for IPDatagram protocol field
-        int defaultBroadCastAddressInterface=default(101);
-        @display("i=block/app");
+        string forwardingPolicy = default("stochastic");
+        double deltaPhi = default(1);
+        int nrOfNetworkInterfaces = default(1);
+
     gates:
-        inout gate;        
+        inout  upperLayerGate;
+        input  ifIn[nrOfNetworkInterfaces];		// input from NIC interface (INET/MANET needs this to be named this way) 
+        output ifOut[nrOfNetworkInterfaces];	// output to  NIC interface (INET/MANET needs this to be named this way)
 }

@@ -19,46 +19,61 @@ package ara_simulation.simulations;
 import inet.base.NotificationBoard;
 import ara_simulation.omnetpp.ARATrafficGenerator;
 import ara_simulation.omnetpp.Debugger;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import ara_simulation.omnetpp.OMNeTARAClient;
+import inet.linklayer.ieee80211.Ieee80211NicSTA;
 import inet.mobility.NullMobility;
+import inet.nodes.wireless.WirelessHost;
+import inet.applications.pingapp.PingApp;
+import inet.networklayer.common.InterfaceTable;
 
 import inet.world.ChannelControl;
 
 module ARAClient
 {
     parameters:
-        @display("i=device/wifilaptop");
+        @display("i=device/wifilaptop;bgb=287,284");
+        int nrOfNetworkInterfaces = default(1);
     gates:
         input radioIn @directIn;
 
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=52,70");
+                @display("p=50,31");
         }
-        app: ARATrafficGenerator {
+        interfaceTable: InterfaceTable {
             parameters:
-                @display("b=40,24;p=180,60,col");
+                @display("p=50,100");
         }
-		debugger: Debugger {
-		    
-		}
-	
+        app: PingApp {
+            parameters:
+                @display("b=40,24;p=178,31,col");
+        }
+        ara: OMNeTARAClient {
+            parameters:
+                nrOfNetworkInterfaces = nrOfNetworkInterfaces;
+                @display("p=178,126");
+        }
+        wlan[nrOfNetworkInterfaces]: Ieee80211NicSTA {
+            parameters:
+                @display("p=178,226;q=queue");
+        }
 
-//        wlan: Ieee80211NicSTASimplified {
-//            parameters:
-//                @display("p=112,134;q=queue");
-//        }
-        
         // Stationary node
         mobility: NullMobility {
             parameters:
-                @display("p=50,141");
+                @display("p=50,157");
         }
     connections allowunconnected:
-//        wlan.radioIn <-- radioIn;
-//        app.out --> wlan.uppergateIn;
-		app.out --> debugger.in;
+        app.pingOut --> ara.upperLayerGate$i;
+        app.pingIn <-- ara.upperLayerGate$o;
+
+        for i=0..nrOfNetworkInterfaces-1 {
+            wlan[i].uppergateOut --> ara.ifIn[i];
+            wlan[i].uppergateIn <-- ara.ifOut[i];
+            wlan[i].radioIn <-- radioIn;
+        }
+
 }
 
 network ManetTest
@@ -73,14 +88,7 @@ network ManetTest
             parameters:
                 @display("r=,,#707070");
         }
-//        srvHost: ThroughputServer {
-//            parameters:
-//                @display("p=350,350;r=,,#707070");
-//        }
-//        ap: WirelessAPSimplified {
-//            parameters:
-//                @display("p=200,200;r=,,#707070");
-//        }
+
         channelcontrol: ChannelControl {
             parameters:
                 playgroundSizeX = playgroundSizeX;

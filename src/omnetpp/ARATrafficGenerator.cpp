@@ -79,7 +79,7 @@ void ARATrafficGenerator::sendPacket() {
     EV << "Sending packet: ";
     printPacket(payload);
 
-    send(payload, "out");
+    send(payload, "gate$o");
 
     numberOfSentPackets++;
 }
