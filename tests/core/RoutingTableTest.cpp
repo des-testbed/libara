@@ -141,11 +141,7 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
     routingTable.update(destination2, nextHop4, &interface1, pheromoneValue4);
 
     std::deque<RoutingTableEntry*>* nextHopsForDestination1 = routingTable.getPossibleNextHops(destination1);
-<<<<<<< HEAD
-    LONGS_EQUAL(3, nextHopsForDestination1->size());
-=======
     BYTES_EQUAL(3, nextHopsForDestination1->size());
->>>>>>> replaced CHECK_EQUAL with BYTE_EQUAL in unit tests for routing table (conversion errors from size_type to string type)
     for (unsigned int i = 0; i < nextHopsForDestination1->size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination1->at(i);
         AddressPtr hopAddress = possibleHop->getAddress();
@@ -167,11 +163,7 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
     }
 
     std::deque<RoutingTableEntry*>* nextHopsForDestination2 = routingTable.getPossibleNextHops(destination2);
-<<<<<<< HEAD
-    LONGS_EQUAL(2, nextHopsForDestination2->size());
-=======
     BYTES_EQUAL(2, nextHopsForDestination2->size());
->>>>>>> replaced CHECK_EQUAL with BYTE_EQUAL in unit tests for routing table (conversion errors from size_type to string type)
     for (unsigned int i = 0; i < nextHopsForDestination2->size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination2->at(i);
         AddressPtr hopAddress = possibleHop->getAddress();
