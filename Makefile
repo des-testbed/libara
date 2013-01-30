@@ -1,9 +1,4 @@
-WORKING_DIR = $(shell basename `pwd`)
-TARGET = src/$(WORKING_DIR)
-
-all: checkmakefiles inetmanet_headers $(TARGET)	
-
-$(TARGET): 
+all: checkmakefiles inetmanet_headers
 	@echo -e "\n~~~ BUILDING SOURCE ~~~~~~~~~~~~~~~~~\n"
 	@cd src && $(MAKE)
 
