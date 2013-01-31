@@ -133,4 +133,27 @@ float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std:
     return 0;
 }
 
+/**
+ *
+ */
+void RoutingTable::evaporatePheromones(){
+    std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator i;
+    /// iterate over the destination entries
+    for(i = table.begin(); i != table.end(); i++){
+       std::deque<RoutingTableEntry*>::iterator j;
+       /// iterate over the possible next hop entries of a destination
+       for(j = (*i).second->begin(); j != (*i).second->end(); j++){
+          /// TODO: remove the '1' and replace it by a function parameter
+          float phi = this->mEvaporationPolicy->evaporate((*j)->getPheromoneValue(), 1);
+          /// update the entry
+          if(phi != 0.0){
+              (*j)->setPheromoneValue(phi);
+          // remove the entry from the list (CHECK IF THAT'S A GOOD IDEA)
+          }else{
+              /// todo
+          }
+       }
+    }
+}
+
 } /* namespace ARA */

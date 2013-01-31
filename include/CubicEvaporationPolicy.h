@@ -31,7 +31,6 @@
 #include <stdint.h>
 
 #include "EvaporationPolicy.h"
-#include "NoRemainingPheromoneException.h"
 
 namespace ARA { 
    /**
@@ -41,7 +40,7 @@ namespace ARA {
         public:
             CubicEvaporationPolicy();
             /// the method reduces the pheromone value of a routing table entry
-            void evaporate(float*, uint8_t);
+            float evaporate(float, uint8_t);
         private:
             /// 
             float plateau;

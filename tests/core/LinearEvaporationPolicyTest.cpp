@@ -38,20 +38,13 @@ TEST(LinearEvaporationPolicyTest, testEvaporate) {
     float pheromone = 1;
 
     // simply test the evaporate function
-    policy.evaporate(&pheromone, 1);
+    pheromone = policy.evaporate(pheromone, 1);
     DOUBLES_EQUAL(0.9, pheromone, 0.00001);
 
     // check the pow function used in the evaporate method
-    policy.evaporate(&pheromone, 2);
+    pheromone = policy.evaporate(pheromone, 2);
     DOUBLES_EQUAL(0.6561, pheromone, 0.00001);
 
-    // FIXME: there should be a better way to test this
-
-    // check if the exception is thrown
-    try {
-        policy.evaporate(&pheromone, 6);
-    }catch(NoRemainingPheromoneException&){
-        // the pheromone value should have been set to 0
-        DOUBLES_EQUAL(0.0, pheromone, 0.00001);
-    }
+    pheromone = policy.evaporate(pheromone, 6);
+    DOUBLES_EQUAL(0.0, pheromone, 0.00001);
 }

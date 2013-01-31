@@ -37,7 +37,7 @@ namespace ARA {
         public:
             virtual ~EvaporationPolicy() {};
             /// the method reduces the pheromone value of a routing table entry
-            virtual void evaporate(float*, uint8_t) = 0;
+            virtual float evaporate(float, uint8_t) = 0;
     };
 } /* namespace ARA */
 
