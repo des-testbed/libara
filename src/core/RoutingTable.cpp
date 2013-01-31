@@ -32,6 +32,12 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
+RoutingTable::RoutingTable( ){ 
+    this->mEvaporationPolicy = new LinearEvaporationPolicy();
+}
+
+RoutingTable::RoutingTable(EvaporationPolicy *pEvaporationPolicy):mEvaporationPolicy(pEvaporationPolicy){ }
+
 RoutingTable::~RoutingTable() {
     std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
@@ -46,6 +52,8 @@ RoutingTable::~RoutingTable() {
         delete entryList;
     }
     table.clear();
+
+    delete mEvaporationPolicy;
 }
 
 void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
