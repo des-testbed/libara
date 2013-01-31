@@ -26,6 +26,7 @@
 #include "OMNeTGate.h"
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
+#include "IPAddressResolver.h"
 
 using namespace std;
 
@@ -34,7 +35,9 @@ namespace ARA {
 OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
     this->module = module;
     this->gate = gate;
-    this->localAddress = shared_ptr<Address>(new OMNeTAddress(module->getName()));
+    cModule* connectedModule = gate->getNextGate()->getOwnerModule();
+    IPvXAddress localAddress = IPAddressResolver().addressOf(module->getParentModule(), connectedModule->getFullName(), IPAddressResolver::ADDR_IPv4);
+    this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress.get4()));
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {

@@ -14,6 +14,8 @@
 // 
 
 #include "OMNeTARAClient.h"
+#include "IPControlInfo.h"
+#include "IPAddress.h"
 
 using namespace ARA;
 
@@ -23,41 +25,33 @@ typedef std::shared_ptr<Address> AddressPtr;
 Define_Module(OMNeTARAClient);
 
 
-/**
- * 
- */
-void OMNeTARAClient::initialize() {
-    std::string policy = par("forwardingPolicy").stringValue();
-    initializeForwardingPolicy(policy);
-    deltaPhi = par("deltaPhi").doubleValue();
+void OMNeTARAClient::initialize(int stage) {
+    if(stage == 1) {
+        std::string policy = par("forwardingPolicy").stringValue();
+        initializeForwardingPolicy(policy);
+        deltaPhi = par("deltaPhi").doubleValue();
 
-    for (cModule::GateIterator i(this); !i.end(); i++) {
-        cGate* gate = i();
-        if(gate->getType() == cGate::OUTPUT) {
-            addNetworkInterface(new OMNeTGate(this, gate));
+        for (cModule::GateIterator i(this); !i.end(); i++) {
+            cGate* gate = i();
+            if(gate->getType() == cGate::OUTPUT && gate->isVector()) {
+                // only the vector gates go to the NICs
+                addNetworkInterface(new OMNeTGate(this, gate));
+            }
         }
     }
-
-    if (strcmp("source", getName()) == 0) {
-        sendInitialPacket();
-    }
-}
-
-void OMNeTARAClient::sendInitialPacket() {
-    AddressPtr source = AddressPtr(new OMNeTAddress("source"));
-    AddressPtr destination = AddressPtr(new OMNeTAddress("destination"));
-    OMNeTPacket initialPacket = OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
-    sendPacket(&initialPacket);
 }
 
 void OMNeTARAClient::handleMessage(cMessage* msg) {
-    printPacket(msg);
     if(isFromUpperLayer(msg)) {
-        //IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
-        //controlInfo->getSrcAddr()
-        //AddressPtr source = AddressPtr(new OMNeTAddress("source"));
-        //AddressPtr destination = AddressPtr(new OMNeTAddress("destination"));
+        IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
+        IPAddress sourceIP = controlInfo->getSrcAddr();
+        IPAddress destinationIP = controlInfo->getDestAddr();
+        AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
+        AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
+        //TODO encaps packet (HIER WEITER MACHEN)
         //OMNeTPacket initialPacket = OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
+
+        EV << "Handling upper layer message from " << source << " to " << destination << ": "<< msg;
     }
     else {
         EV << "Message from lower layer";
@@ -73,10 +67,6 @@ bool OMNeTARAClient::isFromUpperLayer(cMessage* msg) {
     std::string gateName = std::string(msg->getArrivalGate()->getName());
     return gateName.length() <= nameOfUpperLayergate.length()
         && std::equal(gateName.begin(), gateName.end(), nameOfUpperLayergate.begin());
-}
-
-void OMNeTARAClient::printPacket(cMessage* msg) {
-    EV << "Message: " << msg;
 }
 
 ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
@@ -123,7 +113,5 @@ void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* 
 
 void OMNeTARAClient::deliverToSystem(const Packet* packet) {
     EV << getName() << " delivered a packet to the system\n";
-
-    OMNeTPacket answer = OMNeTPacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
-    sendPacket(&answer);
+    //TODO send to higher layer
 }

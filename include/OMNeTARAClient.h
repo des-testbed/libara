@@ -46,7 +46,7 @@ namespace ARA {
     class OMNeTARAClient: public cSimpleModule, public AbstractARAClient {
         protected:
             //~~~ INHERITED FROM cSimpleModule ~~~~~~~
-            virtual void initialize();
+            virtual void initialize(int stage);
             virtual void handleMessage(cMessage *msg);
 
             //~~~ INHERITED FROM AbstractARAClient ~~~
@@ -60,13 +60,10 @@ namespace ARA {
             /// The member denotes the constant which is used in the pheromone reinforcement of a path
             double deltaPhi;
 
-            ///
-            void sendInitialPacket();
             /// The method checks if the in NED file given policy exists and initializes the policy
             void initializeForwardingPolicy(std::string policy);
 
             bool isFromUpperLayer(cMessage* msg);
-            void printPacket(cMessage* msg); // just for testing
     };
 } /* namespace ARA */
 #endif 

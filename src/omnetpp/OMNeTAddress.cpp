@@ -30,8 +30,15 @@ using namespace std;
 
 namespace ARA {
 
-OMNeTAddress::OMNeTAddress(const std::string name) {
-    this->address = name;
+OMNeTAddress::OMNeTAddress(IPAddress address) {
+    this->address = address;
+    IPAddress netmask = IPAddress(255, 255, 255, 0);
+    this->broadCastAddress = address.getBroadcastAddress(netmask);
+}
+
+OMNeTAddress::OMNeTAddress(IPAddress address, IPAddress netmask) {
+    this->address = address;
+    this->broadCastAddress = address.getBroadcastAddress(netmask);
 }
 
 bool OMNeTAddress::equals(const Address* otherAddress) const {
@@ -40,7 +47,7 @@ bool OMNeTAddress::equals(const Address* otherAddress) const {
         return false;
     }
     else {
-        return this->address.compare(otherAddressMock->address) == 0;
+        return this->address.equals(otherAddressMock->address);
     }
 }
 
@@ -50,21 +57,22 @@ bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
         return false;
     }
     else {
-        return this->address.compare(otherOmnetMock->address) == 0;
+        return this->address.equals(otherOmnetMock->address);
     }
 }
 
 size_t OMNeTAddress::getHashValue() const {
-    __gnu_cxx::hash<const char*> hashFunction;
-    return hashFunction(address.c_str());
+    int firstByte = address.getDByte(0);
+    int secondByte = address.getDByte(1);
+    return firstByte * 256 + secondByte;  // integer value between 0 and 65535
 }
 
-string OMNeTAddress::getAddress() {
+IPAddress OMNeTAddress::getAddress() {
     return address;
 }
 
 bool OMNeTAddress::isBroadCast() {
-    return address == "BROADCAST";
+    return address.equals(broadCastAddress);
 }
 
 Address* OMNeTAddress::clone() {

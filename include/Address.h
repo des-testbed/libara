@@ -38,7 +38,6 @@ class Address {
 public:
     virtual ~Address() {}
 
-    //TODO do we need the equals method if we support operator== overloading now?
     virtual bool equals(const Address* otherAddress) const = 0;
     virtual bool equals(const std::shared_ptr<Address> otherAddress) const = 0;
     virtual size_t getHashValue() const = 0;

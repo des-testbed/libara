@@ -27,13 +27,16 @@
 #define OMNETADDRESS_H_
 
 #include "Address.h"
+#include "IPAddress.h"
+
 #include <string>
 
 namespace ARA {
 
 class OMNeTAddress : public Address {
 public:
-    OMNeTAddress(std::string name);
+    OMNeTAddress(IPAddress address);
+    OMNeTAddress(IPAddress address, IPAddress netmask);
 
     bool equals(const Address* otherAddress) const;
     bool equals(const std::shared_ptr<Address> otherAddress) const;
@@ -42,10 +45,11 @@ public:
     bool isBroadCast();
     Address* clone();
 
-    std::string getAddress();
+    IPAddress getAddress();
 
 private:
-    std::string address;
+    IPAddress address;
+    IPAddress broadCastAddress;
 
 };
 

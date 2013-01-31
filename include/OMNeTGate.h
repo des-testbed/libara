@@ -26,9 +26,10 @@
 #ifndef OMNETGATE_H_
 #define OMNETGATE_H_
 
+#include "NetworkInterface.h"
+
 #include <omnetpp.h>
 #include <memory>
-#include "NetworkInterface.h"
 
 namespace ARA {
 
