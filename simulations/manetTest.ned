@@ -16,10 +16,12 @@
 package ara.simulations;
 
 // Imports for the ARAClient
-import inet.base.NotificationBoard;
 import ara.ARATrafficGenerator;
 import ara.Debugger;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import ara.OMNeTARAClient;
+
+import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
+import inet.base.NotificationBoard;
 import inet.mobility.NullMobility;
 import inet.nodes.wireless.WirelessHost;
 import inet.applications.pingapp.PingApp;
@@ -53,7 +55,7 @@ module ARAClient
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("p=178,126");
         }
-        wlan[nrOfNetworkInterfaces]: Ieee80211NicSTA {
+        wlan[nrOfNetworkInterfaces]: Ieee80211NicAdhoc {
             parameters:
                 @display("p=178,226;q=queue");
         }
