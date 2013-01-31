@@ -1,6 +1,4 @@
-#!/bin/bash
-
-SEARCH="/******************************************************************************
+/******************************************************************************
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
@@ -23,18 +21,37 @@ SEARCH="/***********************************************************************
  ------------------------------------------------------------------------------
  For further information and questions please use the web site
  http://www.des-testbed.net/
- *******************************************************************************/"
+ *******************************************************************************/
 
-REPLACE="/*
- * \$FU-Copyright\$
- */"
+#include "CppUTest/TestHarness.h"
 
-SEARCH=$(echo "$SEARCH" | sed -e 's/[\/&*.()]/\\&/g')
-REPLACE=$(echo "$REPLACE" | sed -e 's/[\/&*()]/\\&/g')
+#include "LinearEvaporationPolicy.h" 
+#include "NoRemainingPheromoneException.h"
 
+using namespace ARA;
 
-for i in `find . -type f`; do mkdir -p tmp/`dirname $i`; sed -e "s/$SEARCH/$REPLACE/g" $i > tmp/$i; done
-cd tmp
-cp -Rf * ..
-cd ..
-rm -rf tmp
+TEST_GROUP(LinearEvaporationPolicyTest) {};
+
+TEST(LinearEvaporationPolicyTest, testEvaporate) {
+    LinearEvaporationPolicy policy = LinearEvaporationPolicy();
+
+    float pheromone = 1;
+
+    // simply test the evaporate function
+    policy.evaporate(&pheromone, 1);
+    DOUBLES_EQUAL(0.9, pheromone, 0.00001);
+
+    // check the pow function used in the evaporate method
+    policy.evaporate(&pheromone, 2);
+    DOUBLES_EQUAL(0.6561, pheromone, 0.00001);
+
+    // FIXME: there should be a better way to test this
+
+    // check if the exception is thrown
+    try {
+        policy.evaporate(&pheromone, 6);
+    }catch(NoRemainingPheromoneException&){
+        // the pheromone value should have been set to 0
+        DOUBLES_EQUAL(0.0, pheromone, 0.00001);
+    }
+}

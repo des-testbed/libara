@@ -1,10 +1,8 @@
-#!/bin/bash
-
-SEARCH="/******************************************************************************
+/******************************************************************************
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ These sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,18 +21,24 @@ SEARCH="/***********************************************************************
  ------------------------------------------------------------------------------
  For further information and questions please use the web site
  http://www.des-testbed.net/
- *******************************************************************************/"
+ *******************************************************************************/
 
-REPLACE="/*
- * \$FU-Copyright\$
- */"
+#ifndef EVAPORATION_POLICY_H_
+#define EVAPORATION_POLICY_H_
 
-SEARCH=$(echo "$SEARCH" | sed -e 's/[\/&*.()]/\\&/g')
-REPLACE=$(echo "$REPLACE" | sed -e 's/[\/&*()]/\\&/g')
+#include <stdint.h>
 
+namespace ARA { 
+   /**
+    * This purely virtual interface is used by the RoutingTable to evaporate
+    * pheromones of its entries.
+    */
+    class EvaporationPolicy {
+        public:
+            virtual ~EvaporationPolicy() {};
+            /// the method reduces the pheromone value of a routing table entry
+            virtual void evaporate(float*, uint8_t) = 0;
+    };
+} /* namespace ARA */
 
-for i in `find . -type f`; do mkdir -p tmp/`dirname $i`; sed -e "s/$SEARCH/$REPLACE/g" $i > tmp/$i; done
-cd tmp
-cp -Rf * ..
-cd ..
-rm -rf tmp
+#endif 

@@ -1,6 +1,4 @@
-#!/bin/bash
-
-SEARCH="/******************************************************************************
+/******************************************************************************
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
@@ -23,18 +21,19 @@ SEARCH="/***********************************************************************
  ------------------------------------------------------------------------------
  For further information and questions please use the web site
  http://www.des-testbed.net/
- *******************************************************************************/"
+ *******************************************************************************/
 
-REPLACE="/*
- * \$FU-Copyright\$
- */"
+#ifndef NOSUCHELEMENTEXCEPTION_H_
+#define NOSUCHELEMENTEXCEPTION_H_
 
-SEARCH=$(echo "$SEARCH" | sed -e 's/[\/&*.()]/\\&/g')
-REPLACE=$(echo "$REPLACE" | sed -e 's/[\/&*()]/\\&/g')
+#include <string>
+#include "Exception.h"
 
-
-for i in `find . -type f`; do mkdir -p tmp/`dirname $i`; sed -e "s/$SEARCH/$REPLACE/g" $i > tmp/$i; done
-cd tmp
-cp -Rf * ..
-cd ..
-rm -rf tmp
+namespace ARA {
+    class NoRemainingPheromoneException: public Exception {
+        public:
+            NoRemainingPheromoneException() {};
+            NoRemainingPheromoneException(const char* message) : Exception(message) {};
+    };
+} /* namespace ARA */
+#endif 

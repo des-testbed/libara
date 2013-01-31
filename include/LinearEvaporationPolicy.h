@@ -1,10 +1,8 @@
-#!/bin/bash
-
-SEARCH="/******************************************************************************
+/******************************************************************************
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ These sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,18 +21,33 @@ SEARCH="/***********************************************************************
  ------------------------------------------------------------------------------
  For further information and questions please use the web site
  http://www.des-testbed.net/
- *******************************************************************************/"
+ *******************************************************************************/
 
-REPLACE="/*
- * \$FU-Copyright\$
- */"
+#ifndef LINEAR_EVAPORATION_POLICY_H_
+#define LINEAR_EVAPORATION_POLICY_H_
 
-SEARCH=$(echo "$SEARCH" | sed -e 's/[\/&*.()]/\\&/g')
-REPLACE=$(echo "$REPLACE" | sed -e 's/[\/&*()]/\\&/g')
+#include <cmath>
+#include <stdint.h>
 
+#include "EvaporationPolicy.h"
+#include "NoRemainingPheromoneException.h"
 
-for i in `find . -type f`; do mkdir -p tmp/`dirname $i`; sed -e "s/$SEARCH/$REPLACE/g" $i > tmp/$i; done
-cd tmp
-cp -Rf * ..
-cd ..
-rm -rf tmp
+namespace ARA { 
+   /**
+    * This class provides the linear evaporation function of the ant routing algorithm (ARA).
+    */
+    class LinearEvaporationPolicy : public EvaporationPolicy {
+        public:
+            LinearEvaporationPolicy();
+//            LinearEvaporationPolicy();
+            /// the method reduces the pheromone value of a routing table entry
+            void evaporate(float*, uint8_t);
+        private:
+            /// the linear factor
+            float q;
+            /// the threshold which denotes at what point the pheromone level is set to 0
+            float threshold;
+    };
+} /* namespace ARA */
+
+#endif 
