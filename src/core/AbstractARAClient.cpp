@@ -34,6 +34,8 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 AbstractARAClient::AbstractARAClient() {
     packetTrap = new PacketTrap(&routingTable);
+    /// set it to a 'random' initial value
+    this->initialPhi = 1.0;
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -114,6 +116,11 @@ void AbstractARAClient::handlePacket(const Packet* packet, NetworkInterface* int
         handleDataPacket(packet);
     }
     else if(packet->isAntPacket()) {
+        if(hasBeenSentByThisNode(packet) == false){
+            /// set the initial pheromone value
+            initializePheromone(packet, interface);
+        }
+
         handleAntPacket(packet);
     }
     else if(packet->getType() == PacketType::DUPLICATE_ERROR) {
@@ -133,6 +140,7 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
 
 void AbstractARAClient::handleAntPacket(const Packet* packet) {
     if(hasBeenSentByThisNode(packet) == false) {
+        
         if(isDirectedToThisNode(packet) == false) {
             broadCast(packet);
         }
