@@ -1,30 +1,18 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
-
 #include "OMNeTARAClient.h"
 
 using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-// The module class needs to be registered with OMNeT++
+/// The module class needs to be registered with OMNeT++
 Define_Module(OMNeTARAClient);
 
-
 /**
- * 
+ * The method initializes the OMNeTARAClient class. Typically, this is
+ * a task which would be provided by a constructor, but it is one of the
+ * main concepts of OMNeT++ to provide such a method (and to leave 
+ * constructors 'untouched'). The method parses the parameters 
+ * specified in the NED file and initializes the gates.
  */
 void OMNeTARAClient::initialize() {
     /// parse the policy parameter from the NED file
@@ -32,8 +20,11 @@ void OMNeTARAClient::initialize() {
     /// check and initialize the forwarding policy
     this->initializeForwardingPolicy(policy);
     /// parse the delta phi parameter from the NED file
-    this->deltaPhi = par("policy").doubleValue();
+    this->deltaPhi = par("deltaPhi").doubleValue();
+    /// parse the initial pheromone parameter from the NED file
+    this->initialPhi = par("initialPhi").doubleValue();
 
+    /// initialize the gates
     for (cModule::GateIterator i(this); !i.end(); i++) {
         cGate* gate = i();
         if(gate->getType() == cGate::OUTPUT) {
@@ -41,6 +32,7 @@ void OMNeTARAClient::initialize() {
         }
     }
 
+    /// check if the node is a source node
     if (strcmp("source", getName()) == 0) {
         sendInitialPacket();
     }
@@ -111,3 +103,4 @@ void OMNeTARAClient::deliverToSystem(const Packet* packet) {
     OMNeTPacket answer = OMNeTPacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
     sendPacket(&answer);
 }
+

@@ -41,7 +41,7 @@ cleanall: clean
 
 release: cleanall makefiles test	
 
-makefiles:
+makefiles: 
 	cd src && opp_makemake -f --deep -I ../include -I ../include/inetmanet -L"../inetmanet/src" -linet
 
 checkmakefiles:
@@ -57,7 +57,7 @@ checkmakefiles:
 installCppUTest:
 	@cd tests && $(MAKE) installCppUTest
 		
-doc: all 
+doc: all
 	@if type doxygen >/dev/null 2>&1; then \
 	if type dot >/dev/null 2>&1; then \
 	echo; \

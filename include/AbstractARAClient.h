@@ -108,11 +108,17 @@ public:
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
+    /// The method initializes the pheromone value of a link
+    void initializePheromone(const Packet* packet, NetworkInterface* interface);
+
 protected:
 
     std::deque<NetworkInterface*> interfaces;
     RoutingTable routingTable;
     PacketTrap* packetTrap;
+
+    /// The member specifies the initial level 
+    double initialPhi;
 
     /**
      * This method is called to retrieve an instance of ForwardingPolicy

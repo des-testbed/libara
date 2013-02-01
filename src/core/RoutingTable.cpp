@@ -120,6 +120,9 @@ bool RoutingTable::isDeliverable(const Packet* packet) {
     return isDeliverable(packet->getDestination());
 }
 
+/**
+ * TODO: The method should throw an exception if the host can not be found
+ */
 float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
     if(isDeliverable(destination)) {
         std::deque<RoutingTableEntry*>* entryList = table[destination];
@@ -131,6 +134,22 @@ float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std:
     }
 
     return 0;
+}
+
+/**
+ * The method checks if an destination/nextHop/interface entry already exists.
+ */
+bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface){
+    if(isDeliverable(destination)){
+        std::deque<RoutingTableEntry*>* entries = table[destination];
+        for (auto& entry: *entries) {
+            if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){
+                delete entries;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**

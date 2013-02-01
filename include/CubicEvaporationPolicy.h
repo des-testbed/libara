@@ -44,10 +44,10 @@ namespace ARA {
         private:
             /// 
             float plateau;
-            /// 
-            float reduction;
             ///
             float slow;
+            /// 
+            float reduction;
             /// the threshold which denotes at what point the pheromone level is set to 0
             float threshold;
     };

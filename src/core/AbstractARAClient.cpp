@@ -236,4 +236,19 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     }
 }
 
+/**
+ * The method initializes the pheromone value of 
+ *
+ */
+void AbstractARAClient::initializePheromone(const Packet* packet, NetworkInterface* interface){
+    /// determine the hop count malus
+    float hopCountMalus = 1 / (float) packet->getHopCount();
+    /// compute the phi value   
+    float phi = this->initialPhi * hopCountMalus;
+    /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
+    if(!(this->routingTable.exists(packet->getSource(), packet->getSender(), interface))){
+        this->routingTable.update(packet->getSource(), packet->getSender(), interface, phi);
+    }
+}
+
 } /* namespace ARA */
