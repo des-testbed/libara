@@ -52,12 +52,12 @@ public:
     std::deque<RoutingTableEntry*>* getPossibleNextHops(const Packet* packet);
     bool isDeliverable(std::shared_ptr<Address> destination);
     bool isDeliverable(const Packet* packet);
-    void evaporatePheromones();
+    void checkForEvaporation();
     bool exists(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
 private:
     std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table;
-    EvaporationPolicy *mEvaporationPolicy;
+    EvaporationPolicy *evaporationPolicy;
 };
 
 } /* namespace ARA */

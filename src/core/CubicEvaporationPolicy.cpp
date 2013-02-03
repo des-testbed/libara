@@ -4,11 +4,18 @@ using namespace ARA;
 
 CubicEvaporationPolicy::CubicEvaporationPolicy():plateau(0.1),slow(0.2),reduction(0.3),threshold(0.2){};
 
+bool CubicEvaporationPolicy::checkForEvaporation(){
+    return false;
+}
 /**
  *
  * 
  */
-float CubicEvaporationPolicy::evaporate(float pheromone, uint8_t factor){
+float CubicEvaporationPolicy::evaporate(){
+   // FIXME
+   float pheromone = 5.0;
+   // FIXME
+   int factor = 1;
     float t, m;
     // TODO: method ignores the factor right now :-(
     float a = 1 - (2 * (pheromone));

@@ -39,8 +39,9 @@ namespace ARA {
     class CubicEvaporationPolicy : public EvaporationPolicy {
         public:
             CubicEvaporationPolicy();
+            bool checkForEvaporation();
             /// the method reduces the pheromone value of a routing table entry
-            float evaporate(float, uint8_t);
+            float evaporate();
         private:
             /// 
             float plateau;

@@ -36,8 +36,11 @@ namespace ARA {
     class EvaporationPolicy {
         public:
             virtual ~EvaporationPolicy() {};
+            virtual bool checkForEvaporation() = 0;
             /// the method reduces the pheromone value of a routing table entry
-            virtual float evaporate(float, uint8_t) = 0;
+            virtual float evaporate() = 0;
+		private:
+			float lastAccessTime;
     };
 } /* namespace ARA */
 
