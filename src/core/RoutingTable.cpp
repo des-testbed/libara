@@ -36,7 +36,7 @@ RoutingTable::RoutingTable( ){
     this->evaporationPolicy = new LinearEvaporationPolicy();
 }
 
-RoutingTable::RoutingTable(EvaporationPolicy *pEvaporationPolicy):evaporationPolicy(pEvaporationPolicy){ }
+RoutingTable::RoutingTable(EvaporationPolicy *evaporationPolicy):evaporationPolicy(evaporationPolicy){ }
 
 RoutingTable::~RoutingTable() {
     std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
@@ -52,7 +52,7 @@ RoutingTable::~RoutingTable() {
         delete entryList;
     }
     table.clear();
-    /// FIXME: causes core dump
+
     delete evaporationPolicy;
 }
 
@@ -149,7 +149,6 @@ bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInt
         std::deque<RoutingTableEntry*>* entries = table[destination];
         for (auto& entry: *entries) {
             if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){
-                delete entries;
                 return true;
             }
         }
