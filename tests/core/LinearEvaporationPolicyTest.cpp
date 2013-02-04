@@ -31,19 +31,12 @@ using namespace ARA;
 
 TEST_GROUP(LinearEvaporationPolicyTest) {};
 
-IGNORE_TEST(LinearEvaporationPolicyTest, testEvaporate) {
+TEST(LinearEvaporationPolicyTest, testEvaporate) {
     LinearEvaporationPolicy policy = LinearEvaporationPolicy();
 
     float pheromone = 1;
 
     // simply test the evaporate function
-//    pheromone = policy.evaporate(pheromone, 1);
-  //  DOUBLES_EQUAL(0.9, pheromone, 0.00001);
-
-    // check the pow function used in the evaporate method
-    //pheromone = policy.evaporate(pheromone, 2);
-    //DOUBLES_EQUAL(0.6561, pheromone, 0.00001);
-
-//    pheromone = policy.evaporate(pheromone, 6);
-  //  DOUBLES_EQUAL(0.0, pheromone, 0.00001);
+    pheromone = policy.evaporate(pheromone);
+    DOUBLES_EQUAL(0.9, pheromone, 0.00001);
 }
