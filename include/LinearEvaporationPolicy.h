@@ -27,6 +27,7 @@
 #define LINEAR_EVAPORATION_POLICY_H_
 
 #include <cmath>
+#include <cstring>
 #include <stdint.h>
 #include <sys/time.h>
 
