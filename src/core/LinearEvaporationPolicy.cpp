@@ -2,7 +2,7 @@
 
 using namespace ARA;
 
-LinearEvaporationPolicy::LinearEvaporationPolicy():q(0.1),threshold(0.2),factor(1){ 
+LinearEvaporationPolicy::LinearEvaporationPolicy():q(0.1),threshold(0.2),factor(1),interval(1.0){ 
     this->lastAccessTime = new timeval;
     /// initialize the last access time with '0'
     memset(this->lastAccessTime, 0, sizeof(timeval));
@@ -13,6 +13,7 @@ LinearEvaporationPolicy::~LinearEvaporationPolicy(){
 } 
 
 bool LinearEvaporationPolicy::checkForEvaporation(){
+    /// check if the last access time to the routing tables has been initialized
     if(this->lastAccessTime->tv_sec != 0){
         struct timeval *now = new timeval;
         /// get the current time
@@ -32,7 +33,7 @@ bool LinearEvaporationPolicy::checkForEvaporation(){
         }
 
         /// compare the timestamps (only the seconds
-        if((now->tv_sec - this->lastAccessTime->tv_sec) > 5){
+        if((now->tv_sec - this->lastAccessTime->tv_sec) > this->interval){
             /// delete the last access time
             delete this->lastAccessTime;
             /// update the timestamp
@@ -52,6 +53,10 @@ bool LinearEvaporationPolicy::checkForEvaporation(){
         gettimeofday(this->lastAccessTime, 0);
     } 
     return false;
+}
+
+void LinearEvaporationPolicy::setInterval(float interval){
+    this->interval = interval;
 }
 
 /**

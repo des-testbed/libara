@@ -23,6 +23,7 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
+#include <unistd.h>
 #include "CppUTest/TestHarness.h"
 
 #include "LinearEvaporationPolicy.h" 
@@ -30,6 +31,16 @@
 using namespace ARA;
 
 TEST_GROUP(LinearEvaporationPolicyTest) {};
+
+TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
+    LinearEvaporationPolicy policy = LinearEvaporationPolicy();
+    // set the interval
+    policy.setInterval(1.0);
+    // call the method for the first time
+    bool status = policy.checkForEvaporation();
+    // the result should false
+    CHECK(!status);
+}
 
 TEST(LinearEvaporationPolicyTest, testEvaporate) {
     LinearEvaporationPolicy policy = LinearEvaporationPolicy();
