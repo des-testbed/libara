@@ -22,6 +22,7 @@ extern/cpputest
 .settings/*
 *.tkenvrc
 *.tkenvlog
+simulations/results*
 
 # valgrind core dumps
 *vgcore*
