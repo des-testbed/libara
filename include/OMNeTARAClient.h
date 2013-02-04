@@ -46,8 +46,10 @@ namespace ARA {
     class OMNeTARAClient: public cSimpleModule, public AbstractARAClient {
         protected:
             //~~~ INHERITED FROM cSimpleModule ~~~~~~~
+            int numInitStages() const;
             virtual void initialize(int stage);
             virtual void handleMessage(cMessage *msg);
+            void handleUpperLayerMessage(cMessage* msg);
 
             //~~~ INHERITED FROM AbstractARAClient ~~~
             ForwardingPolicy* getForwardingPolicy();

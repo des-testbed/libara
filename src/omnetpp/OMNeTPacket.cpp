@@ -1,7 +1,8 @@
-#include <iostream>
-#include <sstream>
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
+
+#include <iostream>
+#include <sstream>
 
 using namespace ARA;
 
@@ -24,7 +25,7 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTPacket);
 
-OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
+OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, unsigned int hopCount) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, hopCount) {
 
 }
 
@@ -58,8 +59,20 @@ void OMNeTPacket::parsimUnpack(cCommBuffer *b) {
     throw cRuntimeError("Parsim error: OMNeTPacket::parsimUnpack is not yet implemented");
 }
 
+std::shared_ptr<OMNeTAddress> OMNeTPacket::getSource() const {
+    return std::dynamic_pointer_cast<OMNeTAddress>(this->source);
+}
+
+std::shared_ptr<OMNeTAddress> OMNeTPacket::getDestination() const {
+    return std::dynamic_pointer_cast<OMNeTAddress>(this->destination);
+}
+
+std::shared_ptr<OMNeTAddress> OMNeTPacket::getSender() const {
+    return std::dynamic_pointer_cast<OMNeTAddress>(this->sender);
+}
+
 Packet* OMNeTPacket::clone() const {
-    return new OMNeTPacket(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
+    return new OMNeTPacket(source, destination, sender, type, seqNr, hopCount);
 }
 
 Packet* OMNeTPacket::createFANT(unsigned int sequenceNumber) const {
@@ -71,7 +84,7 @@ Packet* OMNeTPacket::createBANT(unsigned int sequenceNumber) const {
 }
 
 Packet* OMNeTPacket::createDuplicateWarning() const {
-    return new OMNeTPacket(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, NULL, 0, hopCount+1);
+    return new OMNeTPacket(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, hopCount+1);
 }
 
 class OMNeTPacketDescriptor : public cClassDescriptor {

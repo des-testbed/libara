@@ -26,7 +26,9 @@
 #include "OMNeTGate.h"
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
+#include "IInterfaceTable.h"
 #include "IPAddressResolver.h"
+#include "IPControlInfo.h"
 
 using namespace std;
 
@@ -35,17 +37,35 @@ namespace ARA {
 OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
     this->module = module;
     this->gate = gate;
-    cModule* connectedModule = gate->getNextGate()->getOwnerModule();
-    IPvXAddress localAddress = IPAddressResolver().addressOf(module->getParentModule(), connectedModule->getFullName(), IPAddressResolver::ADDR_IPv4);
+
+    cModule *host = module->getParentModule();
+
+    // find IInterfaceTable
+    cModule *mod = host->getSubmodule("interfaceTable");
+    if (!mod)
+        opp_error("IPAddressResolver: IInterfaceTable not found as submodule "
+                  " `interfaceTable' in host/router `%s'", host->getFullPath().c_str());
+    IInterfaceTable* interfaceTable = check_and_cast<IInterfaceTable *>(mod);
+
+    InterfaceEntry* interfaceEntry = interfaceTable->getInterfaceByNodeInputGateId(gate->getNextGate()->getId());
+
+    IPvXAddress localAddress = IPAddressResolver().getAddressFrom(interfaceEntry, IPAddressResolver::ADDR_IPv4);
     this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress.get4()));
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
     OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+
+    IPControlInfo* ctrl = new IPControlInfo();
+    ctrl->setSrcAddr(omnetPacket->getSource()->getAddress());
+    ctrl->setDestAddr(omnetPacket->getDestination()->getAddress());
+    omnetPacket->setControlInfo(ctrl);
+
     module->send(omnetPacket, gate);
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
+    EV << "Broadcasting something\n";
     OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
     module->send(omnetPacket, gate);
 }
