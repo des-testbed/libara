@@ -11,7 +11,7 @@ bool CubicEvaporationPolicy::checkForEvaporation(){
  *
  * 
  */
-float CubicEvaporationPolicy::evaporate(){
+float CubicEvaporationPolicy::evaporate(float phi){
    // FIXME
    float pheromone = 5.0;
    // FIXME

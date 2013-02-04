@@ -42,10 +42,10 @@ namespace ARA {
             LinearEvaporationPolicy();
             ~LinearEvaporationPolicy();
 
-            ///
+            /// the method checks if it's time to start the evaporation process
             bool checkForEvaporation();
             /// the method reduces the pheromone value of a routing table entry
-            float evaporate();
+            float evaporate(float phi);
 
         private:
             /// the linear factor
@@ -54,6 +54,8 @@ namespace ARA {
             float threshold;
             /// the last access time of the routing table
 			struct timeval *lastAccessTime;
+            /// the factor which indicates how often the evaporation should take place 
+            uint8_t factor;
     };
 } /* namespace ARA */
 
