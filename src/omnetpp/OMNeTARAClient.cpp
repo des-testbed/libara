@@ -30,7 +30,7 @@ int OMNeTARAClient::numInitStages() const {
 }
 
 void OMNeTARAClient::initialize(int stage) {
-    if(stage == 1) {
+    if(stage == 2) {
         std::string policy = par("forwardingPolicy").stringValue();
         initializeForwardingPolicy(policy);
         deltaPhi = par("deltaPhi").doubleValue();
@@ -47,7 +47,15 @@ void OMNeTARAClient::initialize(int stage) {
 
 void OMNeTARAClient::handleMessage(cMessage* msg) {
     if(isFromUpperLayer(msg)) {
-        handleUpperLayerMessage(msg);
+        IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
+        IPAddress sourceIP = controlInfo->getSrcAddr();
+        IPAddress destinationIP = controlInfo->getDestAddr();
+        AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
+        AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
+        //TODO encaps packet (HIER WEITER MACHEN)
+        //OMNeTPacket initialPacket = OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
+
+        EV << "Handling upper layer message from " << source << " to " << destination << ": "<< msg;
     }
     else {
         EV << "Message from lower layer";
@@ -76,34 +84,6 @@ void OMNeTARAClient::handleUpperLayerMessage(cMessage* msg) {
     OMNeTPacket omnetPacket = OMNeTPacket(source, destination, sender, PacketType::DATA, getNextSequenceNumber());
 
     sendPacket(&omnetPacket);
-}
-
-void OMNeTARAClient::handleMessage(cMessage* msg) {
-    if(isFromUpperLayer(msg)) {
-        IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
-        IPAddress sourceIP = controlInfo->getSrcAddr();
-        IPAddress destinationIP = controlInfo->getDestAddr();
-        AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
-        AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
-        //TODO encaps packet (HIER WEITER MACHEN)
-        //OMNeTPacket initialPacket = OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
-
-        EV << "Handling upper layer message from " << source << " to " << destination << ": "<< msg;
-    }
-    else {
-        EV << "Message from lower layer";
-    }
-
-    //OMNeTPacket* omnetPacket = (OMNeTPacket*) msg;
-    //receivePacket(omnetPacket, getNetworkInterface(msg->getArrivalGate()->getIndex()));
-    delete msg;
-}
-
-bool OMNeTARAClient::isFromUpperLayer(cMessage* msg) {
-    std::string nameOfUpperLayergate = "upperLayerGate$i";
-    std::string gateName = std::string(msg->getArrivalGate()->getName());
-    return gateName.length() <= nameOfUpperLayergate.length()
-        && std::equal(gateName.begin(), gateName.end(), nameOfUpperLayergate.begin());
 }
 
 ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
