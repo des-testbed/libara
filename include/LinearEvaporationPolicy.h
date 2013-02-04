@@ -28,6 +28,7 @@
 
 #include <cmath>
 #include <stdint.h>
+#include <sys/time.h>
 
 #include "EvaporationPolicy.h"
 
@@ -38,15 +39,20 @@ namespace ARA {
     class LinearEvaporationPolicy : public EvaporationPolicy {
         public:
             LinearEvaporationPolicy();
+            ~LinearEvaporationPolicy();
+
+            ///
             bool checkForEvaporation();
-//            LinearEvaporationPolicy();
             /// the method reduces the pheromone value of a routing table entry
             float evaporate();
+
         private:
             /// the linear factor
             float q;
             /// the threshold which denotes at what point the pheromone level is set to 0
             float threshold;
+            /// the last access time of the routing table
+			struct timeval *lastAccessTime;
     };
 } /* namespace ARA */
 

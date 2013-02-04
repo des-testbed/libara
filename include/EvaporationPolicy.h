@@ -36,11 +36,10 @@ namespace ARA {
     class EvaporationPolicy {
         public:
             virtual ~EvaporationPolicy() {};
+            /// the method checks how much time has passed since the last access to the routing table
             virtual bool checkForEvaporation() = 0;
             /// the method reduces the pheromone value of a routing table entry
             virtual float evaporate() = 0;
-		private:
-			float lastAccessTime;
     };
 } /* namespace ARA */
 
