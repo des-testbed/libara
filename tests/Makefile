@@ -26,7 +26,7 @@ LD_LIB_PATH=$(OMNETPP_LIB_DIR):$(INETMANET_LIB_DIR)
 
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CPPUTEST_HOME = ../extern/cpputest
-INCLUDE_PATH= -I../include -I./ -I$(OMNETPP_INCL_DIR) -I$(CPPUTEST_HOME)/include
+INCLUDE_PATH= -I../include -I../include/omnetpp -I./ -I$(OMNETPP_INCL_DIR) -I$(CPPUTEST_HOME)/include
 LINKFLAGS= $(OMNETPP_LIBS) -L$(CPPUTEST_HOME)/lib -lCppUTest
 
 # Enable CppUTest memory leak detection
