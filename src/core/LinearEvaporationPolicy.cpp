@@ -38,8 +38,6 @@ bool LinearEvaporationPolicy::checkForEvaporation(){
         /// delete the object
         delete time;
 
-//        std::cout << timeDifference << "  " << this->interval <<  std::endl;
-
         /// compare the timestamps 
         if(timeDifference > this->interval){
             /// compute the factor
