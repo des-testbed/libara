@@ -51,6 +51,8 @@ runSingleTest: all
 	@cd tests && $(MAKE) runSingleTest
 
 clean: checkmakefiles
+	@cd src && $(MAKE) MODE=release clean
+	@cd src && $(MAKE) MODE=debug clean
 	@cd omnetpp && $(MAKE) MODE=release clean
 	@cd omnetpp && $(MAKE) MODE=debug clean
 	@cd tests && $(MAKE) clean
