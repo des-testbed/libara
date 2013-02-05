@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 @namespace(ARA);
-package ara_simulation.omnetpp;
+package ara;
 
 
 simple ARATrafficGenerator

@@ -13,9 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara_simulation.simulations;
+package ara.simulations;
 
-import ara_simulation.omnetpp.ARAClient;
+// Imports for the ARAClient
+import inet.base.NotificationBoard;
+import ara.ARATrafficGenerator;
+import ara.Debugger;
+import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import inet.mobility.NullMobility;
+
 import inet.world.ChannelControl;
 
 network ManetTest {
