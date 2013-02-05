@@ -26,7 +26,7 @@ LD_LIB_PATH=$(OMNETPP_LIB_DIR):$(INETMANET_LIB_DIR)
 
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CPPUTEST_HOME = ../extern/cpputest
-INCLUDE_PATH= -I../include -I../include/inetmanet -I./ -I$(OMNETPP_INCL_DIR) -I$(CPPUTEST_HOME)/include
+INCLUDE_PATH= -I../include -I../include/omnetpp -I../include/inetmanet -I./ -I$(OMNETPP_INCL_DIR) -I$(CPPUTEST_HOME)/include
 LINKFLAGS= $(OMNETPP_LIBS) -L$(CPPUTEST_HOME)/lib -lCppUTest
 
 # Enable CppUTest memory leak detection
@@ -40,7 +40,7 @@ TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/tests
 
 # Test sources ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COMPILED_SRC = $(shell find $(SRC_OUTPUT_DIR) -type f -name '*.o')
-TEST_SOURCES = $(shell find ./ -type f -name '*Test.cpp' -o -name 'Test*.cpp')
+TEST_SOURCES = $(shell find ./ -name cpputest -prune -o -type f -name '*Test.cpp' -o -name 'Test*.cpp' -print)
 COMPILED_TESTS = $(TEST_SOURCES:.cpp=.o)
 TESTAPI_SOURCES = $(shell find ./testAPI/ -name tests -prune -o -type f -name '*.cpp' -print)
 COMPILED_TESTAPI = $(TESTAPI_SOURCES:.cpp=.o)

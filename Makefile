@@ -42,7 +42,7 @@ cleanall: clean
 release: cleanall makefiles test	
 
 makefiles:
-	cd src && opp_makemake -f --deep -I ../include -I ../include/inetmanet -L"../inetmanet/src" -linet
+	cd omnetpp && opp_makemake -f --deep -I ../src/core -I ../src/exceptions -I ../src/util -I ../include -I ../include/inetmanet -I ../include/omnetpp -L"../inetmanet/src" -linet -L"../src" -lara
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \
