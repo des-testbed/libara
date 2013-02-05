@@ -32,7 +32,7 @@ void OMNeTARAClient::initialize() {
     /// check and initialize the forwarding policy
     this->initializeForwardingPolicy(policy);
     /// parse the delta phi parameter from the NED file
-    this->deltaPhi = par("policy").doubleValue();
+    this->deltaPhi = par("deltaPhi").doubleValue();
 
     for (cModule::GateIterator i(this); !i.end(); i++) {
         cGate* gate = i();
