@@ -13,12 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara_simulation.simulations;
+package ara.simulations;
 
 // Imports for the ARAClient
 import inet.base.NotificationBoard;
-import ara_simulation.omnetpp.ARATrafficGenerator;
-import ara_simulation.omnetpp.Debugger;
+import ara.ARATrafficGenerator;
+import ara.Debugger;
 import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
 import inet.mobility.NullMobility;
 
