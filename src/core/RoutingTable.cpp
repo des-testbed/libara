@@ -36,7 +36,7 @@ RoutingTable::RoutingTable( ){
     this->evaporationPolicy = new LinearEvaporationPolicy();
 }
 
-RoutingTable::RoutingTable(EvaporationPolicy *evaporationPolicy):evaporationPolicy(evaporationPolicy){ }
+RoutingTable::RoutingTable(EvaporationPolicy *policy):evaporationPolicy(policy){ }
 
 RoutingTable::~RoutingTable() {
     std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;

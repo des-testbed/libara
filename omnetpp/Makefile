@@ -1,12 +1,12 @@
 #
-# OMNeT++/OMNEST Makefile for ARA-Simulation
+# OMNeT++/OMNEST Makefile for ara-sim
 #
 # This file was generated with the command:
 #  opp_makemake -f --deep -I ../src/core -I ../src/exceptions -I ../src/util -I ../include -I ../include/inetmanet -I ../include/omnetpp -L../inetmanet/src -linet -L../src -lara
 #
 
 # Name of target to be created (-o option)
-TARGET = ARA-Simulation$(EXE_SUFFIX)
+TARGET = ara-sim$(EXE_SUFFIX)
 
 # User interface (uncomment one) (-u option)
 USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
@@ -117,7 +117,7 @@ msgheaders: $(MSGFILES:.msg=_m.h)
 
 clean:
 	-rm -rf $O
-	-rm -f ARA-Simulation ARA-Simulation.exe libARA-Simulation.so libARA-Simulation.a libARA-Simulation.dll libARA-Simulation.dylib
+	-rm -f ara-sim ara-sim.exe libara-sim.so libara-sim.a libara-sim.dll libara-sim.dylib
 	-rm -f ./*_m.cpp ./*_m.h
 
 cleanall: clean

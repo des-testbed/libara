@@ -23,7 +23,6 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <unistd.h>
 #include "CppUTest/TestHarness.h"
 
 #include "LinearEvaporationPolicy.h" 
@@ -35,14 +34,12 @@ TEST_GROUP(LinearEvaporationPolicyTest) {};
 TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
     LinearEvaporationPolicy policy = LinearEvaporationPolicy();
     // set the interval
-    policy.setInterval(1.0);
+    policy.setInterval(100000);
     // call the method for the first time
     bool status = policy.checkForEvaporation();
     // the result should false
     CHECK(!status);
-    //
-    sleep(3);
-    //
+    // check if enough time has passed
     status = policy.checkForEvaporation();
     CHECK(status);
 }
@@ -50,8 +47,7 @@ TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
 TEST(LinearEvaporationPolicyTest, testEvaporate) {
     LinearEvaporationPolicy policy = LinearEvaporationPolicy();
 
-    float pheromone = 1;
-
+    float pheromone = 1.;
     // simply test the evaporate function
     pheromone = policy.evaporate(pheromone);
     DOUBLES_EQUAL(0.9, pheromone, 0.00001);

@@ -35,8 +35,8 @@ namespace ARA {
      */
     class Time {
         public:
-          float getTimeDifferenceInSeconds(struct timeval*, struct timeval*);
-          float getTimeDifferenceInMilliseconds(struct timeval*, struct timeval*);
+          int getTimeDifferenceInSeconds(struct timeval*, struct timeval*);
+          int getTimeDifferenceInMilliseconds(struct timeval*, struct timeval*);
 
         private:
           /// the method returns the time difference in seconds

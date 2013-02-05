@@ -44,8 +44,9 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(BestPheromoneForwardingPolicyTest) {};
 
 TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
-    // prepare the test
-    RoutingTable routingTable = RoutingTable();
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
+    RoutingTable routingTable = RoutingTable(evaporationPolicy);
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 

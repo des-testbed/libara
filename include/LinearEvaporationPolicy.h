@@ -48,9 +48,10 @@ namespace ARA {
             /// the method reduces the pheromone value of a routing table entry
             float evaporate(float phi);
             /// sets the time until the evaporation is triggered
-            void setInterval(float interval);
+            void setInterval(int interval);
 
         private:
+            void determineEvaporationFactor(float timeDifference);
             /// the linear factor
             float q;
             /// the threshold which denotes at what point the pheromone level is set to 0
@@ -60,7 +61,7 @@ namespace ARA {
             /// the factor which indicates how often the evaporation should take place 
             uint8_t factor;
             /// the interval which denotes how much time has to pass in order to trigger the evaporation
-            float interval;
+            int interval;
     };
 } /* namespace ARA */
 

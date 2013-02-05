@@ -17,12 +17,12 @@ void Time::getTimeDifference(struct timeval *a, struct timeval *b){
     }
 }
 
-float Time::getTimeDifferenceInSeconds(struct timeval *a, struct timeval *b){
+int Time::getTimeDifferenceInSeconds(struct timeval *a, struct timeval *b){
     this->getTimeDifference(a, b);
     return (a->tv_sec - b->tv_sec);
 }
 
-float Time::getTimeDifferenceInMilliseconds(struct timeval *a, struct timeval *b){
+int Time::getTimeDifferenceInMilliseconds(struct timeval *a, struct timeval *b){
     this->getTimeDifference(a, b);
     return (a->tv_usec - b->tv_usec);
 }
