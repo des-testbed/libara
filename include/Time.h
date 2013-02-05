@@ -1,8 +1,8 @@
 /******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ These sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,36 +23,26 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <unistd.h>
-#include "CppUTest/TestHarness.h"
+#ifndef TIME_H_
+#define TIME_H_
 
-#include "LinearEvaporationPolicy.h" 
+#include <sys/time.h>
 
-using namespace ARA;
+namespace ARA {
+    /**
+     * The class provides methods for determining the difference between 
+     * two timestamps.
+     */
+    class Time {
+        public:
+          float getTimeDifferenceInSeconds(struct timeval*, struct timeval*);
+          float getTimeDifferenceInMilliseconds(struct timeval*, struct timeval*);
 
-TEST_GROUP(LinearEvaporationPolicyTest) {};
-
-TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
-    LinearEvaporationPolicy policy = LinearEvaporationPolicy();
-    // set the interval
-    policy.setInterval(1.0);
-    // call the method for the first time
-    bool status = policy.checkForEvaporation();
-    // the result should false
-    CHECK(!status);
-    //
-    sleep(3);
-    //
-    status = policy.checkForEvaporation();
-    CHECK(status);
+        private:
+          /// the method returns the time difference in seconds
+          void getTimeDifference(struct timeval*, struct timeval*);
+    };
 }
 
-TEST(LinearEvaporationPolicyTest, testEvaporate) {
-    LinearEvaporationPolicy policy = LinearEvaporationPolicy();
+#endif 
 
-    float pheromone = 1;
-
-    // simply test the evaporate function
-    pheromone = policy.evaporate(pheromone);
-    DOUBLES_EQUAL(0.9, pheromone, 0.00001);
-}
