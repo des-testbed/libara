@@ -1,5 +1,25 @@
-all: checkmakefiles inetmanet_headers
-	@echo -e "\n~~~ BUILDING SOURCE ~~~~~~~~~~~~~~~~~\n"
+#
+# Make "debug" the default mode
+#
+ifndef MODE
+MODE = debug
+endif
+
+#
+# Configname determines where (in which subdirectory of out/)
+# makemake-generated makefiles create object files and other
+# build artifacts.
+#
+ifndef CONFIGNAME
+CONFIGNAME = gcc-$(MODE)
+endif
+
+all: checkmakefiles arasource inetmanet_headers
+	@echo -e "\n~~~ BUILDING OMNeT++ SIMULATIONS ~~~~\n"
+	@cd omnetpp && $(MAKE)
+
+arasource: 
+	@echo -e "\n~~~ BUILDING ARA SOURCE ~~~~~~~~~~~~~\n"
 	@cd src && $(MAKE)
 
 inetmanet_headers: inetmanet/src/libinet.so
@@ -31,25 +51,25 @@ runSingleTest: all
 	@cd tests && $(MAKE) runSingleTest
 
 clean: checkmakefiles
-	@cd src && $(MAKE) MODE=release clean
-	@cd src && $(MAKE) MODE=debug clean
+	@cd omnetpp && $(MAKE) MODE=release clean
+	@cd omnetpp && $(MAKE) MODE=debug clean
 	@cd tests && $(MAKE) clean
 	rm -R -f include/inetmanet
 
 cleanall: clean	
-	rm -f src/Makefile
+	rm -f omnetpp/Makefile
 
 release: cleanall makefiles test	
 
 makefiles:
-	cd src && opp_makemake -f --deep -I ../include -I ../include/inetmanet -L"../inetmanet/src" -linet
+	cd omnetpp && opp_makemake -f --deep -I ../src/core -I ../src/exceptions -I ../src/util -I ../include -I ../include/inetmanet -L"../inetmanet/src" -linet -L"../src" -lara
 
 checkmakefiles:
-	@if [ ! -f src/Makefile ]; then \
+	@if [ ! -f omnetpp/Makefile ]; then \
 	echo; \
-	echo '======================================================================='; \
-	echo 'src/Makefile does not exist. Please use "make makefiles" to generate it!'; \
-	echo '======================================================================='; \
+	echo '============================================================================'; \
+	echo 'omnetpp/Makefile does not exist. Please use "make makefiles" to generate it!'; \
+	echo '============================================================================'; \
 	echo; \
 	exit 1; \
 	fi

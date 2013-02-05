@@ -40,9 +40,11 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.979128767" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.paths.287814472" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ARA-Simulation/inetmanet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ARA-Simulation/src}&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1777035253" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="inet"/>
+									<listOptionValue builtIn="false" value="ara"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.302378774" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -62,6 +64,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="tests"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="simulations"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="omnetpp"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -106,9 +109,11 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1532096407" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.paths.2100800236" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ARA-Simulation/inetmanet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ARA-Simulation/src}&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.411866554" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="inet"/>
+									<listOptionValue builtIn="false" value="ara"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.868553528" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
