@@ -19,21 +19,15 @@ bool LinearEvaporationPolicy::checkForEvaporation(){
         /// get the current time
         gettimeofday(now, 0);
 
-        /// determine the difference between the last access time and now
-        if(now->tv_usec < this->lastAccessTime->tv_usec) {
-            int nanoSeconds = (this->lastAccessTime->tv_usec - now->tv_usec) / 1000000 + 1;
-            this->lastAccessTime->tv_usec = this->lastAccessTime->tv_usec - (1000000 * nanoSeconds);
-            this->lastAccessTime->tv_sec  = this->lastAccessTime->tv_sec + nanoSeconds;
-        }
+        /// FIXME (it's not so cool to create all the time an object)
+        Time* time = new Time();
+        /// compute the time difference in seconds
+        float timeDifference = time->getTimeDifferenceInSeconds(now, lastAccessTime);
+        /// delete the object
+        delete time;
 
-        if(now->tv_usec - this->lastAccessTime->tv_usec > 1000000) {
-            int nanoSeconds = (now->tv_usec - this->lastAccessTime->tv_usec) / 1000000;
-            this->lastAccessTime->tv_usec = this->lastAccessTime->tv_usec + (1000000 * nanoSeconds);
-            this->lastAccessTime->tv_sec  = this->lastAccessTime->tv_sec - nanoSeconds;
-        }
-
-        /// compare the timestamps (only the seconds
-        if((now->tv_sec - this->lastAccessTime->tv_sec) > this->interval){
+        /// compare the timestamps 
+        if(timeDifference > this->interval){
             /// delete the last access time
             delete this->lastAccessTime;
             /// update the timestamp
