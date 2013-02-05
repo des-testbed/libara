@@ -42,11 +42,9 @@ IGNORE_TEST(OMNeTPacketTest, testCreate) {
     AddressPtr originalSender (new AddressMock("sender"));
     char type=PacketType::DATA;
     unsigned int originalSeqenceNumber=123;
-    const char* payload="Hello World";
-    unsigned int payloadSize=11;
     unsigned int originalHopCount = 3;
 
-    OMNeTPacket packet2 = OMNeTPacket(originalSource, originalDestination, originalSender, type, originalSeqenceNumber, payload, payloadSize, originalHopCount);
+    OMNeTPacket packet2 = OMNeTPacket(originalSource, originalDestination, originalSender, type, originalSeqenceNumber, originalHopCount);
 }
 
 // FIXME make this test work (segfault)
@@ -57,12 +55,10 @@ IGNORE_TEST(OMNeTPacketTest, testCreateDuplicateWarning) {
     AddressPtr originalSender (new AddressMock("sender"));
     char type=PacketType::DATA;
     unsigned int originalSeqenceNumber=123;
-    const char* payload="Hello World";
-    unsigned int payloadSize=11;
     unsigned int originalHopCount = 3;
 
     // create duplicateWarning packet
-    OMNeTPacket packet = OMNeTPacket(originalSource, originalDestination, originalSender, type, originalSeqenceNumber, payload, payloadSize, originalHopCount);
+    OMNeTPacket packet = OMNeTPacket(originalSource, originalDestination, originalSender, type, originalSeqenceNumber, originalHopCount);
     Packet* duplicateWarning = packet.createDuplicateWarning();
 
     // check packet contents
