@@ -6,6 +6,7 @@
 out/*
 *.o
 src/libara.so
+omnetpp/ara-sim
 doc/doxygen/html
 include/inetmanet/*
 

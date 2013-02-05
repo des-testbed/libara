@@ -1,12 +1,12 @@
 #
-# OMNeT++/OMNEST Makefile for ARA-Simulation
+# OMNeT++/OMNEST Makefile for ara-sim
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -I ../src/core -I ../src/exceptions -I ../src/util -I ../include -I ../include/inetmanet -L../inetmanet/src -linet -L../src -lara
+#  opp_makemake -f --deep -o ara-sim -O out -I/home/fgrosse/Masterthesis/ARA-Simulation/include -I/home/fgrosse/Masterthesis/ARA-Simulation/include/inetmanet -L/home/fgrosse/Masterthesis/ARA-Simulation/inetmanet/src -L/home/fgrosse/Masterthesis/ARA-Simulation/src -lara -linet
 #
 
 # Name of target to be created (-o option)
-TARGET = ARA-Simulation$(EXE_SUFFIX)
+TARGET = ara-sim$(EXE_SUFFIX)
 
 # User interface (uncomment one) (-u option)
 USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
@@ -14,35 +14,29 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
 #USERIF_LIBS = $(TKENV_LIBS)
 
 # C++ include paths (with -I)
-INCLUDE_PATH = \
-    -I../src/core \
-    -I../src/exceptions \
-    -I../src/util \
-    -I../include \
-    -I../include/inetmanet \
-    -I.
+INCLUDE_PATH = -I../include -I../include/inetmanet -I.
 
 # Additional object and library files to link with
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = -L../inetmanet/src -L../src  -linet -lara
+LIBS = -L../inetmanet/src -L../src  -lara -linet
 LIBS += -Wl,-rpath,`abspath ../inetmanet/src` -Wl,-rpath,`abspath ../src`
 
 # Output directory
 PROJECT_OUTPUT_DIR = ../out
-PROJECTRELATIVE_PATH = /omnetpp
+PROJECTRELATIVE_PATH = omnetpp
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cpp and .msg files
 OBJS = \
-    $O/ARATrafficGenerator.o \
-    $O/Debugger.o \
-    $O/OMNeTAddress.o \
-    $O/OMNeTARAClient.o \
     $O/OMNeTGate.o \
+    $O/OMNeTStochasticForwardingPolicy.o \
+    $O/OMNeTARAClient.o \
+    $O/OMNeTAddress.o \
     $O/OMNeTPacket.o \
-    $O/OMNeTStochasticForwardingPolicy.o
+    $O/ARATrafficGenerator.o \
+    $O/Debugger.o
 
 # Message files
 MSGFILES =
@@ -116,7 +110,7 @@ msgheaders: $(MSGFILES:.msg=_m.h)
 
 clean:
 	-rm -rf $O
-	-rm -f ARA-Simulation ARA-Simulation.exe libARA-Simulation.so libARA-Simulation.a libARA-Simulation.dll libARA-Simulation.dylib
+	-rm -f ara-sim ara-sim.exe libara-sim.so libara-sim.a libara-sim.dll libara-sim.dylib
 	-rm -f ./*_m.cpp ./*_m.h
 
 cleanall: clean
@@ -126,53 +120,11 @@ depend:
 	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cpp
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-$O/ARATrafficGenerator.o: ARATrafficGenerator.cpp \
-  ../include/ARATrafficGenerator.h
-$O/Debugger.o: Debugger.cpp \
-  ../include/Debugger.h
-$O/OMNeTAddress.o: OMNeTAddress.cpp \
-  ../include/OMNeTAddress.h \
-  ../include/Address.h
-$O/OMNeTARAClient.o: OMNeTARAClient.cpp \
-  ../include/OMNeTStochasticForwardingPolicy.h \
-  ../include/NextHop.h \
-  ../include/OMNeTAddress.h \
-  ../include/AbstractARAClient.h \
-  ../include/OMNeTGate.h \
-  ../include/BestPheromoneForwardingPolicy.h \
-  ../include/OMNeTARAClient.h \
-  ../include/OMNeTPacket.h \
-  ../include/ForwardingPolicy.h \
-  ../include/Address.h \
-  ../include/RoutingTableEntry.h \
-  ../include/Packet.h \
-  ../include/PacketTrap.h \
-  ../include/NetworkInterface.h \
-  ../include/RoutingTable.h \
-  ../include/StochasticForwardingPolicy.h \
-  ../include/PacketType.h
-$O/OMNeTGate.o: OMNeTGate.cpp \
-  ../include/OMNeTAddress.h \
-  ../include/OMNeTGate.h \
-  ../include/OMNeTPacket.h \
-  ../include/Address.h \
-  ../include/Packet.h \
-  ../include/NetworkInterface.h \
-  ../include/PacketType.h
-$O/OMNeTPacket.o: OMNeTPacket.cpp \
-  ../include/OMNeTAddress.h \
-  ../include/OMNeTPacket.h \
-  ../include/Address.h \
-  ../include/Packet.h \
-  ../include/PacketType.h
-$O/OMNeTStochasticForwardingPolicy.o: OMNeTStochasticForwardingPolicy.cpp \
-  ../include/OMNeTStochasticForwardingPolicy.h \
-  ../include/NextHop.h \
-  ../include/ForwardingPolicy.h \
-  ../include/Address.h \
-  ../include/RoutingTableEntry.h \
-  ../include/Packet.h \
-  ../include/RoutingTable.h \
-  ../include/NetworkInterface.h \
-  ../include/StochasticForwardingPolicy.h \
-  ../include/PacketType.h
+$O/ARATrafficGenerator.o: ARATrafficGenerator.cpp
+$O/Debugger.o: Debugger.cpp
+$O/OMNeTARAClient.o: OMNeTARAClient.cpp
+$O/OMNeTAddress.o: OMNeTAddress.cpp
+$O/OMNeTGate.o: OMNeTGate.cpp
+$O/OMNeTPacket.o: OMNeTPacket.cpp
+$O/OMNeTStochasticForwardingPolicy.o: OMNeTStochasticForwardingPolicy.cpp
+
