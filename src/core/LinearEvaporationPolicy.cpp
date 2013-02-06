@@ -8,10 +8,6 @@ LinearEvaporationPolicy::LinearEvaporationPolicy():EvaporationPolicy(),q(0.1),th
 
 }
 
-LinearEvaporationPolicy::~LinearEvaporationPolicy(){
-
-} 
-
 /**
  *
  * 

@@ -8,9 +8,11 @@ EvaporationPolicy::EvaporationPolicy():factor(1),interval(100){
     this->lastAccessTime = new timeval;
     /// initialize the last access time with '0'
     memset(this->lastAccessTime, 0, sizeof(timeval));
+    this->time = new Time();
 }
 
 EvaporationPolicy::~EvaporationPolicy(){
+    delete this->time;
     delete this->lastAccessTime;
 } 
 
@@ -31,13 +33,7 @@ bool EvaporationPolicy::checkForEvaporation(){
         /// get the current time
         gettimeofday(now, 0);
 
-        /// FIXME (it's not so cool to create all the time an object)
-        Time* time = new Time();
-        /// compute the time difference in seconds
-        int timeDifference = time->getTimeDifferenceInMilliseconds(now, lastAccessTime);
-        /// delete the object
-        delete time;
-
+        int timeDifference = this->getTimeDifference(now);
         /// compare the timestamps 
         if(timeDifference > this->interval){
             /// compute the factor
@@ -72,4 +68,8 @@ void EvaporationPolicy::determineEvaporationFactor(int timeDifference){
 
 void EvaporationPolicy::setInterval(int interval){
     this->interval = interval;
+}
+
+int EvaporationPolicy::getTimeDifference(struct timeval *now){
+    return time->getTimeDifferenceInMilliseconds(now, lastAccessTime);
 }

@@ -41,10 +41,8 @@ namespace ARA {
     class LinearEvaporationPolicy : public EvaporationPolicy {
         public:
             LinearEvaporationPolicy();
-            ~LinearEvaporationPolicy();
+            ~LinearEvaporationPolicy(){};
 
-            /// the method checks if it's time to start the evaporation process
-//            bool checkForEvaporation();
             /// the method reduces the pheromone value of a routing table entry
             float evaporate(float phi);
 
