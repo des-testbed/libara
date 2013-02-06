@@ -44,9 +44,9 @@ namespace ARA {
           int getTimeDifferenceInMilliseconds(SimTime *a, SimTime *b);
         private:
           /// The method computes the time difference between two timestamps
-          int getTimeDifference(SimTime *a, SimTime *b);
+          int getTimeDifference(SimTime *a, SimTime *b, int scaleExponent);
           /// The method converts the desired time scale from the pre-set simulation time scale
-          int converSimulationTime(SimTime r, int scaleExponent);
+          int convertSimulationTime(SimTime r, int scaleExponent);
     };
 }
 

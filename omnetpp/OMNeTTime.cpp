@@ -47,13 +47,13 @@ int OMNeTTime::getTimeDifference(SimTime *a, SimTime *b, int scaleExponent){
     SimTime result = (*a - *b);
     // get the simulation time exponent
     if(result.getScaleExp() != scaleExponent){
-        return convertSimulationTime(result, scaleExponent)
+        return convertSimulationTime(result, scaleExponent);
     }
     return result.raw();
 }
 
 // check if there is a better way to do it
-int converSimulationTime(SimTime r, int scaleExponent){
+int OMNeTTime::convertSimulationTime(SimTime r, int scaleExponent){
     /**
      * TODO: Check if this is working the way it is intended to do
      *
@@ -67,5 +67,5 @@ int converSimulationTime(SimTime r, int scaleExponent){
      * The method would return 0 for the latter example. The 
      * question if that is sufficient in an simulation scenario.
      */
-    return (r.getRaw() / pow(10, (scaleExponent - r.getScaleExp())));
+    return (r.raw() / pow(10, (scaleExponent - r.getScaleExp())));
 }
