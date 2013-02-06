@@ -51,7 +51,7 @@ namespace ARA {
             void setInterval(int interval);
 
         private:
-            void determineEvaporationFactor(float timeDifference);
+            void determineEvaporationFactor(int timeDifference);
             /// the linear factor
             float q;
             /// the threshold which denotes at what point the pheromone level is set to 0

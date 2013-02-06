@@ -50,11 +50,37 @@ TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
 
 TEST(LinearEvaporationPolicyTest, testEvaporate) {
     LinearEvaporationPolicy policy = LinearEvaporationPolicy();
-    // set the interval
-    policy.setInterval(1000);
-
+    // set the interval to 200 millisecond
+    policy.setInterval(200);
+    // 'trigger the evaporation mechanism
+    bool status = policy.checkForEvaporation();
+    // the 'last access time' has not been intialized
+    CHECK(!status);
+    // initialize the pheromone value
     float pheromone = 1.;
     // simply test the evaporate function
     pheromone = policy.evaporate(pheromone);
     DOUBLES_EQUAL(0.9, pheromone, 0.00001);
+
+    /// sleep for 10 ms
+    usleep(200);
+    // check the status
+    status = policy.checkForEvaporation();
+    // the 'last access time' should have been intialized
+    CHECK(status);
+    // simply test the evaporate function
+    pheromone = policy.evaporate(pheromone);
+    DOUBLES_EQUAL(0.81, pheromone, 0.00001);
+
+    // set the interval to 10 millisecond
+    policy.setInterval(10);
+    /// sleep for 10 ms
+    usleep(200);
+    // check the status
+    status = policy.checkForEvaporation();
+    CHECK(status);
+    pheromone = policy.evaporate(pheromone);
+    // check if the threshold sets the pheromone value to null
+    DOUBLES_EQUAL(0.0, pheromone, 0.00001);
 }
+

@@ -86,7 +86,6 @@ float LinearEvaporationPolicy::evaporate(float phi){
 /** 
  *
  */
-void LinearEvaporationPolicy::determineEvaporationFactor(float timeDifference){
-    /// every 10 ms
-    this->factor = ((uint8_t)timeDifference) %  100;
+void LinearEvaporationPolicy::determineEvaporationFactor(int timeDifference){
+    this->factor = (uint8_t)(timeDifference/this->interval);
 }
