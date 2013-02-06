@@ -26,6 +26,9 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 OBJS = \
     $O/core/AbstractARAClient.o \
     $O/core/BestPheromoneForwardingPolicy.o \
+    $O/core/CubicEvaporationPolicy.o \
+    $O/core/EvaporationPolicy.o \
+    $O/core/LinearEvaporationPolicy.o \
     $O/core/NextHop.o \
     $O/core/Packet.o \
     $O/core/PacketTrap.o \
@@ -34,7 +37,8 @@ OBJS = \
     $O/core/StochasticForwardingPolicy.o \
     $O/exceptions/Exception.o \
     $O/exceptions/NoSuchElementException.o \
-    $O/util/Pair.o
+    $O/util/Pair.o \
+    $O/util/Time.o
 
 # Message files
 MSGFILES =
@@ -129,10 +133,13 @@ $O/core/AbstractARAClient.o: core/AbstractARAClient.cpp \
   ../include/Packet.h \
   ../include/NextHop.h \
   ../include/PacketTrap.h \
+  ../include/LinearEvaporationPolicy.h \
   ../include/RoutingTable.h \
   ../include/NetworkInterface.h \
+  ../include/EvaporationPolicy.h \
   ../include/AbstractARAClient.h \
-  ../include/PacketType.h
+  ../include/PacketType.h \
+  ../include/Time.h
 $O/core/BestPheromoneForwardingPolicy.o: core/BestPheromoneForwardingPolicy.cpp \
   ../include/ForwardingPolicy.h \
   ../include/Address.h \
@@ -141,8 +148,20 @@ $O/core/BestPheromoneForwardingPolicy.o: core/BestPheromoneForwardingPolicy.cpp 
   ../include/NextHop.h \
   ../include/RoutingTable.h \
   ../include/NetworkInterface.h \
+  ../include/LinearEvaporationPolicy.h \
+  ../include/EvaporationPolicy.h \
   ../include/PacketType.h \
-  ../include/BestPheromoneForwardingPolicy.h
+  ../include/BestPheromoneForwardingPolicy.h \
+  ../include/Time.h
+$O/core/CubicEvaporationPolicy.o: core/CubicEvaporationPolicy.cpp \
+  ../include/CubicEvaporationPolicy.h \
+  ../include/EvaporationPolicy.h
+$O/core/EvaporationPolicy.o: core/EvaporationPolicy.cpp \
+  ../include/EvaporationPolicy.h
+$O/core/LinearEvaporationPolicy.o: core/LinearEvaporationPolicy.cpp \
+  ../include/LinearEvaporationPolicy.h \
+  ../include/EvaporationPolicy.h \
+  ../include/Time.h
 $O/core/NextHop.o: core/NextHop.cpp \
   ../include/Address.h \
   ../include/Packet.h \
@@ -159,17 +178,23 @@ $O/core/PacketTrap.o: core/PacketTrap.cpp \
   ../include/Packet.h \
   ../include/NextHop.h \
   ../include/PacketTrap.h \
-  ../include/RoutingTable.h \
+  ../include/LinearEvaporationPolicy.h \
   ../include/NetworkInterface.h \
-  ../include/PacketType.h
+  ../include/RoutingTable.h \
+  ../include/EvaporationPolicy.h \
+  ../include/PacketType.h \
+  ../include/Time.h
 $O/core/RoutingTable.o: core/RoutingTable.cpp \
   ../include/Address.h \
   ../include/RoutingTableEntry.h \
   ../include/Packet.h \
   ../include/NextHop.h \
+  ../include/LinearEvaporationPolicy.h \
   ../include/NetworkInterface.h \
   ../include/RoutingTable.h \
-  ../include/PacketType.h
+  ../include/EvaporationPolicy.h \
+  ../include/PacketType.h \
+  ../include/Time.h
 $O/core/RoutingTableEntry.o: core/RoutingTableEntry.cpp \
   ../include/Address.h \
   ../include/RoutingTableEntry.h \
@@ -183,10 +208,13 @@ $O/core/StochasticForwardingPolicy.o: core/StochasticForwardingPolicy.cpp \
   ../include/RoutingTableEntry.h \
   ../include/Packet.h \
   ../include/NextHop.h \
-  ../include/NetworkInterface.h \
   ../include/RoutingTable.h \
+  ../include/NetworkInterface.h \
+  ../include/LinearEvaporationPolicy.h \
+  ../include/EvaporationPolicy.h \
   ../include/PacketType.h \
-  ../include/StochasticForwardingPolicy.h
+  ../include/StochasticForwardingPolicy.h \
+  ../include/Time.h
 $O/exceptions/Exception.o: exceptions/Exception.cpp \
   ../include/Exception.h
 $O/exceptions/NoSuchElementException.o: exceptions/NoSuchElementException.cpp \
@@ -195,3 +223,5 @@ $O/exceptions/NoSuchElementException.o: exceptions/NoSuchElementException.cpp \
 $O/util/Pair.o: util/Pair.cpp \
   ../include/../src/util/Pair.cpp \
   ../include/Pair.h
+$O/util/Time.o: util/Time.cpp \
+  ../include/Time.h

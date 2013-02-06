@@ -34,6 +34,8 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 AbstractARAClient::AbstractARAClient() {
     packetTrap = new PacketTrap(&routingTable);
+    /// set it to a 'random' initial value
+    this->initialPhi = 1.0;
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -114,6 +116,11 @@ void AbstractARAClient::handlePacket(const Packet* packet, NetworkInterface* int
         handleDataPacket(packet);
     }
     else if(packet->isAntPacket()) {
+        if(hasBeenSentByThisNode(packet) == false){
+            /// set the initial pheromone value
+            initializePheromone(packet, interface);
+        }
+
         handleAntPacket(packet);
     }
     else if(packet->getType() == PacketType::DUPLICATE_ERROR) {
@@ -133,6 +140,7 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
 
 void AbstractARAClient::handleAntPacket(const Packet* packet) {
     if(hasBeenSentByThisNode(packet) == false) {
+        
         if(isDirectedToThisNode(packet) == false) {
             broadCast(packet);
         }
@@ -233,6 +241,21 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     else {
         listOfSequenceNumbers = foundPacketSeqNumbersFromSource->second;
         listOfSequenceNumbers->insert(packet->getSequenceNumber());
+    }
+}
+
+/**
+ * The method initializes the pheromone value of 
+ *
+ */
+void AbstractARAClient::initializePheromone(const Packet* packet, NetworkInterface* interface){
+    /// determine the hop count malus
+    float hopCountMalus = 1 / (float) packet->getHopCount();
+    /// compute the phi value   
+    float phi = this->initialPhi * hopCountMalus;
+    /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
+    if(!(this->routingTable.exists(packet->getSource(), packet->getSender(), interface))){
+        this->routingTable.update(packet->getSource(), packet->getSender(), interface, phi);
     }
 }
 

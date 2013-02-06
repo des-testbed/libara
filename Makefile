@@ -79,7 +79,7 @@ checkmakefiles:
 installCppUTest:
 	@cd tests && $(MAKE) installCppUTest
 		
-doc: all 
+doc: all
 	@if type doxygen >/dev/null 2>&1; then \
 	if type dot >/dev/null 2>&1; then \
 	echo; \

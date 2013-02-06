@@ -1,10 +1,8 @@
-#!/bin/bash
-
-SEARCH="/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
+/******************************************************************************
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ These sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,18 +21,28 @@ SEARCH="/***********************************************************************
  ------------------------------------------------------------------------------
  For further information and questions please use the web site
  http://www.des-testbed.net/
- *******************************************************************************/"
+ *******************************************************************************/
 
-REPLACE="/*
- * \$FU-Copyright\$
- */"
+#ifndef TIME_H_
+#define TIME_H_
 
-SEARCH=$(echo "$SEARCH" | sed -e 's/[\/&*.()]/\\&/g')
-REPLACE=$(echo "$REPLACE" | sed -e 's/[\/&*()]/\\&/g')
+#include <sys/time.h>
 
+namespace ARA {
+    /**
+     * The class provides methods for determining the difference between 
+     * two timestamps.
+     */
+    class Time {
+        public:
+          int getTimeDifferenceInSeconds(struct timeval*, struct timeval*);
+          int getTimeDifferenceInMilliseconds(struct timeval*, struct timeval*);
 
-for i in `find . -type f`; do mkdir -p tmp/`dirname $i`; sed -e "s/$SEARCH/$REPLACE/g" $i > tmp/$i; done
-cd tmp
-cp -Rf * ..
-cd ..
-rm -rf tmp
+        private:
+          /// the method returns the time difference in seconds
+          void getTimeDifference(struct timeval*, struct timeval*);
+    };
+}
+
+#endif 
+
