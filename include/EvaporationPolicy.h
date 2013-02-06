@@ -45,8 +45,10 @@ namespace ARA {
             bool checkForEvaporation();
             /// sets the time until the evaporation is triggered
             void setInterval(int interval);
-            ///
+            /// the method returns the different of the last access and the current date
             int getTimeDifference(struct timeval *now);
+            /// the method returns how often the evaporation should take place
+            int getFactor();
 
             /// the method reduces the pheromone value of a routing table entry
             virtual float evaporate(float phi) = 0;

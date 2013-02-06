@@ -66,6 +66,10 @@ void EvaporationPolicy::determineEvaporationFactor(int timeDifference){
     this->factor = (uint8_t)(timeDifference/this->interval);
 }
 
+int EvaporationPolicy::getFactor(){
+    return this->factor;
+}
+
 void EvaporationPolicy::setInterval(int interval){
     this->interval = interval;
 }

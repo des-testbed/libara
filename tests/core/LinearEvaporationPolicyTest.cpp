@@ -33,6 +33,17 @@ using namespace ARA;
 
 TEST_GROUP(LinearEvaporationPolicyTest) {};
 
+TEST(LinearEvaporationPolicyTest, testGetFactor) {
+    LinearEvaporationPolicy policy = LinearEvaporationPolicy();
+    policy.setInterval(100);
+    bool status = policy.checkForEvaporation();
+    CHECK(!status);
+    usleep(500);
+	status = policy.checkForEvaporation();
+	CHECK(status);
+    BYTES_EQUAL(5, policy.getFactor());
+}
+
 TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
     LinearEvaporationPolicy policy = LinearEvaporationPolicy();
     // set the interval
