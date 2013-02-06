@@ -14,34 +14,32 @@ CubicEvaporationPolicy::~CubicEvaporationPolicy(){
  *
  * 
  */
-float CubicEvaporationPolicy::evaporate(float phi){
-   // FIXME
-   float pheromone = 5.0;
-   // FIXME
-   int factor = 1;
-    float t, m;
-    // TODO: method ignores the factor right now :-(
-    float a = 1 - (2 * (pheromone));
+float CubicEvaporationPolicy::evaporate(float pheromone){
+    /// we iterate 'factor' times since it is not (yet) possible just to use the pow function
+    for(int i = 0; i < this->factor; i++){
+        float t, m;
+        float a = 1 - (2 * (pheromone));
 
-    if(a > 0){
-      t = 0.5 * (pow(abs(a), (1/this->plateau)) + 1);
-    }else{
-      t = 0.5 * (1 - pow(abs(a), (1/this->plateau)));
-    }
+        if(a > 0){
+            t = 0.5 * (pow(abs(a), (1/this->plateau)) + 1);
+        }else{
+            t = 0.5 * (1 - pow(abs(a), (1/this->plateau)));
+        }
 
-    m = t + (this->reduction * this->slow);
+        m = t + (this->reduction * this->slow);
 
-    pheromone = 0.5 * (pow(((2 * m) - 1), this->plateau) + 1);
+        pheromone = 0.5 * (pow(((2 * m) - 1), this->plateau) + 1);
 
-    /// check if the result is below a threshold
-    if(pheromone < 0){
-        /// set pheromone to 0
-        pheromone = 0;
-    }
+        /// check if the result is below a threshold
+        if(pheromone < 0){
+            /// set pheromone to 0
+            return 0;
+        }
 
-    if(pheromone > 1){
-        // TODO: check!
-        pheromone = 1;
+        if(pheromone > 1){
+            // TODO: check!
+            pheromone = 1;
+        }
     }
 
     return pheromone;
