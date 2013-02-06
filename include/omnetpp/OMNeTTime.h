@@ -23,24 +23,25 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef TIME_H_
-#define TIME_H_
+#ifndef OMNET_TIME_H_
+#define OMNET_TIME_H_
 
-#include <sys/time.h>
+#include <simtime.h>
+
+#include "Time.h"
 
 namespace ARA {
     /**
      * The class provides methods for determining the difference between 
-     * two timestamps.
+     * two timestamps in OMNeT++.
      */
-    class Time {
+    class OMNeTTime : public Time {
         public:
-          virtual ~Time(){};
-          virtual int getTimeDifferenceInSeconds(struct timeval*, struct timeval*);
-          virtual int getTimeDifferenceInMilliseconds(struct timeval*, struct timeval*);
-
+          int getTimeDifferenceInSeconds(SimTime *a, SimTime *b);
+          int getTimeDifferenceInMilliseconds(SimTime *a, SimTime *b);
         private:
-          void getTimeDifference(struct timeval*, struct timeval*);
+          int getTimeDifference(SimTime *a, SimTime *b);
+          int converSimulationTime(SimTime r, int precision);
     };
 }
 

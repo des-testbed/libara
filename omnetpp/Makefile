@@ -43,7 +43,8 @@ OBJS = \
     $O/OMNeTARAClient.o \
     $O/OMNeTGate.o \
     $O/OMNeTPacket.o \
-    $O/OMNeTStochasticForwardingPolicy.o
+    $O/OMNeTStochasticForwardingPolicy.o \
+    $O/OMNeTTime.o
 
 # Message files
 MSGFILES =
@@ -128,6 +129,15 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/ARATrafficGenerator.o: ARATrafficGenerator.cpp \
+  ../include/inetmanet/IPControlInfo_m.h \
+  ../include/inetmanet/IPv6Address.h \
+  ../include/inetmanet/IPAddressResolver.h \
+  ../include/inetmanet/IPControlInfo.h \
+  ../include/inetmanet/IPProtocolId_m.h \
+  ../include/inetmanet/INETDefs.h \
+  ../include/inetmanet/IPvXAddress.h \
+  ../include/inetmanet/MACAddress.h \
+  ../include/inetmanet/IPAddress.h \
   ../include/omnetpp/ARATrafficGenerator.h
 $O/Debugger.o: Debugger.cpp \
   ../include/omnetpp/Debugger.h
@@ -183,3 +193,5 @@ $O/OMNeTStochasticForwardingPolicy.o: OMNeTStochasticForwardingPolicy.cpp \
   ../include/StochasticForwardingPolicy.h \
   ../include/PacketType.h \
   ../include/omnetpp/OMNeTStochasticForwardingPolicy.h
+$O/OMNeTTime.o: OMNeTTime.cpp \
+  ../include/omnetpp/OMNeTTime.h
