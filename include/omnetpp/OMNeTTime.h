@@ -26,22 +26,27 @@
 #ifndef OMNET_TIME_H_
 #define OMNET_TIME_H_
 
+#include <cmath>
 #include <simtime.h>
 
 #include "Time.h"
 
 namespace ARA {
     /**
-     * The class provides methods for determining the difference between 
+     * The class provides methods for determining the time difference between 
      * two timestamps in OMNeT++.
      */
     class OMNeTTime : public Time {
         public:
+          /// The method computes the time difference between two timestamps in seconds
           int getTimeDifferenceInSeconds(SimTime *a, SimTime *b);
+          /// The method computes the time difference between two timestamps in milliseconds
           int getTimeDifferenceInMilliseconds(SimTime *a, SimTime *b);
         private:
+          /// The method computes the time difference between two timestamps
           int getTimeDifference(SimTime *a, SimTime *b);
-          int converSimulationTime(SimTime r, int precision);
+          /// The method converts the desired time scale from the pre-set simulation time scale
+          int converSimulationTime(SimTime r, int scaleExponent);
     };
 }
 
