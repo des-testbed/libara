@@ -2,11 +2,14 @@
 
 using namespace ARA;
 
-CubicEvaporationPolicy::CubicEvaporationPolicy():plateau(0.1),slow(0.2),reduction(0.3),threshold(0.2){};
+CubicEvaporationPolicy::CubicEvaporationPolicy():EvaporationPolicy(),plateau(0.1),slow(0.2),reduction(0.3),threshold(0.2){
 
-bool CubicEvaporationPolicy::checkForEvaporation(){
-    return false;
 }
+
+CubicEvaporationPolicy::~CubicEvaporationPolicy(){
+
+}
+
 /**
  *
  * 

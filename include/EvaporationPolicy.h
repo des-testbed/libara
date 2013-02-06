@@ -27,19 +27,38 @@
 #define EVAPORATION_POLICY_H_
 
 #include <stdint.h>
+#include <cstring>
+#include <sys/time.h>
+
+#include "Time.h"
 
 namespace ARA { 
    /**
-    * This purely virtual interface is used by the RoutingTable to evaporate
-    * pheromones of its entries.
+    *
     */
     class EvaporationPolicy {
         public:
-            virtual ~EvaporationPolicy() {};
+            EvaporationPolicy();
+            ~EvaporationPolicy();
+
             /// the method checks how much time has passed since the last access to the routing table
-            virtual bool checkForEvaporation() = 0;
+            bool checkForEvaporation();
+            /// sets the time until the evaporation is triggered
+            void setInterval(int interval);
+
             /// the method reduces the pheromone value of a routing table entry
             virtual float evaporate(float phi) = 0;
+
+        protected:
+            /// the factor which indicates how often the evaporation should take place 
+            uint8_t factor;
+
+        private:
+            void determineEvaporationFactor(int timeDifference);
+            /// the last access time of the routing table
+			struct timeval *lastAccessTime;
+            /// the interval which denotes how much time has to pass in order to trigger the evaporation
+            int interval;
     };
 } /* namespace ARA */
 

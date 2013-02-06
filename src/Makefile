@@ -27,6 +27,7 @@ OBJS = \
     $O/core/AbstractARAClient.o \
     $O/core/BestPheromoneForwardingPolicy.o \
     $O/core/CubicEvaporationPolicy.o \
+    $O/core/EvaporationPolicy.o \
     $O/core/LinearEvaporationPolicy.o \
     $O/core/NextHop.o \
     $O/core/Packet.o \
@@ -154,6 +155,8 @@ $O/core/BestPheromoneForwardingPolicy.o: core/BestPheromoneForwardingPolicy.cpp 
   ../include/Time.h
 $O/core/CubicEvaporationPolicy.o: core/CubicEvaporationPolicy.cpp \
   ../include/CubicEvaporationPolicy.h \
+  ../include/EvaporationPolicy.h
+$O/core/EvaporationPolicy.o: core/EvaporationPolicy.cpp \
   ../include/EvaporationPolicy.h
 $O/core/LinearEvaporationPolicy.o: core/LinearEvaporationPolicy.cpp \
   ../include/LinearEvaporationPolicy.h \

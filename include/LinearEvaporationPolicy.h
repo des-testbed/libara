@@ -44,11 +44,9 @@ namespace ARA {
             ~LinearEvaporationPolicy();
 
             /// the method checks if it's time to start the evaporation process
-            bool checkForEvaporation();
+//            bool checkForEvaporation();
             /// the method reduces the pheromone value of a routing table entry
             float evaporate(float phi);
-            /// sets the time until the evaporation is triggered
-            void setInterval(int interval);
 
         private:
             void determineEvaporationFactor(int timeDifference);
@@ -56,12 +54,6 @@ namespace ARA {
             float q;
             /// the threshold which denotes at what point the pheromone level is set to 0
             float threshold;
-            /// the last access time of the routing table
-			struct timeval *lastAccessTime;
-            /// the factor which indicates how often the evaporation should take place 
-            uint8_t factor;
-            /// the interval which denotes how much time has to pass in order to trigger the evaporation
-            int interval;
     };
 } /* namespace ARA */
 

@@ -38,12 +38,19 @@ namespace ARA {
     */
     class CubicEvaporationPolicy : public EvaporationPolicy {
         public:
-            CubicEvaporationPolicy();
+			CubicEvaporationPolicy();
+            ~CubicEvaporationPolicy();
             ///
-            bool checkForEvaporation();
+//            bool checkForEvaporation();
             /// the method reduces the pheromone value of a routing table entry
             float evaporate(float phi);
+            /// sets the time until the evaporation is triggered
+ //           void setInterval(int interval);
+
         private:
+ //           void determineEvaporationFactor(int timeDifference);
+            /// the last access time of the routing table
+//			struct timeval *lastAccessTime;
             /// 
             float plateau;
             ///
