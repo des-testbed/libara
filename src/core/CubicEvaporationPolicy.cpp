@@ -2,16 +2,17 @@
 
 using namespace ARA;
 
-CubicEvaporationPolicy::CubicEvaporationPolicy():EvaporationPolicy(),plateau(0.1),slow(0.2),reduction(0.3),threshold(0.2){
+CubicEvaporationPolicy::CubicEvaporationPolicy():EvaporationPolicy(),plateau(3),slow(0.2),reduction(0.3),threshold(0.2){ }
 
-}
+CubicEvaporationPolicy::CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold)
+:EvaporationPolicy(),plateau(pPlateau),slow(pSlow),reduction(pReduction),threshold(pThreshold){ }
 
 CubicEvaporationPolicy::~CubicEvaporationPolicy(){
 
 }
 
 /**
- *
+ * FIXME: There is something wrong 
  * 
  */
 float CubicEvaporationPolicy::evaporate(float pheromone){
