@@ -129,21 +129,9 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/ARATrafficGenerator.o: ARATrafficGenerator.cpp \
-  ../include/inetmanet/IPControlInfo_m.h \
-  ../include/inetmanet/IPv6Address.h \
-  ../include/inetmanet/IPAddressResolver.h \
-  ../include/inetmanet/IPControlInfo.h \
-  ../include/inetmanet/IPProtocolId_m.h \
-  ../include/inetmanet/INETDefs.h \
-  ../include/inetmanet/IPvXAddress.h \
-  ../include/inetmanet/MACAddress.h \
-  ../include/inetmanet/IPAddress.h \
   ../include/omnetpp/ARATrafficGenerator.h
 $O/Debugger.o: Debugger.cpp \
   ../include/omnetpp/Debugger.h
-$O/OMNeTAddress.o: OMNeTAddress.cpp \
-  ../include/Address.h \
-  ../include/omnetpp/OMNeTAddress.h
 $O/OMNeTARAClient.o: OMNeTARAClient.cpp \
   ../include/NextHop.h \
   ../include/AbstractARAClient.h \
@@ -165,6 +153,9 @@ $O/OMNeTARAClient.o: OMNeTARAClient.cpp \
   ../include/omnetpp/OMNeTAddress.h \
   ../include/omnetpp/OMNeTStochasticForwardingPolicy.h \
   ../include/omnetpp/OMNeTPacket.h
+$O/OMNeTAddress.o: OMNeTAddress.cpp \
+  ../include/Address.h \
+  ../include/omnetpp/OMNeTAddress.h
 $O/OMNeTGate.o: OMNeTGate.cpp \
   ../include/omnetpp/OMNeTGate.h \
   ../include/Address.h \
@@ -194,4 +185,5 @@ $O/OMNeTStochasticForwardingPolicy.o: OMNeTStochasticForwardingPolicy.cpp \
   ../include/PacketType.h \
   ../include/omnetpp/OMNeTStochasticForwardingPolicy.h
 $O/OMNeTTime.o: OMNeTTime.cpp \
-  ../include/omnetpp/OMNeTTime.h
+  ../include/omnetpp/OMNeTTime.h \
+  ../include/Time.h

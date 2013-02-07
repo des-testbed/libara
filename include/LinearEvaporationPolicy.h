@@ -41,17 +41,22 @@ namespace ARA {
     class LinearEvaporationPolicy : public EvaporationPolicy {
         public:
             LinearEvaporationPolicy();
+            LinearEvaporationPolicy(float t, float q);
             ~LinearEvaporationPolicy(){};
 
             /// the method reduces the pheromone value of a routing table entry
             float evaporate(float phi);
+            /// the method sets the threshold
+            void setThreshold(float threshold);
+            /// the method sets the linear factor
+            void setLinearFactor(float factor);
 
         private:
             void determineEvaporationFactor(int timeDifference);
-            /// the linear factor
-            float q;
             /// the threshold which denotes at what point the pheromone level is set to 0
             float threshold;
+            /// the linear factor
+            float q;
     };
 } /* namespace ARA */
 

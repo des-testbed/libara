@@ -2,27 +2,56 @@
 
 using namespace ARA;
 
+Time::Time(struct timeval *timestamp):timestamp(timestamp){ }
 
-void Time::getTimeDifference(struct timeval *a, struct timeval *b){
-    if(a->tv_usec < b->tv_usec) {
-        int nanoSeconds = (b->tv_usec - a->tv_usec) / 1000000 + 1;
-        b->tv_usec = b->tv_usec - (1000000 * nanoSeconds);
-        b->tv_sec  = b->tv_sec + nanoSeconds;
+Time::Time(){
+    this->timestamp = new timeval;
+    /// get the current time
+    memset(this->timestamp, 0, sizeof(timeval));
+}
+
+Time::~Time(){
+    delete this->timestamp;
+}
+
+Time Time::operator-(const Time& right){
+    ///
+    struct timeval *result = new timeval;
+    ///
+    struct timeval *r = new timeval;
+//    memcpy(r, right.getTimestamp(), sizeof(timeval));
+    
+    if(this->timestamp->tv_usec < r->tv_usec){
+        int nanoSeconds = (r->tv_usec - this->timestamp->tv_usec) / 1000000 + 1;
+        r->tv_usec = r->tv_usec - (1000000 * nanoSeconds);
+        r->tv_sec  = r->tv_sec + nanoSeconds;
     }
 
-    if(a->tv_usec - b->tv_usec > 1000000) {
-        int nanoSeconds = (a->tv_usec - b->tv_usec) / 1000000;
-        b->tv_usec = b->tv_usec + (1000000 * nanoSeconds);
-        b->tv_sec  = b->tv_sec - nanoSeconds;
+    if(this->timestamp->tv_usec - r->tv_usec > 1000000){
+        int nanoSeconds = (this->timestamp->tv_usec - r->tv_usec) / 1000000;
+        r->tv_usec = r->tv_usec + (1000000 * nanoSeconds);
+        r->tv_sec  = r->tv_sec - nanoSeconds;
     }
+
+    result->tv_sec = this->timestamp->tv_sec - r->tv_sec; 
+    result->tv_usec = this->timestamp->tv_usec - r->tv_usec; 
+
+    return Time(result);
 }
 
-int Time::getTimeDifferenceInSeconds(struct timeval *a, struct timeval *b){
-    this->getTimeDifference(a, b);
-    return (a->tv_sec - b->tv_sec);
+Time Time::operator-=(const Time& right){
+   return *(this);
 }
 
-int Time::getTimeDifferenceInMilliseconds(struct timeval *a, struct timeval *b){
-    this->getTimeDifference(a, b);
-    return (a->tv_usec - b->tv_usec);
+int Time::toSeconds(){
+   return this->timestamp->tv_sec;
 }
+
+long int Time::toMilliseconds(){
+   return this->timestamp->tv_usec;
+}
+
+struct timeval* Time::getTimestamp(){
+  return this->timestamp;
+}
+

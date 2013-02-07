@@ -1,5 +1,5 @@
 /******************************************************************************
- Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
+ Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
  These sources were originally developed by Friedrich Große, Michael Frey
@@ -23,39 +23,28 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef TIME_H_
-#define TIME_H_
+#ifndef OMNET_LINEAR_EVAPORATION_POLICY_H_
+#define OMNET_LINEAR_EVAPORATION_POLICY_H_
 
-#include <cstring>
-#include <sys/time.h>
+#include <omnetpp.h>
+#include <csimplemodule.h>
 
-namespace ARA {
-    /**
-     * The class provides methods for determining the difference between 
-     * two timestamps.
-     */
-    class Time {
+#include "OMNeTTime.h"
+#include "LinearEvaporationPolicy.h"
+
+namespace ARA { 
+   /**
+    * This class provides the linear evaporation function of the ant routing algorithm (ARA) 
+    * for the OMNeT++ simulation framework.
+    */
+    class OMNeTLinearEvaporationPolicy : public LinearEvaporationPolicy, public cSimpleModule {
         public:
-          Time();
-          Time(struct timeval* timestamp);
-          virtual ~Time();
- 
-          ///
-          Time operator-(const Time& right);
-          Time operator-=(const Time& right);
+            OMNeTLinearEvaporationPolicy();
+            ~OMNeTLinearEvaporationPolicy(){};
 
-          ///
-          virtual int toSeconds();
-          ///
-          virtual long int toMilliseconds();
-          ///
-          virtual struct timeval* getTimestamp();
-
-        private:
-          /// 
-          struct timeval* timestamp;
+            virtual void initialize();
+            virtual void handleMessage(cMessage *msg);
     };
-}
+} /* namespace ARA */
 
 #endif 
-
