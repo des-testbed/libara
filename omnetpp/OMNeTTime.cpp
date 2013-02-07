@@ -2,33 +2,43 @@
 
 using namespace ARA;
 
-/**
- * The method returns the time difference between two OMNeT++SimTime instances in 
- * seconds.
- *
- * @param a in The newer timestamp
- * @param b in The older timestamp
- * 
- * @return The time difference in seconds between two timestamps
- */
-int OMNeTTime::getTimeDifferenceInSeconds(SimTime *a, SimTime *b){
-    return this->getTimeDifference(a, b, 0);
+OMNeTTime::OMNeTTime(SimTime *timestamp):timestamp(timestamp){}
+
+OMNeTTime::~OMNeTTime(){
+    delete timestamp;
+}
+
+OMNeTTime OMNeTTime::operator-(const OMNeTTime& right){
+    SimTime* result = &(*this->getTimestamp() - *right->getTimestamp());
+    return OMNeTTime(result);
+}
+
+OMNeTTime OMNeTTime::operator-=(const OMNeTTime& right){
+    // fixme
+    SimTime* result = &(*this->getTimestamp() - *right->getTimestamp());
+    return OMNeTTime(result);
 }
 
 /**
- * The method returns the time difference between two OMNeT++SimTime instances in 
- * milliseconds.
- *
- * @param a in The newer timestamp
- * @param b in The older timestamp
+ * The method returns a timestamp in seconds.
  * 
- * @return The time difference in milliseconds between two timestamps
+ * @return A timestamp in seconds
  */
-int OMNeTTime::getTimeDifferenceInMilliseconds(SimTime *a, SimTime *b){
-     return this->getTimeDifference(a, b, -3);
+int OMNeTTime::toSeconds(){
+    return this->convertSimulationTime(0);
 }
 
 /**
+ * The method returns a timestamp in milliseconds.
+ * 
+ * @return A timestamp in milliseconds
+ */
+long int OMNeTTime::toMilliseconds(){
+    return this->convertSimulationTime(-3);
+}
+
+/**
+ * TODO: change documentation of method
  * The method computes the time difference between two timestamps in OMNeT++ 
  * simulation time (as provided by the class SimTime). The method checks if
  * the desired time resolution meets the pre-set time resolution of the 
@@ -43,29 +53,28 @@ int OMNeTTime::getTimeDifferenceInMilliseconds(SimTime *a, SimTime *b){
  * @return The method returns the time difference between two timestamps based 
  *   on the desired time scale
  */
-int OMNeTTime::getTimeDifference(SimTime *a, SimTime *b, int scaleExponent){
-    SimTime result = (*a - *b);
+int OMNeTTime::convertSimulationTime(int scaleExponent){
     // get the simulation time exponent
-    if(result.getScaleExp() != scaleExponent){
-        return convertSimulationTime(result, scaleExponent);
+    if(this->timestamp->getScaleExp() != scaleExponent){
+       /**
+        * TODO: Check if this is working the way it is intended to do
+        *
+        * Example:
+        *    simulation time precision is already millisecond
+        *    3000 / 10 ^ (-3 - -3) =  3000 / 10 ^ 0 = 3000
+        *
+        *    simulation time is picoseconds, but seconds desired
+        *    3000 / 10 ^ (0 - -9) = 3000 / 10 ^ 9 = 0.000003 
+        *
+        * The method would return 0 for the latter example. The 
+        * question if that is sufficient in an simulation scenario.
+        */
+        return (this->timestamp->raw() / pow(10, (scaleExponent - this->timestamp->getScaleExp())));
     }
-    return result.raw();
+    return this->timestamp->raw();
 }
 
-// check if there is a better way to do it
-int OMNeTTime::convertSimulationTime(SimTime r, int scaleExponent){
-    /**
-     * TODO: Check if this is working the way it is intended to do
-     *
-     * Example:
-     *    simulation time precision is already millisecond
-     *    3000 / 10 ^ (-3 - -3) =  3000 / 10 ^ 0 = 3000
-     *
-     *    simulation time is picoseconds, but seconds desired
-     *    3000 / 10 ^ (0 - -9) = 3000 / 10 ^ 9 = 0.000003 
-     *
-     * The method would return 0 for the latter example. The 
-     * question if that is sufficient in an simulation scenario.
-     */
-    return (r.raw() / pow(10, (scaleExponent - r.getScaleExp())));
+
+SimTime* OMNeTTime::getTimestamp() const{
+    return this->timestamp;
 }
