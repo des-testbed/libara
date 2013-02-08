@@ -64,7 +64,7 @@ cleanall: clean
 release: cleanall makefiles test	
 
 makefiles:
-	cd omnetpp && opp_makemake -f --deep -I ../src/core -I ../src/exceptions -I ../src/util -I ../include -I ../include/inetmanet -I ../include/omnetpp -L"../inetmanet/src" -linet -L"../src" -lara
+	cd omnetpp && opp_makemake -f --deep -I ../src/core -I ../src/exceptions -I ../src/util -I ../include -I ../include/inetmanet -I ../include/omnetpp -L"../inetmanet/src" -linet -L"../src" -lara -o ara-sim
 
 checkmakefiles:
 	@if [ ! -f omnetpp/Makefile ]; then \

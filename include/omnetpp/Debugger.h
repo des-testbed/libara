@@ -19,6 +19,7 @@
 #include <omnetpp.h>
 
 namespace ARA {
+namespace omnetpp {
 
     class Debugger : public cSimpleModule {
     protected:
@@ -26,6 +27,6 @@ namespace ARA {
         virtual void handleMessage(cMessage *msg);
     };
 
-}
+}}
 
 #endif

@@ -30,6 +30,7 @@
 #include <string>
 
 namespace ARA {
+namespace omnetpp {
 
 class OMNeTAddress : public Address {
 public:
@@ -49,5 +50,6 @@ private:
 
 };
 
+} /* namespace omnetpp */
 } /* namespace ARA */
 #endif /* OMNETADDRESS_H_ */

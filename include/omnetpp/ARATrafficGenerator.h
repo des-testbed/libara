@@ -22,6 +22,7 @@
 #include <vector>
 
 namespace ARA {
+namespace omnetpp {
     class ARATrafficGenerator : public cSimpleModule {
     protected:
         virtual void initialize();
@@ -41,6 +42,7 @@ namespace ARA {
         IPvXAddress chooseDestinationAddress();
         void printPacket(cPacket* msg);
     };
+}
 }
 
 #endif

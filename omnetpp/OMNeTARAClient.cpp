@@ -1,6 +1,7 @@
 #include "OMNeTARAClient.h"
 
-using namespace ARA;
+namespace ARA {
+namespace omnetpp {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
@@ -104,3 +105,5 @@ void OMNeTARAClient::deliverToSystem(const Packet* packet) {
     sendPacket(&answer);
 }
 
+} /* namespace omnetpp */
+} /* namespace ARA */
