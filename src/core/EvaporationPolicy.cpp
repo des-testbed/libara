@@ -5,14 +5,10 @@
 using namespace ARA;
 
 EvaporationPolicy::EvaporationPolicy():factor(1),interval(100){ 
-    this->lastAccessTime = new timeval;
-    /// initialize the last access time with '0'
-    memset(this->lastAccessTime, 0, sizeof(timeval));
-    this->time = new Time();
+    this->lastAccessTime = new Time();
 }
 
 EvaporationPolicy::~EvaporationPolicy(){
-    delete this->time;
     delete this->lastAccessTime;
 } 
 
@@ -27,35 +23,22 @@ EvaporationPolicy::~EvaporationPolicy(){
  *   false otherwise
  */
 bool EvaporationPolicy::checkForEvaporation(){
-    /// check if the last access time to the routing tables has been initialized
-    if(this->lastAccessTime->tv_sec != 0){
-        struct timeval *now = new timeval;
-        /// get the current time
-        gettimeofday(now, 0);
-
-        int timeDifference = this->getTimeDifference(now);
-        /// compare the timestamps 
-        if(timeDifference > this->interval){
-            /// compute the factor
-            determineEvaporationFactor(timeDifference);
-            /// delete the last access time
-            delete this->lastAccessTime;
-            /// update the timestamp
-            this->lastAccessTime = now;
-            /// set the factor
-
-            /// return the result
-            return true;
-        }
-
+    /// get the current date
+    Time* now = new Time();
+    /// compute the time difference
+    long int timeDifference = (*(this->lastAccessTime) - *(now)).toMilliseconds();
+    /// compare the timestamps 
+    if(timeDifference > this->interval){
+        /// compute the factor
+        determineEvaporationFactor(timeDifference);
         /// delete the last access time
         delete this->lastAccessTime;
         /// update the timestamp
         this->lastAccessTime = now;
-    }else{
-        /// initialize the last access time
-        gettimeofday(this->lastAccessTime, 0);
-    } 
+        /// return the result
+        return true;
+    }
+
     return false;
 }
 
@@ -74,6 +57,3 @@ void EvaporationPolicy::setInterval(int interval){
     this->interval = interval;
 }
 
-int EvaporationPolicy::getTimeDifference(struct timeval *now){
-    return time->getTimeDifferenceInMilliseconds(now, lastAccessTime);
-}

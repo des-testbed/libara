@@ -38,15 +38,24 @@ namespace ARA {
      */
     class OMNeTTime : public Time {
         public:
-          /// The method computes the time difference between two timestamps in seconds
-          int getTimeDifferenceInSeconds(SimTime *a, SimTime *b);
-          /// The method computes the time difference between two timestamps in milliseconds
-          int getTimeDifferenceInMilliseconds(SimTime *a, SimTime *b);
+          OMNeTTime(SimTime *timestamp);
+          ~OMNeTTime();
+
+          OMNeTTime operator-(const OMNeTTime& right);
+          OMNeTTime operator-=(const OMNeTTime& right);
+
+          ///
+          virtual int toSeconds();
+          ///
+          virtual long int toMilliseconds();
+          ///
+          SimTime* getTimestamp() const;
+
         private:
-          /// The method computes the time difference between two timestamps
-          int getTimeDifference(SimTime *a, SimTime *b, int scaleExponent);
-          /// The method converts the desired time scale from the pre-set simulation time scale
-          int convertSimulationTime(SimTime r, int scaleExponent);
+          /// 
+          int convertSimulationTime(int scaleExponent);
+
+          SimTime *timestamp;
     };
 }
 

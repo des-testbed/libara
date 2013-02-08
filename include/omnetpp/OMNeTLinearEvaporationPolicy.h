@@ -23,40 +23,27 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef LINEAR_EVAPORATION_POLICY_H_
-#define LINEAR_EVAPORATION_POLICY_H_
+#ifndef OMNET_LINEAR_EVAPORATION_POLICY_H_
+#define OMNET_LINEAR_EVAPORATION_POLICY_H_
 
-#include <cmath>
-#include <cstring>
-#include <stdint.h>
-#include <sys/time.h>
+#include <omnetpp.h>
+#include <csimplemodule.h>
 
-#include "Time.h"
-#include "EvaporationPolicy.h"
+#include "OMNeTTime.h"
+#include "LinearEvaporationPolicy.h"
 
 namespace ARA { 
    /**
-    * This class provides the linear evaporation function of the ant routing algorithm (ARA).
+    * This class provides the linear evaporation function of the ant routing algorithm (ARA) 
+    * for the OMNeT++ simulation framework.
     */
-    class LinearEvaporationPolicy : public EvaporationPolicy {
+    class OMNeTLinearEvaporationPolicy : public LinearEvaporationPolicy, public cSimpleModule {
         public:
-            LinearEvaporationPolicy();
-            LinearEvaporationPolicy(float t, float q);
-            ~LinearEvaporationPolicy(){};
+            OMNeTLinearEvaporationPolicy();
+            ~OMNeTLinearEvaporationPolicy(){};
 
-            /// the method reduces the pheromone value of a routing table entry
-            float evaporate(float phi);
-            /// the method sets the threshold
-            void setThreshold(float threshold);
-            /// the method sets the linear factor
-            void setLinearFactor(float factor);
-
-        private:
-            void determineEvaporationFactor(int timeDifference);
-            /// the threshold which denotes at what point the pheromone level is set to 0
-            float threshold;
-            /// the linear factor
-            float q;
+            virtual void initialize();
+            virtual void handleMessage(cMessage *msg);
     };
 } /* namespace ARA */
 

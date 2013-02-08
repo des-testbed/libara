@@ -26,6 +26,7 @@
 #ifndef TIME_H_
 #define TIME_H_
 
+#include <cstring>
 #include <sys/time.h>
 
 namespace ARA {
@@ -35,12 +36,24 @@ namespace ARA {
      */
     class Time {
         public:
-          virtual ~Time(){};
-          virtual int getTimeDifferenceInSeconds(struct timeval*, struct timeval*);
-          virtual int getTimeDifferenceInMilliseconds(struct timeval*, struct timeval*);
+          Time();
+          Time(struct timeval* timestamp);
+          virtual ~Time();
+ 
+          ///
+          Time operator-(const Time& right);
+          Time operator-=(const Time& right);
+
+          ///
+          virtual int toSeconds();
+          ///
+          virtual long int toMilliseconds();
+          ///
+          virtual struct timeval* getTimestamp() const;
 
         private:
-          void getTimeDifference(struct timeval*, struct timeval*);
+          /// 
+          struct timeval* timestamp;
     };
 }
 

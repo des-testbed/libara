@@ -155,9 +155,11 @@ $O/core/BestPheromoneForwardingPolicy.o: core/BestPheromoneForwardingPolicy.cpp 
   ../include/Time.h
 $O/core/CubicEvaporationPolicy.o: core/CubicEvaporationPolicy.cpp \
   ../include/CubicEvaporationPolicy.h \
-  ../include/EvaporationPolicy.h
+  ../include/EvaporationPolicy.h \
+  ../include/Time.h
 $O/core/EvaporationPolicy.o: core/EvaporationPolicy.cpp \
-  ../include/EvaporationPolicy.h
+  ../include/EvaporationPolicy.h \
+  ../include/Time.h
 $O/core/LinearEvaporationPolicy.o: core/LinearEvaporationPolicy.cpp \
   ../include/LinearEvaporationPolicy.h \
   ../include/EvaporationPolicy.h \
