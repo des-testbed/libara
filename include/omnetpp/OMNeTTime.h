@@ -27,6 +27,7 @@
 #define OMNET_TIME_H_
 
 #include <cmath>
+#include <omnetpp.h>
 #include <simtime.h>
 
 #include "Time.h"
@@ -39,7 +40,7 @@ namespace ARA {
     class OMNeTTime : public Time {
         public:
           OMNeTTime();
-          OMNeTTime(SimTime *timestamp);
+          OMNeTTime(SimTime timestamp);
           ~OMNeTTime();
 
           OMNeTTime operator-(const OMNeTTime& right);
@@ -52,11 +53,21 @@ namespace ARA {
           ///
           SimTime* getTimestamp() const;
 
+          /**
+           * The method checks if the timestamp is initialized.
+           */
+          virtual bool isInitialized();
+
+          /**
+           * The method initializes the timestamp.
+           */
+          virtual void initialize();
+
         private:
           /// 
           int convertSimulationTime(int scaleExponent);
 
-          SimTime *timestamp;
+          SimTime timestamp;
     };
 }
 

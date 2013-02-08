@@ -25,20 +25,24 @@ EvaporationPolicy::~EvaporationPolicy(){
  *   false otherwise
  */
 bool EvaporationPolicy::checkForEvaporation(){
-    /// get the current date
-    Time* now = new Time();
-    /// compute the time difference
-    long int timeDifference = (*(this->lastAccessTime) - *(now)).toMilliseconds();
-    /// compare the timestamps 
-    if(timeDifference > this->interval){
-        /// compute the factor
-        determineEvaporationFactor(timeDifference);
-        /// delete the last access time
-        delete this->lastAccessTime;
-        /// update the timestamp
-        this->lastAccessTime = now;
-        /// return the result
-        return true;
+    if(this->lastAccessTime->isInitialized()){
+        /// get the current date
+        Time* now = new Time();
+        /// compute the time difference
+        long int timeDifference = (*(this->lastAccessTime) - *(now)).toMilliseconds();
+        /// compare the timestamps 
+        if(timeDifference > this->interval){
+            /// compute the factor
+            determineEvaporationFactor(timeDifference);
+            /// delete the last access time
+            delete this->lastAccessTime;
+            /// update the timestamp
+            this->lastAccessTime = now;
+            /// return the result
+            return true;
+        }
+    }else{
+       this->lastAccessTime->initialize();
     }
 
     return false;

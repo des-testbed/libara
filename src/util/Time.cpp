@@ -58,3 +58,10 @@ struct timeval* Time::getTimestamp() const{
   return this->timestamp;
 }
 
+bool Time::isInitialized(){
+    return (this->timestamp->tv_sec != 0);
+}
+
+void Time::initialize(){
+    gettimeofday(this->timestamp, 0);
+}

@@ -3,24 +3,22 @@
 using namespace ARA;
 
 OMNeTTime::OMNeTTime(){
-  /// FIXME: Obtain current simulation time and store it in the timestamp
+  this->timestamp = SimTime();
 }
 
-OMNeTTime::OMNeTTime(SimTime *timestamp):timestamp(timestamp){}
+OMNeTTime::OMNeTTime(SimTime timestamp):timestamp(timestamp){}
 
-OMNeTTime::~OMNeTTime(){
-    delete timestamp;
-}
+OMNeTTime::~OMNeTTime(){ }
 
 OMNeTTime OMNeTTime::operator-(const OMNeTTime& right){
     SimTime result = (*this->getTimestamp() - *right.getTimestamp());
-    return OMNeTTime(&result);
+    return OMNeTTime(result);
 }
 
 OMNeTTime OMNeTTime::operator-=(const OMNeTTime& right){
     // fixme
     SimTime result = (*this->getTimestamp() - *right.getTimestamp());
-    return OMNeTTime(&result);
+    return OMNeTTime(result);
 }
 
 /**
@@ -59,7 +57,7 @@ long int OMNeTTime::toMilliseconds(){
  */
 int OMNeTTime::convertSimulationTime(int scaleExponent){
     // get the simulation time exponent
-    if(this->timestamp->getScaleExp() != scaleExponent){
+    if(this->timestamp.getScaleExp() != scaleExponent){
        /**
         * TODO: Check if this is working the way it is intended to do
         *
@@ -73,12 +71,21 @@ int OMNeTTime::convertSimulationTime(int scaleExponent){
         * The method would return 0 for the latter example. The 
         * question if that is sufficient in an simulation scenario.
         */
-        return (this->timestamp->raw() / pow(10, (scaleExponent - this->timestamp->getScaleExp())));
+        return (this->timestamp.raw() / pow(10, (scaleExponent - this->timestamp.getScaleExp())));
     }
-    return this->timestamp->raw();
+    return this->timestamp.raw();
 }
 
 
-SimTime* OMNeTTime::getTimestamp() const{
-    return this->timestamp;
+SimTime OMNeTTime::getTimestamp() const{
+    return (this->timestamp);
+}
+
+bool OMNeTTime::isInitialized(){
+    return (this->timestamp.raw() != 0);
+}
+
+void OMNeTTime::initialize(){
+    /// TODO: check if that's the way to go
+    this->timestamp = simTime();
 }

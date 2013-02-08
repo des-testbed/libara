@@ -40,19 +40,54 @@ namespace ARA {
           Time(struct timeval* timestamp);
           virtual ~Time();
  
-          ///
+          /**
+           * The operator provides the subtract operation for two timestamps
+           * and stores the result in a new instance of class Time.
+           */ 
           Time operator-(const Time& right);
+
+          /**
+           * The operator provides the subtract operation for two timestamps
+           * and stores the result in the left operand.
+           */ 
           Time operator-=(const Time& right);
 
-          ///
+          /**
+           * The method returns the the timestamp which is encapsulated
+           * by the class in seconds.
+           */
           virtual int toSeconds();
-          ///
+
+          /**
+           * The method returns the the timestamp which is encapsulated
+           * by the class in milliseconds.
+           */
           virtual long int toMilliseconds();
-          ///
+
+          /**
+           * The method returns the timestamp which is encapsulated
+           * by the class.
+           */
           struct timeval* getTimestamp() const;
 
+          /**
+           * The method checks if the timestamp is initialized.
+           */
+          virtual bool isInitialized();
+
+ 
+          /**
+           * The method checks if the timestamp is initialized.
+           */
+          virtual void initialize();
+
         private:
-          /// 
+          /**
+           * The member variable represents the current time using
+           * a timeval struct (which consists of the seconds and
+           * milliseconds since the 1st of January 1970 (unix 
+           * time)).
+           */ 
           struct timeval* timestamp;
     };
 }
