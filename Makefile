@@ -44,7 +44,11 @@ inetmanet/.git:
 
 test: all
 	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
-	@cd tests && $(MAKE) runTests	
+	@cd tests && $(MAKE) runTests
+
+testsim: all
+	@echo -e "\n~~~ BUILDING OMNET++ TESTS ~~~~~~~~~~\n"
+	@cd tests && $(MAKE) testsim	
 
 runSingleTest: all
 	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"

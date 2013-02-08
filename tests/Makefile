@@ -34,22 +34,25 @@ CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros
 #CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
 
 # Output directory ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-PROJECT_OUTPUT_DIR = ../out
-SRC_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/src
-TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/tests
+PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
+LIBARA_BIN = $(PROJECT_OUTPUT_DIR)/src/libara.so
+TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/tests
+COMPILED_OMNETPP_ARA = $(shell find $(PROJECT_OUTPUT_DIR)/omnetpp -type f -name '*.o')
 
 # Test sources ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-COMPILED_SRC = $(shell find $(SRC_OUTPUT_DIR) -type f -name '*.o')
-TEST_SOURCES = $(shell find ./ -type f -name '*Test.cpp' -o -name 'Test*.cpp')
-COMPILED_TESTS = $(TEST_SOURCES:.cpp=.o)
+LIBARA_TEST_SRC = $(shell find ./libara -type f -name '*Test.cpp')
+LIBARA_TESTS_BIN = $(shell echo $(LIBARA_TEST_SRC) | sed 's/[a-zA-Z0-9./]* /&\n'/g | sed 's%\.\(.*\).cpp%$(TESTS_OUTPUT_DIR)\1.o%g')
+OMNETPP_ARA_TEST_SRC = $(shell find ./omnetpp -type f -name '*Test.cpp')
+OMNETPP_ARA_TESTS_BIN = $(shell echo $(OMNETPP_ARA_TESTS_BIN) | sed 's/[a-zA-Z0-9./]* /&\n'/g | sed 's%\.\(.*\).cpp%$(TESTS_OUTPUT_DIR)\1.o%g')
 TESTAPI_SOURCES = $(shell find ./testAPI/ -name tests -prune -o -type f -name '*.cpp' -print)
-COMPILED_TESTAPI = $(TESTAPI_SOURCES:.cpp=.o)
+TESTAPI_SOURCES += ./TestRunner.cpp
+TESTAPI_BIN = $(shell echo $(TESTAPI_SOURCES) | sed 's/[a-zA-Z0-9./]* /&\n'/g | sed 's%\.\(.*\).cpp%$(TESTS_OUTPUT_DIR)\1.o%g')
 TEST_EXECUTABLE = runAllTests
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-runSingleTest: $(COMPILED_TESTAPI) $(COMPILED_TESTS)
+runSingleTest: $(TESTAPI_BIN) $(LIBARA_TESTS_BIN)
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(LIBARA_BIN) $(LIBARA_TESTS_BIN) $(TESTAPI_BIN) $(LINKFLAGS)
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
 	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testGetDeliverablePacket; then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
@@ -61,21 +64,27 @@ runTests: all
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
-all: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TESTS)
+all: check_if_cpputest_is_installed  $(LIBARA_BIN) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN)
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -L$(PROJECT_OUTPUT_DIR)/src -lara $(LIBARA_TESTS_BIN) $(TESTAPI_BIN) $(LINKFLAGS) -o $(TEST_EXECUTABLE)
 
-.cpp.o: check_if_cpputest_is_installed # TODO why is this dependency not checked? if you remove this from all you see what I mean
+testsim: check_if_cpputest_is_installed  $(LIBARA_BIN) $(COMPILED_OMNETPP_ARA) $(TESTAPI_BIN) $(OMNETPP_ARA_TEST_BIN)
+	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -L$(PROJECT_OUTPUT_DIR)/src -lara $(COMPILED_OMNETPP_ARA) $(OMNETPP_ARA_TEST_BIN)  $(TESTAPI_BIN) $(LINKFLAGS) -o $(TEST_EXECUTABLE) 
+
+.cpp.o: check_if_cpputest_is_installed
+	@$(MKPATH) $(dir $(TESTS_OUTPUT_DIR)/$@)
 	@if [[ $< == *Test.cpp ]]; then \
 		nrOfTests=$$(grep -c "TEST(" $<); \
 		echo "Compiling $< ($$nrOfTests tests)"; \
 	else  \
 		echo "Compiling $<"; \
 	fi
-	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $< -o $@
+	$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $< -o $@
 
 clean:
-	rm -f $(TEST_EXECUTABLE) $(COMPILED_TESTS) $(COMPILED_TESTAPI)
+	rm -f $(TEST_EXECUTABLE)
+	rm -f $(LIBARA_TESTS_BIN) $(TESTAPI_BIN)
 
 check_if_cpputest_is_installed:
 	@if ! [ -d "$(CPPUTEST_HOME)" ]; then \
