@@ -2,6 +2,10 @@
 
 using namespace ARA;
 
+OMNeTTime::OMNeTTime(){
+  /// FIXME: Obtain current simulation time and store it in the timestamp
+}
+
 OMNeTTime::OMNeTTime(SimTime *timestamp):timestamp(timestamp){}
 
 OMNeTTime::~OMNeTTime(){
@@ -9,14 +13,14 @@ OMNeTTime::~OMNeTTime(){
 }
 
 OMNeTTime OMNeTTime::operator-(const OMNeTTime& right){
-    SimTime* result = &(*this->getTimestamp() - *right->getTimestamp());
-    return OMNeTTime(result);
+    SimTime result = (*this->getTimestamp() - *right.getTimestamp());
+    return OMNeTTime(&result);
 }
 
 OMNeTTime OMNeTTime::operator-=(const OMNeTTime& right){
     // fixme
-    SimTime* result = &(*this->getTimestamp() - *right->getTimestamp());
-    return OMNeTTime(result);
+    SimTime result = (*this->getTimestamp() - *right.getTimestamp());
+    return OMNeTTime(&result);
 }
 
 /**

@@ -38,6 +38,7 @@ namespace ARA {
      */
     class OMNeTTime : public Time {
         public:
+          OMNeTTime();
           OMNeTTime(SimTime *timestamp);
           ~OMNeTTime();
 

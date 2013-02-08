@@ -30,6 +30,7 @@
 #include <csimplemodule.h>
 
 #include "OMNeTTime.h"
+#include "EvaporationPolicy.h"
 #include "LinearEvaporationPolicy.h"
 
 namespace ARA { 

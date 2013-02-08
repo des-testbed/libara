@@ -49,7 +49,7 @@ namespace ARA {
           ///
           virtual long int toMilliseconds();
           ///
-          virtual struct timeval* getTimestamp() const;
+          struct timeval* getTimestamp() const;
 
         private:
           /// 

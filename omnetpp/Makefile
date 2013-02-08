@@ -42,6 +42,7 @@ OBJS = \
     $O/OMNeTAddress.o \
     $O/OMNeTARAClient.o \
     $O/OMNeTGate.o \
+    $O/OMNeTLinearEvaporationPolicy.o \
     $O/OMNeTPacket.o \
     $O/OMNeTStochasticForwardingPolicy.o \
     $O/OMNeTTime.o
@@ -132,6 +133,9 @@ $O/ARATrafficGenerator.o: ARATrafficGenerator.cpp \
   ../include/omnetpp/ARATrafficGenerator.h
 $O/Debugger.o: Debugger.cpp \
   ../include/omnetpp/Debugger.h
+$O/OMNeTAddress.o: OMNeTAddress.cpp \
+  ../include/Address.h \
+  ../include/omnetpp/OMNeTAddress.h
 $O/OMNeTARAClient.o: OMNeTARAClient.cpp \
   ../include/NextHop.h \
   ../include/AbstractARAClient.h \
@@ -153,9 +157,6 @@ $O/OMNeTARAClient.o: OMNeTARAClient.cpp \
   ../include/omnetpp/OMNeTAddress.h \
   ../include/omnetpp/OMNeTStochasticForwardingPolicy.h \
   ../include/omnetpp/OMNeTPacket.h
-$O/OMNeTAddress.o: OMNeTAddress.cpp \
-  ../include/Address.h \
-  ../include/omnetpp/OMNeTAddress.h
 $O/OMNeTGate.o: OMNeTGate.cpp \
   ../include/omnetpp/OMNeTGate.h \
   ../include/Address.h \
@@ -164,6 +165,12 @@ $O/OMNeTGate.o: OMNeTGate.cpp \
   ../include/PacketType.h \
   ../include/omnetpp/OMNeTAddress.h \
   ../include/omnetpp/OMNeTPacket.h
+$O/OMNeTLinearEvaporationPolicy.o: OMNeTLinearEvaporationPolicy.cpp \
+  ../include/omnetpp/OMNeTTime.h \
+  ../include/omnetpp/OMNeTLinearEvaporationPolicy.h \
+  ../include/Time.h \
+  ../include/LinearEvaporationPolicy.h \
+  ../include/EvaporationPolicy.h
 $O/OMNeTPacket.o: OMNeTPacket.cpp \
   ../include/Address.h \
   ../include/Packet.h \

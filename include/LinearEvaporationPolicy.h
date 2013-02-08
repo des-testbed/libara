@@ -41,6 +41,7 @@ namespace ARA {
     class LinearEvaporationPolicy : public EvaporationPolicy {
         public:
             LinearEvaporationPolicy();
+            LinearEvaporationPolicy(Time *time);
             LinearEvaporationPolicy(float t, float q);
             ~LinearEvaporationPolicy(){};
 

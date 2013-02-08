@@ -8,6 +8,8 @@ EvaporationPolicy::EvaporationPolicy():factor(1),interval(100){
     this->lastAccessTime = new Time();
 }
 
+EvaporationPolicy::EvaporationPolicy(Time *time):lastAccessTime(time),factor(1),interval(100){}
+
 EvaporationPolicy::~EvaporationPolicy(){
     delete this->lastAccessTime;
 } 

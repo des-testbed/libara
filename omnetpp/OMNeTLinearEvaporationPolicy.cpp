@@ -5,13 +5,13 @@ using namespace ARA;
 /// The module class needs to be registered with OMNeT++
 Define_Module(OMNeTLinearEvaporationPolicy);
 
-//OMNetLinearEvaporationPolicy::OMNetLinearEvaporationPolicy():LinearEvaporationPolicy(new OMNeTTime()){};
+OMNeTLinearEvaporationPolicy::OMNeTLinearEvaporationPolicy():LinearEvaporationPolicy(new OMNeTTime()){}
 
 void OMNeTLinearEvaporationPolicy::initialize() {
     /// parse the policy parameter from the NED file
-    float q = par("q").doubleValue();
+    this->setLinearFactor(par("q").doubleValue());
     /// parse the delta phi parameter from the NED file
-    float threshold = par("threshold").doubleValue();
+    this->setThreshold(par("threshold").doubleValue());
 }
 
 void OMNeTLinearEvaporationPolicy::handleMessage(cMessage *msg) {
