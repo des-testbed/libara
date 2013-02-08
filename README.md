@@ -37,20 +37,20 @@ Hacking
 -------
 
 If you are new to the framework you should take a look at the [AbstractARAClientTest][3] which can give you a good feeling on how everything works.
-If you are only interested in the OMNet++ part you should look at [src/omnetpp][4] and of course the [simulations][5] folder.
+If you are only interested in the OMNet++ part you should look at [omnetpp][4] and of course the [simulations][5] folder.
 
 
 [1]: http://www.cpputest.org/
 [2]: https://github.com/FGrosse/cpputest
-[3]: https://github.com/FGrosse/Ara-Sim/blob/develop/tests/core/AbstractARAClientTest.cpp
-[4]: https://github.com/FGrosse/Ara-Sim/tree/develop/src/omnetpp
-[5]: https://github.com/FGrosse/Ara-Sim/tree/develop/simulations
+[3]: https://github.com/des-testbed/Ara-Sim/blob/develop/tests/core/AbstractARAClientTest.cpp
+[4]: https://github.com/des-testbed/Ara-Sim/tree/develop/omnetpp
+[5]: https://github.com/des-testbed/Ara-Sim/tree/develop/simulations
 
 Bug tracker
 -----------
 Have a bug or feature request? Please create an issue here on GitHub!
 
-https://github.com/fgrosse/ara-sim/issues
+https://github.com/des-testbed/ara-sim/issues
 
 License
 -------
