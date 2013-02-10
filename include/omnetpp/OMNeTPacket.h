@@ -12,6 +12,7 @@
 #include <omnetpp.h>
 
 namespace ARA {
+namespace omnetpp {
 
 class OMNeTPacket : public ::cPacket, public ARA::Packet {
   private:
@@ -42,4 +43,5 @@ inline void doPacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimPack(b);}
 inline void doUnpacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimUnpack(b);}
 
 } /* namespace ARA */
+} /* namespace omnetpp */
 #endif // _OMNETPACKET_H_

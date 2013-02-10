@@ -29,6 +29,7 @@
 using namespace std;
 
 namespace ARA {
+namespace omnetpp {
 
 OMNeTAddress::OMNeTAddress(IPAddress address) {
     this->address = address;
@@ -80,4 +81,5 @@ Address* OMNeTAddress::clone() {
     return clone;
 }
 
+} /* namespace omnetpp */
 } /* namespace ARA */

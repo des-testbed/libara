@@ -1,5 +1,5 @@
 <buildspec version="4.0">
+<dir makemake-options="--deep -o ara-sim -O out -e cpp -lARA -linet --meta:recurse --meta:auto-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="omnetpp" type="makemake"/>
 <dir path="tests" type="custom"/>
-<dir makemake-options="--deep -o ara-sim -linet --meta:recurse --meta:auto-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="src" type="makemake"/>
-<dir path="." type="custom"/>
+<dir path="src" type="custom"/>
 </buildspec>

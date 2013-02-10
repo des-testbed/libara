@@ -15,10 +15,54 @@
 
 package ara.simulations;
 
-import ara.omnetpp.ARAClient;
+// Imports for the ARAClient
+import inet.base.NotificationBoard;
+import ara.ARATrafficGenerator;
+import ara.Debugger;
+import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
+import inet.mobility.NullMobility;
+
 import inet.world.ChannelControl;
 
-network ManetTest {
+module ARAClient
+{
+    parameters:
+        @display("i=device/wifilaptop");
+    gates:
+        input radioIn @directIn;
+
+    submodules:
+        notificationBoard: NotificationBoard {
+            parameters:
+                @display("p=52,70");
+        }
+        app: ARATrafficGenerator {
+            parameters:
+                @display("b=40,24;p=180,60,col");
+        }
+		debugger: Debugger {
+		    
+		}
+	
+
+//        wlan: Ieee80211NicSTASimplified {
+//            parameters:
+//                @display("p=112,134;q=queue");
+//        }
+        
+        // Stationary node
+        mobility: NullMobility {
+            parameters:
+                @display("p=50,141");
+        }
+    connections allowunconnected:
+//        wlan.radioIn <-- radioIn;
+//        app.out --> wlan.uppergateIn;
+		app.out --> debugger.in;
+}
+
+network ManetTest
+{
     parameters:
         int numberOfHosts;
         double playgroundSizeX;
@@ -28,7 +72,15 @@ network ManetTest {
         node[numberOfHosts]: ARAClient {
             parameters:
                 @display("r=,,#707070");
-        }        
+        }
+//        srvHost: ThroughputServer {
+//            parameters:
+//                @display("p=350,350;r=,,#707070");
+//        }
+//        ap: WirelessAPSimplified {
+//            parameters:
+//                @display("p=200,200;r=,,#707070");
+//        }
 
         channelcontrol: ChannelControl {
             parameters:

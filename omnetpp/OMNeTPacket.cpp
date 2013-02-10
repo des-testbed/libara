@@ -1,10 +1,15 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
 
 #include <iostream>
 #include <sstream>
 
-using namespace ARA;
+namespace ARA {
+namespace omnetpp {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
@@ -325,4 +330,5 @@ void *OMNeTPacketDescriptor::getFieldStructPointer(void *object, int field, int 
     }
 }
 
-
+} /* namespace omnetpp */
+} /* namespace ARA */

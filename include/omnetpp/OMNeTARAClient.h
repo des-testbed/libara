@@ -31,8 +31,9 @@
 #include "BestPheromoneForwardingPolicy.h"
 #include "OMNeTStochasticForwardingPolicy.h"
 
-
 namespace ARA {
+namespace omnetpp {
+
     /**
      * The class represents the implementation of the ant routing algorithm (ARA)
      * for the OMNeT++ simulation framework. 
@@ -67,5 +68,8 @@ namespace ARA {
 
             bool isFromUpperLayer(cMessage* msg);
     };
+
 } /* namespace ARA */
-#endif 
+} /* namespace omnetpp */
+
+#endif /* OMNETARACLIENT_H_ */

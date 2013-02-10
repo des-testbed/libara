@@ -13,12 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara_simulation.omnetpp;
+package ara;
 
 import inet.base.NotificationBoard;
-import ara_simulation.omnetpp.ARATrafficGenerator;
-import ara_simulation.omnetpp.Debugger;
-import ara_simulation.omnetpp.OMNeTARAClient;
+import ara.ARATrafficGenerator;
+import ara.Debugger;
+import ara.OMNeTARAClient;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
 import inet.nodes.wireless.WirelessHost;

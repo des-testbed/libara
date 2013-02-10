@@ -2,7 +2,7 @@
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ These sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,17 +23,36 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
-#include <omnetpp.h>
-#include "OMNeTGate.h"
+#ifndef LINEAR_EVAPORATION_POLICY_H_
+#define LINEAR_EVAPORATION_POLICY_H_
 
-using namespace ARA;
+#include <cmath>
+#include <cstring>
+#include <stdint.h>
+#include <sys/time.h>
 
-TEST_GROUP(OMNeTGateTest) {};
+#include "Time.h"
+#include "EvaporationPolicy.h"
 
-/* TODO: Make this test work (i.e. check back with OMNeT++ API on how to create single simpleModule instances
-TEST(OMNeTGateTest, testCreate) {
-    cSimpleModule* module = new cSimpleModule();
-    OMNeTGate(module, "testGate");
-    delete module;
-}*/
+namespace ARA { 
+   /**
+    * This class provides the linear evaporation function of the ant routing algorithm (ARA).
+    */
+    class LinearEvaporationPolicy : public EvaporationPolicy {
+        public:
+            LinearEvaporationPolicy();
+            ~LinearEvaporationPolicy(){};
+
+            /// the method reduces the pheromone value of a routing table entry
+            float evaporate(float phi);
+
+        private:
+            void determineEvaporationFactor(int timeDifference);
+            /// the linear factor
+            float q;
+            /// the threshold which denotes at what point the pheromone level is set to 0
+            float threshold;
+    };
+} /* namespace ARA */
+
+#endif 

@@ -15,16 +15,20 @@
 
 #include "Debugger.h"
 
-Define_Module(ARA::Debugger);
-
 namespace ARA {
+namespace omnetpp {
 
-void Debugger::initialize() {
+Define_Module(Debugger);
+
+void Debugger::initialize()
+{
+    // TODO - Generated method body
 }
 
-void Debugger::handleMessage(cMessage* msg) {
+void Debugger::handleMessage(cMessage *msg)
+{
     EV << "Got message:" << msg;
-    delete msg;
 }
 
-}
+} /* namespace omnetpp */
+} /* namespace ARA */

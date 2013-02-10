@@ -1,8 +1,8 @@
 /******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ These sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,37 +23,26 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef OMNETADDRESS_H_
-#define OMNETADDRESS_H_
+#ifndef TIME_H_
+#define TIME_H_
 
-#include "Address.h"
-#include "IPAddress.h"
-
-#include <string>
+#include <sys/time.h>
 
 namespace ARA {
-namespace omnetpp {
+    /**
+     * The class provides methods for determining the difference between 
+     * two timestamps.
+     */
+    class Time {
+        public:
+          int getTimeDifferenceInSeconds(struct timeval*, struct timeval*);
+          int getTimeDifferenceInMilliseconds(struct timeval*, struct timeval*);
 
-class OMNeTAddress : public Address {
-public:
-    OMNeTAddress(IPAddress address);
-    OMNeTAddress(IPAddress address, IPAddress netmask);
+        private:
+          /// the method returns the time difference in seconds
+          void getTimeDifference(struct timeval*, struct timeval*);
+    };
+}
 
-    bool equals(const Address* otherAddress) const;
-    bool equals(const std::shared_ptr<Address> otherAddress) const;
+#endif 
 
-    size_t getHashValue() const;
-    bool isBroadCast();
-    Address* clone();
-
-    IPAddress getAddress();
-
-private:
-    IPAddress address;
-    IPAddress broadCastAddress;
-
-};
-
-} /* namespace omnetpp */
-} /* namespace ARA */
-#endif /* OMNETADDRESS_H_ */

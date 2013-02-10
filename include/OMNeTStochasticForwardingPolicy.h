@@ -38,6 +38,7 @@
 #include "StochasticForwardingPolicy.h"
 
 namespace ARA {
+namespace omnetpp {
    /**
     * The class provides a stochastic forwarding policy for the OMNeTARAClient. The
     * class overwrites the getRandomNumber() method of the base class, which uses a
@@ -52,6 +53,7 @@ namespace ARA {
          float getRandomNumber();
    };
 
+} /* namespace omnetpp */
 } /* namespace ARA */
 
 #endif

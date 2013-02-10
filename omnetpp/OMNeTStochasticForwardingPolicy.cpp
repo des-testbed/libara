@@ -1,6 +1,7 @@
 #include "OMNeTStochasticForwardingPolicy.h"
 
-using namespace ARA;
+namespace ARA {
+namespace omnetpp {
 
 OMNeTStochasticForwardingPolicy::OMNeTStochasticForwardingPolicy(RoutingTable* routingTable) : 
  StochasticForwardingPolicy(routingTable) { }
@@ -8,3 +9,6 @@ OMNeTStochasticForwardingPolicy::OMNeTStochasticForwardingPolicy(RoutingTable* r
 float OMNeTStochasticForwardingPolicy::getRandomNumber(){
    return dblrand();
 }
+
+} /* namespace omnetpp */
+} /* namespace ARA */

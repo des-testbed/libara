@@ -32,21 +32,24 @@
 #include <memory>
 
 namespace ARA {
+namespace omnetpp {
 
-class OMNeTGate: public NetworkInterface {
-public:
-    OMNeTGate(cSimpleModule* module, cGate* gate);
+    class OMNeTGate: public ARA::NetworkInterface {
+    public:
+        OMNeTGate(cSimpleModule* module, cGate* gate);
 
-    void send(const Packet* packet, std::shared_ptr<Address> recipient);
-    void broadcast(const Packet* packet);
-    bool equals(NetworkInterface* interface);
-    std::shared_ptr<Address> getLocalAddress();
+        void send(const Packet* packet, std::shared_ptr<Address> recipient);
+        void broadcast(const Packet* packet);
+        bool equals(NetworkInterface* interface);
+        std::shared_ptr<Address> getLocalAddress();
 
-private:
-    cSimpleModule* module;
-    cGate* gate;
-    std::shared_ptr<Address> localAddress;
-};
+    private:
+        cSimpleModule* module;
+        cGate* gate;
+        std::shared_ptr<Address> localAddress;
+    };
 
 } /* namespace ARA */
+} /* namespace omnetpp */
+
 #endif /* OMNETGATE_H_ */

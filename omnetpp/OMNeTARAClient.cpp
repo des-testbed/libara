@@ -1,39 +1,32 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
-
 #include "OMNeTARAClient.h"
 #include "IPControlInfo.h"
 #include "IPAddress.h"
 
-using namespace ARA;
+namespace ARA {
+namespace omnetpp {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-// The module class needs to be registered with OMNeT++
+/// The module class needs to be registered with OMNeT++
 Define_Module(OMNeTARAClient);
 
-;
 int OMNeTARAClient::numInitStages() const {
-    return 3;
+    return 2;
 }
 
+/**
+ * The method initializes the OMNeTARAClient class. Typically, this is
+ * a task which would be provided by a constructor, but it is one of the
+ * main concepts of OMNeT++ to provide such a method (and to leave 
+ * constructors 'untouched'). The method parses the parameters 
+ * specified in the NED file and initializes the gates.
+ */
 void OMNeTARAClient::initialize(int stage) {
     if(stage == 2) {
         std::string policy = par("forwardingPolicy").stringValue();
         initializeForwardingPolicy(policy);
         deltaPhi = par("deltaPhi").doubleValue();
+        initialPhi = par("initialPhi").doubleValue();
 
         for (cModule::GateIterator i(this); !i.end(); i++) {
             cGate* gate = i();
@@ -45,7 +38,7 @@ void OMNeTARAClient::initialize(int stage) {
     }
 }
 
-void OMNeTARAClient::handleMessage(cMessage* msg) {
+void OMNeTARAClient::handleMessage(cMessage *msg) {
     if(isFromUpperLayer(msg)) {
         IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
         IPAddress sourceIP = controlInfo->getSrcAddr();
@@ -103,17 +96,21 @@ void OMNeTARAClient::initializeForwardingPolicy(std::string policy){
     /// we lower case each character, thus accepting strings written in camel case, only first letter upper, etc.
     std::transform(policy.begin(), policy.end(), policy.begin(), ::tolower);
 
-    if(policy.compare("best") == 0) {
+    /// check if its the best pheromone forwarding policy 
+    if(policy.compare("bestpheromoneforwardingpolicy") == 0){
         this->forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
         EV << " set policy to BestPheromoneForwardingPolicy\n";
-    }
-    else if(policy.compare("stochastic") == 0) {
+    /// check if it is the stochastic forwarding policy
+    }else if((policy.compare("stochasticforwardingpolicy") == 0) || (policy.compare("omnetstochasticforwardingpolicy") == 0)){
+        /**
+         * The stochastic forwarding policy is never be instantiated since it does not use
+         * pseudo random number generators provided by the OMNeT++ simulation framework.
+         */
         this->forwardingPolicy = new OMNeTStochasticForwardingPolicy(&routingTable);
         EV << " set policy to StochasticPheromoneForwardingPolicy\n";
-    }
-    else {
+    }else{
         this->forwardingPolicy = nullptr;
-        throw cRuntimeError("Unknown forwarding policy %s; Parameter forwardingPolicy must be 'best' or 'stochastic'", policy.c_str());
+        throw cRuntimeError("unknown forwarding policy %s; forwarding policy must be BestPheromoneForwardingPolicy or OMNeTStochasticForwardingPolicy", policy.c_str());
     }
 }
 
@@ -130,5 +127,10 @@ void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* 
 
 void OMNeTARAClient::deliverToSystem(const Packet* packet) {
     EV << getName() << " delivered a packet to the system\n";
-    //TODO send to higher layer gate: upperLayerGate$o
+
+    OMNeTPacket answer = OMNeTPacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::DATA, getNextSequenceNumber());
+    sendPacket(&answer);
 }
+
+} /* namespace omnetpp */
+} /* namespace ARA */

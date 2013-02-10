@@ -33,6 +33,7 @@
 using namespace std;
 
 namespace ARA {
+namespace omnetpp {
 
 OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
     this->module = module;
@@ -85,4 +86,5 @@ shared_ptr<Address> OMNeTGate::getLocalAddress() {
     return localAddress;
 }
 
+} /* namespace omnetpp */
 } /* namespace ARA */

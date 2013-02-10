@@ -32,6 +32,12 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
+RoutingTable::RoutingTable( ){ 
+    this->evaporationPolicy = new LinearEvaporationPolicy();
+}
+
+RoutingTable::RoutingTable(EvaporationPolicy *policy):evaporationPolicy(policy){ }
+
 RoutingTable::~RoutingTable() {
     std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
@@ -46,6 +52,8 @@ RoutingTable::~RoutingTable() {
         delete entryList;
     }
     table.clear();
+
+    delete evaporationPolicy;
 }
 
 void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
@@ -55,8 +63,7 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
         std::deque<RoutingTableEntry*>* entryList = new std::deque<RoutingTableEntry*>();
         entryList->push_back(newEntry);
         table[destination] = entryList;
-    }
-    else {
+    }else{
         // there is at least one registered route for this destination
         std::deque<RoutingTableEntry*>* entryList = table[destination];
         bool entryHasBeenUpdated = false;
@@ -101,10 +108,14 @@ std::deque<RoutingTableEntry*>* RoutingTable::getPossibleNextHops(AddressPtr des
 }
 
 std::deque<RoutingTableEntry*>* RoutingTable::getPossibleNextHops(const Packet* packet) {
+	this->checkForEvaporation();
+	///
     return getPossibleNextHops(packet->getDestination());
 }
 
 bool RoutingTable::isDeliverable(AddressPtr destination) {
+	this->checkForEvaporation();
+    ///
     return table.find(destination) != table.end();
 }
 
@@ -112,7 +123,12 @@ bool RoutingTable::isDeliverable(const Packet* packet) {
     return isDeliverable(packet->getDestination());
 }
 
+/**
+ * TODO: The method should throw an exception if the host can not be found
+ */
 float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+	this->checkForEvaporation();
+
     if(isDeliverable(destination)) {
         std::deque<RoutingTableEntry*>* entryList = table[destination];
         for (auto& entry: *entryList) {
@@ -123,6 +139,46 @@ float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std:
     }
 
     return 0;
+}
+
+/**
+ * The method checks if an destination/nextHop/interface entry already exists.
+ */
+bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface){
+    if(isDeliverable(destination)){
+        std::deque<RoutingTableEntry*>* entries = table[destination];
+        for (auto& entry: *entries) {
+            if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ *
+ */
+void RoutingTable::checkForEvaporation(){
+    if(this->evaporationPolicy->checkForEvaporation()){
+        std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator i;
+        /// iterate over the destination entries
+        for(i = table.begin(); i != table.end(); i++){
+            std::deque<RoutingTableEntry*>::iterator j;
+            /// iterate over the possible next hop entries of a destination
+            for(j = (*i).second->begin(); j != (*i).second->end(); j++){
+                /// TODO: remove the '1' and replace it by a function parameter
+                float phi = this->evaporationPolicy->evaporate((*j)->getPheromoneValue());
+                /// update the entry
+                if(phi != 0.0){
+                    (*j)->setPheromoneValue(phi);
+                    // remove the entry from the list (CHECK IF THAT'S A GOOD IDEA)
+                }else{
+                    /// todo
+                }
+            }
+        }
+    }
 }
 
 } /* namespace ARA */

@@ -2,7 +2,7 @@
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ These sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,37 +23,37 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef OMNETADDRESS_H_
-#define OMNETADDRESS_H_
+#ifndef LINEAR_EVAPORATION_POLICY_H_
+#define LINEAR_EVAPORATION_POLICY_H_
 
-#include "Address.h"
-#include "IPAddress.h"
+#include <cmath>
+#include <cstdlib>
+#include <stdint.h>
 
-#include <string>
+#include "EvaporationPolicy.h"
 
-namespace ARA {
-namespace omnetpp {
+namespace ARA { 
+   /**
+    * This class provides the linear evaporation function of the ant routing algorithm (ARA).
+    */
+    class CubicEvaporationPolicy : public EvaporationPolicy {
+        public:
+			CubicEvaporationPolicy();
+            CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold);
+            ~CubicEvaporationPolicy();
+            /// the method reduces the pheromone value of a routing table entry
+            float evaporate(float phi);
 
-class OMNeTAddress : public Address {
-public:
-    OMNeTAddress(IPAddress address);
-    OMNeTAddress(IPAddress address, IPAddress netmask);
-
-    bool equals(const Address* otherAddress) const;
-    bool equals(const std::shared_ptr<Address> otherAddress) const;
-
-    size_t getHashValue() const;
-    bool isBroadCast();
-    Address* clone();
-
-    IPAddress getAddress();
-
-private:
-    IPAddress address;
-    IPAddress broadCastAddress;
-
-};
-
-} /* namespace omnetpp */
+        private:
+            /// 
+            float plateau;
+            ///
+            float slow;
+            /// 
+            float reduction;
+            /// the threshold which denotes at what point the pheromone level is set to 0
+            float threshold;
+    };
 } /* namespace ARA */
-#endif /* OMNETADDRESS_H_ */
+
+#endif 

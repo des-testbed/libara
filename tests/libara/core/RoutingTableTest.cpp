@@ -25,6 +25,7 @@
 
 #include "CppUTest/TestHarness.h"
 #include "RoutingTable.h"
+#include "LinearEvaporationPolicy.h"
 #include "RoutingTableEntry.h"
 #include "PacketType.h"
 #include "testAPI/mocks/AddressMock.h"
@@ -63,8 +64,10 @@ TEST(RoutingTableTest, testPacketWithUnregisteredAddressIsNotDeliverable) {
     CHECK(routingTable.isDeliverable(&packet) == false);
 }
 
-TEST(RoutingTableTest, testUdateRoutingTable) {
-    RoutingTable routingTable = RoutingTable();
+TEST(RoutingTableTest, testUpdateRoutingTable) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
+    RoutingTable routingTable = RoutingTable(evaporationPolicy);
     PacketMock packet = PacketMock();
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
@@ -84,7 +87,9 @@ TEST(RoutingTableTest, testUdateRoutingTable) {
 }
 
 TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
-    RoutingTable routingTable = RoutingTable();
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
+    RoutingTable routingTable = RoutingTable(evaporationPolicy);
     PacketMock packet = PacketMock();
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
@@ -113,7 +118,9 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
 }
 
 TEST(RoutingTableTest, testGetPossibleNextHops) {
-    RoutingTable routingTable = RoutingTable();
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
+    RoutingTable routingTable = RoutingTable(evaporationPolicy);
     AddressPtr sourceAddress (new AddressMock("Source"));
     AddressPtr destination1 (new AddressMock("Destination1"));
     AddressPtr destination2 (new AddressMock("Destination2"));
@@ -182,8 +189,9 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
 }
 
 TEST(RoutingTableTest, testGetPheromoneValue) {
-    // prepare the test
-    RoutingTable routingTable = RoutingTable();
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
+    RoutingTable routingTable = RoutingTable(evaporationPolicy);
     AddressPtr sourceAddress (new AddressMock("Source"));
     AddressPtr destination (new AddressMock("Destination"));
     AddressPtr nextHopAddress (new AddressMock("nextHop"));
