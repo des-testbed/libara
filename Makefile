@@ -1,18 +1,4 @@
-#
-# Make "debug" the default mode
-#
-ifndef MODE
-MODE = debug
-endif
-
-#
-# Configname determines where (in which subdirectory of out/)
-# makemake-generated makefiles create object files and other
-# build artifacts.
-#
-ifndef CONFIGNAME
-CONFIGNAME = gcc-$(MODE)
-endif
+include Makefile.inc
 
 all: checkmakefiles arasource inetmanet_headers
 	@echo -e "\n~~~ BUILDING OMNeT++ SIMULATIONS ~~~~\n"
