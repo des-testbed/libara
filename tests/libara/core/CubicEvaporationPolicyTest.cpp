@@ -23,26 +23,50 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "BestPheromoneForwardingPolicy.h"
+#include <iostream>
+#include <unistd.h>
+#include "CppUTest/TestHarness.h"
 
-#include <deque>
+#include "CubicEvaporationPolicy.h" 
 
 using namespace ARA;
 
-// todo: add exception for "no hop available", are not yet interfaces are not yet considered
-NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet){
-    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(packet);
+TEST_GROUP(CubicEvaporationPolicyTest) {};
 
-    RoutingTableEntry* bestEntry = NULL;
-    float globalMaximum = 0;
-    for(auto& possibleNextHop: *possibleNextHops) {
-        if(possibleNextHop->getPheromoneValue() > globalMaximum) {
-            bestEntry = possibleNextHop;
-            globalMaximum = bestEntry->getPheromoneValue();
-        }
-    }
+IGNORE_TEST(CubicEvaporationPolicyTest, testEvaporate) {
+    CubicEvaporationPolicy policy = CubicEvaporationPolicy();
+    // set the interval to 200 millisecond
+    policy.setInterval(200);
+    // 'trigger the evaporation mechanism
+    bool status = policy.checkForEvaporation();
+    // the 'last access time' has not been intialized
+    CHECK(!status);
+    // initialize the pheromone value
+    float pheromone = 1.;
+    // simply test the evaporate function
+    pheromone = policy.evaporate(pheromone);
+    DOUBLES_EQUAL(0.9, pheromone, 0.00001);
+/*
+    /// sleep for 10 ms
+    usleep(200);
+    // check the status
+    status = policy.checkForEvaporation();
+    // the 'last access time' should have been intialized
+    CHECK(status);
+    // simply test the evaporate function
+    pheromone = policy.evaporate(pheromone);
+    DOUBLES_EQUAL(0.81, pheromone, 0.00001);
 
-    NextHop* result = bestEntry->getNextHop();
-    //FIXME possibleNextHops muss noch gelöscht werden!
-    return result;
+    // set the interval to 10 millisecond
+    policy.setInterval(10);
+    /// sleep for 10 ms
+    usleep(200);
+    // check the status
+    status = policy.checkForEvaporation();
+    CHECK(status);
+    pheromone = policy.evaporate(pheromone);
+    // check if the threshold sets the pheromone value to null
+    DOUBLES_EQUAL(0.0, pheromone, 0.00001);
+*/
 }
+

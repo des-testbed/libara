@@ -39,7 +39,7 @@ namespace ARA {
  */
 class Packet {
 public:
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 1);
+    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 0);
     Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, unsigned int hopCount);
     Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, char type, unsigned int seqNr);
     virtual ~Packet();

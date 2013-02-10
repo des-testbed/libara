@@ -1,5 +1,5 @@
 /******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
  These sources were originally developed by Friedrich Große, Michael Frey
@@ -23,34 +23,26 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef STOCHASTIC_FORWARDING_POLICY_H_
-#define STOCHASTIC_FORWARDING_POLICY_H_
+#ifndef TIME_H_
+#define TIME_H_
 
-#include <deque>
-#include <ctime>
-#include <numeric>
-#include <stdlib.h>
-
-#include "Packet.h"
-#include "NextHop.h"
-#include "RoutingTable.h"
-#include "RoutingTableEntry.h"
-#include "ForwardingPolicy.h"
+#include <sys/time.h>
 
 namespace ARA {
+    /**
+     * The class provides methods for determining the difference between 
+     * two timestamps.
+     */
+    class Time {
+        public:
+          int getTimeDifferenceInSeconds(struct timeval*, struct timeval*);
+          int getTimeDifferenceInMilliseconds(struct timeval*, struct timeval*);
 
-class StochasticForwardingPolicy : public ForwardingPolicy {
-public:
-    StochasticForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {};
-    NextHop* getNextHop(const Packet*);
+        private:
+          /// the method returns the time difference in seconds
+          void getTimeDifference(struct timeval*, struct timeval*);
+    };
+}
 
-protected:
-    void initializeRandomNumberGenerator();
-    float getRandomNumber();
+#endif 
 
-    RoutingTable* routingTable;
-};
-
-} /* namespace ARA */
-
-#endif

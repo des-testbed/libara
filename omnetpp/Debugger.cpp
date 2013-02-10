@@ -13,32 +13,22 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef OMNETARACLIENT_H_
-#define OMNETARACLIENT_H_
-
-#include <csimplemodule.h>
-#include "AbstractARAClient.h"
-#include "NetworkInterface.h"
-#include "NextHop.h"
-#include "Packet.h"
+#include "Debugger.h"
 
 namespace ARA {
+namespace omnetpp {
 
-class OMNeTARAClient: public cSimpleModule, public AbstractARAClient {
+Define_Module(Debugger);
 
-protected:
-    //~~~ INHERITED FROM cSimpleModule ~~~~~~~
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
+void Debugger::initialize()
+{
+    // TODO - Generated method body
+}
 
-    //~~~ INHERITED FROM AbstractARAClient ~~~
-    NextHop* getNextHop(const Packet* packet);
-    void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
-    void deliverToSystem(const Packet* packet);
+void Debugger::handleMessage(cMessage *msg)
+{
+    EV << "Got message:" << msg;
+}
 
-private:
-    void sendInitialPacket();
-};
-
+} /* namespace omnetpp */
 } /* namespace ARA */
-#endif /* OMNETARACLIENT_H_ */

@@ -23,53 +23,45 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
+#include "OMNeTGate.h"
+#include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
-#include <hash_fun.h>
 
 using namespace std;
 
 namespace ARA {
+namespace omnetpp {
 
-OMNeTAddress::OMNeTAddress(const std::string name) {
-    this->address = name;
+OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
+    this->module = module;
+    this->gate = gate;
+    this->localAddress = shared_ptr<Address>(new OMNeTAddress(module->getName()));
 }
 
-bool OMNeTAddress::equals(const Address* otherAddress) const {
-    const OMNeTAddress* otherAddressMock = dynamic_cast<const OMNeTAddress*>(otherAddress);
-    if(otherAddressMock == NULL) {
+void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+    module->send(omnetPacket, gate);
+}
+
+void OMNeTGate::broadcast(const Packet* packet) {
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+    module->send(omnetPacket, gate);
+}
+
+bool OMNeTGate::equals(NetworkInterface* otherInterface) {
+    OMNeTGate* otherOMNeTInterface = dynamic_cast<OMNeTGate*>(otherInterface);
+    if(otherOMNeTInterface == NULL) {
         return false;
     }
     else {
-        return this->address.compare(otherAddressMock->address) == 0;
+        return strcmp(module->getFullName(), otherOMNeTInterface->module->getFullName()) == 0
+            && strcmp(gate->getFullName(), otherOMNeTInterface->gate->getFullName()) == 0;
     }
 }
 
-bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
-    shared_ptr<OMNeTAddress> otherOmnetMock (dynamic_pointer_cast<OMNeTAddress>(otherAddress));
-    if(otherOmnetMock == NULL) {
-        return false;
-    }
-    else {
-        return this->address.compare(otherOmnetMock->address) == 0;
-    }
+shared_ptr<Address> OMNeTGate::getLocalAddress() {
+    return localAddress;
 }
 
-size_t OMNeTAddress::getHashValue() const {
-    __gnu_cxx::hash<const char*> hashFunction;
-    return hashFunction(address.c_str());
-}
-
-string OMNeTAddress::getAddress() {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == "BROADCAST";
-}
-
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
-    return clone;
-}
-
+} /* namespace omnetpp */
 } /* namespace ARA */

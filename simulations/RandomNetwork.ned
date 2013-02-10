@@ -12,14 +12,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
-@namespace(ARA);
-package ara_simulation.simulations;
+package ara.simulations;
 
-simple OMNeTARAClient
-{
-    gates:
-        inout g[];
-}
+import ara.OMNeTARAClient;
 
 channel Link extends ned.DatarateChannel
 {
@@ -27,53 +22,117 @@ channel Link extends ned.DatarateChannel
         int cost = default(0);
 }
 
-network RandomNetwork
-{
+network RandomNetwork {
+    parameters:
+        string forwardingPolicy;
+        double deltaPhi;
+        double initialPhi;
+        
     @display("bgb=852,419");
     submodules:
         node0: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=347,247");
         }
         node1: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=464,268");
         }
         node2: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=299,114");
         }
         source: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=45,363");
         }
         node4: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=55,91");
         }
         node5: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=637,137");
         }
         node6: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=386,363");
         }
         node7: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=148,278");
         }
         node8: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=399,29");
         }
         node9: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=102,192");
         }
         node10: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=624,257");
         }
         node11: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=242,229");
         }
         node12: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=464,107");
         }
         node13: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=523,363");
         }
         destination: OMNeTARAClient {
+            parameters:
+              policy = forwardingPolicy;
+              deltaPhi = deltaPhi;
+              initialPhi = initialPhi;
             @display("p=776,153");
         }
     connections:

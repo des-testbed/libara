@@ -2,7 +2,7 @@
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ hese sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,43 +23,34 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "OMNeTGate.h"
-#include "OMNeTPacket.h"
-#include "OMNeTAddress.h"
+#ifndef OMNET_STOCHASTIC_FORWARDING_POLICY_H_
+#define OMNET_STOCHASTIC_FORWARDING_POLICY_H_
 
-using namespace std;
+#include "RoutingTable.h"
+#include "StochasticForwardingPolicy.h"
+
+#include <numeric>
+#include <omnetpp.h>
+
 
 namespace ARA {
+namespace omnetpp {
 
-OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
-    this->module = module;
-    this->gate = gate;
-    this->localAddress = shared_ptr<Address>(new OMNeTAddress(module->getName()));
-}
+   /**
+    * The class provides a stochastic forwarding policy for the OMNeTARAClient. The
+    * class overwrites the getRandomNumber() method of the base class, which uses a
+    * pseudo-random number generator provided by OMNeT++. 
+    */
+   class OMNeTStochasticForwardingPolicy : public StochasticForwardingPolicy {
+      public:
+          OMNeTStochasticForwardingPolicy(RoutingTable* routingTable);
 
-void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
-    module->send(omnetPacket, gate);
-}
+      protected:
+         /// The method returns a random number which uses OMNeT++ pseudo random number generators
+         float getRandomNumber();
+   };
 
-void OMNeTGate::broadcast(const Packet* packet) {
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
-    module->send(omnetPacket, gate);
-}
-
-bool OMNeTGate::equals(NetworkInterface* otherInterface) {
-    OMNeTGate* otherOMNeTInterface = dynamic_cast<OMNeTGate*>(otherInterface);
-    if(otherOMNeTInterface == NULL) {
-        return false;
-    }
-    else {
-        return strcmp(module->getFullName(), otherOMNeTInterface->module->getFullName()) == 0
-            && strcmp(gate->getFullName(), otherOMNeTInterface->gate->getFullName()) == 0;
-    }
-}
-
-shared_ptr<Address> OMNeTGate::getLocalAddress() {
-    return localAddress;
-}
-
+} /* namespace omnetpp */
 } /* namespace ARA */
+
+#endif

@@ -23,34 +23,37 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef STOCHASTIC_FORWARDING_POLICY_H_
-#define STOCHASTIC_FORWARDING_POLICY_H_
+#ifndef LINEAR_EVAPORATION_POLICY_H_
+#define LINEAR_EVAPORATION_POLICY_H_
 
-#include <deque>
-#include <ctime>
-#include <numeric>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
+#include <stdint.h>
 
-#include "Packet.h"
-#include "NextHop.h"
-#include "RoutingTable.h"
-#include "RoutingTableEntry.h"
-#include "ForwardingPolicy.h"
+#include "EvaporationPolicy.h"
 
-namespace ARA {
+namespace ARA { 
+   /**
+    * This class provides the linear evaporation function of the ant routing algorithm (ARA).
+    */
+    class CubicEvaporationPolicy : public EvaporationPolicy {
+        public:
+			CubicEvaporationPolicy();
+            CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold);
+            ~CubicEvaporationPolicy();
+            /// the method reduces the pheromone value of a routing table entry
+            float evaporate(float phi);
 
-class StochasticForwardingPolicy : public ForwardingPolicy {
-public:
-    StochasticForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {};
-    NextHop* getNextHop(const Packet*);
-
-protected:
-    void initializeRandomNumberGenerator();
-    float getRandomNumber();
-
-    RoutingTable* routingTable;
-};
-
+        private:
+            /// 
+            float plateau;
+            ///
+            float slow;
+            /// 
+            float reduction;
+            /// the threshold which denotes at what point the pheromone level is set to 0
+            float threshold;
+    };
 } /* namespace ARA */
 
-#endif
+#endif 

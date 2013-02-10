@@ -25,7 +25,7 @@
 
 #include "CppUTest/TestHarness.h"
 #include "RoutingTable.h"
-#include "BestPheromoneForwardingPolicy.h"
+#include "StochasticForwardingPolicy.h"
 #include "RoutingTableEntry.h"
 #include "NextHop.h"
 #include "PacketType.h"
@@ -35,16 +35,15 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 
 #include <iostream>
-#include <memory>
 
 using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-TEST_GROUP(BestPheromoneForwardingPolicyTest) {};
+TEST_GROUP(StochasticForwardingPolicyTest) {};
 
-TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
-    // prepare the test
+TEST(StochasticForwardingPolicyTest, testGetNextHop) {
+    // Prepare the test
     RoutingTable routingTable = RoutingTable();
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
@@ -56,13 +55,13 @@ TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
 
     PacketMock packet = PacketMock();
 
-    // start the test
+    // Start the test
     routingTable.update(destination, nextHopA, &interface, 1.2);
     routingTable.update(destination, nextHopB, &interface, 2.1);
     routingTable.update(destination, nextHopC, &interface, 2.3);
 
-    BestPheromoneForwardingPolicy policy(&routingTable);
-    NextHop node = policy.getNextHop(&packet);
+    StochasticForwardingPolicy policy(&routingTable);
+    policy.getNextHop(&packet);
+    //FIXME Continue this test
 
-    CHECK(nextHopC->equals(node.getAddress()));
 }

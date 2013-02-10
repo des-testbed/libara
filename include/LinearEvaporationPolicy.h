@@ -23,22 +23,36 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef ABSTRACT_FORWARDING_POLICY_H_
-#define  ABSTRACT_FORWARDING_POLICY_H_
+#ifndef LINEAR_EVAPORATION_POLICY_H_
+#define LINEAR_EVAPORATION_POLICY_H_
 
-#include "Packet.h"
-#include "NextHop.h"
-#include "RoutingTable.h"
+#include <cmath>
+#include <cstring>
+#include <stdint.h>
+#include <sys/time.h>
+
+#include "Time.h"
+#include "EvaporationPolicy.h"
 
 namespace ARA { 
-  class AbstractForwardingPolicy {
-    public:
-      AbstractForwardingPolicy(RoutingTable* pRoutingTable) : mRoutingTable(pRoutingTable){}
-      virtual NextHop getNextHop(Packet*) = 0;
+   /**
+    * This class provides the linear evaporation function of the ant routing algorithm (ARA).
+    */
+    class LinearEvaporationPolicy : public EvaporationPolicy {
+        public:
+            LinearEvaporationPolicy();
+            ~LinearEvaporationPolicy(){};
 
-    protected:
-      RoutingTable* mRoutingTable;
-  };
-} 
+            /// the method reduces the pheromone value of a routing table entry
+            float evaporate(float phi);
+
+        private:
+            void determineEvaporationFactor(int timeDifference);
+            /// the linear factor
+            float q;
+            /// the threshold which denotes at what point the pheromone level is set to 0
+            float threshold;
+    };
+} /* namespace ARA */
 
 #endif 

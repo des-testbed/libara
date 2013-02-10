@@ -2,7 +2,7 @@
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große, Michael Frey
+ These sources were originally developed by Friedrich Große
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,34 +23,55 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef STOCHASTIC_FORWARDING_POLICY_H_
-#define STOCHASTIC_FORWARDING_POLICY_H_
+#include "OMNeTAddress.h"
+#include <hash_fun.h>
 
-#include <deque>
-#include <ctime>
-#include <numeric>
-#include <stdlib.h>
-
-#include "Packet.h"
-#include "NextHop.h"
-#include "RoutingTable.h"
-#include "RoutingTableEntry.h"
-#include "ForwardingPolicy.h"
+using namespace std;
 
 namespace ARA {
+namespace omnetpp {
 
-class StochasticForwardingPolicy : public ForwardingPolicy {
-public:
-    StochasticForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {};
-    NextHop* getNextHop(const Packet*);
+OMNeTAddress::OMNeTAddress(const std::string name) {
+    this->address = name;
+}
 
-protected:
-    void initializeRandomNumberGenerator();
-    float getRandomNumber();
+bool OMNeTAddress::equals(const Address* otherAddress) const {
+    const OMNeTAddress* otherAddressMock = dynamic_cast<const OMNeTAddress*>(otherAddress);
+    if(otherAddressMock == NULL) {
+        return false;
+    }
+    else {
+        return this->address.compare(otherAddressMock->address) == 0;
+    }
+}
 
-    RoutingTable* routingTable;
-};
+bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
+    shared_ptr<OMNeTAddress> otherOmnetMock (dynamic_pointer_cast<OMNeTAddress>(otherAddress));
+    if(otherOmnetMock == NULL) {
+        return false;
+    }
+    else {
+        return this->address.compare(otherOmnetMock->address) == 0;
+    }
+}
 
+size_t OMNeTAddress::getHashValue() const {
+    __gnu_cxx::hash<const char*> hashFunction;
+    return hashFunction(address.c_str());
+}
+
+string OMNeTAddress::getAddress() {
+    return address;
+}
+
+bool OMNeTAddress::isBroadCast() {
+    return address == "BROADCAST";
+}
+
+Address* OMNeTAddress::clone() {
+    OMNeTAddress* clone = new OMNeTAddress(this->address);
+    return clone;
+}
+
+} /* namespace omnetpp */
 } /* namespace ARA */
-
-#endif

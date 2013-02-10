@@ -23,31 +23,32 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef OMNETADDRESS_H_
-#define OMNETADDRESS_H_
+#ifndef OMNETGATE_H_
+#define OMNETGATE_H_
 
-#include "Address.h"
-#include <string>
+#include <omnetpp.h>
+#include <memory>
+#include "NetworkInterface.h"
 
 namespace ARA {
+namespace omnetpp {
 
-class OMNeTAddress : public Address {
-public:
-    OMNeTAddress(std::string name);
+    class OMNeTGate: public ARA::NetworkInterface {
+    public:
+        OMNeTGate(cSimpleModule* module, cGate* gate);
 
-    bool equals(const Address* otherAddress) const;
-    bool equals(const std::shared_ptr<Address> otherAddress) const;
+        void send(const Packet* packet, std::shared_ptr<Address> recipient);
+        void broadcast(const Packet* packet);
+        bool equals(NetworkInterface* interface);
+        std::shared_ptr<Address> getLocalAddress();
 
-    size_t getHashValue() const;
-    bool isBroadCast();
-    Address* clone();
-
-    std::string getAddress();
-
-private:
-    std::string address;
-
-};
+    private:
+        cSimpleModule* module;
+        cGate* gate;
+        std::shared_ptr<Address> localAddress;
+    };
 
 } /* namespace ARA */
-#endif /* OMNETADDRESS_H_ */
+} /* namespace omnetpp */
+
+#endif /* OMNETGATE_H_ */

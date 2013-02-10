@@ -1,4 +1,6 @@
-/******************************************************************************
+#!/bin/bash
+
+SEARCH="/******************************************************************************
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
@@ -21,19 +23,18 @@
  ------------------------------------------------------------------------------
  For further information and questions please use the web site
  http://www.des-testbed.net/
- *******************************************************************************/
+ *******************************************************************************/"
 
-#include "CppUTest/TestHarness.h"
-#include <omnetpp.h>
-#include "OMNeTGate.h"
+REPLACE="/*
+ * \$FU-Copyright\$
+ */"
 
-using namespace ARA;
+SEARCH=$(echo "$SEARCH" | sed -e 's/[\/&*.()]/\\&/g')
+REPLACE=$(echo "$REPLACE" | sed -e 's/[\/&*()]/\\&/g')
 
-TEST_GROUP(OMNeTGateTest) {};
 
-/* TODO: Make this test work (i.e. check back with OMNeT++ API on how to create single simpleModule instances
-TEST(OMNeTGateTest, testCreate) {
-    cSimpleModule* module = new cSimpleModule();
-    OMNeTGate(module, "testGate");
-    delete module;
-}*/
+for i in `find . -type f`; do mkdir -p tmp/`dirname $i`; sed -e "s/$SEARCH/$REPLACE/g" $i > tmp/$i; done
+cd tmp
+cp -Rf * ..
+cd ..
+rm -rf tmp

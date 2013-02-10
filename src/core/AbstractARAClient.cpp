@@ -34,6 +34,8 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 AbstractARAClient::AbstractARAClient() {
     packetTrap = new PacketTrap(&routingTable);
+    /// set it to a 'random' initial value
+    this->initialPhi = 1.0;
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -76,7 +78,6 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
-        registerSentPacket(fant);
         broadCast(fant);
         delete fant;
     }
@@ -95,12 +96,12 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
         registerReceivedPacket(packet);
     }
 
-    handlePacket(packet);
+    handlePacket(packet, interface);
 }
 
-void AbstractARAClient::registerSentPacket(const Packet* packet) {
-    // TODO send packets should be stored in a separate list
-    registerReceivedPacket(packet);
+NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
+    ForwardingPolicy* forwardingPolicy = getForwardingPolicy();
+    return forwardingPolicy->getNextHop(packet);
 }
 
 void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterface* interface) {
@@ -110,12 +111,20 @@ void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterf
     delete duplicateWarningPacket;
 }
 
-void AbstractARAClient::handlePacket(const Packet* packet) {
+void AbstractARAClient::handlePacket(const Packet* packet, NetworkInterface* interface) {
     if(packet->isDataPacket()) {
         handleDataPacket(packet);
     }
     else if(packet->isAntPacket()) {
+        if(hasBeenSentByThisNode(packet) == false){
+            /// set the initial pheromone value
+            initializePheromone(packet, interface);
+        }
+
         handleAntPacket(packet);
+    }
+    else if(packet->getType() == PacketType::DUPLICATE_ERROR) {
+        handleDuplicateErrorPacket(packet, interface);
     }
     // TODO throw exception if we can not handle this packet
 }
@@ -130,11 +139,14 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
 }
 
 void AbstractARAClient::handleAntPacket(const Packet* packet) {
-    if(isDirectedToThisNode(packet) == false) {
-        broadCast(packet);
-    }
-    else {
-        handleAntPacketForThisNode(packet);
+    if(hasBeenSentByThisNode(packet) == false) {
+        
+        if(isDirectedToThisNode(packet) == false) {
+            broadCast(packet);
+        }
+        else {
+            handleAntPacketForThisNode(packet);
+        }
     }
 }
 
@@ -143,7 +155,6 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         Packet* bant = packet->createBANT(getNextSequenceNumber());
-        registerSentPacket(bant);
         broadCast(bant);
         delete bant;
     }
@@ -160,10 +171,25 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     }
 }
 
-bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) {
+void AbstractARAClient::handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface) {
+    routingTable.removeEntry(packet->getDestination(), packet->getSender(), interface);
+    // TODO we can also invalidate the ack timer for the packet
+}
+
+bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) const {
     AddressPtr destination = packet->getDestination();
     for(auto& interface: interfaces) {
         if(interface->getLocalAddress()->equals(destination)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
+    AddressPtr source = packet->getSource();
+    for(auto& interface: interfaces) {
+        if(interface->getLocalAddress()->equals(source)) {
             return true;
         }
     }
@@ -215,6 +241,21 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     else {
         listOfSequenceNumbers = foundPacketSeqNumbersFromSource->second;
         listOfSequenceNumbers->insert(packet->getSequenceNumber());
+    }
+}
+
+/**
+ * The method initializes the pheromone value of 
+ *
+ */
+void AbstractARAClient::initializePheromone(const Packet* packet, NetworkInterface* interface){
+    /// determine the hop count malus
+    float hopCountMalus = 1 / (float) packet->getHopCount();
+    /// compute the phi value   
+    float phi = this->initialPhi * hopCountMalus;
+    /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
+    if(!(this->routingTable.exists(packet->getSource(), packet->getSender(), interface))){
+        this->routingTable.update(packet->getSource(), packet->getSender(), interface, phi);
     }
 }
 

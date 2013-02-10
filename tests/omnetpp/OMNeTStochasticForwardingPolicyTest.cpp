@@ -23,29 +23,31 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef OMNETGATE_H_
-#define OMNETGATE_H_
-
-#include <omnetpp.h>
 #include <memory>
-#include "NetworkInterface.h"
+#include <iostream>
+#include "CppUTest/TestHarness.h"
 
-namespace ARA {
+#include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/PacketMock.h"
 
-class OMNeTGate: public NetworkInterface {
-public:
-    OMNeTGate(cSimpleModule* module, cGate* gate);
+#include "OMNeTStochasticForwardingPolicy.h"
 
-    void send(const Packet* packet, std::shared_ptr<Address> recipient);
-    void broadcast(const Packet* packet);
-    bool equals(NetworkInterface* interface);
-    std::shared_ptr<Address> getLocalAddress();
+using namespace ARA;
 
-private:
-    cSimpleModule* module;
-    cGate* gate;
-    std::shared_ptr<Address> localAddress;
-};
+typedef std::shared_ptr<Address> AddressPtr;
 
-} /* namespace ARA */
-#endif /* OMNETGATE_H_ */
+TEST_GROUP(OMNeTStochasticForwardingPolicyTest) {};
+
+// can't test the method since it is protected and the unit test is not a 'friend'
+/*
+TEST(OMNeTStochasticForwardingPolicyTest, testGetRandomNumber) {
+    // create a routing table without content 
+    RoutingTable routingTable = RoutingTable();
+    // create a policy
+    OMNeTStochasticForwardingPolicy policy(&routingTable);
+    // try to get a random number
+    float randomNumber = policy.getRandomNumber();
+
+    std::cout << " random number is " << randomNumber << std::endl;
+}
+*/

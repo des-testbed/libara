@@ -43,7 +43,10 @@ public:
     ~PacketTrap();
 
     /**
-     * Stores a packet within the packet trap until it is removed.
+     * Creates a copy of this packet and stores it until it is removed via
+     * PacketTrap::untrapPacket(const Packet*).
+     *
+     * All copies are destroyed in the destructor or when untrapped.
      */
     void trapPacket(const Packet* packet);
 

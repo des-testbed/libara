@@ -32,10 +32,12 @@
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "Packet.h"
+#include "ForwardingPolicy.h"
 
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
+#include <memory>
 
 namespace ARA {
 
@@ -45,11 +47,6 @@ class AbstractARAClient {
 public:
     AbstractARAClient();
     virtual ~AbstractARAClient();
-
-    /**
-     * TODO write some documentation
-     */
-    virtual NextHop* getNextHop(const Packet* packet) = 0;
 
     /**
      * This method is called each a time a new packet is received over the
@@ -85,9 +82,12 @@ public:
      * Sends the packet to the packets destination.
      *
      * If the packet is deliverable (e.g there is at least one route known
-     * in the routing table), the next hop is calculated in AbstractARAClient::getNextHop()
+     * in the routing table), the next hop is calculated via the current forwarding policy.
      * If there is no known route to the packet destination a FANT is generated and send
      * according to the ARA algorithm.
+     *
+     * Note: The packet instance may be deleted after this method so we need to
+     * clone the packet if we want to persist it in memory.
      */
     void sendPacket(const Packet* packet);
 
@@ -108,29 +108,43 @@ public:
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
+    /// The method initializes the pheromone value of a link
+    void initializePheromone(const Packet* packet, NetworkInterface* interface);
+
 protected:
 
     std::deque<NetworkInterface*> interfaces;
     RoutingTable routingTable;
     PacketTrap* packetTrap;
 
+    /// The member specifies the initial level 
+    double initialPhi;
+
     /**
-     * Remember this packet in the list of sent packets.
-     * This is used to prevent rebroadcasting ant packets that have been initially
-     * created and broadcasted by this node.
+     * This method is called to retrieve an instance of ForwardingPolicy
+     * each time the next hop for a given destination has to be determined.
+     *
+     * Note: If the forwarding policy is static (i.e. does never change), the
+     * implementation should store the forwarding policy as a member and just
+     * return a pointer to it instead of creating a new instance each time
+     * this method is called.
      */
-    void registerSentPacket(const Packet* packet);
+    virtual ForwardingPolicy* getForwardingPolicy() = 0;
 
 private:
     unsigned int nextSequenceNumber = 1;
     std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 
+    NextHop* getNextHop(const Packet* packet);
     void sendDuplicateWarning(const Packet* packet, NetworkInterface* interface);
-    void handlePacket(const Packet* packet);
+    void handlePacket(const Packet* packet, NetworkInterface* interface);
     void handleDataPacket(const Packet* packet);
     void handleAntPacket(const Packet* packet);
     void handleAntPacketForThisNode(const Packet* packet);
-    bool isDirectedToThisNode(const Packet* packet);
+    void handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface);
+    bool isDirectedToThisNode(const Packet* packet) const;
+    bool hasBeenSentByThisNode(const Packet* packet) const;
+
 };
 
 } /* namespace ARA */

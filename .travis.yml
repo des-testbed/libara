@@ -1,0 +1,16 @@
+Configuration for Travis CI
+# See http://about.travis-ci.org/docs/user/getting-started/
+language: cpp
+compiler: gcc
+script: make libaratest 
+branches:
+  only:
+    - master
+    - develop
+notifications:
+  recipients:
+    - friedrich.grosse@gmail.com
+  email:
+    on_success: change
+    on_failure: always
+

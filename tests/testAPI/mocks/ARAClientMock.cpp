@@ -25,12 +25,19 @@
 
 #include "ARAClientMock.h"
 #include "RoutingTableEntry.h"
+#include "BestPheromoneForwardingPolicy.h"
 
 #include <sstream>
 
 namespace ARA {
 
+ARAClientMock::ARAClientMock() {
+    forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
+}
+
 ARAClientMock::~ARAClientMock() {
+    delete forwardingPolicy;
+
     // delete the NetworkInterfaceMocks that have been created via createNewNetworkInterfaceMock
     while(interfaceMocks.empty() == false) {
         NetworkInterfaceMock* mock = interfaceMocks.back();
@@ -39,27 +46,8 @@ ARAClientMock::~ARAClientMock() {
     }
 }
 
-NextHop* ARAClientMock::getNextHop(const Packet* packet) {
-    if(routingTable.isDeliverable(packet)) {
-        std::deque<RoutingTableEntry*>* possibleHops = routingTable.getPossibleNextHops(packet);
-        // search for the best value
-        // TODO this can be replaced as soon as Michael is ready with the corresponding class
-        RoutingTableEntry* bestHop = NULL;
-
-        unsigned int nrOfPossibleRoutes = possibleHops->size();
-        for (unsigned int i = 0; i < nrOfPossibleRoutes; ++i) {
-            RoutingTableEntry* currentHop = possibleHops->at(i);
-            if(bestHop == NULL || currentHop->getPheromoneValue() > bestHop->getPheromoneValue()) {
-                bestHop = currentHop;
-            }
-        }
-
-        return bestHop->getNextHop();
-    }
-    else {
-        // TODO maybe it would be better to return a NULL Object (Pattern) instead of returning a NULL pointer
-        return NULL;
-    }
+ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
+    return forwardingPolicy;
 }
 
 void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {

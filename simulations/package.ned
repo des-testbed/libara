@@ -1,3 +1,3 @@
-package ara_simulation.simulations;
+package ara.simulations;
 
 @license(LGPL);

@@ -23,44 +23,33 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
-#include "RoutingTable.h"
-#include "StochasticForwardingPolicy.h"
-#include "RoutingTableEntry.h"
-#include "NextHop.h"
-#include "PacketType.h"
-#include "Exception.h" 
-#include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/PacketMock.h"
-#include "testAPI/mocks/NetworkInterfaceMock.h"
+#ifndef OMNETADDRESS_H_
+#define OMNETADDRESS_H_
 
-#include <iostream>
+#include "Address.h"
+#include <string>
 
-using namespace ARA;
+namespace ARA {
+namespace omnetpp {
 
-typedef std::shared_ptr<Address> AddressPtr;
+class OMNeTAddress : public Address {
+public:
+    OMNeTAddress(std::string name);
 
-TEST_GROUP(StochasticForwardingPolicyTest) {};
+    bool equals(const Address* otherAddress) const;
+    bool equals(const std::shared_ptr<Address> otherAddress) const;
 
-TEST(StochasticForwardingPolicyTest, testGetNextHop) {
-    // Prepare the test
-    RoutingTable routingTable = RoutingTable();
-    AddressPtr destination (new AddressMock("Destination"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    size_t getHashValue() const;
+    bool isBroadCast();
+    Address* clone();
 
-    // create multiple next hops
-    AddressPtr nextHopA (new AddressMock("nextHopA"));
-    AddressPtr nextHopB (new AddressMock("nextHopB"));
-    AddressPtr nextHopC (new AddressMock("nextHopC"));
+    std::string getAddress();
 
-    PacketMock packet = PacketMock();
+private:
+    std::string address;
 
-    // Start the test
-    routingTable.update(destination, nextHopA, &interface, 1.2);
-    routingTable.update(destination, nextHopB, &interface, 2.1);
-    routingTable.update(destination, nextHopC, &interface, 2.3);
+};
 
-    StochasticForwardingPolicy policy(&routingTable);
-    NextHop node = policy.getNextHop(&packet);
-
-}
+} /* namespace omnetpp */
+} /* namespace ARA */
+#endif /* OMNETADDRESS_H_ */

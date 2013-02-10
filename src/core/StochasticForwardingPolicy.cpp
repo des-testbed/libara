@@ -27,13 +27,9 @@
 
 using namespace ARA;
 
-StochasticForwardingPolicy::StochasticForwardingPolicy(RoutingTable* pRoutingTable):AbstractForwardingPolicy(pRoutingTable){}
-
-StochasticForwardingPolicy::~StochasticForwardingPolicy(){}
-
 // todo: add exception for "no hop available", are not yet interfaces are not yet considered
-NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket) {
-    std::deque<RoutingTableEntry*>* possibleNextHops = this->mRoutingTable->getPossibleNextHops(pPacket);
+NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet) {
+    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(packet);
     unsigned int nrOfPossibleNextHops = possibleNextHops->size();
 
     float sumOfPheromoneValues = .0;
@@ -66,7 +62,7 @@ NextHop StochasticForwardingPolicy::getNextHop(Packet* pPacket) {
         nodeIndex += 1;
     }
 
-    NextHop result = *(possibleNextHops->at(nodeIndex)->getNextHop());
+    NextHop* result = possibleNextHops->at(nodeIndex)->getNextHop();
     //FIXME possibleNextHops muss noch gelöscht werden!
     return result;
 }

@@ -26,31 +26,38 @@
 #ifndef ROUTINGTABLE_H_
 #define ROUTINGTABLE_H_
 
+#include "Packet.h"
 #include "Address.h"
 #include "NetworkInterface.h"
-#include "Packet.h"
+#include "EvaporationPolicy.h"
 #include "RoutingTableEntry.h"
+#include "LinearEvaporationPolicy.h"
 
-#include <unordered_map>
 #include <deque>
+#include <unordered_map>
 
 namespace ARA {
 
 class RoutingTable {
 
 public:
+    RoutingTable();
+    RoutingTable(EvaporationPolicy*);
     ~RoutingTable();
 
     float getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
     void update(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface, float pheromoneValue);
+    void removeEntry(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
     std::deque<RoutingTableEntry*>* getPossibleNextHops(std::shared_ptr<Address> destination);
     std::deque<RoutingTableEntry*>* getPossibleNextHops(const Packet* packet);
     bool isDeliverable(std::shared_ptr<Address> destination);
     bool isDeliverable(const Packet* packet);
+    void checkForEvaporation();
+    bool exists(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
 private:
     std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table;
-
+    EvaporationPolicy *evaporationPolicy;
 };
 
 } /* namespace ARA */

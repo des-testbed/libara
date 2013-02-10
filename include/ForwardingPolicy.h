@@ -23,34 +23,30 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef STOCHASTIC_FORWARDING_POLICY_H_
-#define STOCHASTIC_FORWARDING_POLICY_H_
-
-#include <deque>
-#include <ctime>
-#include <numeric>
-#include <stdlib.h>
+#ifndef FORWARDING_POLICY_H_
+#define FORWARDING_POLICY_H_
 
 #include "Packet.h"
 #include "NextHop.h"
-#include "RoutingTable.h"
-#include "RoutingTableEntry.h"
-#include "ForwardingPolicy.h"
 
-namespace ARA {
+namespace ARA { 
 
-class StochasticForwardingPolicy : public ForwardingPolicy {
+/**
+ * This purely virtual interface is used by the AbstractARAClient to determine
+ * the next hop for a given packet.
+ */
+class ForwardingPolicy {
 public:
-    StochasticForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {};
-    NextHop* getNextHop(const Packet*);
+    virtual ~ForwardingPolicy() {};
 
-protected:
-    void initializeRandomNumberGenerator();
-    float getRandomNumber();
+    /**
+     * Return the NextHop for the given packet according to this packet forwarding
+     * policy.
+     */
+    virtual NextHop* getNextHop(const Packet*) = 0;
 
-    RoutingTable* routingTable;
 };
 
 } /* namespace ARA */
 
-#endif
+#endif 

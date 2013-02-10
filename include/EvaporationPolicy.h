@@ -23,25 +23,50 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef BEST_FORWARDING_POLICY_H_
-#define BEST_FORWARDING_POLICY_H_
+#ifndef EVAPORATION_POLICY_H_
+#define EVAPORATION_POLICY_H_
 
-#include "ForwardingPolicy.h"
-#include "RoutingTable.h"
-#include "NextHop.h"
-#include "Packet.h"
+#include <stdint.h>
+#include <cstring>
+#include <sys/time.h>
+
+#include "Time.h"
 
 namespace ARA { 
+   /**
+    *
+    */
+    class EvaporationPolicy {
+        public:
+            EvaporationPolicy();
+            virtual ~EvaporationPolicy();
 
-class BestPheromoneForwardingPolicy : public ForwardingPolicy {
-public:
-    BestPheromoneForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {}
-    NextHop* getNextHop(const Packet*);
+            /// the method checks how much time has passed since the last access to the routing table
+            bool checkForEvaporation();
+            /// sets the time until the evaporation is triggered
+            void setInterval(int interval);
+            /// the method returns the different of the last access and the current date
+            int getTimeDifference(struct timeval *now);
+            /// the method returns how often the evaporation should take place
+            int getFactor();
 
-protected:
-    RoutingTable* routingTable;
-};
+            /// the method reduces the pheromone value of a routing table entry
+            virtual float evaporate(float phi) = 0;
+            
 
+        protected:
+            /// the factor which indicates how often the evaporation should take place 
+            uint8_t factor;
+            ///
+            Time *time;
+
+        private:
+            void determineEvaporationFactor(int timeDifference);
+            /// the last access time of the routing table
+			struct timeval *lastAccessTime;
+            /// the interval which denotes how much time has to pass in order to trigger the evaporation
+            int interval;
+    };
 } /* namespace ARA */
 
-#endif
+#endif 
