@@ -46,7 +46,7 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.1777035253" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="inet"/>
-									<listOptionValue builtIn="false" value="ara"/>
+									<listOptionValue builtIn="false" value="ARA"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.302378774" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
