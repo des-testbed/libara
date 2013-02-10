@@ -79,9 +79,6 @@ checkmakefiles:
 	echo; \
 	exit 1; \
 	fi
-
-installCppUTest:
-	@cd tests && $(MAKE) installCppUTest
 		
 doc: all
 	@if type doxygen >/dev/null 2>&1; then \
