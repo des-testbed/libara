@@ -43,8 +43,12 @@ inetmanet/.git:
     fi
 
 test: all
-	@echo -e "\n~~~ BUILDING TESTS ~~~~~~~~~~~~~~~~~~\n"
+	@echo -e "\n~~~ BUILDING ALL TESTS ~~~~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runTests	
+	
+libaratest: arasource
+	@echo -e "\n~~~ BUILDING LIB ARA TESTS ~~~~~~~~~~\n"
+	@cd tests && $(MAKE) runLibAraTests
 
 runSingleTest: all
 	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"

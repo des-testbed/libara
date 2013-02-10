@@ -19,85 +19,127 @@ CFLAGS += -std=c++11
 
 # Simulation kernel and user interface libraries
 OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
-INETMANET_LIB_DIR = ../inetmanet/src
-OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS) -L$(INETMANET_LIB_DIR) -linet
+ARA_LIB_DIR = ../src
+ARA_LIB = $(PROJECT_OUTPUT_DIR)/src/libara.so
 
-LD_LIB_PATH=$(OMNETPP_LIB_DIR):$(INETMANET_LIB_DIR)
+INETMANET_LIB_DIR = ../inetmanet/src
+
+CPPUTEST_BASE_DIR = ./cpputest
+CPPUTEST_LIB_DIR = $(CPPUTEST_BASE_DIR)/lib
+CPPUTEST_LIB = $(CPPUTEST_LIB_DIR)/libCppUTest.a
+
+OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
+LD_LIB_PATH=$(OMNETPP_LIB_DIR):$(INETMANET_LIB_DIR):$(ARA_LIB_DIR)
 
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-CPPUTEST_HOME = ../extern/cpputest
-INCLUDE_PATH= -I../include -I../include/omnetpp -I./ -I$(OMNETPP_INCL_DIR) -I$(CPPUTEST_HOME)/include
-LINKFLAGS= $(OMNETPP_LIBS) -L$(CPPUTEST_HOME)/lib -lCppUTest
+INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
+OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -I../include/omnetpp -I$(OMNETPP_INCL_DIR)
+LINKFLAGS = -L$(ARA_LIB_DIR) -lara -L$(CPPUTEST_LIB_DIR) -lCppUTest
+OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet
 
 # Enable CppUTest memory leak detection
-CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
-#CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
+CFLAGS += -include $(CPPUTEST_BASE_DIR)/include/CppUTest/MemoryLeakDetectorNewMacros.h
+#CFLAGS += -include $(CPPUTEST_BASE_DIR)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
 
-# Output directory ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-PROJECT_OUTPUT_DIR = ../out
-SRC_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/src
-TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/tests
+# Output directory and files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
+TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/tests
+COMPILED_OMNETPP_ARA = $(shell find $(PROJECT_OUTPUT_DIR)/omnetpp -type f -name '*.o')
+TEST_EXECUTABLE = runAllTests
+LIBARA_TEST_EXECUTABLE = libAraTests
+OMNETPP_ARA_TEST_EXECUTABLE = omnetAraTests
 
 # Test sources ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-COMPILED_SRC = $(shell find $(SRC_OUTPUT_DIR) -type f -name '*.o')
-TEST_SOURCES = $(shell find ./ -type f -name '*Test.cpp' -o -name 'Test*.cpp')
-COMPILED_TESTS = $(TEST_SOURCES:.cpp=.o)
+LIBARA_TEST_SRC = $(shell find ./libara -type f -name '*Test.cpp')
+LIBARA_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(LIBARA_TEST_SRC)))
+
+OMNETPP_ARA_TEST_SRC = $(shell find ./omnetpp -type f -name '*Test.cpp')
+OMNETPP_ARA_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(OMNETPP_ARA_TEST_SRC)))
+
 TESTAPI_SOURCES = $(shell find ./testAPI/ -name tests -prune -o -type f -name '*.cpp' -print)
-COMPILED_TESTAPI = $(TESTAPI_SOURCES:.cpp=.o)
-TEST_EXECUTABLE = runAllTests
+TESTAPI_SOURCES += ./TestRunner.cpp
+TESTAPI_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(TESTAPI_SOURCES)))
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-runSingleTest: $(COMPILED_TESTAPI) $(COMPILED_TESTS)
-	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)
-	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"
-	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testGetDeliverablePacket; then \
-		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi	
-
 runTests: all
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"	
 	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
-all: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TESTS)
-	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	
+runLibAraTests: $(LIBARA_TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING LIBARA TEST SUIT ~~~~~~~~\n"	
+	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE); then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+    fi
 
-.cpp.o: check_if_cpputest_is_installed # TODO why is this dependency not checked? if you remove this from all you see what I mean
-	@if [[ $< == *Test.cpp ]]; then \
-		nrOfTests=$$(grep -c "TEST(" $<); \
-		echo "Compiling $< ($$nrOfTests tests)"; \
+runOmnetAraTests: $(OMNETPP_ARA_TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING OMNET ARA TEST SUIT ~~~~~\n"	
+	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE); then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+    fi
+    
+runSingleTest: all
+	@echo -e "\n~~~ RUNNING A SINGLE TEST ~~~~~~~~~~~\n"
+	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testGetDeliverablePacket; then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+    fi	
+
+all: $(TEST_EXECUTABLE)
+
+#
+# Builds all available tests (libara and omnet ARA)
+#
+$(TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TEST_BIN)
+	@echo "Building the comlete test suit (./$(TEST_EXECUTABLE))"
+	@$(CXX) $(CFLAGS) $(OMNETPP_INCLUDE_PATH) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TEST_BIN) $(OMNETPP_LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE)
+	@ln -s -f $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE) $(TEST_EXECUTABLE)
+
+#
+# Tests only the libara sources
+#
+$(LIBARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN)
+	@echo "Building the libara test suit (./$(LIBARA_TEST_EXECUTABLE))"
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE)
+	@ln -s -f $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE) $(LIBARA_TEST_EXECUTABLE)
+
+#
+# Tests only the omnetpp ARA sources
+#
+$(OMNETPP_ARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(OMNETPP_ARA_TEST_BIN)
+	@echo "Building the libara test suit (./$(OMNETPP_ARA_TEST_EXECUTABLE))"
+	@$(CXX) $(CFLAGS) $(OMNETPP_INCLUDE_PATH) $(TESTAPI_BIN) $(OMNETPP_ARA_TEST_BIN) $(OMNETPP_LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE)
+	@ln -s -f $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
+
+#
+# Builds all cpp files in the test folder and its subfolders (recursive)
+#
+$(TESTS_OUTPUT_DIR)/%.o:	
+	@$(MKPATH) $(dir $@)
+	@if [[ $* == *Test ]]; then \
+		nrOfTests=$$(grep -c "TEST(" $*.cpp); \
+		echo "Compiling $*.cpp ($$nrOfTests tests)"; \
 	else  \
-		echo "Compiling $<"; \
+		echo "Compiling $*.cpp"; \
 	fi
-	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $< -o $@
+	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $*.cpp -o $@
+
+#
+# Builds the CppUTest Framework
+#
+$(CPPUTEST_LIB): $(CPPUTEST_BASE_DIR)/.git
+	@echo -e "\n~~~ BUILDING CPPUTEST FRAMEWORK ~~~~~\n"
+	@cd $(CPPUTEST_BASE_DIR) && $(MAKE)
+
+$(CPPUTEST_BASE_DIR)/.git:
+	@echo -e "\n~~~ INITIALIZING CPPUTEST SUBMODULE ~\n";
+	@cd ../ && git submodule init tests/cpputest;
+	@cd ../ && git submodule update tests/cpputest;
 
 clean:
-	rm -f $(TEST_EXECUTABLE) $(COMPILED_TESTS) $(COMPILED_TESTAPI)
-
-check_if_cpputest_is_installed:
-	@if ! [ -d "$(CPPUTEST_HOME)" ]; then \
-	echo >&2; \
-	echo '======================================================================='>&2; \
-	echo 'ERROR: It seems like CppUTest is not correctly installed. '>&2; \
-	echo '       Please run make installCppUTest and try again'>&2; \
-	echo '======================================================================='>&2; \
-	echo>&2; \
-	exit 1; \
-	fi
-	
-installCppUTest:
-	@echo -e "\n~~~ INSTALLING CppUTest FRAMEWORK FROM SOURCE ~~~~~~~~~~~~~~~~~~~\n"
-	@if ! [ -d "../extern" ]; then \
-	mkdir "../extern"; \
-	fi
-	git clone git://github.com/FGrosse/cpputest.git $(CPPUTEST_HOME)
-	cd $(CPPUTEST_HOME) && $(MAKE)
-	@echo; \
-	echo '======================================================================='; \
-	echo 'CppUTest framework has been installed successfully in ./extern/cpputest'; \
-	echo '======================================================================='; \
-	echo; \
-
+	rm -f $(TEST_EXECUTABLE) $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE)
+	rm -f $(LIBARA_TEST_EXECUTABLE) $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE)
+	rm -f $(OMNETPP_ARA_TEST_EXECUTABLE) $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE)
+	rm -f $(TESTAPI_BIN)
+	rm -f $(LIBARA_TESTS_BIN)
+	rm -f $(OMNETPP_ARA_TESTS_BIN)
