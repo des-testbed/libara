@@ -3,6 +3,10 @@ Configuration for Travis CI
 language: cpp
 compiler: gcc
 script: make libaratest 
+branches:
+  only:
+    - master
+    - develop
 notifications:
   recipients:
     - friedrich.grosse@gmail.com
