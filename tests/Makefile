@@ -131,8 +131,8 @@ $(CPPUTEST_LIB): $(CPPUTEST_BASE_DIR)/.git
 
 $(CPPUTEST_BASE_DIR)/.git:
 	@echo -e "\n~~~ INITIALIZING CPPUTEST SUBMODULE ~\n";
-	@cd ../ && git submodule init cpputest; \
-	@cd ../ && git submodule update cpputest; \
+	@cd ../ && git submodule init tests/cpputest;
+	@cd ../ && git submodule update tests/cpputest;
 
 clean:
 	rm -f $(TEST_EXECUTABLE) $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE)
