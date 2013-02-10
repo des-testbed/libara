@@ -1,6 +1,6 @@
 [submodule "inetmanet"]
 	path = inetmanet
-	url = git@github.com:FGrosse/inetmanet.git
+	url = git://github.com:FGrosse/inetmanet.git
 [submodule "tests/cpputest"]
 	path = tests/cpputest
-	url = git@github.com:FGrosse/cpputest.git
+	url = git://github.com:FGrosse/cpputest.git
