@@ -1,7 +1,9 @@
 # Configuration for Travis CI
 # See http://about.travis-ci.org/docs/user/getting-started/
 language: cpp
-compiler: gcc
+compiler:
+  - gcc
+  - clang
 script: "make libaratest"
 branches:
   only:
