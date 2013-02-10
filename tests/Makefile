@@ -84,16 +84,19 @@ all: $(TEST_EXECUTABLE)
 $(TEST_EXECUTABLE): check_if_cpputest_is_installed $(LIB_ARA_BIN) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TEST_BIN)
 	@echo "Building the comlete test suit (./$(TEST_EXECUTABLE))"
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TEST_BIN) $(LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE)
+	@ln -s $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE) $(TEST_EXECUTABLE)
 
 # Tests only the libara sources
 $(LIBARA_TEST_EXECUTABLE): check_if_cpputest_is_installed $(LIB_ARA_BIN) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN)
 	@echo "Building the libara test suit (./$(LIBARA_TEST_EXECUTABLE))"
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE)
+	@ln -s $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE) $(LIBARA_TEST_EXECUTABLE)
 
 # Tests only the omnetpp ARA sources
 $(OMNETPP_ARA_TEST_EXECUTABLE): check_if_cpputest_is_installed $(LIB_ARA_BIN) $(TESTAPI_BIN) $(OMNETPP_ARA_TEST_BIN)
 	@echo "Building the libara test suit (./$(OMNETPP_ARA_TEST_EXECUTABLE))"
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(TESTAPI_BIN) $(OMNETPP_ARA_TEST_BIN) $(LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE)
+	@ln -s $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
 
 # Builds all cpp files in the test folder and its subfolders (recursive)
 $(TESTS_OUTPUT_DIR)/%.o:	
@@ -107,10 +110,12 @@ $(TESTS_OUTPUT_DIR)/%.o:
 	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $*.cpp -o $@
 
 clean:
-	rm -f $(TEST_EXECUTABLE)
-	rm -f $(LIBARA_TEST_EXECUTABLE)
-	rm -f $(LIBARA_TESTS_BIN)
+	rm -f $(TEST_EXECUTABLE) $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE)
+	rm -f $(LIBARA_TEST_EXECUTABLE) $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE)
+	rm -f $(OMNETPP_ARA_TEST_EXECUTABLE) $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 	rm -f $(TESTAPI_BIN)
+	rm -f $(LIBARA_TESTS_BIN)
+	rm -f $(OMNETPP_ARA_TESTS_BIN)
 
 check_if_cpputest_is_installed:
 	@if ! [ -d "$(CPPUTEST_LIB_DIR)" ]; then \
