@@ -1,3 +1,6 @@
+include ../Makefile.inc
+
+ifneq ("$(NO_OMNET)", "TRUE")
 # Pull in OMNeT++ configuration (Makefile.inc or configuser.vc) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ifneq ("$(OMNETPP_CONFIGFILE)","")
 CONFIGFILE = $(OMNETPP_CONFIGFILE)
@@ -14,37 +17,37 @@ $(error Config file '$(CONFIGFILE)' does not exist -- add the OMNeT++ bin direct
 endif
 
 include $(CONFIGFILE)
+endif
 
+# Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11
+INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
+LINKFLAGS = -L$(ARA_LIB_DIR) -lara -L$(CPPUTEST_LIB_DIR) -lCppUTest
+LD_LIB_PATH = $(ARA_LIB_DIR)
 
-# Simulation kernel and user interface libraries
-OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
+# libARA stuff
 ARA_LIB_DIR = ../src
-ARA_LIB = $(PROJECT_OUTPUT_DIR)/src/libara.so
+ARA_LIB = $(ARA_LIB_DIR)/$(ARA_LIB_NAME)
 
-INETMANET_LIB_DIR = ../inetmanet/src
-
+# CppUTest options
 CPPUTEST_BASE_DIR = ./cpputest
 CPPUTEST_LIB_DIR = $(CPPUTEST_BASE_DIR)/lib
 CPPUTEST_LIB = $(CPPUTEST_LIB_DIR)/libCppUTest.a
-
-OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
-LD_LIB_PATH=$(OMNETPP_LIB_DIR):$(INETMANET_LIB_DIR):$(ARA_LIB_DIR)
-
-# Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
-OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -I../include/omnetpp -I$(OMNETPP_INCL_DIR)
-LINKFLAGS = -L$(ARA_LIB_DIR) -lara -L$(CPPUTEST_LIB_DIR) -lCppUTest
-OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet
-
-# Enable CppUTest memory leak detection
 CFLAGS += -include $(CPPUTEST_BASE_DIR)/include/CppUTest/MemoryLeakDetectorNewMacros.h
-#CFLAGS += -include $(CPPUTEST_BASE_DIR)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
+
+# Simulation kernel and user interface libraries
+OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
+OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
+INETMANET_LIB_DIR = ../inetmanet/src
+OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -I../include/omnetpp -I$(OMNETPP_INCL_DIR)
+OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet
+OMNETPP_LIB_PATH = $(LD_LIB_PATH):$(OMNETPP_LIB_DIR):$(INETMANET_LIB_DIR)
 
 # Output directory and files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
 TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/tests
 COMPILED_OMNETPP_ARA = $(shell find $(PROJECT_OUTPUT_DIR)/omnetpp -type f -name '*.o')
+
 TEST_EXECUTABLE = runAllTests
 LIBARA_TEST_EXECUTABLE = libAraTests
 OMNETPP_ARA_TEST_EXECUTABLE = omnetAraTests
@@ -63,27 +66,21 @@ TESTAPI_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(TESTAPI_SOURC
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 runTests: all
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE); then \
+	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
 runLibAraTests: $(LIBARA_TEST_EXECUTABLE)
-	@echo -e "\n~~~ RUNNING LIBARA TEST SUIT ~~~~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE); then \
+	@echo -e "\n~~~ RUNNING libARA TEST SUIT ~~~~~~~~\n"	
+	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(LIBARA_TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
 runOmnetAraTests: $(OMNETPP_ARA_TEST_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING OMNET ARA TEST SUIT ~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE); then \
+	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH):$$LD_LIBRARY_PATH ./$(OMNETPP_ARA_TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
-    
-runSingleTest: all
-	@echo -e "\n~~~ RUNNING A SINGLE TEST ~~~~~~~~~~~\n"
-	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE) -n testGetDeliverablePacket; then \
-		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi	
 
 all: $(TEST_EXECUTABLE)
 

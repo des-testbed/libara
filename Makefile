@@ -34,7 +34,7 @@ test: all
 	
 libaratest: arasource
 	@echo -e "\n~~~ BUILDING LIB ARA TESTS ~~~~~~~~~~\n"
-	@cd tests && $(MAKE) runLibAraTests
+	@cd tests && $(MAKE) runLibAraTests NO_OMNET=TRUE
 
 runSingleTest: all
 	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"

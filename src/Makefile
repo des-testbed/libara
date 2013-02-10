@@ -19,7 +19,7 @@ all: $(ARA_LIB_NAME)
 #
 $(ARA_LIB_NAME): $(LIBARA_O)
 	@echo "Building libara (./$(ARA_LIB_NAME))"
-	@$(CXX) -shared -Wl,-soname,$(ARA_SONAME) $(COPTS) $(LINKFLAGS) $(LIBARA_O) \
+	@$(CXX) -shared -Wl,-soname,$(ARA_LIB_NAME) $(COPTS) $(LINKFLAGS) $(LIBARA_O) \
 		-o $(LIBARA_OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
 	@ln -s -f $(LIBARA_OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION) $(ARA_LIB_NAME)
 	
