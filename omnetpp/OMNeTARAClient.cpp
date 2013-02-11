@@ -40,21 +40,13 @@ void OMNeTARAClient::initialize(int stage) {
 
 void OMNeTARAClient::handleMessage(cMessage *msg) {
     if(isFromUpperLayer(msg)) {
-        IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
-        IPAddress sourceIP = controlInfo->getSrcAddr();
-        IPAddress destinationIP = controlInfo->getDestAddr();
-        AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
-        AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
-        //TODO encaps packet (HIER WEITER MACHEN)
-        //OMNeTPacket initialPacket = OMNeTPacket(source, destination, source, PacketType::DATA, getNextSequenceNumber(), "Hello ARA World");
-
-        EV << "Handling upper layer message from " << source << " to " << destination << ": "<< msg;
+        handleUpperLayerMessage(msg);
     }
     else {
         EV << "Message from lower layer";
+        //receivePacket(omnetPacket, getNetworkInterface(msg->getArrivalGate()->getIndex()));
     }
 
-    //receivePacket(omnetPacket, getNetworkInterface(msg->getArrivalGate()->getIndex()));
     delete msg;
 }
 
