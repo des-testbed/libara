@@ -36,14 +36,14 @@ bool EvaporationPolicy::checkForEvaporation(){
         if(timeDifference > this->interval){
             /// compute the factor
             determineEvaporationFactor(timeDifference);
-            /// delete the last access time
-            delete this->lastAccessTime;
             /// update the timestamp
-            this->lastAccessTime->update(*now);
+            this->lastAccessTime->update(*(this->now));
             /// return the result
             return true;
         }
     }else{
+       // check
+       this->now->initialize();
        this->lastAccessTime->initialize();
     }
 
