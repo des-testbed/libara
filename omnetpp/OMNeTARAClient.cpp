@@ -11,7 +11,7 @@ typedef std::shared_ptr<Address> AddressPtr;
 Define_Module(OMNeTARAClient);
 
 int OMNeTARAClient::numInitStages() const {
-    return 2;
+    return 3;
 }
 
 /**
