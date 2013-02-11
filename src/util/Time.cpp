@@ -66,6 +66,11 @@ void Time::update(){
     this->initialize();
 }
 
+void Time::update(Time t){
+    this->timestamp->tv_sec = t.getTimestamp()->tv_sec;
+    this->timestamp->tv_usec = t.getTimestamp()->tv_usec;
+}
+
 void Time::initialize(){
     gettimeofday(this->timestamp, 0);
 }

@@ -39,7 +39,7 @@ bool EvaporationPolicy::checkForEvaporation(){
             /// delete the last access time
             delete this->lastAccessTime;
             /// update the timestamp
-            this->lastAccessTime = now;
+            this->lastAccessTime->update(*now);
             /// return the result
             return true;
         }

@@ -19,6 +19,7 @@ namespace ARA {
             long int toMilliseconds();
 
             void update();
+            void update(TimeMock t);
             
 /*
    

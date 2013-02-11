@@ -79,6 +79,7 @@ namespace ARA {
 
 
           virtual void update();
+          virtual void update(Time timestamp);
  
           /**
            * The method checks if the timestamp is initialized.
