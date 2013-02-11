@@ -8,14 +8,18 @@ namespace ARA {
         public:
             TimeMock();
             TimeMock(struct timeval* timestamp);
+            ~TimeMock();
 
-            int usleep(int seconds);
+            void usleep(int seconds);
 
             TimeMock operator-(const TimeMock& right);
             TimeMock operator-=(const TimeMock& right);
 
             int toSeconds();
-            //virtual long int toMilliseconds();
+            long int toMilliseconds();
+
+            void update();
+            
 /*
    
             virtual ~TimeMock();

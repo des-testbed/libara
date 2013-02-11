@@ -70,6 +70,8 @@ namespace ARA {
            */
           struct timeval* getTimestamp() const;
 
+          void setTimestamp(struct timeval* timestamp);
+
           /**
            * The method checks if the timestamp is initialized.
            */

@@ -61,6 +61,9 @@ runTests: all
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
+runGDB: all
+	echo $(LD_LIB_PATH)
+
 all: check_if_cpputest_is_installed $(COMPILED_TESTAPI) $(COMPILED_TESTS)
 	@echo "Building executable test suit (./tests/$(TEST_EXECUTABLE))" 
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) -o $(TEST_EXECUTABLE) $(COMPILED_SRC) $(COMPILED_TESTS) $(COMPILED_TESTAPI) $(LINKFLAGS)	

@@ -9,13 +9,31 @@ TimeMock::TimeMock(){}
  */
 TimeMock::TimeMock(struct timeval* timestamp):Time(timestamp){}
 
+TimeMock::~TimeMock(){}
+
 /**
  *
  */
-int TimeMock::usleep(int seconds){
-  return 0;
+void TimeMock::usleep(int seconds){
+  // create a new timestamp
+  struct timeval *timestamp = new timeval;
+  // copy over the old values
+  timestamp->tv_sec = this->getTimestamp()->tv_sec;
+  timestamp->tv_usec = this->getTimestamp()->tv_usec;
+  // add the sleep time
+  timestamp->tv_usec += seconds;
+  // updat ehte value
+  this->setTimestamp(timestamp);
 }
 
 int TimeMock::toSeconds(){
-  return 0;
+  return this->getTimestamp()->tv_sec;
+}
+
+long int TimeMock::toMilliseconds(){
+  return this->getTimestamp()->tv_usec;
+}
+
+void TimeMock::update(){
+  /// this is a stub
 }

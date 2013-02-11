@@ -69,3 +69,8 @@ void Time::update(){
 void Time::initialize(){
     gettimeofday(this->timestamp, 0);
 }
+
+void Time::setTimestamp(struct timeval* timestamp){
+    delete this->timestamp;
+    this->timestamp = timestamp;
+}
