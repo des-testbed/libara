@@ -7,7 +7,7 @@ LIBARA_SRC = $(shell find ./ -type f -name '*.cpp')
 LIBARA_O = $(subst .cpp,.o, $(addprefix $(LIBARA_OUTPUT_DIR)/, $(LIBARA_SRC)))
 
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-CFLAGS += -std=c++11
+CFLAGS += -std=c++11 -fPIC
 INCLUDE_PATH = -I../include -I. -Icore -Iexceptions -Iutil
 COPTS = $(CFLAGS) $(INCLUDE_PATH)
 
