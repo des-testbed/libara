@@ -28,13 +28,17 @@
 #include "CppUTest/TestHarness.h"
 
 #include "LinearEvaporationPolicy.h" 
+#include "testAPI/mocks/TimeMock.h"
 
 using namespace ARA;
 
 TEST_GROUP(LinearEvaporationPolicyTest) {};
 
 TEST(LinearEvaporationPolicyTest, testGetFactor) {
-    LinearEvaporationPolicy policy = LinearEvaporationPolicy();
+    // create a time mock
+    TimeMock* time = new TimeMock();
+    LinearEvaporationPolicy policy = LinearEvaporationPolicy(time);
+
     policy.setInterval(100);
     bool status = policy.checkForEvaporation();
     CHECK(!status);

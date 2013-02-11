@@ -6,11 +6,13 @@ using namespace ARA;
 
 EvaporationPolicy::EvaporationPolicy():factor(1),interval(100){ 
     this->lastAccessTime = new Time();
+    this->now = new Time();
 }
 
-EvaporationPolicy::EvaporationPolicy(Time *time):lastAccessTime(time),factor(1),interval(100){}
+EvaporationPolicy::EvaporationPolicy(Time *last, Time *now):factor(1),lastAccessTime(last),now(now),interval(100){}
 
 EvaporationPolicy::~EvaporationPolicy(){
+    delete this->now;
     delete this->lastAccessTime;
 } 
 
@@ -27,9 +29,9 @@ EvaporationPolicy::~EvaporationPolicy(){
 bool EvaporationPolicy::checkForEvaporation(){
     if(this->lastAccessTime->isInitialized()){
         /// get the current date
-        Time* now = new Time();
+        now->update();
         /// compute the time difference
-        long int timeDifference = (*(this->lastAccessTime) - *(now)).toMilliseconds();
+        long int timeDifference = (*(this->lastAccessTime) - *(this->now)).toMilliseconds();
         /// compare the timestamps 
         if(timeDifference > this->interval){
             /// compute the factor

@@ -75,6 +75,8 @@ namespace ARA {
            */
           virtual bool isInitialized();
 
+
+          virtual void update();
  
           /**
            * The method checks if the timestamp is initialized.

@@ -102,6 +102,10 @@ bool OMNeTTime::isInitialized(){
     return (this->timestamp.raw() != 0);
 }
 
+void OMNeTTime::update(){
+    this->initialize();
+}
+
 /**
  * The method initializes the timestamp using the global 
  * simTime() function of the OMNeT++ network simulator

@@ -39,7 +39,7 @@ namespace ARA {
     class EvaporationPolicy {
         public:
             EvaporationPolicy();
-            EvaporationPolicy(Time *time);
+            EvaporationPolicy(Time *lastAccessTime, Time *now);
             virtual ~EvaporationPolicy();
 
             /// the method checks how much time has passed since the last access to the routing table
@@ -60,6 +60,8 @@ namespace ARA {
             void determineEvaporationFactor(int timeDifference);
             /// the last access time of the routing table
             Time *lastAccessTime;
+            /// the actual system time
+            Time *now;
             /// the interval which denotes how much time has to pass in order to trigger the evaporation
             long int interval;
     };

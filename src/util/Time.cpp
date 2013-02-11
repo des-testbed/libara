@@ -62,6 +62,10 @@ bool Time::isInitialized(){
     return (this->timestamp->tv_sec != 0);
 }
 
+void Time::update(){
+    this->initialize();
+}
+
 void Time::initialize(){
     gettimeofday(this->timestamp, 0);
 }

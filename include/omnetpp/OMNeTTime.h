@@ -58,6 +58,8 @@ namespace ARA {
            */
           virtual bool isInitialized();
 
+          virtual void update();
+
           /**
            * The method initializes the timestamp.
            */
