@@ -10,15 +10,29 @@ OMNeTTime::OMNeTTime(SimTime timestamp):timestamp(timestamp){}
 
 OMNeTTime::~OMNeTTime(){ }
 
+/**
+ * The method provides the subtraction of two timestamps using
+ * the '-' operator.
+ * 
+ * @return A new instance of a OMNeT++ simulation time timestamp (encapsulated in class OMNeTTime)
+ */
 OMNeTTime OMNeTTime::operator-(const OMNeTTime& right){
-    SimTime result = (*this->getTimestamp() - *right.getTimestamp());
+    SimTime result = (this->getTimestamp() - right.getTimestamp());
     return OMNeTTime(result);
 }
 
+/**
+ * The method provides the subtraction of two timestamps using
+ * the '-=' operator. In contrast to the '-' operator this operation
+ * does not return a new object, but updates the value of the right
+ * operand.
+ * 
+ * @return A OMNeT++ simulation time timestamp (encapsulated in class OMNeTTime)
+ */
 OMNeTTime OMNeTTime::operator-=(const OMNeTTime& right){
     // fixme
-    SimTime result = (*this->getTimestamp() - *right.getTimestamp());
-    return OMNeTTime(result);
+    this->timestamp = this->timestamp - right.getTimestamp();
+    return *this;
 }
 
 /**
@@ -40,20 +54,13 @@ long int OMNeTTime::toMilliseconds(){
 }
 
 /**
- * TODO: change documentation of method
- * The method computes the time difference between two timestamps in OMNeT++ 
- * simulation time (as provided by the class SimTime). The method checks if
- * the desired time resolution meets the pre-set time resolution of the 
- * simulation (set in omnetpp.ini) which is by default picoseconds. If this
- * is not the case, the difference between the two timestamps is computed in
- * the desired time scale (e.g. seconds or milliseconds).
+ * The method converts the simulation time to the desired time scale as specified in
+ * the parameter of method. 
  *
- * @param a in The newer timestamp
- * @param b in The older timestamp
  * @param scaleExponent in The desired time scale
  *
- * @return The method returns the time difference between two timestamps based 
- *   on the desired time scale
+ * @return The method returns the (raw) simulation time in the
+ *   desired time scale
  */
 int OMNeTTime::convertSimulationTime(int scaleExponent){
     // get the simulation time exponent
@@ -76,15 +83,29 @@ int OMNeTTime::convertSimulationTime(int scaleExponent){
     return this->timestamp.raw();
 }
 
-
+/**
+ * The method returns the simulation time member variable
+ *
+ * @return The simulation time member variable
+ */
 SimTime OMNeTTime::getTimestamp() const{
     return (this->timestamp);
 }
 
+/**
+ * The method checks if the timestamp is initialized.
+ *
+ * @return The method returns true if the timestamp is initialized,
+ *   otherwise false.
+ */
 bool OMNeTTime::isInitialized(){
     return (this->timestamp.raw() != 0);
 }
 
+/**
+ * The method initializes the timestamp using the global 
+ * simTime() function of the OMNeT++ network simulator
+ */
 void OMNeTTime::initialize(){
     /// TODO: check if that's the way to go
     this->timestamp = simTime();

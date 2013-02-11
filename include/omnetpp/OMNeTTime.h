@@ -51,7 +51,7 @@ namespace ARA {
           ///
           virtual long int toMilliseconds();
           ///
-          SimTime* getTimestamp() const;
+          SimTime getTimestamp() const;
 
           /**
            * The method checks if the timestamp is initialized.
