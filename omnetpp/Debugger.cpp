@@ -15,9 +15,10 @@
 
 #include "Debugger.h"
 
-Define_Module(ARA::Debugger);
-
 namespace ARA {
+namespace omnetpp {
+
+Define_Module(Debugger);
 
 void Debugger::initialize()
 {
@@ -29,4 +30,5 @@ void Debugger::handleMessage(cMessage *msg)
     EV << "Got message:" << msg;
 }
 
-}
+} /* namespace omnetpp */
+} /* namespace ARA */

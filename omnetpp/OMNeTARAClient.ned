@@ -1,5 +1,5 @@
-@namespace(ARA);
-package ara_simulation.simulations;
+@namespace(ARA::omnetpp);
+package ara;
 
 simple OMNeTARAClient
 {

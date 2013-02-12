@@ -17,7 +17,8 @@
 #include "IPAddressResolver.h"
 #include "IPControlInfo.h"
 
-using namespace ARA;
+namespace ARA {
+namespace omnetpp {
 
 Define_Module(ARATrafficGenerator);
 
@@ -103,3 +104,6 @@ void ARATrafficGenerator::printPacket(cPacket *msg) {
         ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
     }
 }
+
+} /* namespace omnetpp */
+} /* namespace ARA */

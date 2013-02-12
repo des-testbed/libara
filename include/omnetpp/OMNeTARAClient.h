@@ -31,8 +31,9 @@
 #include "BestPheromoneForwardingPolicy.h"
 #include "OMNeTStochasticForwardingPolicy.h"
 
-
 namespace ARA {
+namespace omnetpp {
+
     /**
      * The class represents the implementation of the ant routing algorithm (ARA)
      * for the OMNeT++ simulation framework. 
@@ -43,7 +44,7 @@ namespace ARA {
      *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
      *
      */
-    class OMNeTARAClient: public cSimpleModule, public AbstractARAClient {
+    class OMNeTARAClient: public cSimpleModule, public ARA::AbstractARAClient {
         protected:
             //~~~ INHERITED FROM cSimpleModule ~~~~~~~
             virtual void initialize();
@@ -65,5 +66,8 @@ namespace ARA {
             /// The member denotes the constant which is used in the pheromone reinforcement of a path
             double deltaPhi;
     };
+
 } /* namespace ARA */
-#endif 
+} /* namespace omnetpp */
+
+#endif /* OMNETARACLIENT_H_ */

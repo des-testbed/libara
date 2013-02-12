@@ -26,18 +26,16 @@
 #ifndef OMNET_STOCHASTIC_FORWARDING_POLICY_H_
 #define OMNET_STOCHASTIC_FORWARDING_POLICY_H_
 
-#include <numeric>
-//#include <stdlib.h>
-#include <omnetpp.h>
-
-/*
-#include "Packet.h"
-#include "NextHop.h"
-*/
 #include "RoutingTable.h"
 #include "StochasticForwardingPolicy.h"
 
+#include <numeric>
+#include <omnetpp.h>
+
+
 namespace ARA {
+namespace omnetpp {
+
    /**
     * The class provides a stochastic forwarding policy for the OMNeTARAClient. The
     * class overwrites the getRandomNumber() method of the base class, which uses a
@@ -48,10 +46,11 @@ namespace ARA {
           OMNeTStochasticForwardingPolicy(RoutingTable* routingTable);
 
       protected:
-         /// The method returns a random number wich uses OMNeT++ pseudo random number generators
+         /// The method returns a random number which uses OMNeT++ pseudo random number generators
          float getRandomNumber();
    };
 
+} /* namespace omnetpp */
 } /* namespace ARA */
 
 #endif
