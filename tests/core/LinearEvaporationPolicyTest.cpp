@@ -42,14 +42,13 @@ TEST(LinearEvaporationPolicyTest, testGetFactor) {
     /// create linear policy object
     LinearEvaporationPolicy policy = LinearEvaporationPolicy(a, b);
     /// set the interval to 100 ms
-    policy.setInterval(100);
+    policy.setInterval(1000);
     /// update the current time
-    b->usleep(100);
     bool status = policy.checkForEvaporation();
     CHECK(!status);
-    b->usleep(500);
-	status = policy.checkForEvaporation();
-	CHECK(status);
+    b->usleep(5000);
+    status = policy.checkForEvaporation();
+    CHECK(status);
     BYTES_EQUAL(5, policy.getFactor());
 }
 
@@ -61,13 +60,13 @@ TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
     /// create linear policy object
     LinearEvaporationPolicy policy = LinearEvaporationPolicy(a, b);
     // set the interval
-    policy.setInterval(10);
+    policy.setInterval(1000);
     // call the method for the first time
     bool status = policy.checkForEvaporation();
     // the result should false
     CHECK(!status);
     /// sleep for 10 ms
-    b->usleep(10);
+    b->usleep(10000);
     // check if enough time has passed
     status = policy.checkForEvaporation();
     CHECK(status);

@@ -4,9 +4,14 @@ using namespace ARA;
 
 Time::Time(struct timeval *timestamp):timestamp(timestamp){ }
 
+/**
+ * The standard constructor initializes the timestamp with the
+ * zero. 
+ */
 Time::Time(){
+    /// create a new timestamp
     this->timestamp = new timeval;
-    /// get the current time
+    /// set the members of the struct to 0
     memset(this->timestamp, 0, sizeof(timeval));
 }
 
