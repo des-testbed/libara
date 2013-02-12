@@ -38,6 +38,10 @@ namespace ARA {
         public:
           Time();
           Time(struct timeval* timestamp);
+
+          /** The copy constructor of class Time */ 
+          Time(const Time& other);
+
           virtual ~Time();
  
           /**
