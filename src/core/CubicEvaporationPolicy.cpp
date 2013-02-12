@@ -7,8 +7,25 @@ CubicEvaporationPolicy::CubicEvaporationPolicy():EvaporationPolicy(),plateau(3),
 CubicEvaporationPolicy::CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold)
 :EvaporationPolicy(),plateau(pPlateau),slow(pSlow),reduction(pReduction),threshold(pThreshold){ }
 
-CubicEvaporationPolicy::~CubicEvaporationPolicy(){
+CubicEvaporationPolicy::CubicEvaporationPolicy(Time *a, Time *b)
+:EvaporationPolicy(a, b),plateau(3),slow(0.2),reduction(0.3),threshold(0.2){ }
 
+CubicEvaporationPolicy::~CubicEvaporationPolicy(){ }
+
+void CubicEvaporationPolicy::setPlateau(float pPlateau){
+    this->plateau = pPlateau;
+}
+
+void CubicEvaporationPolicy::setSlow(float pSlow){
+    this->slow = pSlow;
+}
+
+void CubicEvaporationPolicy::setReduction(float pReduction){
+    this->reduction = pReduction;
+}
+
+void CubicEvaporationPolicy::setThreshold(float pThreshold){
+    this->threshold = pThreshold;
 }
 
 /**

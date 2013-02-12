@@ -23,43 +23,28 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef LINEAR_EVAPORATION_POLICY_H_
-#define LINEAR_EVAPORATION_POLICY_H_
+#ifndef OMNET_LINEAR_EVAPORATION_POLICY_H_
+#define OMNET_LINEAR_EVAPORATION_POLICY_H_
 
-#include <cmath>
-#include <cstdlib>
-#include <stdint.h>
+#include <omnetpp.h>
+#include <csimplemodule.h>
 
-#include "Time.h"
+#include "OMNeTTime.h"
 #include "EvaporationPolicy.h"
+#include "CubicEvaporationPolicy.h"
 
 namespace ARA { 
    /**
-    * This class provides the linear evaporation function of the ant routing algorithm (ARA).
+    * This class provides the cubic evaporation function of the ant routing algorithm (ARA) 
+    * for the OMNeT++ simulation framework.
     */
-    class CubicEvaporationPolicy : public EvaporationPolicy {
+    class OMNeTCubicEvaporationPolicy : public CubicEvaporationPolicy, public cSimpleModule {
         public:
-            CubicEvaporationPolicy();
-            CubicEvaporationPolicy(Time* a, Time *b);
-            CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold);
-            ~CubicEvaporationPolicy();
-            /// the method reduces the pheromone value of a routing table entry
-            float evaporate(float phi);
+            OMNeTCubicEvaporationPolicy();
+            ~OMNeTCubicEvaporationPolicy(){};
 
-            void setPlateau(float plateau);
-            void setSlow(float slow);
-            void setReduction(float reduction);
-            void setThreshold(float threshold);
-
-        private:
-            /// 
-            float plateau;
-            ///
-            float slow;
-            /// 
-            float reduction;
-            /// the threshold which denotes at what point the pheromone level is set to 0
-            float threshold;
+            virtual void initialize();
+            virtual void handleMessage(cMessage *msg);
     };
 } /* namespace ARA */
 
