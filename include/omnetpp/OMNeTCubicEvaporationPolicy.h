@@ -1,5 +1,5 @@
 /******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
  These sources were originally developed by Friedrich Große, Michael Frey
@@ -34,18 +34,20 @@
 #include "CubicEvaporationPolicy.h"
 
 namespace ARA { 
-   /**
-    * This class provides the cubic evaporation function of the ant routing algorithm (ARA) 
-    * for the OMNeT++ simulation framework.
-    */
-    class OMNeTCubicEvaporationPolicy : public CubicEvaporationPolicy, public cSimpleModule {
-        public:
-            OMNeTCubicEvaporationPolicy();
-            ~OMNeTCubicEvaporationPolicy(){};
+   namespace omnetpp {
+        /**
+         * This class provides the cubic evaporation function of the ant routing algorithm (ARA) 
+         * for the OMNeT++ simulation framework.
+         */
+        class OMNeTCubicEvaporationPolicy : public CubicEvaporationPolicy, public cSimpleModule {
+            public:
+                OMNeTCubicEvaporationPolicy();
+                ~OMNeTCubicEvaporationPolicy(){};
 
-            virtual void initialize();
-            virtual void handleMessage(cMessage *msg);
-    };
+                virtual void initialize();
+                virtual void handleMessage(cMessage *msg);
+        };
+    }
 } /* namespace ARA */
 
 #endif 
