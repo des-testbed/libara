@@ -72,15 +72,15 @@ TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
     CHECK(status);
 }
 
-IGNORE_TEST(LinearEvaporationPolicyTest, testEvaporate) {
+TEST(LinearEvaporationPolicyTest, testEvaporate) {
     /// create a time mock for the last access time
     TimeMock* a = new TimeMock();
     /// create a time mock for the current time
     TimeMock* b = new TimeMock();
     /// create linear policy object
     LinearEvaporationPolicy policy = LinearEvaporationPolicy(a, b);
-    // set the interval to 200 millisecond
-    policy.setInterval(200);
+    // set the interval to 2 seconds
+    policy.setInterval(2000);
     // 'trigger the evaporation mechanism
     bool status = policy.checkForEvaporation();
     // the 'last access time' has not been intialized

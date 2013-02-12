@@ -8,13 +8,10 @@ namespace ARA {
         OMNeTCubicEvaporationPolicy::OMNeTCubicEvaporationPolicy():CubicEvaporationPolicy(new OMNeTTime(), new OMNeTTime()){}
 
         void OMNeTCubicEvaporationPolicy::initialize() {
-            /// parse the plateau parameter from the NED file
+            /// read the member variables from the ned file
             this->setPlateau(par("plateau").doubleValue());
-            /// parse the slow parameter from the NED file
             this->setSlow(par("slow").doubleValue());
-            /// parse the reduction parameter from the NED file
             this->setReduction(par("reduction").doubleValue());
-            /// parse the threshold parameter from the NED file
             this->setThreshold(par("reduction").doubleValue());
         }
 
