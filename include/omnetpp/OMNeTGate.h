@@ -42,6 +42,7 @@ namespace omnetpp {
         void broadcast(const Packet* packet);
         bool equals(NetworkInterface* interface);
         std::shared_ptr<Address> getLocalAddress();
+        bool isBroadcastAddress(std::shared_ptr<Address> someAddress) const;
 
     private:
         cSimpleModule* module;

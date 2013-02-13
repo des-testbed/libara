@@ -43,7 +43,6 @@ public:
     bool equals(const std::shared_ptr<Address> otherAddress) const;
 
     size_t getHashValue() const;
-    bool isBroadCast();
     Address* clone();
 
     IPAddress getAddress();

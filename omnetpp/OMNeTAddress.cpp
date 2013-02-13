@@ -72,10 +72,6 @@ IPAddress OMNeTAddress::getAddress() {
     return address;
 }
 
-bool OMNeTAddress::isBroadCast() {
-    return address.equals(broadCastAddress);
-}
-
 Address* OMNeTAddress::clone() {
     OMNeTAddress* clone = new OMNeTAddress(this->address);
     return clone;

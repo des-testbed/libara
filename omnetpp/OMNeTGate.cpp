@@ -86,5 +86,15 @@ shared_ptr<Address> OMNeTGate::getLocalAddress() {
     return localAddress;
 }
 
+bool OMNeTGate::isBroadcastAddress(std::shared_ptr<Address> someAddress) const {
+//    IPAddress someIPAddress = IPAddress(192, 168, 0, 1);
+//    IPAddress subnetMask = IPAddress(255, 240, 0, 0);
+//    IPAddress networkAddress = someIPAddress.doAnd(subnetMask);
+//    IPAddress broadcastAddress = networkAddress.getBroadcastAddress(subnetMask);
+//
+//    return someAddress
+    return false; //FIXE echte Adresse berechnen
+}
+
 } /* namespace omnetpp */
 } /* namespace ARA */

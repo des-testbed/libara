@@ -82,7 +82,7 @@ bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
         AddressPtr recipient = pair->getRight();
 
         if(currentPacket->equals(packet)) {
-            if(recipient->isBroadCast() == true) {
+            if(isBroadcastAddress(recipient)) {
                 return true;
             }
         }
@@ -119,6 +119,11 @@ unsigned int NetworkInterfaceMock::getNumberOfSentPackets() {
 
 shared_ptr<Address> NetworkInterfaceMock::getLocalAddress() {
     return shared_ptr<Address>(localAddress);
+}
+
+bool NetworkInterfaceMock::isBroadcastAddress(std::shared_ptr<Address> someAddress) const {
+    AddressMock broadcastAddress = AddressMock("BROADCAST");
+    return someAddress->equals(&broadcastAddress);
 }
 
 } /* namespace ARA */
