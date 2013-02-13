@@ -47,8 +47,10 @@ TEST(LinearEvaporationPolicyTest, testGetFactor) {
     bool status = policy.checkForEvaporation();
     CHECK(!status);
     b->usleep(5000);
-    status = policy.checkForEvaporation();
+    std::cout << b->toSeconds() << " "  << b->toMilliseconds() << std::endl;
+    std::cout << policy.getFactor() << std::endl;
     CHECK(status);
+    std::cout << policy.getFactor() << std::endl;
     BYTES_EQUAL(5, policy.getFactor());
 }
 
@@ -67,7 +69,6 @@ TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
     CHECK(!status);
     /// sleep for 10 ms
     b->usleep(10000);
-    std::cout << b->toSeconds() << " "  << b->toMilliseconds() << std::endl;
     // check if enough time has passed
     status = policy.checkForEvaporation();
     CHECK(status);

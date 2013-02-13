@@ -32,9 +32,10 @@ bool EvaporationPolicy::checkForEvaporation(){
         now->update();
         /// compute the time difference
         long int timeDifference = (*(this->now) - *(this->lastAccessTime)).toMilliseconds();
-// DEBUG:        std::cout << "time difference " << timeDifference << std::endl;
+        // DEBUG:        std::cout << "time difference " << timeDifference << std::endl;
+
         /// compare the timestamps 
-        if(timeDifference > this->interval){
+        if(timeDifference >= this->interval){
             /// compute the factor
             determineEvaporationFactor(timeDifference);
             /// update the timestamp

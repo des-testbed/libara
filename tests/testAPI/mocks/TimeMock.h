@@ -7,7 +7,7 @@ namespace ARA {
     class TimeMock : public Time {
         public:
             TimeMock();
-            TimeMock(struct timeval* timestamp);
+            TimeMock(Time* time);
             ~TimeMock();
 
             void usleep(int seconds);
@@ -20,23 +20,14 @@ namespace ARA {
 
             void update();
             void update(TimeMock t);
+
+            bool isInitialized();
+            void initialize();
             
-/*
-   
-            virtual ~TimeMock();
+            Time getTimestamp() const;
 
-            int getTime();
-            void setTime();
- 
-
-
-
-            virtual struct timeval* getTimestamp() const;
-
-            virtual bool isInitialized();
-
-            virtual void initialize();
-*/
+        private:
+            Time* timestamp;
     };
 }
 

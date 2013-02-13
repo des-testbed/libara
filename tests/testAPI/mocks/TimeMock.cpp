@@ -1,15 +1,30 @@
 #include "TimeMock.h"
 
+#include <iostream>
+
 using namespace ARA;
 
-TimeMock::TimeMock():Time(){}
+TimeMock::TimeMock(){
+    this->timestamp = new Time();
+}
 
-/**
- *
- */
-TimeMock::TimeMock(struct timeval* timestamp):Time(timestamp){}
+TimeMock::TimeMock(Time* time){
+    this->timestamp = time;
+}
 
-TimeMock::~TimeMock(){}
+TimeMock TimeMock::operator-(const TimeMock& right){
+    Time result = (*(this->timestamp) - right.getTimestamp());
+    return TimeMock(&result);
+}
+
+TimeMock TimeMock::operator-=(const TimeMock& right){
+    *(this->timestamp) = *(this->timestamp) - right.getTimestamp();
+    return *(this);
+}
+
+TimeMock::~TimeMock(){
+    delete this->timestamp;
+}
 
 /**
  * The usleep method simply adds the milliseconds passed as 
@@ -22,23 +37,29 @@ TimeMock::~TimeMock(){}
  */
 void TimeMock::usleep(int milliseconds){
     // create a new timestamp
-    struct timeval *timestamp = new timeval;
-    // copy over the old values
-    timestamp->tv_sec = this->getTimestamp()->tv_sec;
-    timestamp->tv_usec = this->getTimestamp()->tv_usec;
-    // add the sleep time
-    timestamp->tv_sec += milliseconds/1000;
-    timestamp->tv_usec += milliseconds * 1000;
+    struct timeval *time = new timeval;
 
-    this->setTimestamp(timestamp);
+    // copy over the old values
+    time->tv_sec = this->timestamp->getTimestamp()->tv_sec;
+    time->tv_usec = this->timestamp->getTimestamp()->tv_usec;
+
+    // add the sleep time
+    time->tv_sec += milliseconds/1000;
+    time->tv_usec += milliseconds * 1000;
+
+    this->timestamp->setTimestamp(time);
+}
+
+Time TimeMock::getTimestamp() const{
+    return *(this->timestamp);
 }
 
 int TimeMock::toSeconds(){
-    return this->getTimestamp()->tv_sec;
+    return this->timestamp->toSeconds();
 }
 
 long int TimeMock::toMilliseconds(){
-    return (this->getTimestamp()->tv_usec/1000);
+    return this->timestamp->toMilliseconds();
 }
 
 void TimeMock::update(){
@@ -46,5 +67,13 @@ void TimeMock::update(){
 }
 
 void TimeMock::update(TimeMock t){
-    this->update(t.getTimestamp());
+    this->timestamp->update(t.getTimestamp());
+}
+
+void TimeMock::initialize(){
+    /// this is a stub
+}
+
+bool TimeMock::isInitialized(){
+    return true;
 }
