@@ -7,7 +7,7 @@ Installation from git
 ---------------------
 1. Clone the repository:
 
-		git clone git://github.com/fgrosse/ara-sim.git
+		git clone git://github.com/des-testbed/Ara-Sim.git
 
 2. After the checkout you should run the following make target which will create src/Makefile and prepare the OMNeT++build.
 
