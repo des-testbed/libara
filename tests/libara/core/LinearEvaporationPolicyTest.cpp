@@ -67,6 +67,7 @@ TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
     CHECK(!status);
     /// sleep for 10 ms
     b->usleep(10000);
+    std::cout << b->toSeconds() << " "  << b->toMilliseconds() << std::endl;
     // check if enough time has passed
     status = policy.checkForEvaporation();
     CHECK(status);

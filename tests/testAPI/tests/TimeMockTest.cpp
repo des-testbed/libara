@@ -1,6 +1,8 @@
 #include "CppUTest/TestHarness.h"
 #include "testAPI/mocks/TimeMock.h"
 
+#include <iostream>
+
 using namespace ARA;
 
 TEST_GROUP(TimeMockTest) {};
@@ -15,8 +17,8 @@ TEST(TimeMockTest, testUsleep) {
     BYTES_EQUAL(0, milliseconds);
     /// test the usleep method
     time.usleep(1000);
-    seconds = time.getTimestamp()->tv_sec;
+    seconds = time.toSeconds();
     BYTES_EQUAL(1, seconds);
-    milliseconds = time.getTimestamp()->tv_usec;
-    BYTES_EQUAL(1000, milliseconds);
+    milliseconds = time.toMilliseconds();
+    LONGS_EQUAL(1000, milliseconds);
 }

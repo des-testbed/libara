@@ -2,7 +2,7 @@
 
 using namespace ARA;
 
-TimeMock::TimeMock(){}
+TimeMock::TimeMock():Time(){}
 
 /**
  *
@@ -28,8 +28,8 @@ void TimeMock::usleep(int milliseconds){
     timestamp->tv_usec = this->getTimestamp()->tv_usec;
     // add the sleep time
     timestamp->tv_sec += milliseconds/1000;
-    timestamp->tv_usec += milliseconds;
-    // updat ehte value
+    timestamp->tv_usec += milliseconds * 1000;
+
     this->setTimestamp(timestamp);
 }
 
@@ -38,7 +38,7 @@ int TimeMock::toSeconds(){
 }
 
 long int TimeMock::toMilliseconds(){
-    return this->getTimestamp()->tv_usec;
+    return (this->getTimestamp()->tv_usec/1000);
 }
 
 void TimeMock::update(){

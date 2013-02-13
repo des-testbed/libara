@@ -1,5 +1,7 @@
 #include "Time.h"
 
+#include <iostream>
+
 using namespace ARA;
 
 Time::Time(struct timeval *timestamp):timestamp(timestamp){ }
@@ -94,7 +96,13 @@ int Time::toSeconds(){
 }
 
 long int Time::toMilliseconds(){
-   return (this->timestamp->tv_usec/(10^(-3));
+   /**
+    * The method will return 0 as long as tv_usec is below 1000
+    * since the float (which is a result of the division) will be
+    * cast to an long int. If a precision of milliseconds is to
+    * low, the methods needs to be redone. 
+    */
+   return (this->timestamp->tv_usec/1000);
 }
 
 struct timeval* Time::getTimestamp() const{
