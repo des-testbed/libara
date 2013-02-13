@@ -263,7 +263,7 @@ std::string OMNeTPacketDescriptor::getFieldAsString(void *object, int field, int
             return "NULL";
         }
         else {
-            return address->getAddress().str();
+            return address->str();
         }
     }
 

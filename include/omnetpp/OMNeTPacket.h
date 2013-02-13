@@ -8,6 +8,7 @@
 #include "Packet.h"
 #include "Address.h"
 #include "OMNeTAddress.h"
+#include "IPAddress.h"
 
 #include <omnetpp.h>
 
@@ -33,6 +34,11 @@ class OMNeTPacket : public ::cPacket, public ARA::Packet {
     std::shared_ptr<OMNeTAddress> getSource() const;
     std::shared_ptr<OMNeTAddress> getDestination() const;
     std::shared_ptr<OMNeTAddress> getSender() const;
+
+    IPAddress getSourceIP() const { return *(getSource().get()); }
+    IPAddress getDestinationIP() const { return *(getDestination().get()); }
+    IPAddress getSenderIP() const { return *(getSender().get()); }
+
     virtual Packet* clone() const;
     virtual Packet* createFANT(unsigned int sequenceNumber) const;
     virtual Packet* createBANT(unsigned int sequenceNumber) const;

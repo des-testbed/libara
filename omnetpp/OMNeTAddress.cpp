@@ -31,49 +31,29 @@ using namespace std;
 namespace ARA {
 namespace omnetpp {
 
-OMNeTAddress::OMNeTAddress(IPAddress address) {
-    this->address = address;
-    IPAddress netmask = IPAddress(255, 255, 255, 0);
-    this->broadCastAddress = address.getBroadcastAddress(netmask);
-}
-
-OMNeTAddress::OMNeTAddress(IPAddress address, IPAddress netmask) {
-    this->address = address;
-    this->broadCastAddress = address.getBroadcastAddress(netmask);
-}
-
 bool OMNeTAddress::equals(const Address* otherAddress) const {
-    const OMNeTAddress* otherAddressMock = dynamic_cast<const OMNeTAddress*>(otherAddress);
-    if(otherAddressMock == NULL) {
+    const OMNeTAddress* otherOMNeTAddress = dynamic_cast<const OMNeTAddress*>(otherAddress);
+    if(otherOMNeTAddress == NULL) {
         return false;
     }
     else {
-        return this->address.equals(otherAddressMock->address);
+        // use the native implementation of IPAddress
+        return IPAddress::equals(*otherOMNeTAddress);
     }
 }
 
 bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
-    shared_ptr<OMNeTAddress> otherOmnetMock (dynamic_pointer_cast<OMNeTAddress>(otherAddress));
-    if(otherOmnetMock == NULL) {
-        return false;
-    }
-    else {
-        return this->address.equals(otherOmnetMock->address);
-    }
+    return this->equals(otherAddress.get());
 }
 
 size_t OMNeTAddress::getHashValue() const {
-    int firstByte = address.getDByte(0);
-    int secondByte = address.getDByte(1);
+    int firstByte = getDByte(0);
+    int secondByte = getDByte(1);
     return firstByte * 256 + secondByte;  // integer value between 0 and 65535
 }
 
-IPAddress OMNeTAddress::getAddress() {
-    return address;
-}
-
 Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
+    OMNeTAddress* clone = new OMNeTAddress(getInt());
     return clone;
 }
 

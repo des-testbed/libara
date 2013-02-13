@@ -28,13 +28,14 @@ void OMNeTARAClient::initialize(int stage) {
         deltaPhi = par("deltaPhi").doubleValue();
         initialPhi = par("initialPhi").doubleValue();
 
-        for (cModule::GateIterator i(this); !i.end(); i++) {
+        /*for (cModule::GateIterator i(this); !i.end(); i++) {
             cGate* gate = i();
             if(gate->getType() == cGate::OUTPUT && gate->isVector()) {
                 // only the vector gates go to the NICs
                 addNetworkInterface(new OMNeTGate(this, gate));
             }
-        }
+        }*/
+        addNetworkInterface(new OMNeTGate(this, gate("arpOut")));
     }
 }
 

@@ -29,6 +29,7 @@
 #include "IInterfaceTable.h"
 #include "IPAddressResolver.h"
 #include "IPControlInfo.h"
+#include "IPDatagram.h"
 
 using namespace std;
 
@@ -57,17 +58,24 @@ OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
     OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
 
-    IPControlInfo* ctrl = new IPControlInfo();
-    ctrl->setSrcAddr(omnetPacket->getSource()->getAddress());
-    ctrl->setDestAddr(omnetPacket->getDestination()->getAddress());
-    omnetPacket->setControlInfo(ctrl);
+    IPDatagram* ipPacket = new IPDatagram();
+    ipPacket->encapsulate(omnetPacket);
 
-    module->send(omnetPacket, gate);
+    IPRoutingDecision* controlInfo = new IPRoutingDecision();
+    controlInfo->setNextHopAddr(omnetPacket->getSourceIP());
+    ipPacket->setControlInfo(controlInfo);
+
+    module->send(ipPacket, gate);
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
     EV << "Broadcasting something\n";
     OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+
+    IPRoutingDecision* controlInfo = new IPRoutingDecision();
+    controlInfo->setNextHopAddr(omnetPacket->getSourceIP());    // FIXE make this a broadcast address
+    omnetPacket->setControlInfo(controlInfo);
+
     module->send(omnetPacket, gate);
 }
 
