@@ -94,8 +94,7 @@ int Time::toSeconds(){
 }
 
 long int Time::toMilliseconds(){
-   /// FIXME: This are microseconds and not milliseconds
-   return this->timestamp->tv_usec;
+   return (this->timestamp->tv_usec/(10^(-3));
 }
 
 struct timeval* Time::getTimestamp() const{
