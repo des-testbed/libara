@@ -6,7 +6,7 @@ Time::Time(struct timeval *timestamp):timestamp(timestamp){ }
 
 /**
  * The standard constructor initializes the timestamp with the
- * zero. 
+ * value of zero. 
  */
 Time::Time(){
     /// create a new timestamp
@@ -36,35 +36,57 @@ Time::~Time(){
 }
 
 Time Time::operator-(const Time& right){
-    ///
     struct timeval *result = new timeval;
-    ///
     struct timeval r;
 
+    /// copy the content of the right operand
     r.tv_sec = right.getTimestamp()->tv_sec;
     r.tv_usec = right.getTimestamp()->tv_usec;
-    
-    if(this->timestamp->tv_usec < r.tv_usec){
-        int nanoSeconds = (r.tv_usec - this->timestamp->tv_usec) / 1000000 + 1;
-        r.tv_usec = r.tv_usec - (1000000 * nanoSeconds);
-        r.tv_sec  = r.tv_sec + nanoSeconds;
-    }
 
-    if(this->timestamp->tv_usec - r.tv_usec > 1000000){
-        int nanoSeconds = (this->timestamp->tv_usec - r.tv_usec) / 1000000;
-        r.tv_usec = r.tv_usec + (1000000 * nanoSeconds);
-        r.tv_sec  = r.tv_sec - nanoSeconds;
-    }
-
-    result->tv_sec = this->timestamp->tv_sec - r.tv_sec; 
-    result->tv_usec = this->timestamp->tv_usec - r.tv_usec; 
+    this->getTimeDifference(r, result);    
 
     return Time(result);
 }
 
 Time Time::operator-=(const Time& right){
-   // fixme
-   return *(this);
+    struct timeval r;
+
+    /// copy the content of the right operand
+    r.tv_sec = right.getTimestamp()->tv_sec;
+    r.tv_usec = right.getTimestamp()->tv_usec;
+
+    this->getTimeDifference(r, this->timestamp);    
+
+    return *(this);
+}
+
+/**
+ * The method determines the time difference between two timestamps. Here,
+ * the member variable "timestamp" and a operand "time". The result is stored
+ * in a timeval struct which is passed as an argument to the function
+ *
+ * The code is from the libc manual:
+ *   http://www.gnu.org/software/libc/manual/html_node/Elapsed-Time.html
+ *
+ * @param right in The right operand of the computation.
+ * @param result out The data structure which will hold the result of the 
+ *   operation
+ */
+void Time::getTimeDifference(struct timeval right, struct timeval* result){
+    if(this->timestamp->tv_usec < right.tv_usec){
+        int nanoSeconds = (right.tv_usec - this->timestamp->tv_usec) / 1000000 + 1;
+        right.tv_usec = right.tv_usec - (1000000 * nanoSeconds);
+        right.tv_sec  = right.tv_sec + nanoSeconds;
+    }
+
+    if(this->timestamp->tv_usec - right.tv_usec > 1000000){
+        int nanoSeconds = (this->timestamp->tv_usec - right.tv_usec) / 1000000;
+        right.tv_usec = right.tv_usec + (1000000 * nanoSeconds);
+        right.tv_sec  = right.tv_sec - nanoSeconds;
+    }
+
+    result->tv_sec = this->timestamp->tv_sec - right.tv_sec; 
+    result->tv_usec = this->timestamp->tv_usec - right.tv_usec; 
 }
 
 int Time::toSeconds(){
@@ -72,6 +94,7 @@ int Time::toSeconds(){
 }
 
 long int Time::toMilliseconds(){
+   /// FIXME: This are microseconds and not milliseconds
    return this->timestamp->tv_usec;
 }
 
