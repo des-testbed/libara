@@ -47,6 +47,8 @@ Time Time::operator-(const Time& right){
 
     this->getTimeDifference(r, result);    
 
+    std::cout << "Time::operator- " << r.tv_sec << " " << r.tv_usec << std::endl;
+
     return Time(result);
 }
 

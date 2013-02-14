@@ -14,6 +14,7 @@ TimeMock::TimeMock(Time* time){
 
 TimeMock TimeMock::operator-(const TimeMock& right){
     Time result = (*(this->timestamp) - right.getTimestamp());
+    std::cout << "TimeMock::operator-" << result.toSeconds() << " " << result.toMilliseconds() << std::endl;
     return TimeMock(&result);
 }
 

@@ -12,19 +12,19 @@ namespace ARA {
 
             void usleep(int seconds);
 
-            TimeMock operator-(const TimeMock& right);
-            TimeMock operator-=(const TimeMock& right);
+            virtual TimeMock operator-(const TimeMock& right);
+            virtual TimeMock operator-=(const TimeMock& right);
 
-            int toSeconds();
-            long int toMilliseconds();
+            virtual int toSeconds();
+            virtual long int toMilliseconds();
 
-            void update();
-            void update(TimeMock t);
+            virtual void update();
+            virtual void update(TimeMock t);
 
-            bool isInitialized();
-            void initialize();
+            virtual bool isInitialized();
+            virtual void initialize();
             
-            Time getTimestamp() const;
+            virtual Time getTimestamp() const;
 
         private:
             Time* timestamp;

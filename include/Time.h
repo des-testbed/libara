@@ -48,13 +48,13 @@ namespace ARA {
              * The operator provides the subtract operation for two timestamps
              * and stores the result in a new instance of class Time.
              */ 
-            Time operator-(const Time& right);
+            virtual Time operator-(const Time& right);
 
             /**
              * The operator provides the subtract operation for two timestamps
              * and stores the result in the left operand.
              */ 
-            Time operator-=(const Time& right);
+            virtual Time operator-=(const Time& right);
 
             /**
              * The method returns the the timestamp which is encapsulated

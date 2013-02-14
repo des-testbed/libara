@@ -43,15 +43,18 @@ TEST(LinearEvaporationPolicyTest, testGetFactor) {
     LinearEvaporationPolicy policy = LinearEvaporationPolicy(a, b);
     /// set the interval to 100 ms
     policy.setInterval(1000);
+    std::cout << "FUCK " << std::endl;
     /// update the current time
     bool status = policy.checkForEvaporation();
     CHECK(!status);
     b->usleep(5000);
     std::cout << b->toSeconds() << " "  << b->toMilliseconds() << std::endl;
     std::cout << policy.getFactor() << std::endl;
+    status = policy.checkForEvaporation();
     CHECK(status);
     std::cout << policy.getFactor() << std::endl;
     BYTES_EQUAL(5, policy.getFactor());
+    std::cout << "NO " << std::endl;
 }
 
 TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
