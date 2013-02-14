@@ -50,33 +50,32 @@ OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
     IInterfaceTable* interfaceTable = check_and_cast<IInterfaceTable *>(mod);
 
     InterfaceEntry* interfaceEntry = interfaceTable->getInterfaceByNodeInputGateId(gate->getNextGate()->getId());
+    this->interfaceID = interfaceEntry->getInterfaceId();
 
     IPvXAddress localAddress = IPAddressResolver().getAddressFrom(interfaceEntry, IPAddressResolver::ADDR_IPv4);
     this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress.get4()));
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+    shared_ptr<OMNeTAddress> nextHopAddress (dynamic_pointer_cast<OMNeTAddress>(recipient));
+    if(nextHopAddress == NULL) {
+        throw cRuntimeError("Error in OMNeTGate: Can only send packets to OMNeTAddress recipients");
+    }
 
-    IPDatagram* ipPacket = new IPDatagram();
-    ipPacket->encapsulate(omnetPacket);
-
-    IPRoutingDecision* controlInfo = new IPRoutingDecision();
-    controlInfo->setNextHopAddr(omnetPacket->getSourceIP());
-    ipPacket->setControlInfo(controlInfo);
-
-    module->send(ipPacket, gate);
-}
-
-void OMNeTGate::broadcast(const Packet* packet) {
-    EV << "Broadcasting something\n";
     OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
 
     IPRoutingDecision* controlInfo = new IPRoutingDecision();
-    controlInfo->setNextHopAddr(omnetPacket->getSourceIP());    // FIXE make this a broadcast address
+    controlInfo->setNextHopAddr(*(nextHopAddress.get()));
+    controlInfo->setInterfaceId(interfaceID);
+
     omnetPacket->setControlInfo(controlInfo);
 
     module->send(omnetPacket, gate);
+}
+
+void OMNeTGate::broadcast(const Packet* packet) {
+    shared_ptr<OMNeTAddress> broadcastAddress(new OMNeTAddress(192, 168, 0, 255));
+    send(packet, broadcastAddress);
 }
 
 bool OMNeTGate::equals(NetworkInterface* otherInterface) {

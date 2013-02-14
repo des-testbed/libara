@@ -11,7 +11,7 @@ typedef std::shared_ptr<Address> AddressPtr;
 Define_Module(OMNeTARAClient);
 
 int OMNeTARAClient::numInitStages() const {
-    return 3;
+    return 5;
 }
 
 /**
@@ -22,7 +22,7 @@ int OMNeTARAClient::numInitStages() const {
  * specified in the NED file and initializes the gates.
  */
 void OMNeTARAClient::initialize(int stage) {
-    if(stage == 2) {
+    if(stage == 4) {
         std::string policy = par("forwardingPolicy").stringValue();
         initializeForwardingPolicy(policy);
         deltaPhi = par("deltaPhi").doubleValue();

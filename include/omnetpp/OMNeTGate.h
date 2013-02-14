@@ -48,6 +48,7 @@ namespace omnetpp {
         cSimpleModule* module;
         cGate* gate;
         std::shared_ptr<Address> localAddress;
+        int interfaceID;
     };
 
 } /* namespace ARA */
