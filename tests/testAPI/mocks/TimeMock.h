@@ -12,8 +12,8 @@ namespace ARA {
 
             void usleep(int seconds);
 
-            virtual TimeMock operator-(const TimeMock& right);
-            virtual TimeMock operator-=(const TimeMock& right);
+            virtual Time operator-(const Time& right);
+            virtual Time operator-=(const Time& right);
 
             virtual int toSeconds();
             virtual long int toMilliseconds();

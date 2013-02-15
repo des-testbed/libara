@@ -1,6 +1,7 @@
 #include "TimeMock.h"
 
 #include <iostream>
+#include <typeinfo>
 
 using namespace ARA;
 
@@ -12,15 +13,32 @@ TimeMock::TimeMock(Time* time){
     this->timestamp = time;
 }
 
-TimeMock TimeMock::operator-(const TimeMock& right){
-    Time result = (*(this->timestamp) - right.getTimestamp());
-    std::cout << "TimeMock::operator-" << result.toSeconds() << " " << result.toMilliseconds() << std::endl;
-    return TimeMock(&result);
+Time TimeMock::operator-(const Time& right){
+    Time result;
+
+    try{
+        const TimeMock& r = dynamic_cast<const TimeMock&>(right);
+        result = (*(this->timestamp) - r.getTimestamp());
+        std::cout << "TimeMock::operator-" << result.toSeconds() << " " << result.toMilliseconds() << std::endl;
+    }catch(const std::bad_cast& exception){
+        std::cerr << exception.what() << std::endl;
+        std::cerr << "This object is not of type TimeMock but " << typeid(right).name() << std::endl;
+        result = Time();
+    }
+
+    return result;
 }
 
-TimeMock TimeMock::operator-=(const TimeMock& right){
-    *(this->timestamp) = *(this->timestamp) - right.getTimestamp();
-    return *(this);
+Time TimeMock::operator-=(const Time& right){
+    try{
+        const TimeMock& r = dynamic_cast<const TimeMock&>(right);
+        *(this->timestamp) = *(this->timestamp) - r.getTimestamp();
+    }catch(const std::bad_cast& exception){
+        std::cerr << exception.what() << std::endl;
+        std::cerr << "This object is not of type TimeMock but " << typeid(right).name() << std::endl;
+    }
+    // FIXME
+    return *(this->timestamp);
 }
 
 TimeMock::~TimeMock(){
