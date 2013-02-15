@@ -8,6 +8,7 @@ namespace ARA {
         public:
             TimeMock();
             TimeMock(Time* time);
+            TimeMock(const TimeMock& other);
             ~TimeMock();
 
             void usleep(int seconds);
@@ -24,7 +25,7 @@ namespace ARA {
             virtual bool isInitialized();
             virtual void initialize();
             
-            virtual Time getTimestamp() const;
+            virtual Time* getTimestamp() const;
 
         private:
             Time* timestamp;

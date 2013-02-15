@@ -13,13 +13,18 @@ TimeMock::TimeMock(Time* time){
     this->timestamp = time;
 }
 
+TimeMock::TimeMock(const TimeMock& other){
+    this->timestamp = new Time();
+    /// this should hopefully call the copy constructor of class Time
+    this->timestamp = other.getTimestamp();
+}
+
 Time TimeMock::operator-(const Time& right){
     Time result = Time();
 
     try{
         const TimeMock& r = dynamic_cast<const TimeMock&>(right);
-        result = (*(this->timestamp) - r.getTimestamp());
-        std::cout << result.getTimestamp()->tv_sec;
+        result = (*(this->timestamp) - *(r.getTimestamp()));
         //std::cout << "TimeMock::operator-" << result.toSeconds() << " " << result.toMilliseconds() << std::endl;
     }catch(const std::bad_cast& exception){
         std::cerr << exception.what() << std::endl;
@@ -33,7 +38,7 @@ Time TimeMock::operator-(const Time& right){
 Time TimeMock::operator-=(const Time& right){
     try{
         const TimeMock& r = dynamic_cast<const TimeMock&>(right);
-        *(this->timestamp) = *(this->timestamp) - r.getTimestamp();
+        *(this->timestamp) = *(this->timestamp) - *(r.getTimestamp());
     }catch(const std::bad_cast& exception){
         std::cerr << exception.what() << std::endl;
         std::cerr << "This object is not of type TimeMock but " << typeid(right).name() << std::endl;
@@ -68,8 +73,8 @@ void TimeMock::usleep(int milliseconds){
     this->timestamp->setTimestamp(time);
 }
 
-Time TimeMock::getTimestamp() const{
-    return *(this->timestamp);
+Time* TimeMock::getTimestamp() const{
+    return this->timestamp;
 }
 
 int TimeMock::toSeconds(){
@@ -85,7 +90,7 @@ void TimeMock::update(){
 }
 
 void TimeMock::update(TimeMock t){
-    this->timestamp->update(t.getTimestamp());
+    this->timestamp->update(*t.getTimestamp());
 }
 
 void TimeMock::initialize(){
