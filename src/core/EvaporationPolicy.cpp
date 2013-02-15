@@ -31,7 +31,9 @@ bool EvaporationPolicy::checkForEvaporation(){
     if(this->lastAccessTime->isInitialized()){
         /// get the current date
         now->update();
-        long int timeDifference = (*(this->now) - *(this->lastAccessTime)).toMilliseconds();
+        Time bla = *(this->now) - *(this->lastAccessTime);
+        //long int timeDifference = (*(this->now) - *(this->lastAccessTime)).toMilliseconds();
+        long int timeDifference = 0;
         // DEBUG:       std::cout << "# " << this->now->toSeconds() << " " << this->lastAccessTime->toMilliseconds() << std::endl;
         // DEBUG:       std::cout << "time difference " << timeDifference << std::endl;
 

@@ -14,12 +14,13 @@ TimeMock::TimeMock(Time* time){
 }
 
 Time TimeMock::operator-(const Time& right){
-    Time result;
+    Time result = Time();
 
     try{
         const TimeMock& r = dynamic_cast<const TimeMock&>(right);
         result = (*(this->timestamp) - r.getTimestamp());
-        std::cout << "TimeMock::operator-" << result.toSeconds() << " " << result.toMilliseconds() << std::endl;
+        std::cout << result.getTimestamp()->tv_sec;
+        //std::cout << "TimeMock::operator-" << result.toSeconds() << " " << result.toMilliseconds() << std::endl;
     }catch(const std::bad_cast& exception){
         std::cerr << exception.what() << std::endl;
         std::cerr << "This object is not of type TimeMock but " << typeid(right).name() << std::endl;
@@ -55,13 +56,11 @@ TimeMock::~TimeMock(){
  *   timestamp
  */
 void TimeMock::usleep(int milliseconds){
-    // create a new timestamp
     struct timeval *time = new timeval;
 
     // copy over the old values
     time->tv_sec = this->timestamp->getTimestamp()->tv_sec;
     time->tv_usec = this->timestamp->getTimestamp()->tv_usec;
-
     // add the sleep time
     time->tv_sec += milliseconds/1000;
     time->tv_usec += milliseconds * 1000;

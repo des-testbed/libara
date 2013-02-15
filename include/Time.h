@@ -37,6 +37,7 @@ namespace ARA {
     class Time {
         public:
             Time();
+            Time(int seconds, long int microsonds);
             Time(struct timeval* timestamp);
 
             /** The copy constructor of class Time */ 
@@ -91,7 +92,7 @@ namespace ARA {
             virtual void initialize();
 
         private:
-            void getTimeDifference(struct timeval right, struct timeval* result);
+            struct timeval getTimeDifference(const Time& right);
 
             /**
              * The member variable represents the current time using

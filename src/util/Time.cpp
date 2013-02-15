@@ -1,8 +1,38 @@
-#include "Time.h"
+/******************************************************************************
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
+ All rights reserved.
 
+ These sources were originally developed by Friedrich Große, Michael Frey
+ at Freie Universität Berlin (http://www.fu-berlin.de/),
+ Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
+ (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
+ ------------------------------------------------------------------------------
+ This program is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later
+ version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with
+ this program. If not, see http://www.gnu.org/licenses/ .
+ ------------------------------------------------------------------------------
+ For further information and questions please use the web site
+ http://www.des-testbed.net/
+ *******************************************************************************/
+#include "Time.h"
 #include <iostream>
 
 using namespace ARA;
+
+Time::Time(int seconds, long int microseconds){ 
+   this->timestamp = new timeval;
+   this->timestamp->tv_sec = seconds;
+   this->timestamp->tv_usec = microseconds;
+}
+
 
 Time::Time(struct timeval *timestamp):timestamp(timestamp){ }
 
@@ -38,29 +68,14 @@ Time::~Time(){
 }
 
 Time Time::operator-(const Time& right){
-    struct timeval *result = new timeval;
-    struct timeval r;
-
-    /// copy the content of the right operand
-    r.tv_sec = right.getTimestamp()->tv_sec;
-    r.tv_usec = right.getTimestamp()->tv_usec;
-
-    this->getTimeDifference(r, result);    
-
-    std::cout << "Time::operator- " << r.tv_sec << " " << r.tv_usec << std::endl;
-
-    return Time(result);
+    struct timeval result = this->getTimeDifference(right);    
+    return Time(result.tv_sec, result.tv_usec);
 }
 
 Time Time::operator-=(const Time& right){
-    struct timeval r;
-
-    /// copy the content of the right operand
-    r.tv_sec = right.getTimestamp()->tv_sec;
-    r.tv_usec = right.getTimestamp()->tv_usec;
-
-    this->getTimeDifference(r, this->timestamp);    
-
+    struct timeval result = this->getTimeDifference(right);    
+    this->timestamp->tv_sec = result.tv_sec;
+    this->timestamp->tv_usec = result.tv_usec;
     return *(this);
 }
 
@@ -76,21 +91,30 @@ Time Time::operator-=(const Time& right){
  * @param result out The data structure which will hold the result of the 
  *   operation
  */
-void Time::getTimeDifference(struct timeval right, struct timeval* result){
-    if(this->timestamp->tv_usec < right.tv_usec){
-        int nanoSeconds = (right.tv_usec - this->timestamp->tv_usec) / 1000000 + 1;
-        right.tv_usec = right.tv_usec - (1000000 * nanoSeconds);
-        right.tv_sec  = right.tv_sec + nanoSeconds;
+struct timeval Time::getTimeDifference(const Time& right){
+    struct timeval result;
+
+    struct timeval r;
+    /// copy the content of the right operand
+    r.tv_sec = right.getTimestamp()->tv_sec;
+    r.tv_usec = right.getTimestamp()->tv_usec;
+
+    if(this->timestamp->tv_usec < r.tv_usec){
+        int nanoSeconds = (r.tv_usec - this->timestamp->tv_usec) / 1000000 + 1;
+        r.tv_usec -= (1000000 * nanoSeconds);
+        r.tv_sec  += nanoSeconds;
     }
 
-    if(this->timestamp->tv_usec - right.tv_usec > 1000000){
-        int nanoSeconds = (this->timestamp->tv_usec - right.tv_usec) / 1000000;
-        right.tv_usec = right.tv_usec + (1000000 * nanoSeconds);
-        right.tv_sec  = right.tv_sec - nanoSeconds;
+    if(this->timestamp->tv_usec - r.tv_usec > 1000000){
+        int nanoSeconds = (this->timestamp->tv_usec - r.tv_usec) / 1000000;
+        r.tv_usec += (1000000 * nanoSeconds);
+        r.tv_sec -= nanoSeconds;
     }
 
-    result->tv_sec = this->timestamp->tv_sec - right.tv_sec; 
-    result->tv_usec = this->timestamp->tv_usec - right.tv_usec; 
+    result.tv_sec = this->timestamp->tv_sec - r.tv_sec; 
+    result.tv_usec = this->timestamp->tv_usec - r.tv_usec; 
+
+    return result;
 }
 
 int Time::toSeconds(){
