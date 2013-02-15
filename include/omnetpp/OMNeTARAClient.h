@@ -63,6 +63,9 @@ namespace omnetpp {
             /// The member denotes the constant which is used in the pheromone reinforcement of a path
             double deltaPhi;
 
+            void initializeNetworkInterfaces();
+            IInterfaceTable* getInterfaceTable();
+
             /// The method checks if the in NED file given policy exists and initializes the policy
             void initializeForwardingPolicy(std::string policy);
 

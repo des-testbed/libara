@@ -36,44 +36,39 @@ using namespace std;
 namespace ARA {
 namespace omnetpp {
 
-OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gate) {
+typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
+
+OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gateToARP, InterfaceEntry* interfaceEntry) {
     this->module = module;
-    this->gate = gate;
-
-    cModule *host = module->getParentModule();
-
-    // find IInterfaceTable
-    cModule *mod = host->getSubmodule("interfaceTable");
-    if (!mod)
-        opp_error("IPAddressResolver: IInterfaceTable not found as submodule "
-                  " `interfaceTable' in host/router `%s'", host->getFullPath().c_str());
-    IInterfaceTable* interfaceTable = check_and_cast<IInterfaceTable *>(mod);
-
-    InterfaceEntry* interfaceEntry = interfaceTable->getInterfaceByNodeInputGateId(gate->getNextGate()->getId());
-    this->interfaceID = interfaceEntry->getInterfaceId();
+    this->gateToARP = gateToARP;
 
     IPvXAddress localAddress = IPAddressResolver().getAddressFrom(interfaceEntry, IPAddressResolver::ADDR_IPv4);
     this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress.get4()));
+    this->interfaceID = interfaceEntry->getInterfaceId();
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
-    shared_ptr<OMNeTAddress> nextHopAddress (dynamic_pointer_cast<OMNeTAddress>(recipient));
-    if(nextHopAddress == NULL) {
-        throw cRuntimeError("Error in OMNeTGate: Can only send packets to OMNeTAddress recipients");
-    }
-
     OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
+    OMNeTAddressPtr nextHopAddress = getNextHopAddress(recipient);
 
     IPRoutingDecision* controlInfo = new IPRoutingDecision();
     controlInfo->setNextHopAddr(*(nextHopAddress.get()));
     controlInfo->setInterfaceId(interfaceID);
-
     omnetPacket->setControlInfo(controlInfo);
 
-    module->send(omnetPacket, gate);
+    module->send(omnetPacket, gateToARP);
+}
+
+OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
+    shared_ptr<OMNeTAddress> nextHopAddress (dynamic_pointer_cast<OMNeTAddress>(recipient));
+    if(nextHopAddress == NULL) {
+        throw cRuntimeError("Error in OMNeTGate: Can only send packets to OMNeTAddress recipients");
+    }
+    return nextHopAddress;
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
+    //FIXME this is just a test dummy
     shared_ptr<OMNeTAddress> broadcastAddress(new OMNeTAddress(192, 168, 0, 255));
     send(packet, broadcastAddress);
 }
@@ -85,7 +80,7 @@ bool OMNeTGate::equals(NetworkInterface* otherInterface) {
     }
     else {
         return strcmp(module->getFullName(), otherOMNeTInterface->module->getFullName()) == 0
-            && strcmp(gate->getFullName(), otherOMNeTInterface->gate->getFullName()) == 0;
+            && strcmp(gateToARP->getFullName(), otherOMNeTInterface->gateToARP->getFullName()) == 0;
     }
 }
 

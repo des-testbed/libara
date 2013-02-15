@@ -1,6 +1,7 @@
 #include "OMNeTARAClient.h"
 #include "IPControlInfo.h"
 #include "IPAddress.h"
+#include "IInterfaceTable.h"
 
 namespace ARA {
 namespace omnetpp {
@@ -28,15 +29,30 @@ void OMNeTARAClient::initialize(int stage) {
         deltaPhi = par("deltaPhi").doubleValue();
         initialPhi = par("initialPhi").doubleValue();
 
-        /*for (cModule::GateIterator i(this); !i.end(); i++) {
-            cGate* gate = i();
-            if(gate->getType() == cGate::OUTPUT && gate->isVector()) {
-                // only the vector gates go to the NICs
-                addNetworkInterface(new OMNeTGate(this, gate));
-            }
-        }*/
-        addNetworkInterface(new OMNeTGate(this, gate("arpOut")));
+        initializeNetworkInterfaces();
     }
+}
+
+void OMNeTARAClient::initializeNetworkInterfaces() {
+    IInterfaceTable* interfaceTable = getInterfaceTable();
+    cGate* gateToARP = gate("arpOut");
+    for (cModule::GateIterator i(this); !i.end(); i++) {
+        cGate* gate = i();
+        if(gate->getType() == cGate::OUTPUT && gate->isVector()) {
+            // only the vector gates go to the NICs
+            InterfaceEntry* interfaceEntry = interfaceTable->getInterfaceByNodeInputGateId(gate->getNextGate()->getId());
+            addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry));
+        }
+    }
+}
+
+IInterfaceTable* OMNeTARAClient::getInterfaceTable() {
+    cModule* host = getParentModule();
+    cModule* interfaceTable = host->getSubmodule("interfaceTable");
+    if (interfaceTable == false) {
+        throw cRuntimeError("Could not find the interfaceTable in host '%s'. Every %s needs to be part of a compound module that has an IInterfaceTable submodule called 'interfaceTable'", host->getFullPath().c_str(), getFullName());
+    }
+    return check_and_cast<IInterfaceTable*>(interfaceTable);
 }
 
 void OMNeTARAClient::handleMessage(cMessage *msg) {
