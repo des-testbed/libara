@@ -16,9 +16,11 @@
 package ara.simulations;
 
 import ara.ARAClient;
+import ara.ARANetworkConfigurator;
 import inet.world.ChannelControl;
 
-network ManetTest {
+network ManetTest
+{
     parameters:
         int numberOfHosts;
         double playgroundSizeX;
@@ -35,7 +37,14 @@ network ManetTest {
             parameters:
                 playgroundSizeX = playgroundSizeX;
                 playgroundSizeY = playgroundSizeY;
-                @display("p=61,46");
+                @display("p=78,36");
+        }
+
+        networkConfigurator: ARANetworkConfigurator {
+            parameters:
+                networkAddress = "192.168.0.0";
+                netmask = "255.255.0.0";
+            	@display("p=78,97");
         }
 }
 
