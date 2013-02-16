@@ -16,8 +16,6 @@
 package ara;
 
 import inet.base.NotificationBoard;
-import ara.ARATrafficGenerator;
-import ara.Debugger;
 import ara.OMNeTARAClient;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
@@ -56,7 +54,7 @@ module ARAClient {
         ara: OMNeTARAClient {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("p=178,126");
+                @display("i=ara;p=178,126");
         }
         arp: ARP {
             parameters:
