@@ -45,21 +45,14 @@ TEST(LinearEvaporationPolicyTest, testGetFactor) {
     policy.setInterval(1000);
     /// update the current time
     bool status = policy.checkForEvaporation();
-/*
     CHECK(!status);
-
     b->usleep(5000);
-    std::cout << "ARR  " << b->toSeconds() << " "  << b->toMilliseconds() << std::endl;
-    std::cout << policy.getFactor() << std::endl;
     status = policy.checkForEvaporation();
     CHECK(status);
-    std::cout << policy.getFactor() << std::endl;
     BYTES_EQUAL(5, policy.getFactor());
-    std::cout << "NO " << std::endl;
-*/
 }
 
-IGNORE_TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
+TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
     /// create a time mock for the last access time
     TimeMock* a = new TimeMock();
     /// create a time mock for the current time
@@ -79,7 +72,7 @@ IGNORE_TEST(LinearEvaporationPolicyTest, testCheckForEvaporation) {
     CHECK(status);
 }
 
-IGNORE_TEST(LinearEvaporationPolicyTest, testEvaporate) {
+TEST(LinearEvaporationPolicyTest, testEvaporate) {
     /// create a time mock for the last access time
     TimeMock* a = new TimeMock();
     /// create a time mock for the current time
@@ -99,7 +92,7 @@ IGNORE_TEST(LinearEvaporationPolicyTest, testEvaporate) {
     DOUBLES_EQUAL(0.9, pheromone, 0.00001);
 
     /// sleep for ? ms
-    b->usleep(200);
+    b->usleep(2000);
     // check the status
     status = policy.checkForEvaporation();
     // the 'last access time' should have been intialized

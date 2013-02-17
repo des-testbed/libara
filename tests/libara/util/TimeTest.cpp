@@ -47,13 +47,13 @@ TEST(TimeTest, testInitialize) {
  * methods which are overloaded in class Time.
  */
 TEST(TimeTest, testOperator) {
-    struct timeval* timestampA = new timeval;
-    timestampA->tv_sec = 10;
-    timestampA->tv_usec = 10000;
+    struct timeval timestampA;
+    timestampA.tv_sec = 10;
+    timestampA.tv_usec = 10000;
 
-    struct timeval* timestampB = new timeval;
-    timestampB->tv_sec = 20;
-    timestampB->tv_usec = 20000;
+    struct timeval timestampB;
+    timestampB.tv_sec = 20;
+    timestampB.tv_usec = 20000;
 
     Time timeA = Time(timestampA); 
     Time timeB = Time(timestampB);
@@ -65,15 +65,15 @@ TEST(TimeTest, testOperator) {
 
 TEST(TimeTest, testUpdate) {
     Time time = Time();
-    CHECK(time.getTimestamp()->tv_sec == 0);
+    CHECK(time.getTimestamp().tv_sec == 0);
     time.update();
-    CHECK(time.getTimestamp()->tv_sec != 0);
+    CHECK(time.getTimestamp().tv_sec != 0);
 
-    struct timeval* timestamp = new timeval;
-    timestamp->tv_sec = 10;
-    timestamp->tv_usec = 10000;
+    struct timeval timestamp;
+    timestamp.tv_sec = 10;
+    timestamp.tv_usec = 10000;
 
     Time anotherTime = Time(timestamp);
     time.update(anotherTime);
-    CHECK(time.getTimestamp()->tv_sec == 10);
+    CHECK(time.getTimestamp().tv_sec == 10);
 }

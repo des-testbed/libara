@@ -11,9 +11,9 @@ TEST(TimeMockTest, testUsleep) {
     /// create a time mock
     TimeMock time = TimeMock();
     /// check if the timestamp is initialized with '0'
-    int seconds = time.getTimestamp().getTimestamp()->tv_sec;
+    int seconds = time.getTimestamp().getTimestamp().tv_sec;
     BYTES_EQUAL(0, seconds);
-    long int milliseconds = time.getTimestamp().getTimestamp()->tv_usec;
+    long int milliseconds = time.getTimestamp().getTimestamp().tv_usec;
     BYTES_EQUAL(0, milliseconds);
     /// test the usleep method
     time.usleep(1000);

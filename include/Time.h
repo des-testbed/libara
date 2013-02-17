@@ -38,7 +38,7 @@ namespace ARA {
         public:
             Time();
             Time(int seconds, long int microsonds);
-            Time(struct timeval* timestamp);
+            Time(struct timeval timestamp);
 
             /** The copy constructor of class Time */ 
             Time(const Time& other);
@@ -73,9 +73,9 @@ namespace ARA {
              * The method returns the timestamp which is encapsulated
              * by the class.
              */
-            struct timeval* getTimestamp() const;
+            struct timeval getTimestamp() const;
 
-            void setTimestamp(struct timeval* timestamp);
+            void setTimestamp(struct timeval timestamp);
 
             /**
              * The method checks if the timestamp is initialized.
@@ -100,7 +100,7 @@ namespace ARA {
              * milliseconds since the 1st of January 1970 (unix 
              * time)).
              */ 
-            struct timeval* timestamp;
+            struct timeval timestamp;
     };
 }
 

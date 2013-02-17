@@ -1,10 +1,12 @@
 #include "LinearEvaporationPolicy.h"
 
+#include <iostream>
+
 using namespace ARA;
 
 LinearEvaporationPolicy::LinearEvaporationPolicy():EvaporationPolicy(),threshold(0.2),q(0.1){}
 
-LinearEvaporationPolicy::LinearEvaporationPolicy(Time *last, Time *now):EvaporationPolicy(last, now){}
+LinearEvaporationPolicy::LinearEvaporationPolicy(Time *last, Time *now):EvaporationPolicy(last, now), threshold(0.2), q(0.1){}
 
 LinearEvaporationPolicy::LinearEvaporationPolicy(float pThreshold, float pQ):EvaporationPolicy(),threshold(pThreshold),q(pQ){}
 

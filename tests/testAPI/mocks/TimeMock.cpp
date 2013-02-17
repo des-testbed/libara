@@ -6,15 +6,15 @@
 using namespace ARA;
 
 TimeMock::TimeMock(){
-    this->timestamp = new Time();
+    this->timestamp = Time();
 }
 
-TimeMock::TimeMock(Time* time){
+TimeMock::TimeMock(Time time){
     this->timestamp = time;
 }
 
 TimeMock::TimeMock(const TimeMock& other){
-    this->timestamp = new Time();
+    this->timestamp = Time();
     /// this should hopefully call the copy constructor of class Time
     this->timestamp = other.getTimestamp();
 }
@@ -24,7 +24,7 @@ Time TimeMock::operator-(const Time& right){
 
     try{
         const TimeMock& r = dynamic_cast<const TimeMock&>(right);
-        result = (*(this->timestamp) - *(r.getTimestamp()));
+        result = this->timestamp - r.getTimestamp();
         //std::cout << "TimeMock::operator-" << result.toSeconds() << " " << result.toMilliseconds() << std::endl;
     }catch(const std::bad_cast& exception){
         std::cerr << exception.what() << std::endl;
@@ -38,17 +38,13 @@ Time TimeMock::operator-(const Time& right){
 Time TimeMock::operator-=(const Time& right){
     try{
         const TimeMock& r = dynamic_cast<const TimeMock&>(right);
-        *(this->timestamp) = *(this->timestamp) - *(r.getTimestamp());
+        this->timestamp = this->timestamp - r.getTimestamp();
     }catch(const std::bad_cast& exception){
         std::cerr << exception.what() << std::endl;
         std::cerr << "This object is not of type TimeMock but " << typeid(right).name() << std::endl;
     }
     // FIXME
-    return *(this->timestamp);
-}
-
-TimeMock::~TimeMock(){
-    delete this->timestamp;
+    return this->timestamp;
 }
 
 /**
@@ -61,28 +57,28 @@ TimeMock::~TimeMock(){
  *   timestamp
  */
 void TimeMock::usleep(int milliseconds){
-    struct timeval *time = new timeval;
+    struct timeval time;
 
     // copy over the old values
-    time->tv_sec = this->timestamp->getTimestamp()->tv_sec;
-    time->tv_usec = this->timestamp->getTimestamp()->tv_usec;
+    time.tv_sec = this->timestamp.getTimestamp().tv_sec;
+    time.tv_usec = this->timestamp.getTimestamp().tv_usec;
     // add the sleep time
-    time->tv_sec += milliseconds/1000;
-    time->tv_usec += milliseconds * 1000;
+    time.tv_sec += milliseconds/1000;
+    time.tv_usec += milliseconds * 1000;
 
-    this->timestamp->setTimestamp(time);
+    this->timestamp.setTimestamp(time);
 }
 
-Time* TimeMock::getTimestamp() const{
+Time TimeMock::getTimestamp() const{
     return this->timestamp;
 }
 
 int TimeMock::toSeconds(){
-    return this->timestamp->toSeconds();
+    return this->timestamp.toSeconds();
 }
 
 long int TimeMock::toMilliseconds(){
-    return this->timestamp->toMilliseconds();
+    return this->timestamp.toMilliseconds();
 }
 
 void TimeMock::update(){
@@ -90,7 +86,7 @@ void TimeMock::update(){
 }
 
 void TimeMock::update(TimeMock t){
-    this->timestamp->update(*t.getTimestamp());
+    this->timestamp.update(t.getTimestamp());
 }
 
 void TimeMock::initialize(){
