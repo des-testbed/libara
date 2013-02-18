@@ -64,7 +64,8 @@ void TimeMock::usleep(int milliseconds){
     time.tv_usec = this->timestamp.getTimestamp().tv_usec;
     // add the sleep time
     time.tv_sec += milliseconds/1000;
-    time.tv_usec += milliseconds * 1000;
+    // FIXME
+    time.tv_usec += 0;
 
     this->timestamp.setTimestamp(time);
 }

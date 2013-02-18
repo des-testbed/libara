@@ -40,10 +40,6 @@ Time::Time(struct timeval timestamp):timestamp(timestamp){ }
  * value of zero. 
  */
 Time::Time(){
-    /// create a new timestamp
-//    this->timestamp = new timeval;
-    /// set the members of the struct to 0
-//   memset(this->timestamp, 0, sizeof(timeval));
     this->timestamp.tv_sec = 0;
     this->timestamp.tv_usec = 0;
 }
@@ -64,9 +60,7 @@ Time::Time(const Time& other){
     this->timestamp.tv_usec = other.getTimestamp().tv_usec;
 }
 
-Time::~Time(){
-//    delete this->timestamp;
-}
+Time::~Time(){ }
 
 Time Time::operator-(const Time& right){
     struct timeval result = this->getTimeDifference(right);    
@@ -99,7 +93,7 @@ struct timeval Time::getTimeDifference(const Time& right){
     /// copy the content of the right operand
     r.tv_sec = right.getTimestamp().tv_sec;
     r.tv_usec = right.getTimestamp().tv_usec;
-/*
+
     if(this->timestamp.tv_usec < r.tv_usec){
         int nanoSeconds = (r.tv_usec - this->timestamp.tv_usec) / 1000000 + 1;
         r.tv_usec -= (1000000 * nanoSeconds);
@@ -111,7 +105,7 @@ struct timeval Time::getTimeDifference(const Time& right){
         r.tv_usec += (1000000 * nanoSeconds);
         r.tv_sec -= nanoSeconds;
     }
-*/
+
     result.tv_sec = this->timestamp.tv_sec - r.tv_sec; 
     result.tv_usec = this->timestamp.tv_usec - r.tv_usec; 
 
@@ -122,14 +116,13 @@ int Time::toSeconds(){
    return this->timestamp.tv_sec;
 }
 
+/**
+ * The method returns the timestamp in milliseconds. However, it
+ * ignores the tv_usec member of the timeval structure (which represents
+ * the rest of the elasped time).
+ */
 long int Time::toMilliseconds(){
-   /**
-    * The method will return 0 as long as tv_usec is below 1000
-    * since the float (which is a result of the division) will be
-    * cast to an long int. If a precision of milliseconds is to
-    * low, the methods needs to be redone. 
-    */
-   return (this->timestamp.tv_usec/1000);
+   return (this->timestamp.tv_sec * 1000);
 }
 
 struct timeval Time::getTimestamp() const{

@@ -60,7 +60,7 @@ TEST(TimeTest, testOperator) {
 
     Time result = timeB - timeA;
     BYTES_EQUAL(10, result.toSeconds()); 
-    LONGS_EQUAL(10, result.toMilliseconds()); 
+    LONGS_EQUAL(10000, result.toMilliseconds()); 
 }
 
 TEST(TimeTest, testUpdate) {
