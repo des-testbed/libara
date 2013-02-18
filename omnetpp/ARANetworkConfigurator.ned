@@ -15,18 +15,10 @@
 @namespace(ARA::omnetpp);
 package ara;
 
-
-simple ARATrafficGenerator
-{
-    parameters:
-        string destAddresses; // list of IP addresses, separated by spaces
-        int numberOfPackets = default(50);
-        double packetInterval @unit("s") = default(10ms);
-        int packetLength @unit("B");
-        int protocol = default(4); // value for IPDatagram protocol field
-        int defaultBroadCastAddressInterface=default(101);
-        @display("i=block/app");
-    gates:
-        input in;
-        output out;
+simple ARANetworkConfigurator { 
+	parameters:
+        string networkAddress = default("192.168.0.0"); // network part of the address (see netmask parameter)
+        string netmask = default("255.255.0.0"); // host part of addresses are autoconfigured
+        @display("i=block/cogwheel_s");
+        @labels(node);
 }

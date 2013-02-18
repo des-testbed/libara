@@ -31,45 +31,29 @@ using namespace std;
 namespace ARA {
 namespace omnetpp {
 
-OMNeTAddress::OMNeTAddress(const std::string name) {
-    this->address = name;
-}
-
 bool OMNeTAddress::equals(const Address* otherAddress) const {
-    const OMNeTAddress* otherAddressMock = dynamic_cast<const OMNeTAddress*>(otherAddress);
-    if(otherAddressMock == NULL) {
+    const OMNeTAddress* otherOMNeTAddress = dynamic_cast<const OMNeTAddress*>(otherAddress);
+    if(otherOMNeTAddress == NULL) {
         return false;
     }
     else {
-        return this->address.compare(otherAddressMock->address) == 0;
+        // use the native implementation of IPAddress
+        return IPAddress::equals(*otherOMNeTAddress);
     }
 }
 
 bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
-    shared_ptr<OMNeTAddress> otherOmnetMock (dynamic_pointer_cast<OMNeTAddress>(otherAddress));
-    if(otherOmnetMock == NULL) {
-        return false;
-    }
-    else {
-        return this->address.compare(otherOmnetMock->address) == 0;
-    }
+    return this->equals(otherAddress.get());
 }
 
 size_t OMNeTAddress::getHashValue() const {
-    __gnu_cxx::hash<const char*> hashFunction;
-    return hashFunction(address.c_str());
-}
-
-string OMNeTAddress::getAddress() {
-    return address;
-}
-
-bool OMNeTAddress::isBroadCast() {
-    return address == "BROADCAST";
+    int firstByte = getDByte(0);
+    int secondByte = getDByte(1);
+    return firstByte * 256 + secondByte;  // integer value between 0 and 65535
 }
 
 Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(this->address);
+    OMNeTAddress* clone = new OMNeTAddress(getInt());
     return clone;
 }
 

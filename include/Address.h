@@ -38,11 +38,9 @@ class Address {
 public:
     virtual ~Address() {}
 
-    //TODO do we need the equals method if we support operator== overloading now?
     virtual bool equals(const Address* otherAddress) const = 0;
-    virtual bool equals(const std::shared_ptr<Address> otherAddress) const = 0;
+    virtual bool equals(const std::shared_ptr<Address> otherAddress) const = 0; // FIXME 2 abstract equals definitions is not necessary
     virtual size_t getHashValue() const = 0;
-    virtual bool isBroadCast() = 0;
     virtual Address* clone() = 0;
 
     bool operator==(const Address& otherAddress) const {

@@ -7,6 +7,8 @@
 
 #include "Packet.h"
 #include "Address.h"
+#include "OMNeTAddress.h"
+#include "IPAddress.h"
 
 #include <omnetpp.h>
 
@@ -22,12 +24,20 @@ class OMNeTPacket : public ::cPacket, public ARA::Packet {
     bool operator==(const OMNeTPacket&);
 
   public:
-    OMNeTPacket(std::shared_ptr<Address> source=NULL, std::shared_ptr<Address> destination=NULL, std::shared_ptr<Address> sender=NULL, char type=0, unsigned int seqNr=0, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 0);
+    OMNeTPacket(std::shared_ptr<Address> source=NULL, std::shared_ptr<Address> destination=NULL, std::shared_ptr<Address> sender=NULL, char type=0, unsigned int seqNr=0, unsigned int hopCount = 0);
     OMNeTPacket(const OMNeTPacket& other);
     OMNeTPacket& operator=(const OMNeTPacket& other);
     virtual OMNeTPacket *dup() const {return new OMNeTPacket(*this);}
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
+
+    std::shared_ptr<OMNeTAddress> getSource() const;
+    std::shared_ptr<OMNeTAddress> getDestination() const;
+    std::shared_ptr<OMNeTAddress> getSender() const;
+
+    IPAddress getSourceIP() const { return *(getSource().get()); }
+    IPAddress getDestinationIP() const { return *(getDestination().get()); }
+    IPAddress getSenderIP() const { return *(getSender().get()); }
 
     virtual Packet* clone() const;
     virtual Packet* createFANT(unsigned int sequenceNumber) const;

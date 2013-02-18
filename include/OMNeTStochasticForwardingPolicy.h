@@ -2,7 +2,7 @@
  Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
- These sources were originally developed by Friedrich Große
+ hese sources were originally developed by Friedrich Große, Michael Frey
  at Freie Universität Berlin (http://www.fu-berlin.de/),
  Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
  (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
@@ -23,43 +23,37 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef NETWORKINTERFACEMOCK_H_
-#define NETWORKINTERFACEMOCK_H_
+#ifndef OMNET_STOCHASTIC_FORWARDING_POLICY_H_
+#define OMNET_STOCHASTIC_FORWARDING_POLICY_H_
 
-#include "NetworkInterface.h"
+#include <numeric>
+//#include <stdlib.h>
+#include <omnetpp.h>
+
+/*
 #include "Packet.h"
-#include "Pair.h"
-#include "AddressMock.h"
-
-#include <memory>
-#include <deque>
+#include "NextHop.h"
+*/
+#include "RoutingTable.h"
+#include "StochasticForwardingPolicy.h"
 
 namespace ARA {
+namespace omnetpp {
+   /**
+    * The class provides a stochastic forwarding policy for the OMNeTARAClient. The
+    * class overwrites the getRandomNumber() method of the base class, which uses a
+    * pseudo-random number generator provided by OMNeT++. 
+    */
+   class OMNeTStochasticForwardingPolicy : public StochasticForwardingPolicy {
+      public:
+          OMNeTStochasticForwardingPolicy(RoutingTable* routingTable);
 
-class NetworkInterfaceMock: public ARA::NetworkInterface {
-public:
-    NetworkInterfaceMock();
-    NetworkInterfaceMock(const std::string interfaceName);
-    NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName);
-    ~NetworkInterfaceMock();
+      protected:
+         /// The method returns a random number wich uses OMNeT++ pseudo random number generators
+         float getRandomNumber();
+   };
 
-    void send(const Packet* packet, std::shared_ptr<Address> recipient);
-    void broadcast(const Packet* packet);
-    bool equals(NetworkInterface* otherInterface);
-    std::shared_ptr<Address> getLocalAddress();
-    bool isBroadcastAddress(std::shared_ptr<Address> someAddress) const;
-
-    std::string getName();
-    std::deque<Pair<Packet*, std::shared_ptr<Address>>*>* getSentPackets();
-    unsigned int getNumberOfSentPackets();
-    bool hasPacketBeenSend(Packet* packet);
-    bool hasPacketBeenBroadCasted(Packet* packet);
-
-private:
-    std::string name;
-    std::deque<Pair<Packet*, std::shared_ptr<Address>>*> sentPackets;
-    std::shared_ptr<Address> localAddress;
-};
-
+} /* namespace omnetpp */
 } /* namespace ARA */
-#endif /* NETWORKINTERFACEMOCK_H_ */
+
+#endif

@@ -134,4 +134,16 @@ TEST(NetworkInterfaceMockTest, testGetLocalAddress) {
     interface = NetworkInterfaceMock("eth0", "192.168.0.1");
     expectedLocalAddress.reset(new AddressMock("192.168.0.1"));
     defaultLocalAddress = interface.getLocalAddress();
-    CHECK(defaultLocalAddress->equals(expectedLocalAddress));}
+    CHECK(defaultLocalAddress->equals(expectedLocalAddress));
+}
+
+TEST(NetworkInterfaceMockTest, testIsBroadCastAddress) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr someAddress1 (new AddressMock("192.168.0.1"));
+    AddressPtr someAddress2 (new AddressMock("Foo"));
+    AddressPtr broadcaseAddress (new AddressMock("BROADCAST"));
+
+    CHECK_FALSE(interface.isBroadcastAddress(someAddress1));
+    CHECK_FALSE(interface.isBroadcastAddress(someAddress2));
+    CHECK_TRUE(interface.isBroadcastAddress(broadcaseAddress));
+}

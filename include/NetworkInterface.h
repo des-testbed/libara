@@ -67,6 +67,18 @@ public:
 	 * This method is used to determine the sender address each time a a new packet is created.
 	 */
 	virtual std::shared_ptr<Address> getLocalAddress() = 0;
+
+	/**
+	 * Returns true if the given address is known to be a broadcast address.
+	 * This method is now implemented at the network interface because this is
+	 * the only object that is officially required to recognize a broadcast
+	 * address.
+	 *
+	 * Example: An ordinary IPv4 Address object by itself may not be able to
+	 * distinguish between a normal address and a broadcast address without
+	 * knowing its subnet mask.
+	 */
+	virtual bool isBroadcastAddress(std::shared_ptr<Address> someAddress) const = 0;
 };
 
 } /* namespace ARA */

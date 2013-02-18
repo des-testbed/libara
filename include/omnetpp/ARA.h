@@ -20,6 +20,9 @@
 #include <algorithm>
 #include <csimplemodule.h>
 
+#include "IInterfaceTable.h"
+#include "InterfaceEntry.h"
+
 #include "Packet.h"
 #include "NextHop.h"
 #include "OMNeTGate.h"
@@ -44,10 +47,11 @@ namespace omnetpp {
      *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
      *
      */
-    class OMNeTARAClient: public cSimpleModule, public ARA::AbstractARAClient {
+    class ARA: public cSimpleModule, public AbstractARAClient {
         protected:
             //~~~ INHERITED FROM cSimpleModule ~~~~~~~
-            virtual void initialize();
+            int numInitStages() const;
+            virtual void initialize(int stage);
             virtual void handleMessage(cMessage *msg);
 
             //~~~ INHERITED FROM AbstractARAClient ~~~
@@ -55,16 +59,26 @@ namespace omnetpp {
             void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
             void deliverToSystem(const Packet* packet);
 
-
         private:
             /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
             ForwardingPolicy* forwardingPolicy;
-            ///
-            void sendInitialPacket();
-            /// The method checks if the in NED file given policy exists and initializes the policy
-            void initializeForwardingPolicy(std::string policy);
             /// The member denotes the constant which is used in the pheromone reinforcement of a path
             double deltaPhi;
+
+            IInterfaceTable* interfaceTable;
+
+            void initializeNetworkInterfaces();
+            IInterfaceTable* getInterfaceTable();
+            InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
+
+            /// The method checks if the in NED file given policy exists and initializes the policy
+            void initializeForwardingPolicy(std::string policy);
+
+            bool isFromUpperLayer(cMessage* msg);
+            bool isARPMessage(cMessage* msg);
+            void handleUpperLayerMessage(cMessage* msg);
+            void handleARP(cMessage* msg);
+            void handleARA(cMessage* msg);
     };
 
 } /* namespace ARA */
