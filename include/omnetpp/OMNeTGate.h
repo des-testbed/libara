@@ -53,6 +53,7 @@ namespace omnetpp {
         cSimpleModule* module;
         cGate* gateToARP;
         std::shared_ptr<Address> localAddress;
+        std::shared_ptr<Address> broadcastAddress;
         int interfaceID;
     };
 

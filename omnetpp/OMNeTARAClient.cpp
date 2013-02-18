@@ -1,7 +1,8 @@
 #include "OMNeTARAClient.h"
 #include "IPControlInfo.h"
 #include "IPAddress.h"
-#include "IInterfaceTable.h"
+#include "IPAddressResolver.h"
+#include "ARPPacket_m.h"
 
 namespace ARA {
 namespace omnetpp {
@@ -29,42 +30,49 @@ void OMNeTARAClient::initialize(int stage) {
         deltaPhi = par("deltaPhi").doubleValue();
         initialPhi = par("initialPhi").doubleValue();
 
+        interfaceTable = getInterfaceTable();
         initializeNetworkInterfaces();
     }
 }
 
+IInterfaceTable* OMNeTARAClient::getInterfaceTable() {
+    //TODO find a more generic way to determine the real host module
+    cModule* host = getParentModule();
+    cModule* parentHost = host->getParentModule();
+
+    IInterfaceTable* interfaceTable = IPAddressResolver().findInterfaceTableOf(parentHost);
+    if (interfaceTable == NULL) {
+        throw cRuntimeError("Could not find the interfaceTable in host '%s'. Every %s needs to be part of a compound module that has an IInterfaceTable submodule called 'interfaceTable'", host->getFullPath().c_str(), getFullName());
+    }
+    return interfaceTable;
+}
+
 void OMNeTARAClient::initializeNetworkInterfaces() {
-    IInterfaceTable* interfaceTable = getInterfaceTable();
+    ASSERT(interfaceTable);
     cGate* gateToARP = gate("arpOut");
-    for (cModule::GateIterator i(this); !i.end(); i++) {
-        cGate* gate = i();
-        if(gate->getType() == cGate::OUTPUT && gate->isVector()) {
-            // only the vector gates go to the NICs
-            InterfaceEntry* interfaceEntry = interfaceTable->getInterfaceByNodeInputGateId(gate->getNextGate()->getId());
+
+    int nrOfInterfaces = interfaceTable->getNumInterfaces();
+    for (int i=0; i < nrOfInterfaces; i++)         {
+        InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
+        if (interfaceEntry->isLoopback() == false) {
             addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry));
         }
     }
 }
 
-IInterfaceTable* OMNeTARAClient::getInterfaceTable() {
-    cModule* host = getParentModule();
-    cModule* interfaceTable = host->getSubmodule("interfaceTable");
-    if (interfaceTable == false) {
-        throw cRuntimeError("Could not find the interfaceTable in host '%s'. Every %s needs to be part of a compound module that has an IInterfaceTable submodule called 'interfaceTable'", host->getFullPath().c_str(), getFullName());
-    }
-    return check_and_cast<IInterfaceTable*>(interfaceTable);
-}
-
-void OMNeTARAClient::handleMessage(cMessage *msg) {
+void OMNeTARAClient::handleMessage(cMessage* msg) {
     if(isFromUpperLayer(msg)) {
         handleUpperLayerMessage(msg);
+        delete msg;
     }
     else {
-        EV << "Message from lower layer";
-        //receivePacket(omnetPacket, getNetworkInterface(msg->getArrivalGate()->getIndex()));
+        if(isARPMessage(msg)) {
+            handleARP(msg);
+        }
+        else {
+            handleARA(msg);
+        }
     }
-
-    delete msg;
 }
 
 bool OMNeTARAClient::isFromUpperLayer(cMessage* msg) {
@@ -86,6 +94,40 @@ void OMNeTARAClient::handleUpperLayerMessage(cMessage* msg) {
     OMNeTPacket omnetPacket = OMNeTPacket(source, destination, sender, PacketType::DATA, getNextSequenceNumber());
 
     sendPacket(&omnetPacket);
+}
+
+bool OMNeTARAClient::isARPMessage(cMessage* msg) {
+    return dynamic_cast<ARPPacket*>(msg) != NULL;
+}
+
+void OMNeTARAClient::handleARP(cMessage* msg) {
+    // FIXME hasBitError() check  missing!
+    delete msg->removeControlInfo();
+
+    InterfaceEntry* arrivalInterface = getSourceInterfaceFrom(msg);
+    ASSERT(arrivalInterface);
+
+    IPRoutingDecision* routingDecision = new IPRoutingDecision();
+    routingDecision->setInterfaceId(arrivalInterface->getInterfaceId());
+    msg->setControlInfo(routingDecision);
+
+    send(msg, "arpOut");
+}
+
+void OMNeTARAClient::handleARA(cMessage* msg) {
+    OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(msg);
+    NetworkInterface* arrivalInterface = getNetworkInterface(msg->getArrivalGate()->getIndex());
+    receivePacket(omnetPacket, arrivalInterface);
+}
+
+InterfaceEntry* OMNeTARAClient::getSourceInterfaceFrom(cMessage* msg) {
+    cGate* arrivalGate = msg->getArrivalGate();
+    if(arrivalGate != NULL) {
+        return interfaceTable->getInterfaceByNetworkLayerGateIndex(arrivalGate->getIndex());
+    }
+    else {
+        return NULL;
+    }
 }
 
 ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {

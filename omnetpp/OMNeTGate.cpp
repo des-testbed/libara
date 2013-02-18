@@ -27,6 +27,7 @@
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
 #include "IInterfaceTable.h"
+#include "IPv4InterfaceData.h"
 #include "IPAddressResolver.h"
 #include "IPControlInfo.h"
 #include "IPDatagram.h"
@@ -42,8 +43,13 @@ OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gateToARP, InterfaceEntry* in
     this->module = module;
     this->gateToARP = gateToARP;
 
-    IPvXAddress localAddress = IPAddressResolver().getAddressFrom(interfaceEntry, IPAddressResolver::ADDR_IPv4);
-    this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress.get4()));
+    IPAddress localAddress = IPAddressResolver().getAddressFrom(interfaceEntry, IPAddressResolver::ADDR_IPv4).get4();
+    IPAddress netmask = interfaceEntry->ipv4Data()->getNetmask();
+    IPAddress networkAddress = localAddress.doAnd(netmask);
+    IPAddress broadcastAddress = networkAddress.getBroadcastAddress(netmask);
+
+    this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress));
+    this->broadcastAddress = shared_ptr<Address>(new OMNeTAddress(broadcastAddress));
     this->interfaceID = interfaceEntry->getInterfaceId();
 }
 
@@ -68,8 +74,6 @@ OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
-    //FIXME this is just a test dummy
-    shared_ptr<OMNeTAddress> broadcastAddress(new OMNeTAddress(192, 168, 0, 255));
     send(packet, broadcastAddress);
 }
 
@@ -89,13 +93,7 @@ shared_ptr<Address> OMNeTGate::getLocalAddress() {
 }
 
 bool OMNeTGate::isBroadcastAddress(std::shared_ptr<Address> someAddress) const {
-//    IPAddress someIPAddress = IPAddress(192, 168, 0, 1);
-//    IPAddress subnetMask = IPAddress(255, 240, 0, 0);
-//    IPAddress networkAddress = someIPAddress.doAnd(subnetMask);
-//    IPAddress broadcastAddress = networkAddress.getBroadcastAddress(subnetMask);
-//
-//    return someAddress
-    return false; //FIXE echte Adresse berechnen
+    return someAddress->equals(broadcastAddress);
 }
 
 } /* namespace omnetpp */

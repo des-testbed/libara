@@ -20,6 +20,9 @@
 #include <algorithm>
 #include <csimplemodule.h>
 
+#include "IInterfaceTable.h"
+#include "InterfaceEntry.h"
+
 #include "Packet.h"
 #include "NextHop.h"
 #include "OMNeTGate.h"
@@ -50,7 +53,6 @@ namespace omnetpp {
             int numInitStages() const;
             virtual void initialize(int stage);
             virtual void handleMessage(cMessage *msg);
-            void handleUpperLayerMessage(cMessage* msg);
 
             //~~~ INHERITED FROM AbstractARAClient ~~~
             ForwardingPolicy* getForwardingPolicy();
@@ -63,13 +65,20 @@ namespace omnetpp {
             /// The member denotes the constant which is used in the pheromone reinforcement of a path
             double deltaPhi;
 
+            IInterfaceTable* interfaceTable;
+
             void initializeNetworkInterfaces();
             IInterfaceTable* getInterfaceTable();
+            InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
 
             /// The method checks if the in NED file given policy exists and initializes the policy
             void initializeForwardingPolicy(std::string policy);
 
             bool isFromUpperLayer(cMessage* msg);
+            bool isARPMessage(cMessage* msg);
+            void handleUpperLayerMessage(cMessage* msg);
+            void handleARP(cMessage* msg);
+            void handleARA(cMessage* msg);
     };
 
 } /* namespace ARA */

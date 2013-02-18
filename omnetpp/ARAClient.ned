@@ -16,16 +16,16 @@
 package ara;
 
 import inet.base.NotificationBoard;
-import ara.OMNeTARAClient;
+import ara.NetworkLayer;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
 import inet.nodes.wireless.WirelessHost;
 import inet.applications.pingapp.PingApp;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.arp.ARP;
 
 module ARAClient {
+
     parameters:
         @display("i=device/wifilaptop;bgb=344,315");
         int nrOfNetworkInterfaces = default(1);
@@ -49,23 +49,16 @@ module ARAClient {
         }
         app: PingApp {
             parameters:
-                @display("b=40,24;p=178,31,col");
+                @display("b=40,24;p=210,31,col");
         }
-        ara: OMNeTARAClient {
+        ara: NetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=178,126");
-        }
-        arp: ARP {
-            parameters:
-                proxyARP = true;
-                @display("p=305,216;q=pendingQueue");
-            gates:
-                nicOut[nrOfNetworkInterfaces];
+                @display("i=ara;p=210,126");
         }
         wlan[nrOfNetworkInterfaces]: Ieee80211NicAdhoc {
             parameters:
-                @display("p=178,245;q=queue");
+                @display("p=210,224;q=queue");
         }
 
         // Stationary node
@@ -77,11 +70,9 @@ module ARAClient {
         app.pingOut --> ara.upperLayerGate$i;
         app.pingIn <-- ara.upperLayerGate$o;
 
-        arp.ipIn <-- ara.arpOut;
-
         for i=0..nrOfNetworkInterfaces-1 {
             ara.ifOut[i] --> wlan[i].uppergateIn;
-            wlan[i].uppergateOut --> ara.ifIn[i];
+            ara.ifIn[i]  <-- wlan[i].uppergateOut;
             wlan[i].radioIn <-- radioIn;
         }
 
