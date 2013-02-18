@@ -1,4 +1,4 @@
-#include "OMNeTARAClient.h"
+#include "ARA.h"
 #include "IPControlInfo.h"
 #include "IPAddress.h"
 #include "IPAddressResolver.h"
@@ -10,20 +10,20 @@ namespace omnetpp {
 typedef std::shared_ptr<Address> AddressPtr;
 
 /// The module class needs to be registered with OMNeT++
-Define_Module(OMNeTARAClient);
+Define_Module(ARA);
 
-int OMNeTARAClient::numInitStages() const {
+int ARA::numInitStages() const {
     return 5;
 }
 
 /**
- * The method initializes the OMNeTARAClient class. Typically, this is
+ * The method initializes the ARA class. Typically, this is
  * a task which would be provided by a constructor, but it is one of the
  * main concepts of OMNeT++ to provide such a method (and to leave 
  * constructors 'untouched'). The method parses the parameters 
  * specified in the NED file and initializes the gates.
  */
-void OMNeTARAClient::initialize(int stage) {
+void ARA::initialize(int stage) {
     if(stage == 4) {
         std::string policy = par("forwardingPolicy").stringValue();
         initializeForwardingPolicy(policy);
@@ -35,7 +35,7 @@ void OMNeTARAClient::initialize(int stage) {
     }
 }
 
-IInterfaceTable* OMNeTARAClient::getInterfaceTable() {
+IInterfaceTable* ARA::getInterfaceTable() {
     //TODO find a more generic way to determine the real host module
     cModule* host = getParentModule();
     cModule* parentHost = host->getParentModule();
@@ -47,7 +47,7 @@ IInterfaceTable* OMNeTARAClient::getInterfaceTable() {
     return interfaceTable;
 }
 
-void OMNeTARAClient::initializeNetworkInterfaces() {
+void ARA::initializeNetworkInterfaces() {
     ASSERT(interfaceTable);
     cGate* gateToARP = gate("arpOut");
 
@@ -60,7 +60,7 @@ void OMNeTARAClient::initializeNetworkInterfaces() {
     }
 }
 
-void OMNeTARAClient::handleMessage(cMessage* msg) {
+void ARA::handleMessage(cMessage* msg) {
     if(isFromUpperLayer(msg)) {
         handleUpperLayerMessage(msg);
     }
@@ -74,14 +74,14 @@ void OMNeTARAClient::handleMessage(cMessage* msg) {
     }
 }
 
-bool OMNeTARAClient::isFromUpperLayer(cMessage* msg) {
+bool ARA::isFromUpperLayer(cMessage* msg) {
     std::string nameOfUpperLayergate = "upperLayerGate$i";
     std::string gateName = std::string(msg->getArrivalGate()->getName());
     return gateName.length() <= nameOfUpperLayergate.length()
         && std::equal(gateName.begin(), gateName.end(), nameOfUpperLayergate.begin());
 }
 
-void OMNeTARAClient::handleUpperLayerMessage(cMessage* msg) {
+void ARA::handleUpperLayerMessage(cMessage* msg) {
     IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
     IPAddress sourceIP = controlInfo->getSrcAddr();
     IPAddress destinationIP = controlInfo->getDestAddr();
@@ -96,11 +96,11 @@ void OMNeTARAClient::handleUpperLayerMessage(cMessage* msg) {
     delete msg;
 }
 
-bool OMNeTARAClient::isARPMessage(cMessage* msg) {
+bool ARA::isARPMessage(cMessage* msg) {
     return dynamic_cast<ARPPacket*>(msg) != NULL;
 }
 
-void OMNeTARAClient::handleARP(cMessage* msg) {
+void ARA::handleARP(cMessage* msg) {
     // FIXME hasBitError() check  missing!
     delete msg->removeControlInfo();
 
@@ -114,14 +114,14 @@ void OMNeTARAClient::handleARP(cMessage* msg) {
     send(msg, "arpOut");
 }
 
-void OMNeTARAClient::handleARA(cMessage* msg) {
+void ARA::handleARA(cMessage* msg) {
     OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(msg);
     NetworkInterface* arrivalInterface = getNetworkInterface(msg->getArrivalGate()->getIndex());
     receivePacket(omnetPacket, arrivalInterface);
     delete msg;
 }
 
-InterfaceEntry* OMNeTARAClient::getSourceInterfaceFrom(cMessage* msg) {
+InterfaceEntry* ARA::getSourceInterfaceFrom(cMessage* msg) {
     cGate* arrivalGate = msg->getArrivalGate();
     if(arrivalGate != NULL) {
         return interfaceTable->getInterfaceByNetworkLayerGateIndex(arrivalGate->getIndex());
@@ -131,7 +131,7 @@ InterfaceEntry* OMNeTARAClient::getSourceInterfaceFrom(cMessage* msg) {
     }
 }
 
-ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
+ForwardingPolicy* ARA::getForwardingPolicy() {
     return forwardingPolicy;
 }
 
@@ -144,7 +144,7 @@ ForwardingPolicy* OMNeTARAClient::getForwardingPolicy() {
  *
  * @param policy in The name of the policy which should be checked.
  */
-void OMNeTARAClient::initializeForwardingPolicy(std::string policy){
+void ARA::initializeForwardingPolicy(std::string policy){
     /// we lower case each character, thus accepting strings written in camel case, only first letter upper, etc.
     std::transform(policy.begin(), policy.end(), policy.begin(), ::tolower);
 
@@ -166,7 +166,7 @@ void OMNeTARAClient::initializeForwardingPolicy(std::string policy){
     }
 }
 
-void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
+void ARA::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
     AddressPtr source = packet->getSource();
     AddressPtr sender = packet->getSender();
     float currentPheromoneValue = routingTable.getPheromoneValue(source, sender, interface);
@@ -177,7 +177,7 @@ void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* 
     routingTable.update(source, sender, interface, newPheromoneValue);
 }
 
-void OMNeTARAClient::deliverToSystem(const Packet* packet) {
+void ARA::deliverToSystem(const Packet* packet) {
     Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
     OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
     ASSERT(omnetPacket);

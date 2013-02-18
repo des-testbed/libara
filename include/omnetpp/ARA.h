@@ -47,7 +47,7 @@ namespace omnetpp {
      *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
      *
      */
-    class OMNeTARAClient: public cSimpleModule, public AbstractARAClient {
+    class ARA: public cSimpleModule, public AbstractARAClient {
         protected:
             //~~~ INHERITED FROM cSimpleModule ~~~~~~~
             int numInitStages() const;

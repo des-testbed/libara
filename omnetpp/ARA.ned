@@ -1,8 +1,8 @@
 @namespace(ARA::omnetpp);
 package ara;
 
-simple OMNeTARAClient
-{
+simple ARA {
+    
     parameters:
         string forwardingPolicy = default("stochastic");
         double deltaPhi = default(1);

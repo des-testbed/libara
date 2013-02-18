@@ -15,7 +15,7 @@
 
 package ara;
 
-import ara.OMNeTARAClient;
+import ara.ARA;
 import inet.networklayer.arp.ARP;
 
 module NetworkLayer {
@@ -29,7 +29,7 @@ module NetworkLayer {
         output ifOut[nrOfNetworkInterfaces];	// output to  NIC interface (INET/MANET needs this to be named this way)
 
     submodules:
-        ara: OMNeTARAClient {
+        ara: ARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=100,78");
