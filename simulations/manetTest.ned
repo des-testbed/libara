@@ -22,17 +22,11 @@ import inet.world.ChannelControl;
 network ManetTest
 {
     parameters:
-        int numberOfHosts;
         double playgroundSizeX;
         double playgroundSizeY;
-        @display("b=297,203");
+        @display("b=297,203;bgb=758,337");
 
     submodules:
-        node[numberOfHosts]: ARAClient {
-            parameters:
-                @display("r=,,#707070");
-        }
-
         channelcontrol: ChannelControl {
             parameters:
                 playgroundSizeX = playgroundSizeX;
@@ -44,7 +38,22 @@ network ManetTest
             parameters:
                 networkAddress = "192.168.0.0";
                 netmask = "255.255.0.0";
-            	@display("p=78,97");
+                @display("p=78,97");
+        }
+        node1: ARAClient {
+            @display("p=515,69");
+        }
+        node2: ARAClient {
+            @display("p=195,215");
+        }
+        node3: ARAClient {
+            @display("p=697,182");
+        }
+        node4: ARAClient {
+            @display("p=305,125");
+        }
+        node5: ARAClient {
+            @display("p=496,267");
         }
 }
 

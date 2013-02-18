@@ -63,7 +63,6 @@ void OMNeTARAClient::initializeNetworkInterfaces() {
 void OMNeTARAClient::handleMessage(cMessage* msg) {
     if(isFromUpperLayer(msg)) {
         handleUpperLayerMessage(msg);
-        delete msg;
     }
     else {
         if(isARPMessage(msg)) {
@@ -94,6 +93,7 @@ void OMNeTARAClient::handleUpperLayerMessage(cMessage* msg) {
     OMNeTPacket omnetPacket = OMNeTPacket(source, destination, sender, PacketType::DATA, getNextSequenceNumber());
 
     sendPacket(&omnetPacket);
+    delete msg;
 }
 
 bool OMNeTARAClient::isARPMessage(cMessage* msg) {
@@ -118,6 +118,7 @@ void OMNeTARAClient::handleARA(cMessage* msg) {
     OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(msg);
     NetworkInterface* arrivalInterface = getNetworkInterface(msg->getArrivalGate()->getIndex());
     receivePacket(omnetPacket, arrivalInterface);
+    delete msg;
 }
 
 InterfaceEntry* OMNeTARAClient::getSourceInterfaceFrom(cMessage* msg) {
@@ -177,10 +178,12 @@ void OMNeTARAClient::updateRoutingTable(const Packet* packet, NetworkInterface* 
 }
 
 void OMNeTARAClient::deliverToSystem(const Packet* packet) {
-    EV << getName() << " delivered a packet to the system\n";
+    Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
+    OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
+    ASSERT(omnetPacket);
 
-    OMNeTPacket answer = OMNeTPacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::DATA, getNextSequenceNumber());
-    sendPacket(&answer);
+    cPacket* encapsulatedData = omnetPacket->decapsulate();
+    send(encapsulatedData, "upperLayerGate$o");
 }
 
 } /* namespace omnetpp */
