@@ -6,6 +6,7 @@
 out/*
 *.o
 *.so
+src/ara-sim
 src/libARA.so
 omnetpp/ara-sim
 omnetpp/Makefile
