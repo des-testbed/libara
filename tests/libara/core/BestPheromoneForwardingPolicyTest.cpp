@@ -46,7 +46,8 @@ TEST_GROUP(BestPheromoneForwardingPolicyTest) {};
 TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
     LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
     evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+    RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
@@ -62,9 +63,11 @@ TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
     routingTable.update(destination, nextHopB, &interface, 2.1);
     routingTable.update(destination, nextHopC, &interface, 2.3);
     
-    BestPheromoneForwardingPolicy policy(&routingTable);
+    BestPheromoneForwardingPolicy policy =BestPheromoneForwardingPolicy();
+    policy.setRoutingTable(&routingTable);
     NextHop* node = policy.getNextHop(&packet);
 
     // check if the chosen node matches the node with the highest pheromone value
     CHECK(nextHopC->equals(node->getAddress()));
+    delete evaporationPolicy;
 }

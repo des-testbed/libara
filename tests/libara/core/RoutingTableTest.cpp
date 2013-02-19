@@ -191,6 +191,7 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
             CHECK(false); // hops for this destination must either be nextHop3 or nextHop4
         }
     }
+    delete evaporationPolicy;
 }
 
 TEST(RoutingTableTest, testGetPheromoneValue) {
