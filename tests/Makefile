@@ -25,11 +25,11 @@ INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
 LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest
 LD_LIB_PATH = $(ARA_LIB_DIR)
 
-# libARA stuff
+# libARA stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ARA_LIB_DIR = ../src
 ARA_LIB = $(ARA_LIB_DIR)/$(ARA_LIB_NAME)
 
-# CppUTest options
+# CppUTest options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CPPUTEST_BASE_DIR = ./cpputest
 CPPUTEST_LIB_DIR = $(CPPUTEST_BASE_DIR)/lib
 CPPUTEST_LIB = $(CPPUTEST_LIB_DIR)/libCppUTest.a
