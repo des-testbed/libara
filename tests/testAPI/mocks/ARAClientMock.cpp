@@ -32,11 +32,20 @@
 namespace ARA {
 
 ARAClientMock::ARAClientMock() {
-    forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
+    forwardingPolicy = new BestPheromoneForwardingPolicy();
+    forwardingPolicy->setRoutingTable(&routingTable);
+    setEvaporationPolicy(new LinearEvaporationPolicy());
+
 }
+
+void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
+    evaporationPolicy = policy;
+    routingTable.setEvaporationPolicy(policy);
+};
 
 ARAClientMock::~ARAClientMock() {
     delete forwardingPolicy;
+    delete evaporationPolicy;
 
     // delete the NetworkInterfaceMocks that have been created via createNewNetworkInterfaceMock
     while(interfaceMocks.empty() == false) {

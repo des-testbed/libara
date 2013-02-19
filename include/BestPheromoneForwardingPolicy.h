@@ -35,8 +35,9 @@ namespace ARA {
 
 class BestPheromoneForwardingPolicy : public ForwardingPolicy {
 public:
-    BestPheromoneForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {}
+    BestPheromoneForwardingPolicy(){}
     NextHop* getNextHop(const Packet*);
+    void setRoutingTable(RoutingTable *routingTable);
 
 protected:
     RoutingTable* routingTable;

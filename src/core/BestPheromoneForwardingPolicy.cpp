@@ -46,3 +46,7 @@ NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet){
     //FIXME possibleNextHops muss noch gelöscht werden!
     return result;
 }
+
+void BestPheromoneForwardingPolicy::setRoutingTable(RoutingTable *routingTable){
+    this->routingTable = routingTable;
+}

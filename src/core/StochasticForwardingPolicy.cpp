@@ -51,8 +51,6 @@ NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet) {
     // compute the cumulative sum
     std::partial_sum(probabilities, probabilities + nrOfPossibleNextHops, cumulativeSum);
 
-    // pick a random number, TODO: check how to generate random numbers in omnet++
-    // q = genk_dblrand(0);
 
     // get a random number between 0.0 and 1.0
     float randomNumber = this->getRandomNumber();

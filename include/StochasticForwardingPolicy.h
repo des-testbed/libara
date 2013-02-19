@@ -40,7 +40,7 @@
 namespace ARA {
     class StochasticForwardingPolicy : public ForwardingPolicy {
         public:
-            StochasticForwardingPolicy();
+            StochasticForwardingPolicy(){};
             virtual ~StochasticForwardingPolicy(){};
 
             void setRoutingTable(RoutingTable* routingTable);

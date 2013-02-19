@@ -55,12 +55,14 @@ public:
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
     std::deque<const Packet*>* getDeliveredPackets();
+    void setEvaporationPolicy(EvaporationPolicy *policy);
 
 private:
     std::deque<NetworkInterfaceMock*> interfaceMocks;
     std::deque<const Packet*> deliveredPackets;
 
     ForwardingPolicy* forwardingPolicy;
+    EvaporationPolicy* evaporationPolicy;
 };
 
 } /* namespace ARA */
