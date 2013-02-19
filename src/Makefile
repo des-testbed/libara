@@ -37,6 +37,3 @@ $(LIBARA_OUTPUT_DIR)/%.o: %.cpp
 clean:
 	rm -f $(ARA_LIB_NAME) $(LIBARA_OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
 	rm -f $(LIBARA_O)
-	
-foo:
-	@echo $(LIBARA_O)

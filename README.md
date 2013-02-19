@@ -14,11 +14,7 @@ Installation from git
 		g++ >= 4.7
 		OMNeT++ >= 4.2
 
-3. After the checkout you should run the following make target which will create src/Makefile and prepare the OMNeT++build.
-
-		make makefiles
-
-4. Now you should be able to build the sources and simulation via 
+3. After the checkout you can build the sources and simulation via 
 
 		make all
 

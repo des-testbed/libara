@@ -9,7 +9,6 @@ out/*
 src/ara-sim
 src/libARA.so
 omnetpp/ara-sim
-omnetpp/Makefile
 doc/doxygen/html
 include/inetmanet/*
 
