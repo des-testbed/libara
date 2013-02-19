@@ -87,8 +87,11 @@ TEST(PacketTrapTest, testTrapMultiplePackets) {
 }
 
 TEST(PacketTrapTest, testGetDeliverablePacket) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
     // Test setup
     RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     PacketTrap packetTrap = PacketTrap(&routingTable);
     PacketMock trappedPacket = PacketMock();
     std::shared_ptr<Address> someAddress (new AddressMock());
@@ -116,10 +119,14 @@ TEST(PacketTrapTest, testGetDeliverablePacket) {
     CHECK_EQUAL(trappedPacket.getType(), deliverablePacket->getType());
     LONGS_EQUAL(trappedPacket.getHopCount(), deliverablePacket->getHopCount());
     LONGS_EQUAL(trappedPacket.getSequenceNumber(), deliverablePacket->getSequenceNumber());
+    delete evaporationPolicy;
 }
 
 TEST(PacketTrapTest, testUntrap) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
     RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     PacketTrap packetTrap = PacketTrap(&routingTable);
     PacketMock packet = PacketMock();
 
@@ -128,10 +135,14 @@ TEST(PacketTrapTest, testUntrap) {
     CHECK(packetTrap.contains(&packet) == true);
     packetTrap.untrapPacket(&packet);
     CHECK(packetTrap.contains(&packet) == false);
+    delete evaporationPolicy;
 }
 
 TEST(PacketTrapTest, testIsEmpty) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
     RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     PacketTrap packetTrap = PacketTrap(&routingTable);
     PacketMock packet = PacketMock();
 
@@ -142,4 +153,5 @@ TEST(PacketTrapTest, testIsEmpty) {
 
     packetTrap.untrapPacket(&packet);
     CHECK(packetTrap.isEmpty());
+    delete evaporationPolicy;
 }

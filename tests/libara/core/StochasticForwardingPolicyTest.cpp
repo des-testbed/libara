@@ -43,8 +43,11 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(StochasticForwardingPolicyTest) {};
 
 TEST(StochasticForwardingPolicyTest, testGetNextHop) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
     // Prepare the test
     RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
@@ -65,4 +68,5 @@ TEST(StochasticForwardingPolicyTest, testGetNextHop) {
     policy.getNextHop(&packet);
     //FIXME Continue this test
 
+    delete evaporationPolicy;
 }

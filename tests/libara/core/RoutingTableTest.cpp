@@ -41,27 +41,39 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(RoutingTableTest) {};
 
 TEST(RoutingTableTest, testGetPossibleNextHopsReturnsEmptyList) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
     RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destination (new AddressMock());
 
     std::deque<RoutingTableEntry*>* list = routingTable.getPossibleNextHops(destination);
     CHECK(list->empty());
 
     delete list;
+    delete evaporationPolicy;
 }
 
 TEST(RoutingTableTest, testUnregisteredAddressIsNotDeliverable) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
     RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destinationAddress (new AddressMock());
 
     CHECK(routingTable.isDeliverable(destinationAddress) == false);
+    delete evaporationPolicy;
 }
 
 TEST(RoutingTableTest, testPacketWithUnregisteredAddressIsNotDeliverable) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
     RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     PacketMock packet = PacketMock();
 
     CHECK(routingTable.isDeliverable(&packet) == false);
+    delete evaporationPolicy;
 }
 
 TEST(RoutingTableTest, testUpdateRoutingTable) {
@@ -215,8 +227,12 @@ TEST(RoutingTableTest, testGetPheromoneValue) {
 }
 
 TEST(RoutingTableTest, removeEntry) {
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    evaporationPolicy->setInterval(10000);
     // prepare the test
     RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
+   
     AddressPtr destination (new AddressMock("Destination"));
 
     AddressPtr nodeA (new AddressMock("A"));
@@ -237,4 +253,5 @@ TEST(RoutingTableTest, removeEntry) {
             FAIL("The deleted hop should not longer be in the list of possible next hops");
         }
     }
+    delete evaporationPolicy;
 }
