@@ -1,5 +1,5 @@
 /******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
  These sources were originally developed by Friedrich Große, Michael Frey
@@ -28,25 +28,24 @@
 
 #include "Packet.h"
 #include "NextHop.h"
+#include "RoutingTable.h"
 
 namespace ARA { 
-
-/**
- * This purely virtual interface is used by the AbstractARAClient to determine
- * the next hop for a given packet.
- */
-class ForwardingPolicy {
-public:
-    virtual ~ForwardingPolicy() {};
-
     /**
-     * Return the NextHop for the given packet according to this packet forwarding
-     * policy.
+     * This purely virtual interface is used by the AbstractARAClient to determine
+     * the next hop for a given packet.
      */
-    virtual NextHop* getNextHop(const Packet*) = 0;
+    class ForwardingPolicy {
+        public:
+            virtual ~ForwardingPolicy() {};
 
-};
+            /**
+             * Return the NextHop for the given packet according to this packet forwarding
+             * policy.
+             */
+            virtual NextHop* getNextHop(const Packet*) = 0;
 
-} /* namespace ARA */
-
-#endif 
+            virtual void setRoutingTable(RoutingTable *routingTable) = 0;
+    };
+}
+#endif

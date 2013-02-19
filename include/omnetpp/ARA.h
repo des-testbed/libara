@@ -35,53 +35,58 @@
 #include "OMNeTStochasticForwardingPolicy.h"
 
 namespace ARA {
-namespace omnetpp {
+    namespace omnetpp {
 
-    /**
-     * The class represents the implementation of the ant routing algorithm (ARA)
-     * for the OMNeT++ simulation framework. 
-     *
-     * The algorithm was first published in:
-     *
-     *  Gunes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs." 
-     *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
-     *
-     */
-    class ARA: public cSimpleModule, public AbstractARAClient {
-        protected:
-            //~~~ INHERITED FROM cSimpleModule ~~~~~~~
-            int numInitStages() const;
-            virtual void initialize(int stage);
-            virtual void handleMessage(cMessage *msg);
+        /**
+         * The class represents the implementation of the ant routing algorithm (ARA)
+         * for the OMNeT++ simulation framework.
+         *
+         * The algorithm was first published in:
+         *
+         *  Gunes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
+         *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
+         *
+         */
+        class ARA: public cSimpleModule, public AbstractARAClient {
+            protected:
+                //~~~ INHERITED FROM cSimpleModule ~~~~~~~
+                int numInitStages() const;
+                virtual void initialize(int stage);
+                virtual void handleMessage(cMessage *msg);
 
-            //~~~ INHERITED FROM AbstractARAClient ~~~
-            ForwardingPolicy* getForwardingPolicy();
-            void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
-            void deliverToSystem(const Packet* packet);
+                //~~~ INHERITED FROM AbstractARAClient ~~~
+                ForwardingPolicy* getForwardingPolicy();
+                void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
+                void deliverToSystem(const Packet* packet);
 
-        private:
-            /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
-            ForwardingPolicy* forwardingPolicy;
-            /// The member denotes the constant which is used in the pheromone reinforcement of a path
-            double deltaPhi;
+                void setEvaporationPolicy(EvaporationPolicy *policy);
 
-            IInterfaceTable* interfaceTable;
+            private:
+                /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
+                ForwardingPolicy* forwardingPolicy;
+                EvaporationPolicy* evaporationPolicy;
 
-            void initializeNetworkInterfaces();
-            IInterfaceTable* getInterfaceTable();
-            InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
+                /// The member denotes the constant which is used in the pheromone reinforcement of a path
+                double deltaPhi;
 
-            /// The method checks if the in NED file given policy exists and initializes the policy
-            void initializeForwardingPolicy(std::string policy);
+                IInterfaceTable* interfaceTable;
 
-            bool isFromUpperLayer(cMessage* msg);
-            bool isARPMessage(cMessage* msg);
-            void handleUpperLayerMessage(cMessage* msg);
-            void handleARP(cMessage* msg);
-            void handleARA(cMessage* msg);
-    };
+                void initializeNetworkInterfaces();
+                IInterfaceTable* getInterfaceTable();
+                InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
 
-} /* namespace ARA */
+                void initializeForwardingPolicy();
+
+                void initializeEvaporationPolicy();
+
+                bool isFromUpperLayer(cMessage* msg);
+                bool isARPMessage(cMessage* msg);
+                void handleUpperLayerMessage(cMessage* msg);
+                void handleARP(cMessage* msg);
+                void handleARA(cMessage* msg);
+        };
+
+    } /* namespace ARA */
 } /* namespace omnetpp */
 
 #endif /* OMNETARACLIENT_H_ */

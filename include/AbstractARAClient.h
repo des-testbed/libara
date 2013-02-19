@@ -111,6 +111,9 @@ public:
     /// The method initializes the pheromone value of a link
     void initializePheromone(const Packet* packet, NetworkInterface* interface);
 
+    ///
+    virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
+
 protected:
 
     std::deque<NetworkInterface*> interfaces;

@@ -75,3 +75,8 @@ float StochasticForwardingPolicy::getRandomNumber(){
   // not sure if this really works
   return ((float)rand()/(float)RAND_MAX);
 }
+
+void StochasticForwardingPolicy::setRoutingTable(RoutingTable* routingTable){
+    this->routingTable = routingTable;
+}
+

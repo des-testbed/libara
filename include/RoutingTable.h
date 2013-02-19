@@ -42,7 +42,6 @@ class RoutingTable {
 
 public:
     RoutingTable();
-    RoutingTable(EvaporationPolicy*);
     ~RoutingTable();
 
     float getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
@@ -55,8 +54,15 @@ public:
     void checkForEvaporation();
     bool exists(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
+    void setEvaporationPolicy(EvaporationPolicy *policy);
+
+
 private:
     std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table;
+    /**
+     * The memory management of the evaporationPolicy member is handled in class
+     * ARA. Thus, there is no delete call to the evaporationPolicy member.
+     */
     EvaporationPolicy *evaporationPolicy;
 };
 

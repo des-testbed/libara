@@ -16,11 +16,14 @@
 package ara;
 
 import ara.ARA;
+import ara.OMNetStochasticForwardingPolicy;
+import ara.OMNeTLinearEvaporationPolicy;
 import inet.networklayer.arp.ARP;
 
 module NetworkLayer {
     parameters:
         int nrOfNetworkInterfaces = default(1);
+        
         @display("i=ara.png;bgb=210,275");
 
     gates:
@@ -33,6 +36,14 @@ module NetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=100,78");
+        }
+        
+        evaporationPolicy : OMNeTLinearEvaporationPolicy {
+            
+        }
+        
+        forwardingPolicy : OMNetStochasticForwardingPolicy {
+        
         }
 
         arp: ARP {

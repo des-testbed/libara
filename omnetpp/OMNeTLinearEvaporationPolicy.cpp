@@ -15,7 +15,7 @@ namespace ARA {
         }
 
         void OMNeTLinearEvaporationPolicy::handleMessage(cMessage *msg) {
-            /// this method is a stub since we don't handle messages in the evaporation policy
+            throw cRuntimeError("OMNeTLinearEvaporationPolicy: handleMessage() should never be called!");
         }
     }
 }
