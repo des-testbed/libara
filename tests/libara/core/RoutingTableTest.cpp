@@ -67,7 +67,8 @@ TEST(RoutingTableTest, testPacketWithUnregisteredAddressIsNotDeliverable) {
 TEST(RoutingTableTest, testUpdateRoutingTable) {
     LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
     evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+    RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     PacketMock packet = PacketMock();
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
@@ -84,12 +85,14 @@ TEST(RoutingTableTest, testUpdateRoutingTable) {
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
+    delete evaporationPolicy;
 }
 
 TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
     evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+    RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     PacketMock packet = PacketMock();
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
@@ -115,12 +118,14 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(42, possibleHop->getPheromoneValue());
+    delete evaporationPolicy;
 }
 
 TEST(RoutingTableTest, testGetPossibleNextHops) {
     LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
     evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+    RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr sourceAddress (new AddressMock("Source"));
     AddressPtr destination1 (new AddressMock("Destination1"));
     AddressPtr destination2 (new AddressMock("Destination2"));
@@ -191,7 +196,8 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
 TEST(RoutingTableTest, testGetPheromoneValue) {
     LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
     evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+    RoutingTable routingTable = RoutingTable();
+    routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr sourceAddress (new AddressMock("Source"));
     AddressPtr destination (new AddressMock("Destination"));
     AddressPtr nextHopAddress (new AddressMock("nextHop"));
@@ -204,6 +210,7 @@ TEST(RoutingTableTest, testGetPheromoneValue) {
 
     routingTable.update(destination, nextHopAddress, &interface, 123);
     LONGS_EQUAL(123, routingTable.getPheromoneValue(destination, nextHopAddress, &interface));
+    delete evaporationPolicy;
 }
 
 TEST(RoutingTableTest, removeEntry) {
