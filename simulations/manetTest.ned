@@ -15,77 +15,45 @@
 
 package ara.simulations;
 
-// Imports for the ARAClient
-import inet.base.NotificationBoard;
-import ara.ARATrafficGenerator;
-import ara.Debugger;
-import inet.linklayer.ieee80211.Ieee80211NicSTASimplified;
-import inet.mobility.NullMobility;
-
+import ara.ARAClient;
+import ara.ARANetworkConfigurator;
 import inet.world.ChannelControl;
-
-module ARAClient
-{
-    parameters:
-        @display("i=device/wifilaptop");
-    gates:
-        input radioIn @directIn;
-
-    submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=52,70");
-        }
-        app: ARATrafficGenerator {
-            parameters:
-                @display("b=40,24;p=180,60,col");
-        }
-		debugger: Debugger {
-		    
-		}
-	
-
-//        wlan: Ieee80211NicSTASimplified {
-//            parameters:
-//                @display("p=112,134;q=queue");
-//        }
-        
-        // Stationary node
-        mobility: NullMobility {
-            parameters:
-                @display("p=50,141");
-        }
-    connections allowunconnected:
-//        wlan.radioIn <-- radioIn;
-//        app.out --> wlan.uppergateIn;
-		app.out --> debugger.in;
-}
 
 network ManetTest
 {
     parameters:
-        int numberOfHosts;
         double playgroundSizeX;
         double playgroundSizeY;
-        @display("b=297,203");
+        @display("b=297,203;bgb=758,337");
+
     submodules:
-        node[numberOfHosts]: ARAClient {
-            parameters:
-                @display("r=,,#707070");
-        }
-//        srvHost: ThroughputServer {
-//            parameters:
-//                @display("p=350,350;r=,,#707070");
-//        }
-//        ap: WirelessAPSimplified {
-//            parameters:
-//                @display("p=200,200;r=,,#707070");
-//        }
         channelcontrol: ChannelControl {
             parameters:
                 playgroundSizeX = playgroundSizeX;
                 playgroundSizeY = playgroundSizeY;
-                @display("p=61,46");
+                @display("p=78,36");
+        }
+
+        networkConfigurator: ARANetworkConfigurator {
+            parameters:
+                networkAddress = "192.168.0.0";
+                netmask = "255.255.0.0";
+                @display("p=78,97");
+        }
+        node1: ARAClient {
+            @display("p=515,69");
+        }
+        node2: ARAClient {
+            @display("p=195,215");
+        }
+        node3: ARAClient {
+            @display("p=697,182");
+        }
+        node4: ARAClient {
+            @display("p=305,125");
+        }
+        node5: ARAClient {
+            @display("p=496,267");
         }
 }
 

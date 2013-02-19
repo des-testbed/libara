@@ -109,7 +109,7 @@ TEST(AbstractARAClientTest, broadcastFANTIfPacketNotDeliverable) {
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
     CHECK(sentPacket->getType() == PacketType::FANT);
-    CHECK(recipientOfSentPacket->isBroadCast());
+    CHECK(interface->isBroadcastAddress(recipientOfSentPacket));
 }
 
 TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
@@ -357,7 +357,7 @@ TEST(AbstractARAClientTest, receivedAntPacketsAreBroadcasted) {
     Pair<Packet*, AddressPtr>* sentPacketInfo2 = sentPackets->at(1);
 
     // check the first sent packet
-    CHECK(sentPacketInfo1->getRight()->isBroadCast());
+    CHECK(interface->isBroadcastAddress(sentPacketInfo1->getRight()));
     Packet* sentPacket1 = sentPacketInfo1->getLeft();
     CHECK(sentPacket1->getSource()->equals(packet1.getSource()));
     CHECK(sentPacket1->getDestination()->equals(packet1.getDestination()));
@@ -399,7 +399,7 @@ TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
     // check the sent packet
     CHECK(sentPackets->size() == 1);
     Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
-    CHECK(sentPacketInfo->getRight()->isBroadCast());
+    CHECK(interface->isBroadcastAddress(sentPacketInfo->getRight()));
     Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getSource()->equals(nodeA));
     CHECK(sentPacket->getDestination()->equals(nodeB));
