@@ -26,32 +26,33 @@
 #ifndef OMNET_STOCHASTIC_FORWARDING_POLICY_H_
 #define OMNET_STOCHASTIC_FORWARDING_POLICY_H_
 
-
-#include "RoutingTable.h"
-#include "StochasticForwardingPolicy.h"
-
 #include <numeric>
 #include <omnetpp.h>
+#include <csimplemodule.h>
 
+
+#include "RoutingTable.h"
+#include "ForwardingPolicy.h"
+#include "StochasticForwardingPolicy.h"
 
 namespace ARA {
-namespace omnetpp {
+    namespace omnetpp {
+           /**
+            * The class provides a stochastic forwarding policy for class ARA. The
+            * class overwrites the getRandomNumber() method of the base class. It uses a
+            * pseudo-random number generator provided by OMNeT++.
+            */
+           class OMNeTStochasticForwardingPolicy : public cSimpleModule, public StochasticForwardingPolicy {
+              protected:
+                 /// The method returns a random number wich uses OMNeT++ pseudo random number generators
+                 float getRandomNumber();
 
-   /**
-    * The class provides a stochastic forwarding policy for the OMNeTARAClient. The
-    * class overwrites the getRandomNumber() method of the base class, which uses a
-    * pseudo-random number generator provided by OMNeT++. 
-    */
-   class OMNeTStochasticForwardingPolicy : public StochasticForwardingPolicy {
-      public:
-          OMNeTStochasticForwardingPolicy(RoutingTable* routingTable);
+                 virtual void initialize(int stage);
 
-      protected:
-         /// The method returns a random number which uses OMNeT++ pseudo random number generators
-         float getRandomNumber();
-   };
+                 virtual void handleMessage(cMessage *msg);
+           };
 
-} /* namespace omnetpp */
+    } /* namespace omnetpp */
 } /* namespace ARA */
 
 #endif
