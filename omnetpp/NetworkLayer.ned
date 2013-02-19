@@ -16,7 +16,7 @@
 package ara;
 
 import ara.ARA;
-import ara.OMNetStochasticForwardingPolicy;
+import ara.OMNeTStochasticForwardingPolicy;
 import ara.OMNeTLinearEvaporationPolicy;
 import inet.networklayer.arp.ARP;
 
@@ -42,7 +42,7 @@ module NetworkLayer {
             
         }
         
-        forwardingPolicy : OMNetStochasticForwardingPolicy {
+        forwardingPolicy : OMNeTStochasticForwardingPolicy {
         
         }
 
