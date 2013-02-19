@@ -60,7 +60,8 @@ TEST(StochasticForwardingPolicyTest, testGetNextHop) {
     routingTable.update(destination, nextHopB, &interface, 2.1);
     routingTable.update(destination, nextHopC, &interface, 2.3);
 
-    StochasticForwardingPolicy policy(&routingTable);
+    StochasticForwardingPolicy policy = StochasticForwardingPolicy();
+    policy.setRoutingTable(&routingTable);
     policy.getNextHop(&packet);
     //FIXME Continue this test
 
