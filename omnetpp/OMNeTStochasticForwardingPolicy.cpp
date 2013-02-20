@@ -9,7 +9,7 @@ namespace ARA {
            return dblrand();
         }
 
-        void OMNeTStochasticForwardingPolicy::initialize(int stage){
+        void OMNeTStochasticForwardingPolicy::initialize(){
 
         }
 

@@ -147,6 +147,7 @@ namespace ARA {
         }
 
         void ARA::initializeEvaporationPolicy(){
+
             cModule *module = getSubmodule("evaporationPolicy");
 
             if(module == NULL){

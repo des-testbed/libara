@@ -47,7 +47,7 @@ namespace ARA {
                  /// The method returns a random number wich uses OMNeT++ pseudo random number generators
                  float getRandomNumber();
 
-                 virtual void initialize(int stage);
+                 virtual void initialize();
 
                  virtual void handleMessage(cMessage *msg);
            };
