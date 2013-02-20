@@ -136,7 +136,8 @@ namespace ARA {
         }
 
         void ARA::initializeForwardingPolicy(){
-            cModule *module = getSubmodule("forwardingPolicy");
+            cModule* host = getParentModule();
+            cModule* module = host->getSubmodule("forwardingPolicy");
 
             if(module == NULL){
                 throw cRuntimeError("ARA: the forwarding policy has to be called forwardingPolicy");
@@ -147,8 +148,8 @@ namespace ARA {
         }
 
         void ARA::initializeEvaporationPolicy(){
-
-            cModule *module = getSubmodule("evaporationPolicy");
+            cModule* host = getParentModule();
+            cModule* module = host->getSubmodule("evaporationPolicy");
 
             if(module == NULL){
                 throw cRuntimeError("ARA: the evaporation policy has to be called evaporationPolicy");

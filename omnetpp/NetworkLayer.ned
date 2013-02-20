@@ -20,11 +20,12 @@ import ara.OMNeTLinearEvaporationPolicy;
 import ara.OMNeTStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
-module NetworkLayer {
+module NetworkLayer
+{
     parameters:
         int nrOfNetworkInterfaces = default(1);
-        
-        @display("i=ara.png;bgb=210,275");
+
+        @display("i=ara.png;bgb=273,275");
 
     gates:
         inout upperLayerGate;
@@ -35,21 +36,23 @@ module NetworkLayer {
         ara: ARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=100,78");
+                @display("i=ara;p=138,102");
         }
-        
-        evaporationPolicy : OMNeTLinearEvaporationPolicy {
-            
+
+        evaporationPolicy: OMNeTLinearEvaporationPolicy {
+
+            @display("p=210,30");
         }
-        
-        //forwardingPolicy : OMNeTStochasticForwardingPolicy {
-        
-        //}
+
+        forwardingPolicy: OMNeTStochasticForwardingPolicy {
+
+            @display("p=72,30");
+        }
 
         arp: ARP {
             parameters:
                 proxyARP = false;
-                @display("p=100,191;q=pendingQueue");
+                @display("p=138,215;q=pendingQueue");
             gates:
                 nicOut[nrOfNetworkInterfaces];
         }
@@ -57,8 +60,8 @@ module NetworkLayer {
     connections allowunconnected:
         upperLayerGate <--> ara.upperLayerGate;
         arp.ipIn <-- ara.arpOut;
-        
-        for i = 0..nrOfNetworkInterfaces-1 {
+
+        for i=0..nrOfNetworkInterfaces-1 {
             ifIn[i] --> ara.ifIn[i];
         }
 }
