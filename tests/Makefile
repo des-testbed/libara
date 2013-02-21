@@ -23,7 +23,7 @@ endif
 CFLAGS += -std=c++11
 INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
 LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest
-LD_LIB_PATH = $(ARA_LIB_DIR)
+LINKFLAGS += -Wl,-rpath,$(ARA_LIB_DIR)
 
 # libARA stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ARA_LIB_DIR = ../src
@@ -41,7 +41,8 @@ OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $
 INETMANET_LIB_DIR = ../inetmanet/src
 OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -I../include/omnetpp -I../include/inetmanet -I$(OMNETPP_INCL_DIR)
 OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet
-OMNETPP_LIB_PATH = $(LD_LIB_PATH):$(OMNETPP_LIB_DIR):$(INETMANET_LIB_DIR)
+OMNETPP_LINKFLAGS += -Wl,-rpath,$(INETMANET_LIB_DIR)
+OMNETPP_LIB_PATH = $(OMNETPP_LIB_DIR)
 
 # Output directory and files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
@@ -75,7 +76,7 @@ runTests: all
 
 runLibAraTests: $(LIBARA_TEST_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING libARA TEST SUIT ~~~~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(LIBARA_TEST_EXECUTABLE); then \
+	@if ./$(LIBARA_TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
