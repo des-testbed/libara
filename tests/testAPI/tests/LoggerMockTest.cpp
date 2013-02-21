@@ -40,6 +40,16 @@ TEST(LoggerMockTest, create) {
 }
 
 TEST(LoggerMockTest, logMessage) {
-    logger->message("This is a test");
+    logger->info("This is a test");
     CHECK(hasLoggedMessage("This is a test", Logger::LEVEL_INFO));
+}
+
+TEST(LoggerMockTest, logMessageWithOneParameter) {
+    logger->info("Hello %s", "World");
+    CHECK(hasLoggedMessage("Hello World", Logger::LEVEL_INFO));
+}
+
+TEST(LoggerMockTest, logMessageWithMultipleParameters) {
+    logger->info("%i This is a %s test", 1, "cool");
+    CHECK(hasLoggedMessage("1 This is a cool test", Logger::LEVEL_INFO));
 }

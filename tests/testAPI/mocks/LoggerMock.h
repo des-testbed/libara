@@ -22,7 +22,7 @@ namespace ARA {
         LoggerMock();
         ~LoggerMock();
 
-        void message(const std::string &logMessage, Level level = Level::LEVEL_INFO) const;
+        void performLoggingAction(const std::string &logMessage, Level level, va_list args) const;
         unsigned int getNrOfLoggedMessages() const;
         std::deque<LogMessage>* getLoggedMessages() const;
 

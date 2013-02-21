@@ -4,6 +4,8 @@
 
 #include "LoggerMock.h"
 
+#include <cstdio>
+
 using namespace ARA;
 
 LoggerMock::LoggerMock() {
@@ -14,9 +16,11 @@ LoggerMock::~LoggerMock() {
     delete loggedMessages;
 }
 
-void LoggerMock::message(const std::string &logMessage, Level level) const {
+void LoggerMock::performLoggingAction(const std::string &text, Level level, va_list args) const {
+    char buffer[512]; // FIXME a dynamic buffer size would be awesome
+    std::vsprintf(buffer, text.c_str(), args);
     LogMessage newLogMessage;
-    newLogMessage.text = logMessage;
+    newLogMessage.text = buffer;
     newLogMessage.level = level;
 
     loggedMessages->push_back(newLogMessage);
