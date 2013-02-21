@@ -26,6 +26,7 @@
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "Logger.h"
 #include "Address.h"
 #include "NextHop.h"
 #include "NetworkInterface.h"
@@ -38,6 +39,8 @@
 #include <unordered_set>
 #include <deque>
 #include <memory>
+#include <string>
+#include <sstream>
 
 namespace ARA {
 
@@ -62,6 +65,14 @@ public:
      * The packet should be directed to this node and must be delivered to the local system.
      */
     virtual void deliverToSystem(const Packet* packet) = 0;
+
+    /**
+     * Sets a logger for this ARA client.
+     *
+     * This logger will be used to log messages during the routing algorithm.
+     * It will be deleted in the destructor of this client.
+     */
+    void setLogger(Logger* logger);
 
     /**
      * Registers a new NetworkInterface at this client.
@@ -134,7 +145,23 @@ protected:
      */
     virtual ForwardingPolicy* getForwardingPolicy() = 0;
 
+    /**
+     * Checks if a logger has been assigned to this ARA client and if so
+     * delegates the call to it with Logger::LEVEL_DEBUG.
+     * The optional varargs are handled as parameters to the logMessage string.
+     *
+     * If no logger has been set via setLogger() nothing happens.
+     */
+    void logMessage(const std::string &logMessage, Logger::Level level, ...) const;
+
+    /**
+     * Logs with level debug.
+     * See AbstractARAClient::logMessage for more details.
+     */
+    void logDebug(const std::string &logMessage, ...) const;
+
 private:
+    Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
     std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 

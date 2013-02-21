@@ -30,11 +30,13 @@
 #include "PacketType.h"
 #include "Address.h"
 #include "Pair.h"
+#include "Logger.h"
 
 #include "testAPI/mocks/ARAClientMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/LoggerMock.h"
 
 using namespace ARA;
 
@@ -542,4 +544,26 @@ TEST(AbstractARAClientTest, receiveDuplicateErrorPacket) {
     // start the test
     client->receivePacket(&duplicateErrorPacket, interface);
     CHECK(aRouteToDestinationIsKnown(destination, nodeC, interface) == false);
+}
+
+TEST(AbstractARAClientTest, deleteAssignedLogger) {
+    LoggerMock* logger = new LoggerMock();
+    client->setLogger(logger);
+    // Should finish without a memory leak
+}
+
+TEST(AbstractARAClientTest, sendsLogMessageIfAPacketIsTrappedAndFANTIsBroadcasted) {
+    LoggerMock* logger = new LoggerMock();
+    client->setLogger(logger);
+    PacketMock packet = PacketMock("abc", "xyz", 123);
+
+    // assume that the packet is not deliverable
+    CHECK(routingTable->isDeliverable(&packet) == false);
+    client->sendPacket(&packet);
+
+    // check that the log message is generated
+    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
+    LogMessage logMessage = logger->getLoggedMessages()->front();
+    CHECK_EQUAL("Packet 123 from abc to xyz is not deliverable. Starting route discovery phase", logMessage.text);
+    BYTES_EQUAL(Logger::LEVEL_DEBUG, logMessage.level);
 }

@@ -41,6 +41,11 @@ AbstractARAClient::AbstractARAClient() {
 AbstractARAClient::~AbstractARAClient() {
     delete packetTrap; //TODO we must check for and delete all packets that might still be trapped
 
+    // delete logger if it has been set
+    if(logger != nullptr) {
+        delete logger;
+    }
+
     // delete the sequence number lists of the last received packets
     unordered_map<AddressPtr, unordered_set<unsigned int>*>::iterator iterator;
     for (iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
@@ -50,6 +55,26 @@ AbstractARAClient::~AbstractARAClient() {
         delete entryPair.second;
     }
     lastReceivedPackets.clear();
+}
+
+void AbstractARAClient::setLogger(Logger* logger) {
+    this->logger = logger;
+}
+
+void AbstractARAClient::logMessage(const std::string &text, Logger::Level level, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, level);
+        logger->logMessageWithVAList(text, level, args);
+    }
+}
+
+void AbstractARAClient::logDebug(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_DEBUG, args);
+    }
 }
 
 void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
@@ -75,6 +100,8 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         delete newPacket;
     }
     else {
+        logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase",
+                packet->getSequenceNumber(), packet->getSource()->toString(), packet->getDestination()->toString());
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
