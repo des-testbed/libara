@@ -57,6 +57,7 @@ public:
      */
     OMNeTAddress(const IPAddress& someIPAddress) : IPAddress(someIPAddress) {}
 
+    const char* toString() const;
     bool equals(const Address* otherAddress) const;
     bool equals(const std::shared_ptr<Address> otherAddress) const;
     bool equals(const IPAddress& ipAddress) const {return IPAddress::equals(ipAddress);}

@@ -31,6 +31,10 @@ using namespace std;
 namespace ARA {
 namespace omnetpp {
 
+const char* OMNeTAddress::toString() const {
+    return this->str().c_str();
+}
+
 bool OMNeTAddress::equals(const Address* otherAddress) const {
     const OMNeTAddress* otherOMNeTAddress = dynamic_cast<const OMNeTAddress*>(otherAddress);
     if(otherOMNeTAddress == NULL) {
