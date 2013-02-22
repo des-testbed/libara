@@ -69,6 +69,14 @@ void AbstractARAClient::logMessage(const std::string &text, Logger::Level level,
     }
 }
 
+void AbstractARAClient::logTrace(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_TRACE, args);
+    }
+}
+
 void AbstractARAClient::logDebug(const std::string &text, ...) const {
     if(logger != nullptr) {
         va_list args;
@@ -169,6 +177,7 @@ void AbstractARAClient::handleAntPacket(const Packet* packet) {
     if(hasBeenSentByThisNode(packet) == false) {
         
         if(isDirectedToThisNode(packet) == false) {
+            logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
             broadCast(packet);
         }
         else {
@@ -181,13 +190,14 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     char packetType = packet->getType();
 
     if(packetType == PacketType::FANT) {
-        logDebug("FANT %u from %s reached its goal. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
+        logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
         Packet* bant = packet->createBANT(getNextSequenceNumber());
         broadCast(bant);
         delete bant;
     }
     else if(packetType == PacketType::BANT) {
         deque<const Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
+        logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString(), deliverablePackets->size());
         for(auto& deliverablePacket : *deliverablePackets) {
             sendPacket(deliverablePacket);
             packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back

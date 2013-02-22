@@ -569,9 +569,10 @@ TEST(AbstractARAClientTest, sendsLogMessageIfAPacketIsTrappedAndFANTIsBroadcaste
 }
 
 TEST(AbstractARAClientTest, sendsLogMessageIfFANTReachedItsDestination) {
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("destination");
     LoggerMock* logger = new LoggerMock();
     client->setLogger(logger);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("destination");
     PacketMock packet = PacketMock("source", "destination", 123, 10, PacketType::FANT);
 
     client->receivePacket(&packet, interface);
@@ -579,6 +580,39 @@ TEST(AbstractARAClientTest, sendsLogMessageIfFANTReachedItsDestination) {
     // check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
     LogMessage logMessage = logger->getLoggedMessages()->front();
-    CHECK_EQUAL("FANT 123 from source reached its goal. Broadcasting BANT", logMessage.text);
+    CHECK_EQUAL("FANT 123 from source reached its destination. Broadcasting BANT", logMessage.text);
     BYTES_EQUAL(Logger::LEVEL_DEBUG, logMessage.level);
+}
+
+TEST(AbstractARAClientTest, sendsLogMessageIfBANTReachedItsDestination) {
+    LoggerMock* logger = new LoggerMock();
+    client->setLogger(logger);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
+    PacketMock packet = PacketMock("destination", "source", 123, 10, PacketType::BANT);
+    PacketMock trappedPacket = PacketMock("source", "destination", 1, 1, PacketType::DATA);
+    packetTrap->trapPacket(&trappedPacket);
+
+    client->receivePacket(&packet, interface);
+
+    // check that the log message is generated
+    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
+    LogMessage logMessage = logger->getLoggedMessages()->front();
+    CHECK_EQUAL("BANT 123 came back from destination. 1 trapped packet can now be delivered", logMessage.text);
+    BYTES_EQUAL(Logger::LEVEL_DEBUG, logMessage.level);
+}
+
+TEST(AbstractARAClientTest, sendsLogMessageIfAntPacketIsBroadcasted) {
+    LoggerMock* logger = new LoggerMock();
+    client->setLogger(logger);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    PacketMock antPacket = PacketMock("source", "destination", 123, 3, PacketType::FANT);
+    client->receivePacket(&antPacket, interface);
+
+    // check that the log message is generated
+    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
+    LogMessage logMessage = logger->getLoggedMessages()->front();
+    CHECK_EQUAL("Broadcasting FANT 123 from source", logMessage.text);
+    BYTES_EQUAL(Logger::LEVEL_TRACE, logMessage.level);
 }

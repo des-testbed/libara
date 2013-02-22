@@ -155,6 +155,12 @@ protected:
     void logMessage(const std::string &logMessage, Logger::Level level, ...) const;
 
     /**
+     * Logs with level trace.
+     * See AbstractARAClient::logMessage for more details.
+     */
+    void logTrace(const std::string &logMessage, ...) const;
+
+    /**
      * Logs with level debug.
      * See AbstractARAClient::logMessage for more details.
      */
