@@ -121,6 +121,18 @@ public:
         performLoggingAction(logMessage, level, args);
     }
 
+    static const char* getLevelString(Level level) {
+        switch (level) {
+            case Level::LEVEL_TRACE: return "TRACE";
+            case Level::LEVEL_DEBUG: return "DEBUG";
+            case Level::LEVEL_INFO:  return "INFO";
+            case Level::LEVEL_WARN:  return "WARN";
+            case Level::LEVEL_ERROR: return "ERROR";
+            case Level::LEVEL_FATAL: return "FATAL";
+            default: return "UNKOWN";
+        }
+    }
+
 protected:
 
     /**
