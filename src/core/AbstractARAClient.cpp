@@ -33,7 +33,8 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 AbstractARAClient::AbstractARAClient() {
-    packetTrap = new PacketTrap(&routingTable);
+    this->routingTable = new RoutingTable();
+    packetTrap = new PacketTrap(routingTable);
     /// set it to a 'random' initial value
     this->initialPhi = 1.0;
 }
@@ -50,6 +51,8 @@ AbstractARAClient::~AbstractARAClient() {
         delete entryPair.second;
     }
     lastReceivedPackets.clear();
+
+    delete routingTable;
 }
 
 void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
@@ -65,7 +68,7 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
 }
 
 void AbstractARAClient::sendPacket(const Packet* packet) {
-    if(routingTable.isDeliverable(packet)) {
+    if(routingTable->isDeliverable(packet)) {
         NextHop* nextHop = getNextHop(packet);
         NetworkInterface* interface = nextHop->getInterface();
         Packet* newPacket = packet->clone();
@@ -172,7 +175,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
 }
 
 void AbstractARAClient::handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface) {
-    routingTable.removeEntry(packet->getDestination(), packet->getSender(), interface);
+    routingTable->removeEntry(packet->getDestination(), packet->getSender(), interface);
     // TODO we can also invalidate the ack timer for the packet
 }
 
@@ -254,9 +257,18 @@ void AbstractARAClient::initializePheromone(const Packet* packet, NetworkInterfa
     /// compute the phi value   
     float phi = this->initialPhi * hopCountMalus;
     /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
-    if(!(this->routingTable.exists(packet->getSource(), packet->getSender(), interface))){
-        this->routingTable.update(packet->getSource(), packet->getSender(), interface, phi);
+    if(!(this->routingTable->exists(packet->getSource(), packet->getSender(), interface))){
+        this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
     }
+}
+
+void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
+    // update packet trap to new routing table
+    this->packetTrap->setRoutingTable(routingTable);
+    // delete old routing table
+    delete this->routingTable;
+    // set new routing table
+    this->routingTable = routingTable;
 }
 
 } /* namespace ARA */

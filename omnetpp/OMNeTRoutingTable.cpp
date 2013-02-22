@@ -2,14 +2,12 @@
 
 namespace ARA {
     namespace omnetpp {
-        Register_ClassDescriptor(OMNeTRoutingTable);
-
         //OMNeTRoutingTable::
 //        OMNeTRoutingTable::
 
         /**
-         * The class provides a class descriptor for the OMNeTRoutingTable 
-         * class. The class offers a description of members of the RoutingTable
+         * The class implements a class descriptor for the OMNeTRoutingTable 
+         * class. The class provides a description of members of the RoutingTable
          * which in turn is used by TKenv to display the content in the 
          * simulators graphical user interface.
          */
@@ -39,9 +37,8 @@ namespace ARA {
         };
 
         Register_ClassDescriptor(OMNeTRoutingTableDescriptor);
-/*
-        OMNeTRoutingTableDescriptor::OMNeTRoutingTableDescriptor() : cClassDescriptor("OMNeTRoutingTable", "cPacket"){}
-*/
+
+        OMNeTRoutingTableDescriptor::OMNeTRoutingTableDescriptor() : cClassDescriptor("OMNeTRoutingTable", "cObject"){}
 
         OMNeTRoutingTableDescriptor::~OMNeTRoutingTableDescriptor(){ }
         
@@ -59,7 +56,6 @@ namespace ARA {
             return basedesc ? nrOfFields+basedesc->getFieldCount(object) : nrOfFields;
         }
 
-/*
         unsigned int OMNeTRoutingTableDescriptor::getFieldTypeFlags(void *object, int field) const {
             cClassDescriptor *basedesc = getBaseClassDescriptor();
             if(basedesc){
@@ -76,13 +72,14 @@ namespace ARA {
             };
             return (field>=0 && field<nrOfFields) ? fieldTypeFlags[field] : 0;
         }
-*/
+
         const char *OMNeTRoutingTableDescriptor::getFieldName(void *object, int field) const {
             cClassDescriptor *basedesc = getBaseClassDescriptor();
             if(basedesc){
                 if(field < basedesc->getFieldCount(object)) {
                     return basedesc->getFieldName(object, field);
                 }
+
                 field -= basedesc->getFieldCount(object);
             }
 
@@ -109,49 +106,49 @@ namespace ARA {
             return basedesc ? basedesc->findField(object, fieldName) : -1;
         }
 
-	const char *OMNeTRoutingTableDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const {
-	    cClassDescriptor *basedesc = getBaseClassDescriptor();
+	    const char *OMNeTRoutingTableDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const {
+	        cClassDescriptor *basedesc = getBaseClassDescriptor();
 
-	    if(basedesc){
-		if(field < basedesc->getFieldCount(object)){
-		    return basedesc->getFieldProperty(object, field, propertyname);
+            if(basedesc){
+		        if(field < basedesc->getFieldCount(object)){
+		            return basedesc->getFieldProperty(object, field, propertyname);
                 }
-		field -= basedesc->getFieldCount(object);
-	    }
+                field -= basedesc->getFieldCount(object);
+            }
            
             return NULL;
-	}
+        }
 
-	int OMNeTRoutingTableDescriptor::getArraySize(void *object, int field) const{
-	    cClassDescriptor *basedesc = getBaseClassDescriptor();
+	    int OMNeTRoutingTableDescriptor::getArraySize(void *object, int field) const{
+	        cClassDescriptor *basedesc = getBaseClassDescriptor();
 
-	    if(basedesc){
-		if(field < basedesc->getFieldCount(object)){
+            if(basedesc){
+		        if(field < basedesc->getFieldCount(object)){
                     return basedesc->getArraySize(object, field);
                 }
-		field -= basedesc->getFieldCount(object);
-	    }
+                field -= basedesc->getFieldCount(object);
+            }
 
-	    OMNeTRoutingTable *routingTable = (OMNeTRoutingTable *)object; (void)routingTable;
+            OMNeTRoutingTable *routingTable = (OMNeTRoutingTable *)object; (void)routingTable;
 
             return 0;
-	}
+        }
 
         /// FIXME
-	std::string OMNeTRoutingTableDescriptor::getFieldAsString(void *object, int field, int i) const{
-	    cClassDescriptor *basedesc = getBaseClassDescriptor();
-	    if(basedesc){
-		if(field < basedesc->getFieldCount(object)){
-		    return basedesc->getFieldAsString(object,field,i);
+        std::string OMNeTRoutingTableDescriptor::getFieldAsString(void *object, int field, int i) const{
+            cClassDescriptor *basedesc = getBaseClassDescriptor();
+            if(basedesc){
+                if(field < basedesc->getFieldCount(object)){
+                    return basedesc->getFieldAsString(object,field,i);
                 }
-		field -= basedesc->getFieldCount(object);
-	    }
+                field -= basedesc->getFieldCount(object);
+            } 
             /// FIXME
-	    OMNeTRoutingTable *routingTable = (OMNeTRoutingTable *)object; 
+            OMNeTRoutingTable *routingTable = (OMNeTRoutingTable *)object; 
             (void)routingTable;
 
             /// FIXME
-	    if(field >= 0 && field < 3) {
+            if(field >= 0 && field < 3) {
 /*
 		std::shared_ptr<OMNeTAddress> address;
 		switch (field) {A
@@ -168,7 +165,7 @@ namespace ARA {
 */
 	    }
 
-	    switch (field) {
+            switch (field) {
 /*
 		case 3: return PacketType::getAsString(pp->getType());
 		case 4: return long2string(pp->getSequenceNumber());
@@ -176,66 +173,84 @@ namespace ARA {
 		case 6: return long2string(pp->getPayloadLength());
 		case 7: return long2string(pp->getHopCount());
 */
-		default: return "NOT IMPLEMENTED";
-	    }
-	}
-	bool OMNeTRoutingTableDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const{
-	    cClassDescriptor *basedesc = getBaseClassDescriptor();
+                default: return "NOT IMPLEMENTED";
+	        }
+        }
 
-	    if(basedesc){
-		if(field < basedesc->getFieldCount(object)){
-		    return basedesc->setFieldAsString(object,field,i,value);
+ 	    bool OMNeTRoutingTableDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const{
+	        cClassDescriptor *basedesc = getBaseClassDescriptor();
+
+	        if(basedesc){
+		        if(field < basedesc->getFieldCount(object)){
+		            return basedesc->setFieldAsString(object,field,i,value);
                 }
-		field -= basedesc->getFieldCount(object);
-	    }
+		        field -= basedesc->getFieldCount(object);
+	        }
 
             return false;
-	}
+        }
 
-	const char *OMNeTRoutingTableDescriptor::getFieldStructName(void *object, int field) const{
-	    cClassDescriptor *basedesc = getBaseClassDescriptor();
+	    const char *OMNeTRoutingTableDescriptor::getFieldStructName(void *object, int field) const{
+	        cClassDescriptor *basedesc = getBaseClassDescriptor();
 
-	    if(basedesc){
-		if(field < basedesc->getFieldCount(object)){
-		    return basedesc->getFieldStructName(object, field);
+	        if(basedesc){
+		        if(field < basedesc->getFieldCount(object)){
+		            return basedesc->getFieldStructName(object, field);
                 }
-		field -= basedesc->getFieldCount(object);
-	    }
+		        field -= basedesc->getFieldCount(object);
+	        }
 
             /// FIXME
-	    static const char *fieldStructNames[] = {
-		"Address",
-		"Address",
-		"Address",
-		NULL
-	    };
+           static const char *fieldStructNames[] = {
+               "Address",
+               "Address",
+               "Address",
+               NULL
+           };
 
-	    return (field>=0 && field<nrOfFields) ? fieldStructNames[field] : NULL;
-	}
+           return (field>=0 && field<nrOfFields) ? fieldStructNames[field] : NULL;
+        }
 
         /// FIXME
-	void *OMNeTRoutingTableDescriptor::getFieldStructPointer(void *object, int field, int i) const{
-	    cClassDescriptor *basedesc = getBaseClassDescriptor();
-	    if(basedesc){
-		if (field < basedesc->getFieldCount(object)){
-		    return basedesc->getFieldStructPointer(object, field, i);
+        void *OMNeTRoutingTableDescriptor::getFieldStructPointer(void *object, int field, int i) const{
+	        cClassDescriptor *basedesc = getBaseClassDescriptor();
+	        if(basedesc){
+		        if(field < basedesc->getFieldCount(object)){
+		            return basedesc->getFieldStructPointer(object, field, i);
                 }
-		field -= basedesc->getFieldCount(object);
-	    }
+		        field -= basedesc->getFieldCount(object);
+	        }
 
-	    OMNeTPacket* pp = (OMNeTPacket *)object; 
+	        OMNeTRoutingTable* pp = (OMNeTRoutingTable *)object; 
             /// What's the purpose of that?
             (void)pp;
 
-	    switch(field){
+	        switch(field){
 /*
 		case 0: return pp->getSource().get();
 		case 1: return pp->getDestination().get();
 		case 2: return pp->getSender().get();
 */
-		default: return NULL;
+		        default: return NULL;
+	        }
 	    }
-	}
 
+        const char *OMNeTRoutingTableDescriptor::getFieldTypeString(void *object, int field) const {
+            cClassDescriptor *basedesc = getBaseClassDescriptor();
+            if(basedesc){
+                if(field < basedesc->getFieldCount(object)){
+                    return basedesc->getFieldTypeString(object, field);
+                }
+                field -= basedesc->getFieldCount(object);
+            }
+
+            static const char *fieldTypeStrings[] = {
+                "Address*",
+                "Address*",
+                "Address*",
+                "PacketType"
+            };
+            return (field>=0 && field<nrOfFields) ? fieldTypeStrings[field] : NULL;
+        }
     }
 }

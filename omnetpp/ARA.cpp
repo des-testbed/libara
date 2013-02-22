@@ -144,7 +144,7 @@ namespace ARA {
             }
 
             this->forwardingPolicy = check_and_cast<ForwardingPolicy *>(module);
-            this->forwardingPolicy->setRoutingTable(&(this->routingTable));
+            this->forwardingPolicy->setRoutingTable(this->routingTable);
         }
 
         void ARA::initializeEvaporationPolicy(){
@@ -163,12 +163,12 @@ namespace ARA {
         void ARA::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
             AddressPtr source = packet->getSource();
             AddressPtr sender = packet->getSender();
-            float currentPheromoneValue = routingTable.getPheromoneValue(source, sender, interface);
+            float currentPheromoneValue = routingTable->getPheromoneValue(source, sender, interface);
 
             float hopCountMalus = 1 / (float) packet->getHopCount();
             float newPheromoneValue = currentPheromoneValue + deltaPhi * hopCountMalus;
 
-            routingTable.update(source, sender, interface, newPheromoneValue);
+            routingTable->update(source, sender, interface, newPheromoneValue);
         }
 
         void ARA::deliverToSystem(const Packet* packet) {
@@ -181,7 +181,7 @@ namespace ARA {
         }
 
         void ARA::setEvaporationPolicy(EvaporationPolicy *policy){
-            this->routingTable.setEvaporationPolicy(policy);
+            this->routingTable->setEvaporationPolicy(policy);
         }
 
 

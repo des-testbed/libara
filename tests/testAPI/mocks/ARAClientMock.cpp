@@ -33,14 +33,14 @@ namespace ARA {
 
 ARAClientMock::ARAClientMock() {
     forwardingPolicy = new BestPheromoneForwardingPolicy();
-    forwardingPolicy->setRoutingTable(&routingTable);
+    forwardingPolicy->setRoutingTable(routingTable);
     setEvaporationPolicy(new LinearEvaporationPolicy());
 
 }
 
 void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
     evaporationPolicy = policy;
-    routingTable.setEvaporationPolicy(policy);
+    routingTable->setEvaporationPolicy(policy);
 };
 
 ARAClientMock::~ARAClientMock() {
@@ -60,7 +60,7 @@ ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
 }
 
 void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
-    routingTable.update(packet->getSource(), packet->getSender(), interface, 10);
+    routingTable->update(packet->getSource(), packet->getSender(), interface, 10);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
@@ -81,7 +81,7 @@ PacketTrap* ARAClientMock::getPacketTrap() {
 }
 
 RoutingTable* ARAClientMock::getRoutingTable() {
-    return &routingTable;
+    return routingTable;
 }
 
 std::deque<const Packet*>* ARAClientMock::getDeliveredPackets() {

@@ -36,14 +36,13 @@
 
 namespace ARA {
     namespace omnetpp {
-
         /**
          * The class represents the implementation of the ant routing algorithm (ARA)
          * for the OMNeT++ simulation framework.
          *
          * The algorithm was first published in:
          *
-         *  Gunes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
+         *  Guenes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
          *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
          *
          */
@@ -64,6 +63,8 @@ namespace ARA {
             private:
                 /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
                 ForwardingPolicy* forwardingPolicy;
+
+                /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time
                 EvaporationPolicy* evaporationPolicy;
 
                 /// The member denotes the constant which is used in the pheromone reinforcement of a path

@@ -114,10 +114,13 @@ public:
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
+
+    void setRoutingTable(RoutingTable *routingTable);
+
 protected:
 
     std::deque<NetworkInterface*> interfaces;
-    RoutingTable routingTable;
+    RoutingTable *routingTable;
     PacketTrap* packetTrap;
 
     /// The member specifies the initial level 

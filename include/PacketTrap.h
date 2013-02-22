@@ -66,6 +66,8 @@ public:
      */
     std::deque<const Packet*>* getDeliverablePackets();
 
+    void setRoutingTable(RoutingTable *routingTable);
+
 private:
 
     bool thereIsAHashSetFor(std::shared_ptr<Address> destination);

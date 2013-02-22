@@ -8,9 +8,15 @@
 
 namespace ARA {
     namespace omnetpp {
+        /**
+         *
+         *
+         *
+         */
         class OMNeTRoutingTable : public ARA::RoutingTable, public cObject {
              public:
-
+                 OMNeTRoutingTable(){};
+                 virtual ~OMNeTRoutingTable(){};
         };
     } 
 } 

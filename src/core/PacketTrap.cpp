@@ -125,4 +125,9 @@ deque<const Packet*>* PacketTrap::getDeliverablePackets() {
     return deliverablePackets;
 }
 
+// TODO: checks if this is a problem
+void PacketTrap::setRoutingTable(RoutingTable *routingTable){
+    this->routingTable = routingTable;
+}
+
 } /* namespace ARA */
