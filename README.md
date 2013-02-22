@@ -13,6 +13,7 @@ Installation from git
 
 		g++ >= 4.7
 		OMNeT++ >= 4.2
+		log4cxx-devel >= 0.10.0
 
 3. After the checkout you can build the sources and simulation via 
 

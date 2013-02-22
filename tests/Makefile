@@ -22,7 +22,7 @@ endif
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11
 INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
-LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest
+LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -llog4cxx
 LINKFLAGS += -Wl,-rpath,$(ARA_LIB_DIR)
 
 # libARA stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
