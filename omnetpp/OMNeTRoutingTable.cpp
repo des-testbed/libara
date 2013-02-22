@@ -2,8 +2,24 @@
 
 namespace ARA {
     namespace omnetpp {
+        Register_Class(OMNeTRoutingTable);
+
         //OMNeTRoutingTable::
 //        OMNeTRoutingTable::
+        const char *OMNeTRoutingTable::getClassName() const{
+            return "OMNeTRoutingTable";
+        }
+
+        std::string OMNeTRoutingTable::info() const{
+            return std::string("This is a test!");
+        }
+
+        
+        OMNeTRoutingTable::OMNeTRoutingTable(const OMNeTRoutingTable& other){
+            // FIXME
+            setRoutingTable(other.getRoutingTable());
+            setEvaporationPolicy(other.getEvaporationPolicy());
+        }
 
         /**
          * The class implements a class descriptor for the OMNeTRoutingTable 
@@ -65,10 +81,10 @@ namespace ARA {
                 field -= basedesc->getFieldCount(object);
             }
             static unsigned int fieldTypeFlags[] = {
-                FD_ISCOMPOUND | FD_ISPOINTER,   // Address* source
-                FD_ISCOMPOUND | FD_ISPOINTER,   // Address* destination
-                FD_ISCOMPOUND | FD_ISPOINTER,   // Address* sender
                 FD_NONE,                        // char type;
+                FD_NONE,                        // char type;
+                FD_NONE,                        // char type;
+                FD_NONE                         // char type;
             };
             return (field>=0 && field<nrOfFields) ? fieldTypeFlags[field] : 0;
         }
@@ -202,9 +218,9 @@ namespace ARA {
 
             /// FIXME
            static const char *fieldStructNames[] = {
-               "Address",
-               "Address",
-               "Address",
+               NULL,
+               NULL,
+               NULL,
                NULL
            };
 
@@ -227,9 +243,9 @@ namespace ARA {
 
 	        switch(field){
 /*
-		case 0: return pp->getSource().get();
-		case 1: return pp->getDestination().get();
-		case 2: return pp->getSender().get();
+		        case 0: return 0;
+		        case 1: return 1;
+		        case 2: return 2;
 */
 		        default: return NULL;
 	        }
@@ -245,10 +261,10 @@ namespace ARA {
             }
 
             static const char *fieldTypeStrings[] = {
-                "Address*",
-                "Address*",
-                "Address*",
-                "PacketType"
+                "int",
+                "int",
+                "int",
+                "int"
             };
             return (field>=0 && field<nrOfFields) ? fieldTypeStrings[field] : NULL;
         }

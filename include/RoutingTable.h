@@ -55,6 +55,9 @@ public:
     bool exists(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
     void setEvaporationPolicy(EvaporationPolicy *policy);
+    EvaporationPolicy *getEvaporationPolicy() const;
+    std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> getRoutingTable() const;
+    void setRoutingTable(std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table);
 
 
 private:
