@@ -101,7 +101,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
     }
     else {
         logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase",
-                packet->getSequenceNumber(), packet->getSource()->toString(), packet->getDestination()->toString());
+                packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
@@ -181,6 +181,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     char packetType = packet->getType();
 
     if(packetType == PacketType::FANT) {
+        logDebug("FANT %u from %s reached its goal. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
         Packet* bant = packet->createBANT(getNextSequenceNumber());
         broadCast(bant);
         delete bant;
