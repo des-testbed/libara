@@ -3,6 +3,7 @@
 #include "IPAddress.h"
 #include "IPAddressResolver.h"
 #include "ARPPacket_m.h"
+#include "SimpleLogger.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -30,6 +31,7 @@ namespace ARA {
                 interfaceTable = getInterfaceTable();
                 initializeNetworkInterfaces();
 
+                setLogger(new SimpleLogger());
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
             }
