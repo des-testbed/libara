@@ -41,6 +41,11 @@ AbstractARAClient::AbstractARAClient() {
 AbstractARAClient::~AbstractARAClient() {
     delete packetTrap; //TODO we must check for and delete all packets that might still be trapped
 
+    // delete logger if it has been set
+    if(logger != nullptr) {
+        delete logger;
+    }
+
     // delete the sequence number lists of the last received packets
     unordered_map<AddressPtr, unordered_set<unsigned int>*>::iterator iterator;
     for (iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
@@ -50,6 +55,34 @@ AbstractARAClient::~AbstractARAClient() {
         delete entryPair.second;
     }
     lastReceivedPackets.clear();
+}
+
+void AbstractARAClient::setLogger(Logger* logger) {
+    this->logger = logger;
+}
+
+void AbstractARAClient::logMessage(const std::string &text, Logger::Level level, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, level);
+        logger->logMessageWithVAList(text, level, args);
+    }
+}
+
+void AbstractARAClient::logTrace(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_TRACE, args);
+    }
+}
+
+void AbstractARAClient::logDebug(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_DEBUG, args);
+    }
 }
 
 void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
@@ -75,6 +108,8 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         delete newPacket;
     }
     else {
+        logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase",
+                packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
@@ -142,6 +177,7 @@ void AbstractARAClient::handleAntPacket(const Packet* packet) {
     if(hasBeenSentByThisNode(packet) == false) {
         
         if(isDirectedToThisNode(packet) == false) {
+            logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
             broadCast(packet);
         }
         else {
@@ -154,12 +190,14 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     char packetType = packet->getType();
 
     if(packetType == PacketType::FANT) {
+        logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
         Packet* bant = packet->createBANT(getNextSequenceNumber());
         broadCast(bant);
         delete bant;
     }
     else if(packetType == PacketType::BANT) {
         deque<const Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
+        logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString(), deliverablePackets->size());
         for(auto& deliverablePacket : *deliverablePackets) {
             sendPacket(deliverablePacket);
             packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back

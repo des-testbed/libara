@@ -3,6 +3,7 @@
 #include "IPAddress.h"
 #include "IPAddressResolver.h"
 #include "ARPPacket_m.h"
+#include "SimpleLogger.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -30,17 +31,22 @@ namespace ARA {
                 interfaceTable = getInterfaceTable();
                 initializeNetworkInterfaces();
 
+                setLogger(new SimpleLogger(getHostModule()->getName()));
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
             }
         }
 
-        IInterfaceTable* ARA::getInterfaceTable() {
+        cModule* ARA::getHostModule() {
             //TODO find a more generic way to determine the real host module
-            cModule* host = getParentModule();
-            cModule* parentHost = host->getParentModule();
+            cModule* parent = getParentModule();
+            cModule* grandParent = parent->getParentModule();
+            return grandParent;
+        }
 
-            IInterfaceTable* interfaceTable = IPAddressResolver().findInterfaceTableOf(parentHost);
+        IInterfaceTable* ARA::getInterfaceTable() {
+            cModule* host = getHostModule();
+            IInterfaceTable* interfaceTable = IPAddressResolver().findInterfaceTableOf(host);
             if (interfaceTable == NULL) {
                 throw cRuntimeError("Could not find the interfaceTable in host '%s'. Every %s needs to be part of a compound module that has an IInterfaceTable submodule called 'interfaceTable'", host->getFullPath().c_str(), getFullName());
             }

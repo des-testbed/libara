@@ -38,6 +38,10 @@ AddressMock::AddressMock(const std::string name) {
     this->address = name;
 }
 
+const char* AddressMock::toString() const {
+    return address.c_str();
+}
+
 bool AddressMock::equals(const Address* otherAddress) const {
     const AddressMock* otherAddressMock = dynamic_cast<const AddressMock*>(otherAddress);
     if(otherAddressMock == NULL) {

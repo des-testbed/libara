@@ -76,6 +76,39 @@ public:
     std::shared_ptr<Address> getSender() const;
 
     /**
+     * Returns the null-terminated string representation of the address of the source.
+     * This is only a shortcut to getSource()->toString() for the convenience of the
+     * developer.
+     *
+     * @see Packet::getSource()
+     */
+    const char* getSourceString() const {
+        return getSource()->toString();
+    }
+
+    /**
+     * Returns the null-terminated string representation of the sender address.
+     * This is only a shortcut to getSender()->toString() for the convenience of the
+     * developer.
+     *
+     * @see Packet::getSender()
+     */
+    const char* getSenderString() const {
+        return getSender()->toString();
+    }
+
+    /**
+     * Returns the null-terminated string representation of the destination address.
+     * This is only a shortcut to getDestination()->toString() for the convenience of the
+     * developer.
+     *
+     * @see Packet::getDestination()
+     */
+    const char* getDestinationString() const {
+        return getDestination()->toString();
+    }
+
+    /**
      * Assigns a new sender to this packet.
      */
     void setSender(std::shared_ptr<Address> newSender);
