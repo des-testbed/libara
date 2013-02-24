@@ -62,8 +62,8 @@ namespace ARA {
                 IInterfaceTable* getInterfaceTable();
                 InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
 
+                void initializeRoutingTable();
                 void initializeForwardingPolicy();
-
                 void initializeEvaporationPolicy();
 
                 bool isFromUpperLayer(cMessage* msg);

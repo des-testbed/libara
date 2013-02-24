@@ -49,14 +49,13 @@ namespace ARA {
          */
         void ARA::initialize(int stage) {
             if(stage == 4) {
-                this->setRoutingTable(new OMNeTRoutingTable());
-
                 deltaPhi = par("deltaPhi").doubleValue();
                 initialPhi = par("initialPhi").doubleValue();
 
                 interfaceTable = getInterfaceTable();
-                initializeNetworkInterfaces();
+				initializeNetworkInterfaces();
 
+				initializeRoutingTable();
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
             }
@@ -184,6 +183,17 @@ namespace ARA {
 
             this->evaporationPolicy = check_and_cast<EvaporationPolicy *>(module);
             setEvaporationPolicy(this->evaporationPolicy);
+        }
+
+        void ARA::initializeRoutingTable(){
+            cModule* host = getParentModule();
+            cModule* module = host->getSubmodule("routingTable");
+
+            if(module == NULL){
+                throw cRuntimeError("ARA: the routing table has to be called routingTable");
+            }
+
+            this->routingTable = check_and_cast<RoutingTable *>(module);
         }
 
 

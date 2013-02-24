@@ -2,7 +2,7 @@
 
 namespace ARA {
     namespace omnetpp {
-        Register_Class(OMNeTRoutingTable);
+        Define_Module(OMNeTRoutingTable);
 
         //OMNeTRoutingTable::
 //        OMNeTRoutingTable::
@@ -20,6 +20,15 @@ namespace ARA {
             setRoutingTable(other.getRoutingTable());
             setEvaporationPolicy(other.getEvaporationPolicy());
         }
+
+        void OMNeTRoutingTable::initialize(){
+
+
+		}
+
+        void OMNeTRoutingTable::handleMessage(cMessage *msg){
+            throw cRuntimeError("OMNeTRoutingTable: handleMessage() should never be called!");
+		}
 
         /**
          * The class implements a class descriptor for the OMNeTRoutingTable 
