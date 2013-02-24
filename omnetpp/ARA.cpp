@@ -187,10 +187,10 @@ namespace ARA {
 
         void ARA::initializeRoutingTable(){
             cModule* host = getParentModule();
-            cModule* module = host->getSubmodule("routingTable");
+            cModule* module = host->getSubmodule("visRoutingTable");
 
             if(module == NULL){
-                throw cRuntimeError("ARA: the routing table has to be called routingTable");
+                throw cRuntimeError("ARA: the routing table has to be called visRoutingTable");
             }
 
             this->routingTable = check_and_cast<RoutingTable *>(module);

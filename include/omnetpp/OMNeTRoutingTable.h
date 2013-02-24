@@ -44,10 +44,7 @@ namespace ARA {
                  OMNeTRoutingTable(){};
                  OMNeTRoutingTable(const OMNeTRoutingTable& other);
                  virtual ~OMNeTRoutingTable(){};
-
                  virtual OMNeTRoutingTable *dup() const {return new OMNeTRoutingTable(*this);};
-                 virtual const char *getClassName() const;
-                 virtual std::string info() const;
 
              protected:
                  virtual void initialize();

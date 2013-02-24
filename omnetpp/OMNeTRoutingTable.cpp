@@ -6,14 +6,6 @@ namespace ARA {
 
         //OMNeTRoutingTable::
 //        OMNeTRoutingTable::
-        const char *OMNeTRoutingTable::getClassName() const{
-            return "OMNeTRoutingTable";
-        }
-
-        std::string OMNeTRoutingTable::info() const{
-            return std::string("This is a test!");
-        }
-
         
         OMNeTRoutingTable::OMNeTRoutingTable(const OMNeTRoutingTable& other){
             // FIXME
@@ -61,7 +53,7 @@ namespace ARA {
                 const int nrOfFields = 4;
         };
 
-        Register_ClassDescriptor(OMNeTRoutingTableDescriptor);
+        //Register_ClassDescriptor(OMNeTRoutingTableDescriptor);
 
         OMNeTRoutingTableDescriptor::OMNeTRoutingTableDescriptor() : cClassDescriptor("OMNeTRoutingTable", "cObject"){}
 
