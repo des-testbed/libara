@@ -27,16 +27,23 @@
 #include "PacketType.h"
 
 using namespace std;
+using namespace log4cxx;
+using namespace log4cxx::helpers;
 
 namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
+
+LoggerPtr AbstractARAClient::logger(Logger::getLogger("ARA.AbstractARAClient"));
 
 AbstractARAClient::AbstractARAClient() {
     this->routingTable = new RoutingTable();
     packetTrap = new PacketTrap(routingTable);
     /// set it to a 'random' initial value
     this->initialPhi = 1.0;
+   
+    ///
+    this->initializeLoggingFramework();
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -76,8 +83,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         newPacket->increaseHopCount();
         interface->send(newPacket, nextHop->getAddress());
         delete newPacket;
-    }
-    else {
+    } else {
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
@@ -87,6 +93,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
 }
 
 void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
+    ///
     updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
 
     if(hasBeenReceivedEarlier(packet)) {
@@ -94,8 +101,7 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
             sendDuplicateWarning(packet, interface);
         }
         return;
-    }
-    else {
+    } else {
         registerReceivedPacket(packet);
     }
 
@@ -115,15 +121,15 @@ void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterf
 }
 
 void AbstractARAClient::handlePacket(const Packet* packet, NetworkInterface* interface) {
-    if(packet->isDataPacket()) {
+    if(packet->isDataPacket()){
         handleDataPacket(packet);
-    }
-    else if(packet->isAntPacket()) {
-        if(hasBeenSentByThisNode(packet) == false){
-            /// set the initial pheromone value
-            initializePheromone(packet, interface);
+    }else if(packet->isAntPacket()){
+       /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
+        if(!(routingTable->isDeliverable(packet))){
+           float phi = this->initializePheromone(packet);
+           this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
         }
-
+        ///
         handleAntPacket(packet);
     }
     else if(packet->getType() == PacketType::DUPLICATE_ERROR) {
@@ -248,18 +254,19 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
 }
 
 /**
- * The method initializes the pheromone value of 
+ * The method determines the initial pheromone value of a new routing table
+ * entry. The pheromone value is only determined for a non-existing routing
+ * table entry.
  *
+ * @param in packet The received packet 
+ *
+ * @return The pheromone value
  */
-void AbstractARAClient::initializePheromone(const Packet* packet, NetworkInterface* interface){
+float AbstractARAClient::initializePheromone(const Packet* packet){
     /// determine the hop count malus
     float hopCountMalus = 1 / (float) packet->getHopCount();
     /// compute the phi value   
-    float phi = this->initialPhi * hopCountMalus;
-    /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
-    if(!(this->routingTable->exists(packet->getSource(), packet->getSender(), interface))){
-        this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
-    }
+    return (this->initialPhi * hopCountMalus);
 }
 
 void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
@@ -269,6 +276,17 @@ void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
     delete this->routingTable;
     // set new routing table
     this->routingTable = routingTable;
+}
+
+void AbstractARAClient::initializeLoggingFramework(){
+    try{
+       // Read log4cxx property file
+       PropertyConfigurator::configure("/home/frey/Desktop/Projekte/code/ara-sim/logging.properties");
+       // Print a first dummy line
+       LOG4CXX_TRACE(logger, "starting application");
+    }catch(Exception&){
+       std::cerr << "An exception has occurred initializing the logging framework" << std::endl;
+    }
 }
 
 } /* namespace ARA */

@@ -4,6 +4,9 @@
 #include <typeinfo> 
 
 using namespace ARA;
+using namespace log4cxx;
+
+LoggerPtr EvaporationPolicy::logger(Logger::getLogger("ARA.EvaporationPolicy"));
 
 EvaporationPolicy::EvaporationPolicy():factor(1),interval(100){ 
     this->lastAccessTime = new Time();

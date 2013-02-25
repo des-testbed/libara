@@ -34,10 +34,16 @@
 #include "Packet.h"
 #include "ForwardingPolicy.h"
 
+#include <iostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
 #include <memory>
+
+#include "log4cxx/logger.h"
+#include "log4cxx/basicconfigurator.h"
+#include "log4cxx/propertyconfigurator.h"
+#include "log4cxx/helpers/exception.h"
 
 namespace ARA {
 
@@ -108,8 +114,8 @@ public:
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
-    /// The method initializes the pheromone value of a link
-    void initializePheromone(const Packet* packet, NetworkInterface* interface);
+    /// The computes the initial pheromone value of a link
+    float initializePheromone(const Packet* packet);
 
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
@@ -150,6 +156,9 @@ private:
     void handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
+
+    void initializeLoggingFramework();
+    static log4cxx::LoggerPtr logger;
 
 };
 
