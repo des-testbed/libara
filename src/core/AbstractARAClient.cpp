@@ -39,7 +39,7 @@ AbstractARAClient::AbstractARAClient() {
 }
 
 AbstractARAClient::~AbstractARAClient() {
-    delete packetTrap; //TODO we must check for and delete all packets that might still be trapped
+    delete packetTrap;
 
     // delete logger if it has been set
     if(logger != nullptr) {

@@ -616,3 +616,20 @@ TEST(AbstractARAClientTest, sendsLogMessageIfAntPacketIsBroadcasted) {
     CHECK_EQUAL("Broadcasting FANT 123 from source", logMessage.text);
     BYTES_EQUAL(Logger::LEVEL_TRACE, logMessage.level);
 }
+
+/**
+ * In this test we want to check that all packets that might still be trapped
+ * in the PacketTrap are deleted when the destructor is called.
+ */
+TEST(AbstractARAClientTest, deleteTrappedPacketsInDestructor) {
+    Packet* packet = new PacketMock("source", "destination", 1);
+
+    // the client will trap the packet because it is not deliverable
+    client->sendPacket(packet);
+
+    // we need to delete the original packet because only a clone is trapped
+    delete packet;
+
+    // when the test finishes, the client will be deleted in teardown()
+    // and the packet clone should be deleted as well
+}
