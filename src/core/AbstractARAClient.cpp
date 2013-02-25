@@ -26,6 +26,8 @@
 #include "AbstractARAClient.h"
 #include "PacketType.h"
 
+using namespace std;
+
 namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
