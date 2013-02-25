@@ -61,14 +61,6 @@ void AbstractARAClient::setLogger(Logger* logger) {
     this->logger = logger;
 }
 
-void AbstractARAClient::logMessage(const std::string &text, Logger::Level level, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, level);
-        logger->logMessageWithVAList(text, level, args);
-    }
-}
-
 void AbstractARAClient::logTrace(const std::string &text, ...) const {
     if(logger != nullptr) {
         va_list args;
@@ -82,6 +74,38 @@ void AbstractARAClient::logDebug(const std::string &text, ...) const {
         va_list args;
         va_start(args, text);
         logger->logMessageWithVAList(text, Logger::LEVEL_DEBUG, args);
+    }
+}
+
+void AbstractARAClient::logInfo(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_INFO, args);
+    }
+}
+
+void AbstractARAClient::logWarn(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_WARN, args);
+    }
+}
+
+void AbstractARAClient::logError(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_ERROR, args);
+    }
+}
+
+void AbstractARAClient::logFatal(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_FATAL, args);
     }
 }
 

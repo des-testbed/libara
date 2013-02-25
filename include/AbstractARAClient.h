@@ -147,25 +147,61 @@ protected:
 
     /**
      * Checks if a logger has been assigned to this ARA client and if so
-     * delegates the call to it with Logger::LEVEL_DEBUG.
-     * The optional varargs are handled as parameters to the logMessage string.
+     * delegates the call to it with Logger::LEVEL_TRACE.
      *
+     * The optional varargs are handled as parameters to the logMessage string.
      * If no logger has been set via setLogger() nothing happens.
+     *
+     * @see AbstractARAClient::logTrace
+     * @see AbstractARAClient::logDebug
+     * @see AbstractARAClient::logInfo
+     * @see AbstractARAClient::logWarn
+     * @see AbstractARAClient::logError
+     * @see AbstractARAClient::logFatal
      */
     void logMessage(const std::string &logMessage, Logger::Level level, ...) const;
 
     /**
-     * Logs with level trace.
-     * See AbstractARAClient::logMessage for more details.
+     * Logs with trace level.
+     *
+     * @see AbstractARAClient::logMessage
      */
     void logTrace(const std::string &logMessage, ...) const;
 
     /**
-     * Logs with level debug.
-     * See AbstractARAClient::logMessage for more details.
+     * Logs with debug level.
+     *
+     * @see AbstractARAClient::logMessage
      */
     void logDebug(const std::string &logMessage, ...) const;
 
+    /**
+     * Logs with info level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logInfo(const std::string &logMessage, ...) const;
+
+    /**
+     * Logs with warn level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logWarn(const std::string &logMessage, ...) const;
+
+    /**
+     * Logs with error level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logError(const std::string &logMessage, ...) const;
+
+    /**
+     * Logs with fatal level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logFatal(const std::string &logMessage, ...) const;
 private:
     Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
