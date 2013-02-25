@@ -115,7 +115,7 @@ public:
     void registerReceivedPacket(const Packet* packet);
 
     /// The computes the initial pheromone value of a link
-    float initializePheromone(const Packet* packet);
+    virtual float initializePheromone(const Packet* packet);
 
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
