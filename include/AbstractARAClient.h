@@ -35,6 +35,7 @@
 #include "Packet.h"
 #include "ForwardingPolicy.h"
 
+#include <iostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
@@ -119,16 +120,19 @@ public:
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
-    /// The method initializes the pheromone value of a link
-    void initializePheromone(const Packet* packet, NetworkInterface* interface);
+    /// The computes the initial pheromone value of a link
+    virtual float initializePheromone(const Packet* packet);
 
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
+
+    void setRoutingTable(RoutingTable *routingTable);
+
 protected:
 
     std::deque<NetworkInterface*> interfaces;
-    RoutingTable routingTable;
+    RoutingTable *routingTable;
     PacketTrap* packetTrap;
 
     /// The member specifies the initial level 
@@ -216,7 +220,6 @@ private:
     void handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
-
 };
 
 } /* namespace ARA */

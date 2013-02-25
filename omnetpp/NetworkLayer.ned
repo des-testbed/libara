@@ -17,6 +17,7 @@ package ara;
 
 import ara.ARA;
 import ara.OMNeTLinearEvaporationPolicy;
+import ara.OMNeTRoutingTable;
 import ara.OMNeTStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
@@ -48,6 +49,11 @@ module NetworkLayer
 
             @display("p=72,30");
         }
+
+        visRoutingTable: OMNeTRoutingTable {
+
+           @display("p=210,122");
+ 	    }
 
         arp: ARP {
             parameters:

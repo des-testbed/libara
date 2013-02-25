@@ -33,19 +33,18 @@ namespace ARA {
 
 ARAClientMock::ARAClientMock() {
     forwardingPolicy = new BestPheromoneForwardingPolicy();
-    forwardingPolicy->setRoutingTable(&routingTable);
-    setEvaporationPolicy(new LinearEvaporationPolicy());
-
+    forwardingPolicy->setRoutingTable(routingTable);
+    EvaporationPolicy* policy = new LinearEvaporationPolicy();
+    setEvaporationPolicy(policy);
 }
 
 void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
     evaporationPolicy = policy;
-    routingTable.setEvaporationPolicy(policy);
+    routingTable->setEvaporationPolicy(evaporationPolicy);
 };
 
 ARAClientMock::~ARAClientMock() {
     delete forwardingPolicy;
-    delete evaporationPolicy;
 
     // delete the NetworkInterfaceMocks that have been created via createNewNetworkInterfaceMock
     while(interfaceMocks.empty() == false) {
@@ -53,6 +52,9 @@ ARAClientMock::~ARAClientMock() {
         interfaceMocks.pop_back();
         delete mock;
     }
+
+    routingTable->setEvaporationPolicy(NULL);
+    delete evaporationPolicy;
 }
 
 ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
@@ -60,7 +62,7 @@ ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
 }
 
 void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
-    routingTable.update(packet->getSource(), packet->getSender(), interface, 10);
+    routingTable->update(packet->getSource(), packet->getSender(), interface, 10);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
@@ -81,7 +83,7 @@ PacketTrap* ARAClientMock::getPacketTrap() {
 }
 
 RoutingTable* ARAClientMock::getRoutingTable() {
-    return &routingTable;
+    return routingTable;
 }
 
 std::deque<const Packet*>* ARAClientMock::getDeliveredPackets() {

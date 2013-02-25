@@ -33,7 +33,8 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 AbstractARAClient::AbstractARAClient() {
-    packetTrap = new PacketTrap(&routingTable);
+    this->routingTable = new RoutingTable();
+    packetTrap = new PacketTrap(routingTable);
     /// set it to a 'random' initial value
     this->initialPhi = 1.0;
 }
@@ -55,6 +56,8 @@ AbstractARAClient::~AbstractARAClient() {
         delete entryPair.second;
     }
     lastReceivedPackets.clear();
+
+    delete routingTable;
 }
 
 void AbstractARAClient::setLogger(Logger* logger) {
@@ -122,7 +125,7 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
 }
 
 void AbstractARAClient::sendPacket(const Packet* packet) {
-    if(routingTable.isDeliverable(packet)) {
+    if(routingTable->isDeliverable(packet)) {
         NextHop* nextHop = getNextHop(packet);
         NetworkInterface* interface = nextHop->getInterface();
         Packet* newPacket = packet->clone();
@@ -130,8 +133,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         newPacket->increaseHopCount();
         interface->send(newPacket, nextHop->getAddress());
         delete newPacket;
-    }
-    else {
+    }else{
         logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase",
                 packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
@@ -143,6 +145,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
 }
 
 void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
+    ///
     updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
 
     if(hasBeenReceivedEarlier(packet)) {
@@ -150,8 +153,7 @@ void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* in
             sendDuplicateWarning(packet, interface);
         }
         return;
-    }
-    else {
+    } else {
         registerReceivedPacket(packet);
     }
 
@@ -171,15 +173,15 @@ void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterf
 }
 
 void AbstractARAClient::handlePacket(const Packet* packet, NetworkInterface* interface) {
-    if(packet->isDataPacket()) {
+    if(packet->isDataPacket()){
         handleDataPacket(packet);
-    }
-    else if(packet->isAntPacket()) {
-        if(hasBeenSentByThisNode(packet) == false){
-            /// set the initial pheromone value
-            initializePheromone(packet, interface);
+    }else if(packet->isAntPacket()){
+       /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
+        if(!(routingTable->isDeliverable(packet))){
+           float phi = this->initializePheromone(packet);
+           this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
         }
-
+        ///
         handleAntPacket(packet);
     }
     else if(packet->getType() == PacketType::DUPLICATE_ERROR) {
@@ -234,7 +236,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
 }
 
 void AbstractARAClient::handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface) {
-    routingTable.removeEntry(packet->getDestination(), packet->getSender(), interface);
+    routingTable->removeEntry(packet->getDestination(), packet->getSender(), interface);
     // TODO we can also invalidate the ack timer for the packet
 }
 
@@ -307,18 +309,27 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
 }
 
 /**
- * The method initializes the pheromone value of 
+ * The method determines the initial pheromone value of a new routing table
+ * entry. The pheromone value is only determined for a non-existing routing
+ * table entry.
  *
+ * @param in packet The received packet 
+ *
+ * @return The pheromone value
  */
-void AbstractARAClient::initializePheromone(const Packet* packet, NetworkInterface* interface){
+float AbstractARAClient::initializePheromone(const Packet* packet){
     /// determine the hop count malus
     float hopCountMalus = 1 / (float) packet->getHopCount();
     /// compute the phi value   
-    float phi = this->initialPhi * hopCountMalus;
-    /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
-    if(!(this->routingTable.exists(packet->getSource(), packet->getSender(), interface))){
-        this->routingTable.update(packet->getSource(), packet->getSender(), interface, phi);
-    }
+    return (this->initialPhi * hopCountMalus);
 }
 
+void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
+    // update packet trap to new routing table
+    this->packetTrap->setRoutingTable(routingTable);
+    // delete old routing table
+    delete this->routingTable;
+    // set new routing table
+    this->routingTable = routingTable;
+}
 } /* namespace ARA */

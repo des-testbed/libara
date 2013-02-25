@@ -1,3 +1,28 @@
+/******************************************************************************
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
+ All rights reserved.
+
+ These sources were originally developed by Friedrich Große, Michael Frey
+ at Freie Universität Berlin (http://www.fu-berlin.de/),
+ Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
+ (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
+ ------------------------------------------------------------------------------
+ This program is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later
+ version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with
+ this program. If not, see http://www.gnu.org/licenses/ .
+ ------------------------------------------------------------------------------
+ For further information and questions please use the web site
+ http://www.des-testbed.net/
+ *******************************************************************************/
+
 #include "ARA.h"
 #include "IPControlInfo.h"
 #include "IPAddress.h"
@@ -29,9 +54,9 @@ namespace ARA {
                 initialPhi = par("initialPhi").doubleValue();
 
                 interfaceTable = getInterfaceTable();
-                initializeNetworkInterfaces();
-
+				initializeNetworkInterfaces();
                 setLogger(new SimpleLogger(getHostModule()->getName()));
+				initializeRoutingTable();
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
             }
@@ -150,7 +175,7 @@ namespace ARA {
             }
 
             this->forwardingPolicy = check_and_cast<ForwardingPolicy *>(module);
-            this->forwardingPolicy->setRoutingTable(&(this->routingTable));
+            this->forwardingPolicy->setRoutingTable(this->routingTable);
         }
 
         void ARA::initializeEvaporationPolicy(){
@@ -165,16 +190,27 @@ namespace ARA {
             setEvaporationPolicy(this->evaporationPolicy);
         }
 
+        void ARA::initializeRoutingTable(){
+            cModule* host = getParentModule();
+            cModule* module = host->getSubmodule("visRoutingTable");
+
+            if(module == NULL){
+                throw cRuntimeError("ARA: the routing table has to be called visRoutingTable");
+            }
+
+            this->routingTable = check_and_cast<RoutingTable *>(module);
+        }
+
 
         void ARA::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
             AddressPtr source = packet->getSource();
             AddressPtr sender = packet->getSender();
-            float currentPheromoneValue = routingTable.getPheromoneValue(source, sender, interface);
+            float currentPheromoneValue = routingTable->getPheromoneValue(source, sender, interface);
 
             float hopCountMalus = 1 / (float) packet->getHopCount();
             float newPheromoneValue = currentPheromoneValue + deltaPhi * hopCountMalus;
 
-            routingTable.update(source, sender, interface, newPheromoneValue);
+            routingTable->update(source, sender, interface, newPheromoneValue);
         }
 
         void ARA::deliverToSystem(const Packet* packet) {
@@ -187,7 +223,7 @@ namespace ARA {
         }
 
         void ARA::setEvaporationPolicy(EvaporationPolicy *policy){
-            this->routingTable.setEvaporationPolicy(policy);
+            this->routingTable->setEvaporationPolicy(policy);
         }
 
 
