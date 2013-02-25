@@ -30,8 +30,6 @@
 #include <cstring>
 #include <sys/time.h>
 
-#include "log4cxx/logger.h"
-
 #include "Time.h"
 
 namespace ARA { 
@@ -66,8 +64,6 @@ namespace ARA {
             Time *now;
             /// the interval which denotes how much time has to pass in order to trigger the evaporation
             long int interval;
-
-            static log4cxx::LoggerPtr logger;
     };
 } /* namespace ARA */
 

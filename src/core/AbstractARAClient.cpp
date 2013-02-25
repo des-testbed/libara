@@ -26,24 +26,15 @@
 #include "AbstractARAClient.h"
 #include "PacketType.h"
 
-using namespace std;
-using namespace log4cxx;
-using namespace log4cxx::helpers;
-
 namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
-
-LoggerPtr AbstractARAClient::logger(Logger::getLogger("ARA.AbstractARAClient"));
 
 AbstractARAClient::AbstractARAClient() {
     this->routingTable = new RoutingTable();
     packetTrap = new PacketTrap(routingTable);
     /// set it to a 'random' initial value
     this->initialPhi = 1.0;
-   
-    ///
-    this->initializeLoggingFramework();
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -277,16 +268,4 @@ void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
     // set new routing table
     this->routingTable = routingTable;
 }
-
-void AbstractARAClient::initializeLoggingFramework(){
-    try{
-       // Read log4cxx property file
-       PropertyConfigurator::configure("/home/frey/Desktop/Projekte/code/ara-sim/logging.properties");
-       // Print a first dummy line
-       LOG4CXX_TRACE(logger, "starting application");
-    }catch(Exception&){
-       std::cerr << "An exception has occurred initializing the logging framework" << std::endl;
-    }
-}
-
 } /* namespace ARA */

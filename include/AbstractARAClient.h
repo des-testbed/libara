@@ -40,11 +40,6 @@
 #include <deque>
 #include <memory>
 
-#include "log4cxx/logger.h"
-#include "log4cxx/basicconfigurator.h"
-#include "log4cxx/propertyconfigurator.h"
-#include "log4cxx/helpers/exception.h"
-
 namespace ARA {
 
 //TODO fix the visibility: most of the methods should be protected instead of public
@@ -156,10 +151,6 @@ private:
     void handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
-
-    void initializeLoggingFramework();
-    static log4cxx::LoggerPtr logger;
-
 };
 
 } /* namespace ARA */

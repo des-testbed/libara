@@ -27,7 +27,7 @@ CFLAGS=$(CFLAGS_RELEASE)
 D=
 endif
 
-CFLAGS_DEBUG = -g -Wall -llog4cxx
+CFLAGS_DEBUG = -g -Wall
 CFLAGS_RELEASE = -O2 -DNDEBUG=1
 
 CXX = g++
