@@ -53,8 +53,6 @@ namespace ARA {
                 /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time
                 EvaporationPolicy* evaporationPolicy;
 
-                /// The member denotes the constant which is used in the pheromone reinforcement of a path
-                double deltaPhi;
 
                 IInterfaceTable* interfaceTable;
 

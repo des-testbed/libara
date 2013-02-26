@@ -74,6 +74,12 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         Packet* newPacket = packet->clone();
         newPacket->setSender(interface->getLocalAddress());
         newPacket->increaseHopCount();
+
+        /// get the new pheromone value TODO: rename the method
+        float newPhi = increasePheromone(packet->getDestination(), nextHop->getAddress(), interface);
+        // increase pheromone trail for path
+        routingTable->update(packet->getDestination(), nextHop->getAddress(), interface, newPhi);
+
         interface->send(newPacket, nextHop->getAddress());
         delete newPacket;
     } else {
@@ -260,6 +266,11 @@ float AbstractARAClient::initializePheromone(const Packet* packet){
     float hopCountMalus = 1 / (float) packet->getHopCount();
     /// compute the phi value   
     return (this->initialPhi * hopCountMalus);
+}
+
+float AbstractARAClient::increasePheromone(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface){
+     float phi = this->routingTable->getPheromoneValue(destination, nextHop, interface);
+     return (this->deltaPhi + phi);
 }
 
 void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
