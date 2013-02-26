@@ -61,6 +61,7 @@ namespace ARA {
                 void initializeNetworkInterfaces();
                 IInterfaceTable* getInterfaceTable();
                 InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
+                cModule* getSubModule(const char* moduleIdentifier, const char* errorMessage);
 
                 void initializeRoutingTable();
                 void initializeForwardingPolicy();

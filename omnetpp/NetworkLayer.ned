@@ -50,7 +50,7 @@ module NetworkLayer
             @display("p=72,30");
         }
 
-        visRoutingTable: OMNeTRoutingTable {
+        routingTableStatistics: OMNeTRoutingTable {
 
            @display("p=210,122");
  	    }
