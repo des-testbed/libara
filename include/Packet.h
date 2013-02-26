@@ -185,7 +185,7 @@ protected:
     unsigned int payloadSize;
     unsigned int hopCount;
 
-friend class PacketPredicate;
+friend struct PacketPredicate;
 };
 
 /**
