@@ -35,7 +35,9 @@ typedef unordered_set<const Packet*, PacketHash, PacketPredicate> PacketSet;
 PacketTrap::PacketTrap(RoutingTable* routingTable) {
     this->routingTable = routingTable;
 }
+
 PacketTrap::~PacketTrap() {
+    // delete all packets that might still be trapped
     unordered_map<AddressPtr, PacketSet*>::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
         pair<AddressPtr, PacketSet*> entryPair = *iterator;

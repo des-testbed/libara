@@ -7,7 +7,7 @@ endif
 # makemake-generated makefiles create object files and other
 # build artifacts.
 ifndef CONFIGNAME
-CONFIGNAME = gcc-$(MODE)
+CONFIGNAME = clang-$(MODE)
 endif
 
 ARA_MAJOR_VERSION = 0
@@ -30,5 +30,6 @@ endif
 CFLAGS_DEBUG = -g -Wall
 CFLAGS_RELEASE = -O2 -DNDEBUG=1
 
-CXX = g++
+CXX = clang
 MKPATH = mkdir -p
+

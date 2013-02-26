@@ -25,8 +25,6 @@
 
 #include "Exception.h"
 
-using namespace std;
-
 namespace ARA {
 
 Exception::Exception() {

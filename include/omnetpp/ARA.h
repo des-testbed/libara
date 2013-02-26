@@ -57,6 +57,7 @@ namespace ARA {
                 IInterfaceTable* interfaceTable;
 
                 void initializeNetworkInterfaces();
+                cModule* getHostModule();
                 IInterfaceTable* getInterfaceTable();
                 InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
                 cModule* getSubModule(const char* moduleIdentifier, const char* errorMessage);

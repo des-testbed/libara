@@ -85,3 +85,8 @@ TEST(AddressMockTest, testCloneAddress) {
     CHECK(original.equals(clone));
     delete clone;
 }
+
+TEST(AddressMockTest, toString) {
+    AddressMock address = AddressMock("192.168.0.1");
+    STRCMP_EQUAL("192.168.0.1", address.toString());
+}

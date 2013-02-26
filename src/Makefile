@@ -8,7 +8,7 @@ LIBARA_O = $(subst .cpp,.o, $(addprefix $(LIBARA_OUTPUT_DIR)/, $(LIBARA_SRC)))
 
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11 -fPIC
-INCLUDE_PATH = -I../include -I. -Icore -Iexceptions -Iutil
+INCLUDE_PATH = -I../include
 COPTS = $(CFLAGS) $(INCLUDE_PATH)
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
