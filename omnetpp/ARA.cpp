@@ -50,7 +50,6 @@ namespace ARA {
          */
         void ARA::initialize(int stage) {
             if(stage == 4) {
-                deltaPhi = par("deltaPhi").doubleValue();
                 initialPhi = par("initialPhi").doubleValue();
 
                 interfaceTable = getInterfaceTable();
@@ -59,6 +58,7 @@ namespace ARA {
 				initializeRoutingTable();
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
+                initializePathReinforcementPolicy();
             }
         }
 
@@ -201,6 +201,16 @@ namespace ARA {
             try{
                 cModule *module = this->getSubModule("routingTableStatistics", "ARA: the routing table has to be called routingTableStatistics");
                 this->routingTable = check_and_cast<RoutingTable *>(module);
+            }catch(cRuntimeError &error){
+                throw;
+            }
+        }
+
+        void ARA::initializePathReinforcementPolicy(){
+            try{
+                cModule *module = this->getSubModule("pathReinforcementPolicy", "ARA: the routing table has to be called pathReinforcementPolicy");
+                this->pathReinforcementPolicy = check_and_cast<PathReinforcementPolicy *>(module);
+                this->pathReinforcementPolicy->setRoutingTable(this->routingTable);
             }catch(cRuntimeError &error){
                 throw;
             }

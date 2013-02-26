@@ -55,6 +55,10 @@ module NetworkLayer
            @display("p=210,122");
  	    }
 
+        pathReinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
+
+        }
+
         arp: ARP {
             parameters:
                 proxyARP = false;

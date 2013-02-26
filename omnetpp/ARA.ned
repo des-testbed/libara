@@ -5,7 +5,6 @@ simple ARA {
     
     parameters:
         string forwardingPolicy = default("stochastic");
-        double deltaPhi = default(1);
         double initialPhi;
         int nrOfNetworkInterfaces = default(1);
 

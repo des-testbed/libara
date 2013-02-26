@@ -53,7 +53,6 @@ namespace ARA {
                 /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time
                 EvaporationPolicy* evaporationPolicy;
 
-
                 IInterfaceTable* interfaceTable;
 
                 void initializeNetworkInterfaces();
@@ -65,6 +64,7 @@ namespace ARA {
                 void initializeRoutingTable();
                 void initializeForwardingPolicy();
                 void initializeEvaporationPolicy();
+                void initializePathReinforcementPolicy();
 
                 bool isFromUpperLayer(cMessage* msg);
                 bool isARPMessage(cMessage* msg);
