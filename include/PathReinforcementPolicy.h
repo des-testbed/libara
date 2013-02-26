@@ -23,24 +23,25 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#ifndef REINFORCEMENT_POLICY_H_
-#define REINFORCEMENT_POLICY_H_
+#ifndef PATH_REINFORCEMENT_POLICY_H_
+#define PATH_REINFORCEMENT_POLICY_H_
 
 #include "RoutingTable.h"
 
 namespace ARA {
-    class ReinforcementPolicy {
+    class PathReinforcementPolicy {
          public:
-             ReinforcementPolicy(){};
-             ReinforcementPolicy(RoutingTable* pRoutingTable);
-             ReinforcementPolicy(const ReinforcementPolicy& policy);
-             virtual ~ReinforcementPolicy(){};
+             PathReinforcementPolicy(){};
+             PathReinforcementPolicy(RoutingTable* pRoutingTable);
+             PathReinforcementPolicy(const PathReinforcementPolicy& policy);
+             virtual ~PathReinforcementPolicy(){};
 
              virtual void update(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface) = 0;
+
              void setRoutingTable(RoutingTable* pRoutingTable);
              RoutingTable* getRoutingTable() const;
 
-         private:
+         protected:
              RoutingTable* routingTable;
     };
 }

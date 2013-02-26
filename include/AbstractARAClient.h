@@ -34,6 +34,8 @@
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "ForwardingPolicy.h"
+#include "PathReinforcementPolicy.h"
+#include "LinearPathReinforcementPolicy.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -123,8 +125,6 @@ public:
 
     /// The computes the initial pheromone value of a link
     virtual float initializePheromone(const Packet* packet);
-
-    virtual float increasePheromone(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
@@ -139,6 +139,8 @@ protected:
     std::deque<NetworkInterface*> interfaces;
     RoutingTable *routingTable;
     PacketTrap* packetTrap;
+  
+    PathReinforcementPolicy* pathReinforcementPolicy;
 
     /// The member specifies the initial level 
     double initialPhi;
