@@ -166,7 +166,7 @@ namespace ARA {
             cModule* module = host->getSubmodule(moduleIdentifier);
    
             if(module == NULL){
-                throw cRuntimeError("ARA: the forwarding policy has to be called forwardingPolicy");
+                throw cRuntimeError(errorMessage);
             }
 
             return module;
