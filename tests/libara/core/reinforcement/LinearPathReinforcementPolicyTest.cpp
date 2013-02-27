@@ -53,15 +53,12 @@ TEST(LinearPathReinforcementPolicyTest, testUpate) {
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
-    AddressPtr nextHop (new AddressMock("nextHopA"));
-
-    routingTable.update(destination, nextHopA, &interface, 1.2);
-    routingTable.update(destination, nextHopB, &interface, 2.1);
-    routingTable.update(destination, nextHopC, &interface, 2.3);
+    AddressPtr nextHop (new AddressMock("nextHop"));
+    routingTable.update(destination, nextHop, &interface, 1.2);
     
     LinearPathReinforcementPolicy reinforcementPolicy = LinearPathReinforcementPolicy(&routingTable, 1.2);
-    reinforcementPolicy.update(destination, nextHopA, &interface);
+    reinforcementPolicy.update(destination, nextHop, &interface);
 
-    DOUBLES_EQUAL(routingTable.getPheromoneValue(destination, nextHopA, &interface), 2.4,  0.00001);
+    DOUBLES_EQUAL(routingTable.getPheromoneValue(destination, nextHop, &interface), 2.4,  0.00001);
     delete evaporationPolicy;
 }
