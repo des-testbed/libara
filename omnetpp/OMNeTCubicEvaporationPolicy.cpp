@@ -1,11 +1,16 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "OMNeTCubicEvaporationPolicy.h"
+#include "OMNeTTimeFactory.h"
 
 namespace ARA {
     namespace omnetpp {
         /// The module class needs to be registered with OMNeT++
         Define_Module(OMNeTCubicEvaporationPolicy);
 
-        OMNeTCubicEvaporationPolicy::OMNeTCubicEvaporationPolicy(int plateau, float slow, float reduction, float threshold) : CubicEvaporationPolicy(new OMNeTTime(), new OMNeTTime(), plateau, slow, reduction, threshold){
+        OMNeTCubicEvaporationPolicy::OMNeTCubicEvaporationPolicy(int plateau, float slow, float reduction, float threshold) : CubicEvaporationPolicy(new OMNeTTimeFactory(), plateau, slow, reduction, threshold){
 
         }
 

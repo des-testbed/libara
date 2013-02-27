@@ -25,7 +25,7 @@
 
 #include "CppUTest/TestHarness.h"
 #include "CubicEvaporationPolicy.h"
-#include "testAPI/mocks/TimeMock.h"
+#include "testAPI/mocks/TimeFactoryMock.h"
 
 using namespace ARA;
 
@@ -36,7 +36,7 @@ IGNORE_TEST(CubicEvaporationPolicyTest, testEvaporate) {
     float slow = 0.2;
     float reduction = 0.3;
     float threshold = 0.2;
-    CubicEvaporationPolicy policy = CubicEvaporationPolicy(new TimeMock(), new TimeMock(), plateau, slow, reduction, threshold);
+    CubicEvaporationPolicy policy = CubicEvaporationPolicy(new TimeFactoryMock(), plateau, slow, reduction, threshold);
     // set the interval to 200 millisecond
     policy.setInterval(200);
     // 'trigger the evaporation mechanism

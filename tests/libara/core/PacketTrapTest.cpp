@@ -30,7 +30,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/TimeMock.h"
+#include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <memory>
 #include <deque>
@@ -46,7 +46,7 @@ TEST_GROUP(PacketTrapTest) {
         // FIXME do we really need to setup all this stuff here?
         float threshold = 0.2;
         float q = 0.1;
-        evaporationPolicy = new LinearEvaporationPolicy(new TimeMock(), new TimeMock(), threshold, q);
+        evaporationPolicy = new LinearEvaporationPolicy(new TimeFactoryMock(), threshold, q);
         evaporationPolicy->setInterval(10000);
         routingTable = new RoutingTable();
         routingTable->setEvaporationPolicy(evaporationPolicy);

@@ -4,7 +4,7 @@
 
 using namespace ARA;
 
-LinearEvaporationPolicy::LinearEvaporationPolicy(Time* last, Time* now, float pThreshold, float pQ) : EvaporationPolicy(last, now) {
+LinearEvaporationPolicy::LinearEvaporationPolicy(TimeFactory* timeFactory, float pThreshold, float pQ) : EvaporationPolicy(timeFactory) {
     threshold = pThreshold;
     q = pQ;
 }

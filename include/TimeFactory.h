@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef TIMEFACTORY_H_
 #define TIMEFACTORY_H_
 

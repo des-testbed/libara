@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "EvaporationPolicy.h"
 
 #include <iostream>
@@ -5,15 +9,15 @@
 
 using namespace ARA;
 
-EvaporationPolicy::EvaporationPolicy(Time *last, Time *now) {
+EvaporationPolicy::EvaporationPolicy(TimeFactory* timeFactory) {
     this->factor = 1;
-    this->lastAccessTime = last;
-    this->now = now;
+    this->timeFactory = timeFactory;
+    this->lastAccessTime = timeFactory->makeTime();
     this->interval = 100;
 }
 
 EvaporationPolicy::~EvaporationPolicy(){
-    delete this->now;
+    delete this->timeFactory;
     delete this->lastAccessTime;
 } 
 
@@ -28,25 +32,27 @@ EvaporationPolicy::~EvaporationPolicy(){
  *   false otherwise
  */
 bool EvaporationPolicy::checkForEvaporation(){
-    if(this->lastAccessTime->isInitialized()){
-        /// get the current date
-        now->update();
+    Time* currentTime = timeFactory->makeTime();
+    currentTime->setToCurrentTime();
 
-        long int timeDifference = (*(this->now) - *(this->lastAccessTime)).toMilliseconds();
+    if(this->lastAccessTime->isInitialized()){
+        long int timeDifference = (*(currentTime) - *(this->lastAccessTime)).toMilliseconds();
 
         /// compare the timestamps 
         if(timeDifference >= this->interval){
             /// compute the factor
             this->determineEvaporationFactor(timeDifference);
             /// update the timestamp
-            this->lastAccessTime->update(*(this->now));
+            this->lastAccessTime->update(*(currentTime));
 
+            delete currentTime;
             return true;
         }
     }else{
-       this->lastAccessTime->initialize();
+        this->lastAccessTime->initialize();
     }
 
+    delete currentTime;
     return false;
 }
 

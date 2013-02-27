@@ -66,7 +66,7 @@ TEST(TimeTest, testOperator) {
 TEST(TimeTest, testUpdate) {
     Time time = Time();
     CHECK(time.getTimestamp().tv_sec == 0);
-    time.update();
+    time.setToCurrentTime();
     CHECK(time.getTimestamp().tv_sec != 0);
 
     struct timeval timestamp;

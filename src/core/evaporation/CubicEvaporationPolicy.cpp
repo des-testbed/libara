@@ -2,7 +2,7 @@
 
 using namespace ARA;
 
-CubicEvaporationPolicy::CubicEvaporationPolicy(Time *a, Time *b, int pPlateau, float pSlow, float pReduction, float pThreshold) : EvaporationPolicy(a, b) {
+CubicEvaporationPolicy::CubicEvaporationPolicy(TimeFactory* timeFactory, int pPlateau, float pSlow, float pReduction, float pThreshold) : EvaporationPolicy(timeFactory) {
     this->plateau = pPlateau;
     this->slow = pSlow;
     this->reduction = pReduction;

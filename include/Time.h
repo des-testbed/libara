@@ -83,7 +83,7 @@ namespace ARA {
             virtual bool isInitialized();
 
 
-            virtual void update();
+            virtual void setToCurrentTime();
             virtual void update(Time timestamp);
  
             /**

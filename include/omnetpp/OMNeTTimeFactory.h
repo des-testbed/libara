@@ -2,16 +2,18 @@
  * $FU-Copyright$
  */
 
-#ifndef TIMEFACTORY_MOCK_H_
-#define TIMEFACTORY_MOCK_H_
+#ifndef OMNET_TIMEFACTORY_H_
+#define OMNET_TIMEFACTORY_H_
 
 #include "TimeFactory.h"
 
 namespace ARA {
-    class TimeFactoryMock : public TimeFactory {
+namespace omnetpp {
+
+    class OMNeTTimeFactory : public TimeFactory {
         public:
             Time* makeTime();
     };
 }
-
+}
 #endif

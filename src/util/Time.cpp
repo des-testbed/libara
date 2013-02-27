@@ -133,7 +133,7 @@ bool Time::isInitialized(){
     return (this->timestamp.tv_sec != 0);
 }
 
-void Time::update(){
+void Time::setToCurrentTime(){
     this->initialize();
 }
 
