@@ -1,47 +1,24 @@
-/******************************************************************************
- Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
- All rights reserved.
+/*
+ * $FU-Copyright$
+ */
 
- These sources were originally developed by Friedrich Große, Michael Frey
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
 #include "Time.h"
 #include <iostream>
 
 using namespace ARA;
 
-Time::Time(int seconds, long int microseconds){ 
+Time::Time(){
+    this->timestamp.tv_sec = 0;
+    this->timestamp.tv_usec = 0;
+}
+
+Time::Time(int seconds, long int microseconds){
    this->timestamp.tv_sec = seconds;
    this->timestamp.tv_usec = microseconds;
 }
 
+Time::Time(struct timeval timestamp):timestamp(timestamp){
 
-Time::Time(struct timeval timestamp):timestamp(timestamp){ }
-
-/**
- * The standard constructor initializes the timestamp with the
- * value of zero. 
- */
-Time::Time(){
-    this->timestamp.tv_sec = 0;
-    this->timestamp.tv_usec = 0;
 }
 
 /**
@@ -62,7 +39,7 @@ Time::Time(const Time& other){
 
 Time::~Time(){ }
 
-Time Time::operator-(const Time& right){
+Time Time::subtract(const Time& right) const {
     struct timeval result = this->getTimeDifference(right);    
     return Time(result.tv_sec, result.tv_usec);
 }
@@ -79,7 +56,7 @@ Time Time::operator-(const Time& right){
  * @param result out The data structure which will hold the result of the 
  *   operation
  */
-struct timeval Time::getTimeDifference(const Time& right){
+struct timeval Time::getTimeDifference(const Time& right) const {
     struct timeval result;
 
     struct timeval r;

@@ -24,7 +24,7 @@ Time TimeMock::operator-(const Time& right){
 
     try{
         const TimeMock& r = dynamic_cast<const TimeMock&>(right);
-        result = this->timestamp - r.getTimestamp();
+        result = this->timestamp.subtract(r.getTimestamp());
         //std::cout << "TimeMock::operator-" << result.toSeconds() << " " << result.toMilliseconds() << std::endl;
     }catch(const std::bad_cast& exception){
         std::cerr << exception.what() << std::endl;
@@ -38,7 +38,7 @@ Time TimeMock::operator-(const Time& right){
 Time TimeMock::operator-=(const Time& right){
     try{
         const TimeMock& r = dynamic_cast<const TimeMock&>(right);
-        this->timestamp = this->timestamp - r.getTimestamp();
+        this->timestamp = this->timestamp.subtract(r.getTimestamp());
     }catch(const std::bad_cast& exception){
         std::cerr << exception.what() << std::endl;
         std::cerr << "This object is not of type TimeMock but " << typeid(right).name() << std::endl;

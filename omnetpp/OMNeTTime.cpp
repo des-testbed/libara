@@ -6,21 +6,13 @@
 
 using namespace ARA;
 
-OMNeTTime::OMNeTTime(){
+OMNeTTime::OMNeTTime() {
   this->timestamp = SimTime();
 }
 
 OMNeTTime::OMNeTTime(SimTime timestamp):timestamp(timestamp){}
 
-OMNeTTime::~OMNeTTime(){ }
-
-/**
- * The method provides the subtraction of two timestamps using
- * the '-' operator.
- * 
- * @return A new instance of a OMNeT++ simulation time timestamp (encapsulated in class OMNeTTime)
- */
-OMNeTTime OMNeTTime::operator-(const OMNeTTime& right){
+OMNeTTime OMNeTTime::subtract(const OMNeTTime& right) const {
     SimTime result = (this->getTimestamp() - right.getTimestamp());
     return OMNeTTime(result);
 }

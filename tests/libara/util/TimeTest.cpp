@@ -48,7 +48,7 @@ TEST(TimeTest, testOperator) {
     Time timeA = Time(timestampA); 
     Time timeB = Time(timestampB);
 
-    Time result = timeB - timeA;
+    Time result = timeB.subtract(timeA);
     BYTES_EQUAL(10, result.getSeconds());
     LONGS_EQUAL(10000, result.getMilliSeconds());
 }

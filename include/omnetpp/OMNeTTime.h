@@ -19,9 +19,14 @@ namespace ARA {
         public:
           OMNeTTime();
           OMNeTTime(SimTime timestamp);
-          ~OMNeTTime();
 
-          OMNeTTime operator-(const OMNeTTime& right);
+          /**
+           * The method provides the subtraction of two timestamps using
+           * the '-' operator.
+           *
+           * @return A new instance of a OMNeT++ simulation time timestamp (encapsulated in class OMNeTTime)
+           */
+          OMNeTTime subtract(const OMNeTTime& right) const;
 
           int getSeconds() const;
           long getMilliseconds() const;

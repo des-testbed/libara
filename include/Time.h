@@ -14,7 +14,7 @@ namespace ARA {
      */
     class Time {
         public:
-            Time();
+            Time(); // standard constructor will be removed shortly
             Time(int seconds, long int microsonds);
             Time(struct timeval timestamp);
 
@@ -24,10 +24,10 @@ namespace ARA {
             virtual ~Time();
  
             /**
-             * The operator provides the subtract operation for two timestamps
-             * and stores the result in a new instance of class Time.
-             */ 
-            virtual Time operator-(const Time& right);
+             * Subtracts another time from this time and returns the result
+             * in a new Time instance.
+             */
+            virtual Time subtract(const Time& right) const;
 
             /**
              * The method returns the the timestamp which is encapsulated
@@ -52,7 +52,7 @@ namespace ARA {
             virtual void update(Time timestamp);
 
         private:
-            struct timeval getTimeDifference(const Time& right);
+            struct timeval getTimeDifference(const Time& right) const;
 
             /**
              * The member variable represents the current time using
