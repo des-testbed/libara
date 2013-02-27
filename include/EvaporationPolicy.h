@@ -35,6 +35,8 @@ namespace ARA {
             uint8_t factor;
 
         private:
+            bool tableHasBeenAccessedEarlier();
+
             void determineEvaporationFactor(int timeDifference);
 
             /**

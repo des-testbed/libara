@@ -67,13 +67,6 @@ Time Time::operator-(const Time& right){
     return Time(result.tv_sec, result.tv_usec);
 }
 
-Time Time::operator-=(const Time& right){
-    struct timeval result = this->getTimeDifference(right);    
-    this->timestamp.tv_sec = result.tv_sec;
-    this->timestamp.tv_usec = result.tv_usec;
-    return *(this);
-}
-
 /**
  * The method determines the time difference between two timestamps. Here,
  * the member variable "timestamp" and a operand "time". The result is stored
@@ -129,21 +122,13 @@ struct timeval Time::getTimestamp() const{
   return this->timestamp;
 }
 
-bool Time::isInitialized(){
-    return (this->timestamp.tv_sec != 0);
-}
-
 void Time::setToCurrentTime(){
-    this->initialize();
+    gettimeofday(&this->timestamp, 0);
 }
 
 void Time::update(Time t){
     this->timestamp.tv_sec = t.getTimestamp().tv_sec;
     this->timestamp.tv_usec = t.getTimestamp().tv_usec;
-}
-
-void Time::initialize(){
-    gettimeofday(&this->timestamp, 0);
 }
 
 void Time::setTimestamp(struct timeval timestamp){

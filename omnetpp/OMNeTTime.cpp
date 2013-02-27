@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "OMNeTTime.h"
 
 using namespace ARA;
@@ -19,20 +23,6 @@ OMNeTTime::~OMNeTTime(){ }
 OMNeTTime OMNeTTime::operator-(const OMNeTTime& right){
     SimTime result = (this->getTimestamp() - right.getTimestamp());
     return OMNeTTime(result);
-}
-
-/**
- * The method provides the subtraction of two timestamps using
- * the '-=' operator. In contrast to the '-' operator this operation
- * does not return a new object, but updates the value of the right
- * operand.
- * 
- * @return A OMNeT++ simulation time timestamp (encapsulated in class OMNeTTime)
- */
-OMNeTTime OMNeTTime::operator-=(const OMNeTTime& right){
-    // fixme
-    this->timestamp = this->timestamp - right.getTimestamp();
-    return *this;
 }
 
 /**
@@ -92,25 +82,7 @@ SimTime OMNeTTime::getTimestamp() const{
     return (this->timestamp);
 }
 
-/**
- * The method checks if the timestamp is initialized.
- *
- * @return The method returns true if the timestamp is initialized,
- *   otherwise false.
- */
-bool OMNeTTime::isInitialized(){
-    return (this->timestamp.raw() != 0);
-}
-
-void OMNeTTime::update(){
-    this->initialize();
-}
-
-/**
- * The method initializes the timestamp using the global 
- * simTime() function of the OMNeT++ network simulator
- */
-void OMNeTTime::initialize(){
+void OMNeTTime::setToCurrentTime(){
     /// TODO: check if that's the way to go
     this->timestamp = simTime();
 }

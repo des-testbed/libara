@@ -32,16 +32,6 @@ using namespace ARA;
 
 TEST_GROUP(TimeTest) {};
 
-TEST(TimeTest, testInitialize) {
-    Time time = Time();
-    bool result = time.isInitialized();
-    CHECK(!result);
-    time.initialize();
-    result = time.isInitialized();
-    CHECK(result);
-}
-
-
 /**
  * This unit test tests the operator- and operator-=
  * methods which are overloaded in class Time.
