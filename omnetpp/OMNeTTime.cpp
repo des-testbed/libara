@@ -25,21 +25,11 @@ OMNeTTime OMNeTTime::operator-(const OMNeTTime& right){
     return OMNeTTime(result);
 }
 
-/**
- * The method returns a timestamp in seconds.
- * 
- * @return A timestamp in seconds
- */
-int OMNeTTime::toSeconds(){
+int OMNeTTime::getSeconds() const {
     return this->convertSimulationTime(0);
 }
 
-/**
- * The method returns a timestamp in milliseconds.
- * 
- * @return A timestamp in milliseconds
- */
-long int OMNeTTime::toMilliseconds(){
+long OMNeTTime::getMilliseconds() const {
     return this->convertSimulationTime(-3);
 }
 
@@ -52,7 +42,7 @@ long int OMNeTTime::toMilliseconds(){
  * @return The method returns the (raw) simulation time in the
  *   desired time scale
  */
-int OMNeTTime::convertSimulationTime(int scaleExponent){
+int OMNeTTime::convertSimulationTime(int scaleExponent) const {
     // get the simulation time exponent
     if(this->timestamp.getScaleExp() != scaleExponent){
        /**

@@ -23,18 +23,15 @@ namespace ARA {
 
           OMNeTTime operator-(const OMNeTTime& right);
 
-          ///
-          virtual int toSeconds();
-          ///
-          virtual long int toMilliseconds();
-          ///
+          int getSeconds() const;
+          long getMilliseconds() const;
+
           SimTime getTimestamp() const;
 
           void setToCurrentTime();
 
         private:
-          /// 
-          int convertSimulationTime(int scaleExponent);
+          int convertSimulationTime(int scaleExponent) const;
 
           SimTime timestamp;
     };

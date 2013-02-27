@@ -74,12 +74,12 @@ Time TimeMock::getTimestamp() const{
     return this->timestamp;
 }
 
-int TimeMock::toSeconds(){
-    return this->timestamp.toSeconds();
+int TimeMock::getSeconds(){
+    return this->timestamp.getSeconds();
 }
 
-long int TimeMock::toMilliseconds(){
-    return this->timestamp.toMilliseconds();
+long int TimeMock::getMilliSeconds(){
+    return this->timestamp.getMilliSeconds();
 }
 
 void TimeMock::update(){

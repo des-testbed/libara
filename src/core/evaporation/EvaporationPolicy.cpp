@@ -45,7 +45,7 @@ bool EvaporationPolicy::checkForEvaporation(){
     }
     else {
         Time timeSinceLastAccess = *(currentTime) - *(this->lastAccessTime);
-        long timeDifferenceInMilliSeconds = timeSinceLastAccess.toMilliseconds();
+        long timeDifferenceInMilliSeconds = timeSinceLastAccess.getMilliSeconds();
         delete currentTime;
 
         if(timeDifferenceInMilliSeconds >= interval) {

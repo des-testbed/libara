@@ -33,13 +33,12 @@ namespace ARA {
              * The method returns the the timestamp which is encapsulated
              * by the class in seconds.
              */
-            virtual int toSeconds();
+            virtual int getSeconds() const;
 
             /**
-             * The method returns the the timestamp which is encapsulated
-             * by the class in milliseconds.
+             * Returns the milliseconds part of this time as an integer value
              */
-            virtual long int toMilliseconds();
+            virtual long getMilliSeconds() const;
 
             /**
              * The method returns the timestamp which is encapsulated

@@ -15,8 +15,8 @@ namespace ARA {
             virtual Time operator-(const Time& right);
             virtual Time operator-=(const Time& right);
 
-            virtual int toSeconds();
-            virtual long int toMilliseconds();
+            virtual int getSeconds();
+            virtual long int getMilliSeconds();
 
             virtual void update();
             virtual void update(TimeMock t);

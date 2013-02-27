@@ -105,21 +105,16 @@ struct timeval Time::getTimeDifference(const Time& right){
     return result;
 }
 
-int Time::toSeconds(){
-   return this->timestamp.tv_sec;
+int Time::getSeconds() const {
+   return timestamp.tv_sec;
 }
 
-/**
- * The method returns the timestamp in milliseconds. However, it
- * ignores the tv_usec member of the timeval structure (which represents
- * the rest of the elasped time).
- */
-long int Time::toMilliseconds(){
-   return (this->timestamp.tv_sec * 1000);
+long int Time::getMilliSeconds() const {
+   return timestamp.tv_sec * 1000;
 }
 
-struct timeval Time::getTimestamp() const{
-  return this->timestamp;
+struct timeval Time::getTimestamp() const {
+  return timestamp;
 }
 
 void Time::setToCurrentTime(){

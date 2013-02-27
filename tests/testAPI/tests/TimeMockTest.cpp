@@ -17,8 +17,8 @@ TEST(TimeMockTest, testUsleep) {
     BYTES_EQUAL(0, milliseconds);
     /// test the usleep method
     time.usleep(1000);
-    seconds = time.toSeconds();
+    seconds = time.getSeconds();
     BYTES_EQUAL(1, seconds);
-    milliseconds = time.toMilliseconds();
+    milliseconds = time.getMilliSeconds();
     LONGS_EQUAL(1000, milliseconds);
 }
