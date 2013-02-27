@@ -5,7 +5,9 @@ namespace ARA {
         /// The module class needs to be registered with OMNeT++
         Define_Module(OMNeTLinearEvaporationPolicy);
 
-        OMNeTLinearEvaporationPolicy::OMNeTLinearEvaporationPolicy():LinearEvaporationPolicy(new OMNeTTime(), new OMNeTTime()){}
+        OMNeTLinearEvaporationPolicy::OMNeTLinearEvaporationPolicy(float t, float q) : LinearEvaporationPolicy(new OMNeTTime(), new OMNeTTime(), t, q){
+
+        }
 
         void OMNeTLinearEvaporationPolicy::initialize() {
             /// parse the policy parameter from the NED file

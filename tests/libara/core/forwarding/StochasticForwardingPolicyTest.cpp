@@ -33,6 +33,7 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/TimeMock.h"
 
 #include <iostream>
 
@@ -43,7 +44,9 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(StochasticForwardingPolicyTest) {};
 
 TEST(StochasticForwardingPolicyTest, testGetNextHop) {
-    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    float threshold = 0.2;
+    float q = 0.1;
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy(new TimeMock(), new TimeMock(), threshold, q);
     evaporationPolicy->setInterval(10000);
     // Prepare the test
     RoutingTable routingTable = RoutingTable();

@@ -2,15 +2,12 @@
 
 using namespace ARA;
 
-CubicEvaporationPolicy::CubicEvaporationPolicy():EvaporationPolicy(),plateau(3),slow(0.2),reduction(0.3),threshold(0.2){ }
-
-CubicEvaporationPolicy::CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold)
-:EvaporationPolicy(),plateau(pPlateau),slow(pSlow),reduction(pReduction),threshold(pThreshold){ }
-
-CubicEvaporationPolicy::CubicEvaporationPolicy(Time *a, Time *b)
-:EvaporationPolicy(a, b),plateau(3),slow(0.2),reduction(0.3),threshold(0.2){ }
-
-CubicEvaporationPolicy::~CubicEvaporationPolicy(){ }
+CubicEvaporationPolicy::CubicEvaporationPolicy(Time *a, Time *b, int pPlateau, float pSlow, float pReduction, float pThreshold) : EvaporationPolicy(a, b) {
+    this->plateau = pPlateau;
+    this->slow = pSlow;
+    this->reduction = pReduction;
+    this->threshold = pThreshold;
+}
 
 void CubicEvaporationPolicy::setPlateau(float pPlateau){
     this->plateau = pPlateau;

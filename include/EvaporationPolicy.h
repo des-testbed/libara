@@ -38,7 +38,6 @@ namespace ARA {
     */
     class EvaporationPolicy {
         public:
-            EvaporationPolicy();
             EvaporationPolicy(Time *lastAccessTime, Time *now);
             virtual ~EvaporationPolicy();
 

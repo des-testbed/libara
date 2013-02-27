@@ -26,9 +26,11 @@
 #include "CppUTest/TestHarness.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
+#include "EvaporationPolicy.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/TimeMock.h"
 
 #include <memory>
 #include <deque>
@@ -42,7 +44,9 @@ TEST_GROUP(PacketTrapTest) {
 
     void setup() {
         // FIXME do we really need to setup all this stuff here?
-        evaporationPolicy = new LinearEvaporationPolicy();
+        float threshold = 0.2;
+        float q = 0.1;
+        evaporationPolicy = new LinearEvaporationPolicy(new TimeMock(), new TimeMock(), threshold, q);
         evaporationPolicy->setInterval(10000);
         routingTable = new RoutingTable();
         routingTable->setEvaporationPolicy(evaporationPolicy);

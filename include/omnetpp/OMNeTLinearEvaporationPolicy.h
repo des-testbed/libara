@@ -41,8 +41,15 @@ namespace ARA {
          */
         class OMNeTLinearEvaporationPolicy : public LinearEvaporationPolicy, public cSimpleModule {
             public:
-                OMNeTLinearEvaporationPolicy();
-                ~OMNeTLinearEvaporationPolicy(){};
+
+                /**
+                 * Creates a new instance of OMNeTLinearEvaporationPolicy.
+                 * Please note that the default parameter are chosen arbitrary
+                 * to supply a standard constructor for OMNeT++ Define_Module()
+                 *
+                 * The actual parameters are loaded in the initialize() method!
+                 */
+                OMNeTLinearEvaporationPolicy(float t=0.0, float q=0.0);
 
                 virtual void initialize();
                 virtual void handleMessage(cMessage *msg);

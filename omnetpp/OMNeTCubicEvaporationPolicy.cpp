@@ -5,7 +5,9 @@ namespace ARA {
         /// The module class needs to be registered with OMNeT++
         Define_Module(OMNeTCubicEvaporationPolicy);
 
-        OMNeTCubicEvaporationPolicy::OMNeTCubicEvaporationPolicy():CubicEvaporationPolicy(new OMNeTTime(), new OMNeTTime()){}
+        OMNeTCubicEvaporationPolicy::OMNeTCubicEvaporationPolicy(int plateau, float slow, float reduction, float threshold) : CubicEvaporationPolicy(new OMNeTTime(), new OMNeTTime(), plateau, slow, reduction, threshold){
+
+        }
 
         void OMNeTCubicEvaporationPolicy::initialize() {
             /// read the member variables from the ned file

@@ -41,8 +41,15 @@ namespace ARA {
          */
         class OMNeTCubicEvaporationPolicy : public CubicEvaporationPolicy, public cSimpleModule {
             public:
-                OMNeTCubicEvaporationPolicy();
-                ~OMNeTCubicEvaporationPolicy(){};
+
+                /**
+                 * Creates a new instance of OMNeTCubicEvaporationPolicy.
+                 * Please note that the default parameter are chosen arbitrary
+                 * to supply a standard constructor for OMNeT++ Define_Module()
+                 *
+                 * The actual parameters are loaded in the initialize() method!
+                 */
+                OMNeTCubicEvaporationPolicy(int plateau=0.0, float slow=0.0, float reduction=0.0, float threshold=0.0);
 
                 virtual void initialize();
                 virtual void handleMessage(cMessage *msg);

@@ -4,11 +4,10 @@
 
 using namespace ARA;
 
-LinearEvaporationPolicy::LinearEvaporationPolicy():EvaporationPolicy(),threshold(0.2),q(0.1){}
-
-LinearEvaporationPolicy::LinearEvaporationPolicy(Time *last, Time *now):EvaporationPolicy(last, now), threshold(0.2), q(0.1){}
-
-LinearEvaporationPolicy::LinearEvaporationPolicy(float pThreshold, float pQ):EvaporationPolicy(),threshold(pThreshold),q(pQ){}
+LinearEvaporationPolicy::LinearEvaporationPolicy(Time* last, Time* now, float pThreshold, float pQ) : EvaporationPolicy(last, now) {
+    threshold = pThreshold;
+    q = pQ;
+}
 
 /**
  * The methods provides the linear evaporation of pheromones as proposed

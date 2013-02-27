@@ -5,12 +5,12 @@
 
 using namespace ARA;
 
-EvaporationPolicy::EvaporationPolicy():factor(1),interval(100){ 
-    this->lastAccessTime = new Time();
-    this->now = new Time();
+EvaporationPolicy::EvaporationPolicy(Time *last, Time *now) {
+    this->factor = 1;
+    this->lastAccessTime = last;
+    this->now = now;
+    this->interval = 100;
 }
-
-EvaporationPolicy::EvaporationPolicy(Time *last, Time *now):factor(1),lastAccessTime(last),now(now),interval(100){}
 
 EvaporationPolicy::~EvaporationPolicy(){
     delete this->now;

@@ -23,18 +23,20 @@
  http://www.des-testbed.net/
  *******************************************************************************/
 
-#include <iostream>
-#include <unistd.h>
 #include "CppUTest/TestHarness.h"
-
-#include "CubicEvaporationPolicy.h" 
+#include "CubicEvaporationPolicy.h"
+#include "testAPI/mocks/TimeMock.h"
 
 using namespace ARA;
 
 TEST_GROUP(CubicEvaporationPolicyTest) {};
 
 IGNORE_TEST(CubicEvaporationPolicyTest, testEvaporate) {
-    CubicEvaporationPolicy policy = CubicEvaporationPolicy();
+    float plateau = 3;
+    float slow = 0.2;
+    float reduction = 0.3;
+    float threshold = 0.2;
+    CubicEvaporationPolicy policy = CubicEvaporationPolicy(new TimeMock(), new TimeMock(), plateau, slow, reduction, threshold);
     // set the interval to 200 millisecond
     policy.setInterval(200);
     // 'trigger the evaporation mechanism
