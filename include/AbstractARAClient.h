@@ -34,6 +34,8 @@
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "ForwardingPolicy.h"
+#include "PathReinforcementPolicy.h"
+#include "LinearPathReinforcementPolicy.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -55,7 +57,8 @@ public:
     /**
      * This method is called each a time a new packet is received over the
      * given interface.
-     * It's is responsible for updating the routing table so a route to the
+     *
+     * It is responsible for updating the routing table so a route to the
      * packets source is known in the future.
      *
      * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_ERROR).
@@ -122,7 +125,6 @@ public:
 
     /// The computes the initial pheromone value of a link
     virtual float initializePheromone(const Packet* packet);
-
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
@@ -131,9 +133,14 @@ public:
 
 protected:
 
+    /// The member denotes the constant which is used in the pheromone reinforcement of a path
+    double deltaPhi;
+
     std::deque<NetworkInterface*> interfaces;
     RoutingTable *routingTable;
     PacketTrap* packetTrap;
+  
+    PathReinforcementPolicy* pathReinforcementPolicy;
 
     /// The member specifies the initial level 
     double initialPhi;

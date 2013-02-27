@@ -50,7 +50,6 @@ namespace ARA {
          */
         void ARA::initialize(int stage) {
             if(stage == 4) {
-                deltaPhi = par("deltaPhi").doubleValue();
                 initialPhi = par("initialPhi").doubleValue();
 
                 interfaceTable = getInterfaceTable();
@@ -59,6 +58,7 @@ namespace ARA {
 				initializeRoutingTable();
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
+                initializePathReinforcementPolicy();
             }
         }
 
@@ -166,39 +166,54 @@ namespace ARA {
             return forwardingPolicy;
         }
 
-        void ARA::initializeForwardingPolicy(){
+        cModule* ARA::getSubModule(const char* moduleIdentifier, const char* errorMessage){
             cModule* host = getParentModule();
-            cModule* module = host->getSubmodule("forwardingPolicy");
-
+            cModule* module = host->getSubmodule(moduleIdentifier);
+   
             if(module == NULL){
-                throw cRuntimeError("ARA: the forwarding policy has to be called forwardingPolicy");
+                throw cRuntimeError(errorMessage);
             }
 
-            this->forwardingPolicy = check_and_cast<ForwardingPolicy *>(module);
-            this->forwardingPolicy->setRoutingTable(this->routingTable);
+            return module;
+        }
+
+        void ARA::initializeForwardingPolicy(){
+            try{
+                cModule *module = this->getSubModule("forwardingPolicy", "ARA: the forwarding policy has to be called forwardingPolicy");
+                this->forwardingPolicy = check_and_cast<ForwardingPolicy *>(module);
+                this->forwardingPolicy->setRoutingTable(this->routingTable);
+            }catch(cRuntimeError &error){
+                throw;
+            }
         }
 
         void ARA::initializeEvaporationPolicy(){
-            cModule* host = getParentModule();
-            cModule* module = host->getSubmodule("evaporationPolicy");
-
-            if(module == NULL){
-                throw cRuntimeError("ARA: the evaporation policy has to be called evaporationPolicy");
+            try{
+                cModule *module = this->getSubModule("evaporationPolicy", "ARA: the evaporation policy has to be called evaporationPolicy");
+                this->evaporationPolicy = check_and_cast<EvaporationPolicy *>(module);
+                setEvaporationPolicy(this->evaporationPolicy);
+            }catch(cRuntimeError &error){
+                throw;
             }
-
-            this->evaporationPolicy = check_and_cast<EvaporationPolicy *>(module);
-            setEvaporationPolicy(this->evaporationPolicy);
         }
 
         void ARA::initializeRoutingTable(){
-            cModule* host = getParentModule();
-            cModule* module = host->getSubmodule("visRoutingTable");
-
-            if(module == NULL){
-                throw cRuntimeError("ARA: the routing table has to be called visRoutingTable");
+            try{
+                cModule *module = this->getSubModule("routingTableStatistics", "ARA: the routing table has to be called routingTableStatistics");
+                this->routingTable = check_and_cast<RoutingTable *>(module);
+            }catch(cRuntimeError &error){
+                throw;
             }
+        }
 
-            this->routingTable = check_and_cast<RoutingTable *>(module);
+        void ARA::initializePathReinforcementPolicy(){
+            try{
+                cModule *module = this->getSubModule("pathReinforcementPolicy", "ARA: the routing table has to be called pathReinforcementPolicy");
+                this->pathReinforcementPolicy = check_and_cast<PathReinforcementPolicy *>(module);
+                this->pathReinforcementPolicy->setRoutingTable(this->routingTable);
+            }catch(cRuntimeError &error){
+                throw;
+            }
         }
 
 

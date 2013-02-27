@@ -53,19 +53,18 @@ namespace ARA {
                 /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time
                 EvaporationPolicy* evaporationPolicy;
 
-                /// The member denotes the constant which is used in the pheromone reinforcement of a path
-                double deltaPhi;
-
                 IInterfaceTable* interfaceTable;
 
                 void initializeNetworkInterfaces();
                 cModule* getHostModule();
                 IInterfaceTable* getInterfaceTable();
                 InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
+                cModule* getSubModule(const char* moduleIdentifier, const char* errorMessage);
 
                 void initializeRoutingTable();
                 void initializeForwardingPolicy();
                 void initializeEvaporationPolicy();
+                void initializePathReinforcementPolicy();
 
                 bool isFromUpperLayer(cMessage* msg);
                 bool isARPMessage(cMessage* msg);

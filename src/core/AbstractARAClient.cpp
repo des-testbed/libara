@@ -37,6 +37,8 @@ AbstractARAClient::AbstractARAClient() {
     packetTrap = new PacketTrap(routingTable);
     /// set it to a 'random' initial value
     this->initialPhi = 1.0;
+    this->deltaPhi = 2.0;
+    this->pathReinforcementPolicy = new LinearPathReinforcementPolicy(this->routingTable, deltaPhi);
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -58,6 +60,7 @@ AbstractARAClient::~AbstractARAClient() {
     lastReceivedPackets.clear();
 
     delete routingTable;
+    delete pathReinforcementPolicy;
 }
 
 void AbstractARAClient::setLogger(Logger* logger) {
@@ -131,6 +134,9 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
         Packet* newPacket = packet->clone();
         newPacket->setSender(interface->getLocalAddress());
         newPacket->increaseHopCount();
+
+        pathReinforcementPolicy->update(packet->getDestination(), nextHop->getAddress(), interface);
+
         interface->send(newPacket, nextHop->getAddress());
         delete newPacket;
     }else{
