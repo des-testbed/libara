@@ -36,11 +36,14 @@
 namespace ARA {
 namespace omnetpp {
 
+//TODO write some more documentation for this class
     class OMNeTGate: public ARA::NetworkInterface {
     public:
-        OMNeTGate(cSimpleModule* module, cGate* gate, InterfaceEntry* interfaceEntry);
+        OMNeTGate(cSimpleModule* module, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay);
 
         void send(const Packet* packet, std::shared_ptr<Address> recipient);
+        void send(const Packet* packet, std::shared_ptr<Address> recipient, double sendDelay);
+
         void broadcast(const Packet* packet);
         bool equals(NetworkInterface* interface);
         std::shared_ptr<Address> getLocalAddress();
@@ -55,6 +58,19 @@ namespace omnetpp {
         std::shared_ptr<Address> localAddress;
         std::shared_ptr<Address> broadcastAddress;
         int interfaceID;
+
+        /**
+         * The delay in seconds that is added to broadcast operations to
+         * prevent packet collision by perfect synchronization in the simulation
+         */
+        double broadCastDelay;
+
+        /**
+         * The delay in seconds that is added to unicast messaged.
+         * It is used to model processing time and prevents perfect
+         * event synchronization which would lead to packet collisions
+         */
+        double uniCastDelay;
     };
 
 } /* namespace ARA */

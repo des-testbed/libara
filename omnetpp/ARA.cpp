@@ -79,6 +79,9 @@ namespace ARA {
         }
 
         void ARA::initializeNetworkInterfaces() {
+            double broadCastDelay = par("broadCastDelay").doubleValue();
+            double uniCastDelay = par("uniCastDelay").doubleValue();
+
             ASSERT(interfaceTable);
             cGate* gateToARP = gate("arpOut");
 
@@ -86,7 +89,7 @@ namespace ARA {
             for (int i=0; i < nrOfInterfaces; i++)         {
                 InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
                 if (interfaceEntry->isLoopback() == false) {
-                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry));
+                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay));
                 }
             }
         }

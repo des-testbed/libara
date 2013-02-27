@@ -39,9 +39,11 @@ namespace omnetpp {
 
 typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
 
-OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gateToARP, InterfaceEntry* interfaceEntry) {
+OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) {
     this->module = module;
     this->gateToARP = gateToARP;
+    this->broadCastDelay = broadCastDelay;
+    this->uniCastDelay = uniCastDelay;
 
     IPAddress localAddress = IPAddressResolver().getAddressFrom(interfaceEntry, IPAddressResolver::ADDR_IPv4).get4();
     IPAddress netmask = interfaceEntry->ipv4Data()->getNetmask();
@@ -54,6 +56,10 @@ OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gateToARP, InterfaceEntry* in
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
+    send(packet, recipient, uniCastDelay);
+}
+
+void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
     OMNeTPacket* omnetPacket = (OMNeTPacket*) packet->clone();
     OMNeTAddressPtr nextHopAddress = getNextHopAddress(recipient);
 
@@ -62,7 +68,7 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
     controlInfo->setInterfaceId(interfaceID);
     omnetPacket->setControlInfo(controlInfo);
 
-    module->send(omnetPacket, gateToARP);
+    module->sendDelayed(omnetPacket, sendDelay, gateToARP);
 }
 
 OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
@@ -74,7 +80,7 @@ OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
-    send(packet, broadcastAddress);
+    send(packet, broadcastAddress, broadCastDelay);
 }
 
 bool OMNeTGate::equals(NetworkInterface* otherInterface) {
