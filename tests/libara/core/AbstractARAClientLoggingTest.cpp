@@ -88,7 +88,6 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
     client->receivePacket(&packet, interface);
 
     // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
     CHECK(hasLoggedMessage("BANT 123 came back from destination. 1 trapped packet can now be delivered", Logger::LEVEL_DEBUG));
 }
 
@@ -100,4 +99,20 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
     // check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
     CHECK(hasLoggedMessage("Broadcasting FANT 123 from source", Logger::LEVEL_TRACE));
+}
+
+TEST(AbstractARAClientLoggerTest, sendsLogMessageIfDataPacketIsRelayed) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("192.168.0.2");
+    PacketMock dataPacket = PacketMock("192.168.0.1", "192.168.0.10", 123, 4, PacketType::DATA);
+
+    // create a route for this packet
+    AddressPtr nextHop (new AddressMock("192.168.0.3"));
+    routingTable->update(dataPacket.getDestination(), nextHop, interface, 10);
+
+    CHECK(routingTable->isDeliverable(&dataPacket));
+    client->receivePacket(&dataPacket, interface);
+
+    // check that the log message is generated
+    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
+    CHECK(hasLoggedMessage("Forwarding DATA packet 123 from 192.168.0.1 to 192.168.0.10 via 192.168.0.3", Logger::LEVEL_TRACE));
 }

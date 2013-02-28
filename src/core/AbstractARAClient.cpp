@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "AbstractARAClient.h"
 #include "PacketType.h"
@@ -132,17 +111,17 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
     if(routingTable->isDeliverable(packet)) {
         NextHop* nextHop = getNextHop(packet);
         NetworkInterface* interface = nextHop->getInterface();
+        AddressPtr nextHopAddress = nextHop->getAddress();
         Packet* newPacket = packet->clone();
         newPacket->setSender(interface->getLocalAddress());
         newPacket->increaseHopCount();
 
-        pathReinforcementPolicy->update(packet->getDestination(), nextHop->getAddress(), interface);
-
+        logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSenderString(), packet->getDestinationString(), nextHopAddress->toString());
+        pathReinforcementPolicy->update(packet->getDestination(), nextHopAddress, interface);
         interface->send(newPacket, nextHop->getAddress());
         delete newPacket;
-    }else{
-        logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase",
-                packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
+    } else {
+        logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
