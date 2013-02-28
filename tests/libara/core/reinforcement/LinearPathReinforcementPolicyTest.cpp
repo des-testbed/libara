@@ -34,6 +34,7 @@
 #include "Exception.h" 
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <iostream>
 #include <memory>
@@ -46,7 +47,9 @@ TEST_GROUP(LinearPathReinforcementPolicyTest) {};
 
 TEST(LinearPathReinforcementPolicyTest, testUpate) {
     /// routing table and evaporation policy setup
-    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
+    float threshold = 0.2;
+    float q = 0.1;
+    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy(new TimeFactoryMock(), threshold, q);
     evaporationPolicy->setInterval(10000);
     RoutingTable routingTable = RoutingTable();
     routingTable.setEvaporationPolicy(evaporationPolicy);

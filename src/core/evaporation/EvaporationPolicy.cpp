@@ -1,21 +1,29 @@
-#include "EvaporationPolicy.h"
+/*
+ * $FU-Copyright$
+ */
 
-#include <iostream>
-#include <typeinfo> 
+#include "EvaporationPolicy.h"
 
 using namespace ARA;
 
-EvaporationPolicy::EvaporationPolicy():factor(1),interval(100){ 
-    this->lastAccessTime = new Time();
-    this->now = new Time();
+EvaporationPolicy::EvaporationPolicy(TimeFactory* timeFactory) {
+    this->interval = 100;
+    this->factor = 1;
+    this->timeFactory = timeFactory;
+    this->lastAccessTime = nullptr;
 }
 
-EvaporationPolicy::EvaporationPolicy(Time *last, Time *now):factor(1),lastAccessTime(last),now(now),interval(100){}
-
 EvaporationPolicy::~EvaporationPolicy(){
-    delete this->now;
-    delete this->lastAccessTime;
+    delete this->timeFactory;
+
+    if(tableHasBeenAccessedEarlier()) {
+        delete lastAccessTime;
+    }
 } 
+
+bool EvaporationPolicy::tableHasBeenAccessedEarlier() {
+    return lastAccessTime != nullptr;
+}
 
 /**
  * The method checks if a given threshold is passed time-wise. If it is so, 
@@ -24,30 +32,32 @@ EvaporationPolicy::~EvaporationPolicy(){
  * every second and if 30 seconds have passed since the last access to the routing
  * table, the evaporation method has to be called 30 times. 
  *
- * @return The method returns true if the evaporation method should be trigged, 
+ * @return The method returns true if the evaporation method should be triggered,
  *   false otherwise
  */
 bool EvaporationPolicy::checkForEvaporation(){
-    if(this->lastAccessTime->isInitialized()){
-        /// get the current date
-        now->update();
+    Time* currentTime = timeFactory->makeTime();
+    currentTime->setToCurrentTime();
 
-        long int timeDifference = (*(this->now) - *(this->lastAccessTime)).toMilliseconds();
+    if (tableHasBeenAccessedEarlier() == false) {
+        lastAccessTime = currentTime;
+        return false;
+    }
+    else {
+        Time* timeSinceLastAccess = currentTime->subtract(this->lastAccessTime);
+        long timeDifferenceInMilliSeconds = timeSinceLastAccess->getMilliSeconds();
+        delete currentTime;
+        delete timeSinceLastAccess;
 
-        /// compare the timestamps 
-        if(timeDifference >= this->interval){
-            /// compute the factor
-            this->determineEvaporationFactor(timeDifference);
-            /// update the timestamp
-            this->lastAccessTime->update(*(this->now));
-
+        if(timeDifferenceInMilliSeconds >= interval) {
+            this->determineEvaporationFactor(timeDifferenceInMilliSeconds);
+            this->lastAccessTime->setToCurrentTime();
             return true;
         }
-    }else{
-       this->lastAccessTime->initialize();
+        else {
+            return false;
+        }
     }
-
-    return false;
 }
 
 /** 

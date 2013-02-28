@@ -33,6 +33,7 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
 
 #include <iostream>
 #include <memory>
@@ -44,8 +45,7 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(BestPheromoneForwardingPolicyTest) {};
 
 TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
-    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
-    evaporationPolicy->setInterval(10000);
+    EvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicyMock();
     RoutingTable routingTable = RoutingTable();
     routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destination (new AddressMock("Destination"));

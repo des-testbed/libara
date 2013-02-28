@@ -7,27 +7,18 @@ namespace ARA {
     class TimeMock : public Time {
         public:
             TimeMock();
-            TimeMock(Time time);
-            TimeMock(const TimeMock& other);
+            TimeMock(long seconds, long int milliseconds);
 
-            void usleep(int seconds);
+            virtual void setToCurrentTime();
+            virtual Time* subtract(const Time* right) const;
+            virtual long getSeconds() const;
+            virtual long getMilliSeconds() const;
 
-            virtual Time operator-(const Time& right);
-            virtual Time operator-=(const Time& right);
-
-            virtual int toSeconds();
-            virtual long int toMilliseconds();
-
-            virtual void update();
-            virtual void update(TimeMock t);
-
-            virtual bool isInitialized();
-            virtual void initialize();
-            
-            virtual Time getTimestamp() const;
+            void letTimePass(long milliSeconds);
 
         private:
-            Time timestamp;
+            long seconds;
+            long milliseconds;
     };
 }
 

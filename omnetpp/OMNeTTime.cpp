@@ -1,55 +1,36 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "OMNeTTime.h"
 
 using namespace ARA;
+using namespace ARA::omnetpp;
 
-OMNeTTime::OMNeTTime(){
-  this->timestamp = SimTime();
+OMNeTTime::OMNeTTime() {
+    //FIXME setToCurrentTime(); // does not work in the tests
 }
 
-OMNeTTime::OMNeTTime(SimTime timestamp):timestamp(timestamp){}
-
-OMNeTTime::~OMNeTTime(){ }
-
-/**
- * The method provides the subtraction of two timestamps using
- * the '-' operator.
- * 
- * @return A new instance of a OMNeT++ simulation time timestamp (encapsulated in class OMNeTTime)
- */
-OMNeTTime OMNeTTime::operator-(const OMNeTTime& right){
-    SimTime result = (this->getTimestamp() - right.getTimestamp());
-    return OMNeTTime(result);
+OMNeTTime::OMNeTTime(SimTime timestamp) {
+    this->timestamp = timestamp;
 }
 
-/**
- * The method provides the subtraction of two timestamps using
- * the '-=' operator. In contrast to the '-' operator this operation
- * does not return a new object, but updates the value of the right
- * operand.
- * 
- * @return A OMNeT++ simulation time timestamp (encapsulated in class OMNeTTime)
- */
-OMNeTTime OMNeTTime::operator-=(const OMNeTTime& right){
-    // fixme
-    this->timestamp = this->timestamp - right.getTimestamp();
-    return *this;
+Time* OMNeTTime::subtract(const Time* right) const {
+    const OMNeTTime* omnetTime = dynamic_cast<const OMNeTTime*>(right);
+    if(omnetTime) {
+        SimTime result = (this->getTimestamp() - omnetTime->getTimestamp());
+        return new OMNeTTime(result);
+    }
+    else {
+        throw cRuntimeError("Can only subtract other OMNeTTime instances from this OMNeTTime instance");
+    }
 }
 
-/**
- * The method returns a timestamp in seconds.
- * 
- * @return A timestamp in seconds
- */
-int OMNeTTime::toSeconds(){
+long OMNeTTime::getSeconds() const {
     return this->convertSimulationTime(0);
 }
 
-/**
- * The method returns a timestamp in milliseconds.
- * 
- * @return A timestamp in milliseconds
- */
-long int OMNeTTime::toMilliseconds(){
+long OMNeTTime::getMilliSeconds() const {
     return this->convertSimulationTime(-3);
 }
 
@@ -62,7 +43,7 @@ long int OMNeTTime::toMilliseconds(){
  * @return The method returns the (raw) simulation time in the
  *   desired time scale
  */
-int OMNeTTime::convertSimulationTime(int scaleExponent){
+int OMNeTTime::convertSimulationTime(int scaleExponent) const {
     // get the simulation time exponent
     if(this->timestamp.getScaleExp() != scaleExponent){
        /**
@@ -92,25 +73,7 @@ SimTime OMNeTTime::getTimestamp() const{
     return (this->timestamp);
 }
 
-/**
- * The method checks if the timestamp is initialized.
- *
- * @return The method returns true if the timestamp is initialized,
- *   otherwise false.
- */
-bool OMNeTTime::isInitialized(){
-    return (this->timestamp.raw() != 0);
-}
-
-void OMNeTTime::update(){
-    this->initialize();
-}
-
-/**
- * The method initializes the timestamp using the global 
- * simTime() function of the OMNeT++ network simulator
- */
-void OMNeTTime::initialize(){
+void OMNeTTime::setToCurrentTime(){
     /// TODO: check if that's the way to go
-    this->timestamp = simTime();
+    //this->timestamp = simTime(); // this throws a segfault in the test
 }

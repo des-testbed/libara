@@ -30,8 +30,8 @@
 #include <cstdlib>
 #include <stdint.h>
 
-#include "Time.h"
 #include "EvaporationPolicy.h"
+#include "TimeFactory.h"
 
 namespace ARA { 
    /**
@@ -39,10 +39,8 @@ namespace ARA {
     */
     class CubicEvaporationPolicy : public EvaporationPolicy {
         public:
-            CubicEvaporationPolicy();
-            CubicEvaporationPolicy(Time* a, Time *b);
-            CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold);
-            ~CubicEvaporationPolicy();
+            CubicEvaporationPolicy(TimeFactory* timeFactory, int pPlateau, float pSlow, float pReduction, float pThreshold);
+
             /// the method reduces the pheromone value of a routing table entry
             float evaporate(float phi);
 

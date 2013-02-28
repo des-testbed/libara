@@ -31,8 +31,8 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-#include "Time.h"
 #include "EvaporationPolicy.h"
+#include "TimeFactory.h"
 
 namespace ARA { 
    /**
@@ -40,10 +40,7 @@ namespace ARA {
     */
     class LinearEvaporationPolicy : public EvaporationPolicy {
         public:
-            LinearEvaporationPolicy();
-            LinearEvaporationPolicy(Time *last, Time *now);
-            LinearEvaporationPolicy(float t, float q);
-            ~LinearEvaporationPolicy(){};
+            LinearEvaporationPolicy(TimeFactory* timeFactory, float t, float q);
 
             /// the method reduces the pheromone value of a routing table entry
             float evaporate(float phi);

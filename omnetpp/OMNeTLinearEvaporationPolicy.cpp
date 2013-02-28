@@ -1,11 +1,18 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "OMNeTLinearEvaporationPolicy.h"
+#include "OMNeTTimeFactory.h"
 
 namespace ARA {
     namespace omnetpp {
         /// The module class needs to be registered with OMNeT++
         Define_Module(OMNeTLinearEvaporationPolicy);
 
-        OMNeTLinearEvaporationPolicy::OMNeTLinearEvaporationPolicy():LinearEvaporationPolicy(new OMNeTTime(), new OMNeTTime()){}
+        OMNeTLinearEvaporationPolicy::OMNeTLinearEvaporationPolicy(float t, float q) : LinearEvaporationPolicy(new OMNeTTimeFactory(), t, q){
+
+        }
 
         void OMNeTLinearEvaporationPolicy::initialize() {
             /// parse the policy parameter from the NED file
