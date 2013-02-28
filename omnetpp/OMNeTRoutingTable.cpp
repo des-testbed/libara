@@ -7,7 +7,7 @@ namespace ARA {
         //OMNeTRoutingTable::
 //        OMNeTRoutingTable::
         
-        OMNeTRoutingTable::OMNeTRoutingTable(const OMNeTRoutingTable& other){
+        OMNeTRoutingTable::OMNeTRoutingTable(const OMNeTRoutingTable& other)  : RoutingTable(new OMNeTTimeFactory()) {
             // FIXME
             setRoutingTable(other.getRoutingTable());
             setEvaporationPolicy(other.getEvaporationPolicy());

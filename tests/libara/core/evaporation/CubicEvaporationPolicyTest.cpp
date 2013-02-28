@@ -25,7 +25,6 @@
 
 #include "CppUTest/TestHarness.h"
 #include "CubicEvaporationPolicy.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
 
 using namespace ARA;
 
@@ -36,17 +35,12 @@ IGNORE_TEST(CubicEvaporationPolicyTest, testEvaporate) {
     float slow = 0.2;
     float reduction = 0.3;
     float threshold = 0.2;
-    CubicEvaporationPolicy policy = CubicEvaporationPolicy(new TimeFactoryMock(), plateau, slow, reduction, threshold);
-    // set the interval to 200 millisecond
-    policy.setInterval(200);
-    // 'trigger the evaporation mechanism
-    bool status = policy.checkForEvaporation();
-    // the 'last access time' has not been intialized
-    CHECK(!status);
-    // initialize the pheromone value
+    unsigned int timeInterval = 200;
+    CubicEvaporationPolicy policy = CubicEvaporationPolicy(plateau, slow, reduction, threshold, timeInterval);
+
     float pheromone = 1.;
-    // simply test the evaporate function
-    pheromone = policy.evaporate(pheromone);
+
+    pheromone = policy.evaporate(pheromone, timeInterval);
     DOUBLES_EQUAL(0.9, pheromone, 0.00001);
 /*
     /// sleep for 10 ms
@@ -72,3 +66,16 @@ IGNORE_TEST(CubicEvaporationPolicyTest, testEvaporate) {
 */
 }
 
+TEST(CubicEvaporationPolicyTest, evaporateWithZeroTimeInterval) {
+    float plateau = 3;
+    float slow = 0.2;
+    float reduction = 0.3;
+    float threshold = 0.2;
+    unsigned int timeInterval = 200;
+    CubicEvaporationPolicy policy = CubicEvaporationPolicy(plateau, slow, reduction, threshold, timeInterval);
+
+    float pheromone = 10;
+
+    pheromone = policy.evaporate(pheromone, 0);
+    DOUBLES_EQUAL(10, pheromone, 0.00001);
+}

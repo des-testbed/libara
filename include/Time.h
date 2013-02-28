@@ -29,21 +29,10 @@ namespace ARA {
 
             /**
              * Subtracts another time from this time and returns the result
-             * in a new Time instance which will have to be deleted by the
-             * invoking object.
+             * as numerical value in milliseconds.
              */
-            virtual Time* subtract(const Time* right) const = 0;
+            virtual long getDifferenceInMilliSeconds(const Time* right) const = 0;
 
-            /**
-             * The method returns the the timestamp which is encapsulated
-             * by the class in seconds.
-             */
-            virtual long getSeconds() const = 0;
-
-            /**
-             * Returns the milliseconds part of this time as an integer value
-             */
-            virtual long getMilliSeconds() const = 0;
     };
 }
 

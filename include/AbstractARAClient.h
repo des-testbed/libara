@@ -31,11 +31,11 @@
 #include "NextHop.h"
 #include "NetworkInterface.h"
 #include "PacketTrap.h"
+#include "TimeFactory.h"
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "ForwardingPolicy.h"
 #include "PathReinforcementPolicy.h"
-#include "LinearPathReinforcementPolicy.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -51,7 +51,7 @@ namespace ARA {
 
 class AbstractARAClient {
 public:
-    AbstractARAClient();
+    AbstractARAClient(TimeFactory* timeFactory);
     virtual ~AbstractARAClient();
 
     /**

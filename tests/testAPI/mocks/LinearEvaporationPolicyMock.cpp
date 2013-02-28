@@ -3,13 +3,8 @@
 
 using namespace ARA;
 
-LinearEvaporationPolicyMock::LinearEvaporationPolicyMock(float evaporationFactor, long intervallInMilliSeconds) : EvaporationPolicy(new TimeFactoryMock()) {
-    this->evaporationFactor = evaporationFactor;
-    setInterval(intervallInMilliSeconds);
-}
-
-float LinearEvaporationPolicyMock::evaporate(float phi) {
-    return evaporationFactor;
+LinearEvaporationPolicyMock::LinearEvaporationPolicyMock(float evaporationFactor, float threshold, int intervalInMilliSeconds) : LinearEvaporationPolicy(evaporationFactor, threshold, intervalInMilliSeconds) {
+    // nothing to do here
 }
 
 float LinearEvaporationPolicyMock::getEvaporationFactor() const {

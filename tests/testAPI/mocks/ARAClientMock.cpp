@@ -26,17 +26,17 @@
 #include "ARAClientMock.h"
 #include "RoutingTableEntry.h"
 #include "BestPheromoneForwardingPolicy.h"
+#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
 #include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <sstream>
 
 namespace ARA {
 
-ARAClientMock::ARAClientMock() {
+ARAClientMock::ARAClientMock() : AbstractARAClient(new TimeFactoryMock()) {
     forwardingPolicy = new BestPheromoneForwardingPolicy();
     forwardingPolicy->setRoutingTable(routingTable);
-    EvaporationPolicy* policy = new LinearEvaporationPolicy(new TimeFactoryMock(), 0.2, 0.3);
-    setEvaporationPolicy(policy);
+    setEvaporationPolicy(new LinearEvaporationPolicyMock());
 }
 
 void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){

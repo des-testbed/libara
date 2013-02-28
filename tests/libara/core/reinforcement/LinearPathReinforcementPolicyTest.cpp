@@ -34,6 +34,7 @@
 #include "Exception.h" 
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
 #include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <iostream>
@@ -45,18 +46,17 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(LinearPathReinforcementPolicyTest) {};
 
-TEST(LinearPathReinforcementPolicyTest, testUpate) {
+TEST(LinearPathReinforcementPolicyTest, pathReinforcementViaRoutingTableUpdate) {
     /// routing table and evaporation policy setup
-    float threshold = 0.2;
-    float q = 0.1;
-    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy(new TimeFactoryMock(), threshold, q);
-    evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable();
+    EvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicyMock();
+    RoutingTable routingTable = RoutingTable(new TimeFactoryMock());
     routingTable.setEvaporationPolicy(evaporationPolicy);
+
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-
     AddressPtr nextHop (new AddressMock("nextHop"));
+
+    // start the test
     routingTable.update(destination, nextHop, &interface, 1.2);
     
     LinearPathReinforcementPolicy reinforcementPolicy = LinearPathReinforcementPolicy(&routingTable, 1.2);

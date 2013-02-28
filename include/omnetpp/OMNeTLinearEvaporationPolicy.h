@@ -19,12 +19,10 @@ namespace ARA {
 
                 /**
                  * Creates a new instance of OMNeTLinearEvaporationPolicy.
-                 * Please note that the default parameter are chosen arbitrary
-                 * to supply a standard constructor for OMNeT++ Define_Module()
-                 *
-                 * The actual parameters are loaded in the initialize() method!
+                 * Please note that the parameters need to be initialized in the
+                 * initialize method due to OMNeT++s need for a standard constructor
                  */
-                OMNeTLinearEvaporationPolicy(float t=0.0, float q=0.0);
+                OMNeTLinearEvaporationPolicy();
 
                 virtual void initialize();
                 virtual void handleMessage(cMessage *msg);

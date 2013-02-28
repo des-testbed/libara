@@ -10,7 +10,7 @@ namespace ARA {
         /// The module class needs to be registered with OMNeT++
         Define_Module(OMNeTCubicEvaporationPolicy);
 
-        OMNeTCubicEvaporationPolicy::OMNeTCubicEvaporationPolicy(int plateau, float slow, float reduction, float threshold) : CubicEvaporationPolicy(new OMNeTTimeFactory(), plateau, slow, reduction, threshold){
+        OMNeTCubicEvaporationPolicy::OMNeTCubicEvaporationPolicy(int plateau, float slow, float reduction, float threshold, unsigned int timeIntervalInMilliSeconds) : CubicEvaporationPolicy(plateau, slow, reduction, threshold, timeIntervalInMilliSeconds){
 
         }
 

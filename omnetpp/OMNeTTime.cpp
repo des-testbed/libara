@@ -15,23 +15,16 @@ OMNeTTime::OMNeTTime(SimTime timestamp) {
     this->timestamp = timestamp;
 }
 
-Time* OMNeTTime::subtract(const Time* right) const {
-    const OMNeTTime* omnetTime = dynamic_cast<const OMNeTTime*>(right);
+long OMNeTTime::getDifferenceInMilliSeconds(const Time* right) const {
+    /*FIXME const OMNeTTime* omnetTime = dynamic_cast<const OMNeTTime*>(right);
     if(omnetTime) {
         SimTime result = (this->getTimestamp() - omnetTime->getTimestamp());
         return new OMNeTTime(result);
     }
     else {
         throw cRuntimeError("Can only subtract other OMNeTTime instances from this OMNeTTime instance");
-    }
-}
-
-long OMNeTTime::getSeconds() const {
-    return this->convertSimulationTime(0);
-}
-
-long OMNeTTime::getMilliSeconds() const {
-    return this->convertSimulationTime(-3);
+    }*/
+    return 0;
 }
 
 /**

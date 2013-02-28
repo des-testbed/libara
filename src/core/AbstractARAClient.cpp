@@ -25,6 +25,7 @@
 
 #include "AbstractARAClient.h"
 #include "PacketType.h"
+#include "LinearPathReinforcementPolicy.h"
 
 using namespace std;
 
@@ -32,13 +33,13 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-AbstractARAClient::AbstractARAClient() {
-    this->routingTable = new RoutingTable();
+AbstractARAClient::AbstractARAClient(TimeFactory* timeFactory) {
+    routingTable = new RoutingTable(timeFactory);
     packetTrap = new PacketTrap(routingTable);
-    /// set it to a 'random' initial value
+    /// set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;
     this->deltaPhi = 2.0;
-    this->pathReinforcementPolicy = new LinearPathReinforcementPolicy(this->routingTable, deltaPhi);
+    this->pathReinforcementPolicy = new LinearPathReinforcementPolicy(this->routingTable, deltaPhi); //FIXME this needs to be more flexible (pure virtual getter)
 }
 
 AbstractARAClient::~AbstractARAClient() {

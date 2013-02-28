@@ -24,7 +24,7 @@ namespace ARA {
                  *
                  * The actual parameters are loaded in the initialize() method!
                  */
-                OMNeTCubicEvaporationPolicy(int plateau=0.0, float slow=0.0, float reduction=0.0, float threshold=0.0);
+                OMNeTCubicEvaporationPolicy(int plateau=0.0, float slow=0.0, float reduction=0.0, float threshold=0.0, unsigned int timeIntervalInMilliSeconds = 1000);
 
                 virtual void initialize();
                 virtual void handleMessage(cMessage *msg);

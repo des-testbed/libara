@@ -12,43 +12,32 @@
 #include "TimeFactory.h"
 
 namespace ARA { 
-   /**
-    *
-    */
+
+    /**
+     * TODO write description
+     */
     class EvaporationPolicy {
         public:
-            EvaporationPolicy(TimeFactory* timeFactory);
-            virtual ~EvaporationPolicy();
-
-            /// the method checks how much time has passed since the last access to the routing table
-            bool checkForEvaporation();
-            /// sets the time until the evaporation is triggered
-            void setInterval(int interval);
-            /// the method returns how often the evaporation should take place
-            int getFactor();
-
-            /// the method reduces the pheromone value of a routing table entry
-            virtual float evaporate(float phi) = 0;
-
-        protected:
-            /// the factor which indicates how often the evaporation should take place 
-            uint8_t factor;
-
-        private:
-            bool tableHasBeenAccessedEarlier();
-
-            void determineEvaporationFactor(int timeDifference);
+            EvaporationPolicy(unsigned int timeIntervalInMilliSeconds = 1000, unsigned int minimumTimeDifferenceBeforeEvaporation = 50) : timeInterval(timeIntervalInMilliSeconds), minimumTimeDifferenceBeforeEvaporation(minimumTimeDifferenceBeforeEvaporation) {}
+            virtual ~EvaporationPolicy() {}
 
             /**
-             * The TimeFactory that is used to get the concrete Time implementations.
+             * This method calculates a new evaporated pheromone value
+             * based on an oldValue and when the last evaporation has taken place.
              */
-            TimeFactory* timeFactory;
+            virtual float evaporate(float oldPheromoneValue, int milliSecondsSinceLastEvaporation) = 0;
 
-            /// the last access time of the routing table
-            Time *lastAccessTime;
+            virtual bool isEvaporationNecessary(unsigned int timeDifferenceInMillis) {
+                return timeDifferenceInMillis >= minimumTimeDifferenceBeforeEvaporation;
+            }
 
-            /// the interval which denotes how much time has to pass in order to trigger the evaporation
-            long int interval;
+            unsigned int getTimeInterval() const {
+                return timeInterval;
+            }
+
+        protected:
+            unsigned int timeInterval;
+            unsigned int minimumTimeDifferenceBeforeEvaporation;
     };
 } /* namespace ARA */
 

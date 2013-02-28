@@ -50,17 +50,14 @@ TEST(UnixTimeTest, getSeconds) {
     LONGS_EQUAL(123, time.getSeconds());
 }
 
-TEST(UnixTimeTest, getMicroSeconds) {
+TEST(UnixTimeTest, getMilliSeconds) {
     UnixTime time = UnixTime(123, 456);
     LONGS_EQUAL(456, time.getMilliSeconds());
 }
 
-TEST(UnixTimeTest, minus) {
-    UnixTime timeA = UnixTime(20, 20000);
-    UnixTime timeB = UnixTime(30, 30000);
+TEST(UnixTimeTest, getDifferenceInMilliSeconds) {
+    UnixTime timeA = UnixTime(20, 200);
+    UnixTime timeB = UnixTime(30, 300);
 
-    Time* result = timeB.subtract(&timeA);
-    LONGS_EQUAL(10, result->getSeconds());
-    LONGS_EQUAL(10000, result->getMilliSeconds());
-    delete result;
+    LONGS_EQUAL(10100, timeB.getDifferenceInMilliSeconds(&timeA));
 }

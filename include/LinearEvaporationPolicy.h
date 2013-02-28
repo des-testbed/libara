@@ -1,60 +1,36 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große, Michael Frey
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef LINEAR_EVAPORATION_POLICY_H_
 #define LINEAR_EVAPORATION_POLICY_H_
 
-#include <cmath>
-#include <cstring>
-#include <stdint.h>
-#include <sys/time.h>
-
 #include "EvaporationPolicy.h"
 #include "TimeFactory.h"
 
-namespace ARA { 
+namespace ARA {
+
    /**
     * This class provides the linear evaporation function of the ant routing algorithm (ARA).
     */
     class LinearEvaporationPolicy : public EvaporationPolicy {
         public:
-            LinearEvaporationPolicy(TimeFactory* timeFactory, float t, float q);
 
-            /// the method reduces the pheromone value of a routing table entry
-            float evaporate(float phi);
-            /// the method sets the threshold
-            void setThreshold(float threshold);
-            /// the method sets the linear factor
-            void setLinearFactor(float factor);
+            /**
+             * Creates a new LinearEvaporationPolicy with the given TimeFactory.
+             *
+             * @param timeFactory the TimeFactory object which is used to get an abstract instance in time
+             * @param evaporationFactor the factor which is used to evaporate the pheromone values
+             * @param threshold denotes at what point the pheromone level is set to 0
+             * @param timeIntervalMillis denotes the time interval in milliseconds at which the evaporation periodically should take place
+             */
+            LinearEvaporationPolicy(float evaporationFactor, float threshold, unsigned int timeIntervalMillis = 1000);
 
-        private:
-            void determineEvaporationFactor(int timeDifference);
-            /// the threshold which denotes at what point the pheromone level is set to 0
+            float evaporate(float oldPheromoneValue, int millisecondsSinceLastEvaporation);
+
+        protected:
             float threshold;
-            /// the linear factor
-            float q;
+            float evaporationFactor;
     };
 } /* namespace ARA */
 

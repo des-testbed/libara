@@ -5,10 +5,7 @@
 
 using namespace ARA;
 
-TimeMock::TimeMock() {
-    this->seconds = 0;
-    this->milliseconds = 0;
-}
+TimeMock TimeMock::currentTime = TimeMock();
 
 TimeMock::TimeMock(long seconds, long int milliseconds) {
     this->seconds = seconds;
@@ -16,11 +13,24 @@ TimeMock::TimeMock(long seconds, long int milliseconds) {
 }
 
 void TimeMock::setToCurrentTime() {
-
+    this->seconds = currentTime.seconds;
+    this->milliseconds = currentTime.milliseconds;
 }
 
-Time* TimeMock::subtract(const Time* right) const {
-    return new TimeMock();
+long TimeMock::getDifferenceInMilliSeconds(const Time* otherTime) const {
+    const TimeMock* otherTimeMock = dynamic_cast<const TimeMock*>(otherTime);
+    if(otherTimeMock != NULL) {
+        long seconds = this->seconds - otherTimeMock->seconds;
+        long milliSeconds = this->milliseconds - otherTimeMock->milliseconds;
+        if(milliSeconds < 0) {
+            seconds--;
+            milliSeconds = 1000 + milliSeconds;
+        }
+        return seconds * 1000 + milliSeconds;
+    }
+    else {
+        throw "TimeMock can only calculate the difference in respect to another TimeMock";
+    }
 }
 
 long TimeMock::getSeconds() const {
@@ -29,12 +39,4 @@ long TimeMock::getSeconds() const {
 
 long TimeMock::getMilliSeconds() const {
     return milliseconds;
-}
-
-void TimeMock::letTimePass(long milliSeconds) {
-    long passedSeconds = (this->milliseconds + milliSeconds)/1000;
-    long passedMilliseconds = milliSeconds-passedSeconds*1000;
-
-    this->seconds += passedSeconds;
-    this->milliseconds += passedMilliseconds;
 }

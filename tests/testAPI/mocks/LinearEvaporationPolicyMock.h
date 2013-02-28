@@ -5,17 +5,13 @@
 #ifndef LINEAR_EVAPORATION_POLCY_MOCK_H_
 #define LINEAR_EVAPORATION_POLCY_MOCK_H_
 
-#include "EvaporationPolicy.h"
+#include "LinearEvaporationPolicy.h"
 
 namespace ARA {
-    class LinearEvaporationPolicyMock : public EvaporationPolicy {
+    class LinearEvaporationPolicyMock : public LinearEvaporationPolicy {
         public:
-            LinearEvaporationPolicyMock(float evaporationFactor=0.2, long intervallInMilliSeconds=10000);
-            virtual float evaporate(float phi);
+            LinearEvaporationPolicyMock(float evaporationFactor = 0.8, float threshold = 0.5, int timeIntervalMillis = 1000);
             float getEvaporationFactor() const;
-
-        private:
-            float evaporationFactor;
     };
 }
 

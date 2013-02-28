@@ -22,9 +22,7 @@ namespace omnetpp {
           OMNeTTime(SimTime timestamp);
 
           virtual void setToCurrentTime();
-          virtual Time* subtract(const Time* right) const;
-          virtual long getSeconds() const;
-          virtual long getMilliSeconds() const;
+          virtual long getDifferenceInMilliSeconds(const Time* otherTime) const;
 
           SimTime getTimestamp() const;
 

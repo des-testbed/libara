@@ -33,54 +33,22 @@ long UnixTime::getMilliSeconds() const {
     return timestamp.tv_usec;
 }
 
-Time* UnixTime::subtract(const Time* right) const {
-    const UnixTime* unixTime = dynamic_cast<const UnixTime*>(right);
-    if(unixTime) {
-        timeval result = this->getTimeDifference(unixTime);
-        return new UnixTime(result.tv_sec, result.tv_usec);
+long UnixTime::getDifferenceInMilliSeconds(const Time* otherTime) const {
+    const UnixTime* otherUnixTime = dynamic_cast<const UnixTime*>(otherTime);
+    if(otherUnixTime != 0) {
+        long seconds = this->timestamp.tv_sec - otherUnixTime->timestamp.tv_sec;
+        long milliSeconds = this->timestamp.tv_usec - otherUnixTime->timestamp.tv_usec;
+        if(milliSeconds < 0) {
+            seconds--;
+            milliSeconds = 1000 + milliSeconds;
+        }
+        return seconds * 1000 + milliSeconds;
     }
     else {
-        throw Exception("Can only subtract other UnixTime instances from this UnixTime instance");
+        throw "UnixTime can only calculate the difference in respect to another UnixTime";
     }
 }
 
 void UnixTime::setToCurrentTime() {
     gettimeofday(&this->timestamp, 0);
-}
-
-/**
- * The method determines the time difference between two timestamps. Here,
- * the member variable "timestamp" and a operand "time". The result is stored
- * in a timeval struct which is passed as an argument to the function
- *
- * The code is from the libc manual:
- *   http://www.gnu.org/software/libc/manual/html_node/Elapsed-Time.html
- *
- * @param right in The right operand of the computation.
- * @param result out The data structure which will hold the result of the
- *   operation
- */
-timeval UnixTime::getTimeDifference(const UnixTime* right) const {
-    // copy the content of the right operand
-    timeval r;
-    r.tv_sec = right->getTimestamp().tv_sec;
-    r.tv_usec = right->getTimestamp().tv_usec;
-
-    if (this->timestamp.tv_usec < r.tv_usec) {
-        int nanoSeconds = (r.tv_usec - this->timestamp.tv_usec) / 1000000 + 1;
-        r.tv_usec -= (1000000 * nanoSeconds);
-        r.tv_sec  += nanoSeconds;
-    }
-
-    if (this->timestamp.tv_usec - r.tv_usec > 1000000) {
-        int nanoSeconds = (this->timestamp.tv_usec - r.tv_usec) / 1000000;
-        r.tv_usec += (1000000 * nanoSeconds);
-        r.tv_sec -= nanoSeconds;
-    }
-
-    timeval result;
-    result.tv_sec = this->timestamp.tv_sec - r.tv_sec;
-    result.tv_usec = this->timestamp.tv_usec - r.tv_usec;
-
-    return result;
 }

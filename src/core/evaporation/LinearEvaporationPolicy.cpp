@@ -1,38 +1,30 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "LinearEvaporationPolicy.h"
 
-#include <iostream>
+#include <cmath>
 
 using namespace ARA;
 
-LinearEvaporationPolicy::LinearEvaporationPolicy(TimeFactory* timeFactory, float pThreshold, float pQ) : EvaporationPolicy(timeFactory) {
-    threshold = pThreshold;
-    q = pQ;
-}
-
-/**
- * The methods provides the linear evaporation of pheromones as proposed
- * in the original ant routing algorithm (ARA). 
- * 
- * @param phi in The value of the pheromone which should be decreased
- *
- * @return The decreased pheromone value 
- */
-float LinearEvaporationPolicy::evaporate(float phi){
-   /// do the computation 
-   phi = pow(((1 - this->q) * phi), this->factor); 
-
-   /// check if the result is below a threshold
-   if(phi < this->threshold){
-     /// set pheromone to 0
-     phi = 0;
-   }
-   return phi;
-}
-
-void LinearEvaporationPolicy::setThreshold(float threshold){
+LinearEvaporationPolicy::LinearEvaporationPolicy(float evaporationFactor, float threshold, unsigned int timeIntervalInMilliSeconds) : EvaporationPolicy(timeIntervalInMilliSeconds) {
+    this->evaporationFactor = evaporationFactor;
     this->threshold = threshold;
 }
 
-void LinearEvaporationPolicy::setLinearFactor(float factor){
-    this->factor = factor;
+float LinearEvaporationPolicy::evaporate(float oldPheromoneValue, int millisecondsSinceLastEvaporation){
+    if(millisecondsSinceLastEvaporation == 0) {
+        return oldPheromoneValue;
+    }
+    else {
+        float multiplicator = millisecondsSinceLastEvaporation / timeInterval;
+        float newPheromoneValue = pow(evaporationFactor * oldPheromoneValue, multiplicator);
+
+        if (newPheromoneValue < threshold) {
+            newPheromoneValue = 0;
+        }
+
+        return newPheromoneValue;
+    }
 }

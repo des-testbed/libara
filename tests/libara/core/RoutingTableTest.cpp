@@ -11,6 +11,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <deque>
 
@@ -20,11 +21,11 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(RoutingTableTest) {
     RoutingTable* routingTable;
-    EvaporationPolicy* evaporationPolicy;
+    LinearEvaporationPolicyMock* evaporationPolicy;
 
     void setup() {
         evaporationPolicy = new LinearEvaporationPolicyMock();
-        routingTable = new RoutingTable();
+        routingTable = new RoutingTable(new TimeFactoryMock());
         routingTable->setEvaporationPolicy(evaporationPolicy);
     }
 
@@ -176,8 +177,6 @@ TEST(RoutingTableTest, getPheromoneValue) {
     AddressPtr nextHopAddress (new AddressMock("nextHop"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
-    // start the test
-
     // Should be zero because there is no known route to this destination
     LONGS_EQUAL(0, routingTable->getPheromoneValue(destination, nextHopAddress, &interface));
 
@@ -213,15 +212,27 @@ TEST(RoutingTableTest, evaporatePheromones) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("A"));
-    AddressPtr nodeC (new AddressMock("A"));
-    float pheromoneValueA = 2.5;
-    float pheromoneValueB = 3.8;
-    float pheromoneValueC = 0.2;
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    float pheromoneValueA = 2.5f;
+    float pheromoneValueB = 3.8f;
+    float pheromoneValueC = 0.2f;
 
     routingTable->update(destination, nodeA, &interface, pheromoneValueA);
     routingTable->update(destination, nodeB, &interface, pheromoneValueB);
     routingTable->update(destination, nodeC, &interface, pheromoneValueC);
 
+    // no time has passed so nothing is evaporated
+    CHECK_EQUAL(pheromoneValueA, routingTable->getPheromoneValue(destination, nodeA, &interface));
+    CHECK_EQUAL(pheromoneValueB, routingTable->getPheromoneValue(destination, nodeB, &interface));
+    CHECK_EQUAL(pheromoneValueC, routingTable->getPheromoneValue(destination, nodeC, &interface));
 
+    // let some time pass to trigger the evaporation
+    TimeMock::letTimePass(evaporationPolicy->getTimeInterval());
+    float evaporationFactor = evaporationPolicy->getEvaporationFactor();
+    DOUBLES_EQUAL(pheromoneValueA * evaporationFactor, routingTable->getPheromoneValue(destination, nodeA, &interface), 0.00001);
+    DOUBLES_EQUAL(pheromoneValueB * evaporationFactor, routingTable->getPheromoneValue(destination, nodeB, &interface), 0.00001);
+
+    // pheromoneValueC should be well below the threshold and therefore be zero
+    CHECK_EQUAL(0.0, routingTable->getPheromoneValue(destination, nodeC, &interface));
 }

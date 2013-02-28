@@ -34,6 +34,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <iostream>
 
@@ -45,7 +46,7 @@ TEST_GROUP(StochasticForwardingPolicyTest) {};
 
 TEST(StochasticForwardingPolicyTest, testGetNextHop) {
     EvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicyMock();
-    RoutingTable routingTable = RoutingTable();
+    RoutingTable routingTable = RoutingTable(new TimeFactoryMock());
     routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();

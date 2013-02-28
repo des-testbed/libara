@@ -1,39 +1,21 @@
-/******************************************************************************
- Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große, Michael Frey
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "RoutingTable.h"
 #include <utility>
 
-#include <iostream>
-
 namespace ARA {
     typedef std::shared_ptr<Address> AddressPtr;
 
-    RoutingTable::RoutingTable(){}
+    RoutingTable::RoutingTable(TimeFactory* timeFactory){
+        this->timeFactory = timeFactory;
+        this->lastAccessTime = nullptr;
+    }
 
     RoutingTable::~RoutingTable() {
+        delete timeFactory;
+
         std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
         for (iterator=table.begin(); iterator!=table.end(); iterator++) {
             std::pair<AddressPtr const, std::deque<RoutingTableEntry*>*> entryPair = *iterator;
@@ -47,6 +29,10 @@ namespace ARA {
             delete entryList;
         }
         table.clear();
+
+        if(hasTableBeenAccessedEarlier()) {
+            delete lastAccessTime;
+        }
     }
 
     void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
@@ -56,7 +42,7 @@ namespace ARA {
             std::deque<RoutingTableEntry*>* entryList = new std::deque<RoutingTableEntry*>();
             entryList->push_back(newEntry);
             table[destination] = entryList;
-        }else{
+        } else {
             // there is at least one registered route for this destination
             std::deque<RoutingTableEntry*>* entryList = table[destination];
             bool entryHasBeenUpdated = false;
@@ -101,14 +87,12 @@ namespace ARA {
     }
 
     std::deque<RoutingTableEntry*>* RoutingTable::getPossibleNextHops(const Packet* packet) {
-        this->checkForEvaporation();
-        ///
+        triggerEvaporation();
         return getPossibleNextHops(packet->getDestination());
     }
 
     bool RoutingTable::isDeliverable(AddressPtr destination) {
-        this->checkForEvaporation();
-        ///
+        triggerEvaporation();
         return table.find(destination) != table.end();
     }
 
@@ -116,11 +100,8 @@ namespace ARA {
         return isDeliverable(packet->getDestination());
     }
 
-    /**
-     * TODO: The method should throw an exception if the host can not be found
-     */
     float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
-        this->checkForEvaporation();
+        triggerEvaporation();
 
         if(isDeliverable(destination)) {
             std::deque<RoutingTableEntry*>* entryList = table[destination];
@@ -149,32 +130,45 @@ namespace ARA {
         return false;
     }
 
-    /**
-     *
-     */
-    void RoutingTable::checkForEvaporation(){
-        if(this->evaporationPolicy->checkForEvaporation()){
-            std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator i;
-            /// iterate over the destination entries
-            for(i = table.begin(); i != table.end(); i++){
-                std::deque<RoutingTableEntry*>::iterator j;
-                /// iterate over the possible next hop entries of a destination
-                for(j = (*i).second->begin(); j != (*i).second->end(); j++){
-                    /// TODO: remove the '1' and replace it by a function parameter
-                    float phi = this->evaporationPolicy->evaporate((*j)->getPheromoneValue());
-                    /// update the entry
-                    if(phi != 0.0){
-                        (*j)->setPheromoneValue(phi);
-                        // remove the entry from the list (CHECK IF THAT'S A GOOD IDEA)
-                    }else{
-                        /// todo
+    void RoutingTable::triggerEvaporation() {
+        Time* currentTime = timeFactory->makeTime();
+        currentTime->setToCurrentTime();
+
+        if (hasTableBeenAccessedEarlier() == false) {
+            lastAccessTime = currentTime;
+        }
+        else {
+            long timeDifference = currentTime->getDifferenceInMilliSeconds(lastAccessTime);
+            delete currentTime;
+
+            if(evaporationPolicy->isEvaporationNecessary(timeDifference)) {
+                lastAccessTime->setToCurrentTime();
+
+                std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator i;
+                for (i=table.begin(); i!=table.end(); i++) {
+                    std::pair<AddressPtr const, std::deque<RoutingTableEntry*>*> entryPair = *i;
+                    std::deque<RoutingTableEntry*>* entryList = entryPair.second;
+
+                    for (auto& entry: *entryList) {
+                        float newPheromoneValue = evaporationPolicy->evaporate(entry->getPheromoneValue(), timeDifference);
+                        if(newPheromoneValue > 0) {
+                            entry->setPheromoneValue(newPheromoneValue);
+                        }
+                        else {
+                            //TODO delete entry from table
+                            entry->setPheromoneValue(newPheromoneValue);
+                        }
                     }
                 }
             }
         }
     }
 
-    void RoutingTable::setEvaporationPolicy(EvaporationPolicy *policy){
+    bool RoutingTable::hasTableBeenAccessedEarlier() {
+        return lastAccessTime != nullptr;
+    }
+
+    void RoutingTable::setEvaporationPolicy(EvaporationPolicy* policy) {
         this->evaporationPolicy = policy;
     }
 

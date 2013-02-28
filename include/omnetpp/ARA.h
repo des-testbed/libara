@@ -3,7 +3,6 @@
 
 #include <omnetpp.h>
 #include <algorithm>
-#include <csimplemodule.h>
 
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
@@ -19,6 +18,7 @@
 #include "OMNeTRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "OMNeTStochasticForwardingPolicy.h"
+#include "OMNeTTimeFactory.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -32,13 +32,14 @@ namespace ARA {
          *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
          */
         class ARA: public cSimpleModule, public AbstractARAClient {
+            public:
+                ARA() : AbstractARAClient(new OMNeTTimeFactory()) {}
+
             protected:
-                //~~~ INHERITED FROM cSimpleModule ~~~~~~~
                 int numInitStages() const;
                 virtual void initialize(int stage);
                 virtual void handleMessage(cMessage *msg);
 
-                //~~~ INHERITED FROM AbstractARAClient ~~~
                 ForwardingPolicy* getForwardingPolicy();
                 void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
                 void deliverToSystem(const Packet* packet);

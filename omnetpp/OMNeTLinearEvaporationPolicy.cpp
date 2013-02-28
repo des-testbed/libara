@@ -10,15 +10,13 @@ namespace ARA {
         /// The module class needs to be registered with OMNeT++
         Define_Module(OMNeTLinearEvaporationPolicy);
 
-        OMNeTLinearEvaporationPolicy::OMNeTLinearEvaporationPolicy(float t, float q) : LinearEvaporationPolicy(new OMNeTTimeFactory(), t, q){
-
+        OMNeTLinearEvaporationPolicy::OMNeTLinearEvaporationPolicy() : LinearEvaporationPolicy(1, 0, (unsigned int)1000) {
+            // any parameters need to be initialized in OMNeTLinearEvaporationPolicy::initialize()
         }
 
         void OMNeTLinearEvaporationPolicy::initialize() {
-            /// parse the policy parameter from the NED file
-            this->setLinearFactor(par("q").doubleValue());
-            /// parse the delta phi parameter from the NED file
-            this->setThreshold(par("threshold").doubleValue());
+            evaporationFactor = par("evaporationFactor").doubleValue();
+            threshold = par("threshold").doubleValue();
         }
 
         void OMNeTLinearEvaporationPolicy::handleMessage(cMessage *msg) {
