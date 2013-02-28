@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "CppUTest/TestHarness.h"
 #include "RoutingTable.h"
@@ -31,7 +10,7 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
+#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
 
 #include <deque>
 
@@ -44,10 +23,7 @@ TEST_GROUP(RoutingTableTest) {
     EvaporationPolicy* evaporationPolicy;
 
     void setup() {
-        float threshold = 0.2;
-        float q = 0.1;
-        evaporationPolicy = new LinearEvaporationPolicy(new TimeFactoryMock(), threshold, q);
-        evaporationPolicy->setInterval(10000);
+        evaporationPolicy = new LinearEvaporationPolicyMock();
         routingTable = new RoutingTable();
         routingTable->setEvaporationPolicy(evaporationPolicy);
     }
@@ -230,4 +206,22 @@ TEST(RoutingTableTest, removeEntry) {
             FAIL("The deleted hop should not longer be in the list of possible next hops");
         }
     }
+}
+
+TEST(RoutingTableTest, evaporatePheromones) {
+    AddressPtr destination (new AddressMock("Destination"));
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("A"));
+    AddressPtr nodeC (new AddressMock("A"));
+    float pheromoneValueA = 2.5;
+    float pheromoneValueB = 3.8;
+    float pheromoneValueC = 0.2;
+
+    routingTable->update(destination, nodeA, &interface, pheromoneValueA);
+    routingTable->update(destination, nodeB, &interface, pheromoneValueB);
+    routingTable->update(destination, nodeC, &interface, pheromoneValueC);
+
+
 }

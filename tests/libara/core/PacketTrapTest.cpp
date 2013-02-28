@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "CppUTest/TestHarness.h"
 #include "PacketTrap.h"
@@ -30,7 +9,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
+#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
 
 #include <memory>
 #include <deque>
@@ -43,11 +22,7 @@ TEST_GROUP(PacketTrapTest) {
     EvaporationPolicy* evaporationPolicy;
 
     void setup() {
-        // FIXME do we really need to setup all this stuff here?
-        float threshold = 0.2;
-        float q = 0.1;
-        evaporationPolicy = new LinearEvaporationPolicy(new TimeFactoryMock(), threshold, q);
-        evaporationPolicy->setInterval(10000);
+        evaporationPolicy = new LinearEvaporationPolicyMock();
         routingTable = new RoutingTable();
         routingTable->setEvaporationPolicy(evaporationPolicy);
         packetTrap = new PacketTrap(routingTable);
