@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "CppUTest/TestHarness.h"
 #include "PacketTrap.h"
@@ -52,6 +31,7 @@ TEST_GROUP(AbstractARAClientTest) {
         packetTrap = client->getPacketTrap();
         routingTable = client->getRoutingTable();
     }
+
     void teardown() {
         delete client;
     }
@@ -552,71 +532,6 @@ TEST(AbstractARAClientTest, deleteAssignedLogger) {
     // Should finish without a memory leak
 }
 
-TEST(AbstractARAClientTest, sendsLogMessageIfAPacketIsTrappedAndFANTIsBroadcasted) {
-    LoggerMock* logger = new LoggerMock();
-    client->setLogger(logger);
-    PacketMock packet = PacketMock("abc", "xyz", 123);
-
-    // assume that the packet is not deliverable
-    CHECK(routingTable->isDeliverable(&packet) == false);
-    client->sendPacket(&packet);
-
-    // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    LogMessage logMessage = logger->getLoggedMessages()->front();
-    CHECK_EQUAL("Packet 123 from abc to xyz is not deliverable. Starting route discovery phase", logMessage.text);
-    BYTES_EQUAL(Logger::LEVEL_DEBUG, logMessage.level);
-}
-
-TEST(AbstractARAClientTest, sendsLogMessageIfFANTReachedItsDestination) {
-    LoggerMock* logger = new LoggerMock();
-    client->setLogger(logger);
-
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("destination");
-    PacketMock packet = PacketMock("source", "destination", 123, 10, PacketType::FANT);
-
-    client->receivePacket(&packet, interface);
-
-    // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    LogMessage logMessage = logger->getLoggedMessages()->front();
-    CHECK_EQUAL("FANT 123 from source reached its destination. Broadcasting BANT", logMessage.text);
-    BYTES_EQUAL(Logger::LEVEL_DEBUG, logMessage.level);
-}
-
-TEST(AbstractARAClientTest, sendsLogMessageIfBANTReachedItsDestination) {
-    LoggerMock* logger = new LoggerMock();
-    client->setLogger(logger);
-
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
-    PacketMock packet = PacketMock("destination", "source", 123, 10, PacketType::BANT);
-    PacketMock trappedPacket = PacketMock("source", "destination", 1, 1, PacketType::DATA);
-    packetTrap->trapPacket(&trappedPacket);
-
-    client->receivePacket(&packet, interface);
-
-    // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    LogMessage logMessage = logger->getLoggedMessages()->front();
-    CHECK_EQUAL("BANT 123 came back from destination. 1 trapped packet can now be delivered", logMessage.text);
-    BYTES_EQUAL(Logger::LEVEL_DEBUG, logMessage.level);
-}
-
-TEST(AbstractARAClientTest, sendsLogMessageIfAntPacketIsBroadcasted) {
-    LoggerMock* logger = new LoggerMock();
-    client->setLogger(logger);
-
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-    PacketMock antPacket = PacketMock("source", "destination", 123, 3, PacketType::FANT);
-    client->receivePacket(&antPacket, interface);
-
-    // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    LogMessage logMessage = logger->getLoggedMessages()->front();
-    CHECK_EQUAL("Broadcasting FANT 123 from source", logMessage.text);
-    BYTES_EQUAL(Logger::LEVEL_TRACE, logMessage.level);
-}
-
 /**
  * In this test we want to check that all packets that might still be trapped
  * in the PacketTrap are deleted when the destructor is called.
@@ -633,3 +548,4 @@ TEST(AbstractARAClientTest, deleteTrappedPacketsInDestructor) {
     // when the test finishes, the client will be deleted in teardown()
     // and the packet clone should be deleted as well
 }
+
