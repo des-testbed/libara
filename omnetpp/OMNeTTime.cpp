@@ -5,23 +5,32 @@
 #include "OMNeTTime.h"
 
 using namespace ARA;
+using namespace ARA::omnetpp;
 
 OMNeTTime::OMNeTTime() {
-  this->timestamp = SimTime();
+    //FIXME setToCurrentTime(); // does not work in the tests
 }
 
-OMNeTTime::OMNeTTime(SimTime timestamp):timestamp(timestamp){}
-
-OMNeTTime OMNeTTime::subtract(const OMNeTTime& right) const {
-    SimTime result = (this->getTimestamp() - right.getTimestamp());
-    return OMNeTTime(result);
+OMNeTTime::OMNeTTime(SimTime timestamp) {
+    this->timestamp = timestamp;
 }
 
-int OMNeTTime::getSeconds() const {
+Time* OMNeTTime::subtract(const Time* right) const {
+    const OMNeTTime* omnetTime = dynamic_cast<const OMNeTTime*>(right);
+    if(omnetTime) {
+        SimTime result = (this->getTimestamp() - omnetTime->getTimestamp());
+        return new OMNeTTime(result);
+    }
+    else {
+        throw cRuntimeError("Can only subtract other OMNeTTime instances from this OMNeTTime instance");
+    }
+}
+
+long OMNeTTime::getSeconds() const {
     return this->convertSimulationTime(0);
 }
 
-long OMNeTTime::getMilliseconds() const {
+long OMNeTTime::getMilliSeconds() const {
     return this->convertSimulationTime(-3);
 }
 
@@ -66,5 +75,5 @@ SimTime OMNeTTime::getTimestamp() const{
 
 void OMNeTTime::setToCurrentTime(){
     /// TODO: check if that's the way to go
-    this->timestamp = simTime();
+    //this->timestamp = simTime(); // this throws a segfault in the test
 }

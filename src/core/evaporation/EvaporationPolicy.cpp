@@ -44,9 +44,10 @@ bool EvaporationPolicy::checkForEvaporation(){
         return false;
     }
     else {
-        Time timeSinceLastAccess = currentTime->subtract(*this->lastAccessTime);
-        long timeDifferenceInMilliSeconds = timeSinceLastAccess.getMilliSeconds();
+        Time* timeSinceLastAccess = currentTime->subtract(this->lastAccessTime);
+        long timeDifferenceInMilliSeconds = timeSinceLastAccess->getMilliSeconds();
         delete currentTime;
+        delete timeSinceLastAccess;
 
         if(timeDifferenceInMilliSeconds >= interval) {
             this->determineEvaporationFactor(timeDifferenceInMilliSeconds);

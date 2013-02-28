@@ -11,6 +11,7 @@
 #include "Time.h"
 
 namespace ARA {
+namespace omnetpp {
     /**
      * The class provides methods for determining the time difference between 
      * two timestamps in OMNeT++.
@@ -20,26 +21,19 @@ namespace ARA {
           OMNeTTime();
           OMNeTTime(SimTime timestamp);
 
-          /**
-           * The method provides the subtraction of two timestamps using
-           * the '-' operator.
-           *
-           * @return A new instance of a OMNeT++ simulation time timestamp (encapsulated in class OMNeTTime)
-           */
-          OMNeTTime subtract(const OMNeTTime& right) const;
-
-          int getSeconds() const;
-          long getMilliseconds() const;
+          virtual void setToCurrentTime();
+          virtual Time* subtract(const Time* right) const;
+          virtual long getSeconds() const;
+          virtual long getMilliSeconds() const;
 
           SimTime getTimestamp() const;
-
-          void setToCurrentTime();
 
         private:
           int convertSimulationTime(int scaleExponent) const;
 
           SimTime timestamp;
     };
+}
 }
 
 #endif 
