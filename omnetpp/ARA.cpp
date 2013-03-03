@@ -131,7 +131,6 @@ namespace ARA {
             OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(msg);
             NetworkInterface* arrivalInterface = getNetworkInterface(msg->getArrivalGate()->getIndex());
             receivePacket(omnetPacket, arrivalInterface);
-            delete msg;
         }
 
         InterfaceEntry* ARA::getSourceInterfaceFrom(cMessage* msg) {
