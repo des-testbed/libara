@@ -125,9 +125,9 @@ namespace ARA {
             AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
             AddressPtr sender = source; // FIXME is this ok?
             OMNeTPacket omnetPacket = OMNeTPacket(source, destination, sender, PacketType::DATA, getNextSequenceNumber());
+            omnetPacket.encapsulate(check_and_cast<cPacket*>(msg));
 
             sendPacket(&omnetPacket);
-            delete msg;
         }
 
         bool ARA::isARPMessage(cMessage* msg) {
