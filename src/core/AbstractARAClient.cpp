@@ -252,16 +252,13 @@ bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
     return false;
 }
 
-void AbstractARAClient::broadCast(const Packet* packet) {
-    Packet* newPacket = packet->clone();
-    newPacket->increaseHopCount();
+void AbstractARAClient::broadCast(Packet* packet) {
+    packet->increaseHopCount();
 
     for(auto& interface: interfaces) {
-        newPacket->setSender(interface->getLocalAddress());
-        interface->broadcast(newPacket);
+        packet->setSender(interface->getLocalAddress());
+        interface->broadcast(packet);
     }
-
-    delete newPacket;
 }
 
 unsigned int AbstractARAClient::getNextSequenceNumber() {

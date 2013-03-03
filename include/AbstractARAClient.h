@@ -99,7 +99,7 @@ public:
     unsigned int getNumberOfNetworkInterfaces();
 
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
-    void broadCast(const Packet* packet);
+    void broadCast(Packet* packet);
     //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     unsigned int getNextSequenceNumber();
     //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(

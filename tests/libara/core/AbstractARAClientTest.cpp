@@ -64,12 +64,14 @@ TEST(AbstractARAClientTest, generalBroadCast) {
     NetworkInterfaceMock* interface2 = client->createNewNetworkInterfaceMock();
     NetworkInterfaceMock* interface3 = client->createNewNetworkInterfaceMock();
 
-    PacketMock packet = PacketMock();
-    client->broadCast(&packet);
+    Packet* packet = new PacketMock();
+    client->broadCast(packet);
 
-    CHECK(interface1->hasPacketBeenBroadCasted(&packet) == true);
-    CHECK(interface2->hasPacketBeenBroadCasted(&packet) == true);
-    CHECK(interface3->hasPacketBeenBroadCasted(&packet) == true);
+    CHECK(interface1->hasPacketBeenBroadCasted(packet) == true);
+    CHECK(interface2->hasPacketBeenBroadCasted(packet) == true);
+    CHECK(interface3->hasPacketBeenBroadCasted(packet) == true);
+
+    delete packet;
 }
 
 TEST(AbstractARAClientTest, getNextSequenceNumber) {
