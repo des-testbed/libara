@@ -1,57 +1,69 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "Logger.h"
 #include "Address.h"
 #include "NextHop.h"
 #include "NetworkInterface.h"
 #include "PacketTrap.h"
+#include "TimeFactory.h"
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "ForwardingPolicy.h"
+#include "PathReinforcementPolicy.h"
 
+#include <iostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
 #include <memory>
+#include <string>
+#include <sstream>
 
 namespace ARA {
 
 //TODO fix the visibility: most of the methods should be protected instead of public
 
+/**
+ * TODO write class description
+ */
 class AbstractARAClient {
 public:
-    AbstractARAClient();
+    AbstractARAClient(TimeFactory* timeFactory);
     virtual ~AbstractARAClient();
+
+    /**
+     * Sends the packet to the packets destination.
+     *
+     * If the packet is deliverable (e.g there is at least one route known
+     * in the routing table), the next hop is calculated via the current
+     * forwarding policy. If there is no known route to the packet destination
+     * a FANT is generated and send according to the Abstract Ant Routing
+     * Algorithm (ARA).
+     *
+     * @param packet the Packet to be send. Please note that the packet will be
+     *        deleted by the AbstractARAClient when it is no longer needed.
+     */
+    void sendPacket(Packet* packet);
+
+    /**
+     * Receive a Packet over the given NetworkInterface. The packet will be
+     * processed according to the Ant Routing Algorithm (ARA).
+     *
+     * @param packet the received Packet. Please note that the packet will be
+     *        deleted by the AbstractARAClient when it has been fully processed.
+     */
+    void receivePacket(Packet* packet, NetworkInterface* interface);
 
     /**
      * This method is called each a time a new packet is received over the
      * given interface.
-     * It's is responsible for updating the routing table so a route to the
+     *
+     * It is responsible for updating the routing table so a route to the
      * packets source is known in the future.
      *
      * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_ERROR).
@@ -60,8 +72,18 @@ public:
 
     /**
      * The packet should be directed to this node and must be delivered to the local system.
+     * Please note that this method is responsible for deleting the given packet (or delegating
+     * this responsibility to another method)
      */
     virtual void deliverToSystem(const Packet* packet) = 0;
+
+    /**
+     * Sets a logger for this ARA client.
+     *
+     * This logger will be used to log messages during the routing algorithm.
+     * It will be deleted in the destructor of this client.
+     */
+    void setLogger(Logger* logger);
 
     /**
      * Registers a new NetworkInterface at this client.
@@ -78,29 +100,8 @@ public:
      */
     unsigned int getNumberOfNetworkInterfaces();
 
-    /**
-     * Sends the packet to the packets destination.
-     *
-     * If the packet is deliverable (e.g there is at least one route known
-     * in the routing table), the next hop is calculated via the current forwarding policy.
-     * If there is no known route to the packet destination a FANT is generated and send
-     * according to the ARA algorithm.
-     *
-     * Note: The packet instance may be deleted after this method so we need to
-     * clone the packet if we want to persist it in memory.
-     */
-    void sendPacket(const Packet* packet);
-
-    /**
-     * Receive a Packet over the given NetworkInterface. The packet will be
-     * processed according to the Ant Routing Algorithm (ARA).
-     *
-     * TODO write some more documentation
-     */
-    void receivePacket(const Packet* packet, NetworkInterface* interface);
-
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
-    void broadCast(const Packet* packet);
+    void broadCast(Packet* packet);
     //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     unsigned int getNextSequenceNumber();
     //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
@@ -108,16 +109,29 @@ public:
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
-    /// The method initializes the pheromone value of a link
-    void initializePheromone(const Packet* packet, NetworkInterface* interface);
+    /// The computes the initial pheromone value of a link
+    virtual float initializePheromone(const Packet* packet);
+    ///
+    virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
+
+
+    void setRoutingTable(RoutingTable *routingTable);
 
 protected:
 
-    std::deque<NetworkInterface*> interfaces;
-    RoutingTable routingTable;
-    PacketTrap* packetTrap;
+    /// The member denotes the constant which is used in the pheromone reinforcement of a path
+    // FIXME do we need this here any more? I thought we have a policy class for that
+    double deltaPhi;
 
-    /// The member specifies the initial level 
+    std::deque<NetworkInterface*> interfaces;
+    RoutingTable *routingTable;
+    PacketTrap* packetTrap;
+  
+    // FIXME let the AbstractARAClient access this object via a pure virtual method to force the implementations to actually set this policy
+    PathReinforcementPolicy* pathReinforcementPolicy;
+
+    /// The member specifies the initial level
+    // FIXME do we need this here any more? I thought we have a policy class for that
     double initialPhi;
 
     /**
@@ -131,20 +145,79 @@ protected:
      */
     virtual ForwardingPolicy* getForwardingPolicy() = 0;
 
+    /**
+     * Checks if a logger has been assigned to this ARA client and if so
+     * delegates the call to it with Logger::LEVEL_TRACE.
+     *
+     * The optional varargs are handled as parameters to the logMessage string.
+     * If no logger has been set via setLogger() nothing happens.
+     *
+     * @see AbstractARAClient::logTrace
+     * @see AbstractARAClient::logDebug
+     * @see AbstractARAClient::logInfo
+     * @see AbstractARAClient::logWarn
+     * @see AbstractARAClient::logError
+     * @see AbstractARAClient::logFatal
+     */
+    void logMessage(const std::string &logMessage, Logger::Level level, ...) const;
+
+    /**
+     * Logs with trace level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logTrace(const std::string &logMessage, ...) const;
+
+    /**
+     * Logs with debug level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logDebug(const std::string &logMessage, ...) const;
+
+    /**
+     * Logs with info level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logInfo(const std::string &logMessage, ...) const;
+
+    /**
+     * Logs with warn level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logWarn(const std::string &logMessage, ...) const;
+
+    /**
+     * Logs with error level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logError(const std::string &logMessage, ...) const;
+
+    /**
+     * Logs with fatal level.
+     *
+     * @see AbstractARAClient::logMessage
+     */
+    void logFatal(const std::string &logMessage, ...) const;
+
 private:
+    Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
     std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 
     NextHop* getNextHop(const Packet* packet);
-    void sendDuplicateWarning(const Packet* packet, NetworkInterface* interface);
-    void handlePacket(const Packet* packet, NetworkInterface* interface);
-    void handleDataPacket(const Packet* packet);
-    void handleAntPacket(const Packet* packet);
-    void handleAntPacketForThisNode(const Packet* packet);
-    void handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface);
+    void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
+    void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
+    void handlePacket(Packet* packet, NetworkInterface* interface);
+    void handleDataPacket(Packet* packet);
+    void handleAntPacket(Packet* packet);
+    void handleAntPacketForThisNode(Packet* packet);
+    void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
-
 };
 
 } /* namespace ARA */

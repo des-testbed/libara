@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "CppUTest/TestHarness.h"
 #include "RoutingTable.h"
@@ -31,6 +10,8 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <deque>
 
@@ -38,47 +19,55 @@ using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-TEST_GROUP(RoutingTableTest) {};
+TEST_GROUP(RoutingTableTest) {
+    RoutingTable* routingTable;
+    LinearEvaporationPolicyMock* evaporationPolicy;
 
-TEST(RoutingTableTest, testGetPossibleNextHopsReturnsEmptyList) {
-    RoutingTable routingTable = RoutingTable();
+    void setup() {
+        evaporationPolicy = new LinearEvaporationPolicyMock();
+        routingTable = new RoutingTable(new TimeFactoryMock());
+        routingTable->setEvaporationPolicy(evaporationPolicy);
+    }
+
+    void teardown() {
+        delete routingTable;
+        delete evaporationPolicy;
+    }
+};
+
+TEST(RoutingTableTest, getPossibleNextHopsReturnsEmptyList) {
     AddressPtr destination (new AddressMock());
 
-    std::deque<RoutingTableEntry*>* list = routingTable.getPossibleNextHops(destination);
+    std::deque<RoutingTableEntry*>* list = routingTable->getPossibleNextHops(destination);
     CHECK(list->empty());
 
     delete list;
 }
 
-TEST(RoutingTableTest, testUnregisteredAddressIsNotDeliverable) {
-    RoutingTable routingTable = RoutingTable();
+TEST(RoutingTableTest, unregisteredAddressIsNotDeliverable) {
     AddressPtr destinationAddress (new AddressMock());
 
-    CHECK(routingTable.isDeliverable(destinationAddress) == false);
+    CHECK(routingTable->isDeliverable(destinationAddress) == false);
 }
 
-TEST(RoutingTableTest, testPacketWithUnregisteredAddressIsNotDeliverable) {
-    RoutingTable routingTable = RoutingTable();
+TEST(RoutingTableTest, packetWithUnregisteredAddressIsNotDeliverable) {
     PacketMock packet = PacketMock();
 
-    CHECK(routingTable.isDeliverable(&packet) == false);
+    CHECK(routingTable->isDeliverable(&packet) == false);
 }
 
-TEST(RoutingTableTest, testUpdateRoutingTable) {
-    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
-    evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+TEST(RoutingTableTest, updateRoutingTable) {
     PacketMock packet = PacketMock();
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     float pheromoneValue = 123.456;
 
-    CHECK(routingTable.isDeliverable(&packet) == false);
-    routingTable.update(destination, nextHop, &interface, pheromoneValue);
+    CHECK(routingTable->isDeliverable(&packet) == false);
+    routingTable->update(destination, nextHop, &interface, pheromoneValue);
 
-    CHECK(routingTable.isDeliverable(&packet));
-    std::deque<RoutingTableEntry*>* nextHops = routingTable.getPossibleNextHops(&packet);
+    CHECK(routingTable->isDeliverable(&packet));
+    std::deque<RoutingTableEntry*>* nextHops = routingTable->getPossibleNextHops(&packet);
     CHECK(nextHops->size() == 1);
     RoutingTableEntry* possibleHop = nextHops->front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
@@ -86,10 +75,7 @@ TEST(RoutingTableTest, testUpdateRoutingTable) {
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
 }
 
-TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
-    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
-    evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+TEST(RoutingTableTest, overwriteExistingEntryWithUpdate) {
     PacketMock packet = PacketMock();
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
@@ -97,10 +83,10 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     float pheromoneValue = 123.456;
 
     // first we register a route to a destination the first time
-    routingTable.update(destination, nextHop, &interface, pheromoneValue);
+    routingTable->update(destination, nextHop, &interface, pheromoneValue);
 
-    CHECK(routingTable.isDeliverable(&packet));
-    std::deque<RoutingTableEntry*>* nextHops = routingTable.getPossibleNextHops(&packet);
+    CHECK(routingTable->isDeliverable(&packet));
+    std::deque<RoutingTableEntry*>* nextHops = routingTable->getPossibleNextHops(&packet);
     BYTES_EQUAL(1, nextHops->size());
     RoutingTableEntry* possibleHop = nextHops->front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
@@ -108,8 +94,8 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
 
     // now we want to update the pheromone value of this route
-    routingTable.update(destination, nextHop, &interface, 42);
-    nextHops = routingTable.getPossibleNextHops(&packet);
+    routingTable->update(destination, nextHop, &interface, 42);
+    nextHops = routingTable->getPossibleNextHops(&packet);
     BYTES_EQUAL(1, nextHops->size());
     possibleHop = nextHops->front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
@@ -117,10 +103,7 @@ TEST(RoutingTableTest, testOverwriteExistingEntryWithUpdate) {
     CHECK_EQUAL(42, possibleHop->getPheromoneValue());
 }
 
-TEST(RoutingTableTest, testGetPossibleNextHops) {
-    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
-    evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+TEST(RoutingTableTest, getPossibleNextHops) {
     AddressPtr sourceAddress (new AddressMock("Source"));
     AddressPtr destination1 (new AddressMock("Destination1"));
     AddressPtr destination2 (new AddressMock("Destination2"));
@@ -140,14 +123,14 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
     float pheromoneValue3 = 4;
     float pheromoneValue4 = 2;
 
-    routingTable.update(destination1, nextHop1a, &interface1, pheromoneValue1a);
-    routingTable.update(destination1, nextHop1b, &interface1, pheromoneValue1b);
-    routingTable.update(destination1, nextHop2, &interface2, pheromoneValue2);
+    routingTable->update(destination1, nextHop1a, &interface1, pheromoneValue1a);
+    routingTable->update(destination1, nextHop1b, &interface1, pheromoneValue1b);
+    routingTable->update(destination1, nextHop2, &interface2, pheromoneValue2);
 
-    routingTable.update(destination2, nextHop3, &interface3, pheromoneValue3);
-    routingTable.update(destination2, nextHop4, &interface1, pheromoneValue4);
+    routingTable->update(destination2, nextHop3, &interface3, pheromoneValue3);
+    routingTable->update(destination2, nextHop4, &interface1, pheromoneValue4);
 
-    std::deque<RoutingTableEntry*>* nextHopsForDestination1 = routingTable.getPossibleNextHops(destination1);
+    std::deque<RoutingTableEntry*>* nextHopsForDestination1 = routingTable->getPossibleNextHops(destination1);
     BYTES_EQUAL(3, nextHopsForDestination1->size());
     for (unsigned int i = 0; i < nextHopsForDestination1->size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination1->at(i);
@@ -169,7 +152,7 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
         }
     }
 
-    std::deque<RoutingTableEntry*>* nextHopsForDestination2 = routingTable.getPossibleNextHops(destination2);
+    std::deque<RoutingTableEntry*>* nextHopsForDestination2 = routingTable->getPossibleNextHops(destination2);
     BYTES_EQUAL(2, nextHopsForDestination2->size());
     for (unsigned int i = 0; i < nextHopsForDestination2->size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination2->at(i);
@@ -188,27 +171,20 @@ TEST(RoutingTableTest, testGetPossibleNextHops) {
     }
 }
 
-TEST(RoutingTableTest, testGetPheromoneValue) {
-    LinearEvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicy();
-    evaporationPolicy->setInterval(10000);
-    RoutingTable routingTable = RoutingTable(evaporationPolicy);
+TEST(RoutingTableTest, getPheromoneValue) {
     AddressPtr sourceAddress (new AddressMock("Source"));
     AddressPtr destination (new AddressMock("Destination"));
     AddressPtr nextHopAddress (new AddressMock("nextHop"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
-    // start the test
-
     // Should be zero because there is no known route to this destination
-    LONGS_EQUAL(0, routingTable.getPheromoneValue(destination, nextHopAddress, &interface));
+    LONGS_EQUAL(0, routingTable->getPheromoneValue(destination, nextHopAddress, &interface));
 
-    routingTable.update(destination, nextHopAddress, &interface, 123);
-    LONGS_EQUAL(123, routingTable.getPheromoneValue(destination, nextHopAddress, &interface));
+    routingTable->update(destination, nextHopAddress, &interface, 123);
+    LONGS_EQUAL(123, routingTable->getPheromoneValue(destination, nextHopAddress, &interface));
 }
 
 TEST(RoutingTableTest, removeEntry) {
-    // prepare the test
-    RoutingTable routingTable = RoutingTable();
     AddressPtr destination (new AddressMock("Destination"));
 
     AddressPtr nodeA (new AddressMock("A"));
@@ -217,16 +193,46 @@ TEST(RoutingTableTest, removeEntry) {
 
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
-    routingTable.update(destination, nodeA, &interface, 2.5);
-    routingTable.update(destination, nodeB, &interface, 2.5);
-    routingTable.update(destination, nodeC, &interface, 2.5);
+    routingTable->update(destination, nodeA, &interface, 2.5);
+    routingTable->update(destination, nodeB, &interface, 2.5);
+    routingTable->update(destination, nodeC, &interface, 2.5);
 
     // start the test
-    routingTable.removeEntry(destination, nodeB, &interface);
-    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable.getPossibleNextHops(destination);
+    routingTable->removeEntry(destination, nodeB, &interface);
+    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(destination);
     for(auto& entry: *possibleNextHops) {
         if(entry->getAddress()->equals(nodeB)) {
             FAIL("The deleted hop should not longer be in the list of possible next hops");
         }
     }
+}
+
+TEST(RoutingTableTest, evaporatePheromones) {
+    AddressPtr destination (new AddressMock("Destination"));
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    float pheromoneValueA = 2.5f;
+    float pheromoneValueB = 3.8f;
+    float pheromoneValueC = 0.2f;
+
+    routingTable->update(destination, nodeA, &interface, pheromoneValueA);
+    routingTable->update(destination, nodeB, &interface, pheromoneValueB);
+    routingTable->update(destination, nodeC, &interface, pheromoneValueC);
+
+    // no time has passed so nothing is evaporated
+    CHECK_EQUAL(pheromoneValueA, routingTable->getPheromoneValue(destination, nodeA, &interface));
+    CHECK_EQUAL(pheromoneValueB, routingTable->getPheromoneValue(destination, nodeB, &interface));
+    CHECK_EQUAL(pheromoneValueC, routingTable->getPheromoneValue(destination, nodeC, &interface));
+
+    // let some time pass to trigger the evaporation
+    TimeMock::letTimePass(evaporationPolicy->getTimeInterval());
+    float evaporationFactor = evaporationPolicy->getEvaporationFactor();
+    DOUBLES_EQUAL(pheromoneValueA * evaporationFactor, routingTable->getPheromoneValue(destination, nodeA, &interface), 0.00001);
+    DOUBLES_EQUAL(pheromoneValueB * evaporationFactor, routingTable->getPheromoneValue(destination, nodeB, &interface), 0.00001);
+
+    // pheromoneValueC should be well below the threshold and therefore be zero
+    CHECK_EQUAL(0.0, routingTable->getPheromoneValue(destination, nodeC, &interface));
 }

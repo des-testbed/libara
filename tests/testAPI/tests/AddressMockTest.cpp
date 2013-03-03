@@ -78,18 +78,15 @@ TEST(AddressMockTest, testOperatorEquals) {
     CHECK((mock2 == mock1) == false);
 }
 
-TEST(AddressMockTest, testISBroadCast) {
-    AddressMock broadCastAddress = AddressMock("BROADCAST");
-    AddressMock nonBroadCastAddress = AddressMock("Foobar");
-
-    CHECK(broadCastAddress.isBroadCast() == true);
-    CHECK(nonBroadCastAddress.isBroadCast() == false);
-}
-
 TEST(AddressMockTest, testCloneAddress) {
     AddressMock original = AddressMock("Foo");
     Address* clone = original.clone();
 
     CHECK(original.equals(clone));
     delete clone;
+}
+
+TEST(AddressMockTest, toString) {
+    AddressMock address = AddressMock("192.168.0.1");
+    STRCMP_EQUAL("192.168.0.1", address.toString());
 }

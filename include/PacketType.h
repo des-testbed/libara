@@ -41,6 +41,8 @@ class PacketType {
 public:
     virtual ~PacketType() {}
     
+    //TODO move all the PacketType class code into the Enum and then rename the enum
+
     enum PacketTypeEnum {
         DATA,
         FANT,

@@ -7,12 +7,13 @@ endif
 # makemake-generated makefiles create object files and other
 # build artifacts.
 ifndef CONFIGNAME
-CONFIGNAME = gcc-$(MODE)
+CONFIGNAME = clang-$(MODE)
 endif
 
 ARA_MAJOR_VERSION = 0
 ARA_MINOR_VERSION = 5
-ARA_LIB_NAME = libara.so
+ARA_TARGET_NAME = ARA
+ARA_LIB_NAME = lib$(ARA_TARGET_NAME).so
 ARA_SONAME = $(ARA_LIB_NAME).$(ARA_MAJOR_VERSION)
 
 #
@@ -29,5 +30,6 @@ endif
 CFLAGS_DEBUG = -g -Wall
 CFLAGS_RELEASE = -O2 -DNDEBUG=1
 
-CXX = g++
+CXX = clang
 MKPATH = mkdir -p
+

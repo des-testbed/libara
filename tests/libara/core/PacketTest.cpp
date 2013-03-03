@@ -35,7 +35,7 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(PacketTest) {};
 
-TEST(PacketTest, testCreate) {
+TEST(PacketTest, create) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender (new AddressMock("sender"));    // This is the node from which the packet has actually been received
@@ -55,7 +55,7 @@ TEST(PacketTest, testCreate) {
     CHECK(packet.getPayload() == false);
 }
 
-TEST(PacketTest, testCreateWithPayload) {
+TEST(PacketTest, createWithPayload) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender (new AddressMock("sender"));
@@ -76,7 +76,7 @@ TEST(PacketTest, testCreateWithPayload) {
     LONGS_EQUAL(payload, packet.getPayload());
 }
 
-TEST(PacketTest, testCreateWithPayloadAndHopCount) {
+TEST(PacketTest, createWithPayloadAndHopCount) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender (new AddressMock("sender"));
@@ -97,7 +97,7 @@ TEST(PacketTest, testCreateWithPayloadAndHopCount) {
     CHECK_EQUAL(hopCount, packet.getHopCount());
 }
 
-TEST(PacketTest, testCreateWithoutPayloadButWithHopCount) {
+TEST(PacketTest, createWithoutPayloadButWithHopCount) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender (new AddressMock("sender"));
@@ -118,7 +118,7 @@ TEST(PacketTest, testCreateWithoutPayloadButWithHopCount) {
     CHECK(packet.getPayload() == false);
 }
 
-TEST(PacketTest, testCreateFANT) {
+TEST(PacketTest, createFANT) {
    AddressPtr source (new AddressMock("source"));
    AddressPtr destination (new AddressMock("destination"));
    AddressPtr sender (new AddressMock("sender"));
@@ -141,7 +141,7 @@ TEST(PacketTest, testCreateFANT) {
    delete fant;
 }
 
-TEST(PacketTest, testClone) {
+TEST(PacketTest, clone) {
    AddressPtr source (new AddressMock("source"));
    AddressPtr destination (new AddressMock("destination"));
    AddressPtr sender (new AddressMock("sender"));
@@ -166,7 +166,7 @@ TEST(PacketTest, testClone) {
    delete clone;
 }
 
-TEST(PacketTest, testSetHopCount) {
+TEST(PacketTest, setHopCount) {
    AddressPtr source (new AddressMock("source"));
    AddressPtr destination (new AddressMock("destination"));
    AddressPtr sender (new AddressMock("sender"));
@@ -183,7 +183,7 @@ TEST(PacketTest, testSetHopCount) {
    CHECK_EQUAL(newHopCount, packet.getHopCount());
 }
 
-TEST(PacketTest, testEquals) {
+TEST(PacketTest, equals) {
    unsigned int dataPacket = PacketType::DATA;
    const char* payload = "Hello World";
 
@@ -205,7 +205,7 @@ TEST(PacketTest, testEquals) {
    CHECK(packet.equals(&otherPacket) == false);
 }
 
-TEST(PacketTest, testCalculatePayloadLength) {
+TEST(PacketTest, calculatePayloadLength) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender (new AddressMock("sender"));
@@ -217,7 +217,7 @@ TEST(PacketTest, testCalculatePayloadLength) {
     LONGS_EQUAL(11, packet.getPayloadLength())
 }
 
-TEST(PacketTest, testSetSender) {
+TEST(PacketTest, setSender) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender1 (new AddressMock("originalSender"));
@@ -238,7 +238,7 @@ TEST(PacketTest, testSetSender) {
     CHECK(packet.getSource()->equals(source));
 }
 
-TEST(PacketTest, testIncreaseHopCount) {
+TEST(PacketTest, increaseHopCount) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender (new AddressMock("originalSender"));
@@ -257,7 +257,7 @@ TEST(PacketTest, testIncreaseHopCount) {
     LONGS_EQUAL(hopCount+2, packet.getHopCount());
 }
 
-TEST(PacketTest, testCreateBANT) {
+TEST(PacketTest, createBANT) {
     AddressPtr originalSource (new AddressMock("source"));
     AddressPtr originalDestination (new AddressMock("destination"));
     AddressPtr originalSender (new AddressMock("sender"));
@@ -280,7 +280,7 @@ TEST(PacketTest, testCreateBANT) {
     delete bant;
 }
 
-TEST(PacketTest, testGetHashValue) {
+TEST(PacketTest, getHashValue) {
     AddressPtr address1 (new AddressMock("A"));
     AddressPtr address2 (new AddressMock("B"));
     Packet packet1 = Packet(address1, address2, PacketType::DATA, 1);
@@ -295,7 +295,7 @@ TEST(PacketTest, testGetHashValue) {
     CHECK(packet4.getHashValue() == packet5.getHashValue()); // same source - same seqNr
 }
 
-TEST(PacketTest, testCreateDulicatePacket) {
+TEST(PacketTest, createDulicatePacket) {
     AddressPtr originalSource (new AddressMock("source"));
     AddressPtr originalDestination (new AddressMock("destination"));
     AddressPtr originalSender (new AddressMock("sender"));
@@ -312,7 +312,21 @@ TEST(PacketTest, testCreateDulicatePacket) {
     CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
     CHECK_EQUAL(originalseqenceNumber, duplicateWarning->getSequenceNumber());
     CHECK_EQUAL(0, duplicateWarning->getPayloadLength());
-    CHECK_EQUAL(originalHopCount+1, duplicateWarning->getHopCount());
+    CHECK_EQUAL(1, duplicateWarning->getHopCount());
 
     delete duplicateWarning;
+}
+
+TEST(PacketTest, getAddressString) {
+    AddressPtr originalSource (new AddressMock("source"));
+    AddressPtr originalDestination (new AddressMock("destination"));
+    AddressPtr originalSender (new AddressMock("sender"));
+    unsigned int type = PacketType::DATA;
+    unsigned int originalseqenceNumber = 3;
+    unsigned int originalHopCount = 123;
+
+    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalHopCount);
+    STRCMP_EQUAL("source", packet.getSourceString());
+    STRCMP_EQUAL("sender", packet.getSenderString());
+    STRCMP_EQUAL("destination", packet.getDestinationString());
 }

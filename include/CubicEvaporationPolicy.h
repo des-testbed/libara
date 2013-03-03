@@ -26,11 +26,8 @@
 #ifndef LINEAR_EVAPORATION_POLICY_H_
 #define LINEAR_EVAPORATION_POLICY_H_
 
-#include <cmath>
-#include <cstdlib>
-#include <stdint.h>
-
 #include "EvaporationPolicy.h"
+#include "TimeFactory.h"
 
 namespace ARA { 
    /**
@@ -38,20 +35,19 @@ namespace ARA {
     */
     class CubicEvaporationPolicy : public EvaporationPolicy {
         public:
-			CubicEvaporationPolicy();
-            CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold);
-            ~CubicEvaporationPolicy();
-            /// the method reduces the pheromone value of a routing table entry
-            float evaporate(float phi);
+            CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold, unsigned int timeIntervalInMilliSeconds = 1000);
+
+            float evaporate(float oldPheromoneValue, int milliSecondsSinceLastEvaporation);
+
+            void setPlateau(float plateau);
+            void setSlow(float slow);
+            void setReduction(float reduction);
+            void setThreshold(float threshold);
 
         private:
-            /// 
             float plateau;
-            ///
             float slow;
-            /// 
             float reduction;
-            /// the threshold which denotes at what point the pheromone level is set to 0
             float threshold;
     };
 } /* namespace ARA */

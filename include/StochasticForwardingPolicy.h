@@ -1,5 +1,5 @@
 /******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
+ Copyright 2012, The DES-ARA-SIM Team, Freie Universität Berlin (FUB).
  All rights reserved.
 
  These sources were originally developed by Friedrich Große, Michael Frey
@@ -38,18 +38,20 @@
 #include "ForwardingPolicy.h"
 
 namespace ARA {
+    class StochasticForwardingPolicy : public ForwardingPolicy {
+        public:
+            StochasticForwardingPolicy(){};
+            virtual ~StochasticForwardingPolicy(){};
 
-class StochasticForwardingPolicy : public ForwardingPolicy {
-public:
-    StochasticForwardingPolicy(RoutingTable* routingTable) : routingTable(routingTable) {};
-    NextHop* getNextHop(const Packet*);
+            void setRoutingTable(RoutingTable* routingTable);
+            NextHop* getNextHop(const Packet*);
 
-protected:
-    void initializeRandomNumberGenerator();
-    float getRandomNumber();
+        protected:
+            void initializeRandomNumberGenerator();
+            float getRandomNumber();
 
-    RoutingTable* routingTable;
-};
+            RoutingTable* routingTable;
+    };
 
 } /* namespace ARA */
 

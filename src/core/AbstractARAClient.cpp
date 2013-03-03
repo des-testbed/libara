@@ -1,30 +1,10 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "AbstractARAClient.h"
 #include "PacketType.h"
+#include "LinearPathReinforcementPolicy.h"
 
 using namespace std;
 
@@ -32,14 +12,20 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-AbstractARAClient::AbstractARAClient() {
-    packetTrap = new PacketTrap(&routingTable);
-    /// set it to a 'random' initial value
+AbstractARAClient::AbstractARAClient(TimeFactory* timeFactory) {
+    routingTable = new RoutingTable(timeFactory);
+    packetTrap = new PacketTrap(routingTable);
+    /// set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;
+    this->deltaPhi = 2.0;
+    this->pathReinforcementPolicy = new LinearPathReinforcementPolicy(this->routingTable, deltaPhi); //FIXME this needs to be more flexible (pure virtual getter)
 }
 
 AbstractARAClient::~AbstractARAClient() {
-    delete packetTrap; //TODO we must check for and delete all packets that might still be trapped
+    // delete logger if it has been set
+    if(logger != nullptr) {
+        delete logger;
+    }
 
     // delete the sequence number lists of the last received packets
     unordered_map<AddressPtr, unordered_set<unsigned int>*>::iterator iterator;
@@ -50,6 +36,62 @@ AbstractARAClient::~AbstractARAClient() {
         delete entryPair.second;
     }
     lastReceivedPackets.clear();
+
+    delete packetTrap;
+    delete routingTable;
+    delete pathReinforcementPolicy;
+}
+
+void AbstractARAClient::setLogger(Logger* logger) {
+    this->logger = logger;
+}
+
+void AbstractARAClient::logTrace(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_TRACE, args);
+    }
+}
+
+void AbstractARAClient::logDebug(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_DEBUG, args);
+    }
+}
+
+void AbstractARAClient::logInfo(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_INFO, args);
+    }
+}
+
+void AbstractARAClient::logWarn(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_WARN, args);
+    }
+}
+
+void AbstractARAClient::logError(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_ERROR, args);
+    }
+}
+
+void AbstractARAClient::logFatal(const std::string &text, ...) const {
+    if(logger != nullptr) {
+        va_list args;
+        va_start(args, text);
+        logger->logMessageWithVAList(text, Logger::LEVEL_FATAL, args);
+    }
 }
 
 void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
@@ -64,17 +106,21 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
     return interfaces.size();
 }
 
-void AbstractARAClient::sendPacket(const Packet* packet) {
-    if(routingTable.isDeliverable(packet)) {
+void AbstractARAClient::sendPacket(Packet* packet) {
+    if(routingTable->isDeliverable(packet)) {
         NextHop* nextHop = getNextHop(packet);
         NetworkInterface* interface = nextHop->getInterface();
-        Packet* newPacket = packet->clone();
-        newPacket->setSender(interface->getLocalAddress());
-        newPacket->increaseHopCount();
-        interface->send(newPacket, nextHop->getAddress());
-        delete newPacket;
-    }
-    else {
+        AddressPtr nextHopAddress = nextHop->getAddress();
+        packet->setSender(interface->getLocalAddress());
+        packet->increaseHopCount();
+
+        logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
+        pathReinforcementPolicy->update(packet->getDestination(), nextHopAddress, interface);
+
+        interface->send(packet, nextHopAddress);
+        delete packet;
+    } else {
+        logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = packet->createFANT(sequenceNr);
@@ -83,20 +129,16 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
+void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
     updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
 
     if(hasBeenReceivedEarlier(packet)) {
-        if(packet->isDataPacket()) {
-            sendDuplicateWarning(packet, interface);
-        }
-        return;
+        handleDuplicatePacket(packet, interface);
     }
     else {
         registerReceivedPacket(packet);
+        handlePacket(packet, interface);
     }
-
-    handlePacket(packet, interface);
 }
 
 NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
@@ -104,32 +146,41 @@ NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
     return forwardingPolicy->getNextHop(packet);
 }
 
-void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterface* interface) {
+void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* interface) {
+    if(packet->isDataPacket()) {
+        sendDuplicateWarning(packet, interface);
+    }
+    delete packet;
+}
+
+void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
     Packet* duplicateWarningPacket = packet->createDuplicateWarning();
     duplicateWarningPacket->setSender(interface->getLocalAddress());
     interface->send(duplicateWarningPacket, packet->getSender());
     delete duplicateWarningPacket;
 }
 
-void AbstractARAClient::handlePacket(const Packet* packet, NetworkInterface* interface) {
-    if(packet->isDataPacket()) {
+void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
+    if (packet->isDataPacket()) {
         handleDataPacket(packet);
-    }
-    else if(packet->isAntPacket()) {
-        if(hasBeenSentByThisNode(packet) == false){
-            /// set the initial pheromone value
-            initializePheromone(packet, interface);
+    } else if(packet->isAntPacket()) {
+
+        //FIXME this is in the wrong place. Pheromone update has already taken place... also this is not very generic because you have no chance to override this..
+        /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
+        if (!(routingTable->isDeliverable(packet))) {
+           float phi = this->initializePheromone(packet);
+           this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
         }
 
         handleAntPacket(packet);
     }
-    else if(packet->getType() == PacketType::DUPLICATE_ERROR) {
+    else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
     }
     // TODO throw exception if we can not handle this packet
 }
 
-void AbstractARAClient::handleDataPacket(const Packet* packet) {
+void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
         deliverToSystem(packet);
     }
@@ -138,31 +189,36 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::handleAntPacket(const Packet* packet) {
+void AbstractARAClient::handleAntPacket(Packet* packet) {
     if(hasBeenSentByThisNode(packet) == false) {
-        
+
         if(isDirectedToThisNode(packet) == false) {
+            logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
             broadCast(packet);
         }
         else {
             handleAntPacketForThisNode(packet);
         }
     }
+
+    delete packet;
 }
 
-void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
+void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     char packetType = packet->getType();
 
     if(packetType == PacketType::FANT) {
+        logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
         Packet* bant = packet->createBANT(getNextSequenceNumber());
         broadCast(bant);
         delete bant;
     }
     else if(packetType == PacketType::BANT) {
-        deque<const Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
+        deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
+        logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString(), deliverablePackets->size());
         for(auto& deliverablePacket : *deliverablePackets) {
-            sendPacket(deliverablePacket);
             packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
+            sendPacket(deliverablePacket);
         }
         delete deliverablePackets;
     }
@@ -171,8 +227,8 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface) {
-    routingTable.removeEntry(packet->getDestination(), packet->getSender(), interface);
+void AbstractARAClient::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
+    routingTable->removeEntry(packet->getDestination(), packet->getSender(), interface);
     // TODO we can also invalidate the ack timer for the packet
 }
 
@@ -196,16 +252,13 @@ bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
     return false;
 }
 
-void AbstractARAClient::broadCast(const Packet* packet) {
-    Packet* newPacket = packet->clone();
-    newPacket->increaseHopCount();
+void AbstractARAClient::broadCast(Packet* packet) {
+    packet->increaseHopCount();
 
     for(auto& interface: interfaces) {
-        newPacket->setSender(interface->getLocalAddress());
-        interface->broadcast(newPacket);
+        packet->setSender(interface->getLocalAddress());
+        interface->broadcast(packet);
     }
-
-    delete newPacket;
 }
 
 unsigned int AbstractARAClient::getNextSequenceNumber() {
@@ -245,18 +298,27 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
 }
 
 /**
- * The method initializes the pheromone value of 
+ * The method determines the initial pheromone value of a new routing table
+ * entry. The pheromone value is only determined for a non-existing routing
+ * table entry.
  *
+ * @param in packet The received packet 
+ *
+ * @return The pheromone value
  */
-void AbstractARAClient::initializePheromone(const Packet* packet, NetworkInterface* interface){
+float AbstractARAClient::initializePheromone(const Packet* packet){
     /// determine the hop count malus
     float hopCountMalus = 1 / (float) packet->getHopCount();
     /// compute the phi value   
-    float phi = this->initialPhi * hopCountMalus;
-    /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
-    if(!(this->routingTable.exists(packet->getSource(), packet->getSender(), interface))){
-        this->routingTable.update(packet->getSource(), packet->getSender(), interface, phi);
-    }
+    return (this->initialPhi * hopCountMalus);
 }
 
+void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
+    // update packet trap to new routing table
+    this->packetTrap->setRoutingTable(routingTable);
+    // delete old routing table
+    delete this->routingTable;
+    // set new routing table
+    this->routingTable = routingTable;
+}
 } /* namespace ARA */

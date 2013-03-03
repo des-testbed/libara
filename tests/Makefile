@@ -22,14 +22,14 @@ endif
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11
 INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
-LINKFLAGS = -L$(ARA_LIB_DIR) -lara -L$(CPPUTEST_LIB_DIR) -lCppUTest
-LD_LIB_PATH = $(ARA_LIB_DIR)
+LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -llog4cxx
+LINKFLAGS += -Wl,-rpath,$(ARA_LIB_DIR)
 
-# libARA stuff
+# libARA stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ARA_LIB_DIR = ../src
 ARA_LIB = $(ARA_LIB_DIR)/$(ARA_LIB_NAME)
 
-# CppUTest options
+# CppUTest options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CPPUTEST_BASE_DIR = ./cpputest
 CPPUTEST_LIB_DIR = $(CPPUTEST_BASE_DIR)/lib
 CPPUTEST_LIB = $(CPPUTEST_LIB_DIR)/libCppUTest.a
@@ -39,14 +39,15 @@ CFLAGS += -include $(CPPUTEST_BASE_DIR)/include/CppUTest/MemoryLeakDetectorNewMa
 OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
 OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 INETMANET_LIB_DIR = ../inetmanet/src
-OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -I../include/omnetpp -I$(OMNETPP_INCL_DIR)
+OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -I../include/omnetpp -I../include/inetmanet -I$(OMNETPP_INCL_DIR)
 OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet
-OMNETPP_LIB_PATH = $(LD_LIB_PATH):$(OMNETPP_LIB_DIR):$(INETMANET_LIB_DIR)
+OMNETPP_LINKFLAGS += -Wl,-rpath,$(INETMANET_LIB_DIR)
+OMNETPP_LIB_PATH = $(OMNETPP_LIB_DIR)
 
 # Output directory and files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
 TESTS_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/tests
-COMPILED_OMNETPP_ARA = $(shell find $(PROJECT_OUTPUT_DIR)/omnetpp -type f -name '*.o')
+OMNETPP_ARA_BIN = $(shell find $(PROJECT_OUTPUT_DIR)/omnetpp -type f -name '*.o')
 
 TEST_EXECUTABLE = runAllTests
 LIBARA_TEST_EXECUTABLE = libAraTests
@@ -63,6 +64,9 @@ TESTAPI_SOURCES = $(shell find ./testAPI/ -name tests -prune -o -type f -name '*
 TESTAPI_SOURCES += ./TestRunner.cpp
 TESTAPI_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(TESTAPI_SOURCES)))
 
+TESTAPI_TESTS_SRC = $(shell find ./testAPI/tests -type f -name '*Test.cpp')
+TESTAPI_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(TESTAPI_TESTS_SRC)))
+
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 runTests: all
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"	
@@ -72,7 +76,7 @@ runTests: all
 
 runLibAraTests: $(LIBARA_TEST_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING libARA TEST SUIT ~~~~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(LD_LIB_PATH):$$LD_LIBRARY_PATH ./$(LIBARA_TEST_EXECUTABLE); then \
+	@if ./$(LIBARA_TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
     fi
 
@@ -87,31 +91,31 @@ all: $(TEST_EXECUTABLE)
 #
 # Builds all available tests (libara and omnet ARA)
 #
-$(TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TEST_BIN)
+$(TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(TESTAPI_TESTS_BIN) $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TESTS_BIN)
 	@echo "Building the comlete test suit (./$(TEST_EXECUTABLE))"
-	@$(CXX) $(CFLAGS) $(OMNETPP_INCLUDE_PATH) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TEST_BIN) $(OMNETPP_LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE)
+	@$(CXX) $(CFLAGS) $(OMNETPP_INCLUDE_PATH) $(OMNETPP_ARA_BIN) $(TESTAPI_BIN) $(TESTAPI_TESTS_BIN) $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TESTS_BIN) $(OMNETPP_LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE)
 	@ln -s -f $(TESTS_OUTPUT_DIR)/$(TEST_EXECUTABLE) $(TEST_EXECUTABLE)
 
 #
 # Tests only the libara sources
 #
-$(LIBARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN)
+$(LIBARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(TESTAPI_TESTS_BIN) $(LIBARA_TESTS_BIN)
 	@echo "Building the libara test suit (./$(LIBARA_TEST_EXECUTABLE))"
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(TESTAPI_BIN) $(LIBARA_TESTS_BIN) $(LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE)
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(TESTAPI_BIN) $(TESTAPI_TESTS_BIN) $(LIBARA_TESTS_BIN) $(LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE)
 	@ln -s -f $(TESTS_OUTPUT_DIR)/$(LIBARA_TEST_EXECUTABLE) $(LIBARA_TEST_EXECUTABLE)
 
 #
 # Tests only the omnetpp ARA sources
 #
-$(OMNETPP_ARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(OMNETPP_ARA_TEST_BIN)
+$(OMNETPP_ARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN)
 	@echo "Building the libara test suit (./$(OMNETPP_ARA_TEST_EXECUTABLE))"
-	@$(CXX) $(CFLAGS) $(OMNETPP_INCLUDE_PATH) $(TESTAPI_BIN) $(OMNETPP_ARA_TEST_BIN) $(OMNETPP_LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE)
+	@$(CXX) $(CFLAGS) $(OMNETPP_INCLUDE_PATH) $(OMNETPP_ARA_BIN) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN) $(OMNETPP_LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 	@ln -s -f $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
 
 #
 # Builds all cpp files in the test folder and its subfolders (recursive)
 #
-$(TESTS_OUTPUT_DIR)/%.o:	
+$(TESTS_OUTPUT_DIR)/%.o: %.cpp
 	@$(MKPATH) $(dir $@)
 	@if [[ $* == *Test ]]; then \
 		nrOfTests=$$(grep -c "TEST(" $*.cpp); \
@@ -119,7 +123,7 @@ $(TESTS_OUTPUT_DIR)/%.o:
 	else  \
 		echo "Compiling $*.cpp"; \
 	fi
-	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $*.cpp -o $@
+	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $(OMNETPP_INCLUDE_PATH) $*.cpp -o $@
 
 #
 # Builds the CppUTest Framework
@@ -140,3 +144,4 @@ clean:
 	rm -f $(TESTAPI_BIN)
 	rm -f $(LIBARA_TESTS_BIN)
 	rm -f $(OMNETPP_ARA_TESTS_BIN)
+

@@ -1,6 +1,6 @@
 include Makefile.inc
 
-all: checkmakefiles arasource inetmanet_headers
+all: arasource inetmanet_headers
 	@echo -e "\n~~~ BUILDING OMNeT++ SIMULATIONS ~~~~\n"
 	@cd omnetpp && $(MAKE)
 
@@ -40,31 +40,10 @@ runSingleTest: all
 	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runSingleTest
 
-clean: checkmakefiles
-	@cd src && $(MAKE) MODE=release clean
-	@cd src && $(MAKE) MODE=debug clean
-	@cd omnetpp && $(MAKE) MODE=release clean
-	@cd omnetpp && $(MAKE) MODE=debug clean
-	@cd tests && $(MAKE) clean
-	rm -R -f include/inetmanet
+clean:
+	rm -R -f out/$(CONFIGNAME)
 
-cleanall: clean	
-	rm -f omnetpp/Makefile
-
-release: cleanall makefiles test	
-
-makefiles:
-	cd omnetpp && opp_makemake -f --deep -I ../src/core -I ../src/exceptions -I ../src/util -I ../include -I ../include/inetmanet -I ../include/omnetpp -L"../inetmanet/src" -linet -L"../src" -lara -o ara-sim
-
-checkmakefiles:
-	@if [ ! -f omnetpp/Makefile ]; then \
-	echo; \
-	echo '============================================================================'; \
-	echo 'omnetpp/Makefile does not exist. Please use "make makefiles" to generate it!'; \
-	echo '============================================================================'; \
-	echo; \
-	exit 1; \
-	fi
+release: clean test	
 		
 doc: all
 	@if type doxygen >/dev/null 2>&1; then \

@@ -26,14 +26,23 @@
 #include "ARAClientMock.h"
 #include "RoutingTableEntry.h"
 #include "BestPheromoneForwardingPolicy.h"
+#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <sstream>
 
 namespace ARA {
 
-ARAClientMock::ARAClientMock() {
-    forwardingPolicy = new BestPheromoneForwardingPolicy(&routingTable);
+ARAClientMock::ARAClientMock() : AbstractARAClient(new TimeFactoryMock()) {
+    forwardingPolicy = new BestPheromoneForwardingPolicy();
+    forwardingPolicy->setRoutingTable(routingTable);
+    setEvaporationPolicy(new LinearEvaporationPolicyMock());
 }
+
+void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
+    evaporationPolicy = policy;
+    routingTable->setEvaporationPolicy(evaporationPolicy);
+};
 
 ARAClientMock::~ARAClientMock() {
     delete forwardingPolicy;
@@ -44,6 +53,9 @@ ARAClientMock::~ARAClientMock() {
         interfaceMocks.pop_back();
         delete mock;
     }
+
+    routingTable->setEvaporationPolicy(NULL);
+    delete evaporationPolicy;
 }
 
 ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
@@ -51,7 +63,7 @@ ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
 }
 
 void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
-    routingTable.update(packet->getSource(), packet->getSender(), interface, 10);
+    routingTable->update(packet->getSource(), packet->getSender(), interface, 10);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
@@ -72,7 +84,7 @@ PacketTrap* ARAClientMock::getPacketTrap() {
 }
 
 RoutingTable* ARAClientMock::getRoutingTable() {
-    return &routingTable;
+    return routingTable;
 }
 
 std::deque<const Packet*>* ARAClientMock::getDeliveredPackets() {

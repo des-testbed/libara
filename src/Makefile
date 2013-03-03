@@ -8,7 +8,7 @@ LIBARA_O = $(subst .cpp,.o, $(addprefix $(LIBARA_OUTPUT_DIR)/, $(LIBARA_SRC)))
 
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11 -fPIC
-INCLUDE_PATH = -I../include -I. -Icore -Iexceptions -Iutil
+INCLUDE_PATH = -I../include
 COPTS = $(CFLAGS) $(INCLUDE_PATH)
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,7 +26,7 @@ $(ARA_LIB_NAME): $(LIBARA_O)
 #
 # Builds all cpp files
 #
-$(LIBARA_OUTPUT_DIR)/%.o:	
+$(LIBARA_OUTPUT_DIR)/%.o: %.cpp
 	@$(MKPATH) $(dir $@)
 	@echo "Compiling $*.cpp";
 	@$(CXX) $(COPTS) -c $*.cpp -o $@
@@ -37,6 +37,3 @@ $(LIBARA_OUTPUT_DIR)/%.o:
 clean:
 	rm -f $(ARA_LIB_NAME) $(LIBARA_OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
 	rm -f $(LIBARA_O)
-	
-foo:
-	@echo $(LIBARA_O)

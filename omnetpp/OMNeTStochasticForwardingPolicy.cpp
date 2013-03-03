@@ -1,14 +1,21 @@
 #include "OMNeTStochasticForwardingPolicy.h"
 
 namespace ARA {
-namespace omnetpp {
+    namespace omnetpp {
 
-OMNeTStochasticForwardingPolicy::OMNeTStochasticForwardingPolicy(RoutingTable* routingTable) : 
- StochasticForwardingPolicy(routingTable) { }
+        Define_Module(OMNeTStochasticForwardingPolicy);
 
-float OMNeTStochasticForwardingPolicy::getRandomNumber(){
-   return dblrand();
-}
+        float OMNeTStochasticForwardingPolicy::getRandomNumber(){
+           return dblrand();
+        }
 
-} /* namespace omnetpp */
+        void OMNeTStochasticForwardingPolicy::initialize(){
+
+        }
+
+        void OMNeTStochasticForwardingPolicy::handleMessage(cMessage *msg) {
+            throw cRuntimeError("OMNeTStochasticForwardingPolicy: handleMessage() should never be called!");
+        }
+
+    } /* namespace omnetpp */
 } /* namespace ARA */

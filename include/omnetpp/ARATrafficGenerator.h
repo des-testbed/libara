@@ -23,6 +23,7 @@
 
 namespace ARA {
 namespace omnetpp {
+
     class ARATrafficGenerator : public cSimpleModule {
     protected:
         virtual void initialize();
