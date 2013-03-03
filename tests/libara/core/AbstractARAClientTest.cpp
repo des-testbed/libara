@@ -105,18 +105,18 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
     AddressPtr originalSender (new AddressMock("sender"));
     unsigned int originalHopCount = 5;
     unsigned int originalSequenceNr = 123;
-    Packet originalPacket = Packet(originalSource, originalDestination, originalSender, PacketType::DATA, originalSequenceNr, "Hello", 5, originalHopCount);
+    Packet* packet = new Packet(originalSource, originalDestination, originalSender, PacketType::DATA, originalSequenceNr, "Hello", 5, originalHopCount);
 
     // make sure that a route to the packet destination is available
-    routingTable->update(originalPacket.getDestination(), nextHop, interface2, 1.0);
-    CHECK(routingTable->isDeliverable(&originalPacket) == true);
+    routingTable->update(packet->getDestination(), nextHop, interface2, 1.0);
+    CHECK(routingTable->isDeliverable(packet) == true);
 
-    client->sendPacket(&originalPacket);
+    client->sendPacket(packet);
 
     // check if packet has been send over the correct interface
-    CHECK(interface1->hasPacketBeenSend(&originalPacket) == false);
-    CHECK(interface2->hasPacketBeenSend(&originalPacket) == true);
-    CHECK(interface3->hasPacketBeenSend(&originalPacket) == false);
+    CHECK_EQUAL(0, interface1->getNumberOfSentPackets());
+    CHECK_EQUAL(1, interface2->getNumberOfSentPackets());
+    CHECK_EQUAL(0, interface3->getNumberOfSentPackets());
 
     // check if packet has been send via interface2 to nextHop
     Pair<Packet*, AddressPtr>* sentPacketInfo = interface2->getSentPackets()->front();
@@ -126,8 +126,8 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
 
     // Check that packet content is basically the same
     CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
-    CHECK(originalSource->equals(originalPacket.getSource()));
-    CHECK(originalDestination->equals(originalPacket.getDestination()));
+    CHECK(originalSource->equals(sentPacket->getSource()));
+    CHECK(originalDestination->equals(sentPacket->getDestination()));
     CHECK_EQUAL(originalSequenceNr, sentPacket->getSequenceNumber());
     STRCMP_EQUAL("Hello", sentPacket->getPayload());
     CHECK_EQUAL(5, sentPacket->getPayloadLength());
@@ -301,14 +301,14 @@ TEST(AbstractARAClientTest, dataPacketIsRelayedIfRouteIsKnown) {
     AddressPtr source (new AddressMock("B"));
     AddressPtr destination (new AddressMock("C"));
     AddressPtr sender = source;
-    Packet packet = Packet(source, destination, sender, PacketType::DATA, 123, "Hello World");
-    packet.increaseHopCount();
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123, "Hello World");
+    packet->increaseHopCount();
 
     // create a route to the destination
     routingTable->update(destination, destination, interface, 10);
 
     // start the test
-    client->receivePacket(&packet, interface);
+    client->receivePacket(packet, interface);
     CHECK(sentPackets->size() == 1);
     Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     CHECK(sentPacketInfo->getRight()->equals(destination)); // packet has been sent to destination
@@ -410,7 +410,10 @@ TEST(AbstractARAClientTest, receivedBANTTriggersSendingOfTrappedPackets) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
 
-    Packet* dataPacket = new PacketMock("A", "C");
+    AddressPtr source (new AddressMock("A"));
+    AddressPtr destination (new AddressMock("C"));
+    AddressPtr sender = source;
+    Packet* dataPacket = new Packet(source, destination, sender, PacketType::DATA, 123, "Hello World");
     packetTrap->trapPacket(dataPacket);
 
     PacketMock bant = PacketMock("C", "A", "B", 123, 2, PacketType::BANT);
@@ -423,16 +426,14 @@ TEST(AbstractARAClientTest, receivedBANTTriggersSendingOfTrappedPackets) {
     Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     CHECK(sentPacketInfo->getRight()->equals(bant.getSender()));
     Packet* sentPacket = sentPacketInfo->getLeft();
-    CHECK(sentPacket->getSource()->equals(dataPacket->getSource()));
-    CHECK(sentPacket->getDestination()->equals(dataPacket->getDestination()));
+    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getDestination()->equals(destination));
     CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
     LONGS_EQUAL(1, sentPacket->getHopCount());
 
     // packet trap must now be empty
     CHECK(packetTrap->isEmpty());
-
-    delete dataPacket;
 }
 
 /**

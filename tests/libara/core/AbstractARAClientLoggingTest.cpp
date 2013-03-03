@@ -81,11 +81,11 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfFANTReachedItsDestination) {
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
-    PacketMock packet = PacketMock("destination", "source", 123, 10, PacketType::BANT);
-    PacketMock trappedPacket = PacketMock("source", "destination", 1, 1, PacketType::DATA);
-    packetTrap->trapPacket(&trappedPacket);
+    PacketMock bantPacket = PacketMock("destination", "source", 123, 10, PacketType::BANT);
+    Packet* trappedPacket = new PacketMock("source", "destination", 1, 1, PacketType::DATA);
+    packetTrap->trapPacket(trappedPacket);
 
-    client->receivePacket(&packet, interface);
+    client->receivePacket(&bantPacket, interface);
 
     // check that the log message is generated
     CHECK(hasLoggedMessage("BANT 123 came back from destination. 1 trapped packet can now be delivered", Logger::LEVEL_DEBUG));
@@ -103,14 +103,14 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfDataPacketIsRelayed) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("192.168.0.2");
-    PacketMock dataPacket = PacketMock("192.168.0.1", "192.168.0.10", 123, 4, PacketType::DATA);
+    Packet* dataPacket = new PacketMock("192.168.0.1", "192.168.0.10", 123, 4, PacketType::DATA);
 
     // create a route for this packet
     AddressPtr nextHop (new AddressMock("192.168.0.3"));
-    routingTable->update(dataPacket.getDestination(), nextHop, interface, 10);
+    routingTable->update(dataPacket->getDestination(), nextHop, interface, 10);
 
-    CHECK(routingTable->isDeliverable(&dataPacket));
-    client->receivePacket(&dataPacket, interface);
+    CHECK(routingTable->isDeliverable(dataPacket));
+    client->receivePacket(dataPacket, interface);
 
     // check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());

@@ -78,7 +78,7 @@ TEST(NetworkInterfaceMockTest, testHasPacketBeenBroadCasted) {
     CHECK(interface.hasPacketBeenBroadCasted(&packet3) == false);
 }
 
-TEST(NetworkInterfaceMockTest, testHasPacketBeenSend) {
+TEST(NetworkInterfaceMockTest, testHasPacketBeenSent) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     PacketMock packet1 = PacketMock("Source", "Destination", 1);
     PacketMock packet2 = PacketMock("Source", "Destination", 2);
@@ -88,9 +88,9 @@ TEST(NetworkInterfaceMockTest, testHasPacketBeenSend) {
     interface.send(&packet1, address);
     interface.broadcast(&packet2);
 
-    CHECK(interface.hasPacketBeenSend(&packet1) == true);
-    CHECK(interface.hasPacketBeenSend(&packet2) == true);
-    CHECK(interface.hasPacketBeenSend(&packet3) == false);
+    CHECK(interface.hasPacketBeenSent(&packet1) == true);
+    CHECK(interface.hasPacketBeenSent(&packet2) == true);
+    CHECK(interface.hasPacketBeenSent(&packet3) == false);
 }
 
 TEST(NetworkInterfaceMockTest, testEquals) {

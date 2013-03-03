@@ -52,7 +52,7 @@ public:
     std::string getName();
     std::deque<Pair<Packet*, std::shared_ptr<Address>>*>* getSentPackets();
     unsigned int getNumberOfSentPackets();
-    bool hasPacketBeenSend(Packet* packet);
+    bool hasPacketBeenSent(Packet* packet);
     bool hasPacketBeenBroadCasted(Packet* packet);
 
 private:

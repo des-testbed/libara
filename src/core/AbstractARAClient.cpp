@@ -22,8 +22,6 @@ AbstractARAClient::AbstractARAClient(TimeFactory* timeFactory) {
 }
 
 AbstractARAClient::~AbstractARAClient() {
-    delete packetTrap;
-
     // delete logger if it has been set
     if(logger != nullptr) {
         delete logger;
@@ -39,6 +37,7 @@ AbstractARAClient::~AbstractARAClient() {
     }
     lastReceivedPackets.clear();
 
+    delete packetTrap;
     delete routingTable;
     delete pathReinforcementPolicy;
 }
@@ -117,7 +116,9 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
         logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
         pathReinforcementPolicy->update(packet->getDestination(), nextHopAddress, interface);
+
         interface->send(packet, nextHopAddress);
+        delete packet;
     } else {
         logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
@@ -129,7 +130,6 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
-    ///
     updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
 
     if(hasBeenReceivedEarlier(packet)) {
@@ -160,12 +160,12 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     if (packet->isDataPacket()) {
         handleDataPacket(packet);
     } else if(packet->isAntPacket()) {
-       /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
+        /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
         if (!(routingTable->isDeliverable(packet))) {
            float phi = this->initializePheromone(packet);
            this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
         }
-        ///
+
         handleAntPacket(packet);
     }
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
@@ -209,8 +209,8 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
         deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
         logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString(), deliverablePackets->size());
         for(auto& deliverablePacket : *deliverablePackets) {
-            sendPacket(deliverablePacket);
             packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
+            sendPacket(deliverablePacket);
         }
         delete deliverablePackets;
     }
