@@ -52,11 +52,11 @@ TEST_GROUP(AbstractARAClientTest) {
 };
 
 TEST(AbstractARAClientTest, packetGetsTrappedIfNotDeliverable) {
-    PacketMock packet = PacketMock();
+    Packet* packet = new PacketMock();
 
-    CHECK(routingTable->isDeliverable(&packet) == false);
-    client->sendPacket(&packet);
-    CHECK(packetTrap->contains(&packet));
+    CHECK(routingTable->isDeliverable(packet) == false);
+    client->sendPacket(packet);
+    CHECK(packetTrap->contains(packet));
 }
 
 TEST(AbstractARAClientTest, generalBroadCast) {
@@ -80,10 +80,10 @@ TEST(AbstractARAClientTest, getNextSequenceNumber) {
 
 TEST(AbstractARAClientTest, broadcastFANTIfPacketNotDeliverable) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
-    PacketMock packet = PacketMock();
+    Packet* packet = new PacketMock();
 
-    CHECK(routingTable->isDeliverable(&packet) == false);
-    client->sendPacket(&packet);
+    CHECK(routingTable->isDeliverable(packet) == false);
+    client->sendPacket(packet);
 
     LONGS_EQUAL(1, interface->getNumberOfSentPackets());
     Pair<Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->front();
@@ -185,12 +185,12 @@ TEST(AbstractARAClientTest, registerReceivedPacket) {
  */
 TEST(AbstractARAClientTest, respondWithDuplicateError) {
     // prepare a packet
-    PacketMock packet = PacketMock("A", "B", "C", 123, 1, PacketType::DATA);
+    Packet* packet = new PacketMock("A", "B", "C", 123, 1, PacketType::DATA);
 
     // let client receive the packet over the same interface twice
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("X");
-    client->receivePacket(&packet, interface);
-    client->receivePacket(&packet, interface);
+    client->receivePacket(packet, interface);
+    client->receivePacket(packet, interface);
 
     // the client should have relayed the first packet and sent a duplicate warning back for the second packet
     LONGS_EQUAL(2, interface->getNumberOfSentPackets());
@@ -200,11 +200,11 @@ TEST(AbstractARAClientTest, respondWithDuplicateError) {
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
     // check the contents of the duplicate warning packet
-    CHECK(recipientOfSentPacket->equals(packet.getSender()));
+    CHECK(recipientOfSentPacket->equals(packet->getSender()));
     CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
-    CHECK(sentPacket->getSource()->equals(packet.getSource()));
+    CHECK(sentPacket->getSource()->equals(packet->getSource()));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_ERROR);
-    LONGS_EQUAL(packet.getHopCount()+1, sentPacket->getHopCount());
+    LONGS_EQUAL(packet->getHopCount()+1, sentPacket->getHopCount());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
 }
 
@@ -248,10 +248,10 @@ TEST(AbstractARAClientTest, routingTableIsUpdated) {
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
-    Packet packet = Packet(nodeA, nodeB, nodeC, PacketType::DATA, 123);
+    Packet* packet = new Packet(nodeA, nodeB, nodeC, PacketType::DATA, 123);
 
     CHECK(routingTable->isDeliverable(nodeA) == false);
-    client->receivePacket(&packet, interface);
+    client->receivePacket(packet, interface);
     CHECK(routingTable->isDeliverable(nodeA) == true);
     std::deque<RoutingTableEntry*>* possibleHops = routingTable->getPossibleNextHops(nodeA);
     LONGS_EQUAL(1, possibleHops->size());
@@ -267,17 +267,19 @@ TEST(AbstractARAClientTest, routingTableIsUpdated) {
 TEST(AbstractARAClientTest, dataPacketIsDeliveredToSystem) {
     std::deque<const Packet*>* deliveredPackets = client->getDeliveredPackets();
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("192.168.0.1");
-    PacketMock packet1 = PacketMock("192.168.0.4", "192.168.0.123", 123, 1, PacketType::DATA);// directed to some other node
-    PacketMock packet2 = PacketMock("192.168.0.4", "192.168.0.1",   124);  // directed to this node
+    Packet* packetToThisNode = new PacketMock("192.168.0.4", "192.168.0.1",   124);  // directed to this node
+    Packet* anotherPacket = new PacketMock("192.168.0.4", "192.168.0.123", 123, 1, PacketType::DATA);// directed to some other node
 
     CHECK(deliveredPackets->empty())
 
-    client->receivePacket(&packet1, interface);
+    client->receivePacket(anotherPacket, interface);
     CHECK(deliveredPackets->empty())
 
-    client->receivePacket(&packet2, interface);
+    client->receivePacket(packetToThisNode, interface);
     LONGS_EQUAL(1, deliveredPackets->size());
-    CHECK(deliveredPackets->front()->equals(&packet2));
+    CHECK(deliveredPackets->front()->equals(packetToThisNode));
+
+    delete packetToThisNode;
 }
 
 /**
@@ -396,15 +398,14 @@ TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
  * Now it has received a BANT that has come back from the data packets destination.
  * It is expected that the trapped packet is send over the discovered route and is
  * no longer trapped in the PacketTrap.
- *
  */
 TEST(AbstractARAClientTest, receivedBANTTriggersSendingOfTrappedPackets) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
 
-    PacketMock dataPacket = PacketMock("A", "C");
-    packetTrap->trapPacket(&dataPacket);
+    Packet* dataPacket = new PacketMock("A", "C");
+    packetTrap->trapPacket(dataPacket);
 
     PacketMock bant = PacketMock("C", "A", "B", 123, 2, PacketType::BANT);
 
@@ -416,14 +417,16 @@ TEST(AbstractARAClientTest, receivedBANTTriggersSendingOfTrappedPackets) {
     Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     CHECK(sentPacketInfo->getRight()->equals(bant.getSender()));
     Packet* sentPacket = sentPacketInfo->getLeft();
-    CHECK(sentPacket->getSource()->equals(dataPacket.getSource()));
-    CHECK(sentPacket->getDestination()->equals(dataPacket.getDestination()));
+    CHECK(sentPacket->getSource()->equals(dataPacket->getSource()));
+    CHECK(sentPacket->getDestination()->equals(dataPacket->getDestination()));
     CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
     LONGS_EQUAL(1, sentPacket->getHopCount());
 
     // packet trap must now be empty
     CHECK(packetTrap->isEmpty());
+
+    delete dataPacket;
 }
 
 /**
@@ -434,10 +437,10 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     std::deque<Pair<Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
-    PacketMock data = PacketMock("A", "Z", "A", 123, 1, PacketType::DATA);
+    Packet* data = new PacketMock("A", "Z", "A", 123, 1, PacketType::DATA);
 
     // sending the initial packet should trigger a FANT broadcast
-    client->sendPacket(&data);
+    client->sendPacket(data);
     CHECK(sentPackets->size() == 1);
     Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->at(0);
     Packet* sentPacket = sentPacketInfo->getLeft();
@@ -460,9 +463,6 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
     delete sentPacket;
 }
 
-/**
- *
- */
 TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("Z");
@@ -541,9 +541,6 @@ TEST(AbstractARAClientTest, deleteTrappedPacketsInDestructor) {
 
     // the client will trap the packet because it is not deliverable
     client->sendPacket(packet);
-
-    // we need to delete the original packet because only a clone is trapped
-    delete packet;
 
     // when the test finishes, the client will be deleted in teardown()
     // and the packet clone should be deleted as well

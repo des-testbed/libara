@@ -41,7 +41,7 @@ void PacketTrap::trapPacket(Packet* packet) {
         trappedPackets[destination] = newHashSet;
     }
 
-    trappedPackets[destination]->insert(packet->clone());
+    trappedPackets[destination]->insert(packet);
 }
 
 void PacketTrap::untrapPacket(Packet* packet) {
@@ -53,7 +53,6 @@ void PacketTrap::untrapPacket(Packet* packet) {
         if(storedPacketIterator != packetSet->end()) {
             Packet* storedPacket = *storedPacketIterator;
             packetSet->erase(storedPacket);
-            delete storedPacket;
 
             // if this was the last packet for this destination we need to delete the set
             if(packetSet->size() == 0) {

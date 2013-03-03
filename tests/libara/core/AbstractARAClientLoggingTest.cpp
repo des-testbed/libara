@@ -57,11 +57,11 @@ TEST_GROUP(AbstractARAClientLoggerTest) {
 };
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAPacketIsTrappedAndFANTIsBroadcasted) {
-    PacketMock packet = PacketMock("abc", "xyz", 123);
+    Packet* packet = new PacketMock("abc", "xyz", 123);
 
     // assume that the packet is not deliverable
-    CHECK(routingTable->isDeliverable(&packet) == false);
-    client->sendPacket(&packet);
+    CHECK(routingTable->isDeliverable(packet) == false);
+    client->sendPacket(packet);
 
     // check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
