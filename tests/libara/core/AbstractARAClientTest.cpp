@@ -98,8 +98,14 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
     NetworkInterfaceMock* interface1 = client->createNewNetworkInterfaceMock();
     NetworkInterfaceMock* interface2 = client->createNewNetworkInterfaceMock();
     NetworkInterfaceMock* interface3 = client->createNewNetworkInterfaceMock();
-    PacketMock originalPacket = PacketMock();
     AddressPtr nextHop (new AddressMock("nextHop"));
+
+    AddressPtr originalSource (new AddressMock("source"));
+    AddressPtr originalDestination (new AddressMock("destination"));
+    AddressPtr originalSender (new AddressMock("sender"));
+    unsigned int originalHopCount = 5;
+    unsigned int originalSequenceNr = 123;
+    Packet originalPacket = Packet(originalSource, originalDestination, originalSender, PacketType::DATA, originalSequenceNr, "Hello", 5, originalHopCount);
 
     // make sure that a route to the packet destination is available
     routingTable->update(originalPacket.getDestination(), nextHop, interface2, 1.0);
@@ -119,15 +125,15 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
     CHECK(recipientOfSentPacket->equals(nextHop));
 
     // Check that packet content is basically the same
-    CHECK_EQUAL(originalPacket.getType(), sentPacket->getType());
-    CHECK(sentPacket->getSource()->equals(originalPacket.getSource()));
-    CHECK(sentPacket->getDestination()->equals(originalPacket.getDestination()));
-    CHECK_EQUAL(originalPacket.getSequenceNumber(), sentPacket->getSequenceNumber());
-    CHECK_EQUAL(originalPacket.getPayload(), sentPacket->getPayload());
-    CHECK_EQUAL(originalPacket.getPayloadLength(), sentPacket->getPayloadLength());
+    CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
+    CHECK(originalSource->equals(originalPacket.getSource()));
+    CHECK(originalDestination->equals(originalPacket.getDestination()));
+    CHECK_EQUAL(originalSequenceNr, sentPacket->getSequenceNumber());
+    STRCMP_EQUAL("Hello", sentPacket->getPayload());
+    CHECK_EQUAL(5, sentPacket->getPayloadLength());
 
     // only the hop count needs to be incremented by 1
-    CHECK_EQUAL(originalPacket.getHopCount() + 1, sentPacket->getHopCount());
+    CHECK_EQUAL(originalHopCount + 1, sentPacket->getHopCount());
 }
 
 TEST(AbstractARAClientTest, getNumberOfNetworkInterfaces) {

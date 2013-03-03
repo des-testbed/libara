@@ -112,14 +112,12 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         NextHop* nextHop = getNextHop(packet);
         NetworkInterface* interface = nextHop->getInterface();
         AddressPtr nextHopAddress = nextHop->getAddress();
-        Packet* newPacket = packet->clone();
-        newPacket->setSender(interface->getLocalAddress());
-        newPacket->increaseHopCount();
+        packet->setSender(interface->getLocalAddress());
+        packet->increaseHopCount();
 
-        logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSenderString(), packet->getDestinationString(), nextHopAddress->toString());
+        logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
         pathReinforcementPolicy->update(packet->getDestination(), nextHopAddress, interface);
-        interface->send(newPacket, nextHop->getAddress());
-        delete newPacket;
+        interface->send(packet, nextHopAddress);
     } else {
         logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
