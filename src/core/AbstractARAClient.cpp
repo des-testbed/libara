@@ -107,7 +107,7 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
     return interfaces.size();
 }
 
-void AbstractARAClient::sendPacket(const Packet* packet) {
+void AbstractARAClient::sendPacket(Packet* packet) {
     if(routingTable->isDeliverable(packet)) {
         NextHop* nextHop = getNextHop(packet);
         NetworkInterface* interface = nextHop->getInterface();
@@ -130,7 +130,7 @@ void AbstractARAClient::sendPacket(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::receivePacket(const Packet* packet, NetworkInterface* interface) {
+void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
     ///
     updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
 
@@ -151,32 +151,32 @@ NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
     return forwardingPolicy->getNextHop(packet);
 }
 
-void AbstractARAClient::sendDuplicateWarning(const Packet* packet, NetworkInterface* interface) {
+void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
     Packet* duplicateWarningPacket = packet->createDuplicateWarning();
     duplicateWarningPacket->setSender(interface->getLocalAddress());
     interface->send(duplicateWarningPacket, packet->getSender());
     delete duplicateWarningPacket;
 }
 
-void AbstractARAClient::handlePacket(const Packet* packet, NetworkInterface* interface) {
-    if(packet->isDataPacket()){
+void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
+    if (packet->isDataPacket()) {
         handleDataPacket(packet);
-    }else if(packet->isAntPacket()){
+    } else if(packet->isAntPacket()) {
        /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
-        if(!(routingTable->isDeliverable(packet))){
+        if (!(routingTable->isDeliverable(packet))) {
            float phi = this->initializePheromone(packet);
            this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
         }
         ///
         handleAntPacket(packet);
     }
-    else if(packet->getType() == PacketType::DUPLICATE_ERROR) {
+    else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
     }
     // TODO throw exception if we can not handle this packet
 }
 
-void AbstractARAClient::handleDataPacket(const Packet* packet) {
+void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
         deliverToSystem(packet);
     }
@@ -185,7 +185,7 @@ void AbstractARAClient::handleDataPacket(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::handleAntPacket(const Packet* packet) {
+void AbstractARAClient::handleAntPacket(Packet* packet) {
     if(hasBeenSentByThisNode(packet) == false) {
         
         if(isDirectedToThisNode(packet) == false) {
@@ -198,7 +198,7 @@ void AbstractARAClient::handleAntPacket(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
+void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     char packetType = packet->getType();
 
     if(packetType == PacketType::FANT) {
@@ -208,7 +208,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
         delete bant;
     }
     else if(packetType == PacketType::BANT) {
-        deque<const Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
+        deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
         logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString(), deliverablePackets->size());
         for(auto& deliverablePacket : *deliverablePackets) {
             sendPacket(deliverablePacket);
@@ -221,7 +221,7 @@ void AbstractARAClient::handleAntPacketForThisNode(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface) {
+void AbstractARAClient::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
     routingTable->removeEntry(packet->getDestination(), packet->getSender(), interface);
     // TODO we can also invalidate the ack timer for the packet
 }

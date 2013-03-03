@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
@@ -49,10 +28,36 @@ namespace ARA {
 
 //TODO fix the visibility: most of the methods should be protected instead of public
 
+/**
+ * TODO write class description
+ */
 class AbstractARAClient {
 public:
     AbstractARAClient(TimeFactory* timeFactory);
     virtual ~AbstractARAClient();
+
+    /**
+     * Sends the packet to the packets destination.
+     *
+     * If the packet is deliverable (e.g there is at least one route known
+     * in the routing table), the next hop is calculated via the current
+     * forwarding policy. If there is no known route to the packet destination
+     * a FANT is generated and send according to the Abstract Ant Routing
+     * Algorithm (ARA).
+     *
+     * @param packet the Packet to be send. Please note that the packet will be
+     *        deleted by the AbstractARAClient when it is no longer needed.
+     */
+    void sendPacket(Packet* packet);
+
+    /**
+     * Receive a Packet over the given NetworkInterface. The packet will be
+     * processed according to the Ant Routing Algorithm (ARA).
+     *
+     * @param packet the received Packet. Please note that the packet will be
+     *        deleted by the AbstractARAClient when it has been fully processed.
+     */
+    void receivePacket(Packet* packet, NetworkInterface* interface);
 
     /**
      * This method is called each a time a new packet is received over the
@@ -93,27 +98,6 @@ public:
      */
     unsigned int getNumberOfNetworkInterfaces();
 
-    /**
-     * Sends the packet to the packets destination.
-     *
-     * If the packet is deliverable (e.g there is at least one route known
-     * in the routing table), the next hop is calculated via the current forwarding policy.
-     * If there is no known route to the packet destination a FANT is generated and send
-     * according to the ARA algorithm.
-     *
-     * Note: The packet instance may be deleted after this method so we need to
-     * clone the packet if we want to persist it in memory.
-     */
-    void sendPacket(const Packet* packet);
-
-    /**
-     * Receive a Packet over the given NetworkInterface. The packet will be
-     * processed according to the Ant Routing Algorithm (ARA).
-     *
-     * TODO write some more documentation
-     */
-    void receivePacket(const Packet* packet, NetworkInterface* interface);
-
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     void broadCast(const Packet* packet);
     //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
@@ -134,15 +118,18 @@ public:
 protected:
 
     /// The member denotes the constant which is used in the pheromone reinforcement of a path
+    // FIXME do we need this here any more? I thought we have a policy class for that
     double deltaPhi;
 
     std::deque<NetworkInterface*> interfaces;
     RoutingTable *routingTable;
     PacketTrap* packetTrap;
   
+    // FIXME let the AbstractARAClient access this object via a pure virtual method to force the implementations to actually set this policy
     PathReinforcementPolicy* pathReinforcementPolicy;
 
-    /// The member specifies the initial level 
+    /// The member specifies the initial level
+    // FIXME do we need this here any more? I thought we have a policy class for that
     double initialPhi;
 
     /**
@@ -213,18 +200,19 @@ protected:
      * @see AbstractARAClient::logMessage
      */
     void logFatal(const std::string &logMessage, ...) const;
+
 private:
     Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
     std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 
     NextHop* getNextHop(const Packet* packet);
-    void sendDuplicateWarning(const Packet* packet, NetworkInterface* interface);
-    void handlePacket(const Packet* packet, NetworkInterface* interface);
-    void handleDataPacket(const Packet* packet);
-    void handleAntPacket(const Packet* packet);
-    void handleAntPacketForThisNode(const Packet* packet);
-    void handleDuplicateErrorPacket(const Packet* packet, NetworkInterface* interface);
+    void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
+    void handlePacket(Packet* packet, NetworkInterface* interface);
+    void handleDataPacket(Packet* packet);
+    void handleAntPacket(Packet* packet);
+    void handleAntPacketForThisNode(Packet* packet);
+    void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
 };

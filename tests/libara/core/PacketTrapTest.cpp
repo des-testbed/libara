@@ -87,7 +87,7 @@ TEST(PacketTrapTest, getDeliverablePacket) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     // Start the test
-    std::deque<const Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
+    std::deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
     CHECK(deliverablePackets->empty());   // there is no trapped packet so none can be deliverable
     delete deliverablePackets;
 
