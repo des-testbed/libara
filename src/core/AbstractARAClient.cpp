@@ -133,20 +133,24 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
     updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
 
     if(hasBeenReceivedEarlier(packet)) {
-        if(packet->isDataPacket()) {
-            sendDuplicateWarning(packet, interface);
-        }
-        return;
-    } else {
-        registerReceivedPacket(packet);
+        handleDuplicatePacket(packet, interface);
     }
-
-    handlePacket(packet, interface);
+    else {
+        registerReceivedPacket(packet);
+        handlePacket(packet, interface);
+    }
 }
 
 NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
     ForwardingPolicy* forwardingPolicy = getForwardingPolicy();
     return forwardingPolicy->getNextHop(packet);
+}
+
+void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* interface) {
+    if(packet->isDataPacket()) {
+        sendDuplicateWarning(packet, interface);
+    }
+    delete packet;
 }
 
 void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
@@ -160,6 +164,8 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     if (packet->isDataPacket()) {
         handleDataPacket(packet);
     } else if(packet->isAntPacket()) {
+
+        //FIXME this is in the wrong place. Pheromone update has already taken place... also this is not very generic because you have no chance to override this..
         /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
         if (!(routingTable->isDeliverable(packet))) {
            float phi = this->initializePheromone(packet);
@@ -185,7 +191,7 @@ void AbstractARAClient::handleDataPacket(Packet* packet) {
 
 void AbstractARAClient::handleAntPacket(Packet* packet) {
     if(hasBeenSentByThisNode(packet) == false) {
-        
+
         if(isDirectedToThisNode(packet) == false) {
             logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
             broadCast(packet);
@@ -194,6 +200,8 @@ void AbstractARAClient::handleAntPacket(Packet* packet) {
             handleAntPacketForThisNode(packet);
         }
     }
+
+    delete packet;
 }
 
 void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {

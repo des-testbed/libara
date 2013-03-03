@@ -312,7 +312,7 @@ TEST(PacketTest, createDulicatePacket) {
     CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
     CHECK_EQUAL(originalseqenceNumber, duplicateWarning->getSequenceNumber());
     CHECK_EQUAL(0, duplicateWarning->getPayloadLength());
-    CHECK_EQUAL(originalHopCount+1, duplicateWarning->getHopCount());
+    CHECK_EQUAL(1, duplicateWarning->getHopCount());
 
     delete duplicateWarning;
 }

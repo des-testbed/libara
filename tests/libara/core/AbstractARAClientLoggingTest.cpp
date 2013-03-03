@@ -70,9 +70,9 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAPacketIsTrappedAndFANTIsBroa
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfFANTReachedItsDestination) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("destination");
-    PacketMock packet = PacketMock("source", "destination", 123, 10, PacketType::FANT);
+    Packet* packet = new PacketMock("source", "destination", 123, 10, PacketType::FANT);
 
-    client->receivePacket(&packet, interface);
+    client->receivePacket(packet, interface);
 
     // check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
@@ -81,11 +81,11 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfFANTReachedItsDestination) {
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
-    PacketMock bantPacket = PacketMock("destination", "source", 123, 10, PacketType::BANT);
+    Packet* bantPacket = new PacketMock("destination", "source", 123, 10, PacketType::BANT);
     Packet* trappedPacket = new PacketMock("source", "destination", 1, 1, PacketType::DATA);
     packetTrap->trapPacket(trappedPacket);
 
-    client->receivePacket(&bantPacket, interface);
+    client->receivePacket(bantPacket, interface);
 
     // check that the log message is generated
     CHECK(hasLoggedMessage("BANT 123 came back from destination. 1 trapped packet can now be delivered", Logger::LEVEL_DEBUG));
@@ -93,8 +93,8 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-    PacketMock antPacket = PacketMock("source", "destination", 123, 3, PacketType::FANT);
-    client->receivePacket(&antPacket, interface);
+    Packet* antPacket = new PacketMock("source", "destination", 123, 3, PacketType::FANT);
+    client->receivePacket(antPacket, interface);
 
     // check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());

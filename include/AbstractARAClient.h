@@ -207,6 +207,7 @@ private:
     std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 
     NextHop* getNextHop(const Packet* packet);
+    void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
     void handlePacket(Packet* packet, NetworkInterface* interface);
     void handleDataPacket(Packet* packet);
