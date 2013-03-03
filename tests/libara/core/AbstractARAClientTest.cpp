@@ -567,3 +567,20 @@ TEST(AbstractARAClientTest, deleteTrappedPacketsInDestructor) {
     // and the packet clone should be deleted as well
 }
 
+/**
+ * In this test we let some ARA client receive a packet that it can directly
+ * deliver to its system. Afterwards we attempt to delete this packet.
+ * If this leads to a segfault this is a violation of the call semantics of
+ * AbstractARAClient::deliverToSystem(..)
+ */
+TEST(AbstractARAClientTest, packetIsNotDeletedOutsideOfDeliverToSystem) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("destination");
+    Packet* dataPacket = new PacketMock("source", "destination", 123, 1, PacketType::DATA);
+
+    client->receivePacket(dataPacket, interface);
+    try {
+        delete dataPacket;
+    } catch (std::exception& exception) {
+        FAIL("We should be able to delete the dataPacket.")
+    }
+}
