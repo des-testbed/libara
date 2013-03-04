@@ -12,8 +12,8 @@ TEST(OMNeTTimeFactory, makeTime) {
     OMNeTTimeFactory timeFactory = OMNeTTimeFactory();
     Time* newTime = timeFactory.makeTime();
 
-    OMNeTTime* timeMockInstance = dynamic_cast<OMNeTTime*>(newTime);
-    CHECK(timeMockInstance != NULL);
+    OMNeTTime* omnetTimeInstance = dynamic_cast<OMNeTTime*>(newTime);
+    CHECK(omnetTimeInstance != NULL);
 
     delete newTime;
 }

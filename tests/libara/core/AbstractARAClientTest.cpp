@@ -460,7 +460,7 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
 
     // sending the initial packet should trigger a FANT broadcast
     client->sendPacket(data);
-    CHECK_EQUAL(1, sentPackets->size());
+    BYTES_EQUAL(1, sentPackets->size());
     Pair<Packet*, AddressPtr>* sentPacketInfo = sentPackets->at(0);
     Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getType() == PacketType::FANT);
