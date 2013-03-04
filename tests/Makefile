@@ -1,5 +1,3 @@
-include ../Makefile.inc
-
 ifneq ("$(NO_OMNET)", "TRUE")
 # Pull in OMNeT++ configuration (Makefile.inc or configuser.vc) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ifneq ("$(OMNETPP_CONFIGFILE)","")
@@ -18,6 +16,10 @@ endif
 
 include $(CONFIGFILE)
 endif
+
+# our makefile needs to be included after the omnet stuff (otherwise $(CXX) is overridden
+include ../Makefile.inc
+CONFIGNAME = $(CXX)-$(MODE)
 
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11
