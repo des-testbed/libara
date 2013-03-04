@@ -66,7 +66,6 @@ SimTime OMNeTTime::getTimestamp() const{
     return (this->timestamp);
 }
 
-void OMNeTTime::setToCurrentTime(){
-    /// TODO: check if that's the way to go
-    //this->timestamp = simTime(); // this throws a segfault in the test
+void OMNeTTime::setToCurrentTime() {
+    //timestamp = simTime(); // this throws a segfault in the test
 }
