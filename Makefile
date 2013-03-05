@@ -1,11 +1,11 @@
 include Makefile.inc
 
-all: arasource inetmanet_headers
+all: libARA inetmanet_headers
 	@echo -e "\n~~~ BUILDING OMNeT++ SIMULATIONS ~~~~\n"
 	@cd omnetpp && $(MAKE)
 
-arasource: 
-	@echo -e "\n~~~ BUILDING ARA SOURCE ~~~~~~~~~~~~~\n"
+libARA: 
+	@echo -e "\n~~~ BUILDING libARA ~~~~~~~~~~~~~~~~~\n"
 	@cd src && $(MAKE)
 
 inetmanet_headers: inetmanet/src/libinet.so
