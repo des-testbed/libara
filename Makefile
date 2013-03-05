@@ -41,6 +41,9 @@ runSingleTest: all
 	@cd tests && $(MAKE) runSingleTest
 
 clean:
+	@cd src && $(MAKE) clean
+	@cd omnetpp && $(MAKE) clean
+	@cd tests && $(MAKE) clean
 	rm -R -f out/$(CONFIGNAME)
 
 release: clean test	
