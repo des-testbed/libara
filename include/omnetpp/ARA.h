@@ -34,6 +34,7 @@ namespace ARA {
         class ARA: public cSimpleModule, public AbstractARAClient {
             public:
                 ARA() : AbstractARAClient(new OMNeTTimeFactory()) {}
+                ~ARA();
 
             protected:
                 int numInitStages() const;
@@ -47,9 +48,11 @@ namespace ARA {
                 void setEvaporationPolicy(EvaporationPolicy *policy);
 
             private:
+                /// The member is a self-message which is used as a timer for the route discovery phase
+                cMessage *routeDiscoveryTimer;
+
                 /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
                 ForwardingPolicy* forwardingPolicy;
-
                 /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time
                 EvaporationPolicy* evaporationPolicy;
 
@@ -66,6 +69,8 @@ namespace ARA {
                 void initializeEvaporationPolicy();
                 void initializePathReinforcementPolicy();
 
+                bool isRouteDiscoveryTimer(cMessage *msg);
+                void handleRouteDiscoveryTimer(cMessage *msg);
                 bool isFromUpperLayer(cMessage* msg);
                 bool isARPMessage(cMessage* msg);
                 void handleUpperLayerMessage(cMessage* msg);

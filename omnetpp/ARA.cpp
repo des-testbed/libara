@@ -16,6 +16,12 @@ namespace ARA {
         /// The module class needs to be registered with OMNeT++
         Define_Module(ARA);
 
+        ARA::~ARA(){
+            if (routeDiscoveryTimer != nullptr) {
+                cancelAndDelete(routeDiscoveryTimer);
+            }
+        }
+
         int ARA::numInitStages() const {
             return 5;
         }
@@ -38,6 +44,8 @@ namespace ARA {
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
                 initializePathReinforcementPolicy();
+                
+                routeDiscoveryTimer = nullptr;
             }
         }
 
@@ -74,17 +82,29 @@ namespace ARA {
         }
 
         void ARA::handleMessage(cMessage* msg) {
-            if(isFromUpperLayer(msg)) {
+            if (isRouteDiscoveryTimer(msg)) {
+                handleRouteDiscoveryTimer(msg);
+            } else if(isFromUpperLayer(msg)) {
                 handleUpperLayerMessage(msg);
-            }
-            else {
+            } else {
                 if(isARPMessage(msg)) {
                     handleARP(msg);
-                }
-                else {
+                } else {
                     handleARA(msg);
                 }
             }
+        }
+
+        bool ARA::isRouteDiscoveryTimer(cMessage *msg) {
+           return (msg == routeDiscoveryTimer);
+        }
+
+        void ARA::handleRouteDiscoveryTimer(cMessage *msg){
+            /// check if a route has been established 
+
+            /// if no route has been established, decrement numberOfRetries, retry
+
+            /// if numberOfRetries is 0 pass an error to the 'application'
         }
 
         bool ARA::isFromUpperLayer(cMessage* msg) {
