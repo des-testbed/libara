@@ -11,18 +11,15 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-NetworkInterfaceMock::NetworkInterfaceMock() {
-    localAddress = shared_ptr<Address>(new AddressMock("DEFAULT"));
+NetworkInterfaceMock::NetworkInterfaceMock(AbstractARAClient* client) : ReliableNetworkInterface(client, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST"))) {
     this->name = "NetworkInterfaceMock";
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName) {
-    localAddress = shared_ptr<Address>(new AddressMock("DEFAULT"));
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, AbstractARAClient* client) : ReliableNetworkInterface(client, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST")))  {
     this->name = interfaceName;
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName) {
-    localAddress = shared_ptr<Address>(new AddressMock(localAddressName));
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, const string localAddressName, AbstractARAClient* client) : ReliableNetworkInterface(client, AddressPtr(new AddressMock(localAddressName)), AddressPtr(new AddressMock("BROADCAST"))) {
     this->name = interfaceName;
 }
 
@@ -96,13 +93,12 @@ unsigned int NetworkInterfaceMock::getNumberOfSentPackets() {
     return sentPackets.size();
 }
 
-shared_ptr<Address> NetworkInterfaceMock::getLocalAddress() const {
-    return shared_ptr<Address>(localAddress);
+int NetworkInterfaceMock::getNrOfUnacknowledgedPackets() const {
+    return 0;
 }
 
-bool NetworkInterfaceMock::isBroadcastAddress(std::shared_ptr<Address> someAddress) const {
-    AddressMock broadcastAddress = AddressMock("BROADCAST");
-    return someAddress->equals(&broadcastAddress);
+deque<Packet*> NetworkInterfaceMock::getUnacknowledgedPackets() const {
+    return deque<Packet*>();
 }
 
 } /* namespace ARA */
