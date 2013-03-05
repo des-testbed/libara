@@ -50,7 +50,7 @@ TEST(NetworkInterfaceMockTest, testMockRemembersSentPackets) {
     mock.send(&packet2, recipient2);
     mock.send(&packet3, recipient1);
 
-    std::deque<Pair<Packet*, AddressPtr>*>* sendPackets = mock.getSentPackets();
+    std::deque<Pair<const Packet*, AddressPtr>*>* sendPackets = mock.getSentPackets();
 
     CHECK(sendPackets->at(0)->getLeft()->equals(&packet1));
     CHECK(sendPackets->at(0)->getRight()->equals(recipient1));

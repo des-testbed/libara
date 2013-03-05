@@ -15,7 +15,7 @@ namespace ARA {
      * will be one TimeFactory counterpart that will handle instantiation in
      * the EvaporationPolicy class.
      */
-    class TimeFactory {
+    class TimeFactory { //TODO maybe we should rename TimeFactory to Clock to make its intend more clear
         public:
             virtual ~TimeFactory() {};
 
