@@ -27,11 +27,13 @@
 namespace ARA {
 
 //TODO fix the visibility: most of the methods should be protected instead of public
+//TODO fix the indent
 
 /**
  * TODO write class description
  */
 class AbstractARAClient {
+
 public:
     AbstractARAClient(TimeFactory* timeFactory);
     virtual ~AbstractARAClient();
@@ -114,26 +116,9 @@ public:
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
-
     void setRoutingTable(RoutingTable *routingTable);
 
 protected:
-
-    /// The member denotes the constant which is used in the pheromone reinforcement of a path
-    // FIXME do we need this here any more? I thought we have a policy class for that
-    double deltaPhi;
-
-    std::deque<NetworkInterface*> interfaces;
-    RoutingTable *routingTable;
-    PacketTrap* packetTrap;
-  
-    // FIXME let the AbstractARAClient access this object via a pure virtual method to force the implementations to actually set this policy
-    PathReinforcementPolicy* pathReinforcementPolicy;
-
-    /// The member specifies the initial level
-    // FIXME do we need this here any more? I thought we have a policy class for that
-    double initialPhi;
-
     /**
      * This method is called to retrieve an instance of ForwardingPolicy
      * each time the next hop for a given destination has to be determined.
@@ -204,10 +189,6 @@ protected:
     void logFatal(const std::string &logMessage, ...) const;
 
 private:
-    Logger* logger = nullptr;
-    unsigned int nextSequenceNumber = 1;
-    std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
-
     NextHop* getNextHop(const Packet* packet);
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
@@ -218,6 +199,27 @@ private:
     void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
+
+protected:
+    /// The member denotes the constant which is used in the pheromone reinforcement of a path
+    // FIXME do we need this here any more? I thought we have a policy class for that
+    double deltaPhi;
+
+    std::deque<NetworkInterface*> interfaces;
+    RoutingTable *routingTable;
+    PacketTrap* packetTrap;
+
+    // FIXME let the AbstractARAClient access this object via a pure virtual method to force the implementations to actually set this policy
+    PathReinforcementPolicy* pathReinforcementPolicy;
+
+    /// The member specifies the initial level
+    // FIXME do we need this here any more? I thought we have a policy class for that
+    double initialPhi;
+
+private:
+    Logger* logger = nullptr;
+    unsigned int nextSequenceNumber = 1;
+    std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 };
 
 } /* namespace ARA */
