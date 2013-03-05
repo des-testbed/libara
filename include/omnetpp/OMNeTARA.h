@@ -31,9 +31,9 @@ namespace ARA {
          *  Guenes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
          *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
          */
-        class ARA: public cSimpleModule, public AbstractARAClient {
+        class OMNeTARA: public cSimpleModule, public AbstractARAClient {
             public:
-                ARA() : AbstractARAClient(new OMNeTTimeFactory()) {}
+                OMNeTARA() : AbstractARAClient(new OMNeTTimeFactory()) {}
 
             protected:
                 int numInitStages() const;

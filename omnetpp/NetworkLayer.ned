@@ -15,7 +15,7 @@
 
 package ara;
 
-import ara.ARA;
+import ara.OMNeTARA;
 import ara.OMNeTLinearEvaporationPolicy;
 import ara.OMNeTRoutingTable;
 import ara.OMNeTStochasticForwardingPolicy;
@@ -34,7 +34,7 @@ module NetworkLayer
         output ifOut[nrOfNetworkInterfaces];	// output to  NIC interface (INET/MANET needs this to be named this way)
 
     submodules:
-        ara: ARA {
+        ara: OMNeTARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=138,102");

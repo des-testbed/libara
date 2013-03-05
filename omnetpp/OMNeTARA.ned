@@ -1,7 +1,7 @@
 @namespace(ARA::omnetpp);
 package ara;
 
-simple ARA {
+simple OMNeTARA {
     
     parameters:
         string forwardingPolicy = default("stochastic");
