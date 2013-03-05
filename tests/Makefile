@@ -1,5 +1,3 @@
-include ../Makefile.inc
-
 ifneq ("$(NO_OMNET)", "TRUE")
 # Pull in OMNeT++ configuration (Makefile.inc or configuser.vc) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ifneq ("$(OMNETPP_CONFIGFILE)","")
@@ -19,10 +17,14 @@ endif
 include $(CONFIGFILE)
 endif
 
+# our makefile needs to be included after the omnet stuff (otherwise $(CXX) is overridden
+include ../Makefile.inc
+CONFIGNAME = $(CXX)-$(MODE)
+
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11
 INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
-LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -llog4cxx
+LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -llog4cxx -lm
 LINKFLAGS += -Wl,-rpath,$(ARA_LIB_DIR)
 
 # libARA stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

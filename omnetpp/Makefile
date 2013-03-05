@@ -1,5 +1,3 @@
-include ../Makefile.inc
-
 # Pull in OMNeT++ configuration (Makefile.inc or configuser.vc)
 ifneq ("$(OMNETPP_CONFIGFILE)","")
 CONFIGFILE = $(OMNETPP_CONFIGFILE)
@@ -16,6 +14,10 @@ $(error Config file '$(CONFIGFILE)' does not exist -- add the OMNeT++ bin direct
 endif
 
 include $(CONFIGFILE)
+
+# our makefile needs to be included after the omnet stuff (otherwise $(CXX) is overridden
+include ../Makefile.inc
+CONFIGNAME = $(CXX)-$(MODE)
 
 # Output directory and files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
@@ -41,7 +43,7 @@ INCLUDE_PATH = \
     -I../include/inetmanet \
     -I../include/omnetpp \
     -I.
-LINKFLAGS = $(OMNETPP_LIBS) -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(INETMANET_LIB_DIR) -linet
+LINKFLAGS = $(OMNETPP_LIBS) -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(INETMANET_LIB_DIR) -linet -lm
 LINKFLAGS += -Wl,-rpath,$(INETMANET_LIB_DIR) -Wl,-rpath,$(ARA_LIB_DIR)
 COPTS = $(CFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 

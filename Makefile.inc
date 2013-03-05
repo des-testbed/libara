@@ -3,12 +3,14 @@ ifndef MODE
 MODE = debug
 endif
 
+# TODO we might want to make this more generic (i.e. enable compiling with gcc)
+# A simple ifndef does not work because this will always be set by the OMNeT+ makefile.inc to gcc
+CXX = clang
+
 # Configname determines where (in which subdirectory of out/)
 # makemake-generated makefiles create object files and other
 # build artifacts.
-ifndef CONFIGNAME
-CONFIGNAME = clang-$(MODE)
-endif
+CONFIGNAME = $(CXX)-$(MODE)
 
 ARA_MAJOR_VERSION = 0
 ARA_MINOR_VERSION = 5
@@ -30,6 +32,4 @@ endif
 CFLAGS_DEBUG = -g -Wall
 CFLAGS_RELEASE = -O2 -DNDEBUG=1
 
-CXX = clang
 MKPATH = mkdir -p
-
