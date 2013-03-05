@@ -48,9 +48,6 @@ namespace ARA {
                 void setEvaporationPolicy(EvaporationPolicy *policy);
 
             private:
-                /// The member is a self-message which is used as a timer for the route discovery phase
-                cMessage *routeDiscoveryTimer;
-
                 /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
                 ForwardingPolicy* forwardingPolicy;
                 /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time

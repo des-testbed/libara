@@ -17,9 +17,7 @@ namespace ARA {
         Define_Module(ARA);
 
         ARA::~ARA(){
-            if (routeDiscoveryTimer != nullptr) {
-                cancelAndDelete(routeDiscoveryTimer);
-            }
+
         }
 
         int ARA::numInitStages() const {
@@ -44,8 +42,6 @@ namespace ARA {
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
                 initializePathReinforcementPolicy();
-                
-                routeDiscoveryTimer = nullptr;
             }
         }
 
@@ -96,7 +92,8 @@ namespace ARA {
         }
 
         bool ARA::isRouteDiscoveryTimer(cMessage *msg) {
-           return (msg == routeDiscoveryTimer);
+             return false;
+//           return (msg == routeDiscoveryTimer);
         }
 
         void ARA::handleRouteDiscoveryTimer(cMessage *msg){
