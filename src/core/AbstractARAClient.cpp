@@ -122,10 +122,13 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     } else {
         logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
-        unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packet->createFANT(sequenceNr);
-        broadCast(fant);
-        delete fant;
+        /// check if a route discovery is already happening
+//        if (!routeDiscovery.isRunning(packet->getSource())) {
+            unsigned int sequenceNr = getNextSequenceNumber();
+            Packet* fant = packet->createFANT(sequenceNr);
+            broadCast(fant);
+            delete fant;
+//        }
     }
 }
 
