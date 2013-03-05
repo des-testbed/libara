@@ -13,6 +13,7 @@ namespace ARA {
 
 /**
  * Network interface are used by the ARA clients to send Packets to other clients.
+ * An abstract base implementation can be found in AbstractNetworkInterface
  */
 class NetworkInterface {
 public:
@@ -45,7 +46,7 @@ public:
 	 *
 	 * This method is used to determine the sender address each time a a new packet is created.
 	 */
-	virtual std::shared_ptr<Address> getLocalAddress() = 0;
+	virtual std::shared_ptr<Address> getLocalAddress() const = 0;
 
 	/**
 	 * Returns true if the given address is known to be a broadcast address.

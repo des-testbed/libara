@@ -18,8 +18,8 @@ namespace omnetpp {
 
 typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
 
-OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) {
-    this->module = module;
+OMNeTGate::OMNeTGate(OMNeTARA* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : AbstractNetworkInterface(araClient) {
+    this->module = araClient;
     this->gateToARP = gateToARP;
     this->broadCastDelay = broadCastDelay;
     this->uniCastDelay = uniCastDelay;
@@ -79,14 +79,6 @@ bool OMNeTGate::equals(NetworkInterface* otherInterface) {
         return strcmp(module->getFullName(), otherOMNeTInterface->module->getFullName()) == 0
             && strcmp(gateToARP->getFullName(), otherOMNeTInterface->gateToARP->getFullName()) == 0;
     }
-}
-
-shared_ptr<Address> OMNeTGate::getLocalAddress() {
-    return localAddress;
-}
-
-bool OMNeTGate::isBroadcastAddress(std::shared_ptr<Address> someAddress) const {
-    return someAddress->equals(broadcastAddress);
 }
 
 } /* namespace omnetpp */

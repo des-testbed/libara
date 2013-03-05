@@ -96,7 +96,7 @@ unsigned int NetworkInterfaceMock::getNumberOfSentPackets() {
     return sentPackets.size();
 }
 
-shared_ptr<Address> NetworkInterfaceMock::getLocalAddress() {
+shared_ptr<Address> NetworkInterfaceMock::getLocalAddress() const {
     return shared_ptr<Address>(localAddress);
 }
 

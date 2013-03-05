@@ -46,7 +46,7 @@ public:
     void send(const Packet* packet, std::shared_ptr<Address> recipient);
     void broadcast(const Packet* packet);
     bool equals(NetworkInterface* otherInterface);
-    std::shared_ptr<Address> getLocalAddress();
+    std::shared_ptr<Address> getLocalAddress() const;
     bool isBroadcastAddress(std::shared_ptr<Address> someAddress) const;
 
     std::string getName();
