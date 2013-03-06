@@ -65,13 +65,14 @@ TEST(AbstractARAClientTest, generalBroadCast) {
     NetworkInterfaceMock* interface3 = client->createNewNetworkInterfaceMock();
 
     Packet* packet = new PacketMock();
+    Packet* clone = packet->clone(); // we need to create this clone because the original packet will be deleted directly in the broadcast method
     client->broadCast(packet);
 
-    CHECK(interface1->hasPacketBeenBroadCasted(packet) == true);
-    CHECK(interface2->hasPacketBeenBroadCasted(packet) == true);
-    CHECK(interface3->hasPacketBeenBroadCasted(packet) == true);
+    CHECK(interface1->hasPacketBeenBroadCasted(clone) == true);
+    CHECK(interface2->hasPacketBeenBroadCasted(clone) == true);
+    CHECK(interface3->hasPacketBeenBroadCasted(clone) == true);
 
-    delete packet;
+    delete clone;
 }
 
 TEST(AbstractARAClientTest, getNextSequenceNumber) {
@@ -478,9 +479,6 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
 
     // the client should not broadcast the FANT again
     CHECK(sentPackets->empty())
-
-    // we need to delete this manually because we reseted the sentPackets list earlier
-    delete sentPacket;
 }
 
 TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
@@ -509,9 +507,6 @@ TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
 
     // the client should not broadcast the BANT again
     CHECK(sentPackets->empty())
-
-    // we need to delete this manually because we reseted the sentPackets list earlier
-    delete sentPacket;
 }
 
 /**

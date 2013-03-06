@@ -27,7 +27,6 @@ NetworkInterfaceMock::~NetworkInterfaceMock() {
     while(sentPackets.empty() == false) {
         Pair<const Packet*, AddressPtr>* removedPair = sentPackets.back();
         sentPackets.pop_back();
-        delete removedPair->getLeft();  // this packet has been cloned in the send method
         delete removedPair;
     }
 }
@@ -40,21 +39,8 @@ std::deque<Pair<const Packet*, AddressPtr>*>* NetworkInterfaceMock::getSentPacke
     return &sentPackets;
 }
 
-<<<<<<< Updated upstream
-void NetworkInterfaceMock::send(const Packet* packet, AddressPtr recipient) {
-    Pair<const Packet*, AddressPtr>* pair = new Pair<const Packet*, AddressPtr>(packet, recipient);
-=======
-void NetworkInterfaceMock::doSend(const Packet* packet, std::shared_ptr<Address> recipient) {
-    Packet* copyOfPacket = packet->clone();
-    AddressPtr copyOfAddress = AddressPtr(recipient);
-    Pair<Packet*, AddressPtr>* pair = new Pair<Packet*, AddressPtr>(copyOfPacket, copyOfAddress);
->>>>>>> Stashed changes
-    sentPackets.push_back(pair);
-}
-
-void NetworkInterfaceMock::broadcast(const Packet* packet) {
-    AddressPtr broadCastAddress (new AddressMock("BROADCAST"));
-    doSend(packet, broadCastAddress);
+void NetworkInterfaceMock::doSend(const Packet* packet, AddressPtr recipient) {
+    sentPackets.push_back(new Pair<const Packet*, AddressPtr>(packet, recipient));
 }
 
 bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {

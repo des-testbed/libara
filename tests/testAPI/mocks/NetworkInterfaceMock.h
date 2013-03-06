@@ -24,7 +24,6 @@ public:
     ~NetworkInterfaceMock();
 
     void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
-    void broadcast(const Packet* packet);
     bool equals(NetworkInterface* otherInterface);
 
     std::string getName();

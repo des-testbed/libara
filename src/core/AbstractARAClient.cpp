@@ -155,7 +155,6 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
     Packet* duplicateWarningPacket = packet->createDuplicateWarning();
     duplicateWarningPacket->setSender(interface->getLocalAddress());
     interface->send(duplicateWarningPacket, packet->getSender());
-    delete duplicateWarningPacket;
 }
 
 void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
