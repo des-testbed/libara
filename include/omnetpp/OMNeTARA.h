@@ -87,6 +87,8 @@ namespace ARA {
                 void initializeEvaporationPolicy();
                 void initializePathReinforcementPolicy();
 
+                void deleteRouteDiscoveryTimerParameters(cMessage *message);
+
                 bool isRouteDiscoveryTimer(cMessage *msg);
                 void handleRouteDiscoveryTimer(cMessage *msg);
                 bool isFromUpperLayer(cMessage* msg);
