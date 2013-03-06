@@ -132,6 +132,18 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     }
 }
 
+void AbstractARAClient::initializeRouteDiscoveryTimer(std::shared_ptr<Address> address){
+    /// TODO
+}
+
+void AbstractARAClient::startRouteDiscoveryTimer(std::shared_ptr<Address> address){
+    /// TODO
+}
+
+void AbstractARAClient::stopRouteDiscoveryTimer(std::shared_ptr<Address> address){
+    /// TODO
+}
+
 bool AbstractARAClient::isRouteDiscoveryRunning(std::shared_ptr<Address> address){
     /// FIXME
     return false;
