@@ -110,7 +110,7 @@ namespace ARA {
             addressParameter->setStringValue(address->toString());
             message->addPar(addressParameter);
             /// store the number of retries in the self message
-            cMsgPar *currentRouteDiscoveryRetriesParameter = new cMsgPar();
+            cMsgPar *currentRouteDiscoveryRetriesParameter = new cMsgPar("currentRouteDiscoveryRetries");
             currentRouteDiscoveryRetriesParameter->setLongValue(routeDiscoveryRetries);
             message->addPar(currentRouteDiscoveryRetriesParameter);
             /// add it to the timer table (FIXME: shall we check if the entry already exists?)
@@ -126,7 +126,6 @@ namespace ARA {
         void OMNeTARA::stopRouteDiscoveryTimer(std::shared_ptr<Address> address){
            /// get the correspondent entry in the timer hash map
            cMessage *message = routeDiscoveryTimer[address];
-           /// 
            deleteRouteDiscoveryTimerParameters(message);
            /// cancel the event in the future event chain and delete it
            cancelAndDelete(message);
@@ -154,17 +153,33 @@ namespace ARA {
 
         bool OMNeTARA::isRouteDiscoveryTimer(cMessage *msg) {
             if (msg->isSelfMessage()) {
-                /// TODO
-
+                if (msg->getParList().size() == 2) {
+                    /// check if the parameter list contains the current number of route dicovery entries
+                    return (msg->getParList().find("currentRouteDiscoveryRetries") != -1);
+                }
             }
+            return false;
         }
 
         void OMNeTARA::handleRouteDiscoveryTimer(cMessage *msg){
             /// check if a route has been established 
 
-            /// if no route has been established, decrement numberOfRetries, retry
+            if (msg->getParList().size() == 2) {
+//                const char *address = msg->getParList()[0];
+//                int retries = msg->getParList()[1];
+                int retries = 0;
 
-            /// if numberOfRetries is 0 pass an error to the 'application'
+                /// if no route has been established, decrement numberOfRetries, retry
+                if (retries > 0) {
+
+                } else {
+                  deleteRouteDiscoveryTimerParameters(msg);
+                  cancelAndDelete(msg);
+                  /// if numberOfRetries is 0 pass an error to the 'application'
+
+                  /// 'inform' the packet trap
+                }
+            }
         }
 
         bool OMNeTARA::isFromUpperLayer(cMessage* msg) {
