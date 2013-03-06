@@ -31,6 +31,11 @@ namespace ARA {
             bool isBroadcastAddress(std::shared_ptr<Address> someAddress) const;
 
             /**
+             * Sends the packet with the stored broadcast address as receiver.
+             */
+            void broadcast(const Packet* packet);
+
+            /**
              * Receive a packet over this interface.
              * A received packet is normally delivered to the ARAClient but
              * this might not be the case with some special packets packets

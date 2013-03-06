@@ -22,6 +22,10 @@ bool AbstractNetworkInterface::isBroadcastAddress(std::shared_ptr<Address> someA
     return someAddress->equals(broadcastAddress);
 }
 
+void AbstractNetworkInterface::broadcast(const Packet* packet) {
+    send(packet, broadcastAddress);
+}
+
 void AbstractNetworkInterface::receive(Packet* packet) {
     // standard implementation which might be overwritten in the implementing classes.
     deliverToARAClient(packet);
