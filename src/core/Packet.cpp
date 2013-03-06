@@ -121,6 +121,10 @@ Packet* Packet::createDuplicateWarning() const {
     return new Packet(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, 1);
 }
 
+Packet* Packet::createAcknowledgment() const {
+    return new Packet(source, destination, sender, PacketType::ACK, seqNr, 1);
+}
+
 size_t Packet::getHashValue() const {
     // TODO Review and tweak this hash value generation (naiv implementation)
     size_t sourceHash = source->getHashValue();

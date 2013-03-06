@@ -59,7 +59,7 @@ public:
      * @param packet the received Packet. Please note that the packet will be
      *        deleted by the AbstractARAClient when it has been fully processed.
      */
-    void receivePacket(Packet* packet, NetworkInterface* interface);
+    virtual void receivePacket(Packet* packet, NetworkInterface* interface);
 
     /**
      * This method is called each a time a new packet is received over the

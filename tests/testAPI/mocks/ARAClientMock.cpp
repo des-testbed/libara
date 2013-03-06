@@ -18,11 +18,6 @@ ARAClientMock::ARAClientMock() : AbstractARAClient(new TimeFactoryMock()) {
     setEvaporationPolicy(new LinearEvaporationPolicyMock());
 }
 
-void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
-    evaporationPolicy = policy;
-    routingTable->setEvaporationPolicy(evaporationPolicy);
-};
-
 ARAClientMock::~ARAClientMock() {
     delete forwardingPolicy;
 
@@ -33,9 +28,23 @@ ARAClientMock::~ARAClientMock() {
         delete mock;
     }
 
+    for(auto& pair: receivedPackets) {
+        delete pair;
+    }
+
     routingTable->setEvaporationPolicy(NULL);
     delete evaporationPolicy;
 }
+
+void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
+    receivedPackets.push_back(new Pair<const Packet*, const NetworkInterface*>(packet, interface));
+    AbstractARAClient::receivePacket(packet, interface);
+}
+
+void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
+    evaporationPolicy = policy;
+    routingTable->setEvaporationPolicy(evaporationPolicy);
+};
 
 ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
     return forwardingPolicy;
@@ -68,6 +77,14 @@ RoutingTable* ARAClientMock::getRoutingTable() {
 
 std::deque<const Packet*>* ARAClientMock::getDeliveredPackets() {
     return &deliveredPackets;
+}
+
+int ARAClientMock::getNumberOfReceivedPackets() {
+    return receivedPackets.size();
+}
+
+std::deque<Pair<const Packet*, const NetworkInterface*>*> ARAClientMock::getReceivedPackets() {
+    return receivedPackets;
 }
 
 } /* namespace ARA */

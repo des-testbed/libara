@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "CppUTest/TestHarness.h"
 #include <cstring>
@@ -329,4 +308,26 @@ TEST(PacketTest, getAddressString) {
     STRCMP_EQUAL("source", packet.getSourceString());
     STRCMP_EQUAL("sender", packet.getSenderString());
     STRCMP_EQUAL("destination", packet.getDestinationString());
+}
+
+TEST(PacketTest, createAcknowledgment) {
+    AddressPtr originalSource (new AddressMock("source"));
+    AddressPtr originalDestination (new AddressMock("destination"));
+    AddressPtr originalSender (new AddressMock("sender"));
+    unsigned int type = PacketType::DATA;
+    unsigned int originalseqenceNumber = 123;
+    unsigned int originalHopCount = 3;
+
+    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalHopCount);
+    Packet* ackPacket = packet.createAcknowledgment();
+
+    CHECK(ackPacket->getSource()->equals(originalSource));
+    CHECK(ackPacket->getDestination()->equals(originalDestination));
+    // The sender of the packet will be determined when it is actually send by the ARA client
+    CHECK_EQUAL(PacketType::ACK, ackPacket->getType());
+    CHECK_EQUAL(originalseqenceNumber, ackPacket->getSequenceNumber());
+    CHECK_EQUAL(0, ackPacket->getPayloadLength());
+    CHECK_EQUAL(1, ackPacket->getHopCount());
+
+    delete ackPacket;
 }

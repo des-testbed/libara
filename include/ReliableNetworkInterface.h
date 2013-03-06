@@ -43,6 +43,14 @@ namespace ARA {
              */
             void broadcast(const Packet* packet);
 
+            /**
+             * Receive a packet over this interface. If this is a DATA packet it will be
+             * acknowledged to the sender. If this is an ACK packet it will be used to
+             * remove packets from the list of unacknowledged packets (and stop their timer).
+             * If this is not an ACK packet it will be delivered to the associated AbstractARAClient.
+             */
+            virtual void receive(Packet* packet);
+
             std::deque<const Packet*> getUnacknowledgedPackets() const;
 
         protected:
@@ -55,8 +63,12 @@ namespace ARA {
              */
             virtual void doSend(const Packet* packet, std::shared_ptr<Address> recipient) = 0;
 
+
         private:
             std::deque<const Packet*> unacknowledgedPackets;
+
+            void handleNonAckPacket(Packet* packet);
+            void handleAckPacket(Packet* packet);
     };
 
 } /* namespace ARA */
