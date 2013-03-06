@@ -16,6 +16,17 @@ namespace ARA {
         /// The module class needs to be registered with OMNeT++
         Define_Module(OMNeTARA);
 
+        OMNeTARA::~OMNeTARA() {
+            std::unordered_map<AddressPtr, cMessage*, AddressHash, AddressPredicate>::iterator i;
+            
+            for(i = routeDiscoveryTimer.begin(); i != routeDiscoveryTimer.end(); i++){
+               cMessage *message = i->second;
+               cancelAndDelete(message);
+            }
+
+            routeDiscoveryTimer.clear();
+        }
+
         int OMNeTARA::numInitStages() const {
             return 5;
         }
@@ -30,6 +41,7 @@ namespace ARA {
         void OMNeTARA::initialize(int stage) {
             if(stage == 4) {
                 initialPhi = par("initialPhi").doubleValue();
+                routeDiscoveryRetries = par("nrOfRouteDiscoveryRetries").longValue();
 
                 interfaceTable = getInterfaceTable();
 				initializeNetworkInterfaces();
@@ -88,8 +100,38 @@ namespace ARA {
             }
         }
 
+        void OMNeTARA::initializeRouteDiscoveryTimer(std::shared_ptr<Address> address){
+            cMessage *message = new cMessage();
+            /// store the address in the self message
+
+            /// store the number of retries in the self message
+
+            /// add it to the timer table (FIXME: shall we check if the entry already exists?)
+            routeDiscoveryTimer[address] = message;
+        }
+
+        void OMNeTARA::startRouteDiscoveryTimer(std::shared_ptr<Address> address){
+            int scheduleTime = 5;
+            /// FIXME: how to set the time interval (5 is stupid)
+            scheduleAt(scheduleTime, routeDiscoveryTimer[address]);
+        }
+
+        void OMNeTARA::stopRouteDiscoveryTimer(std::shared_ptr<Address> address){
+           /// get the correspondent entry in the timer hash map
+           cMessage *message = routeDiscoveryTimer[address];
+           /// cancel the event in the future event chain and delete it
+           cancelAndDelete(message);
+           /// remove the address from the timer hash map
+           routeDiscoveryTimer.erase(address);
+        }
+
+        bool OMNeTARA::isRouteDiscoveryRunning(std::shared_ptr<Address> address){
+            return routeDiscoveryTimer.find(address) != routeDiscoveryTimer.end();
+        }
+
+
         bool OMNeTARA::isRouteDiscoveryTimer(cMessage *msg) {
-             return false;
+            return false;
 //           return (msg == routeDiscoveryTimer);
         }
 

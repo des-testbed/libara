@@ -7,6 +7,8 @@
 
 #include <omnetpp.h>
 #include <algorithm>
+#include <cmessage.h>
+#include <unordered_map>
 
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
@@ -31,12 +33,13 @@ namespace ARA {
          *
          * The algorithm was first published in:
          *
-         *  Guenes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
+         *  Mesut Guenes, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
          *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
          */
         class OMNeTARA: public cSimpleModule, public AbstractARAClient {
             public:
                 OMNeTARA() {}
+                ~OMNeTARA();
 
             protected:
                 int numInitStages() const;
@@ -48,6 +51,11 @@ namespace ARA {
                 void deliverToSystem(const Packet* packet);
                 void packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
+				void initializeRouteDiscoveryTimer(std::shared_ptr<Address> address);
+				void startRouteDiscoveryTimer(std::shared_ptr<Address> address);
+				void stopRouteDiscoveryTimer(std::shared_ptr<Address> address);
+                bool isRouteDiscoveryRunning(std::shared_ptr<Address> address);
+
                 void setEvaporationPolicy(EvaporationPolicy *policy);
 
                 /**
@@ -58,6 +66,9 @@ namespace ARA {
                  */
                 void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
             private:
+                /// The member manages the route discovery timers for different destinations
+                std::unordered_map<std::shared_ptr<Address>, cMessage*, AddressHash, AddressPredicate> routeDiscoveryTimer;
+
                 /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
                 ForwardingPolicy* forwardingPolicy;
                 /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time

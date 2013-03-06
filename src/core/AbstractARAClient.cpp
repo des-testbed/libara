@@ -122,12 +122,19 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
         /// check if a route discovery is already happening
-//        if (!routeDiscovery.isRunning(packet->getSource())) {
+        if (!isRouteDiscoveryRunning(packet->getSource())) {
+			initializeRouteDiscoveryTimer(packet->getSource());
+            startRouteDiscoveryTimer(packet->getSource());
             unsigned int sequenceNr = getNextSequenceNumber();
             Packet* fant = packet->createFANT(sequenceNr);
             broadCast(fant);
-//        }
+        }
     }
+}
+
+bool AbstractARAClient::isRouteDiscoveryRunning(std::shared_ptr<Address> address){
+    /// FIXME
+    return false;
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
@@ -215,9 +222,16 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     }
     else if(packetType == PacketType::BANT) {
         deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
+
         logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString(), deliverablePackets->size());
         for(auto& deliverablePacket : *deliverablePackets) {
             packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
+
+            // check if the timer is running
+            if (isRouteDiscoveryRunning(deliverablePacket->getSource())) {
+                stopRouteDiscoveryTimer(deliverablePacket->getSource());
+            }
+
             sendPacket(deliverablePacket);
         }
         delete deliverablePackets;

@@ -117,9 +117,15 @@ public:
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
+    virtual bool isRouteDiscoveryRunning(std::shared_ptr<Address> address);
+    virtual void initializeRouteDiscoveryTimer(std::shared_ptr<Address> address) = 0;
+    virtual void startRouteDiscoveryTimer(std::shared_ptr<Address> address) = 0;
+    virtual void stopRouteDiscoveryTimer(std::shared_ptr<Address> address) = 0;
+
     void setRoutingTable(RoutingTable *routingTable);
 
 protected:
+
     /**
      * This method is called to retrieve an instance of ForwardingPolicy
      * each time the next hop for a given destination has to be determined.
@@ -212,6 +218,8 @@ protected:
 
     // FIXME let the AbstractARAClient access this object via a pure virtual method to force the implementations to actually set this policy
     PathReinforcementPolicy* pathReinforcementPolicy;
+
+    int routeDiscoveryRetries;
 
     /// The member specifies the initial level
     // FIXME do we need this here any more? I thought we have a policy class for that
