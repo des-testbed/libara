@@ -24,6 +24,7 @@ public:
     ~NetworkInterfaceMock();
 
     void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
+    void broadcast(const Packet* packet);
     bool equals(NetworkInterface* otherInterface);
 
     std::string getName();
@@ -37,6 +38,7 @@ public:
 private:
     std::string name;
     std::deque<Pair<const Packet*, std::shared_ptr<Address>>*> sentPackets;
+    std::deque<const Packet*> broadcastedPackets;
 };
 
 } /* namespace ARA */

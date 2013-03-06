@@ -23,6 +23,11 @@ void ReliableNetworkInterface::send(const Packet* packet, std::shared_ptr<Addres
     doSend(packet, recipient);
 }
 
+void ReliableNetworkInterface::broadcast(const Packet* packet) {
+    doSend(packet, broadcastAddress);
+    delete packet;
+}
+
 std::deque<const Packet*> ReliableNetworkInterface::getUnacknowledgedPackets() const {
     return unacknowledgedPackets;
 }

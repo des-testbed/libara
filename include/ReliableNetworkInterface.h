@@ -31,8 +31,17 @@ namespace ARA {
              * Implements a reliable send operation which will deliver the packet to the given recipient.
              * To accomplish this the interface waits for a packet acknowledgment and sends the packet again
              * if it is not acknowledged in a given time interval.
+             *
+             * The Packet will be deleted as soon as the packet has been acknowledged by the client or
+             * is reported undeliverable to the associated ARA client.
              */
             void send(const Packet* packet, std::shared_ptr<Address> recipient);
+
+            /**
+             * Broadcasts the packet using the broadcast address that was provided in the class
+             * constructor. Internally the doSend Method is used.
+             */
+            void broadcast(const Packet* packet);
 
             std::deque<const Packet*> getUnacknowledgedPackets() const;
 
@@ -41,6 +50,8 @@ namespace ARA {
             /**
              * This method needs to be implemented by the concrete ReliableNetworkInterface implementation
              * It must send the given packet to the wanted recipient via this interface.
+             *
+             * Generally the packet might be deleted as soon as this method returns.
              */
             virtual void doSend(const Packet* packet, std::shared_ptr<Address> recipient) = 0;
 

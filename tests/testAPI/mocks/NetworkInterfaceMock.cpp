@@ -29,6 +29,10 @@ NetworkInterfaceMock::~NetworkInterfaceMock() {
         sentPackets.pop_back();
         delete removedPair;
     }
+
+    for(auto& packet: broadcastedPackets) {
+        delete packet;
+    }
 }
 
 std::string NetworkInterfaceMock::getName() {
@@ -43,15 +47,19 @@ void NetworkInterfaceMock::doSend(const Packet* packet, AddressPtr recipient) {
     sentPackets.push_back(new Pair<const Packet*, AddressPtr>(packet, recipient));
 }
 
-bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
-    for (auto& pair: sentPackets) {
-        const Packet* currentPacket = pair->getLeft();
-        AddressPtr recipient = pair->getRight();
+/**
+ * This is implemented here again to prevent the ReliableNetworkInterface from deleting the packet yet.
+ * We want to store the packet until the destructor is called just for our convenience in the unit tests.
+ */
+void NetworkInterfaceMock::broadcast(const Packet* packet) {
+    doSend(packet, broadcastAddress);
+    broadcastedPackets.push_back(packet);
+}
 
+bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
+    for (auto& currentPacket: broadcastedPackets) {
         if(currentPacket->equals(packet)) {
-            if(isBroadcastAddress(recipient)) {
-                return true;
-            }
+            return true;
         }
     }
 
