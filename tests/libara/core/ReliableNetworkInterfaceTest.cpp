@@ -7,7 +7,7 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/time/TimeFactoryMock.h"
+#include "testAPI/mocks/time/ClockMock.h"
 #include "Environment.h"
 
 using namespace ARA;
@@ -197,7 +197,7 @@ TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
     BYTES_EQUAL(1, sentPackets->size());
 
     // get the acknowledgment timer which is used by the interface
-    TimeFactoryMock* clock = (TimeFactoryMock*) Environment::getClock();
+    ClockMock* clock = (ClockMock*) Environment::getClock();
     TimerMock* ackTimer = clock->getLastTimer();
 
     CHECK(ackTimer->isRunning());
@@ -228,7 +228,7 @@ TEST(ReliableNetworkInterfaceTest, undeliverablePacketsAreReportedToARAClient) {
     BYTES_EQUAL(1, sentPackets->size());
 
     // get the acknowledgment timer which is used by the interface
-    TimeFactoryMock* clock = (TimeFactoryMock*) Environment::getClock();
+    ClockMock* clock = (ClockMock*) Environment::getClock();
     TimerMock* ackTimer = clock->getLastTimer();
 
     // simulate that the timer does expire 3 times

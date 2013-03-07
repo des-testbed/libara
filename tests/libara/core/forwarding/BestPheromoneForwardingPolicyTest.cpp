@@ -13,7 +13,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/time/TimeFactoryMock.h"
+#include "testAPI/mocks/time/ClockMock.h"
 
 #include <iostream>
 #include <memory>
@@ -26,7 +26,7 @@ TEST_GROUP(BestPheromoneForwardingPolicyTest) {};
 
 TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
     EvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicyMock();
-    RoutingTable routingTable = RoutingTable(new TimeFactoryMock());
+    RoutingTable routingTable = RoutingTable(new ClockMock());
     routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();

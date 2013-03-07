@@ -3,7 +3,6 @@
  */
 
 #include "OMNeTCubicEvaporationPolicy.h"
-#include "OMNeTTimeFactory.h"
 
 namespace ARA {
     namespace omnetpp {

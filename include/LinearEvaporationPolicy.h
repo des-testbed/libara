@@ -6,7 +6,7 @@
 #define LINEAR_EVAPORATION_POLICY_H_
 
 #include "EvaporationPolicy.h"
-#include "TimeFactory.h"
+#include "Clock.h"
 
 namespace ARA {
 
@@ -17,9 +17,8 @@ namespace ARA {
         public:
 
             /**
-             * Creates a new LinearEvaporationPolicy with the given TimeFactory.
+             * Creates a new LinearEvaporationPolicy with the given Clock.
              *
-             * @param timeFactory the TimeFactory object which is used to get an abstract instance in time
              * @param evaporationFactor the factor which is used to evaporate the pheromone values
              * @param threshold denotes at what point the pheromone level is set to 0
              * @param timeIntervalMillis denotes the time interval in milliseconds at which the evaporation periodically should take place

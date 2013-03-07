@@ -2,15 +2,15 @@
  * $FU-Copyright$
  */
 
-#ifndef OMNET_TIMEFACTORY_H_
-#define OMNET_TIMEFACTORY_H_
+#ifndef OMNET_CLOCK_H_
+#define OMNET_CLOCK_H_
 
-#include "TimeFactory.h"
+#include "Clock.h"
 
 namespace ARA {
 namespace omnetpp {
 
-    class OMNeTTimeFactory : public TimeFactory {
+    class OMNeTClock : public Clock {
         public:
             Time* makeTime();
             Timer* getNewTimer();

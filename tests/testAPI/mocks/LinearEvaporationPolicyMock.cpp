@@ -3,7 +3,6 @@
  */
 
 #include "LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/time/TimeFactoryMock.h"
 
 using namespace ARA;
 

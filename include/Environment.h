@@ -5,7 +5,7 @@
 #ifndef ENVIRONMENT_H_
 #define ENVIRONMENT_H_
 
-#include "TimeFactory.h"
+#include "Clock.h"
 
 namespace ARA {
 
@@ -27,12 +27,12 @@ public:
      * Note: This will default to a UnixClock implementation.
      * The Clock instance will be deleted by the environment when appropriate.
      */
-    static TimeFactory* getClock();
+    static Clock* getClock();
 
-    static void setClock(TimeFactory* newClock);
+    static void setClock(Clock* newClock);
 
 private:
-    TimeFactory* clock;
+    Clock* clock;
 
     /**
      * Private singleton constructor.
@@ -43,7 +43,7 @@ private:
     /**
      * The non static variant of Environment::setClock()
      */
-    void setTheClock(TimeFactory* newClock);
+    void setTheClock(Clock* newClock);
 
     /**
      * Access from the outside should always be directly through the static methods

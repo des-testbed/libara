@@ -5,10 +5,10 @@
 #ifndef UNIXCLOCK_H_
 #define UNIXCLOCK_H_
 
-#include "TimeFactory.h"
+#include "Clock.h"
 
 namespace ARA {
-    class UnixClock : public TimeFactory {
+    class UnixClock : public Clock {
         public:
             Time* makeTime();
             Timer* getNewTimer();

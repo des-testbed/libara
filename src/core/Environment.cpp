@@ -15,7 +15,7 @@ Environment::~Environment() {
     delete clock;
 }
 
-void Environment::setTheClock(TimeFactory* newClock) {
+void Environment::setTheClock(Clock* newClock) {
     delete clock;
     clock = newClock;
 }
@@ -25,11 +25,11 @@ Environment& Environment::getInstance() {
     return instance;
 }
 
-TimeFactory* Environment::getClock() {
+Clock* Environment::getClock() {
     return getInstance().clock;
 }
 
-void Environment::setClock(TimeFactory* newClock) {
+void Environment::setClock(Clock* newClock) {
     getInstance().setTheClock(newClock);
 }
 

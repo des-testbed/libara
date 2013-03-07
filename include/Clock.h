@@ -2,8 +2,8 @@
  * $FU-Copyright$
  */
 
-#ifndef TIMEFACTORY_H_
-#define TIMEFACTORY_H_
+#ifndef CLOCK_H_
+#define CLOCK_H_
 
 #include "Time.h"
 #include "Timer.h"
@@ -11,14 +11,14 @@
 namespace ARA {
 
     /**
-     * A TimeFactory is responsible for instantiating a concrete instance of
-     * the abstract Time class. For each concrete implementation of Time there
-     * will be one TimeFactory counterpart that will handle instantiation in
-     * the EvaporationPolicy class.
+     * A Clock is responsible for instantiating concrete instances of
+     * the abstract Time and Timer class. For each concrete implementation
+     * of Time and timer there will be one Clock counterpart that will
+     * handle its instantiation.
      */
-    class TimeFactory { //TODO maybe we should rename TimeFactory to Clock to make its intend more clear
+    class Clock {
         public:
-            virtual ~TimeFactory() {};
+            virtual ~Clock() {};
 
             /**
              * Creates a new Time instance. The pointer must be deleted by the

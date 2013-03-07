@@ -8,13 +8,13 @@
 namespace ARA {
     typedef std::shared_ptr<Address> AddressPtr;
 
-    RoutingTable::RoutingTable(TimeFactory* timeFactory){
-        this->timeFactory = timeFactory;
+    RoutingTable::RoutingTable(Clock* clock){
+        this->clock = clock;
         this->lastAccessTime = nullptr;
     }
 
     RoutingTable::~RoutingTable() {
-        delete timeFactory;
+        delete clock;
 
         std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
         for (iterator=table.begin(); iterator!=table.end(); iterator++) {
@@ -131,7 +131,7 @@ namespace ARA {
     }
 
     void RoutingTable::triggerEvaporation() {
-        Time* currentTime = timeFactory->makeTime();
+        Time* currentTime = clock->makeTime();
         currentTime->setToCurrentTime();
 
         if (hasTableBeenAccessedEarlier() == false) {

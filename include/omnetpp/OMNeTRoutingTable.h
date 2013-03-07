@@ -9,7 +9,7 @@
 
 #include "RoutingTable.h"
 #include "RoutingTableEntry.h"
-#include "OMNeTTimeFactory.h"
+#include "OMNeTClock.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -20,7 +20,7 @@ namespace ARA {
          */
         class OMNeTRoutingTable : public ARA::RoutingTable, public cSimpleModule {
              public:
-                 OMNeTRoutingTable() : RoutingTable(new OMNeTTimeFactory()) {};
+                 OMNeTRoutingTable() : RoutingTable(new OMNeTClock()) {};
                  OMNeTRoutingTable(const OMNeTRoutingTable& other); //TODO do we really need the copy constructor?
                  virtual ~OMNeTRoutingTable(){}; //TODO do we really need this destructor?
                  virtual OMNeTRoutingTable *dup() const {return new OMNeTRoutingTable(*this);};

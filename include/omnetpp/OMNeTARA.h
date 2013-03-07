@@ -18,7 +18,7 @@
 #include "OMNeTRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "OMNeTStochasticForwardingPolicy.h"
-#include "OMNeTTimeFactory.h"
+#include "OMNeTClock.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -33,7 +33,7 @@ namespace ARA {
          */
         class OMNeTARA: public cSimpleModule, public AbstractARAClient {
             public:
-                OMNeTARA() : AbstractARAClient(new OMNeTTimeFactory()) {}
+                OMNeTARA() : AbstractARAClient(new OMNeTClock()) {}
 
             protected:
                 int numInitStages() const;

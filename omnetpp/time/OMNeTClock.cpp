@@ -1,14 +1,14 @@
-#include "OMNeTTimeFactory.h"
+#include "OMNeTClock.h"
 #include "OMNeTTime.h"
 #include "OMNeTTimer.h"
 
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-Time* OMNeTTimeFactory::makeTime(){
+Time* OMNeTClock::makeTime(){
     return new OMNeTTime();
 }
 
-Timer* OMNeTTimeFactory::getNewTimer() {
+Timer* OMNeTClock::getNewTimer() {
     return new OMNeTTimer();
 }

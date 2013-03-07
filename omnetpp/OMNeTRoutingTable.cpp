@@ -1,4 +1,5 @@
 #include "OMNeTRoutingTable.h"
+#include "OMNeTClock.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -7,7 +8,7 @@ namespace ARA {
         //OMNeTRoutingTable::
 //        OMNeTRoutingTable::
         
-        OMNeTRoutingTable::OMNeTRoutingTable(const OMNeTRoutingTable& other)  : RoutingTable(new OMNeTTimeFactory()) {
+        OMNeTRoutingTable::OMNeTRoutingTable(const OMNeTRoutingTable& other)  : RoutingTable(new OMNeTClock()) {
             // FIXME
             setRoutingTable(other.getRoutingTable());
             setEvaporationPolicy(other.getEvaporationPolicy());

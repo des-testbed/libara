@@ -10,7 +10,7 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/time/TimeFactoryMock.h"
+#include "testAPI/mocks/time/ClockMock.h"
 
 #include <memory>
 #include <deque>
@@ -24,7 +24,7 @@ TEST_GROUP(PacketTrapTest) {
 
     void setup() {
         evaporationPolicy = new LinearEvaporationPolicyMock();
-        routingTable = new RoutingTable(new TimeFactoryMock());
+        routingTable = new RoutingTable(new ClockMock());
         routingTable->setEvaporationPolicy(evaporationPolicy);
         packetTrap = new PacketTrap(routingTable);
     }

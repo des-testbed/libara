@@ -1,22 +1,22 @@
-#include "TimeFactoryMock.h"
+#include "ClockMock.h"
 #include "CppUTest/TestHarness.h"
 #include "testAPI/mocks/time/TimeMock.h"
 #include "testAPI/mocks/time/TimerMock.h"
 
 using namespace ARA;
 
-Time* TimeFactoryMock::makeTime() {
+Time* ClockMock::makeTime() {
     return new TimeMock();
 }
 
-Timer* TimeFactoryMock::getNewTimer() {
+Timer* ClockMock::getNewTimer() {
     lastTimer = new TimerMock();
     return lastTimer;
 }
 
-TimerMock* TimeFactoryMock::getLastTimer() {
+TimerMock* ClockMock::getLastTimer() {
     if(lastTimer == nullptr) {
-        FAIL("Error in TimeFactoryMock: Can not get last timer: not initialized yet!");
+        FAIL("Error in ClockMock: Can not get last timer: not initialized yet!");
     }
     return lastTimer;
 }
