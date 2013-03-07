@@ -12,8 +12,8 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-AbstractARAClient::AbstractARAClient(Clock* clock) {
-    routingTable = new RoutingTable(clock);
+AbstractARAClient::AbstractARAClient() {
+    routingTable = new RoutingTable();
     packetTrap = new PacketTrap(routingTable);
     /// set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;

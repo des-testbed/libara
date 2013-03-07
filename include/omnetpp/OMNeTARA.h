@@ -33,7 +33,7 @@ namespace ARA {
          */
         class OMNeTARA: public cSimpleModule, public AbstractARAClient {
             public:
-                OMNeTARA() : AbstractARAClient(new OMNeTClock()) {}
+                OMNeTARA() {}
 
             protected:
                 int numInitStages() const;

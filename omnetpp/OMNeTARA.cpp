@@ -8,6 +8,7 @@
 #include "IPAddressResolver.h"
 #include "ARPPacket_m.h"
 #include "SimpleLogger.h"
+#include "Environment.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -28,7 +29,10 @@ namespace ARA {
          * specified in the NED file and initializes the gates.
          */
         void OMNeTARA::initialize(int stage) {
-            if(stage == 4) {
+            if(stage == 0) {
+                Environment::setClock(new OMNeTClock());
+            }
+            else if(stage == 4) {
                 initialPhi = par("initialPhi").doubleValue();
 
                 interfaceTable = getInterfaceTable();

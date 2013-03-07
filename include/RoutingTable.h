@@ -21,7 +21,7 @@ namespace ARA {
 class RoutingTable {
 
 public:
-    RoutingTable(Clock* clock);
+    RoutingTable();
     ~RoutingTable();
 
     float getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);

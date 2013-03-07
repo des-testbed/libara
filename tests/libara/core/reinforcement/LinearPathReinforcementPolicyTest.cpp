@@ -14,7 +14,6 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/time/ClockMock.h"
 
 #include <iostream>
 #include <memory>
@@ -28,7 +27,7 @@ TEST_GROUP(LinearPathReinforcementPolicyTest) {};
 TEST(LinearPathReinforcementPolicyTest, pathReinforcementViaRoutingTableUpdate) {
     /// routing table and evaporation policy setup
     EvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicyMock();
-    RoutingTable routingTable = RoutingTable(new ClockMock());
+    RoutingTable routingTable = RoutingTable();
     routingTable.setEvaporationPolicy(evaporationPolicy);
 
     AddressPtr destination (new AddressMock("Destination"));

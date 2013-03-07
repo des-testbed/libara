@@ -11,7 +11,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/time/ClockMock.h"
+#include "testAPI/mocks/time/TimeMock.h"
 
 #include <deque>
 
@@ -25,7 +25,7 @@ TEST_GROUP(RoutingTableTest) {
 
     void setup() {
         evaporationPolicy = new LinearEvaporationPolicyMock();
-        routingTable = new RoutingTable(new ClockMock());
+        routingTable = new RoutingTable();
         routingTable->setEvaporationPolicy(evaporationPolicy);
     }
 

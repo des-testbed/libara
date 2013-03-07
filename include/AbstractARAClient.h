@@ -10,7 +10,6 @@
 #include "NextHop.h"
 #include "NetworkInterface.h"
 #include "PacketTrap.h"
-#include "Clock.h"
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "ForwardingPolicy.h"
@@ -35,7 +34,7 @@ namespace ARA {
 class AbstractARAClient {
 
 public:
-    AbstractARAClient(Clock* clock);
+    AbstractARAClient();
     virtual ~AbstractARAClient();
 
     /**

@@ -12,7 +12,7 @@
 
 namespace ARA {
 
-ARAClientMock::ARAClientMock() : AbstractARAClient(new ClockMock()) {
+ARAClientMock::ARAClientMock() {
     forwardingPolicy = new BestPheromoneForwardingPolicy();
     forwardingPolicy->setRoutingTable(routingTable);
     setEvaporationPolicy(new LinearEvaporationPolicyMock());
