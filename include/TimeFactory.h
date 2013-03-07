@@ -6,6 +6,7 @@
 #define TIMEFACTORY_H_
 
 #include "Time.h"
+#include "Timer.h"
 
 namespace ARA {
 
@@ -20,10 +21,16 @@ namespace ARA {
             virtual ~TimeFactory() {};
 
             /**
-             * Create a new Time instance. The pointer must be deleted by the
+             * Creates a new Time instance. The pointer must be deleted by the
              * invoking object.
              */
             virtual Time* makeTime() = 0;
+
+            /**
+             * Creates a new Timer instance. The pointer must be deleted by the
+             * invoking object.
+             */
+            virtual Timer* getNewTimer() = 0;
     };
 }
 

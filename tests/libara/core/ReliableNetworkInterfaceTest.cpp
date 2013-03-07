@@ -7,6 +7,8 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/time/TimeFactoryMock.h"
+#include "Environment.h"
 
 using namespace ARA;
 using namespace std;
@@ -16,10 +18,12 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(ReliableNetworkInterfaceTest) {
     ARAClientMock* client;
     NetworkInterfaceMock* interface;
+    std::deque<Pair<const Packet*, std::shared_ptr<Address>>*>* sentPackets;
 
     void setup() {
         client = new ARAClientMock();
         interface = new NetworkInterfaceMock(client);
+        sentPackets = interface->getSentPackets();
     }
 
     void teardown() {
@@ -78,7 +82,7 @@ TEST(ReliableNetworkInterfaceTest, acknowledgeDataPacket) {
     // the interface is required to acknowledge this data packet
     BYTES_EQUAL(1, interface->getNumberOfSentPackets());
 
-    Pair<const Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->front();
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     const Packet* sentPacket = sentPacketInfo->getLeft();
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
@@ -180,10 +184,79 @@ TEST(ReliableNetworkInterfaceTest, acknowledgedPacketsAreRemovedFromListofUnackn
     BYTES_EQUAL(0, interface->getNrOfUnacknowledgedPackets());
 }
 
+
 TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
-    //TODO
+    // prepare the test
+    Packet* originalPacket = new PacketMock();
+    AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
+
+    // start the test
+    interface->send(originalPacket, originalRecipient);
+
+    // make sure the packet has been sent once
+    BYTES_EQUAL(1, sentPackets->size());
+
+    // get the acknowledgment timer which is used by the interface
+    TimeFactoryMock* clock = (TimeFactoryMock*) Environment::getClock();
+    TimerMock* ackTimer = clock->getLastTimer();
+
+    CHECK(ackTimer->isRunning());
+
+    // simulate that the timer has expired (timeout)
+    ackTimer->expire();
+
+    // the packet should have been retransmitted again
+    BYTES_EQUAL(2, sentPackets->size());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->back();
+    const Packet* sentPacket = sentPacketInfo->getLeft();
+    AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
+
+    CHECK(recipientOfSentPacket->equals(originalRecipient));
+    CHECK_EQUAL(originalPacket, sentPacket);
 }
 
 TEST(ReliableNetworkInterfaceTest, undeliverablePacketsAreReportedToARAClient) {
+    // prepare the test
+    Packet* originalPacket = new PacketMock();
+    AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
+    interface->setMaxNrOfRetransmissions(3);
+
+    // start the test
+    interface->send(originalPacket, originalRecipient);
+
+    // make sure the packet has been sent once
+    BYTES_EQUAL(1, sentPackets->size());
+
+    // get the acknowledgment timer which is used by the interface
+    TimeFactoryMock* clock = (TimeFactoryMock*) Environment::getClock();
+    TimerMock* ackTimer = clock->getLastTimer();
+
+    // simulate that the timer does expire 3 times
+    ackTimer->expire();
+    ackTimer->expire();
+    ackTimer->expire();
+
+    // the packet should have been retransmitted again
+    BYTES_EQUAL(1+3, sentPackets->size());
+    for (int i = 1; i <= 3; i++) {
+        Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->at(i);
+        const Packet* sentPacket = sentPacketInfo->getLeft();
+        AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
+
+        CHECK(recipientOfSentPacket->equals(originalRecipient));
+        CHECK_EQUAL(originalPacket, sentPacket);
+    }
+
+    // now if we let the timer expire one more time the packet should be reported undeliverable to the client
+    ackTimer->expire();
+
+    BYTES_EQUAL(1, client->getNumberOfUndeliverablePackets());
+    ARAClientMock::PacketInfo undeliverablePacketInfo = client->getUndeliverablePackets().front();
+    CHECK(undeliverablePacketInfo.packet == originalPacket);
+    CHECK(undeliverablePacketInfo.nextHop == originalRecipient);
+    CHECK(undeliverablePacketInfo.interface == interface);
+}
+
+TEST(ReliableNetworkInterfaceTest, packetAcknowledgmentStopsTimer) {
     //TODO
 }

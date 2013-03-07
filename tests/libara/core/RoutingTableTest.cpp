@@ -11,7 +11,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
+#include "testAPI/mocks/time/TimeFactoryMock.h"
 
 #include <deque>
 

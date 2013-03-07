@@ -218,6 +218,11 @@ namespace ARA {
             send(encapsulatedData, "upperLayerGate$o");
         }
 
+        void OMNeTARA::packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+            //TODO to something with this packet other then deleting it
+            delete packet;
+        }
+
         void OMNeTARA::setEvaporationPolicy(EvaporationPolicy *policy){
             this->routingTable->setEvaporationPolicy(policy);
         }

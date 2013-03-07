@@ -6,7 +6,7 @@
 #include "RoutingTableEntry.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
+#include "testAPI/mocks/time/TimeFactoryMock.h"
 
 #include <sstream>
 
@@ -30,6 +30,10 @@ ARAClientMock::~ARAClientMock() {
 
     for(auto& pair: receivedPackets) {
         delete pair;
+    }
+
+    for(auto& packetInfo: undeliverablePackets) {
+        delete packetInfo.packet;
     }
 
     routingTable->setEvaporationPolicy(NULL);
@@ -56,6 +60,14 @@ void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* i
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
     deliveredPackets.push_back(packet);
+}
+
+void ARAClientMock::packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+    PacketInfo packetInfo;
+    packetInfo.packet = packet;
+    packetInfo.nextHop = nextHop;
+    packetInfo.interface = interface;
+    undeliverablePackets.push_back(packetInfo);
 }
 
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
@@ -85,6 +97,14 @@ int ARAClientMock::getNumberOfReceivedPackets() {
 
 std::deque<Pair<const Packet*, const NetworkInterface*>*> ARAClientMock::getReceivedPackets() {
     return receivedPackets;
+}
+
+int ARAClientMock::getNumberOfUndeliverablePackets() {
+    return undeliverablePackets.size();
+}
+
+std::deque<ARAClientMock::PacketInfo> ARAClientMock::getUndeliverablePackets() {
+    return undeliverablePackets;
 }
 
 } /* namespace ARA */

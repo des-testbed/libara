@@ -6,6 +6,7 @@
 #define RELIABLE_NETWORK_INTERFACE_H_
 
 #include "AbstractNetworkInterface.h"
+#include "TimeoutEventListener.h"
 #include "AbstractARAClient.h"
 
 #include <memory>
@@ -15,7 +16,14 @@ namespace ARA {
     /**
      * TODO write class description
      */
-    class ReliableNetworkInterface : public AbstractNetworkInterface {
+    class ReliableNetworkInterface : public AbstractNetworkInterface, public TimeoutEventListener {
+
+        struct AckTimerData {
+            int nrOfRetries;
+            const Packet* packet;
+            std::shared_ptr<Address> recipient;
+        };
+
         public:
             /**
              * Creates a new ReliableNetworkInterface.
@@ -24,7 +32,7 @@ namespace ARA {
              * @param localAddress the Address which is returned when the interface is asked for its local address.
              * @param broadcastAddress the Address which is known to be the broadcast address of this interface.
              */
-            ReliableNetworkInterface(AbstractARAClient* client, std::shared_ptr<Address> localAddress = nullptr, std::shared_ptr<Address> broadcastAddress = nullptr);
+            ReliableNetworkInterface(AbstractARAClient* client, std::shared_ptr<Address> localAddress=nullptr, std::shared_ptr<Address> broadcastAddress=nullptr, int ackTimeoutInMillis=100);
             virtual ~ReliableNetworkInterface();
 
             /**
@@ -53,6 +61,10 @@ namespace ARA {
 
             std::deque<const Packet*> getUnacknowledgedPackets() const;
 
+            void setMaxNrOfRetransmissions(int n);
+
+            void timerHasExpired(Timer* responsibleTimer);
+
         protected:
 
             /**
@@ -66,7 +78,12 @@ namespace ARA {
 
         private:
             std::deque<const Packet*> unacknowledgedPackets;
+            std::unordered_map<Timer*, AckTimerData> runningTimers;
+            double ackTimeoutInMillis;
+            int maxNrOfRetransmissions = 5;
 
+            void startAcknowledgmentTimer(const Packet* packet, std::shared_ptr<Address> recipient);
+            void handleUndeliverablePacket(Timer* ackTimer, AckTimerData& timerData);
             void handleNonAckPacket(Packet* packet);
             void handleAckPacket(Packet* packet);
     };

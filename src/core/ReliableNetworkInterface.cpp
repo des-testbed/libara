@@ -3,24 +3,83 @@
  */
 
 #include "ReliableNetworkInterface.h"
+#include "Environment.h"
+#include "Timer.h"
+
+using namespace std;
 
 namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, AddressPtr localAddress, AddressPtr broadcastAddress) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
-    unacknowledgedPackets = std::deque<const Packet*>();
+ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, AddressPtr localAddress, AddressPtr broadcastAddress, int ackTimeoutInMillis) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
+    unacknowledgedPackets = deque<const Packet*>();
+    runningTimers = unordered_map<Timer*, AckTimerData>();
+    this->ackTimeoutInMillis = ackTimeoutInMillis;
 }
 
 ReliableNetworkInterface::~ReliableNetworkInterface() {
     for(auto& packet : unacknowledgedPackets) {
         delete packet;
     }
+
+    unordered_map<Timer*, AckTimerData>::iterator iterator;
+    for (iterator=runningTimers.begin(); iterator!=runningTimers.end(); iterator++) {
+        pair<Timer*, AckTimerData> entryPair = *iterator;
+        Timer* timer = entryPair.first;
+        delete timer;
+    }
+    runningTimers.clear();
 }
 
-void ReliableNetworkInterface::send(const Packet* packet, std::shared_ptr<Address> recipient) {
+void ReliableNetworkInterface::send(const Packet* packet, AddressPtr recipient) {
     unacknowledgedPackets.push_back(packet);
     doSend(packet, recipient);
+    startAcknowledgmentTimer(packet, recipient);
+}
+
+void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, AddressPtr recipient) {
+    Timer* ackTimer = Environment::getClock()->getNewTimer();
+    ackTimer->addTimeoutListener(this);
+    ackTimer->run(ackTimeoutInMillis);
+
+    AckTimerData timerData;
+    timerData.nrOfRetries = 0;
+    timerData.packet = packet;
+    timerData.recipient = recipient;
+
+    runningTimers[ackTimer] = timerData;
+}
+
+void ReliableNetworkInterface::timerHasExpired(Timer* ackTimer) {
+    // some acknowledgment timed out so we need to send the packet again or tell the client
+    AckTimerData timerData = runningTimers[ackTimer];
+    if(timerData.nrOfRetries < maxNrOfRetransmissions) {
+        timerData.nrOfRetries++;
+        runningTimers[ackTimer] = timerData;
+        doSend(timerData.packet, timerData.recipient);
+    }
+    else {
+        handleUndeliverablePacket(ackTimer, timerData);
+    }
+}
+
+void ReliableNetworkInterface::handleUndeliverablePacket(Timer* ackTimer, AckTimerData& timerData) {
+    // remove the acknowledgment timer
+    runningTimers.erase(ackTimer);
+    delete ackTimer;
+
+    // delete the packet from the list of unacknowledged packets
+    //TODO make this more efficient with a hashmap
+    deque<const Packet*>::iterator currentPacket;
+    for (currentPacket = unacknowledgedPackets.begin(); currentPacket!=unacknowledgedPackets.end(); currentPacket++) {
+        if ((*currentPacket)->equals(timerData.packet)) {
+            unacknowledgedPackets.erase(currentPacket);
+            break;
+        }
+    }
+
+    client->packetIsNotDeliverable(timerData.packet, timerData.recipient, this);
 }
 
 void ReliableNetworkInterface::broadcast(const Packet* packet) {
@@ -72,4 +131,9 @@ void ReliableNetworkInterface::handleAckPacket(Packet* ackPacket) {
 std::deque<const Packet*> ReliableNetworkInterface::getUnacknowledgedPackets() const {
     return unacknowledgedPackets;
 }
+
+void ReliableNetworkInterface::setMaxNrOfRetransmissions(int n) {
+    maxNrOfRetransmissions = n;
+}
+
 } /* namespace ARA */

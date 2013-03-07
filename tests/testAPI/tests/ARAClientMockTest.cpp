@@ -7,6 +7,7 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
+#include "Address.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 
@@ -14,6 +15,8 @@
 
 using namespace ARA;
 using namespace std;
+
+typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(ARAClientMockTest) {
     ARAClientMock* client;
@@ -81,4 +84,14 @@ TEST(ARAClientMockTest, getNumberOfReceivedPackets) {
     BYTES_EQUAL(0, client->getNumberOfReceivedPackets());
     client->receivePacket(packet, interface);
     BYTES_EQUAL(1, client->getNumberOfReceivedPackets());
+}
+
+TEST(ARAClientMockTest, getNumberOfUndeliverablePackets) {
+    Packet* packet = new PacketMock();
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr nextHop (new AddressMock("foo"));
+
+    BYTES_EQUAL(0, client->getNumberOfUndeliverablePackets());
+    client->packetIsNotDeliverable(packet, nextHop, interface);
+    BYTES_EQUAL(1, client->getNumberOfUndeliverablePackets());
 }

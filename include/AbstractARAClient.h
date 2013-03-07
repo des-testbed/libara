@@ -79,6 +79,8 @@ public:
      */
     virtual void deliverToSystem(const Packet* packet) = 0;
 
+    virtual void packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) = 0;
+
     /**
      * Sets a logger for this ARA client.
      *

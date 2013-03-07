@@ -23,6 +23,13 @@ namespace ARA {
  */
 class ARAClientMock: public AbstractARAClient {
 public:
+
+    struct PacketInfo {
+        const Packet* packet;
+        std::shared_ptr<Address> nextHop;
+        const NetworkInterface* interface;
+    };
+
     ARAClientMock();
     ~ARAClientMock();
 
@@ -32,6 +39,7 @@ public:
     ForwardingPolicy* getForwardingPolicy();
     void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
     void deliverToSystem(const Packet* packet);
+    void packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
     // Mocking methods
 
@@ -39,13 +47,18 @@ public:
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
     std::deque<const Packet*>* getDeliveredPackets();
-    int getNumberOfReceivedPackets() ;
+
+    int getNumberOfReceivedPackets();
     std::deque<Pair<const Packet*, const NetworkInterface*>*> getReceivedPackets();
+
+    int getNumberOfUndeliverablePackets();
+    std::deque<PacketInfo> getUndeliverablePackets();
 
 private:
     std::deque<NetworkInterfaceMock*> interfaceMocks;
     std::deque<const Packet*> deliveredPackets;
     std::deque<Pair<const Packet*, const NetworkInterface*>*> receivedPackets;
+    std::deque<PacketInfo> undeliverablePackets;
 
     ForwardingPolicy* forwardingPolicy;
     EvaporationPolicy* evaporationPolicy;
