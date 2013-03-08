@@ -34,6 +34,7 @@ public:
     bool hasPacketBeenBroadCasted(Packet* packet);
 
     int getNrOfUnacknowledgedPackets() const;
+    int getNrOfRunningTimers() const;
 
 private:
     std::string name;

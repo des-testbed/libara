@@ -15,7 +15,7 @@ namespace ARA {
     class UnixTimer : public Timer {
     public:
         void run(double timeInMilliSeconds);
-
+        void interrupt();
     };
 }
 

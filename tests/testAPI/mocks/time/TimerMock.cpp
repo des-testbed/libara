@@ -10,6 +10,10 @@ void TimerMock::run(double timeInMilliSeconds) {
     isTimerRunning = true;
 }
 
+void TimerMock::interrupt() {
+    hasTimerBeenInterrupted = true;
+}
+
 void TimerMock::expire() {
     notifyAllListeners();
     hasTimerExpired = true;
@@ -22,4 +26,8 @@ bool TimerMock::hasExpired() const {
 
 bool TimerMock::isRunning() const {
     return isTimerRunning;
+}
+
+bool TimerMock::hasBeenInterrupted() const {
+    return hasTimerBeenInterrupted;
 }

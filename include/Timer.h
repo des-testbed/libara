@@ -22,6 +22,13 @@ namespace ARA {
          */
         virtual void run(double timeInMilliSeconds) = 0;
 
+        /**
+         * Interrupts a running timer.
+         * This should stop the timer and no TimeoutEventListener should be notified.
+         * Interrupting a timer which has not been started should do nothing.
+         */
+        virtual void interrupt() = 0;
+
     protected:
         void notifyAllListeners();
 

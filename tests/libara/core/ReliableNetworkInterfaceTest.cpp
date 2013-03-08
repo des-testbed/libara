@@ -258,5 +258,27 @@ TEST(ReliableNetworkInterfaceTest, undeliverablePacketsAreReportedToARAClient) {
 }
 
 TEST(ReliableNetworkInterfaceTest, packetAcknowledgmentStopsTimer) {
-    //TODO
+    // prepare the test
+    Packet* originalPacket = new PacketMock();
+    AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
+
+    // start the test
+    interface->send(originalPacket, originalRecipient);
+
+    // make sure the interface is waiting for an acknowledgment
+    BYTES_EQUAL(1, interface->getNrOfUnacknowledgedPackets());
+
+    // get the acknowledgment timer which is used by the interface
+    ClockMock* clock = (ClockMock*) Environment::getClock();
+    TimerMock* ackTimer = clock->getLastTimer();
+
+    // the timer should have been started
+    CHECK(ackTimer->isRunning());
+    BYTES_EQUAL(1, interface->getNrOfRunningTimers());
+
+    // let the interface receive the acknowledgment
+    Packet* acknowledgment = originalPacket->createAcknowledgment();
+    interface->receive(acknowledgment);
+
+    BYTES_EQUAL(0, interface->getNrOfRunningTimers());
 }

@@ -93,7 +93,11 @@ unsigned int NetworkInterfaceMock::getNumberOfSentPackets() {
 }
 
 int NetworkInterfaceMock::getNrOfUnacknowledgedPackets() const {
-    return getUnacknowledgedPackets().size();
+    return unacknowledgedPackets.size();
+}
+
+int NetworkInterfaceMock::getNrOfRunningTimers() const {
+    return runningTimers.size();
 }
 
 } /* namespace ARA */

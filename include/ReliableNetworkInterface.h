@@ -76,12 +76,13 @@ namespace ARA {
             virtual void doSend(const Packet* packet, std::shared_ptr<Address> recipient) = 0;
 
 
-        private:
+        protected:
             std::deque<const Packet*> unacknowledgedPackets;
             std::unordered_map<Timer*, AckTimerData> runningTimers;
             double ackTimeoutInMillis;
             int maxNrOfRetransmissions = 5;
 
+        private:
             void startAcknowledgmentTimer(const Packet* packet, std::shared_ptr<Address> recipient);
             void handleUndeliverablePacket(Timer* ackTimer, AckTimerData& timerData);
             void handleNonAckPacket(Packet* packet);

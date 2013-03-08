@@ -70,7 +70,6 @@ void ReliableNetworkInterface::handleUndeliverablePacket(Timer* ackTimer, AckTim
     delete ackTimer;
 
     // delete the packet from the list of unacknowledged packets
-    //TODO make this more efficient with a hashmap
     deque<const Packet*>::iterator currentPacket;
     for (currentPacket = unacknowledgedPackets.begin(); currentPacket!=unacknowledgedPackets.end(); currentPacket++) {
         if ((*currentPacket)->equals(timerData.packet)) {
@@ -110,6 +109,25 @@ void ReliableNetworkInterface::handleNonAckPacket(Packet* packet) {
 void ReliableNetworkInterface::handleAckPacket(Packet* ackPacket) {
     unsigned int acknowledgedSeqNr = ackPacket->getSequenceNumber();
     AddressPtr acknowledgedSource = ackPacket->getSource();
+
+    // stop the timer
+    unordered_map<Timer*, AckTimerData>::iterator iterator;
+    for (iterator=runningTimers.begin(); iterator!=runningTimers.end(); iterator++) {
+        pair<Timer*, AckTimerData> entryPair = *iterator;
+        Timer* timer = entryPair.first;
+        AckTimerData timerData = entryPair.second;
+
+        if(timerData.packet->getSequenceNumber() == acknowledgedSeqNr
+           && timerData.packet->getSource()->equals(acknowledgedSource) ) {
+            timer->interrupt();
+            runningTimers.erase(timer);
+            delete timer;
+
+            break;
+        }
+    }
+
+    // remove the packet from the list of unacknowledged packets
     for (std::deque<const Packet*>::iterator iterator = unacknowledgedPackets.begin(); iterator!=unacknowledgedPackets.end(); iterator++) {
         const Packet* currentPacket = *iterator;
 
@@ -119,8 +137,6 @@ void ReliableNetworkInterface::handleAckPacket(Packet* ackPacket) {
 
             // free the memory
             delete currentPacket;
-
-            // break out of the for loop
             break;
         }
     }

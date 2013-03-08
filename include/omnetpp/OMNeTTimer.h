@@ -15,6 +15,7 @@ namespace omnetpp {
     class OMNeTTimer : public Timer {
     public:
         void run(double timeInMilliSeconds);
+        void interrupt();
     };
 }
 }
