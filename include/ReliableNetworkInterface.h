@@ -71,7 +71,8 @@ namespace ARA {
              * This method needs to be implemented by the concrete ReliableNetworkInterface implementation
              * It must send the given packet to the wanted recipient via this interface.
              *
-             * Generally the packet might be deleted as soon as this method returns.
+             * The packet is deleted by the ReliableNetworkInterface class and might cease
+             * to exist as soon as this method returns.
              */
             virtual void doSend(const Packet* packet, std::shared_ptr<Address> recipient) = 0;
 

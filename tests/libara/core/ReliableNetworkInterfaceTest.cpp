@@ -3,6 +3,7 @@
  */
 
 #include "CppUTest/TestHarness.h"
+#include "TestMacros.h"
 #include "testAPI/mocks/ARAClientMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/PacketMock.h"
@@ -187,11 +188,19 @@ TEST(ReliableNetworkInterfaceTest, acknowledgedPacketsAreRemovedFromListofUnackn
 
 TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
     // prepare the test
-    Packet* originalPacket = new PacketMock();
+    int type = PacketType::DATA;
+    unsigned int seqNr = 123;
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr destination (new AddressMock("destination"));
+    unsigned int hopCount = 4;
+    const char* payload = "Hello World";
+    int payloadSize = std::strlen(payload);
+    Packet* packet = new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
     AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
 
     // start the test
-    interface->send(originalPacket, originalRecipient);
+    interface->send(packet, originalRecipient);
 
     // make sure the packet has been sent once
     BYTES_EQUAL(1, sentPackets->size());
@@ -212,17 +221,25 @@ TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
     CHECK(recipientOfSentPacket->equals(originalRecipient));
-    CHECK_EQUAL(originalPacket, sentPacket);
+    CHECK_PACKET(sentPacket, type, seqNr, source, sender, destination, hopCount, payload);
 }
 
 TEST(ReliableNetworkInterfaceTest, undeliverablePacketsAreReportedToARAClient) {
     // prepare the test
-    Packet* originalPacket = new PacketMock();
+    int type = PacketType::DATA;
+    unsigned int seqNr = 123;
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr destination (new AddressMock("destination"));
+    unsigned int hopCount = 4;
+    const char* payload = "Hello World";
+    int payloadSize = std::strlen(payload);
+    Packet* packet = new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
     AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
     interface->setMaxNrOfRetransmissions(3);
 
     // start the test
-    interface->send(originalPacket, originalRecipient);
+    interface->send(packet, originalRecipient);
 
     // make sure the packet has been sent once
     BYTES_EQUAL(1, sentPackets->size());
@@ -244,7 +261,7 @@ TEST(ReliableNetworkInterfaceTest, undeliverablePacketsAreReportedToARAClient) {
         AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
         CHECK(recipientOfSentPacket->equals(originalRecipient));
-        CHECK_EQUAL(originalPacket, sentPacket);
+        CHECK_PACKET(sentPacket, type, seqNr, source, sender, destination, hopCount, payload);
     }
 
     // now if we let the timer expire one more time the packet should be reported undeliverable to the client
@@ -252,7 +269,7 @@ TEST(ReliableNetworkInterfaceTest, undeliverablePacketsAreReportedToARAClient) {
 
     BYTES_EQUAL(1, client->getNumberOfUndeliverablePackets());
     ARAClientMock::PacketInfo undeliverablePacketInfo = client->getUndeliverablePackets().front();
-    CHECK(undeliverablePacketInfo.packet == originalPacket);
+    CHECK(undeliverablePacketInfo.packet == packet);
     CHECK(undeliverablePacketInfo.nextHop == originalRecipient);
     CHECK(undeliverablePacketInfo.interface == interface);
 }
@@ -281,4 +298,18 @@ TEST(ReliableNetworkInterfaceTest, packetAcknowledgmentStopsTimer) {
     interface->receive(acknowledgment);
 
     BYTES_EQUAL(0, interface->getNrOfRunningTimers());
+}
+
+TEST(ReliableNetworkInterfaceTest, doNotWaitForAcknowledgmentOfAckPAckets) {
+    // prepare the test
+    Packet* packet = new PacketMock();
+    AddressPtr recipient = AddressPtr(new AddressMock("recipient"));
+
+    BYTES_EQUAL(0, interface->getNrOfUnacknowledgedPackets());
+
+    // the interface is expected to send an acknowledgment
+    interface->receive(packet);
+
+    // check that the interface is still not awaiting any acknowledgment
+    BYTES_EQUAL(0, interface->getNrOfUnacknowledgedPackets());
 }

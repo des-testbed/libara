@@ -479,6 +479,9 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
 
     // the client should not broadcast the FANT again
     CHECK(sentPackets->empty())
+
+    // delete the sent packet (destructor does not know about it because we cleared the list of sent packets earlier)
+    delete sentPacket;
 }
 
 TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
@@ -507,6 +510,9 @@ TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
 
     // the client should not broadcast the BANT again
     CHECK(sentPackets->empty())
+
+    // delete the sent packet (destructor does not know about it because we cleared the list of sent packets earlier)
+    delete sentPacket;
 }
 
 /**

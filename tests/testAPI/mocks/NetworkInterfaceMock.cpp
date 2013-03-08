@@ -27,6 +27,7 @@ NetworkInterfaceMock::~NetworkInterfaceMock() {
     while(sentPackets.empty() == false) {
         Pair<const Packet*, AddressPtr>* removedPair = sentPackets.back();
         sentPackets.pop_back();
+        delete removedPair->getLeft(); // delete the clone of the sent packet
         delete removedPair;
     }
 
@@ -44,7 +45,8 @@ std::deque<Pair<const Packet*, AddressPtr>*>* NetworkInterfaceMock::getSentPacke
 }
 
 void NetworkInterfaceMock::doSend(const Packet* packet, AddressPtr recipient) {
-    sentPackets.push_back(new Pair<const Packet*, AddressPtr>(packet, recipient));
+    Packet* clone = packet->clone();
+    sentPackets.push_back(new Pair<const Packet*, AddressPtr>(clone, recipient));
 }
 
 /**

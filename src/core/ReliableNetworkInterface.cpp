@@ -100,7 +100,8 @@ void ReliableNetworkInterface::handleNonAckPacket(Packet* packet) {
 
     if(isBroadcastAddress(destination) == false) {
         Packet* ackPacket = packet->createAcknowledgment();
-        send(ackPacket, packet->getSender());
+        doSend(ackPacket, packet->getSender());
+        delete ackPacket;
     }
 
     client->receivePacket(packet, this);
