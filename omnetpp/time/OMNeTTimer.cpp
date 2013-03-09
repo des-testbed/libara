@@ -2,7 +2,7 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTTimer.h"
+#include "omnetpp/OMNeTTimer.h"
 
 using namespace ARA;
 using namespace ARA::omnetpp;

@@ -2,7 +2,7 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTARA.h"
+#include "omnetpp/OMNeTARA.h"
 #include "IPControlInfo.h"
 #include "IPAddress.h"
 #include "IPAddressResolver.h"

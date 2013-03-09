@@ -2,9 +2,9 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTGate.h"
-#include "OMNeTPacket.h"
-#include "OMNeTAddress.h"
+#include "omnetpp/OMNeTGate.h"
+#include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/OMNeTAddress.h"
 #include "IInterfaceTable.h"
 #include "IPv4InterfaceData.h"
 #include "IPAddressResolver.h"

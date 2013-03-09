@@ -1,5 +1,5 @@
-#include "OMNeTRoutingTable.h"
-#include "OMNeTClock.h"
+#include "omnetpp/OMNeTRoutingTable.h"
+#include "omnetpp/OMNeTClock.h"
 
 namespace ARA {
     namespace omnetpp {

@@ -2,9 +2,9 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTClock.h"
-#include "OMNeTTime.h"
-#include "OMNeTTimer.h"
+#include "omnetpp/OMNeTClock.h"
+#include "omnetpp/OMNeTTime.h"
+#include "omnetpp/OMNeTTimer.h"
 
 using namespace ARA;
 using namespace ARA::omnetpp;

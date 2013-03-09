@@ -2,7 +2,7 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTTime.h"
+#include "omnetpp/OMNeTTime.h"
 
 #include <cmath>
 
