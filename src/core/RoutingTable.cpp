@@ -10,7 +10,6 @@ namespace ARA {
     typedef std::shared_ptr<Address> AddressPtr;
 
     RoutingTable::RoutingTable() {
-        clock = Environment::getClock();
         lastAccessTime = nullptr;
     }
 
@@ -130,7 +129,7 @@ namespace ARA {
     }
 
     void RoutingTable::triggerEvaporation() {
-        Time* currentTime = clock->makeTime();
+        Time* currentTime = Environment::getClock()->makeTime();
         currentTime->setToCurrentTime();
 
         if (hasTableBeenAccessedEarlier() == false) {

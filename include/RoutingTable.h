@@ -43,7 +43,6 @@ protected:
     bool hasTableBeenAccessedEarlier();
     void triggerEvaporation();
 
-    Clock* clock;
     Time *lastAccessTime;
 
 private:
