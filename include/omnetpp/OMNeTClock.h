@@ -7,6 +7,8 @@
 
 #include "Clock.h"
 
+#include <omnetpp.h>
+
 namespace ARA {
 namespace omnetpp {
 

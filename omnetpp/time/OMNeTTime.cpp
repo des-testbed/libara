@@ -4,27 +4,25 @@
 
 #include "OMNeTTime.h"
 
+#include <cmath>
+
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-OMNeTTime::OMNeTTime() {
-    //FIXME setToCurrentTime(); // does not work in the tests
+
+void OMNeTTime::setToCurrentTime(){
+    timestamp = simTime();
 }
 
-OMNeTTime::OMNeTTime(SimTime timestamp) {
-    this->timestamp = timestamp;
-}
-
-long OMNeTTime::getDifferenceInMilliSeconds(const Time* right) const {
-    /*FIXME const OMNeTTime* omnetTime = dynamic_cast<const OMNeTTime*>(right);
+long OMNeTTime::getDifferenceInMilliSeconds(const Time* otherTime) const {
+    const OMNeTTime* omnetTime = dynamic_cast<const OMNeTTime*>(otherTime);
     if(omnetTime) {
-        SimTime result = (this->getTimestamp() - omnetTime->getTimestamp());
-        return new OMNeTTime(result);
+        SimTime result = this->timestamp - omnetTime->timestamp;
+        return convertSimulationTime(result, SimTime::SCALEEXP_MS);
     }
     else {
         throw cRuntimeError("Can only subtract other OMNeTTime instances from this OMNeTTime instance");
-    }*/
-    return 0;
+    }
 }
 
 /**
@@ -36,9 +34,11 @@ long OMNeTTime::getDifferenceInMilliSeconds(const Time* right) const {
  * @return The method returns the (raw) simulation time in the
  *   desired time scale
  */
-int OMNeTTime::convertSimulationTime(int scaleExponent) const {
-    // get the simulation time exponent
-    if(this->timestamp.getScaleExp() != scaleExponent){
+long OMNeTTime::convertSimulationTime(SimTime time, int wantedScaleExponent) const {
+    if (time.getScaleExp() == wantedScaleExponent) {
+        return time.raw();
+    }
+    else {
        /**
         * TODO: Check if this is working the way it is intended to do
         *
@@ -52,21 +52,7 @@ int OMNeTTime::convertSimulationTime(int scaleExponent) const {
         * The method would return 0 for the latter example. The 
         * question if that is sufficient in an simulation scenario.
         */
-        return (this->timestamp.raw() / pow(10, (scaleExponent - this->timestamp.getScaleExp())));
+        return time.raw() / pow(10, (wantedScaleExponent - time.getScaleExp()));
     }
-    return this->timestamp.raw();
-}
 
-/**
- * The method returns the simulation time member variable
- *
- * @return The simulation time member variable
- */
-SimTime OMNeTTime::getTimestamp() const{
-    return (this->timestamp);
-}
-
-void OMNeTTime::setToCurrentTime(){
-    /// TODO: check if that's the way to go
-    //this->timestamp = simTime(); // this throws a segfault in the test
 }

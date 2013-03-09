@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "OMNeTClock.h"
 #include "OMNeTTime.h"
 #include "OMNeTTimer.h"
