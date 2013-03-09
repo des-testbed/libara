@@ -207,7 +207,7 @@ protected:
     double deltaPhi;
 
     std::deque<NetworkInterface*> interfaces;
-    RoutingTable *routingTable;
+    RoutingTable* routingTable;
     PacketTrap* packetTrap;
 
     // FIXME let the AbstractARAClient access this object via a pure virtual method to force the implementations to actually set this policy

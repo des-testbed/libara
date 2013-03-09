@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef OMNETARACLIENT_H_
 #define OMNETARACLIENT_H_
 
@@ -18,7 +22,6 @@
 #include "OMNeTRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "OMNeTStochasticForwardingPolicy.h"
-#include "OMNeTClock.h"
 
 namespace ARA {
     namespace omnetpp {
