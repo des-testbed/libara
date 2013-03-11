@@ -1,5 +1,9 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "CppUTest/TestHarness.h"
-#include "testAPI/mocks/TimeMock.h"
+#include "testAPI/mocks/time/TimeMock.h"
 
 using namespace ARA;
 

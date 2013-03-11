@@ -16,6 +16,7 @@
 package ara;
 
 import inet.base.NotificationBoard;
+import ara.Environment;
 import ara.NetworkLayer;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
@@ -24,47 +25,51 @@ import inet.applications.pingapp.PingApp;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 
-module ARAClient {
-
+module ARAClient
+{
     parameters:
-        @display("i=device/wifilaptop;bgb=344,315");
+        @display("i=device/wifilaptop;bgb=366,335");
         int nrOfNetworkInterfaces = default(1);
     gates:
         input radioIn @directIn;
 
     submodules:
+        environment: Environment {
+
+            @display("p=50,23");
+        }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=50,31");
+                @display("p=50,94");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=50,100");
+                @display("p=50,163");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "";
-                @display("p=50,165;i=block/table");
+                @display("p=50,228;i=block/table");
         }
         app: PingApp {
             parameters:
-                @display("b=40,24;p=210,31,col");
+                @display("b=40,24;p=239,29,col");
         }
         ara: NetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=210,126");
+                @display("i=ara;p=239,124");
         }
         wlan[nrOfNetworkInterfaces]: Ieee80211NicAdhoc {
             parameters:
-                @display("p=210,224;q=queue");
+                @display("p=239,222;q=queue");
         }
 
         // Stationary node
         mobility: NullMobility {
             parameters:
-                @display("p=50,224");
+                @display("p=50,287");
         }
     connections allowunconnected:
         app.pingOut --> ara.upperLayerGate$i;
@@ -72,7 +77,7 @@ module ARAClient {
 
         for i=0..nrOfNetworkInterfaces-1 {
             ara.ifOut[i] --> wlan[i].uppergateIn;
-            ara.ifIn[i]  <-- wlan[i].uppergateOut;
+            ara.ifIn[i] <-- wlan[i].uppergateOut;
             wlan[i].radioIn <-- radioIn;
         }
 

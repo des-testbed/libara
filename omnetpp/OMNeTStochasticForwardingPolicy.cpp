@@ -1,4 +1,4 @@
-#include "OMNeTStochasticForwardingPolicy.h"
+#include "omnetpp/OMNeTStochasticForwardingPolicy.h"
 
 namespace ARA {
     namespace omnetpp {

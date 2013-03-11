@@ -1,4 +1,4 @@
-#include "OMNeTLinearPathReinforcementPolicy.h"
+#include "omnetpp/OMNeTLinearPathReinforcementPolicy.h"
 
 namespace ARA {
     namespace omnetpp {

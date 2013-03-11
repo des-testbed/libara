@@ -1,5 +1,8 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
 
 using namespace ARA;
 

@@ -2,8 +2,8 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTPacket.h"
-#include "OMNeTAddress.h"
+#include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/OMNeTAddress.h"
 
 #include <iostream>
 #include <sstream>

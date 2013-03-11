@@ -12,8 +12,8 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-AbstractARAClient::AbstractARAClient(TimeFactory* timeFactory) {
-    routingTable = new RoutingTable(timeFactory);
+AbstractARAClient::AbstractARAClient() {
+    routingTable = new RoutingTable();
     packetTrap = new PacketTrap(routingTable);
     /// set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;
@@ -118,7 +118,6 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         pathReinforcementPolicy->update(packet->getDestination(), nextHopAddress, interface);
 
         interface->send(packet, nextHopAddress);
-        delete packet;
     } else {
         logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
         packetTrap->trapPacket(packet);
@@ -127,7 +126,6 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             unsigned int sequenceNr = getNextSequenceNumber();
             Packet* fant = packet->createFANT(sequenceNr);
             broadCast(fant);
-            delete fant;
 //        }
     }
 }
@@ -160,7 +158,6 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
     Packet* duplicateWarningPacket = packet->createDuplicateWarning();
     duplicateWarningPacket->setSender(interface->getLocalAddress());
     interface->send(duplicateWarningPacket, packet->getSender());
-    delete duplicateWarningPacket;
 }
 
 void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
@@ -203,8 +200,9 @@ void AbstractARAClient::handleAntPacket(Packet* packet) {
             handleAntPacketForThisNode(packet);
         }
     }
-
-    delete packet;
+    else {
+        delete packet;
+    }
 }
 
 void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
@@ -214,7 +212,6 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
         logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
         Packet* bant = packet->createBANT(getNextSequenceNumber());
         broadCast(bant);
-        delete bant;
     }
     else if(packetType == PacketType::BANT) {
         deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
@@ -228,6 +225,8 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     else {
         // TODO throw exception if we can not handle this packet
     }
+
+    delete packet;
 }
 
 void AbstractARAClient::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
@@ -259,9 +258,11 @@ void AbstractARAClient::broadCast(Packet* packet) {
     packet->increaseHopCount();
 
     for(auto& interface: interfaces) {
-        packet->setSender(interface->getLocalAddress());
-        interface->broadcast(packet);
+        Packet* packetClone = packet->clone();
+        packetClone->setSender(interface->getLocalAddress());
+        interface->broadcast(packetClone);
     }
+    delete packet;
 }
 
 unsigned int AbstractARAClient::getNextSequenceNumber() {

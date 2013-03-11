@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef OMNETARACLIENT_H_
 #define OMNETARACLIENT_H_
 
@@ -18,7 +22,6 @@
 #include "OMNeTRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "OMNeTStochasticForwardingPolicy.h"
-#include "OMNeTTimeFactory.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -31,10 +34,9 @@ namespace ARA {
          *  Guenes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
          *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
          */
-        class ARA: public cSimpleModule, public AbstractARAClient {
+        class OMNeTARA: public cSimpleModule, public AbstractARAClient {
             public:
-                ARA() : AbstractARAClient(new OMNeTTimeFactory()) {}
-                ~ARA();
+                OMNeTARA() {}
 
             protected:
                 int numInitStages() const;
@@ -44,6 +46,7 @@ namespace ARA {
                 ForwardingPolicy* getForwardingPolicy();
                 void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
                 void deliverToSystem(const Packet* packet);
+                void packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
                 void setEvaporationPolicy(EvaporationPolicy *policy);
 

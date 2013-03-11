@@ -1,48 +1,22 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "ARAClientMock.h"
 #include "RoutingTableEntry.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
+#include "testAPI/mocks/time/ClockMock.h"
 
 #include <sstream>
 
 namespace ARA {
 
-ARAClientMock::ARAClientMock() : AbstractARAClient(new TimeFactoryMock()) {
+ARAClientMock::ARAClientMock() {
     forwardingPolicy = new BestPheromoneForwardingPolicy();
     forwardingPolicy->setRoutingTable(routingTable);
     setEvaporationPolicy(new LinearEvaporationPolicyMock());
 }
-
-void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
-    evaporationPolicy = policy;
-    routingTable->setEvaporationPolicy(evaporationPolicy);
-};
 
 ARAClientMock::~ARAClientMock() {
     delete forwardingPolicy;
@@ -54,9 +28,27 @@ ARAClientMock::~ARAClientMock() {
         delete mock;
     }
 
+    for(auto& pair: receivedPackets) {
+        delete pair;
+    }
+
+    for(auto& packetInfo: undeliverablePackets) {
+        delete packetInfo.packet;
+    }
+
     routingTable->setEvaporationPolicy(NULL);
     delete evaporationPolicy;
 }
+
+void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
+    receivedPackets.push_back(new Pair<const Packet*, const NetworkInterface*>(packet, interface));
+    AbstractARAClient::receivePacket(packet, interface);
+}
+
+void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
+    evaporationPolicy = policy;
+    routingTable->setEvaporationPolicy(evaporationPolicy);
+};
 
 ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
     return forwardingPolicy;
@@ -68,6 +60,14 @@ void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* i
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
     deliveredPackets.push_back(packet);
+}
+
+void ARAClientMock::packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+    PacketInfo packetInfo;
+    packetInfo.packet = packet;
+    packetInfo.nextHop = nextHop;
+    packetInfo.interface = interface;
+    undeliverablePackets.push_back(packetInfo);
 }
 
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
@@ -89,6 +89,22 @@ RoutingTable* ARAClientMock::getRoutingTable() {
 
 std::deque<const Packet*>* ARAClientMock::getDeliveredPackets() {
     return &deliveredPackets;
+}
+
+int ARAClientMock::getNumberOfReceivedPackets() {
+    return receivedPackets.size();
+}
+
+std::deque<Pair<const Packet*, const NetworkInterface*>*> ARAClientMock::getReceivedPackets() {
+    return receivedPackets;
+}
+
+int ARAClientMock::getNumberOfUndeliverablePackets() {
+    return undeliverablePackets.size();
+}
+
+std::deque<ARAClientMock::PacketInfo> ARAClientMock::getUndeliverablePackets() {
+    return undeliverablePackets;
 }
 
 } /* namespace ARA */

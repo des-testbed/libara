@@ -2,8 +2,7 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTCubicEvaporationPolicy.h"
-#include "OMNeTTimeFactory.h"
+#include "omnetpp/OMNeTCubicEvaporationPolicy.h"
 
 namespace ARA {
     namespace omnetpp {
