@@ -142,8 +142,8 @@ namespace ARA {
 
         void OMNeTARA::handleARA(cMessage* msg) {
             OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(msg);
-            NetworkInterface* arrivalInterface = getNetworkInterface(msg->getArrivalGate()->getIndex());
-            receivePacket(omnetPacket, arrivalInterface);
+            OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(msg->getArrivalGate()->getIndex());
+            arrivalGate->receive(omnetPacket);
         }
 
         InterfaceEntry* OMNeTARA::getSourceInterfaceFrom(cMessage* msg) {
