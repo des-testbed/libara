@@ -3,11 +3,10 @@
  */
 
 #include "omnetpp/OMNeTTimerMessage.h"
-#include "omnetpp/Environment.h"
 
 using namespace ARA::omnetpp;
 
-OMNeTTimerMessage::OMNeTTimerMessage(unsigned int timerID) : cMessage("TimerMsg", Environment::TIMER_MSG){
+OMNeTTimerMessage::OMNeTTimerMessage(unsigned int timerID) : cMessage("TimerMsg"){
     this->timerID = timerID;
 }
 

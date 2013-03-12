@@ -232,6 +232,10 @@ namespace ARA {
         }
 
         void OMNeTARA::packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+            // this will presumably be called from the context of the OMNeTTimer
+            // we are now back in the context of the ARACLient simple module
+            Enter_Method_Silent("OMNeTARA::packetIsNotDeliverable");
+
             //TODO to something with this packet other then deleting it
             delete packet;
         }
@@ -240,6 +244,11 @@ namespace ARA {
             this->routingTable->setEvaporationPolicy(policy);
         }
 
+        void OMNeTARA::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
+            Enter_Method_Silent("takeAndSend(msg)");
+            take(msg);
+            sendDelayed(msg, sendDelay, gate);
+        }
 
     } /* namespace omnetpp */
 } /* namespace ARA */

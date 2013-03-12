@@ -7,6 +7,8 @@
 
 namespace ARA {
 
+Environment* Environment::instance = nullptr;
+
 Environment::Environment() {
     clock = new UnixClock();
 }
@@ -21,8 +23,10 @@ void Environment::setTheClock(Clock* newClock) {
 }
 
 Environment& Environment::getInstance() {
-    static Environment instance;
-    return instance;
+    if (instance == nullptr) {
+       instance = new Environment();
+    }
+    return *instance;
 }
 
 Clock* Environment::getClock() {

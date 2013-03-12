@@ -33,7 +33,7 @@ class OMNeTARA;
         std::shared_ptr<OMNeTAddress> getNextHopAddress(std::shared_ptr<Address> recipient);
 
     private:
-        cSimpleModule* module;
+        OMNeTARA* omnetARAClient;
         cGate* gateToARP;
         int interfaceID;
 

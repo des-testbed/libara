@@ -19,7 +19,7 @@ namespace omnetpp {
 typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
 
 OMNeTGate::OMNeTGate(OMNeTARA* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : ReliableNetworkInterface(araClient) {
-    this->module = araClient;
+    this->omnetARAClient = araClient;
     this->gateToARP = gateToARP;
     this->broadCastDelay = broadCastDelay;
     this->uniCastDelay = uniCastDelay;
@@ -55,7 +55,8 @@ void OMNeTGate::doSend(const Packet* packet, shared_ptr<Address> recipient, doub
     controlInfo->setInterfaceId(interfaceID);
     omnetPacket->setControlInfo(controlInfo);
 
-    module->sendDelayed(omnetPacket, sendDelay, gateToARP);
+    // we might have switched the context from the OMNeTTimer
+    omnetARAClient->takeAndSend(omnetPacket, gateToARP, sendDelay);
 }
 
 OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
@@ -76,7 +77,7 @@ bool OMNeTGate::equals(NetworkInterface* otherInterface) {
         return false;
     }
     else {
-        return strcmp(module->getFullName(), otherOMNeTInterface->module->getFullName()) == 0
+        return strcmp(omnetARAClient->getFullName(), otherOMNeTInterface->omnetARAClient->getFullName()) == 0
             && strcmp(gateToARP->getFullName(), otherOMNeTInterface->gateToARP->getFullName()) == 0;
     }
 }

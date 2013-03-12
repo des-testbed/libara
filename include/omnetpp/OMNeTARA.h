@@ -50,6 +50,13 @@ namespace ARA {
 
                 void setEvaporationPolicy(EvaporationPolicy *policy);
 
+                /**
+                 * Method for friend class OMNeTGate.
+                 * It switches the context to the ARAClient,
+                 * takes ownership of the packet and sends it to the specified gate
+                 * with the given delay.
+                 */
+                void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
             private:
                 /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
                 ForwardingPolicy* forwardingPolicy;
@@ -76,6 +83,8 @@ namespace ARA {
                 void handleUpperLayerMessage(cMessage* msg);
                 void handleARP(cMessage* msg);
                 void handleARA(cMessage* msg);
+
+            friend class OMNeTGate;
         };
 
     } /* namespace ARA */
