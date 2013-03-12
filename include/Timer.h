@@ -20,7 +20,7 @@ namespace ARA {
          * This method is used to start the timer. The timer is required to run
          * the stated amount of milliseconds.
          */
-        virtual void run(double timeInMilliSeconds) = 0;
+        virtual void run(long timeInMilliSeconds) = 0;
 
         /**
          * Interrupts a running timer.

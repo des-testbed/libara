@@ -40,19 +40,15 @@ long OMNeTTime::convertSimulationTime(SimTime time, int wantedScaleExponent) con
     }
     else {
        /**
-        * TODO: Check if this is working the way it is intended to do
-        *
         * Example:
-        *    simulation time precision is already millisecond
-        *    3000 / 10 ^ (-3 - -3) =  3000 / 10 ^ 0 = 3000
-        *
-        *    simulation time is picoseconds, but seconds desired
-        *    3000 / 10 ^ (0 - -9) = 3000 / 10 ^ 9 = 0.000003 
-        *
-        * The method would return 0 for the latter example. The 
-        * question if that is sufficient in an simulation scenario.
+        *    Transform from Seconds to
+        *      millisec: 1 * 10^(0 + 3) = 1000
+        *      microsec: 1 * 10^(0 + 6) = 1000000
+        *    Transform from Milliseconds to
+        *      millisec: 1 * 10^(-3 + 3) = 1
+        *      microsec: 1 * 10^(-3 + 6) = 1000
         */
-        return time.raw() / pow(10, (wantedScaleExponent - time.getScaleExp()));
+        return time.raw() * pow(10, time.getScaleExp() + wantedScaleExponent);
     }
 
 }

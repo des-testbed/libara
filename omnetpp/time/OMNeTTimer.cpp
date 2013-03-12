@@ -7,8 +7,13 @@
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-void OMNeTTimer::run(double timeInMilliSeconds) {
-    //TODO implement this
+OMNeTTimer::OMNeTTimer(unsigned int id, OMNeTClock* clock) {
+    this->id = id;
+    this->clock = clock;
+}
+
+void OMNeTTimer::run(long timeInMilliSeconds) {
+    clock->startTimer(id, timeInMilliSeconds);
 }
 
 void OMNeTTimer::interrupt() {

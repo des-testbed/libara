@@ -18,7 +18,7 @@ namespace omnetpp {
 
 typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
 
-OMNeTGate::OMNeTGate(OMNeTARA* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : AbstractNetworkInterface(araClient) {
+OMNeTGate::OMNeTGate(OMNeTARA* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : ReliableNetworkInterface(araClient) {
     this->module = araClient;
     this->gateToARP = gateToARP;
     this->broadCastDelay = broadCastDelay;
@@ -34,11 +34,11 @@ OMNeTGate::OMNeTGate(OMNeTARA* araClient, cGate* gateToARP, InterfaceEntry* inte
     this->interfaceID = interfaceEntry->getInterfaceId();
 }
 
-void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
-    send(packet, recipient, uniCastDelay);
+void OMNeTGate::doSend(const Packet* packet, shared_ptr<Address> recipient) {
+    doSend(packet, recipient, uniCastDelay);
 }
 
-void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
+void OMNeTGate::doSend(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
     // TODO somehow remove this ugly casting stuff
     OMNeTPacket* originalPacket = (OMNeTPacket*) packet;
     OMNeTPacket* omnetPacket = (OMNeTPacket*) originalPacket->clone();
@@ -67,7 +67,7 @@ OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
-    send(packet, broadcastAddress, broadCastDelay);
+    doSend(packet, broadcastAddress, broadCastDelay);
 }
 
 bool OMNeTGate::equals(NetworkInterface* otherInterface) {

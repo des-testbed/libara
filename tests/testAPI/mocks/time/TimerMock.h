@@ -10,7 +10,7 @@
 namespace ARA {
     class TimerMock : public Timer {
     public:
-        void run(double timeInMilliSeconds);
+        void run(long timeInMilliSeconds);
         void interrupt();
 
         void expire();

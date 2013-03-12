@@ -13,9 +13,15 @@ namespace ARA {
 namespace omnetpp {
 
     class Environment : public cSimpleModule {
-
+    public:
         void initialize();
+        void handleMessage(cMessage *msg);
 
+        void scheduleSelfMessage(cMessage* msg, long timeInMilliSeconds);
+
+        enum MessageTypes {
+            TIMER_MSG
+        };
     };
 
 } /* namespace omnetpp */

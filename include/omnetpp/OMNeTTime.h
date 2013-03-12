@@ -14,17 +14,17 @@ namespace omnetpp {
 
     /**
      * The class provides methods for determining the time difference between 
-     * two timestamps in OMNeT++.
+     * two time stamps in OMNeT++.
      */
     class OMNeTTime : public Time {
         public:
-          virtual void setToCurrentTime();
-          virtual long getDifferenceInMilliSeconds(const Time* otherTime) const;
+            virtual void setToCurrentTime();
+            virtual long getDifferenceInMilliSeconds(const Time* otherTime) const;
 
         private:
-          long convertSimulationTime(SimTime time, int wantedScaleExponent) const;
+            long convertSimulationTime(SimTime time, int wantedScaleExponent) const;
 
-          SimTime timestamp;
+            SimTime timestamp;
     };
 }
 }
