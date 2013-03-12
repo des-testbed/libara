@@ -6,7 +6,7 @@
 
 using namespace ARA;
 
-void TimerMock::run(long timeInMilliSeconds) {
+void TimerMock::run(unsigned long timeoutInMicroSeconds) {
     isTimerRunning = true;
 }
 

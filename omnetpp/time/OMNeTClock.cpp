@@ -21,9 +21,9 @@ Timer* OMNeTClock::getNewTimer() {
     return new OMNeTTimer(++nrOfTimers, this);
 }
 
-void OMNeTClock::startTimer(unsigned int timerID, long timeInMilliSeconds) {
+void OMNeTClock::startTimer(unsigned int timerID, unsigned long timeoutInMicroSeconds) {
     cMessage* newMessage = new OMNeTTimerMessage(timerID);
-    environment->scheduleSelfMessage(newMessage, timeInMilliSeconds);
+    environment->scheduleSelfMessage(newMessage, timeoutInMicroSeconds);
 }
 
 void OMNeTClock::handleTimerMessage(OMNeTTimerMessage* msg) {

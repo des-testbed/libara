@@ -12,10 +12,10 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, AddressPtr localAddress, AddressPtr broadcastAddress, int ackTimeoutInMillis) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
+ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, AddressPtr localAddress, AddressPtr broadcastAddress, int ackTimeoutInMicroSeconds) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
     unacknowledgedPackets = deque<const Packet*>();
     runningTimers = unordered_map<Timer*, AckTimerData>();
-    this->ackTimeoutInMillis = ackTimeoutInMillis;
+    this->ackTimeoutInMicroSeconds = ackTimeoutInMicroSeconds;
 }
 
 ReliableNetworkInterface::~ReliableNetworkInterface() {
@@ -41,7 +41,7 @@ void ReliableNetworkInterface::send(const Packet* packet, AddressPtr recipient) 
 void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, AddressPtr recipient) {
     Timer* ackTimer = Environment::getClock()->getNewTimer();
     ackTimer->addTimeoutListener(this);
-    ackTimer->run(ackTimeoutInMillis);
+    ackTimer->run(ackTimeoutInMicroSeconds);
 
     AckTimerData timerData;
     timerData.nrOfRetries = 0;
@@ -98,7 +98,7 @@ void ReliableNetworkInterface::receive(Packet* packet) {
 void ReliableNetworkInterface::handleNonAckPacket(Packet* packet) {
     AddressPtr destination = packet->getDestination();
 
-    if(isBroadcastAddress(destination) == false) {
+    if(isBroadcastAddress(destination) == false) { // FIXME this check does not work (destination is never a broadcast address)
         Packet* ackPacket = packet->createAcknowledgment();
         doSend(ackPacket, packet->getSender());
         delete ackPacket;

@@ -18,9 +18,9 @@ namespace ARA {
 
         /**
          * This method is used to start the timer. The timer is required to run
-         * the stated amount of milliseconds.
+         * the stated amount of microseconds.
          */
-        virtual void run(long timeInMilliSeconds) = 0;
+        virtual void run(unsigned long timeoutInMicroSeconds) = 0;
 
         /**
          * Interrupts a running timer.

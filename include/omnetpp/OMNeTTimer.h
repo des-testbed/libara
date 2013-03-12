@@ -17,7 +17,7 @@ namespace omnetpp {
     class OMNeTTimer : public Timer {
     public:
         OMNeTTimer(unsigned int id, OMNeTClock* clock);
-        void run(long timeInMilliSeconds);
+        void run(unsigned long timeoutInMicroSeconds);
         void interrupt();
 
     private:

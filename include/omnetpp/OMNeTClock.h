@@ -20,7 +20,7 @@ namespace omnetpp {
             Time* makeTime();
             Timer* getNewTimer();
 
-            void startTimer(unsigned int timerID, long timeInMilliSeconds);
+            void startTimer(unsigned int timerID, unsigned long timeoutInMicroSeconds);
             void handleTimerMessage(OMNeTTimerMessage* msg);
 
         private:

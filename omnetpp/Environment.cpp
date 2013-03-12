@@ -21,7 +21,7 @@ void Environment::handleMessage(cMessage* msg) {
     }
 }
 
-void Environment::scheduleSelfMessage(cMessage* msg, long timeInMilliSeconds) {
+void Environment::scheduleSelfMessage(cMessage* msg, unsigned long timeoutInMicroSeconds) {
     // take ownership of the message
     take(msg);
 
@@ -30,8 +30,11 @@ void Environment::scheduleSelfMessage(cMessage* msg, long timeInMilliSeconds) {
 
     // transform the time to the wanted time scale resolution
     SimTime currentTime = simTime();
-    double timeDelta = timeInMilliSeconds * pow(10, SimTime::SCALEEXP_MS + currentTime.getScaleExp());
+    int64 timeDeltaRaw = timeoutInMicroSeconds * pow(10, SimTime::SCALEEXP_US - currentTime.getScaleExp());
+
+    SimTime scheduledTime = SimTime();
+    scheduledTime.setRaw(currentTime.raw() + timeDeltaRaw);
 
     // finally schedule the self message
-    scheduleAt(currentTime + timeDelta , msg);
+    scheduleAt(scheduledTime, msg);
 }

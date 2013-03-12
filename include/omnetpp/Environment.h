@@ -17,7 +17,7 @@ namespace omnetpp {
         void initialize();
         void handleMessage(cMessage *msg);
 
-        void scheduleSelfMessage(cMessage* msg, long timeInMilliSeconds);
+        void scheduleSelfMessage(cMessage* msg, unsigned long timeoutInMicroSeconds);
 
         enum MessageTypes {
             TIMER_MSG

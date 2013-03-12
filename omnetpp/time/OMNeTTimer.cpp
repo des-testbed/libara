@@ -12,8 +12,8 @@ OMNeTTimer::OMNeTTimer(unsigned int id, OMNeTClock* clock) {
     this->clock = clock;
 }
 
-void OMNeTTimer::run(long timeInMilliSeconds) {
-    clock->startTimer(id, timeInMilliSeconds);
+void OMNeTTimer::run(unsigned long timeoutInMicroSeconds) {
+    clock->startTimer(id, timeoutInMicroSeconds);
 }
 
 void OMNeTTimer::interrupt() {

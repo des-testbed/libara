@@ -32,7 +32,7 @@ namespace ARA {
              * @param localAddress the Address which is returned when the interface is asked for its local address.
              * @param broadcastAddress the Address which is known to be the broadcast address of this interface.
              */
-            ReliableNetworkInterface(AbstractARAClient* client, std::shared_ptr<Address> localAddress=nullptr, std::shared_ptr<Address> broadcastAddress=nullptr, int ackTimeoutInMillis=100);
+            ReliableNetworkInterface(AbstractARAClient* client, std::shared_ptr<Address> localAddress=nullptr, std::shared_ptr<Address> broadcastAddress=nullptr, int ackTimeoutInMicroSeconds=1000);
             virtual ~ReliableNetworkInterface();
 
             /**
@@ -80,7 +80,7 @@ namespace ARA {
         protected:
             std::deque<const Packet*> unacknowledgedPackets;
             std::unordered_map<Timer*, AckTimerData> runningTimers;
-            double ackTimeoutInMillis;
+            double ackTimeoutInMicroSeconds;
             int maxNrOfRetransmissions = 5;
 
         private:
