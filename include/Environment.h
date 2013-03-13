@@ -32,6 +32,7 @@ public:
     static void setClock(Clock* newClock);
 
 private:
+    static Environment* instance;
     Clock* clock;
 
     /**

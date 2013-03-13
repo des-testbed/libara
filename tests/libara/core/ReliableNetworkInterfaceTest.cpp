@@ -106,19 +106,19 @@ TEST(ReliableNetworkInterfaceTest, doNotAcknowledgeAckPackets) {
     BYTES_EQUAL(0, interface->getNumberOfSentPackets());
 }
 
-TEST(ReliableNetworkInterfaceTest, doNotAcknowledgeBroadcastPackets) {
+TEST(ReliableNetworkInterfaceTest, doNotAcknowledgeAntPackets) {
     AddressPtr source (new AddressMock("source"));
-    AddressPtr destination (new AddressMock("BROADCAST"));
+    AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender (new AddressMock("sender"));
     unsigned int sequenceNr = 123;
-    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, sequenceNr, 1);
+    Packet* packet = new Packet(source, destination, sender, PacketType::FANT, sequenceNr, 1);
 
     // sanity check
-    CHECK(interface->isBroadcastAddress(destination));
+    CHECK(packet->isAntPacket());
 
     interface->receive(packet);
 
-    // we should never acknowledge broadcast packets
+    // we should never acknowledge ant packets
     BYTES_EQUAL(0, interface->getNumberOfSentPackets());
 }
 

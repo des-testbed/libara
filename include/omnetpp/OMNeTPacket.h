@@ -43,6 +43,7 @@ class OMNeTPacket : public ::cPacket, public ARA::Packet {
     virtual Packet* createFANT(unsigned int sequenceNumber) const;
     virtual Packet* createBANT(unsigned int sequenceNumber) const;
     virtual Packet* createDuplicateWarning() const;
+    virtual Packet* createAcknowledgment() const;
 };
 
 inline void doPacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimPack(b);}

@@ -6,7 +6,7 @@
 
 using namespace ARA;
 
-void UnixTimer::run(double timeInMilliSeconds) {
+void UnixTimer::run(unsigned long timeoutInMicroSeconds) {
     // TODO implement this
 }
 

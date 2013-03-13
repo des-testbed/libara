@@ -13,8 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 @namespace(ARA::omnetpp);
-package ara;
+package ara.time;
 
-simple Environment {
-    
+simple OMNeTClock
+{
+    @display("i=block/timer");
 }

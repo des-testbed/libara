@@ -5,7 +5,7 @@
 #ifndef OMNETGATE_H_
 #define OMNETGATE_H_
 
-#include "AbstractNetworkInterface.h"
+#include "ReliableNetworkInterface.h"
 #include "OMNeTARA.h"
 #include "OMNeTAddress.h"
 #include "InterfaceEntry.h"
@@ -19,12 +19,12 @@ namespace omnetpp {
 class OMNeTARA;
 
 //TODO write some more documentation for this class
-    class OMNeTGate: public AbstractNetworkInterface {
+    class OMNeTGate: public ReliableNetworkInterface {
     public:
-        OMNeTGate(OMNeTARA* module, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay);
+        OMNeTGate(OMNeTARA* module, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay, int ackTimeoutInMicroSeconds);
 
-        void send(const Packet* packet, std::shared_ptr<Address> recipient);
-        void send(const Packet* packet, std::shared_ptr<Address> recipient, double sendDelay);
+        void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
+        void doSend(const Packet* packet, std::shared_ptr<Address> recipient, double sendDelay);
 
         void broadcast(const Packet* packet);
         bool equals(NetworkInterface* interface);
@@ -33,7 +33,7 @@ class OMNeTARA;
         std::shared_ptr<OMNeTAddress> getNextHopAddress(std::shared_ptr<Address> recipient);
 
     private:
-        cSimpleModule* module;
+        OMNeTARA* omnetARAClient;
         cGate* gateToARP;
         int interfaceID;
 

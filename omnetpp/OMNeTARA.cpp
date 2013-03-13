@@ -60,6 +60,7 @@ namespace ARA {
         void OMNeTARA::initializeNetworkInterfaces() {
             double broadCastDelay = par("broadCastDelay").doubleValue();
             double uniCastDelay = par("uniCastDelay").doubleValue();
+            int ackTimeout = par("ackTimeout").longValue();
 
             ASSERT(interfaceTable);
             cGate* gateToARP = gate("arpOut");
@@ -68,7 +69,7 @@ namespace ARA {
             for (int i=0; i < nrOfInterfaces; i++)         {
                 InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
                 if (interfaceEntry->isLoopback() == false) {
-                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay));
+                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay, ackTimeout));
                 }
             }
         }
@@ -142,8 +143,8 @@ namespace ARA {
 
         void OMNeTARA::handleARA(cMessage* msg) {
             OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(msg);
-            NetworkInterface* arrivalInterface = getNetworkInterface(msg->getArrivalGate()->getIndex());
-            receivePacket(omnetPacket, arrivalInterface);
+            OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(msg->getArrivalGate()->getIndex());
+            arrivalGate->receive(omnetPacket);
         }
 
         InterfaceEntry* OMNeTARA::getSourceInterfaceFrom(cMessage* msg) {
@@ -210,7 +211,6 @@ namespace ARA {
             }
         }
 
-
         void OMNeTARA::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
             AddressPtr source = packet->getSource();
             AddressPtr sender = packet->getSender();
@@ -232,6 +232,10 @@ namespace ARA {
         }
 
         void OMNeTARA::packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+            // this will presumably be called from the context of the OMNeTTimer
+            // we are now back in the context of the ARACLient simple module
+            Enter_Method_Silent("OMNeTARA::packetIsNotDeliverable");
+
             //TODO to something with this packet other then deleting it
             delete packet;
         }
@@ -240,6 +244,11 @@ namespace ARA {
             this->routingTable->setEvaporationPolicy(policy);
         }
 
+        void OMNeTARA::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
+            Enter_Method_Silent("takeAndSend(msg)");
+            take(msg);
+            sendDelayed(msg, sendDelay, gate);
+        }
 
     } /* namespace omnetpp */
 } /* namespace ARA */

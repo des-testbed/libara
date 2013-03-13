@@ -11,15 +11,15 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-NetworkInterfaceMock::NetworkInterfaceMock(AbstractARAClient* client) : ReliableNetworkInterface(client, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST"))) {
+NetworkInterfaceMock::NetworkInterfaceMock(AbstractARAClient* client) : ReliableNetworkInterface(client, 5000, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST"))) {
     this->name = "NetworkInterfaceMock";
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, AbstractARAClient* client) : ReliableNetworkInterface(client, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST")))  {
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, AbstractARAClient* client) : ReliableNetworkInterface(client, 5000, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST")))  {
     this->name = interfaceName;
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, const string localAddressName, AbstractARAClient* client) : ReliableNetworkInterface(client, AddressPtr(new AddressMock(localAddressName)), AddressPtr(new AddressMock("BROADCAST"))) {
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, const string localAddressName, AbstractARAClient* client) : ReliableNetworkInterface(client, 5000, AddressPtr(new AddressMock(localAddressName)), AddressPtr(new AddressMock("BROADCAST"))) {
     this->name = interfaceName;
 }
 

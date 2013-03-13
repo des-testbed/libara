@@ -16,7 +16,6 @@
 package ara;
 
 import inet.base.NotificationBoard;
-import ara.Environment;
 import ara.NetworkLayer;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
@@ -34,10 +33,6 @@ module ARAClient
         input radioIn @directIn;
 
     submodules:
-        environment: Environment {
-
-            @display("p=50,23");
-        }
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=50,94");

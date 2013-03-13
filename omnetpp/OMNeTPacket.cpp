@@ -92,6 +92,10 @@ Packet* OMNeTPacket::createDuplicateWarning() const {
     return new OMNeTPacket(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, hopCount+1);
 }
 
+Packet* OMNeTPacket::createAcknowledgment() const {
+    return new OMNeTPacket(source, destination, sender, PacketType::ACK, seqNr, 1);
+}
+
 class OMNeTPacketDescriptor : public cClassDescriptor {
 public:
     OMNeTPacketDescriptor();

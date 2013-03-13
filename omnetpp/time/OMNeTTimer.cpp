@@ -7,10 +7,24 @@
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-void OMNeTTimer::run(double timeInMilliSeconds) {
-    //TODO implement this
+OMNeTTimer::OMNeTTimer(unsigned int id, OMNeTClock* clock) {
+    this->id = id;
+    this->clock = clock;
+}
+
+OMNeTTimer::~OMNeTTimer() {
+    // notify the clock so all pending messages are canceled
+    clock->timerHasBeenDeleted(this->id);
+}
+
+void OMNeTTimer::run(unsigned long timeoutInMicroSeconds) {
+    clock->startTimer(id, timeoutInMicroSeconds);
 }
 
 void OMNeTTimer::interrupt() {
-    //TODO implement this
+    clock->stopTimer(id);
+}
+
+void OMNeTTimer::notifyTimeExpired() {
+    notifyAllListeners();
 }

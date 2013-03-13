@@ -17,6 +17,7 @@ package ara.simulations;
 
 import ara.ARAClient;
 import ara.ARANetworkConfigurator;
+import ara.time.OMNeTClock;
 import inet.world.ChannelControl;
 
 network ManetTest
@@ -27,6 +28,10 @@ network ManetTest
         @display("b=297,203;bgb=758,337");
 
     submodules:
+        clock: OMNeTClock {
+            @display("p=78,161");
+        }
+        
         channelcontrol: ChannelControl {
             parameters:
                 playgroundSizeX = playgroundSizeX;
