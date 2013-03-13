@@ -12,7 +12,7 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, AddressPtr localAddress, AddressPtr broadcastAddress, int ackTimeoutInMicroSeconds) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
+ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, int ackTimeoutInMicroSeconds, AddressPtr localAddress, AddressPtr broadcastAddress) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
     unacknowledgedPackets = deque<const Packet*>();
     runningTimers = unordered_map<Timer*, AckTimerData>();
     this->ackTimeoutInMicroSeconds = ackTimeoutInMicroSeconds;
@@ -98,7 +98,7 @@ void ReliableNetworkInterface::receive(Packet* packet) {
 void ReliableNetworkInterface::handleNonAckPacket(Packet* packet) {
     AddressPtr destination = packet->getDestination();
 
-    if(isBroadcastAddress(destination) == false) { // FIXME this check does not work (destination is never a broadcast address)
+    if(packet->isAntPacket() == false) { // TODO actually we want to test if the packet has been sent via a broadcast but this is currently not possible with the API
         Packet* ackPacket = packet->createAcknowledgment();
         doSend(ackPacket, packet->getSender());
         delete ackPacket;
