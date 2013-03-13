@@ -15,6 +15,7 @@
 @namespace(ARA::omnetpp);
 package ara.time;
 
-simple OMNeTClock {
-    
+simple OMNeTClock
+{
+    @display("i=block/timer");
 }

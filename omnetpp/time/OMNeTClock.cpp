@@ -48,16 +48,20 @@ void OMNeTClock::startTimer(unsigned int timerID, unsigned long timeoutInMicroSe
 
     // finally schedule the self message
     scheduleAt(scheduledTime, newMessage);
+
+    EV << "Timer " << timerID << " has been started\n";
 }
 
 void OMNeTClock::stopTimer(unsigned int timerID) {
     cancelTimerEvents(timerID);
     runningTimers.erase(timerID);
+    EV << "Timer " << timerID << " has been stopped\n";
 }
 
 void OMNeTClock::timerHasBeenDeleted(unsigned int timerID) {
     cancelTimerEvents(timerID);
     runningTimers.erase(timerID);
+    EV << "Timer " << timerID << " has been deleted\n";
 }
 
 void OMNeTClock::cancelTimerEvents(unsigned int timerID) {
@@ -71,6 +75,7 @@ void OMNeTClock::cancelTimerEvents(unsigned int timerID) {
 void OMNeTClock::handleMessage(cMessage* msg) {
     OMNeTTimerMessage* timerMessage = (OMNeTTimerMessage*) msg;
     unsigned int timerID = timerMessage->getTimerID();
+    EV << "Timer " << timerID << " has timed out\n";
 
     // dispatch the message
     OMNeTTimer* expiredTimer = runningTimers[timerID];
@@ -81,4 +86,5 @@ void OMNeTClock::handleMessage(cMessage* msg) {
     if (pendingSelfMessages.find(timerID) != pendingSelfMessages.end()) {
         pendingSelfMessages.erase(timerID);
     }
+    delete msg;
 }
