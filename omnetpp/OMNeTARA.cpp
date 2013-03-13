@@ -60,6 +60,7 @@ namespace ARA {
         void OMNeTARA::initializeNetworkInterfaces() {
             double broadCastDelay = par("broadCastDelay").doubleValue();
             double uniCastDelay = par("uniCastDelay").doubleValue();
+            int ackTimeout = par("ackTimeout").longValue();
 
             ASSERT(interfaceTable);
             cGate* gateToARP = gate("arpOut");
@@ -68,7 +69,7 @@ namespace ARA {
             for (int i=0; i < nrOfInterfaces; i++)         {
                 InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
                 if (interfaceEntry->isLoopback() == false) {
-                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay));
+                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay, ackTimeout));
                 }
             }
         }
@@ -209,7 +210,6 @@ namespace ARA {
                 throw;
             }
         }
-
 
         void OMNeTARA::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
             AddressPtr source = packet->getSource();

@@ -21,7 +21,7 @@ class OMNeTARA;
 //TODO write some more documentation for this class
     class OMNeTGate: public ReliableNetworkInterface {
     public:
-        OMNeTGate(OMNeTARA* module, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay);
+        OMNeTGate(OMNeTARA* module, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay, int ackTimeoutInMicroSeconds);
 
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient, double sendDelay);
