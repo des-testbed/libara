@@ -41,6 +41,8 @@ namespace ARA {
                 OMNeTARA() {}
                 ~OMNeTARA();
 
+                void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+
             protected:
                 int numInitStages() const;
                 virtual void initialize(int stage);
@@ -49,7 +51,7 @@ namespace ARA {
                 ForwardingPolicy* getForwardingPolicy();
                 void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
                 void deliverToSystem(const Packet* packet);
-                void packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+                void packetNotDeliverable(const Packet* packet);
 
                 void setEvaporationPolicy(EvaporationPolicy *policy);
 

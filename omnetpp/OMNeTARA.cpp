@@ -221,7 +221,7 @@ namespace ARA {
             send(encapsulatedData, "upperLayerGate$o");
         }
 
-        void OMNeTARA::packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+        void OMNeTARA::handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
             // this will presumably be called from the context of the OMNeTTimer
             // we are now back in the context of the ARACLient simple module
             Enter_Method_Silent("OMNeTARA::packetIsNotDeliverable");
@@ -238,6 +238,10 @@ namespace ARA {
             Enter_Method_Silent("takeAndSend(msg)");
             take(msg);
             sendDelayed(msg, sendDelay, gate);
+        }
+
+        void OMNeTARA::packetNotDeliverable(const Packet* packet) {
+            //TODO report to upper layer
         }
 
     } /* namespace omnetpp */

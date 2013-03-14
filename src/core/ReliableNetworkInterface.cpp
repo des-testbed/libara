@@ -58,6 +58,7 @@ void ReliableNetworkInterface::timerHasExpired(Timer* ackTimer) {
         timerData.nrOfRetries++;
         runningTimers[ackTimer] = timerData;
         doSend(timerData.packet, timerData.recipient);
+        ackTimer->run(ackTimeoutInMicroSeconds);
     }
     else {
         handleUndeliverablePacket(ackTimer, timerData);
@@ -78,7 +79,7 @@ void ReliableNetworkInterface::handleUndeliverablePacket(Timer* ackTimer, AckTim
         }
     }
 
-    client->packetIsNotDeliverable(timerData.packet, timerData.recipient, this);
+    client->handleRouteFailure(timerData.packet, timerData.recipient, this);
 }
 
 void ReliableNetworkInterface::broadcast(const Packet* packet) {

@@ -214,6 +214,9 @@ TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
     // simulate that the timer has expired (timeout)
     ackTimer->expire();
 
+    // the timer should have been restarted
+    CHECK(ackTimer->isRunning());
+
     // the packet should have been retransmitted again
     BYTES_EQUAL(2, sentPackets->size());
     Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->back();
@@ -224,7 +227,7 @@ TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
     CHECK_PACKET(sentPacket, type, seqNr, source, sender, destination, hopCount, payload);
 }
 
-TEST(ReliableNetworkInterfaceTest, undeliverablePacketsAreReportedToARAClient) {
+TEST(ReliableNetworkInterfaceTest, routeFailuresAreReportedToARAClient) {
     // prepare the test
     int type = PacketType::DATA;
     unsigned int seqNr = 123;
@@ -264,14 +267,14 @@ TEST(ReliableNetworkInterfaceTest, undeliverablePacketsAreReportedToARAClient) {
         CHECK_PACKET(sentPacket, type, seqNr, source, sender, destination, hopCount, payload);
     }
 
-    // now if we let the timer expire one more time the packet should be reported undeliverable to the client
+    // now if we let the timer expire one more time the packet should be reported route failure to the client
     ackTimer->expire();
 
-    BYTES_EQUAL(1, client->getNumberOfUndeliverablePackets());
-    ARAClientMock::PacketInfo undeliverablePacketInfo = client->getUndeliverablePackets().front();
-    CHECK(undeliverablePacketInfo.packet == packet);
-    CHECK(undeliverablePacketInfo.nextHop == originalRecipient);
-    CHECK(undeliverablePacketInfo.interface == interface);
+    BYTES_EQUAL(1, client->getNumberOfRouteFailures());
+    ARAClientMock::PacketInfo routeFailurePacketInfo = client->getRouteFailurePackets().front();
+    CHECK(routeFailurePacketInfo.packet == packet);
+    CHECK(routeFailurePacketInfo.nextHop == originalRecipient);
+    CHECK(routeFailurePacketInfo.interface == interface);
 }
 
 TEST(ReliableNetworkInterfaceTest, packetAcknowledgmentStopsTimer) {

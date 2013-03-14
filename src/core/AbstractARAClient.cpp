@@ -396,9 +396,19 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* fant = discoveryInfo.originalPacket->createFANT(sequenceNr);
         broadCast(fant);
+        routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
     else {
-        // TODO
+        // remove the route discovery timer
+        AddressPtr destination = discoveryInfo.originalPacket->getDestination();
+        runningRouteDiscoveries.erase(destination);
+        runningRouteDiscoveryTimers.erase(routeDiscoveryTimer);
+        delete routeDiscoveryTimer;
+
+        deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);
+        for(auto& packet: undeliverablePackets) {
+            packetNotDeliverable(packet);
+        }
     }
 }
 

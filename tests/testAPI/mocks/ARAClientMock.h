@@ -39,7 +39,8 @@ public:
     ForwardingPolicy* getForwardingPolicy();
     void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
     void deliverToSystem(const Packet* packet);
-    void packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    void packetNotDeliverable(const Packet* packet);
 
     // Mocking methods
 
@@ -51,14 +52,18 @@ public:
     int getNumberOfReceivedPackets();
     std::deque<Pair<const Packet*, const NetworkInterface*>*> getReceivedPackets();
 
+    int getNumberOfRouteFailures();
+    std::deque<PacketInfo> getRouteFailurePackets();
+
     int getNumberOfUndeliverablePackets();
-    std::deque<PacketInfo> getUndeliverablePackets();
+    std::deque<const Packet*> getUndeliverablePackets();
 
 private:
     std::deque<NetworkInterfaceMock*> interfaceMocks;
     std::deque<const Packet*> deliveredPackets;
     std::deque<Pair<const Packet*, const NetworkInterface*>*> receivedPackets;
-    std::deque<PacketInfo> undeliverablePackets;
+    std::deque<PacketInfo> routeFailurePackets;
+    std::deque<const Packet*> undeliverablePackets;
 
     ForwardingPolicy* forwardingPolicy;
     EvaporationPolicy* evaporationPolicy;

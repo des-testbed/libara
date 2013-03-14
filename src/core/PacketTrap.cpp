@@ -110,4 +110,22 @@ void PacketTrap::setRoutingTable(RoutingTable *routingTable){
     this->routingTable = routingTable;
 }
 
+std::deque<Packet*> PacketTrap::removePacketsForDestination(std::shared_ptr<Address> destination) {
+    std::deque<Packet*> removedPackets = std::deque<Packet*>();
+    unordered_map<AddressPtr, PacketSet*>::const_iterator packetsForDestination = trappedPackets.find(destination);
+
+    if(packetsForDestination != trappedPackets.end()) {
+        PacketSet* packetSet = packetsForDestination->second;
+
+        for(auto& packet: *packetSet) {
+            removedPackets.push_back(packet);
+        }
+
+        trappedPackets.erase(packetsForDestination);
+        delete packetSet;
+    }
+
+    return removedPackets;
+}
+
 } /* namespace ARA */

@@ -86,12 +86,20 @@ TEST(ARAClientMockTest, getNumberOfReceivedPackets) {
     BYTES_EQUAL(1, client->getNumberOfReceivedPackets());
 }
 
-TEST(ARAClientMockTest, getNumberOfUndeliverablePackets) {
+TEST(ARAClientMockTest, getNumberOfRouteFailures) {
     Packet* packet = new PacketMock();
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     AddressPtr nextHop (new AddressMock("foo"));
 
+    BYTES_EQUAL(0, client->getNumberOfRouteFailures());
+    client->handleRouteFailure(packet, nextHop, interface);
+    BYTES_EQUAL(1, client->getNumberOfRouteFailures());
+}
+
+TEST(ARAClientMockTest, getNumberOfUndeliverablePackets) {
+    Packet* packet = new PacketMock();
+
     BYTES_EQUAL(0, client->getNumberOfUndeliverablePackets());
-    client->packetIsNotDeliverable(packet, nextHop, interface);
+    client->packetNotDeliverable(packet);
     BYTES_EQUAL(1, client->getNumberOfUndeliverablePackets());
 }

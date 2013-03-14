@@ -12,6 +12,8 @@
 
 namespace ARA {
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 ARAClientMock::ARAClientMock() {
     forwardingPolicy = new BestPheromoneForwardingPolicy();
     forwardingPolicy->setRoutingTable(routingTable);
@@ -32,8 +34,12 @@ ARAClientMock::~ARAClientMock() {
         delete pair;
     }
 
-    for(auto& packetInfo: undeliverablePackets) {
+    for(auto& packetInfo: routeFailurePackets) {
         delete packetInfo.packet;
+    }
+
+    for(auto& packet: undeliverablePackets) {
+        delete packet;
     }
 
     routingTable->setEvaporationPolicy(NULL);
@@ -62,12 +68,12 @@ void ARAClientMock::deliverToSystem(const Packet* packet) {
     deliveredPackets.push_back(packet);
 }
 
-void ARAClientMock::packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+void ARAClientMock::handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
     PacketInfo packetInfo;
     packetInfo.packet = packet;
     packetInfo.nextHop = nextHop;
     packetInfo.interface = interface;
-    undeliverablePackets.push_back(packetInfo);
+    routeFailurePackets.push_back(packetInfo);
 }
 
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
@@ -99,11 +105,23 @@ std::deque<Pair<const Packet*, const NetworkInterface*>*> ARAClientMock::getRece
     return receivedPackets;
 }
 
+int ARAClientMock::getNumberOfRouteFailures() {
+    return routeFailurePackets.size();
+}
+
+std::deque<ARAClientMock::PacketInfo> ARAClientMock::getRouteFailurePackets() {
+    return routeFailurePackets;
+}
+
+void ARAClientMock::packetNotDeliverable(const Packet* packet) {
+    undeliverablePackets.push_back(packet);
+}
+
 int ARAClientMock::getNumberOfUndeliverablePackets() {
     return undeliverablePackets.size();
 }
 
-std::deque<ARAClientMock::PacketInfo> ARAClientMock::getUndeliverablePackets() {
+std::deque<const Packet*> ARAClientMock::getUndeliverablePackets() {
     return undeliverablePackets;
 }
 

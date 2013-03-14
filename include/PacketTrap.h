@@ -46,6 +46,12 @@ public:
      */
     std::deque<Packet*>* getDeliverablePackets();
 
+    /**
+     * This will remove all packets for the given destination address from this packet trap
+     * and return them in a list object.
+     */
+    std::deque<Packet*> removePacketsForDestination(std::shared_ptr<Address> destination);
+
     void setRoutingTable(RoutingTable *routingTable);
 
 private:

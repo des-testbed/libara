@@ -63,24 +63,12 @@ public:
     virtual void receivePacket(Packet* packet, NetworkInterface* interface);
 
     /**
-     * This method is called each a time a new packet is received over the
-     * given interface.
-     *
-     * It is responsible for updating the routing table so a route to the
-     * packets source is known in the future.
-     *
-     * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_ERROR).
+     * This method is called each time packet can not be delivered to a specific next hop address.
+     * This is the case if this client never receives an acknowledgment in the timeout period
+     * and has tried too many times.
+     * TODO this needs to be handled in route failure handling and not as pure virtual method!
      */
-    virtual void updateRoutingTable(const Packet* packet, NetworkInterface* interface) = 0;
-
-    /**
-     * The packet should be directed to this node and must be delivered to the local system.
-     * Please note that this method is responsible for deleting the given packet (or delegating
-     * this responsibility to another method)
-     */
-    virtual void deliverToSystem(const Packet* packet) = 0;
-
-    virtual void packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) = 0;
+    virtual void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) = 0;
 
     /**
      * Sets a logger for this ARA client.
@@ -124,6 +112,8 @@ public:
 
     void timerHasExpired(Timer* responsibleTimer);
 
+    void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
+
 protected:
 
     /**
@@ -136,6 +126,31 @@ protected:
      * this method is called.
      */
     virtual ForwardingPolicy* getForwardingPolicy() = 0;
+
+    /**
+     * This method is called each a time a new packet is received over the
+     * given interface.
+     *
+     * It is responsible for updating the routing table so a route to the
+     * packets source is known in the future.
+     *
+     * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_ERROR).
+     */
+    virtual void updateRoutingTable(const Packet* packet, NetworkInterface* interface) = 0;
+
+    /**
+     * The packet should be directed to this node and must be delivered to the local system.
+     * Please note that this method is responsible for deleting the given packet (or delegating
+     * this responsibility to another method)
+     */
+    virtual void deliverToSystem(const Packet* packet) = 0;
+
+    /**
+     * This method is called if the route discovery is unsuccessful and not route to the packets
+     * destination can be established. The task of this method is to notify the upper layers
+     * about this event and delete the packet.
+     */
+    virtual void packetNotDeliverable(const Packet* packet) = 0;
 
     /**
      * Checks if a logger has been assigned to this ARA client and if so
@@ -194,8 +209,6 @@ protected:
      * @see AbstractARAClient::logMessage
      */
     void logFatal(const std::string &logMessage, ...) const;
-
-    void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
 private:
     NextHop* getNextHop(const Packet* packet);

@@ -620,6 +620,9 @@ TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
     // simulate that the timer has expired (timeout)
     routeDiscoveryTimer->expire();
 
+    // the timer should have been started again
+    CHECK(routeDiscoveryTimer->isRunning());
+
     // the FANT should have been transmitted again
     BYTES_EQUAL(2, sentPackets->size());
     sentPacketInfo = sentPackets->back();
@@ -632,5 +635,56 @@ TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
 }
 
 TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
-    //TODO
+    Packet* packetToOtherDestiantion = new PacketMock("source", "otherDestination", 4);
+    Packet* packet1 = new PacketMock("source", "destination", 1);
+    Packet* packet2 = new PacketMock("source", "destination", 2);
+    Packet* packet3 = new PacketMock("source", "destination", 3);
+
+    int maxNrOfRouteDiscoveryRetries = 4;
+    client->setMaxNrOfRouteDiscoveryRetries(maxNrOfRouteDiscoveryRetries);
+
+    // sanity check
+    CHECK(routingTable->isDeliverable(packet1->getDestination()) == false);
+    CHECK(routingTable->isDeliverable(packetToOtherDestiantion->getDestination()) == false);
+
+    // start the test
+    client->sendPacket(packetToOtherDestiantion);
+    client->sendPacket(packet1);
+    client->sendPacket(packet2);
+    client->sendPacket(packet3);
+
+    // none of the packet are deliverable and should be stored in the packet trap
+    CHECK(packetTrap->contains(packetToOtherDestiantion));
+    CHECK(packetTrap->contains(packet1));
+    CHECK(packetTrap->contains(packet2));
+    CHECK(packetTrap->contains(packet3));
+
+    // get the route discovery timer which is used by the client
+    ClockMock* clock = (ClockMock*) Environment::getClock();
+    TimerMock* routeDiscoveryTimer = clock->getLastTimer();
+
+    CHECK(routeDiscoveryTimer->isRunning());
+
+    for (int i = 1; i <= maxNrOfRouteDiscoveryRetries; i++) {
+        // simulate that the timer has expired (timeout)
+        routeDiscoveryTimer->expire();
+
+        // the packet should not have been reported undeliverable yet
+        BYTES_EQUAL(0, client->getNumberOfUndeliverablePackets());
+
+        // the timer should have been started again
+        CHECK(routeDiscoveryTimer->isRunning());
+    }
+
+    // expire one last time
+    routeDiscoveryTimer->expire();
+
+    // now we have tried so many times and should abort the route discovery
+    BYTES_EQUAL(3, client->getNumberOfUndeliverablePackets());
+
+    // the undeliverable packets must be deleted from the trap
+    CHECK_TRUE(packetTrap->contains(packetToOtherDestiantion));
+    CHECK_FALSE(packetTrap->contains(packet1));
+    CHECK_FALSE(packetTrap->contains(packet2));
+    CHECK_FALSE(packetTrap->contains(packet3));
 }

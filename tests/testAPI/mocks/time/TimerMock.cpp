@@ -15,9 +15,9 @@ void TimerMock::interrupt() {
 }
 
 void TimerMock::expire() {
-    notifyAllListeners();
     hasTimerExpired = true;
     isTimerRunning = false;
+    notifyAllListeners();
 }
 
 bool TimerMock::hasExpired() const {
