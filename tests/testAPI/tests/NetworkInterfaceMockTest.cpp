@@ -42,55 +42,57 @@ TEST(NetworkInterfaceMockTest, testMockRemembersSentPackets) {
     NetworkInterfaceMock mock = NetworkInterfaceMock();
     AddressPtr recipient1 (new AddressMock());
     AddressPtr recipient2 (new AddressMock());
-    PacketMock packet1 = PacketMock();
-    PacketMock packet2 = PacketMock();
-    PacketMock packet3 = PacketMock();
+    Packet* packet1 = new PacketMock();
+    Packet* packet2 = new PacketMock();
+    Packet* packet3 = new PacketMock();
 
-    mock.send(&packet1, recipient1);
-    mock.send(&packet2, recipient2);
-    mock.send(&packet3, recipient1);
+    mock.send(packet1, recipient1);
+    mock.send(packet2, recipient2);
+    mock.send(packet3, recipient1);
 
-    std::deque<Pair<Packet*, AddressPtr>*>* sendPackets = mock.getSentPackets();
+    std::deque<Pair<const Packet*, AddressPtr>*>* sendPackets = mock.getSentPackets();
 
-    CHECK(sendPackets->at(0)->getLeft()->equals(&packet1));
+    CHECK(sendPackets->at(0)->getLeft()->equals(packet1));
     CHECK(sendPackets->at(0)->getRight()->equals(recipient1));
 
-    CHECK(sendPackets->at(1)->getLeft()->equals(&packet2));
+    CHECK(sendPackets->at(1)->getLeft()->equals(packet2));
     CHECK(sendPackets->at(1)->getRight()->equals(recipient2));
 
-    CHECK(sendPackets->at(2)->getLeft()->equals(&packet3));
+    CHECK(sendPackets->at(2)->getLeft()->equals(packet3));
     CHECK(sendPackets->at(2)->getRight()->equals(recipient1));
 }
 
 TEST(NetworkInterfaceMockTest, testHasPacketBeenBroadCasted) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-    PacketMock packet1 = PacketMock("Source", "Destination", 1);
-    PacketMock packet2 = PacketMock("Earth", "Moon", 1234);
-    PacketMock packet3 = PacketMock("Source", "Destination", 2);
+    Packet* packet1 = new PacketMock("Source", "Destination", 1);
+    Packet* packet2 = new PacketMock("Earth", "Moon", 1234);
+    Packet* packet3 = new PacketMock("Source", "Destination", 2);
     AddressPtr viaAddress (new AddressMock());
 
-    interface.send(&packet1, viaAddress);
-    interface.broadcast(&packet2);
-    interface.send(&packet3, viaAddress);
+    interface.send(packet1, viaAddress);
+    interface.broadcast(packet2);
+    interface.send(packet3, viaAddress);
 
-    CHECK(interface.hasPacketBeenBroadCasted(&packet1) == false);
-    CHECK(interface.hasPacketBeenBroadCasted(&packet2) == true);
-    CHECK(interface.hasPacketBeenBroadCasted(&packet3) == false);
+    CHECK(interface.hasPacketBeenBroadCasted(packet1) == false);
+    CHECK(interface.hasPacketBeenBroadCasted(packet2) == true);
+    CHECK(interface.hasPacketBeenBroadCasted(packet3) == false);
 }
 
 TEST(NetworkInterfaceMockTest, testHasPacketBeenSent) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-    PacketMock packet1 = PacketMock("Source", "Destination", 1);
-    PacketMock packet2 = PacketMock("Source", "Destination", 2);
-    PacketMock packet3 = PacketMock("Source", "Destination", 3);
+    Packet* packet1 = new PacketMock("Source", "Destination", 1);
+    Packet* packet2 = new PacketMock("Source", "Destination", 2);
+    Packet* packet3 = new PacketMock("Source", "Destination", 3);
     AddressPtr address (new AddressMock());
 
-    interface.send(&packet1, address);
-    interface.broadcast(&packet2);
+    interface.send(packet1, address);
+    interface.broadcast(packet2);
 
-    CHECK(interface.hasPacketBeenSent(&packet1) == true);
-    CHECK(interface.hasPacketBeenSent(&packet2) == true);
-    CHECK(interface.hasPacketBeenSent(&packet3) == false);
+    CHECK(interface.hasPacketBeenSent(packet1) == true);
+    CHECK(interface.hasPacketBeenSent(packet2) == true);
+    CHECK(interface.hasPacketBeenSent(packet3) == false);
+
+    delete packet3;
 }
 
 TEST(NetworkInterfaceMockTest, testEquals) {
@@ -108,20 +110,21 @@ TEST(NetworkInterfaceMockTest, testEquals) {
 
 TEST(NetworkInterfaceMockTest, testGetNumberOfSentPackets) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
-    PacketMock packet1 = PacketMock("Source", "Destination", 1);
-    PacketMock packet2 = PacketMock("Source", "Destination", 2);
+    Packet* packet1 = new PacketMock("Source", "Destination", 1);
+    Packet* packet2 = new PacketMock("Source", "Destination", 2);
+    Packet* packet3 = new PacketMock("Source", "Destination", 2);
     AddressPtr address1 (new AddressMock("A"));
     AddressPtr address2 (new AddressMock("B"));
 
     CHECK_EQUAL(0, interface.getNumberOfSentPackets());
 
-    interface.send(&packet1, address1);
+    interface.send(packet1, address1);
     CHECK_EQUAL(1, interface.getNumberOfSentPackets());
 
-    interface.send(&packet1, address2);
+    interface.send(packet2, address2);
     CHECK_EQUAL(2, interface.getNumberOfSentPackets());
 
-    interface.send(&packet2, address1);
+    interface.send(packet3, address1);
     CHECK_EQUAL(3, interface.getNumberOfSentPackets());
 }
 

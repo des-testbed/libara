@@ -1,8 +1,14 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef OMNETARACLIENT_H_
 #define OMNETARACLIENT_H_
 
 #include <omnetpp.h>
 #include <algorithm>
+#include <cmessage.h>
+#include <unordered_map>
 
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
@@ -18,7 +24,6 @@
 #include "OMNeTRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "OMNeTStochasticForwardingPolicy.h"
-#include "OMNeTTimeFactory.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -28,12 +33,15 @@ namespace ARA {
          *
          * The algorithm was first published in:
          *
-         *  Guenes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
+         *  Mesut Guenes, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
          *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
          */
-        class ARA: public cSimpleModule, public AbstractARAClient {
+        class OMNeTARA: public cSimpleModule, public AbstractARAClient {
             public:
-                ARA() : AbstractARAClient(new OMNeTTimeFactory()) {}
+                OMNeTARA() {}
+                ~OMNeTARA();
+
+                void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
             protected:
                 int numInitStages() const;
@@ -43,14 +51,20 @@ namespace ARA {
                 ForwardingPolicy* getForwardingPolicy();
                 void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
                 void deliverToSystem(const Packet* packet);
+                void packetNotDeliverable(const Packet* packet);
 
                 void setEvaporationPolicy(EvaporationPolicy *policy);
 
+                /**
+                 * Method for friend class OMNeTGate.
+                 * It switches the context to the ARAClient,
+                 * takes ownership of the packet and sends it to the specified gate
+                 * with the given delay.
+                 */
+                void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
             private:
-                /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
-                ForwardingPolicy* forwardingPolicy;
 
-                /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time
+                ForwardingPolicy* forwardingPolicy;
                 EvaporationPolicy* evaporationPolicy;
 
                 IInterfaceTable* interfaceTable;
@@ -71,6 +85,8 @@ namespace ARA {
                 void handleUpperLayerMessage(cMessage* msg);
                 void handleARP(cMessage* msg);
                 void handleARA(cMessage* msg);
+
+            friend class OMNeTGate;
         };
 
     } /* namespace ARA */

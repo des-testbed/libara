@@ -13,6 +13,7 @@ namespace ARA {
 
 /**
  * Network interface are used by the ARA clients to send Packets to other clients.
+ * An abstract base implementation can be found in AbstractNetworkInterface
  */
 class NetworkInterface {
 public:
@@ -20,15 +21,15 @@ public:
     
     /**
      * Sends the packet over this interface to the given recipient.
+     * From this point on the interface is responsible for deleting the given packet
+     * if it has been fully processed.
      */
 	virtual void send(const Packet* packet, std::shared_ptr<Address> recipient) = 0;
 
 	/**
 	 * Broadcasts the given packet over this interface.
-	 *
-	 * Note: After this method returns, the packet object may be deleted at
-	 * any point so if this NetworkInterface needs access to this object any
-	 * longer it needs to clone the packet itself.
+	 * From this point on the interface is responsible for deleting the given packet
+     * if it has been fully processed.
 	 */
 	virtual void broadcast(const Packet* packet) = 0;
 
@@ -45,7 +46,7 @@ public:
 	 *
 	 * This method is used to determine the sender address each time a a new packet is created.
 	 */
-	virtual std::shared_ptr<Address> getLocalAddress() = 0;
+	virtual std::shared_ptr<Address> getLocalAddress() const = 0;
 
 	/**
 	 * Returns true if the given address is known to be a broadcast address.

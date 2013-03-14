@@ -10,12 +10,14 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
 
 #include <memory>
 #include <deque>
+#include <algorithm>
 
 using namespace ARA;
+
+typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(PacketTrapTest) {
     PacketTrap* packetTrap;
@@ -24,7 +26,7 @@ TEST_GROUP(PacketTrapTest) {
 
     void setup() {
         evaporationPolicy = new LinearEvaporationPolicyMock();
-        routingTable = new RoutingTable(new TimeFactoryMock());
+        routingTable = new RoutingTable();
         routingTable->setEvaporationPolicy(evaporationPolicy);
         packetTrap = new PacketTrap(routingTable);
     }
@@ -134,4 +136,38 @@ TEST(PacketTrapTest, deleteTrappedPacketsInDestructor) {
 
     // when the test finishes, the client will be deleted in teardown()
     // and the packet clone should be deleted as well
+}
+
+TEST(PacketTrapTest, removePacketsForDestination) {
+    AddressPtr someAddress = AddressPtr(new AddressMock("foo"));
+    Packet* packet1 = new PacketMock("A", "B", 1);
+    Packet* packet2 = new PacketMock("A", "B", 2);
+    Packet* packet3 = new PacketMock("X", "Y", 1);
+    Packet* packet4 = new PacketMock("A", "C", 3);
+
+    std::deque<Packet*> removedPackets = packetTrap->removePacketsForDestination(someAddress);
+    CHECK(removedPackets.empty());
+
+    packetTrap->trapPacket(packet1);
+    packetTrap->trapPacket(packet2);
+    packetTrap->trapPacket(packet3);
+    packetTrap->trapPacket(packet4);
+
+    removedPackets = packetTrap->removePacketsForDestination(packet1->getDestination());
+
+    // check that packet 1 and 2 are in the returned list (damn std api suckz)
+    BYTES_EQUAL(2, removedPackets.size());
+    CHECK(std::find(removedPackets.begin(), removedPackets.end(), packet1) != removedPackets.end());
+    CHECK(std::find(removedPackets.begin(), removedPackets.end(), packet2) != removedPackets.end());
+
+    // check that the packets are no longer in the trap
+    CHECK_FALSE(packetTrap->contains(packet1));
+    CHECK_FALSE(packetTrap->contains(packet2));
+
+    // check that the other packets are still in the trap
+    CHECK_TRUE(packetTrap->contains(packet3));
+    CHECK_TRUE(packetTrap->contains(packet4));
+
+    delete packet1;
+    delete packet2;
 }

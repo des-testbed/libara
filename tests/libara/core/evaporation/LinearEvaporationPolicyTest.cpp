@@ -7,7 +7,6 @@
 #include "CppUTest/TestHarness.h"
 
 #include "LinearEvaporationPolicy.h" 
-#include "testAPI/mocks/TimeFactoryMock.h"
 
 using namespace ARA;
 

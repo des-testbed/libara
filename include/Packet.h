@@ -208,6 +208,15 @@ public:
      */
     virtual Packet* createDuplicateWarning() const;
 
+    /**
+     * Creates a new acknowledgment packet based on this packet. The source,
+     * destination and sequence number will equal to this packet.
+     *
+     * Note: The result of this method is a newly created object which must be
+     * deleted later by the calling class.
+     */
+    virtual Packet* createAcknowledgment() const;
+
 protected:
     std::shared_ptr<Address> source;
     std::shared_ptr<Address> destination;

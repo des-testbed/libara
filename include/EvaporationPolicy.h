@@ -9,7 +9,7 @@
 #include <cstring>
 #include <sys/time.h>
 
-#include "TimeFactory.h"
+#include "Clock.h"
 
 namespace ARA { 
 

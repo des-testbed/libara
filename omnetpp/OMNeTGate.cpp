@@ -2,9 +2,9 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTGate.h"
-#include "OMNeTPacket.h"
-#include "OMNeTAddress.h"
+#include "omnetpp/OMNeTGate.h"
+#include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/OMNeTAddress.h"
 #include "IInterfaceTable.h"
 #include "IPv4InterfaceData.h"
 #include "IPAddressResolver.h"
@@ -18,8 +18,8 @@ namespace omnetpp {
 
 typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
 
-OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) {
-    this->module = module;
+OMNeTGate::OMNeTGate(OMNeTARA* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay, int ackTimeoutInMicroSeconds) : ReliableNetworkInterface(araClient, ackTimeoutInMicroSeconds) {
+    this->omnetARAClient = araClient;
     this->gateToARP = gateToARP;
     this->broadCastDelay = broadCastDelay;
     this->uniCastDelay = uniCastDelay;
@@ -34,11 +34,11 @@ OMNeTGate::OMNeTGate(cSimpleModule* module, cGate* gateToARP, InterfaceEntry* in
     this->interfaceID = interfaceEntry->getInterfaceId();
 }
 
-void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
-    send(packet, recipient, uniCastDelay);
+void OMNeTGate::doSend(const Packet* packet, shared_ptr<Address> recipient) {
+    doSend(packet, recipient, uniCastDelay);
 }
 
-void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
+void OMNeTGate::doSend(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
     // TODO somehow remove this ugly casting stuff
     OMNeTPacket* originalPacket = (OMNeTPacket*) packet;
     OMNeTPacket* omnetPacket = (OMNeTPacket*) originalPacket->clone();
@@ -55,7 +55,8 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double
     controlInfo->setInterfaceId(interfaceID);
     omnetPacket->setControlInfo(controlInfo);
 
-    module->sendDelayed(omnetPacket, sendDelay, gateToARP);
+    // we might have switched the context from the OMNeTTimer
+    omnetARAClient->takeAndSend(omnetPacket, gateToARP, sendDelay);
 }
 
 OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
@@ -67,7 +68,7 @@ OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
-    send(packet, broadcastAddress, broadCastDelay);
+    doSend(packet, broadcastAddress, broadCastDelay);
 }
 
 bool OMNeTGate::equals(NetworkInterface* otherInterface) {
@@ -76,17 +77,9 @@ bool OMNeTGate::equals(NetworkInterface* otherInterface) {
         return false;
     }
     else {
-        return strcmp(module->getFullName(), otherOMNeTInterface->module->getFullName()) == 0
+        return strcmp(omnetARAClient->getFullName(), otherOMNeTInterface->omnetARAClient->getFullName()) == 0
             && strcmp(gateToARP->getFullName(), otherOMNeTInterface->gateToARP->getFullName()) == 0;
     }
-}
-
-shared_ptr<Address> OMNeTGate::getLocalAddress() {
-    return localAddress;
-}
-
-bool OMNeTGate::isBroadcastAddress(std::shared_ptr<Address> someAddress) const {
-    return someAddress->equals(broadcastAddress);
 }
 
 } /* namespace omnetpp */

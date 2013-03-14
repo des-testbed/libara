@@ -3,19 +3,17 @@
  */
 
 #include "RoutingTable.h"
+#include "Environment.h"
 #include <utility>
 
 namespace ARA {
     typedef std::shared_ptr<Address> AddressPtr;
 
-    RoutingTable::RoutingTable(TimeFactory* timeFactory){
-        this->timeFactory = timeFactory;
-        this->lastAccessTime = nullptr;
+    RoutingTable::RoutingTable() {
+        lastAccessTime = nullptr;
     }
 
     RoutingTable::~RoutingTable() {
-        delete timeFactory;
-
         std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
         for (iterator=table.begin(); iterator!=table.end(); iterator++) {
             std::pair<AddressPtr const, std::deque<RoutingTableEntry*>*> entryPair = *iterator;
@@ -131,7 +129,7 @@ namespace ARA {
     }
 
     void RoutingTable::triggerEvaporation() {
-        Time* currentTime = timeFactory->makeTime();
+        Time* currentTime = Environment::getClock()->makeTime();
         currentTime->setToCurrentTime();
 
         if (hasTableBeenAccessedEarlier() == false) {

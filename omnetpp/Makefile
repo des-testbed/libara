@@ -40,9 +40,7 @@ USERIF_LIBS = $(ALL_ENV_LIBS)
 CFLAGS += -std=c++11
 INCLUDE_PATH = \
     -I../include \
-    -I../include/inetmanet \
-    -I../include/omnetpp \
-    -I.
+    -I../include/inetmanet
 LINKFLAGS = $(OMNETPP_LIBS) -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(INETMANET_LIB_DIR) -linet -lm
 LINKFLAGS += -Wl,-rpath,$(INETMANET_LIB_DIR) -Wl,-rpath,$(ARA_LIB_DIR)
 COPTS = $(CFLAGS) $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)

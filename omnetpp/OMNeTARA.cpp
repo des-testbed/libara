@@ -2,7 +2,7 @@
  * $FU-Copyright$
  */
 
-#include "ARA.h"
+#include "omnetpp/OMNeTARA.h"
 #include "IPControlInfo.h"
 #include "IPAddress.h"
 #include "IPAddressResolver.h"
@@ -13,10 +13,14 @@ namespace ARA {
     namespace omnetpp {
         typedef std::shared_ptr<Address> AddressPtr;
 
-        /// The module class needs to be registered with OMNeT++
-        Define_Module(ARA);
+        // Register the class with the OMNeT++ simulation
+        Define_Module(OMNeTARA);
 
-        int ARA::numInitStages() const {
+        OMNeTARA::~OMNeTARA() {
+            //TODO delete running route discovery timers
+        }
+
+        int OMNeTARA::numInitStages() const {
             return 5;
         }
 
@@ -27,9 +31,10 @@ namespace ARA {
          * constructors 'untouched'). The method parses the parameters
          * specified in the NED file and initializes the gates.
          */
-        void ARA::initialize(int stage) {
+        void OMNeTARA::initialize(int stage) {
             if(stage == 4) {
                 initialPhi = par("initialPhi").doubleValue();
+                maxNrOfRouteDiscoveryRetries = par("nrOfRouteDiscoveryRetries").longValue();
 
                 interfaceTable = getInterfaceTable();
 				initializeNetworkInterfaces();
@@ -41,14 +46,14 @@ namespace ARA {
             }
         }
 
-        cModule* ARA::getHostModule() {
+        cModule* OMNeTARA::getHostModule() {
             //TODO find a more generic way to determine the real host module
             cModule* parent = getParentModule();
             cModule* grandParent = parent->getParentModule();
             return grandParent;
         }
 
-        IInterfaceTable* ARA::getInterfaceTable() {
+        IInterfaceTable* OMNeTARA::getInterfaceTable() {
             cModule* host = getHostModule();
             IInterfaceTable* interfaceTable = IPAddressResolver().findInterfaceTableOf(host);
             if (interfaceTable == NULL) {
@@ -57,9 +62,10 @@ namespace ARA {
             return interfaceTable;
         }
 
-        void ARA::initializeNetworkInterfaces() {
+        void OMNeTARA::initializeNetworkInterfaces() {
             double broadCastDelay = par("broadCastDelay").doubleValue();
             double uniCastDelay = par("uniCastDelay").doubleValue();
+            int ackTimeout = par("ackTimeout").longValue();
 
             ASSERT(interfaceTable);
             cGate* gateToARP = gate("arpOut");
@@ -68,33 +74,31 @@ namespace ARA {
             for (int i=0; i < nrOfInterfaces; i++)         {
                 InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
                 if (interfaceEntry->isLoopback() == false) {
-                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay));
+                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay, ackTimeout));
                 }
             }
         }
 
-        void ARA::handleMessage(cMessage* msg) {
+        void OMNeTARA::handleMessage(cMessage* msg) {
             if(isFromUpperLayer(msg)) {
                 handleUpperLayerMessage(msg);
             }
+            else if (isARPMessage(msg)) {
+                handleARP(msg);
+            }
             else {
-                if(isARPMessage(msg)) {
-                    handleARP(msg);
-                }
-                else {
-                    handleARA(msg);
-                }
+                handleARA(msg);
             }
         }
 
-        bool ARA::isFromUpperLayer(cMessage* msg) {
+        bool OMNeTARA::isFromUpperLayer(cMessage* msg) {
             std::string nameOfUpperLayergate = "upperLayerGate$i";
             std::string gateName = std::string(msg->getArrivalGate()->getName());
             return gateName.length() <= nameOfUpperLayergate.length()
                 && std::equal(gateName.begin(), gateName.end(), nameOfUpperLayergate.begin());
         }
 
-        void ARA::handleUpperLayerMessage(cMessage* msg) {
+        void OMNeTARA::handleUpperLayerMessage(cMessage* msg) {
             IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
             IPAddress sourceIP = controlInfo->getSrcAddr();
             IPAddress destinationIP = controlInfo->getDestAddr();
@@ -109,11 +113,11 @@ namespace ARA {
             sendPacket(omnetPacket);
         }
 
-        bool ARA::isARPMessage(cMessage* msg) {
+        bool OMNeTARA::isARPMessage(cMessage* msg) {
             return dynamic_cast<ARPPacket*>(msg) != NULL;
         }
 
-        void ARA::handleARP(cMessage* msg) {
+        void OMNeTARA::handleARP(cMessage* msg) {
             // FIXME hasBitError() check  missing!
             delete msg->removeControlInfo();
 
@@ -127,13 +131,13 @@ namespace ARA {
             send(msg, "arpOut");
         }
 
-        void ARA::handleARA(cMessage* msg) {
+        void OMNeTARA::handleARA(cMessage* msg) {
             OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(msg);
-            NetworkInterface* arrivalInterface = getNetworkInterface(msg->getArrivalGate()->getIndex());
-            receivePacket(omnetPacket, arrivalInterface);
+            OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(msg->getArrivalGate()->getIndex());
+            arrivalGate->receive(omnetPacket);
         }
 
-        InterfaceEntry* ARA::getSourceInterfaceFrom(cMessage* msg) {
+        InterfaceEntry* OMNeTARA::getSourceInterfaceFrom(cMessage* msg) {
             cGate* arrivalGate = msg->getArrivalGate();
             if(arrivalGate != NULL) {
                 return interfaceTable->getInterfaceByNetworkLayerGateIndex(arrivalGate->getIndex());
@@ -143,11 +147,11 @@ namespace ARA {
             }
         }
 
-        ForwardingPolicy* ARA::getForwardingPolicy() {
+        ForwardingPolicy* OMNeTARA::getForwardingPolicy() {
             return forwardingPolicy;
         }
 
-        cModule* ARA::getSubModule(const char* moduleIdentifier, const char* errorMessage){
+        cModule* OMNeTARA::getSubModule(const char* moduleIdentifier, const char* errorMessage){
             cModule* host = getParentModule();
             cModule* module = host->getSubmodule(moduleIdentifier);
    
@@ -158,7 +162,7 @@ namespace ARA {
             return module;
         }
 
-        void ARA::initializeForwardingPolicy(){
+        void OMNeTARA::initializeForwardingPolicy(){
             try{
                 cModule *module = this->getSubModule("forwardingPolicy", "ARA: the forwarding policy has to be called forwardingPolicy");
                 this->forwardingPolicy = check_and_cast<ForwardingPolicy *>(module);
@@ -168,7 +172,7 @@ namespace ARA {
             }
         }
 
-        void ARA::initializeEvaporationPolicy(){
+        void OMNeTARA::initializeEvaporationPolicy(){
             try{
                 cModule *module = this->getSubModule("evaporationPolicy", "ARA: the evaporation policy has to be called evaporationPolicy");
                 this->evaporationPolicy = check_and_cast<EvaporationPolicy *>(module);
@@ -178,7 +182,7 @@ namespace ARA {
             }
         }
 
-        void ARA::initializeRoutingTable(){
+        void OMNeTARA::initializeRoutingTable(){
             try{
                 cModule *module = this->getSubModule("routingTableStatistics", "ARA: the routing table has to be called routingTableStatistics");
                 this->routingTable = check_and_cast<RoutingTable *>(module);
@@ -187,7 +191,7 @@ namespace ARA {
             }
         }
 
-        void ARA::initializePathReinforcementPolicy(){
+        void OMNeTARA::initializePathReinforcementPolicy(){
             try{
                 cModule *module = this->getSubModule("pathReinforcementPolicy", "ARA: the routing table has to be called pathReinforcementPolicy");
                 this->pathReinforcementPolicy = check_and_cast<PathReinforcementPolicy *>(module);
@@ -197,8 +201,7 @@ namespace ARA {
             }
         }
 
-
-        void ARA::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
+        void OMNeTARA::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
             AddressPtr source = packet->getSource();
             AddressPtr sender = packet->getSender();
             float currentPheromoneValue = routingTable->getPheromoneValue(source, sender, interface);
@@ -209,7 +212,7 @@ namespace ARA {
             routingTable->update(source, sender, interface, newPheromoneValue);
         }
 
-        void ARA::deliverToSystem(const Packet* packet) {
+        void OMNeTARA::deliverToSystem(const Packet* packet) {
             Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
             OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
             ASSERT(omnetPacket);
@@ -218,10 +221,28 @@ namespace ARA {
             send(encapsulatedData, "upperLayerGate$o");
         }
 
-        void ARA::setEvaporationPolicy(EvaporationPolicy *policy){
+        void OMNeTARA::handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+            // this will presumably be called from the context of the OMNeTTimer
+            // we are now back in the context of the ARACLient simple module
+            Enter_Method_Silent("OMNeTARA::packetIsNotDeliverable");
+
+            //TODO to something with this packet other then deleting it
+            delete packet;
+        }
+
+        void OMNeTARA::setEvaporationPolicy(EvaporationPolicy *policy){
             this->routingTable->setEvaporationPolicy(policy);
         }
 
+        void OMNeTARA::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
+            Enter_Method_Silent("takeAndSend(msg)");
+            take(msg);
+            sendDelayed(msg, sendDelay, gate);
+        }
+
+        void OMNeTARA::packetNotDeliverable(const Packet* packet) {
+            //TODO report to upper layer
+        }
 
     } /* namespace omnetpp */
 } /* namespace ARA */

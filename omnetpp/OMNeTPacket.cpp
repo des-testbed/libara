@@ -2,8 +2,8 @@
  * $FU-Copyright$
  */
 
-#include "OMNeTPacket.h"
-#include "OMNeTAddress.h"
+#include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/OMNeTAddress.h"
 
 #include <iostream>
 #include <sstream>
@@ -90,6 +90,10 @@ Packet* OMNeTPacket::createBANT(unsigned int sequenceNumber) const {
 
 Packet* OMNeTPacket::createDuplicateWarning() const {
     return new OMNeTPacket(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, hopCount+1);
+}
+
+Packet* OMNeTPacket::createAcknowledgment() const {
+    return new OMNeTPacket(source, destination, sender, PacketType::ACK, seqNr, 1);
 }
 
 class OMNeTPacketDescriptor : public cClassDescriptor {

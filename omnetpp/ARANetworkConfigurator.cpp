@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ARANetworkConfigurator.h"
+#include "omnetpp/ARANetworkConfigurator.h"
 #include "IPAddressResolver.h"
 #include "IPv4InterfaceData.h"
 #include "IPAddress.h"

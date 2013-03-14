@@ -31,7 +31,7 @@ namespace ARA {
              * Subtracts another time from this time and returns the result
              * as numerical value in milliseconds.
              */
-            virtual long getDifferenceInMilliSeconds(const Time* right) const = 0;
+            virtual long getDifferenceInMilliSeconds(const Time* otherTime) const = 0;
 
     };
 }

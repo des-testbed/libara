@@ -11,7 +11,7 @@
 #include "EvaporationPolicy.h"
 #include "RoutingTableEntry.h"
 #include "LinearEvaporationPolicy.h"
-#include "TimeFactory.h"
+#include "Clock.h"
 
 #include <deque>
 #include <unordered_map>
@@ -21,7 +21,7 @@ namespace ARA {
 class RoutingTable {
 
 public:
-    RoutingTable(TimeFactory* timeFactory);
+    RoutingTable();
     ~RoutingTable();
 
     float getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
@@ -43,7 +43,6 @@ protected:
     bool hasTableBeenAccessedEarlier();
     void triggerEvaporation();
 
-    TimeFactory* timeFactory;
     Time *lastAccessTime;
 
 private:
