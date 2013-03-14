@@ -10,12 +10,14 @@
 #include "Address.h"
 #include "Pair.h"
 #include "Logger.h"
+#include "Environment.h"
 
 #include "testAPI/mocks/ARAClientMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/LoggerMock.h"
+#include "testAPI/mocks/time/ClockMock.h"
 
 using namespace ARA;
 
@@ -584,4 +586,51 @@ TEST(AbstractARAClientTest, packetIsNotDeletedOutsideOfDeliverToSystem) {
     } catch (std::exception& exception) {
         FAIL("We should be able to delete the dataPacket.")
     }
+}
+
+/**
+ * In this test we simulate that a route discovery did not result in a
+ * BANT from the wanted destination within a given timeout interval.
+ * The client is required to restart the route discovery by sending another
+ * FANT for the discovery destination.
+ */
+TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    Packet* packet = new PacketMock();
+
+    // sanity check
+    CHECK(routingTable->isDeliverable(packet) == false);
+
+    // start the test
+    client->sendPacket(packet);
+
+    // make sure that a FANT has been sent
+    LONGS_EQUAL(1, interface->getNumberOfSentPackets());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->back();
+    const Packet* initialFANT = sentPacketInfo->getLeft();
+    CHECK(initialFANT->getType() == PacketType::FANT);
+
+    // get the route discovery timer which is used by the client
+    ClockMock* clock = (ClockMock*) Environment::getClock();
+    TimerMock* routeDiscoveryTimer = clock->getLastTimer();
+
+    CHECK(routeDiscoveryTimer->isRunning());
+
+    // simulate that the timer has expired (timeout)
+    routeDiscoveryTimer->expire();
+
+    // the FANT should have been transmitted again
+    BYTES_EQUAL(2, sentPackets->size());
+    sentPacketInfo = sentPackets->back();
+    const Packet* sentPacket = sentPacketInfo->getLeft();
+    AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
+
+    CHECK(interface->isBroadcastAddress(recipientOfSentPacket));
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(sentPacket->getDestination()->equals(packet->getDestination()));
+}
+
+TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
+    //TODO
 }

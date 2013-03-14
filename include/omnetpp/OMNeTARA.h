@@ -51,11 +51,6 @@ namespace ARA {
                 void deliverToSystem(const Packet* packet);
                 void packetIsNotDeliverable(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
-				void initializeRouteDiscoveryTimer(std::shared_ptr<Address> address);
-				void startRouteDiscoveryTimer(std::shared_ptr<Address> address);
-				void stopRouteDiscoveryTimer(std::shared_ptr<Address> address);
-                bool isRouteDiscoveryRunning(std::shared_ptr<Address> address);
-
                 void setEvaporationPolicy(EvaporationPolicy *policy);
 
                 /**
@@ -66,12 +61,8 @@ namespace ARA {
                  */
                 void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
             private:
-                /// The member manages the route discovery timers for different destinations
-                std::unordered_map<std::shared_ptr<Address>, cMessage*, AddressHash, AddressPredicate> routeDiscoveryTimer;
 
-                /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
                 ForwardingPolicy* forwardingPolicy;
-                /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time
                 EvaporationPolicy* evaporationPolicy;
 
                 IInterfaceTable* interfaceTable;
@@ -87,10 +78,6 @@ namespace ARA {
                 void initializeEvaporationPolicy();
                 void initializePathReinforcementPolicy();
 
-                void deleteRouteDiscoveryTimerParameters(cMessage *message);
-
-                bool isRouteDiscoveryTimer(cMessage *msg);
-                void handleRouteDiscoveryTimer(cMessage *msg);
                 bool isFromUpperLayer(cMessage* msg);
                 bool isARPMessage(cMessage* msg);
                 void handleUpperLayerMessage(cMessage* msg);

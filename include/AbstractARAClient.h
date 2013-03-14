@@ -5,6 +5,7 @@
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "TimeoutEventListener.h"
 #include "Logger.h"
 #include "Address.h"
 #include "NextHop.h"
@@ -14,6 +15,8 @@
 #include "Packet.h"
 #include "ForwardingPolicy.h"
 #include "PathReinforcementPolicy.h"
+#include "RouteDiscoveryInfo.h"
+#include "Timer.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -21,7 +24,6 @@
 #include <deque>
 #include <memory>
 #include <string>
-#include <sstream>
 
 namespace ARA {
 
@@ -31,7 +33,7 @@ namespace ARA {
 /**
  * TODO write class description
  */
-class AbstractARAClient {
+class AbstractARAClient : public TimeoutEventListener {
 
 public:
     AbstractARAClient();
@@ -113,16 +115,14 @@ public:
     void registerReceivedPacket(const Packet* packet);
 
     /// The computes the initial pheromone value of a link
+    // FIXME do we need this here any more? I thought we have a policy class for that
     virtual float initializePheromone(const Packet* packet);
     ///
     virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
-    virtual bool isRouteDiscoveryRunning(std::shared_ptr<Address> address);
-    virtual void initializeRouteDiscoveryTimer(std::shared_ptr<Address> address) = 0;
-    virtual void startRouteDiscoveryTimer(std::shared_ptr<Address> address) = 0;
-    virtual void stopRouteDiscoveryTimer(std::shared_ptr<Address> address) = 0;
-
     void setRoutingTable(RoutingTable *routingTable);
+
+    void timerHasExpired(Timer* responsibleTimer);
 
 protected:
 
@@ -195,6 +195,8 @@ protected:
      */
     void logFatal(const std::string &logMessage, ...) const;
 
+    void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
+
 private:
     NextHop* getNextHop(const Packet* packet);
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
@@ -206,24 +208,31 @@ private:
     void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
+    void startRouteDiscoveryTimer(const Packet* packet);
+    bool isRouteDiscoveryRunning(std::shared_ptr<Address> destination);
+    void stopRouteDiscoveryTimer(std::shared_ptr<Address> destination);
+    void sendDeliverablePackets(const Packet* packet);
 
 protected:
     /// The member denotes the constant which is used in the pheromone reinforcement of a path
     // FIXME do we need this here any more? I thought we have a policy class for that
     double deltaPhi;
 
-    std::deque<NetworkInterface*> interfaces;
-    RoutingTable* routingTable;
-    PacketTrap* packetTrap;
+    /// The member specifies the initial level
+    // FIXME do we need this here any more? I thought we have a policy class for that
+    double initialPhi;
 
     // FIXME let the AbstractARAClient access this object via a pure virtual method to force the implementations to actually set this policy
     PathReinforcementPolicy* pathReinforcementPolicy;
 
-    int routeDiscoveryRetries;
+    std::deque<NetworkInterface*> interfaces;
+    RoutingTable* routingTable;
+    PacketTrap* packetTrap;
 
-    /// The member specifies the initial level
-    // FIXME do we need this here any more? I thought we have a policy class for that
-    double initialPhi;
+    std::unordered_map<std::shared_ptr<Address>, Timer*> runningRouteDiscoveries;
+    std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
+    unsigned int routeDiscoveryTimeoutInMilliSeconds = 1000;
+    int maxNrOfRouteDiscoveryRetries = 3;
 
 private:
     Logger* logger = nullptr;

@@ -54,11 +54,6 @@ public:
     int getNumberOfUndeliverablePackets();
     std::deque<PacketInfo> getUndeliverablePackets();
 
-    // bogus implementation
-    virtual void initializeRouteDiscoveryTimer(std::shared_ptr<Address> address) {}
-    virtual void startRouteDiscoveryTimer(std::shared_ptr<Address> address) {}
-    virtual void stopRouteDiscoveryTimer(std::shared_ptr<Address> address) {}
-
 private:
     std::deque<NetworkInterfaceMock*> interfaceMocks;
     std::deque<const Packet*> deliveredPackets;

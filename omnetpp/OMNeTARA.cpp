@@ -13,20 +13,11 @@ namespace ARA {
     namespace omnetpp {
         typedef std::shared_ptr<Address> AddressPtr;
 
-        /// The module class needs to be registered with OMNeT++
+        // Register the class with the OMNeT++ simulation
         Define_Module(OMNeTARA);
 
         OMNeTARA::~OMNeTARA() {
-            std::unordered_map<AddressPtr, cMessage*, AddressHash, AddressPredicate>::iterator i;
-            
-            for(i = routeDiscoveryTimer.begin(); i != routeDiscoveryTimer.end(); i++){
-               cMessage *message = i->second;
-               /// 
-               deleteRouteDiscoveryTimerParameters(message);
-               cancelAndDelete(message);
-            }
-
-            routeDiscoveryTimer.clear();
+            //TODO delete running route discovery timers
         }
 
         int OMNeTARA::numInitStages() const {
@@ -43,7 +34,7 @@ namespace ARA {
         void OMNeTARA::initialize(int stage) {
             if(stage == 4) {
                 initialPhi = par("initialPhi").doubleValue();
-                routeDiscoveryRetries = par("nrOfRouteDiscoveryRetries").longValue();
+                maxNrOfRouteDiscoveryRetries = par("nrOfRouteDiscoveryRetries").longValue();
 
                 interfaceTable = getInterfaceTable();
 				initializeNetworkInterfaces();
@@ -89,96 +80,14 @@ namespace ARA {
         }
 
         void OMNeTARA::handleMessage(cMessage* msg) {
-            if (isRouteDiscoveryTimer(msg)) {
-                handleRouteDiscoveryTimer(msg);
-            } else if(isFromUpperLayer(msg)) {
+            if(isFromUpperLayer(msg)) {
                 handleUpperLayerMessage(msg);
-            } else {
-                if(isARPMessage(msg)) {
-                    handleARP(msg);
-                } else {
-                    handleARA(msg);
-                }
             }
-        }
-
-        void OMNeTARA::initializeRouteDiscoveryTimer(std::shared_ptr<Address> address){
-            cMessage *message = new cMessage();
-            /// store the address in the self message
-            cMsgPar *addressParameter = new cMsgPar();
-            /// TODO: toString should only be used for logging purposes
-            addressParameter->setStringValue(address->toString());
-            message->addPar(addressParameter);
-            /// store the number of retries in the self message
-            cMsgPar *currentRouteDiscoveryRetriesParameter = new cMsgPar("currentRouteDiscoveryRetries");
-            currentRouteDiscoveryRetriesParameter->setLongValue(routeDiscoveryRetries);
-            message->addPar(currentRouteDiscoveryRetriesParameter);
-            /// add it to the timer table (FIXME: shall we check if the entry already exists?)
-            routeDiscoveryTimer[address] = message;
-        }
-
-        void OMNeTARA::startRouteDiscoveryTimer(std::shared_ptr<Address> address){
-            int scheduleTime = 5;
-            /// FIXME: how to set the time interval (5 is stupid)
-            scheduleAt(scheduleTime, routeDiscoveryTimer[address]);
-        }
-
-        void OMNeTARA::stopRouteDiscoveryTimer(std::shared_ptr<Address> address){
-           /// get the correspondent entry in the timer hash map
-           cMessage *message = routeDiscoveryTimer[address];
-           deleteRouteDiscoveryTimerParameters(message);
-           /// cancel the event in the future event chain and delete it
-           cancelAndDelete(message);
-           /// remove the address from the timer hash map
-           routeDiscoveryTimer.erase(address);
-        }
-
-        void OMNeTARA::deleteRouteDiscoveryTimerParameters(cMessage *message){
-           /// number of parameters stored in the timer
-           int size = message->getParList().size();
-           /// the parameter list
-           cArray parameters = message->getParList();
-           /// remove the parameters
-           for(int i = (size - 1); i >= 0; i--){
-               /// TODO: this feels wrong
-               cObject *object = parameters.remove(i);
-               delete object;
-           }
-        }
-
-        bool OMNeTARA::isRouteDiscoveryRunning(std::shared_ptr<Address> address){
-            return routeDiscoveryTimer.find(address) != routeDiscoveryTimer.end();
-        }
-
-
-        bool OMNeTARA::isRouteDiscoveryTimer(cMessage *msg) {
-            if (msg->isSelfMessage()) {
-                if (msg->getParList().size() == 2) {
-                    /// check if the parameter list contains the current number of route dicovery entries
-                    return (msg->getParList().find("currentRouteDiscoveryRetries") != -1);
-                }
+            else if (isARPMessage(msg)) {
+                handleARP(msg);
             }
-            return false;
-        }
-
-        void OMNeTARA::handleRouteDiscoveryTimer(cMessage *msg){
-            /// check if a route has been established 
-
-            if (msg->getParList().size() == 2) {
-//                const char *address = msg->getParList()[0];
-//                int retries = msg->getParList()[1];
-                int retries = 0;
-
-                /// if no route has been established, decrement numberOfRetries, retry
-                if (retries > 0) {
-
-                } else {
-                  deleteRouteDiscoveryTimerParameters(msg);
-                  cancelAndDelete(msg);
-                  /// if numberOfRetries is 0 pass an error to the 'application'
-
-                  /// 'inform' the packet trap
-                }
+            else {
+                handleARA(msg);
             }
         }
 
