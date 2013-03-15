@@ -163,7 +163,17 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
-    updateRoutingTable(packet, interface);  //FIXME Check if it is ok to update the routing table here
+    //FIXME the routing table update should take place after the check for duplicate packets
+    // do not insert values to self in the routing table
+    if (hasBeenSentByThisNode(packet) == false) {
+        if (routingTable->isDeliverable(packet)) {
+            updateRoutingTable(packet, interface);
+        }
+        else {
+            float phi = this->initializePheromone(packet);
+            this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
+        }
+    }
 
     if(hasBeenReceivedEarlier(packet)) {
         handleDuplicatePacket(packet, interface);
@@ -196,14 +206,6 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     if (packet->isDataPacket()) {
         handleDataPacket(packet);
     } else if(packet->isAntPacket()) {
-
-        //FIXME this is in the wrong place. Pheromone update has already taken place... also this is not very generic because you have no chance to override this..
-        /// only add the entry if does not exist (otherwise the phi value of the already existing would be reset)
-        if (!(routingTable->isDeliverable(packet))) {
-           float phi = this->initializePheromone(packet);
-           this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
-        }
-
         handleAntPacket(packet);
     }
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {

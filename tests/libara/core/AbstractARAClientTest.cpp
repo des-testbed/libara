@@ -688,3 +688,23 @@ TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
     CHECK_FALSE(packetTrap->contains(packet2));
     CHECK_FALSE(packetTrap->contains(packet3));
 }
+
+/**
+ * In this test we check if a client creates a routing table entry to one of its own interface
+ * addresses if it receives back one of its FANTs or BANTs.
+ */
+TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
+    NetworkInterface* interface = client->createNewNetworkInterfaceMock("source");
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* fant = new Packet(source, destination, destination, PacketType::FANT, 123);
+
+    // sanity check
+    CHECK(routingTable->isDeliverable(source) == false);
+
+    // start the test
+    client->receivePacket(fant, interface);
+
+    // we should still not know this address in the routing table
+    CHECK(routingTable->isDeliverable(source) == false);
+}
