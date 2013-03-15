@@ -22,10 +22,14 @@ class RoutingTable {
 
 public:
     RoutingTable();
-    ~RoutingTable();
+    virtual ~RoutingTable();
 
     float getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+
+   
+    void update(std::shared_ptr<Address> destination, RoutingTableEntry* entry);
     void update(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface, float pheromoneValue);
+
     void removeEntry(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
     std::deque<RoutingTableEntry*>* getPossibleNextHops(std::shared_ptr<Address> destination);
     std::deque<RoutingTableEntry*>* getPossibleNextHops(const Packet* packet);
@@ -42,6 +46,7 @@ public:
 protected:
     bool hasTableBeenAccessedEarlier();
     void triggerEvaporation();
+    virtual void updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTableEntry *newEntry);
 
     Time *lastAccessTime;
 

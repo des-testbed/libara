@@ -34,28 +34,36 @@ namespace ARA {
     }
 
     void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
+        RoutingTableEntry *entry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
+        update(destination, entry);
+    }
+
+
+    void RoutingTable::update(AddressPtr destination, RoutingTableEntry *pEntry) {
         if(isDeliverable(destination) == false) {
-            // this destination is not yet registered
-            RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
             std::deque<RoutingTableEntry*>* entryList = new std::deque<RoutingTableEntry*>();
-            entryList->push_back(newEntry);
+            entryList->push_back(pEntry);
             table[destination] = entryList;
         } else {
             // there is at least one registered route for this destination
             std::deque<RoutingTableEntry*>* entryList = table[destination];
             bool entryHasBeenUpdated = false;
             for (auto& entry: *entryList) {
-                if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
-                    entry->setPheromoneValue(pheromoneValue);
+                if(entry->getAddress()->equals(pEntry->getAddress()) && entry->getNetworkInterface()->equals(pEntry->getNetworkInterface())) {
+                    updateExistingEntry(entry, pEntry);
+                    //entry->setPheromoneValue(pheromoneValue);
                     entryHasBeenUpdated = true;
                 }
             }
 
             if(entryHasBeenUpdated == false) {
-                RoutingTableEntry* newEntry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
-                entryList->push_back(newEntry);
+                entryList->push_back(pEntry);
             }
         }
+    }
+
+    void RoutingTable::updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTableEntry *newEntry){
+        oldEntry->setPheromoneValue(newEntry->getPheromoneValue());
     }
 
     void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
