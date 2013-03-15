@@ -113,9 +113,6 @@ namespace ARA {
         return 0;
     }
 
-    /**
-     * The method checks if an destination/nextHop/interface entry already exists.
-     */
     bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface){
         if(isDeliverable(destination)){
             std::deque<RoutingTableEntry*>* entries = table[destination];

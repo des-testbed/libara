@@ -32,6 +32,9 @@ public:
     bool isDeliverable(std::shared_ptr<Address> destination);
     bool isDeliverable(const Packet* packet);
 
+    /**
+     * The method checks if an destination/nextHop/interface entry already exists.
+     */
     bool exists(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
     void setEvaporationPolicy(EvaporationPolicy *policy);
