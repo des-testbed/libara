@@ -15,11 +15,14 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet *packet)
     float energyValues[nrOfPossibleNextHops];
 
     for(unsigned int i = 0; i < nrOfPossibleNextHops; i++){
-        pheromoneValues[i] = possibleNextHops->at(i)->getPheromoneValue();
-		// FIXME: we need somehow to get the energy values of possible next hops
-		//energyValues[i] = possibleNextHops->at(i)->getEnergyValue();
-		energyValues[i] = 1;
-        sum += (pow(pheromoneValues[i], alpha) * pow(energyValues[i], beta));
+        try {
+            EnergyAwareRoutingTableEntry *entry = static_cast<EnergyAwareRoutingTableEntry*>(possibleNextHops->at(i));
+            pheromoneValues[i] = entry->getPheromoneValue();
+	   	    energyValues[i] = entry->getEnergyValue();
+            sum += (pow(pheromoneValues[i], alpha) * pow(energyValues[i], beta));
+        } catch (std::bad_cast &exp) {
+            throw("EnergyAwareStochasticForwardingPolicy: cast to EnergyAwareRoutingTableEntry failed");
+        }
     }
 
     for(unsigned int i = 0; i < nrOfPossibleNextHops; i++){
