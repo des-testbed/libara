@@ -12,7 +12,7 @@
 namespace ARA {
     namespace omnetpp {
            /**
-            * The class provides a stochastic forwarding policy for class ARA. The
+            * The class provides a stochastic forwarding policy for class OMNeTARA. The
             * class overwrites the getRandomNumber() method of the base class. It uses a
             * pseudo-random number generator provided by OMNeT++.
             */
