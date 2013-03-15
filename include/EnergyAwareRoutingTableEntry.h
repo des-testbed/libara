@@ -15,7 +15,7 @@ namespace ARA {
     class EnergyAwareRoutingTableEntry : public RoutingTableEntry {
         public:
             EnergyAwareRoutingTableEntry(std::shared_ptr<Address> address, NetworkInterface* interface, float pheromoneValue, float energyValue);
-            ~EnergyAwareRoutingTableEntry();
+            ~EnergyAwareRoutingTableEntry(){};
 
             float getEnergyValue();
             void setEnergyValue(float newEnergyValue);
