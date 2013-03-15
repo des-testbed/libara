@@ -171,12 +171,4 @@ namespace ARA {
         return this->evaporationPolicy;
     }
 
-    std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> RoutingTable::getRoutingTable() const{
-        return this->table;
-    }
-
-    void RoutingTable::setRoutingTable(std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table){
-        this->table = table;
-    }
-
 } /* namespace ARA */

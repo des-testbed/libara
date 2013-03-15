@@ -5,15 +5,6 @@ namespace ARA {
     namespace omnetpp {
         Define_Module(OMNeTRoutingTable);
 
-        //OMNeTRoutingTable::
-//        OMNeTRoutingTable::
-        
-        OMNeTRoutingTable::OMNeTRoutingTable(const OMNeTRoutingTable& other) {
-            // FIXME
-            setRoutingTable(other.getRoutingTable());
-            setEvaporationPolicy(other.getEvaporationPolicy());
-        }
-
         void OMNeTRoutingTable::initialize(){
 
 
