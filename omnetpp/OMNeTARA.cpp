@@ -18,6 +18,7 @@ namespace ARA {
 
         OMNeTARA::~OMNeTARA() {
             //TODO delete running route discovery timers
+            delete evaporationPolicy;
         }
 
         int OMNeTARA::numInitStages() const {

@@ -50,7 +50,7 @@ private:
     std::unordered_map<std::shared_ptr<Address>, std::deque<EnergyAwareRoutingTableEntry*>*, AddressHash, AddressPredicate> table;
     /**
      * The memory management of the evaporationPolicy member is handled in class
-     * ARA. Thus, there is no delete call to the evaporationPolicy member.
+     * OMNeTEARAClient. Thus, there is no delete call to the evaporationPolicy member.
      */
     EvaporationPolicy *evaporationPolicy;
 };
