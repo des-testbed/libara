@@ -53,13 +53,13 @@ namespace ARA {
                     updateExistingEntry(entry, pEntry);
                     //entry->setPheromoneValue(pheromoneValue);
                     entryHasBeenUpdated = true;
-                    // remove entry
-                    delete pEntry;
                 }
             }
 
             if(entryHasBeenUpdated == false) {
                 entryList->push_back(pEntry);
+            }else{
+                delete pEntry;
             }
         }
     }
