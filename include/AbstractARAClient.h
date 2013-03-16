@@ -6,6 +6,7 @@
 #define ABSTRACTARACLIENT_H_
 
 #include "TimeoutEventListener.h"
+#include "Configuration.h"
 #include "Logger.h"
 #include "Address.h"
 #include "NextHop.h"
@@ -36,7 +37,27 @@ namespace ARA {
 class AbstractARAClient : public TimeoutEventListener {
 
 public:
-    AbstractARAClient();
+    /**
+     * This standard constructor is only provided for those concrete implementations that
+     * absolutely need a constructor without parameters (like in OMNeT++). If you use this
+     * constructor you must make sure to call AbstractARAClient::initialize before any call
+     * to AbstractARAClient::sendPacket or AbstractARAClient::receivePacket.
+     *
+     * The recommended way is the constructor that accepts a Configuration object which will
+     * handle initialization by default.
+     */
+    AbstractARAClient() {}
+
+    /**
+     * This is the recommended constructor which should be used by all concrete implementation
+     * if possible. It will initialize the client with the given configuration so no additional
+     * call to AbstractARAClient::initialize is required.
+     */
+    AbstractARAClient(Configuration& configuration);
+
+    /**
+     * The standard virtual destructor of this abstract class.
+     */
     virtual ~AbstractARAClient();
 
     /**
@@ -69,6 +90,14 @@ public:
      * TODO this needs to be handled in route failure handling and not as pure virtual method!
      */
     virtual void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) = 0;
+
+    /**
+     * This method will initialize this client with the given configuration.
+     * It must be called before any call to AbstractARAClient::sendPacket or
+     * AbstractARAClient::receivePacket. If this object has been created by the
+     * standard constructor this method must be called manually.
+     */
+    void initialize(Configuration& configuration);
 
     /**
      * Sets a logger for this ARA client.

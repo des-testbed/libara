@@ -5,6 +5,7 @@
 #include "ARAClientMock.h"
 #include "RoutingTableEntry.h"
 #include "BestPheromoneForwardingPolicy.h"
+#include "LinearPathReinforcementPolicy.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
@@ -15,9 +16,17 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 ARAClientMock::ARAClientMock() {
+    evaporationPolicy = new LinearEvaporationPolicyMock();
+    PathReinforcementPolicy* reinforcementPolicy = new LinearPathReinforcementPolicy();
+    Configuration configuration = Configuration(evaporationPolicy, reinforcementPolicy, forwardingPolicy);
+    initialize(configuration);
+
     forwardingPolicy = new BestPheromoneForwardingPolicy();
     forwardingPolicy->setRoutingTable(routingTable);
-    setEvaporationPolicy(new LinearEvaporationPolicyMock());
+    setEvaporationPolicy(evaporationPolicy);
+
+    //FIXME just delete this now because we do not use it yet and dont want any memleaks in the tests
+    delete reinforcementPolicy;
 }
 
 ARAClientMock::~ARAClientMock() {

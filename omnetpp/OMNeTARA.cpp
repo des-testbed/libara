@@ -16,10 +16,6 @@ namespace ARA {
         // Register the class with the OMNeT++ simulation
         Define_Module(OMNeTARA);
 
-        OMNeTARA::~OMNeTARA() {
-            //TODO delete running route discovery timers
-        }
-
         int OMNeTARA::numInitStages() const {
             return 5;
         }
@@ -43,6 +39,9 @@ namespace ARA {
                 initializeEvaporationPolicy();
                 initializeForwardingPolicy();
                 initializePathReinforcementPolicy();
+
+                Configuration config = Configuration(evaporationPolicy, pathReinforcementPolicy, forwardingPolicy);
+                AbstractARAClient::initialize(config);
             }
         }
 

@@ -15,7 +15,11 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-AbstractARAClient::AbstractARAClient() {
+AbstractARAClient::AbstractARAClient(Configuration& configuration) {
+    initialize(configuration);
+}
+
+void AbstractARAClient::initialize(Configuration& configuration) {
     routingTable = new RoutingTable();
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
