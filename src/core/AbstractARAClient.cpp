@@ -28,7 +28,7 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
 
-    /// set it to a 'random' initial value FIXME: WHY?
+    // set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;
 }
 
@@ -176,18 +176,6 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
-    //FIXME the routing table update should take place after the check for duplicate packets
-    // do not insert values to self in the routing table
-    if (hasBeenSentByThisNode(packet) == false) {
-        if (routingTable->isDeliverable(packet)) {
-            reinforcePheromoneValue(packet->getSource(), packet->getSender(), interface);
-        }
-        else {
-            float phi = this->initializePheromone(packet);
-            this->routingTable->update(packet->getSource(), packet->getSender(), interface, phi);
-        }
-    }
-
     if(hasBeenReceivedEarlier(packet)) {
         handleDuplicatePacket(packet, interface);
     }
@@ -211,15 +199,32 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
 }
 
 void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
+    if (hasBeenSentByThisNode(packet) == false) {
+        // do not insert values to self in the routing table
+        AddressPtr source = packet->getSource();
+        if (routingTable->isDeliverable(source)) {
+            // update an existing pheromone value
+            reinforcePheromoneValue(source, packet->getSender(), interface);
+        }
+        else {
+            // initialize a new pheromone value
+            float initialPheromoneValue = calculateInitialPheromoneValue(packet->getHopCount());
+            routingTable->update(source, packet->getSender(), interface, initialPheromoneValue);
+        }
+    }
+
     if (packet->isDataPacket()) {
         handleDataPacket(packet);
-    } else if(packet->isAntPacket()) {
+    }
+    else if(packet->isAntPacket()) {
         handleAntPacket(packet);
     }
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
     }
-    // TODO throw exception if we can not handle this packet
+    else {
+        throw Exception("Can not handle packet");
+    }
 }
 
 void AbstractARAClient::handleDataPacket(Packet* packet) {
@@ -260,7 +265,8 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
         sendDeliverablePackets(packet);
     }
     else {
-        // TODO throw exception if we can not handle this packet
+        delete packet;
+        throw Exception("Can not handle ANT packet (unknown type)");
     }
 
     delete packet;
@@ -361,20 +367,9 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     }
 }
 
-/**
- * The method determines the initial pheromone value of a new routing table
- * entry. The pheromone value is only determined for a non-existing routing
- * table entry.
- *
- * @param in packet The received packet 
- *
- * @return The pheromone value
- */
-float AbstractARAClient::initializePheromone(const Packet* packet){
-    /// determine the hop count malus
-    float hopCountMalus = 1 / (float) packet->getHopCount();
-    /// compute the phi value   
-    return (this->initialPhi * hopCountMalus);
+float AbstractARAClient::calculateInitialPheromoneValue(unsigned int hopCount) {
+    float hopCountMalus = 1 / (float) hopCount;
+    return initialPhi * hopCountMalus;
 }
 
 void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){

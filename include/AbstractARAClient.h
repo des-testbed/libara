@@ -133,9 +133,8 @@ public:
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
-    /// The computes the initial pheromone value of a link
     // FIXME do we need this here any more? I thought we have a policy class for that
-    virtual float initializePheromone(const Packet* packet);
+    float calculateInitialPheromoneValue(unsigned int hopCount);
 
     void setRoutingTable(RoutingTable *routingTable);
 

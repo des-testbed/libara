@@ -716,3 +716,7 @@ IGNORE_TEST(AbstractARAClientTest, pathToSourceIsReinforced) {
 IGNORE_TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
     FAIL("Not implemented yet");
 }
+
+IGNORE_TEST(AbstractARAClientTest, duplicatePacketsDoNotUpdateTheRoutingTable) {
+    FAIL("Not implemented yet");
+}
