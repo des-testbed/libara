@@ -368,17 +368,17 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
 }
 
 float AbstractARAClient::calculateInitialPheromoneValue(unsigned int hopCount) {
-    float hopCountMalus = 1 / (float) hopCount;
-    return initialPheromoneValue * hopCountMalus;
+    return initialPheromoneValue / (float) hopCount;
 }
 
-void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
-    // update packet trap to new routing table
-    this->packetTrap->setRoutingTable(routingTable);
+void AbstractARAClient::setRoutingTable(RoutingTable* newRoutingTable){
+    packetTrap->setRoutingTable(newRoutingTable);
+
     // delete old routing table
-    delete this->routingTable;
+    delete routingTable;
+
     // set new routing table
-    this->routingTable = routingTable;
+    routingTable = newRoutingTable;
 }
 
 void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries) {

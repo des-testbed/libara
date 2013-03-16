@@ -133,8 +133,6 @@ public:
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
-    // FIXME do we need this here any more? I thought we have a policy class for that
-    float calculateInitialPheromoneValue(unsigned int hopCount);
 
     void setRoutingTable(RoutingTable *routingTable);
 
@@ -157,6 +155,13 @@ protected:
      * about this event and delete the packet.
      */
     virtual void packetNotDeliverable(const Packet* packet) = 0;
+
+    /**
+     * Calculates an initial pheromone value based on the initialPhi value from the Configuration
+     * and the given hopCount with the fomula
+     * result = initialPhi / hopCount
+     */
+    float calculateInitialPheromoneValue(unsigned int hopCount);
 
     /**
      * Handles path reinforcement using the currently set PathReinforcementPolicy.
