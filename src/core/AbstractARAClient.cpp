@@ -18,11 +18,15 @@ AbstractARAClient::AbstractARAClient(Configuration& configuration) {
 }
 
 void AbstractARAClient::initialize(Configuration& configuration) {
+    forwardingPolicy = configuration.getForwardingPolicy();
+    pathReinforcementPolicy = configuration.getReinforcementPolicy();
+    evaporationPolicy = configuration.getEvaporationPolicy();
+
     routingTable = new RoutingTable();
+    routingTable->setEvaporationPolicy(evaporationPolicy);
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
-    pathReinforcementPolicy = configuration.getReinforcementPolicy();
 
     /// set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;
@@ -52,6 +56,8 @@ AbstractARAClient::~AbstractARAClient() {
     delete packetTrap;
     delete routingTable;
     delete pathReinforcementPolicy;
+    delete evaporationPolicy;
+    delete forwardingPolicy;
 }
 
 void AbstractARAClient::setLogger(Logger* logger) {
@@ -120,7 +126,7 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
 
 void AbstractARAClient::sendPacket(Packet* packet) {
     if(routingTable->isDeliverable(packet)) {
-        NextHop* nextHop = getNextHop(packet);
+        NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
         NetworkInterface* interface = nextHop->getInterface();
         AddressPtr nextHopAddress = nextHop->getAddress();
         packet->setSender(interface->getLocalAddress());
@@ -189,11 +195,6 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
         registerReceivedPacket(packet);
         handlePacket(packet, interface);
     }
-}
-
-NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
-    ForwardingPolicy* forwardingPolicy = getForwardingPolicy();
-    return forwardingPolicy->getNextHop(packet);
 }
 
 void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* interface) {

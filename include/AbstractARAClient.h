@@ -136,8 +136,6 @@ public:
     /// The computes the initial pheromone value of a link
     // FIXME do we need this here any more? I thought we have a policy class for that
     virtual float initializePheromone(const Packet* packet);
-    ///
-    virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
     void setRoutingTable(RoutingTable *routingTable);
 
@@ -146,17 +144,6 @@ public:
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
 protected:
-
-    /**
-     * This method is called to retrieve an instance of ForwardingPolicy
-     * each time the next hop for a given destination has to be determined.
-     *
-     * Note: If the forwarding policy is static (i.e. does never change), the
-     * implementation should store the forwarding policy as a member and just
-     * return a pointer to it instead of creating a new instance each time
-     * this method is called.
-     */
-    virtual ForwardingPolicy* getForwardingPolicy() = 0;
 
     /**
      * The packet should be directed to this node and must be delivered to the local system.
@@ -236,7 +223,6 @@ protected:
     void logFatal(const std::string &logMessage, ...) const;
 
 private:
-    NextHop* getNextHop(const Packet* packet);
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
     void handlePacket(Packet* packet, NetworkInterface* interface);
@@ -256,7 +242,9 @@ protected:
     // FIXME do we need this here any more? I thought we have a policy class for that
     double initialPhi;
 
+    ForwardingPolicy* forwardingPolicy;
     PathReinforcementPolicy* pathReinforcementPolicy;
+    EvaporationPolicy* evaporationPolicy;
 
     std::deque<NetworkInterface*> interfaces;
     RoutingTable* routingTable;

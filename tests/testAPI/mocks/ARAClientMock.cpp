@@ -17,17 +17,15 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 ARAClientMock::ARAClientMock() {
     float deltaPhi = 5.0;
-    evaporationPolicy = new LinearEvaporationPolicyMock();
-    forwardingPolicy = new BestPheromoneForwardingPolicy();
-    Configuration configuration = Configuration(evaporationPolicy, new LinearPathReinforcementPolicy(deltaPhi), forwardingPolicy);
+    Configuration configuration = Configuration(
+            new LinearEvaporationPolicyMock(),
+            new LinearPathReinforcementPolicy(deltaPhi),
+            new BestPheromoneForwardingPolicy()
+    );
     initialize(configuration);
-
-    forwardingPolicy->setRoutingTable(routingTable);
-    setEvaporationPolicy(evaporationPolicy);
 }
 
 ARAClientMock::~ARAClientMock() {
-    delete forwardingPolicy;
 
     // delete the NetworkInterfaceMocks that have been created via createNewNetworkInterfaceMock
     while(interfaceMocks.empty() == false) {
@@ -47,23 +45,11 @@ ARAClientMock::~ARAClientMock() {
     for(auto& packet: undeliverablePackets) {
         delete packet;
     }
-
-    routingTable->setEvaporationPolicy(NULL);
-    delete evaporationPolicy;
 }
 
 void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
     receivedPackets.push_back(new Pair<const Packet*, const NetworkInterface*>(packet, interface));
     AbstractARAClient::receivePacket(packet, interface);
-}
-
-void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
-    evaporationPolicy = policy;
-    routingTable->setEvaporationPolicy(evaporationPolicy);
-};
-
-ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
-    return forwardingPolicy;
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {

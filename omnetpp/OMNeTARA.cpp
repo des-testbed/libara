@@ -29,27 +29,23 @@ namespace ARA {
          */
         void OMNeTARA::initialize(int stage) {
             if(stage == 4) {
+				Configuration config = Configuration(
+                    check_and_cast<EvaporationPolicy*>(getSubModule("evaporationPolicy", "ARA: the evaporation policy has to be called evaporationPolicy")),
+                    check_and_cast<PathReinforcementPolicy*>(getSubModule("pathReinforcementPolicy", "ARA: the routing table has to be called pathReinforcementPolicy")),
+                    check_and_cast<ForwardingPolicy*>(getSubModule("forwardingPolicy", "ARA: the forwarding policy has to be called forwardingPolicy"))
+                );
+                AbstractARAClient::initialize(config);
+
                 initialPhi = par("initialPhi").doubleValue();
                 maxNrOfRouteDiscoveryRetries = par("nrOfRouteDiscoveryRetries").longValue();
 
                 interfaceTable = getInterfaceTable();
 				initializeNetworkInterfaces();
                 setLogger(new SimpleLogger(getHostModule()->getName()));
-				initializeRoutingTable();
-                initializeEvaporationPolicy();
-                initializeForwardingPolicy();
-                initializePathReinforcementPolicy();
 
-                Configuration config = Configuration(evaporationPolicy, pathReinforcementPolicy, forwardingPolicy);
-                AbstractARAClient::initialize(config);
+                routingTable = check_and_cast<RoutingTable*>(getSubModule("routingTableStatistics", "ARA: the routing table has to be called routingTableStatistics"));
+                routingTable->setEvaporationPolicy(evaporationPolicy);
             }
-        }
-
-        cModule* OMNeTARA::getHostModule() {
-            //TODO find a more generic way to determine the real host module
-            cModule* parent = getParentModule();
-            cModule* grandParent = parent->getParentModule();
-            return grandParent;
         }
 
         IInterfaceTable* OMNeTARA::getInterfaceTable() {
@@ -76,6 +72,23 @@ namespace ARA {
                     addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay, ackTimeout));
                 }
             }
+        }
+
+        cModule* OMNeTARA::getHostModule() {
+            cModule* parent = getParentModule();
+            cModule* grandParent = parent->getParentModule();
+            return grandParent;
+        }
+
+        cModule* OMNeTARA::getSubModule(const char* moduleIdentifier, const char* errorMessage){
+            cModule* host = getParentModule();
+            cModule* module = host->getSubmodule(moduleIdentifier);
+
+            if(module == NULL){
+                throw cRuntimeError(errorMessage);
+            }
+
+            return module;
         }
 
         void OMNeTARA::handleMessage(cMessage* msg) {
@@ -146,59 +159,6 @@ namespace ARA {
             }
         }
 
-        ForwardingPolicy* OMNeTARA::getForwardingPolicy() {
-            return forwardingPolicy;
-        }
-
-        cModule* OMNeTARA::getSubModule(const char* moduleIdentifier, const char* errorMessage){
-            cModule* host = getParentModule();
-            cModule* module = host->getSubmodule(moduleIdentifier);
-   
-            if(module == NULL){
-                throw cRuntimeError(errorMessage);
-            }
-
-            return module;
-        }
-
-        void OMNeTARA::initializeForwardingPolicy(){
-            try{
-                cModule *module = this->getSubModule("forwardingPolicy", "ARA: the forwarding policy has to be called forwardingPolicy");
-                this->forwardingPolicy = check_and_cast<ForwardingPolicy *>(module);
-                this->forwardingPolicy->setRoutingTable(this->routingTable);
-            }catch(cRuntimeError &error){
-                throw;
-            }
-        }
-
-        void OMNeTARA::initializeEvaporationPolicy(){
-            try{
-                cModule *module = this->getSubModule("evaporationPolicy", "ARA: the evaporation policy has to be called evaporationPolicy");
-                this->evaporationPolicy = check_and_cast<EvaporationPolicy *>(module);
-                setEvaporationPolicy(this->evaporationPolicy);
-            }catch(cRuntimeError &error){
-                throw;
-            }
-        }
-
-        void OMNeTARA::initializeRoutingTable(){
-            try{
-                cModule *module = this->getSubModule("routingTableStatistics", "ARA: the routing table has to be called routingTableStatistics");
-                this->routingTable = check_and_cast<RoutingTable *>(module);
-            }catch(cRuntimeError &error){
-                throw;
-            }
-        }
-
-        void OMNeTARA::initializePathReinforcementPolicy(){
-            try{
-                cModule *module = this->getSubModule("pathReinforcementPolicy", "ARA: the routing table has to be called pathReinforcementPolicy");
-                this->pathReinforcementPolicy = check_and_cast<PathReinforcementPolicy *>(module);
-            }catch(cRuntimeError &error){
-                throw;
-            }
-        }
-
         void OMNeTARA::deliverToSystem(const Packet* packet) {
             Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
             OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
@@ -215,10 +175,6 @@ namespace ARA {
 
             //TODO to something with this packet other then deleting it
             delete packet;
-        }
-
-        void OMNeTARA::setEvaporationPolicy(EvaporationPolicy *policy){
-            this->routingTable->setEvaporationPolicy(policy);
         }
 
         void OMNeTARA::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
