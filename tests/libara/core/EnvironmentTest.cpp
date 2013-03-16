@@ -20,12 +20,3 @@ TEST(EnvironmentTest, getClock) {
     time->setToCurrentTime();
     delete time;
 }
-
-//FIXME I dont get why this causes a memory leak...
-IGNORE_TEST(EnvironmentTest, setClock) {
-    Clock* newClock = new ClockMock();
-    Environment::setClock(newClock);
-
-    Clock* clock = Environment::getClock();
-    CHECK(clock == newClock);
-}
