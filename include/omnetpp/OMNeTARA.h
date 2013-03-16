@@ -46,7 +46,6 @@ namespace ARA {
                 virtual void handleMessage(cMessage *msg);
 
                 ForwardingPolicy* getForwardingPolicy();
-                void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
                 void deliverToSystem(const Packet* packet);
                 void packetNotDeliverable(const Packet* packet);
 

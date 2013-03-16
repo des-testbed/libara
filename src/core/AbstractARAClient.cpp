@@ -22,11 +22,10 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
+    pathReinforcementPolicy = configuration.getReinforcementPolicy();
 
     /// set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;
-    this->deltaPhi = 2.0;
-    this->pathReinforcementPolicy = new LinearPathReinforcementPolicy(deltaPhi); //FIXME this needs to be more flexible (pure virtual getter)
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -175,7 +174,7 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
     // do not insert values to self in the routing table
     if (hasBeenSentByThisNode(packet) == false) {
         if (routingTable->isDeliverable(packet)) {
-            updateRoutingTable(packet, interface);
+            reinforcePheromoneValue(packet->getSource(), packet->getSender(), interface);
         }
         else {
             float phi = this->initializePheromone(packet);

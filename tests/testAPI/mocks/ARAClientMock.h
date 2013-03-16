@@ -37,7 +37,6 @@ public:
 
     void setEvaporationPolicy(EvaporationPolicy *policy);
     ForwardingPolicy* getForwardingPolicy();
-    void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
     void deliverToSystem(const Packet* packet);
     void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
     void packetNotDeliverable(const Packet* packet);

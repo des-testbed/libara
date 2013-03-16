@@ -17,17 +17,13 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 ARAClientMock::ARAClientMock() {
     float deltaPhi = 5.0;
-    PathReinforcementPolicy* reinforcementPolicy = new LinearPathReinforcementPolicy(deltaPhi);
     evaporationPolicy = new LinearEvaporationPolicyMock();
-    Configuration configuration = Configuration(evaporationPolicy, reinforcementPolicy, forwardingPolicy);
+    forwardingPolicy = new BestPheromoneForwardingPolicy();
+    Configuration configuration = Configuration(evaporationPolicy, new LinearPathReinforcementPolicy(deltaPhi), forwardingPolicy);
     initialize(configuration);
 
-    forwardingPolicy = new BestPheromoneForwardingPolicy();
     forwardingPolicy->setRoutingTable(routingTable);
     setEvaporationPolicy(evaporationPolicy);
-
-    //FIXME just delete this now because we do not use it yet and dont want any memleaks in the tests
-    delete reinforcementPolicy;
 }
 
 ARAClientMock::~ARAClientMock() {
@@ -68,10 +64,6 @@ void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
 
 ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
     return forwardingPolicy;
-}
-
-void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
-    routingTable->update(packet->getSource(), packet->getSender(), interface, 10);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {

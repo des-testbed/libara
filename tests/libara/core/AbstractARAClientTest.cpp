@@ -708,3 +708,11 @@ TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
     // we should still not know this address in the routing table
     CHECK(routingTable->isDeliverable(source) == false);
 }
+
+IGNORE_TEST(AbstractARAClientTest, pathToSourceIsReinforced) {
+    FAIL("Not implemented yet");
+}
+
+IGNORE_TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
+    FAIL("Not implemented yet");
+}

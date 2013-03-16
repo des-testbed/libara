@@ -199,17 +199,6 @@ namespace ARA {
             }
         }
 
-        void OMNeTARA::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
-            AddressPtr source = packet->getSource();
-            AddressPtr sender = packet->getSender();
-            float currentPheromoneValue = routingTable->getPheromoneValue(source, sender, interface);
-
-            float hopCountMalus = 1 / (float) packet->getHopCount();
-            float newPheromoneValue = currentPheromoneValue + deltaPhi * hopCountMalus;
-
-            routingTable->update(source, sender, interface, newPheromoneValue);
-        }
-
         void OMNeTARA::deliverToSystem(const Packet* packet) {
             Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
             OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
