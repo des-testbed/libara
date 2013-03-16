@@ -194,7 +194,6 @@ namespace ARA {
             try{
                 cModule *module = this->getSubModule("pathReinforcementPolicy", "ARA: the routing table has to be called pathReinforcementPolicy");
                 this->pathReinforcementPolicy = check_and_cast<PathReinforcementPolicy *>(module);
-                this->pathReinforcementPolicy->setRoutingTable(this->routingTable);
             }catch(cRuntimeError &error){
                 throw;
             }

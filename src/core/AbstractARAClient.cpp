@@ -13,8 +13,6 @@ using namespace std;
 
 namespace ARA {
 
-typedef std::shared_ptr<Address> AddressPtr;
-
 AbstractARAClient::AbstractARAClient(Configuration& configuration) {
     initialize(configuration);
 }
@@ -28,7 +26,7 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     /// set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;
     this->deltaPhi = 2.0;
-    this->pathReinforcementPolicy = new LinearPathReinforcementPolicy(this->routingTable, deltaPhi); //FIXME this needs to be more flexible (pure virtual getter)
+    this->pathReinforcementPolicy = new LinearPathReinforcementPolicy(deltaPhi); //FIXME this needs to be more flexible (pure virtual getter)
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -130,7 +128,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         packet->increaseHopCount();
 
         logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
-        pathReinforcementPolicy->update(packet->getDestination(), nextHopAddress, interface);
+        reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
 
         interface->send(packet, nextHopAddress);
     } else {
@@ -143,6 +141,12 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
         startRouteDiscoveryTimer(packet);
     }
+}
+
+void AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    float currentPheromoneValue = routingTable->getPheromoneValue(destination, nextHop, interface);
+    float newPheromoneValue = pathReinforcementPolicy->calculateReinforcedValue(currentPheromoneValue);
+    routingTable->update(destination, nextHop, interface, newPheromoneValue);
 }
 
 void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {

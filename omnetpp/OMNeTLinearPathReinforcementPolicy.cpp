@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "omnetpp/OMNeTLinearPathReinforcementPolicy.h"
 
 namespace ARA {

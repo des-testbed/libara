@@ -16,8 +16,9 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 ARAClientMock::ARAClientMock() {
+    float deltaPhi = 5.0;
+    PathReinforcementPolicy* reinforcementPolicy = new LinearPathReinforcementPolicy(deltaPhi);
     evaporationPolicy = new LinearEvaporationPolicyMock();
-    PathReinforcementPolicy* reinforcementPolicy = new LinearPathReinforcementPolicy();
     Configuration configuration = Configuration(evaporationPolicy, reinforcementPolicy, forwardingPolicy);
     initialize(configuration);
 

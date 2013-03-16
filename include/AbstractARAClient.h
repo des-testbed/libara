@@ -28,6 +28,8 @@
 
 namespace ARA {
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 //TODO fix the visibility: most of the methods should be protected instead of public
 //TODO fix the indent
 
@@ -89,7 +91,7 @@ public:
      * and has tried too many times.
      * TODO this needs to be handled in route failure handling and not as pure virtual method!
      */
-    virtual void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) = 0;
+    virtual void handleRouteFailure(const Packet* packet, AddressPtr nextHop, NetworkInterface* interface) = 0;
 
     /**
      * This method will initialize this client with the given configuration.
@@ -182,6 +184,11 @@ protected:
     virtual void packetNotDeliverable(const Packet* packet) = 0;
 
     /**
+     * Handles path reinforcement using the currently set PathReinforcementPolicy.
+     */
+    void reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
+    /**
      * Checks if a logger has been assigned to this ARA client and if so
      * delegates the call to it with Logger::LEVEL_TRACE.
      *
@@ -251,8 +258,8 @@ private:
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
     void startRouteDiscoveryTimer(const Packet* packet);
-    bool isRouteDiscoveryRunning(std::shared_ptr<Address> destination);
-    void stopRouteDiscoveryTimer(std::shared_ptr<Address> destination);
+    bool isRouteDiscoveryRunning(AddressPtr destination);
+    void stopRouteDiscoveryTimer(AddressPtr destination);
     void sendDeliverablePackets(const Packet* packet);
 
 protected:
@@ -271,7 +278,7 @@ protected:
     RoutingTable* routingTable;
     PacketTrap* packetTrap;
 
-    std::unordered_map<std::shared_ptr<Address>, Timer*> runningRouteDiscoveries;
+    std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
     std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
     unsigned int routeDiscoveryTimeoutInMilliSeconds = 1000;
     int maxNrOfRouteDiscoveryRetries = 3;
@@ -279,7 +286,7 @@ protected:
 private:
     Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
-    std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
+    std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 };
 
 } /* namespace ARA */
