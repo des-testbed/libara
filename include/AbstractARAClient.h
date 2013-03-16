@@ -237,9 +237,8 @@ private:
     void sendDeliverablePackets(const Packet* packet);
 
 protected:
-    /// The member specifies the initial level
-    // FIXME do we need this here any more? I thought we have a policy class for that
-    double initialPhi;
+    std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
+    std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
 
     ForwardingPolicy* forwardingPolicy;
     PathReinforcementPolicy* pathReinforcementPolicy;
@@ -249,10 +248,9 @@ protected:
     RoutingTable* routingTable;
     PacketTrap* packetTrap;
 
-    std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
-    std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
-    unsigned int routeDiscoveryTimeoutInMilliSeconds = 1000;
-    int maxNrOfRouteDiscoveryRetries = 3;
+    double initialPheromoneValue;
+    unsigned int routeDiscoveryTimeoutInMilliSeconds;
+    int maxNrOfRouteDiscoveryRetries;
 
 private:
     Logger* logger = nullptr;

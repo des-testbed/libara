@@ -32,16 +32,15 @@ namespace ARA {
 				Configuration config = Configuration(
                     check_and_cast<EvaporationPolicy*>(getSubModule("evaporationPolicy", "ARA: the evaporation policy has to be called evaporationPolicy")),
                     check_and_cast<PathReinforcementPolicy*>(getSubModule("pathReinforcementPolicy", "ARA: the routing table has to be called pathReinforcementPolicy")),
-                    check_and_cast<ForwardingPolicy*>(getSubModule("forwardingPolicy", "ARA: the forwarding policy has to be called forwardingPolicy"))
+                    check_and_cast<ForwardingPolicy*>(getSubModule("forwardingPolicy", "ARA: the forwarding policy has to be called forwardingPolicy")),
+                    par("initialPhi").doubleValue(),
+                    par("nrOfRouteDiscoveryRetries").longValue(),
+                    par("routeDiscoveryTimeout").longValue()
                 );
                 AbstractARAClient::initialize(config);
 
-                initialPhi = par("initialPhi").doubleValue();
-                maxNrOfRouteDiscoveryRetries = par("nrOfRouteDiscoveryRetries").longValue();
-
-                interfaceTable = getInterfaceTable();
-				initializeNetworkInterfaces();
                 setLogger(new SimpleLogger(getHostModule()->getName()));
+				initializeNetworkInterfaces();
 
                 routingTable = check_and_cast<RoutingTable*>(getSubModule("routingTableStatistics", "ARA: the routing table has to be called routingTableStatistics"));
                 routingTable->setEvaporationPolicy(evaporationPolicy);
@@ -62,7 +61,7 @@ namespace ARA {
             double uniCastDelay = par("uniCastDelay").doubleValue();
             int ackTimeout = par("ackTimeout").longValue();
 
-            ASSERT(interfaceTable);
+            interfaceTable = getInterfaceTable();
             cGate* gateToARP = gate("arpOut");
 
             int nrOfInterfaces = interfaceTable->getNumInterfaces();

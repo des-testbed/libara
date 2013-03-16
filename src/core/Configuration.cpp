@@ -6,10 +6,13 @@
 
 namespace ARA {
 
-Configuration::Configuration(EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy) {
+Configuration::Configuration(EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, unsigned int routeDiscoveryTimeoutInMilliSeconds) {
     this->evaporationPolicy = evaporationPolicy;
     this->reinforcementPolicy = reinforcementPolicy;
     this->forwardingPolicy = forwardingPolicy;
+    this->initialPheromoneValue = initialPheromoneValue;
+    this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
+    this->routeDiscoveryTimeoutInMilliSeconds = routeDiscoveryTimeoutInMilliSeconds;
 }
 
 EvaporationPolicy* Configuration::getEvaporationPolicy() {
@@ -22,6 +25,18 @@ PathReinforcementPolicy* Configuration::getReinforcementPolicy() {
 
 ForwardingPolicy* Configuration::getForwardingPolicy() {
     return forwardingPolicy;
+}
+
+float Configuration::getInitialPheromoneValue() {
+    return initialPheromoneValue;
+}
+
+int Configuration::getMaxNrOfRouteDiscoveryRetries() {
+    return maxNrOfRouteDiscoveryRetries;
+}
+
+unsigned int Configuration::getRouteDiscoveryTimeoutInMilliSeconds() {
+    return routeDiscoveryTimeoutInMilliSeconds;
 }
 
 } /* namespace ARA */

@@ -16,11 +16,13 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 ARAClientMock::ARAClientMock() {
+    float initialPhi = 10.0;
     float deltaPhi = 5.0;
     Configuration configuration = Configuration(
             new LinearEvaporationPolicyMock(),
             new LinearPathReinforcementPolicy(deltaPhi),
-            new BestPheromoneForwardingPolicy()
+            new BestPheromoneForwardingPolicy(),
+            initialPhi
     );
     initialize(configuration);
 }

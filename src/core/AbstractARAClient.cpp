@@ -21,15 +21,15 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     forwardingPolicy = configuration.getForwardingPolicy();
     pathReinforcementPolicy = configuration.getReinforcementPolicy();
     evaporationPolicy = configuration.getEvaporationPolicy();
+    initialPheromoneValue = configuration.getInitialPheromoneValue();
+    maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
+    routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
 
     routingTable = new RoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
-
-    // set it to a 'random' initial value FIXME: WHY?
-    this->initialPhi = 1.0;
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -369,7 +369,7 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
 
 float AbstractARAClient::calculateInitialPheromoneValue(unsigned int hopCount) {
     float hopCountMalus = 1 / (float) hopCount;
-    return initialPhi * hopCountMalus;
+    return initialPheromoneValue * hopCountMalus;
 }
 
 void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
