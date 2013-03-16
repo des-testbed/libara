@@ -6,6 +6,7 @@
 #define ABSTRACTARACLIENT_H_
 
 #include "TimeoutEventListener.h"
+#include "Configuration.h"
 #include "Logger.h"
 #include "Address.h"
 #include "NextHop.h"
@@ -27,6 +28,8 @@
 
 namespace ARA {
 
+typedef std::shared_ptr<Address> AddressPtr;
+
 //TODO fix the visibility: most of the methods should be protected instead of public
 //TODO fix the indent
 
@@ -36,7 +39,27 @@ namespace ARA {
 class AbstractARAClient : public TimeoutEventListener {
 
 public:
-    AbstractARAClient();
+    /**
+     * This standard constructor is only provided for those concrete implementations that
+     * absolutely need a constructor without parameters (like in OMNeT++). If you use this
+     * constructor you must make sure to call AbstractARAClient::initialize before any call
+     * to AbstractARAClient::sendPacket or AbstractARAClient::receivePacket.
+     *
+     * The recommended way is the constructor that accepts a Configuration object which will
+     * handle initialization by default.
+     */
+    AbstractARAClient() {}
+
+    /**
+     * This is the recommended constructor which should be used by all concrete implementation
+     * if possible. It will initialize the client with the given configuration so no additional
+     * call to AbstractARAClient::initialize is required.
+     */
+    AbstractARAClient(Configuration& configuration);
+
+    /**
+     * The standard virtual destructor of this abstract class.
+     */
     virtual ~AbstractARAClient();
 
     /**
@@ -68,7 +91,15 @@ public:
      * and has tried too many times.
      * TODO this needs to be handled in route failure handling and not as pure virtual method!
      */
-    virtual void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) = 0;
+    virtual void handleRouteFailure(const Packet* packet, AddressPtr nextHop, NetworkInterface* interface) = 0;
+
+    /**
+     * This method will initialize this client with the given configuration.
+     * It must be called before any call to AbstractARAClient::sendPacket or
+     * AbstractARAClient::receivePacket. If this object has been created by the
+     * standard constructor this method must be called manually.
+     */
+    void initialize(Configuration& configuration);
 
     /**
      * Sets a logger for this ARA client.
@@ -105,8 +136,6 @@ public:
     /// The computes the initial pheromone value of a link
     // FIXME do we need this here any more? I thought we have a policy class for that
     virtual float initializePheromone(const Packet* packet);
-    ///
-    virtual void setEvaporationPolicy(EvaporationPolicy *policy) = 0;
 
     void setRoutingTable(RoutingTable *routingTable);
 
@@ -115,28 +144,6 @@ public:
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
 protected:
-
-    /**
-     * This method is called to retrieve an instance of ForwardingPolicy
-     * each time the next hop for a given destination has to be determined.
-     *
-     * Note: If the forwarding policy is static (i.e. does never change), the
-     * implementation should store the forwarding policy as a member and just
-     * return a pointer to it instead of creating a new instance each time
-     * this method is called.
-     */
-    virtual ForwardingPolicy* getForwardingPolicy() = 0;
-
-    /**
-     * This method is called each a time a new packet is received over the
-     * given interface.
-     *
-     * It is responsible for updating the routing table so a route to the
-     * packets source is known in the future.
-     *
-     * Note: This method is not called on duplicate packets (which trigger a DUPLICATE_ERROR).
-     */
-    virtual void updateRoutingTable(const Packet* packet, NetworkInterface* interface) = 0;
 
     /**
      * The packet should be directed to this node and must be delivered to the local system.
@@ -151,6 +158,11 @@ protected:
      * about this event and delete the packet.
      */
     virtual void packetNotDeliverable(const Packet* packet) = 0;
+
+    /**
+     * Handles path reinforcement using the currently set PathReinforcementPolicy.
+     */
+    void reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
 
     /**
      * Checks if a logger has been assigned to this ARA client and if so
@@ -211,7 +223,6 @@ protected:
     void logFatal(const std::string &logMessage, ...) const;
 
 private:
-    NextHop* getNextHop(const Packet* packet);
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
     void handlePacket(Packet* packet, NetworkInterface* interface);
@@ -222,27 +233,24 @@ private:
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
     void startRouteDiscoveryTimer(const Packet* packet);
-    bool isRouteDiscoveryRunning(std::shared_ptr<Address> destination);
-    void stopRouteDiscoveryTimer(std::shared_ptr<Address> destination);
+    bool isRouteDiscoveryRunning(AddressPtr destination);
+    void stopRouteDiscoveryTimer(AddressPtr destination);
     void sendDeliverablePackets(const Packet* packet);
 
 protected:
-    /// The member denotes the constant which is used in the pheromone reinforcement of a path
-    // FIXME do we need this here any more? I thought we have a policy class for that
-    double deltaPhi;
-
     /// The member specifies the initial level
     // FIXME do we need this here any more? I thought we have a policy class for that
     double initialPhi;
 
-    // FIXME let the AbstractARAClient access this object via a pure virtual method to force the implementations to actually set this policy
+    ForwardingPolicy* forwardingPolicy;
     PathReinforcementPolicy* pathReinforcementPolicy;
+    EvaporationPolicy* evaporationPolicy;
 
     std::deque<NetworkInterface*> interfaces;
     RoutingTable* routingTable;
     PacketTrap* packetTrap;
 
-    std::unordered_map<std::shared_ptr<Address>, Timer*> runningRouteDiscoveries;
+    std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
     std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
     unsigned int routeDiscoveryTimeoutInMilliSeconds = 1000;
     int maxNrOfRouteDiscoveryRetries = 3;
@@ -250,7 +258,7 @@ protected:
 private:
     Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
-    std::unordered_map<std::shared_ptr<Address>, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
+    std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
 };
 
 } /* namespace ARA */

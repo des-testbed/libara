@@ -13,18 +13,23 @@ using namespace std;
 
 namespace ARA {
 
-typedef std::shared_ptr<Address> AddressPtr;
+AbstractARAClient::AbstractARAClient(Configuration& configuration) {
+    initialize(configuration);
+}
 
-AbstractARAClient::AbstractARAClient() {
+void AbstractARAClient::initialize(Configuration& configuration) {
+    forwardingPolicy = configuration.getForwardingPolicy();
+    pathReinforcementPolicy = configuration.getReinforcementPolicy();
+    evaporationPolicy = configuration.getEvaporationPolicy();
+
     routingTable = new RoutingTable();
+    routingTable->setEvaporationPolicy(evaporationPolicy);
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
 
     /// set it to a 'random' initial value FIXME: WHY?
     this->initialPhi = 1.0;
-    this->deltaPhi = 2.0;
-    this->pathReinforcementPolicy = new LinearPathReinforcementPolicy(this->routingTable, deltaPhi); //FIXME this needs to be more flexible (pure virtual getter)
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -51,6 +56,8 @@ AbstractARAClient::~AbstractARAClient() {
     delete packetTrap;
     delete routingTable;
     delete pathReinforcementPolicy;
+    delete evaporationPolicy;
+    delete forwardingPolicy;
 }
 
 void AbstractARAClient::setLogger(Logger* logger) {
@@ -119,14 +126,14 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
 
 void AbstractARAClient::sendPacket(Packet* packet) {
     if(routingTable->isDeliverable(packet)) {
-        NextHop* nextHop = getNextHop(packet);
+        NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
         NetworkInterface* interface = nextHop->getInterface();
         AddressPtr nextHopAddress = nextHop->getAddress();
         packet->setSender(interface->getLocalAddress());
         packet->increaseHopCount();
 
         logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
-        pathReinforcementPolicy->update(packet->getDestination(), nextHopAddress, interface);
+        reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
 
         interface->send(packet, nextHopAddress);
     } else {
@@ -139,6 +146,12 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
         startRouteDiscoveryTimer(packet);
     }
+}
+
+void AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    float currentPheromoneValue = routingTable->getPheromoneValue(destination, nextHop, interface);
+    float newPheromoneValue = pathReinforcementPolicy->calculateReinforcedValue(currentPheromoneValue);
+    routingTable->update(destination, nextHop, interface, newPheromoneValue);
 }
 
 void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
@@ -167,7 +180,7 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
     // do not insert values to self in the routing table
     if (hasBeenSentByThisNode(packet) == false) {
         if (routingTable->isDeliverable(packet)) {
-            updateRoutingTable(packet, interface);
+            reinforcePheromoneValue(packet->getSource(), packet->getSender(), interface);
         }
         else {
             float phi = this->initializePheromone(packet);
@@ -182,11 +195,6 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
         registerReceivedPacket(packet);
         handlePacket(packet, interface);
     }
-}
-
-NextHop* AbstractARAClient::getNextHop(const Packet* packet) {
-    ForwardingPolicy* forwardingPolicy = getForwardingPolicy();
-    return forwardingPolicy->getNextHop(packet);
 }
 
 void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* interface) {

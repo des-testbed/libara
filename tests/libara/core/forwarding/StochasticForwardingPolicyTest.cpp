@@ -42,8 +42,8 @@ TEST(StochasticForwardingPolicyTest, testGetNextHop) {
     routingTable.update(destination, nextHopC, &interface, 2.3);
 
     StochasticForwardingPolicy policy = StochasticForwardingPolicy();
-    policy.setRoutingTable(&routingTable);
-    policy.getNextHop(&packet);
+    policy.getNextHop(&packet, &routingTable);
+
     //FIXME Continue this test
 
     delete evaporationPolicy;
