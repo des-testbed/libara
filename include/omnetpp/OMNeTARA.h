@@ -37,9 +37,6 @@ namespace ARA {
          *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
          */
         class OMNeTARA: public cSimpleModule, public AbstractARAClient {
-            public:
-                void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
-
             protected:
                 int numInitStages() const;
                 virtual void initialize(int stage);

@@ -114,7 +114,7 @@ namespace ARA {
     }
 
     bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface){
-        if(isDeliverable(destination)){
+        if(isDeliverable(destination)) {
             std::deque<RoutingTableEntry*>* entries = table[destination];
             for (auto& entry: *entries) {
                 if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){

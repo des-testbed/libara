@@ -3,6 +3,7 @@
  */
 
 #include "CppUTest/TestHarness.h"
+#include "TestMacros.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "Packet.h"
@@ -697,7 +698,7 @@ TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("source");
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
-    Packet* fant = new Packet(source, destination, destination, PacketType::FANT, 123);
+    Packet* fant = new Packet(source, source, destination, PacketType::FANT, 123);
 
     // sanity check
     CHECK(routingTable->isDeliverable(source) == false);
@@ -719,4 +720,42 @@ IGNORE_TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
 
 IGNORE_TEST(AbstractARAClientTest, duplicatePacketsDoNotUpdateTheRoutingTable) {
     FAIL("Not implemented yet");
+}
+
+/**
+ * In this test we check if a client who knows two (or more routes) to a destination is
+ * able to fall back to another route if one of the known routes is failing.
+ */
+TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
+    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr sender = source;
+    AddressPtr destination (new AddressMock("destination"));
+    unsigned int originalSeqNr = 123;
+    unsigned int originalHopCount = 5;
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, originalSeqNr, "Foo", 3, originalHopCount);
+    AddressPtr route1 (new AddressMock("route1"));
+    AddressPtr route2 (new AddressMock("route2"));
+
+    // create two known routes to the destination
+    routingTable->update(destination, route1, interface, 10);
+    routingTable->update(destination, route2, interface, 20);
+
+    // sanity check
+    CHECK(routingTable->isDeliverable(destination));
+    CHECK(sentPackets->empty());
+
+    // start the test
+    client->handleRouteFailure(packet, route1, interface);
+
+    // the client is expected to delete the route from the routing table
+    CHECK(routingTable->exists(destination, route1, interface) == false);
+
+    // the packet should have been sent via the other route
+    BYTES_EQUAL(1, sentPackets->size());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
+    CHECK(sentPacketInfo->getRight()->equals(route2));
+
+    CHECK_PACKET(sentPacketInfo->getLeft(), PacketType::DATA, originalSeqNr, source, sender, destination, originalHopCount, "Foo");
 }

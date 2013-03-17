@@ -9,6 +9,7 @@
 #include "Environment.h"
 #include "Exception.h"
 
+#include "sstream"
 using namespace std;
 
 namespace ARA {
@@ -414,6 +415,20 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
         for(auto& packet: undeliverablePackets) {
             packetNotDeliverable(packet);
         }
+    }
+}
+
+void AbstractARAClient::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+    AddressPtr destination = packet->getDestination();
+
+    routingTable->removeEntry(destination, nextHop, interface);
+
+    if (routingTable->isDeliverable(destination)) {
+        packet->decreaseHopCount(); // has been increased when it has been unsuccessfully been sent the first time and will be increased again in sendpacket()
+        sendPacket(packet);
+    }
+    else {
+        // TODO continue route failure handling
     }
 }
 

@@ -331,3 +331,22 @@ TEST(PacketTest, createAcknowledgment) {
 
     delete ackPacket;
 }
+
+TEST(PacketTest, decreaseHopCount) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr sender (new AddressMock("originalSender"));
+    char type = PacketType::DATA;
+    unsigned int seqNr = 1;
+    const char* payload = "Hello World";
+    unsigned int hopCount = 5;
+
+    Packet packet = Packet(source, destination, sender, type, seqNr, payload, 11, hopCount);
+    LONGS_EQUAL(hopCount, packet.getHopCount());
+
+    packet.decreaseHopCount();
+    LONGS_EQUAL(hopCount-1, packet.getHopCount());
+
+    packet.decreaseHopCount();
+    LONGS_EQUAL(hopCount-2, packet.getHopCount());
+}

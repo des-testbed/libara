@@ -89,9 +89,8 @@ public:
      * This method is called each time packet can not be delivered to a specific next hop address.
      * This is the case if this client never receives an acknowledgment in the timeout period
      * and has tried too many times.
-     * TODO this needs to be handled in route failure handling and not as pure virtual method!
      */
-    virtual void handleRouteFailure(const Packet* packet, AddressPtr nextHop, NetworkInterface* interface) = 0;
+    virtual void handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
     /**
      * This method will initialize this client with the given configuration.
@@ -132,7 +131,6 @@ public:
     bool hasBeenReceivedEarlier(const Packet* packet);
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
-
 
     void setRoutingTable(RoutingTable *routingTable);
 

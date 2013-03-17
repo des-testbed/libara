@@ -1,8 +1,5 @@
 /*
- * Packet.cpp
- *
- *  Created on: Dec 2, 2012
- *      Author: Friedrich Große
+ * $FU-Copyright$
  */
 
 #include "Packet.h"
@@ -95,6 +92,10 @@ void Packet::setHopCount(unsigned int newValue) {
 
 void Packet::increaseHopCount() {
     hopCount++;
+}
+
+void Packet::decreaseHopCount() {
+    hopCount--;
 }
 
 void Packet::setSender(AddressPtr newSender) {
