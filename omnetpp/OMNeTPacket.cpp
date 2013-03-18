@@ -263,7 +263,7 @@ std::string OMNeTPacketDescriptor::getFieldAsString(void *object, int field, int
             case 2: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getSender())); break;
         }
 
-        if(address == NULL) {
+        if(address == nullptr) {
             return "NULL";
         }
         else {

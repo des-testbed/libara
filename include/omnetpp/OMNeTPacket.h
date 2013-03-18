@@ -24,7 +24,7 @@ class OMNeTPacket : public ::cPacket, public ARA::Packet {
     bool operator==(const OMNeTPacket&);
 
   public:
-    OMNeTPacket(std::shared_ptr<Address> source=NULL, std::shared_ptr<Address> destination=NULL, std::shared_ptr<Address> sender=NULL, char type=0, unsigned int seqNr=0, unsigned int hopCount = 0);
+    OMNeTPacket(std::shared_ptr<Address> source=nullptr, std::shared_ptr<Address> destination=nullptr, std::shared_ptr<Address> sender=nullptr, char type=0, unsigned int seqNr=0, unsigned int hopCount = 0);
     OMNeTPacket(const OMNeTPacket& other);
     OMNeTPacket& operator=(const OMNeTPacket& other);
     virtual OMNeTPacket *dup() const {return new OMNeTPacket(*this);}

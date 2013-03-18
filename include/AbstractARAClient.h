@@ -143,6 +143,13 @@ public:
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
 protected:
+    /**
+     * The method initializes the routing table. Typically, this would be handled
+     * in the initialize() method. However, we want to support further extensions
+     * of the ant routing algorithm which might have different routing tables (for
+     * example the energy aware ant routing algorithm).
+     */
+    virtual void setupRoutingTable(); 
 
     /**
      * The packet should be directed to this node and must be delivered to the local system.

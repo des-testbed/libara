@@ -61,7 +61,7 @@ void OMNeTGate::doSend(const Packet* packet, shared_ptr<Address> recipient, doub
 
 OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
     shared_ptr<OMNeTAddress> nextHopAddress (dynamic_pointer_cast<OMNeTAddress>(recipient));
-    if(nextHopAddress == NULL) {
+    if(nextHopAddress == nullptr) {
         throw cRuntimeError("Error in OMNeTGate: Can only send packets to OMNeTAddress recipients");
     }
     return nextHopAddress;
