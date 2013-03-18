@@ -48,11 +48,6 @@ protected:
     bool hasTableBeenAccessedEarlier();
     void triggerEvaporation();
     virtual void updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTableEntry *newEntry);
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> 02b19ac7086df67a043277a98cb5532f9f7c08f9
     Time *lastAccessTime;
 
 private:
