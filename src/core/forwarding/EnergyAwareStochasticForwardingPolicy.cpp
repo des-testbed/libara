@@ -2,7 +2,11 @@
 
 using namespace ARA;
 
+<<<<<<< HEAD
 NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet *packet, RoutingTable *routingTable){
+=======
+NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet *packet){
+>>>>>>> 02b19ac7086df67a043277a98cb5532f9f7c08f9
     std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(packet);
     unsigned int nrOfPossibleNextHops = possibleNextHops->size();
 

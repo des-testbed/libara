@@ -29,7 +29,11 @@ namespace ARA {
         triggerEvaporation();
 
         if(isDeliverable(destination)) {
+<<<<<<< HEAD
             std::deque<RoutingTableEntry*>* entryList = getPossibleNextHops(destination);
+=======
+            std::deque<RoutingTableEntry*>* entryList = (getRoutingTable())[destination];
+>>>>>>> 02b19ac7086df67a043277a98cb5532f9f7c08f9
 
             for (auto& entry: *entryList) {
                 if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
