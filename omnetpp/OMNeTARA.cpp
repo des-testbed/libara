@@ -18,6 +18,7 @@ namespace ARA {
 
         OMNeTARA::~OMNeTARA() {
             delete messageDispatcher;
+            delete evaporationPolicy;
         }
 
         int OMNeTARA::numInitStages() const {
