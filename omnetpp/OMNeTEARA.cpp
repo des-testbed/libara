@@ -11,7 +11,8 @@ namespace ARA {
         Define_Module(OMNeTEARA);
 
         OMNeTEARA::OMNeTEARA(){
-             messageDispatcher = new MessageDispatcher(this);
+// FIXME does not work
+//             messageDispatcher = new MessageDispatcher(this);
         }
 
         OMNeTEARA::~OMNeTEARA(){
