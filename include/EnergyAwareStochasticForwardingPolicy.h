@@ -29,7 +29,7 @@ namespace ARA {
             EnergyAwareStochasticForwardingPolicy(){};
             virtual ~EnergyAwareStochasticForwardingPolicy(){};
 
-            virtual NextHop* getNextHop(const Packet*);
+            virtual NextHop* getNextHop(const Packet* packet, RoutingTable* routingTable);
 
             void setPheromoneWeight(float alpha);
             void setEnergyWeight(float beta);
