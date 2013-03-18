@@ -23,8 +23,10 @@
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
 #include "OMNeTRoutingTable.h"
+#include "MessageDispatcher.h"
 #include "OMNeTConfiguration.h"
 #include "OMNeTStochasticForwardingPolicy.h"
+#include "OMNeTEnergyAwareStochasticForwardingPolicy.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -38,13 +40,24 @@ namespace ARA {
                 ~OMNeTEARA();
 
                 void handleRouteFailure(const Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
-                void deliverToSystem(const Packet* packet);
-                void packetNotDeliverable(const Packet* packet);
 
             protected:
                 int numInitStages() const { return 5; };
                 virtual void initialize(int stage);
                 virtual void handleMessage(cMessage *msg);
+
+                void deliverToSystem(const Packet* packet);
+                void packetNotDeliverable(const Packet* packet);
+
+                void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
+
+            private:
+                MessageDispatcher* messageDispatcher;
+                IInterfaceTable* interfaceTable;
+
+            friend class OMNeTGate;
+            friend class OMNeTConfiguration;
+            friend class MessageDispatcher;
         };
 
     } /* namespace ARA */
