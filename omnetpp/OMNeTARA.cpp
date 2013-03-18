@@ -3,10 +3,7 @@
  */
 
 #include "omnetpp/OMNeTARA.h"
-#include "IPControlInfo.h"
-#include "IPAddress.h"
-#include "ARPPacket_m.h"
-#include "SimpleLogger.h"
+#include "omnetpp/OMNeTPacket.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -14,6 +11,14 @@ namespace ARA {
 
         // Register the class with the OMNeT++ simulation
         Define_Module(OMNeTARA);
+
+        OMNeTARA::OMNeTARA() {
+            messageDispatcher = new MessageDispatcher(this);
+        }
+
+        OMNeTARA::~OMNeTARA() {
+            delete messageDispatcher;
+        }
 
         int OMNeTARA::numInitStages() const {
             return 5;
@@ -39,72 +44,8 @@ namespace ARA {
             }
         }
 
-        void OMNeTARA::handleMessage(cMessage* msg) {
-            if(isFromUpperLayer(msg)) {
-                handleUpperLayerMessage(msg);
-            }
-            else if (isARPMessage(msg)) {
-                handleARP(msg);
-            }
-            else {
-                handleARA(msg);
-            }
-        }
-
-        bool OMNeTARA::isFromUpperLayer(cMessage* msg) {
-            std::string nameOfUpperLayergate = "upperLayerGate$i";
-            std::string gateName = std::string(msg->getArrivalGate()->getName());
-            return gateName.length() <= nameOfUpperLayergate.length()
-                && std::equal(gateName.begin(), gateName.end(), nameOfUpperLayergate.begin());
-        }
-
-        void OMNeTARA::handleUpperLayerMessage(cMessage* msg) {
-            IPControlInfo* controlInfo = (IPControlInfo*)msg->getControlInfo();
-            IPAddress sourceIP = controlInfo->getSrcAddr();
-            IPAddress destinationIP = controlInfo->getDestAddr();
-            EV << "Handling upper layer message from " << sourceIP << " to " << destinationIP << ": "<< msg << "\n";
-
-            AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
-            AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
-            AddressPtr sender = source;
-            OMNeTPacket* omnetPacket = new OMNeTPacket(source, destination, sender, PacketType::DATA, getNextSequenceNumber());
-            omnetPacket->encapsulate(check_and_cast<cPacket*>(msg));
-
-            sendPacket(omnetPacket);
-        }
-
-        bool OMNeTARA::isARPMessage(cMessage* msg) {
-            return dynamic_cast<ARPPacket*>(msg) != NULL;
-        }
-
-        void OMNeTARA::handleARP(cMessage* msg) {
-            // FIXME hasBitError() check  missing!
-            delete msg->removeControlInfo();
-
-            InterfaceEntry* arrivalInterface = getSourceInterfaceFrom(msg);
-            ASSERT(arrivalInterface);
-
-            IPRoutingDecision* routingDecision = new IPRoutingDecision();
-            routingDecision->setInterfaceId(arrivalInterface->getInterfaceId());
-            msg->setControlInfo(routingDecision);
-
-            send(msg, "arpOut");
-        }
-
-        void OMNeTARA::handleARA(cMessage* msg) {
-            OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(msg);
-            OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(msg->getArrivalGate()->getIndex());
-            arrivalGate->receive(omnetPacket);
-        }
-
-        InterfaceEntry* OMNeTARA::getSourceInterfaceFrom(cMessage* msg) {
-            cGate* arrivalGate = msg->getArrivalGate();
-            if(arrivalGate != NULL) {
-                return interfaceTable->getInterfaceByNetworkLayerGateIndex(arrivalGate->getIndex());
-            }
-            else {
-                return NULL;
-            }
+        void OMNeTARA::handleMessage(cMessage* message) {
+            messageDispatcher->dispatch(message);
         }
 
         void OMNeTARA::deliverToSystem(const Packet* packet) {

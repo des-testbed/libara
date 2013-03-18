@@ -6,28 +6,21 @@
 #define OMNETARACLIENT_H_
 
 #include <omnetpp.h>
-#include <algorithm>
-#include <cmessage.h>
-#include <unordered_map>
 
-#include "IInterfaceTable.h"
-#include "InterfaceEntry.h"
-
-#include "Packet.h"
-#include "NextHop.h"
-#include "OMNeTGate.h"
-#include "OMNeTPacket.h"
-#include "OMNeTAddress.h"
-#include "OMNeTConfiguration.h"
-#include "ForwardingPolicy.h"
-#include "NetworkInterface.h"
 #include "AbstractARAClient.h"
-#include "OMNeTRoutingTable.h"
-#include "BestPheromoneForwardingPolicy.h"
-#include "OMNeTStochasticForwardingPolicy.h"
+#include "Packet.h"
+#include "OMNeTGate.h"
+#include "OMNeTConfiguration.h"
+#include "MessageDispatcher.h"
+#include "NetworkInterface.h"
+#include "IInterfaceTable.h"
+
 
 namespace ARA {
     namespace omnetpp {
+
+        class MessageDispatcher;
+
         /**
          * The class represents the implementation of the ant routing algorithm (ARA)
          * for the OMNeT++ simulation framework.
@@ -39,6 +32,9 @@ namespace ARA {
          */
         class OMNeTARA: public cSimpleModule, public AbstractARAClient {
             public:
+                OMNeTARA();
+                ~OMNeTARA();
+
                 void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
             protected:
@@ -57,18 +53,12 @@ namespace ARA {
                  */
                 void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
             private:
-
+                MessageDispatcher* messageDispatcher;
                 IInterfaceTable* interfaceTable;
-                InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
-
-                bool isFromUpperLayer(cMessage* msg);
-                bool isARPMessage(cMessage* msg);
-                void handleUpperLayerMessage(cMessage* msg);
-                void handleARP(cMessage* msg);
-                void handleARA(cMessage* msg);
 
             friend class OMNeTGate;
             friend class OMNeTConfiguration;
+            friend class MessageDispatcher;
         };
 
     } /* namespace ARA */
