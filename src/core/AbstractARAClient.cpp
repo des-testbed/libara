@@ -25,12 +25,18 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
     routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
 
-    routingTable = new RoutingTable();
-    routingTable->setEvaporationPolicy(evaporationPolicy);
+    setupRoutingTable();
+
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
 }
+
+void AbstractARAClient::setupRoutingTable() {
+    routingTable = new RoutingTable();
+    routingTable->setEvaporationPolicy(evaporationPolicy);
+}
+
 
 AbstractARAClient::~AbstractARAClient() {
     // delete logger if it has been set

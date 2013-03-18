@@ -18,6 +18,7 @@
 #include "PathReinforcementPolicy.h"
 #include "RouteDiscoveryInfo.h"
 #include "Timer.h"
+#include "EnergyAwareRoutingTable.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -31,6 +32,10 @@ namespace ARA {
         public:
             AbstractEARAClient();
             virtual ~AbstractEARAClient();
+            void initialize(Configuration &configuration);
+
+        protected:
+            void setupRoutingTable(); 
 };
 
 } /* namespace ARA */
