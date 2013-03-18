@@ -18,6 +18,7 @@
 #include "OMNeTGate.h"
 #include "OMNeTPacket.h"
 #include "OMNeTAddress.h"
+#include "OMNeTConfiguration.h"
 #include "ForwardingPolicy.h"
 #include "NetworkInterface.h"
 #include "AbstractARAClient.h"
@@ -58,13 +59,7 @@ namespace ARA {
             private:
 
                 IInterfaceTable* interfaceTable;
-
-                void initializeNetworkInterfaces();
-                cModule* getHostModule();
-                IInterfaceTable* getInterfaceTable();
                 InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
-
-                cModule* getSubModule(const char* moduleIdentifier, const char* errorMessage);
 
                 bool isFromUpperLayer(cMessage* msg);
                 bool isARPMessage(cMessage* msg);
@@ -73,6 +68,7 @@ namespace ARA {
                 void handleARA(cMessage* msg);
 
             friend class OMNeTGate;
+            friend class OMNeTConfiguration;
         };
 
     } /* namespace ARA */

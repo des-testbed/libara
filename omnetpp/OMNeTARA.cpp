@@ -5,7 +5,6 @@
 #include "omnetpp/OMNeTARA.h"
 #include "IPControlInfo.h"
 #include "IPAddress.h"
-#include "IPAddressResolver.h"
 #include "ARPPacket_m.h"
 #include "SimpleLogger.h"
 
@@ -29,65 +28,15 @@ namespace ARA {
          */
         void OMNeTARA::initialize(int stage) {
             if(stage == 4) {
-				Configuration config = Configuration(
-                    check_and_cast<EvaporationPolicy*>(getSubModule("evaporationPolicy", "ARA: the evaporation policy has to be called evaporationPolicy")),
-                    check_and_cast<PathReinforcementPolicy*>(getSubModule("pathReinforcementPolicy", "ARA: the routing table has to be called pathReinforcementPolicy")),
-                    check_and_cast<ForwardingPolicy*>(getSubModule("forwardingPolicy", "ARA: the forwarding policy has to be called forwardingPolicy")),
-                    par("initialPhi").doubleValue(),
-                    par("nrOfRouteDiscoveryRetries").longValue(),
-                    par("routeDiscoveryTimeout").longValue()
-                );
+                Configuration config = OMNeTConfiguration::parseFrom(this);
                 AbstractARAClient::initialize(config);
 
-                setLogger(new SimpleLogger(getHostModule()->getName()));
-				initializeNetworkInterfaces();
+                setLogger(OMNeTConfiguration::getLogger(this));
+                OMNeTConfiguration::initializeNetworkInterfacesOf(this);
 
-                routingTable = check_and_cast<RoutingTable*>(getSubModule("routingTableStatistics", "ARA: the routing table has to be called routingTableStatistics"));
+                routingTable = OMNeTConfiguration::getRoutingTableFrom(this);
                 routingTable->setEvaporationPolicy(evaporationPolicy);
             }
-        }
-
-        IInterfaceTable* OMNeTARA::getInterfaceTable() {
-            cModule* host = getHostModule();
-            IInterfaceTable* interfaceTable = IPAddressResolver().findInterfaceTableOf(host);
-            if (interfaceTable == NULL) {
-                throw cRuntimeError("Could not find the interfaceTable in host '%s'. Every %s needs to be part of a compound module that has an IInterfaceTable submodule called 'interfaceTable'", host->getFullPath().c_str(), getFullName());
-            }
-            return interfaceTable;
-        }
-
-        void OMNeTARA::initializeNetworkInterfaces() {
-            double broadCastDelay = par("broadCastDelay").doubleValue();
-            double uniCastDelay = par("uniCastDelay").doubleValue();
-            int ackTimeout = par("ackTimeout").longValue();
-
-            interfaceTable = getInterfaceTable();
-            cGate* gateToARP = gate("arpOut");
-
-            int nrOfInterfaces = interfaceTable->getNumInterfaces();
-            for (int i=0; i < nrOfInterfaces; i++)         {
-                InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
-                if (interfaceEntry->isLoopback() == false) {
-                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay, ackTimeout));
-                }
-            }
-        }
-
-        cModule* OMNeTARA::getHostModule() {
-            cModule* parent = getParentModule();
-            cModule* grandParent = parent->getParentModule();
-            return grandParent;
-        }
-
-        cModule* OMNeTARA::getSubModule(const char* moduleIdentifier, const char* errorMessage){
-            cModule* host = getParentModule();
-            cModule* module = host->getSubmodule(moduleIdentifier);
-
-            if(module == NULL){
-                throw cRuntimeError(errorMessage);
-            }
-
-            return module;
         }
 
         void OMNeTARA::handleMessage(cMessage* msg) {
