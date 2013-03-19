@@ -17,6 +17,8 @@ package ara;
 
 import inet.base.NotificationBoard;
 import ara.ARANetworkLayer;
+//import ara.OMNeTBattery;
+import inet.battery.InetSimpleBattery;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
 import inet.nodes.wireless.WirelessHost;
@@ -66,6 +68,13 @@ module ARAClient
             parameters:
                 @display("p=50,287");
         }
+
+//        battery : OMNeTBattery {
+        battery : InetSimpleBattery {
+	        parameters:
+		        @display("p=65,310;i=block/plug");
+        }
+
     connections allowunconnected:
         app.pingOut --> ara.upperLayerGate$i;
         app.pingIn <-- ara.upperLayerGate$o;
