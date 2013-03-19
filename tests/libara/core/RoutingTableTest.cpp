@@ -270,3 +270,38 @@ TEST(RoutingTableTest, exists) {
     CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
     CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
 }
+
+TEST(RoutingTableTest, removeAllEntries) {
+    AddressPtr destination (new AddressMock("Destination"));
+
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+
+    routingTable->update(destination, nodeA, &interface, 2.5);
+    routingTable->update(destination, nodeB, &interface, 2.5);
+    routingTable->update(destination, nodeC, &interface, 2.5);
+
+    // sanity check
+    CHECK(routingTable->isDeliverable(destination) == true);
+
+    // start the test
+    routingTable->removeEntry(destination, nodeB, &interface);
+    CHECK_TRUE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+
+    routingTable->removeEntry(destination, nodeA, &interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+
+    routingTable->removeEntry(destination, nodeC, &interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+
+    CHECK(routingTable->isDeliverable(destination) == false);
+}

@@ -62,14 +62,24 @@ namespace ARA {
         if(isDeliverable(destination)) {
             std::deque<RoutingTableEntry*>* entryList = table[destination];
             std::deque<RoutingTableEntry*>::iterator iterator = entryList->begin();
-            while(iterator != entryList->end()) {
-                RoutingTableEntry* entry = *iterator;
-                if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
-                    entryList->erase(iterator);
-                    delete entry;
-                    return;
+            if(entryList->size() == 1) {
+                // delete the last routing table entry for that destination
+                table.erase(destination);
+                RoutingTableEntry* entry =  *iterator;
+                delete entry;
+                delete entryList;
+            }
+            else {
+                // delete one of many routing table entries for that destination
+                while(iterator != entryList->end()) {
+                    RoutingTableEntry* entry = *iterator;
+                    if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+                        entryList->erase(iterator);
+                        delete entry;
+                        return;
+                    }
+                    iterator++;
                 }
-                iterator++;
             }
         }
     }
