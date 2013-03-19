@@ -67,6 +67,7 @@ module ARANetworkLayer
                 nicOut[nrOfNetworkInterfaces];
         }
 
+
     connections allowunconnected:
         upperLayerGate <--> ara.upperLayerGate;
         arp.ipIn <-- ara.arpOut;
