@@ -810,3 +810,30 @@ TEST(AbstractARAClientTest, clientsDeleteRoutingTableEntryWhenTheyReceiveRouting
     // the client should have deleted the entry from its routing table
     CHECK(routingTable->exists(destination, sender, interface) == false);
 }
+
+IGNORE_TEST(AbstractARAClientTest, doSendDuplicateWarningToSameSender) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
+    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+
+    unsigned int sequenceNumber = 123;
+    Packet* originalPacket = new PacketMock("source", "destination", "sender", sequenceNumber);
+    Packet* clone = originalPacket->clone();
+
+    // start the test
+    client->receivePacket(originalPacket, interface);
+
+    // we should have sent an acknowledgment for the first packet
+    BYTES_EQUAL(1, sentPackets->size());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->back();
+    const Packet* firstAck = sentPacketInfo->getLeft();
+    CHECK(firstAck->getType() == PacketType::ACK);
+
+    // receive a packet with the same source and sequence number again from the same sender
+    client->receivePacket(clone, interface);
+
+    // check that we have just received another ACK and no duplicate warning
+    BYTES_EQUAL(2, sentPackets->size());
+    sentPacketInfo = sentPackets->back();
+    const Packet* secondAck = sentPacketInfo->getLeft();
+    CHECK(secondAck->getType() == PacketType::ACK);
+}
