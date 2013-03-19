@@ -18,6 +18,7 @@ package ara;
 import ara.OMNeTARA;
 import ara.OMNeTLinearEvaporationPolicy;
 import ara.OMNeTRoutingTable;
+import ara.OMNeTBattery;
 import ara.OMNeTStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
@@ -65,6 +66,11 @@ module ARANetworkLayer
                 @display("p=138,215;q=pendingQueue");
             gates:
                 nicOut[nrOfNetworkInterfaces];
+        }
+
+        battery : OMNeTBattery {
+            parameters:
+                @display("p=65,310;i=block/plug");
         }
 
     connections allowunconnected:
