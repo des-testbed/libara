@@ -58,12 +58,14 @@ void ARAClientMock::deliverToSystem(const Packet* packet) {
     deliveredPackets.push_back(packet);
 }
 
-void ARAClientMock::handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
+void ARAClientMock::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     PacketInfo packetInfo;
-    packetInfo.packet = packet;
+    packetInfo.packet = packet->clone();
     packetInfo.nextHop = nextHop;
     packetInfo.interface = interface;
     routeFailurePackets.push_back(packetInfo);
+
+    AbstractARAClient::handleRouteFailure(packet, nextHop, interface);
 }
 
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {

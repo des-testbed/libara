@@ -1,8 +1,5 @@
 /*
- * Packet.cpp
- *
- *  Created on: Dec 2, 2012
- *      Author: Friedrich Große
+ * $FU-Copyright$
  */
 
 #include "Packet.h"
@@ -97,6 +94,10 @@ void Packet::increaseHopCount() {
     hopCount++;
 }
 
+void Packet::decreaseHopCount() {
+    hopCount--;
+}
+
 void Packet::setSender(AddressPtr newSender) {
     sender = newSender;
 }
@@ -123,6 +124,10 @@ Packet* Packet::createDuplicateWarning() const {
 
 Packet* Packet::createAcknowledgment() const {
     return new Packet(source, destination, sender, PacketType::ACK, seqNr, 1);
+}
+
+Packet* Packet::createRouteFailurePacket() const {
+    return new Packet(source, destination, sender, PacketType::ROUTE_FAILURE, seqNr, 1);
 }
 
 size_t Packet::getHashValue() const {

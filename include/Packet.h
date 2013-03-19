@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef PACKET_H_
 #define PACKET_H_
@@ -176,7 +155,16 @@ public:
      */
     void increaseHopCount();
 
+    /**
+     * Decreases the hop count of this packet by one.
+     *
+     * @see Packet::setHopCount()
+     */
+    void decreaseHopCount();
+
     virtual Packet* clone() const;
+
+    // TODO all createXYZ methods should be moved into a PacketFactory class which is part of the environment
 
     /**
      * Creates a new FANT based on this packet. The FANT inherits all the
@@ -216,6 +204,15 @@ public:
      * deleted later by the calling class.
      */
     virtual Packet* createAcknowledgment() const;
+
+    /**
+     * Creates a new route failure packet based on this packet. The source,
+     * destination and sequence number will equal to this packet.
+     *
+     * Note: The result of this method is a newly created object which must be
+     * deleted later by the calling class.
+     */
+    virtual Packet* createRouteFailurePacket() const;
 
 protected:
     std::shared_ptr<Address> source;

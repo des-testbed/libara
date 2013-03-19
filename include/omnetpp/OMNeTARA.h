@@ -35,8 +35,6 @@ namespace ARA {
                 OMNeTARA();
                 ~OMNeTARA();
 
-                void handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
-
             protected:
                 int numInitStages() const;
                 virtual void initialize(int stage);

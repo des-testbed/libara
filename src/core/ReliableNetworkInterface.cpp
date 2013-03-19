@@ -79,7 +79,7 @@ void ReliableNetworkInterface::handleUndeliverablePacket(Timer* ackTimer, AckTim
         }
     }
 
-    client->handleRouteFailure(timerData.packet, timerData.recipient, this);
+    client->handleRouteFailure(const_cast<Packet*>(timerData.packet), timerData.recipient, this);
 }
 
 void ReliableNetworkInterface::broadcast(const Packet* packet) {

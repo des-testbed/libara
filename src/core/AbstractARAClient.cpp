@@ -9,6 +9,7 @@
 #include "Environment.h"
 #include "Exception.h"
 
+#include "sstream"
 using namespace std;
 
 namespace ARA {
@@ -223,6 +224,9 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
     }
+    else if (packet->getType() == PacketType::ROUTE_FAILURE) {
+        handleRouteFailurePacket(packet, interface);
+    }
     else {
         throw Exception("Can not handle packet");
     }
@@ -369,17 +373,17 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
 }
 
 float AbstractARAClient::calculateInitialPheromoneValue(unsigned int hopCount) {
-    float hopCountMalus = 1 / (float) hopCount;
-    return initialPheromoneValue * hopCountMalus;
+    return initialPheromoneValue / (float) hopCount;
 }
 
-void AbstractARAClient::setRoutingTable(RoutingTable *routingTable){
-    // update packet trap to new routing table
-    this->packetTrap->setRoutingTable(routingTable);
+void AbstractARAClient::setRoutingTable(RoutingTable* newRoutingTable){
+    packetTrap->setRoutingTable(newRoutingTable);
+
     // delete old routing table
-    delete this->routingTable;
+    delete routingTable;
+
     // set new routing table
-    this->routingTable = routingTable;
+    routingTable = newRoutingTable;
 }
 
 void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries) {
@@ -416,6 +420,29 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
             packetNotDeliverable(packet);
         }
     }
+}
+
+void AbstractARAClient::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+    AddressPtr destination = packet->getDestination();
+
+    routingTable->removeEntry(destination, nextHop, interface);
+
+    if (routingTable->isDeliverable(destination)) {
+        packet->decreaseHopCount(); // has been increased when it has been unsuccessfully been sent the first time and will be increased again in sendpacket()
+        sendPacket(packet);
+    }
+    else {
+        Packet* routeFailurePacket = packet->createRouteFailurePacket();
+        broadCast(routeFailurePacket);
+        delete packet;
+    }
+}
+
+void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterface* interface) {
+    AddressPtr destination = packet->getDestination();
+    AddressPtr sender = packet->getSender();
+    routingTable->removeEntry(destination, sender, interface);
+    delete packet;
 }
 
 } /* namespace ARA */

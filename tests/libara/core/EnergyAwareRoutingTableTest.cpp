@@ -217,14 +217,14 @@ TEST(EnergyAwareRoutingTableTest, removeEntry) {
     AddressPtr destination (new AddressMock("Destination"));
 
     AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("A"));
-    AddressPtr nodeC (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
 
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     routingTable->update(destination, nodeA, &interface, 2.5, 3.6);
-    routingTable->update(destination, nodeB, &interface, 2.5, 3.6);
-    routingTable->update(destination, nodeC, &interface, 2.5, 3.6);
+    routingTable->update(destination, nodeB, &interface, 3.7, 5.8);
+    routingTable->update(destination, nodeC, &interface, 1.2, 10.0);
 
     // start the test
     routingTable->removeEntry(destination, nodeB, &interface);

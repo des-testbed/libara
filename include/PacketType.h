@@ -28,7 +28,8 @@ public:
         BANT,
         PANT,
         DUPLICATE_ERROR,
-        ACK
+        ACK,
+        ROUTE_FAILURE
     };
 
     static bool isAntPacket(char type);
@@ -42,6 +43,7 @@ public:
             case PacketType::DATA: return "DATA";
             case PacketType::ACK: return "ACK";
             case PacketType::DUPLICATE_ERROR: return "DUPLICATE_ERROR";
+            case PacketType::ROUTE_FAILURE: return "ROUTE_FAILURE";
             default: return "UNKOWN";
         }
     }

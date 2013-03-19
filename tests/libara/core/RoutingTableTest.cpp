@@ -188,8 +188,8 @@ TEST(RoutingTableTest, removeEntry) {
     AddressPtr destination (new AddressMock("Destination"));
 
     AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("A"));
-    AddressPtr nodeC (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
 
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
@@ -199,6 +199,7 @@ TEST(RoutingTableTest, removeEntry) {
 
     // start the test
     routingTable->removeEntry(destination, nodeB, &interface);
+
     std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(destination);
     for(auto& entry: *possibleNextHops) {
         if(entry->getAddress()->equals(nodeB)) {
@@ -235,4 +236,72 @@ TEST(RoutingTableTest, evaporatePheromones) {
 
     // pheromoneValueC should be well below the threshold and therefore be zero
     CHECK_EQUAL(0.0, routingTable->getPheromoneValue(destination, nodeC, &interface));
+}
+
+TEST(RoutingTableTest, exists) {
+    AddressPtr destination (new AddressMock("Destination"));
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+
+    // start the test
+    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+
+    routingTable->update(destination, nodeA, &interface, 2.5);
+    CHECK_TRUE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+
+    routingTable->update(destination, nodeC, &interface, 3.7);
+    CHECK_TRUE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+
+    routingTable->removeEntry(destination, nodeA, &interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+
+    routingTable->removeEntry(destination, nodeC, &interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+}
+
+TEST(RoutingTableTest, removeAllEntries) {
+    AddressPtr destination (new AddressMock("Destination"));
+
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+
+    routingTable->update(destination, nodeA, &interface, 2.5);
+    routingTable->update(destination, nodeB, &interface, 2.5);
+    routingTable->update(destination, nodeC, &interface, 2.5);
+
+    // sanity check
+    CHECK(routingTable->isDeliverable(destination) == true);
+
+    // start the test
+    routingTable->removeEntry(destination, nodeB, &interface);
+    CHECK_TRUE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+
+    routingTable->removeEntry(destination, nodeA, &interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+
+    routingTable->removeEntry(destination, nodeC, &interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+
+    CHECK(routingTable->isDeliverable(destination) == false);
 }

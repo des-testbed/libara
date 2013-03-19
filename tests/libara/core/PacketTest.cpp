@@ -331,3 +331,44 @@ TEST(PacketTest, createAcknowledgment) {
 
     delete ackPacket;
 }
+
+TEST(PacketTest, decreaseHopCount) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr sender (new AddressMock("originalSender"));
+    char type = PacketType::DATA;
+    unsigned int seqNr = 1;
+    const char* payload = "Hello World";
+    unsigned int hopCount = 5;
+
+    Packet packet = Packet(source, destination, sender, type, seqNr, payload, 11, hopCount);
+    LONGS_EQUAL(hopCount, packet.getHopCount());
+
+    packet.decreaseHopCount();
+    LONGS_EQUAL(hopCount-1, packet.getHopCount());
+
+    packet.decreaseHopCount();
+    LONGS_EQUAL(hopCount-2, packet.getHopCount());
+}
+
+TEST(PacketTest, createRouteFailurePacket) {
+    AddressPtr originalSource (new AddressMock("source"));
+    AddressPtr originalDestination (new AddressMock("destination"));
+    AddressPtr originalSender (new AddressMock("sender"));
+    unsigned int type = PacketType::DATA;
+    unsigned int originalseqenceNumber = 123;
+    unsigned int originalHopCount = 3;
+
+    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalHopCount);
+    Packet* routeFailurePacket = packet.createRouteFailurePacket();
+
+    CHECK(routeFailurePacket->getSource()->equals(originalSource));
+    CHECK(routeFailurePacket->getDestination()->equals(originalDestination));
+    // The sender of the packet will be determined when it is actually send by the ARA client
+    CHECK_EQUAL(PacketType::ROUTE_FAILURE, routeFailurePacket->getType());
+    CHECK_EQUAL(originalseqenceNumber, routeFailurePacket->getSequenceNumber());
+    CHECK_EQUAL(0, routeFailurePacket->getPayloadLength());
+    CHECK_EQUAL(1, routeFailurePacket->getHopCount());
+
+    delete routeFailurePacket;
+}

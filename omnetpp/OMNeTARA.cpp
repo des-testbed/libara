@@ -18,7 +18,6 @@ namespace ARA {
 
         OMNeTARA::~OMNeTARA() {
             delete messageDispatcher;
-            delete evaporationPolicy;
         }
 
         int OMNeTARA::numInitStages() const {
@@ -57,15 +56,6 @@ namespace ARA {
 
             cPacket* encapsulatedData = omnetPacket->decapsulate();
             send(encapsulatedData, "upperLayerGate$o");
-        }
-
-        void OMNeTARA::handleRouteFailure(const Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
-            // this will presumably be called from the context of the OMNeTTimer
-            // we are now back in the context of the ARACLient simple module
-            Enter_Method_Silent("OMNeTARA::packetIsNotDeliverable");
-
-            //TODO to something with this packet other then deleting it
-            delete packet;
         }
 
         void OMNeTARA::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {

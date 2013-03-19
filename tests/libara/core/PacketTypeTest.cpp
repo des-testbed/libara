@@ -16,6 +16,7 @@ TEST(PacketTypeTest, testIsAntPacket) {
     CHECK(PacketType::isAntPacket(PacketType::DATA) == false);
     CHECK(PacketType::isAntPacket(PacketType::DUPLICATE_ERROR) == false);
     CHECK(PacketType::isAntPacket(PacketType::ACK) == false);
+    CHECK(PacketType::isAntPacket(PacketType::ROUTE_FAILURE) == false);
 }
 
 TEST(PacketTypeTest, testIsDataPacket) {
@@ -25,6 +26,7 @@ TEST(PacketTypeTest, testIsDataPacket) {
     CHECK(PacketType::isDataPacket(PacketType::DATA) == true);
     CHECK(PacketType::isDataPacket(PacketType::DUPLICATE_ERROR) == false);
     CHECK(PacketType::isDataPacket(PacketType::ACK) == false);
+    CHECK(PacketType::isDataPacket(PacketType::ROUTE_FAILURE) == false);
 }
 
 TEST(PacketTypeTest, testGetAsString) {
@@ -34,5 +36,6 @@ TEST(PacketTypeTest, testGetAsString) {
     CHECK_EQUAL("DATA", PacketType::getAsString(PacketType::DATA));
     CHECK_EQUAL("DUPLICATE_ERROR", PacketType::getAsString(PacketType::DUPLICATE_ERROR));
     CHECK_EQUAL("ACK", PacketType::getAsString(PacketType::ACK));
+    CHECK_EQUAL("ROUTE_FAILURE", PacketType::getAsString(PacketType::ROUTE_FAILURE));
     CHECK_EQUAL("UNKOWN", PacketType::getAsString(123));
 }
