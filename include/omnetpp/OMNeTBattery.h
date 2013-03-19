@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <omnetpp.h>
 
+#include "Energy.h"
 #include "InetSimpleBattery.h"
 
 namespace ARA {
@@ -18,19 +19,11 @@ namespace ARA {
          */
         class OMNeTBattery : public InetSimpleBattery {
             public:
-                OMNeTBattery();
-                virtual ~OMNeTBattery();
-
-                virtual int registerDevice(cObject *id,int numAccts);
-                virtual void registerWirelessDevice(int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep);
-
-                virtual void initialize(int stage);
-                virtual int numInitStages() const {return 2;}
-                virtual void finish();
-                virtual void handleMessage(cMessage *msg);
+                OMNeTBattery(){};
+                virtual ~OMNeTBattery(){};
 
             protected:
-
+                void deductAndCheck();
         };
     }
 }
