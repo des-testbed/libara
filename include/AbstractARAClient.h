@@ -232,6 +232,7 @@ private:
     void handleAntPacket(Packet* packet);
     void handleAntPacketForThisNode(Packet* packet);
     void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
+    void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
     void startRouteDiscoveryTimer(const Packet* packet);

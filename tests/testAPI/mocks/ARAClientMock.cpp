@@ -59,15 +59,13 @@ void ARAClientMock::deliverToSystem(const Packet* packet) {
 }
 
 void ARAClientMock::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+    PacketInfo packetInfo;
+    packetInfo.packet = packet->clone();
+    packetInfo.nextHop = nextHop;
+    packetInfo.interface = interface;
+    routeFailurePackets.push_back(packetInfo);
+
     AbstractARAClient::handleRouteFailure(packet, nextHop, interface);
-    if(routingTable->isDeliverable(packet) == false) {
-        // packet could not have been delivered via another route (if not it would have been sent via an interface which would take care of object deletion)
-        PacketInfo packetInfo;
-        packetInfo.packet = packet;
-        packetInfo.nextHop = nextHop;
-        packetInfo.interface = interface;
-        routeFailurePackets.push_back(packetInfo);
-    }
 }
 
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {

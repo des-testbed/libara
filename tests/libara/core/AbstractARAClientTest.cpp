@@ -739,8 +739,8 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     AddressPtr route2 (new AddressMock("route2"));
 
     // create two known routes to the destination
-    routingTable->update(destination, route1, interface, 10);
-    routingTable->update(destination, route2, interface, 20);
+    routingTable->update(destination, route1, interface, 20);
+    routingTable->update(destination, route2, interface, 10);
 
     // sanity check
     CHECK(routingTable->isDeliverable(destination));
@@ -758,4 +758,55 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     CHECK(sentPacketInfo->getRight()->equals(route2));
 
     CHECK_PACKET(sentPacketInfo->getLeft(), PacketType::DATA, originalSeqNr, source, sender, destination, originalHopCount, "Foo");
+}
+
+TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRouteAreKownOnRouteFailure) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("sender");
+    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr sender = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123);
+    AddressPtr nextHop (new AddressMock("nextHop"));
+
+    // create a known route to the destination
+    routingTable->update(destination, nextHop, interface, 10);
+
+    // sanity check
+    CHECK(routingTable->isDeliverable(destination));
+    CHECK(sentPackets->empty());
+
+    // start the test
+    client->handleRouteFailure(packet, nextHop, interface);
+
+    // the client is expected to delete the route from the routing table
+    CHECK(routingTable->exists(destination, nextHop, interface) == false);
+
+    // the client should have sent a broadcast indicating that he can no longer relay to that destination
+    BYTES_EQUAL(1, sentPackets->size());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
+    const Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(interface->isBroadcastAddress(sentPacketInfo->getRight()));
+    CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getDestination()->equals(destination));
+}
+
+TEST(AbstractARAClientTest, clientsDeleteRoutingTableEntryWhenTheyReceiveRoutingFailurePacket) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("sender");
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* routeFailurePacket = new Packet(source, destination, sender, PacketType::ROUTE_FAILURE, 123);
+
+    routingTable->update(destination, sender, interface, 10);
+
+    // sanity check
+    CHECK(routingTable->exists(destination, sender, interface));
+
+    // start the test
+    client->receivePacket(routeFailurePacket, interface);
+
+    // the client should have deleted the entry from its routing table
+    CHECK(routingTable->exists(destination, sender, interface) == false);
 }

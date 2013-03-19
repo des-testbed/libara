@@ -164,6 +164,8 @@ public:
 
     virtual Packet* clone() const;
 
+    // TODO all createXYZ methods should be moved into a PacketFactory class which is part of the environment
+
     /**
      * Creates a new FANT based on this packet. The FANT inherits all the
      * addresses of this packet. The hop count is also replicated.
@@ -202,6 +204,15 @@ public:
      * deleted later by the calling class.
      */
     virtual Packet* createAcknowledgment() const;
+
+    /**
+     * Creates a new route failure packet based on this packet. The source,
+     * destination and sequence number will equal to this packet.
+     *
+     * Note: The result of this method is a newly created object which must be
+     * deleted later by the calling class.
+     */
+    virtual Packet* createRouteFailurePacket() const;
 
 protected:
     std::shared_ptr<Address> source;

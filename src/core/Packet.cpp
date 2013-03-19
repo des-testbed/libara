@@ -126,6 +126,10 @@ Packet* Packet::createAcknowledgment() const {
     return new Packet(source, destination, sender, PacketType::ACK, seqNr, 1);
 }
 
+Packet* Packet::createRouteFailurePacket() const {
+    return new Packet(source, destination, sender, PacketType::ROUTE_FAILURE, seqNr, 1);
+}
+
 size_t Packet::getHashValue() const {
     // TODO Review and tweak this hash value generation (naiv implementation)
     size_t sourceHash = source->getHashValue();

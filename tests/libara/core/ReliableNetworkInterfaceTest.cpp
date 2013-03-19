@@ -272,7 +272,7 @@ TEST(ReliableNetworkInterfaceTest, routeFailuresAreReportedToARAClient) {
 
     BYTES_EQUAL(1, client->getNumberOfRouteFailures());
     ARAClientMock::PacketInfo routeFailurePacketInfo = client->getRouteFailurePackets().front();
-    CHECK(routeFailurePacketInfo.packet == packet);
+    CHECK_PACKET(routeFailurePacketInfo.packet, type, seqNr, source, sender, destination, hopCount, payload);
     CHECK(routeFailurePacketInfo.nextHop == originalRecipient);
     CHECK(routeFailurePacketInfo.interface == interface);
 }

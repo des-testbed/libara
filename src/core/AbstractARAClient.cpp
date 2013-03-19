@@ -223,6 +223,9 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
     }
+    else if (packet->getType() == PacketType::ROUTE_FAILURE) {
+        handleRouteFailurePacket(packet, interface);
+    }
     else {
         throw Exception("Can not handle packet");
     }
@@ -428,8 +431,17 @@ void AbstractARAClient::handleRouteFailure(Packet* packet, AddressPtr nextHop, N
         sendPacket(packet);
     }
     else {
-        // TODO continue route failure handling
+        Packet* routeFailurePacket = packet->createRouteFailurePacket();
+        broadCast(routeFailurePacket);
+        delete packet;
     }
+}
+
+void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterface* interface) {
+    AddressPtr destination = packet->getDestination();
+    AddressPtr sender = packet->getSender();
+    routingTable->removeEntry(destination, sender, interface);
+    delete packet;
 }
 
 } /* namespace ARA */
