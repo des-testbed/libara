@@ -4,6 +4,6 @@ package ara;
 simple OMNeTEnergyAwareStochasticForwardingPolicy
 {
     parameters:
-        doube alpha = default(1.0);
-        doube beta = default(2.0);
+        double alpha = default(1.0);
+        double beta = default(2.0);
 }
