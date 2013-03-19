@@ -24,7 +24,7 @@ ARAClientMock::ARAClientMock() {
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initialize(configuration);
+    initialize(configuration, new RoutingTable());
 }
 
 ARAClientMock::~ARAClientMock() {

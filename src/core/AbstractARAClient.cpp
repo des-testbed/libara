@@ -13,11 +13,11 @@ using namespace std;
 
 namespace ARA {
 
-AbstractARAClient::AbstractARAClient(Configuration& configuration) {
-    initialize(configuration);
+AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable *routingTable) {
+    initialize(configuration, routingTable);
 }
 
-void AbstractARAClient::initialize(Configuration& configuration) {
+void AbstractARAClient::initialize(Configuration& configuration, RoutingTable *routingTable) {
     forwardingPolicy = configuration.getForwardingPolicy();
     pathReinforcementPolicy = configuration.getReinforcementPolicy();
     evaporationPolicy = configuration.getEvaporationPolicy();
@@ -25,18 +25,13 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
     routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
 
-    setupRoutingTable();
+    this->routingTable = routingTable;
+    routingTable->setEvaporationPolicy(evaporationPolicy);
 
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
 }
-
-void AbstractARAClient::setupRoutingTable() {
-    routingTable = new RoutingTable();
-    routingTable->setEvaporationPolicy(evaporationPolicy);
-}
-
 
 AbstractARAClient::~AbstractARAClient() {
     // delete logger if it has been set

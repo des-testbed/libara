@@ -17,11 +17,12 @@ package ara;
 
 import ara.OMNeTARA;
 import ara.OMNeTLinearEvaporationPolicy;
-import ara.OMNeTRoutingTable;
-import ara.OMNeTStochasticForwardingPolicy;
+// TODO!!
+import ara.OMNeTEnergyAwareRoutingTable; 
+import ara.OMNeTEnergyAwareStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
-module NetworkLayer
+module EARANetworkLayer 
 {
     parameters:
         int nrOfNetworkInterfaces = default(1);
@@ -34,7 +35,7 @@ module NetworkLayer
         output ifOut[nrOfNetworkInterfaces];	// output to  NIC interface (INET/MANET needs this to be named this way)
 
     submodules:
-        ara: OMNeTARA {
+        eara: OMNeTARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=138,102");
@@ -45,12 +46,12 @@ module NetworkLayer
             @display("p=210,30");
         }
 
-        forwardingPolicy: OMNeTStochasticForwardingPolicy {
+        forwardingPolicy: OMNeTEnergyAwareStochasticForwardingPolicy {
 
             @display("p=72,30");
         }
 
-        routingTableStatistics: OMNeTRoutingTable {
+        routingTableStatistics: OMNeTEnergyAwareRoutingTable {
 
            @display("p=210,122");
  	    }

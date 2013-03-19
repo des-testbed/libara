@@ -55,7 +55,7 @@ public:
      * if possible. It will initialize the client with the given configuration so no additional
      * call to AbstractARAClient::initialize is required.
      */
-    AbstractARAClient(Configuration& configuration);
+    AbstractARAClient(Configuration& configuration, RoutingTable *routingTable);
 
     /**
      * The standard virtual destructor of this abstract class.
@@ -99,7 +99,7 @@ public:
      * AbstractARAClient::receivePacket. If this object has been created by the
      * standard constructor this method must be called manually.
      */
-    void initialize(Configuration& configuration);
+    void initialize(Configuration& configuration, RoutingTable *routingTable);
 
     /**
      * Sets a logger for this ARA client.
@@ -143,14 +143,6 @@ public:
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
 protected:
-    /**
-     * The method initializes the routing table. Typically, this would be handled
-     * in the initialize() method. However, we want to support further extensions
-     * of the ant routing algorithm which might have different routing tables (for
-     * example the energy aware ant routing algorithm).
-     */
-    virtual void setupRoutingTable(); 
-
     /**
      * The packet should be directed to this node and must be delivered to the local system.
      * Please note that this method is responsible for deleting the given packet (or delegating

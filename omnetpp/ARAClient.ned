@@ -16,7 +16,7 @@
 package ara;
 
 import inet.base.NotificationBoard;
-import ara.NetworkLayer;
+import ara.ARANetworkLayer;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
 import inet.nodes.wireless.WirelessHost;
@@ -51,7 +51,7 @@ module ARAClient
             parameters:
                 @display("b=40,24;p=239,29,col");
         }
-        ara: NetworkLayer {
+        ara: ARANetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");

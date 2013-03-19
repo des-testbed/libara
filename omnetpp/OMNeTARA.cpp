@@ -35,13 +35,14 @@ namespace ARA {
         void OMNeTARA::initialize(int stage) {
             if(stage == 4) {
                 Configuration config = OMNeTConfiguration::parseFrom(this);
-                AbstractARAClient::initialize(config);
 
                 setLogger(OMNeTConfiguration::getLogger(this));
                 OMNeTConfiguration::initializeNetworkInterfacesOf(this);
 
                 routingTable = OMNeTConfiguration::getRoutingTableFrom(this);
                 routingTable->setEvaporationPolicy(evaporationPolicy);
+
+                AbstractARAClient::initialize(config, routingTable);
             }
         }
 
