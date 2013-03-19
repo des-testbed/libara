@@ -47,7 +47,6 @@ cModule* OMNeTConfiguration::getSubModule(cModule* module, const char* moduleIde
 void OMNeTConfiguration::initializeNetworkInterfacesOf(OMNeTARA* client) {
     double broadCastDelay = client->par("broadCastDelay").doubleValue();
     double uniCastDelay = client->par("uniCastDelay").doubleValue();
-    int ackTimeout = client->par("ackTimeout").longValue();
     cGate* gateToARP = client->gate("arpOut");
 
     cModule* host = getHostModule(client);
@@ -60,7 +59,7 @@ void OMNeTConfiguration::initializeNetworkInterfacesOf(OMNeTARA* client) {
     for (int i=0; i < nrOfInterfaces; i++)         {
         InterfaceEntry* interfaceEntry = client->interfaceTable->getInterface(i);
         if (interfaceEntry->isLoopback() == false) {
-            client->addNetworkInterface(new OMNeTGate(client, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay, ackTimeout));
+            client->addNetworkInterface(new OMNeTGate(client, gateToARP, interfaceEntry, broadCastDelay, uniCastDelay));
         }
     }
 }
