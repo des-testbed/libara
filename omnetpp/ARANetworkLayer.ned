@@ -18,7 +18,6 @@ package ara;
 import ara.OMNeTARA;
 import ara.OMNeTLinearEvaporationPolicy;
 import ara.OMNeTRoutingTable;
-import ara.OMNeTBattery;
 import ara.OMNeTStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
