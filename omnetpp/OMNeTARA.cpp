@@ -108,14 +108,16 @@ namespace ARA {
             }
 
             if(category == NF_BATTERY_CHANGED) {
+                logTrace("received battery change ....");
                 Energy *energy = (Energy*) details;
-                double currentEnergyLevel = energy->getEnergy();
+                double currentEnergyLevel = energy->GetEnergy();
 
                 if(currentEnergyLevel == 0) {
                    /// deactivate the node
 
-                   /// draw the node in a differnt color
-
+                   /// draw the node in a different color
+                   cDisplayString& displayString = getParentModule()->getDisplayString(); 
+                   displayString.parse("i=device/wifilaptop,red,80;bgb=366,335");
                 } else {
                    /// set the energy value for the hello messages
 
