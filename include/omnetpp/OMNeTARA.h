@@ -9,6 +9,7 @@
 
 #include "AbstractARAClient.h"
 #include "Packet.h"
+#include "Energy.h"
 #include "OMNeTGate.h"
 #include "OMNeTConfiguration.h"
 #include "MessageDispatcher.h"
