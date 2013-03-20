@@ -13,6 +13,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/StochasticForwardingPolicyMock.h"
 
 #include <iostream>
 
@@ -29,22 +30,18 @@ TEST(StochasticForwardingPolicyTest, testGetNextHop) {
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
-    // create multiple next hops
     AddressPtr nextHopA (new AddressMock("nextHopA"));
     AddressPtr nextHopB (new AddressMock("nextHopB"));
-    AddressPtr nextHopC (new AddressMock("nextHopC"));
 
     PacketMock packet = PacketMock();
 
-    // Start the test
     routingTable.update(destination, nextHopA, &interface, 1.2);
     routingTable.update(destination, nextHopB, &interface, 2.1);
-    routingTable.update(destination, nextHopC, &interface, 2.3);
 
-    StochasticForwardingPolicy policy = StochasticForwardingPolicy();
-    policy.getNextHop(&packet, &routingTable);
+    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock(42);
 
-    //FIXME Continue this test
+    NextHop* result = policy.getNextHop(&packet, &routingTable);
+    CHECK(result->getAddress()->equals(nextHopA));
 
     delete evaporationPolicy;
 }

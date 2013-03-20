@@ -93,9 +93,7 @@ namespace ARA {
         }
 
         void OMNeTARA::receiveChangeNotification(int category, const cObject* details) {
-            EV << " category is " << category << "\n";
             if(category == NF_LINK_BREAK) {
-                EV << " category is NF_LINK_BREAK" << "\n";
                 Ieee80211DataOrMgmtFrame* frame = (Ieee80211DataOrMgmtFrame*) details;
                 cPacket* encapsulatedPacket = frame->decapsulate();
 
@@ -114,7 +112,6 @@ namespace ARA {
             }
 
             if(category == NF_BATTERY_CHANGED) {
-                EV << " category is NF_BATTERY_CHANGED" << "\n";
                 Energy *energy = (Energy*) details;
                 double currentEnergyLevel = energy->GetEnergy();
 
@@ -122,8 +119,8 @@ namespace ARA {
                    /// deactivate the node
                    hasEnoughBattery = false;
                    /// draw the node in a different color
-            //       cDisplayString& displayString = getParentModule()->getDisplayString(); 
-             //      displayString.parse("i=device/wifilaptop,red,80;bgb=366,335");
+                   cDisplayString& displayString = getDisplayString(); 
+                   displayString.parse("i=device/wifilaptop,red,80;bgb=366,335");
                 } else {
                    /// set the energy value for the hello messages
 

@@ -10,13 +10,16 @@
 #include "Packet.h"
 #include "RoutingTable.h"
 
+#include <deque>
+#include <numeric>
+
 namespace ARA {
     class StochasticForwardingPolicy : public ForwardingPolicy {
         public:
             NextHop* getNextHop(const Packet*, RoutingTable* routingTable);
 
         protected:
-            void initializeRandomNumberGenerator();
+            void initializeRandomNumberGenerator(unsigned int seed=((unsigned)time(0)));
             float getRandomNumber();
     };
 
