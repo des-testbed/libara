@@ -22,7 +22,7 @@ namespace ARA {
         int getMaxNrOfRouteDiscoveryRetries();
         unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
 
-    private:
+    protected:
         EvaporationPolicy* evaporationPolicy;
         PathReinforcementPolicy* reinforcementPolicy;
         ForwardingPolicy* forwardingPolicy;

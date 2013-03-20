@@ -4,6 +4,9 @@
 
 #include "omnetpp/OMNeTARA.h"
 #include "omnetpp/OMNeTPacket.h"
+#include "NotificationBoard.h"
+#include "ModuleAccess.h"
+#include "Ieee80211Frame_m.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -33,15 +36,31 @@ namespace ARA {
          */
         void OMNeTARA::initialize(int stage) {
             if(stage == 4) {
-                Configuration config = OMNeTConfiguration::parseFrom(this);
+                NotificationBoard* notificationBoard = NotificationBoardAccess().get();
+                notificationBoard->subscribe(this, NF_LINK_BREAK);
 
-                setLogger(OMNeTConfiguration::getLogger(this));
-                OMNeTConfiguration::initializeNetworkInterfacesOf(this);
+                OMNeTConfiguration config = OMNeTConfiguration(this);
+                setLogger(config.getLogger());
 
-                routingTable = OMNeTConfiguration::getRoutingTableFrom(this);
+                interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
+                arp = ModuleAccess<ARP>("arp").get();
+                routingTable = ModuleAccess<RoutingTable>("routingTableStatistics").get();
                 routingTable->setEvaporationPolicy(evaporationPolicy);
 
                 AbstractARAClient::initialize(config, routingTable);
+                initializeNetworkInterfacesOf(config);
+            }
+        }
+
+        void OMNeTARA::initializeNetworkInterfacesOf(OMNeTConfiguration& config) {
+            cGate* gateToARP = gate("arpOut");
+
+            int nrOfInterfaces = interfaceTable->getNumInterfaces();
+            for (int i=0; i < nrOfInterfaces; i++)         {
+                InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
+                if (interfaceEntry->isLoopback() == false) {
+                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, config.getBroadCastDelay(), config.getUniCastDelay()));
+                }
             }
         }
 
@@ -66,6 +85,26 @@ namespace ARA {
 
         void OMNeTARA::packetNotDeliverable(const Packet* packet) {
             //TODO report to upper layer
+        }
+
+        void OMNeTARA::receiveChangeNotification(int category, const cObject* details) {
+            if(category == NF_LINK_BREAK) {
+                Ieee80211DataOrMgmtFrame* frame = (Ieee80211DataOrMgmtFrame*) details;
+                cPacket* encapsulatedPacket = frame->decapsulate();
+
+                if(messageDispatcher->isARAMessage(encapsulatedPacket)) {
+                    // extract the receiver address
+                    MACAddress receiverMACAddress = frame->getReceiverAddress();
+                    const IPAddress receiverIPAddress = arp->getInverseAddressResolution(receiverMACAddress);
+                    AddressPtr omnetAddress (new OMNeTAddress(receiverIPAddress));
+
+                    OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
+
+                    //TODO somehow get the NetworkInterface*
+                    //handleRouteFailure(omnetPacket, omnetAddress, interface);
+                }
+                EV << "\nFOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
+            }
         }
 
     } /* namespace omnetpp */

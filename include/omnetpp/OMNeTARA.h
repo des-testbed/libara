@@ -14,7 +14,8 @@
 #include "MessageDispatcher.h"
 #include "NetworkInterface.h"
 #include "IInterfaceTable.h"
-
+#include "INotifiable.h"
+#include "ARP.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -30,7 +31,7 @@ namespace ARA {
          *  Mesut Guenes, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
          *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
          */
-        class OMNeTARA: public cSimpleModule, public AbstractARAClient {
+        class OMNeTARA: public cSimpleModule, public AbstractARAClient, public INotifiable {
             public:
                 OMNeTARA();
                 ~OMNeTARA();
@@ -40,9 +41,27 @@ namespace ARA {
                 virtual void initialize(int stage);
                 virtual void handleMessage(cMessage *msg);
 
+                /**
+                 * Called by the NotificationBoard whenever a change of a category
+                 * occurs to which this client has subscribed.
+                 */
+                void receiveChangeNotification(int category, const cObject* details);
+
+                /**
+                 * The packet should be directed to this node and must be delivered to the local system.
+                 * Please note that this method is responsible for deleting the given packet (or delegating
+                 * this responsibility to another method)
+                 */
                 void deliverToSystem(const Packet* packet);
+
+                /**
+                 * This method is called if the route discovery is unsuccessful and not route to the packets
+                 * destination can be established. The task of this method is to notify the upper layers
+                 * about this event and delete the packet.
+                 */
                 void packetNotDeliverable(const Packet* packet);
 
+            private:
                 /**
                  * Method for friend class OMNeTGate.
                  * It switches the context to the ARAClient,
@@ -50,9 +69,12 @@ namespace ARA {
                  * with the given delay.
                  */
                 void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
-            private:
+
+                void initializeNetworkInterfacesOf(OMNeTConfiguration& config);
+
                 MessageDispatcher* messageDispatcher;
                 IInterfaceTable* interfaceTable;
+                ARP* arp;
 
             friend class OMNeTGate;
             friend class OMNeTConfiguration;

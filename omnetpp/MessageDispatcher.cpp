@@ -56,6 +56,10 @@ bool MessageDispatcher::isARPMessage(cMessage* message) {
     return dynamic_cast<ARPPacket*>(message) != NULL;
 }
 
+bool MessageDispatcher::isARAMessage(cMessage* message) {
+    return dynamic_cast<OMNeTPacket*>(message) != NULL;
+}
+
 void MessageDispatcher::handleARP(cMessage* message) {
     // FIXME hasBitError() check  missing!
     delete message->removeControlInfo();

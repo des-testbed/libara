@@ -13,14 +13,18 @@
 namespace ARA {
 namespace omnetpp {
 
+    class OMNeTARA;
+
     class MessageDispatcher {
         public:
             MessageDispatcher(OMNeTARA* araClient);
             void dispatch(cMessage* message);
 
-        private:
             bool isFromUpperLayer(cMessage* message);
             bool isARPMessage(cMessage* message);
+            bool isARAMessage(cMessage* message);
+
+        private:
             void handleUpperLayerMessage(cMessage* message);
             void handleARP(cMessage* message);
             void handleARA(cMessage* message);
