@@ -16,6 +16,7 @@ namespace ARA {
         Define_Module(OMNeTARA);
 
         OMNeTARA::OMNeTARA() {
+            hasEnoughBattery = true;
             messageDispatcher = new MessageDispatcher(this);
         }
 
@@ -50,6 +51,7 @@ namespace ARA {
 
                 AbstractARAClient::initialize(config, routingTable);
                 initializeNetworkInterfacesOf(config);
+                WATCH(hasEnoughBattery);
             }
         }
 
@@ -66,7 +68,9 @@ namespace ARA {
         }
 
         void OMNeTARA::handleMessage(cMessage* message) {
-            messageDispatcher->dispatch(message);
+            if (hasEnoughBattery) {
+                messageDispatcher->dispatch(message);
+            }
         }
 
         void OMNeTARA::deliverToSystem(const Packet* packet) {
@@ -89,7 +93,9 @@ namespace ARA {
         }
 
         void OMNeTARA::receiveChangeNotification(int category, const cObject* details) {
+            EV << " category is " << category << "\n";
             if(category == NF_LINK_BREAK) {
+                EV << " category is NF_LINK_BREAK" << "\n";
                 Ieee80211DataOrMgmtFrame* frame = (Ieee80211DataOrMgmtFrame*) details;
                 cPacket* encapsulatedPacket = frame->decapsulate();
 
@@ -108,16 +114,16 @@ namespace ARA {
             }
 
             if(category == NF_BATTERY_CHANGED) {
-                logTrace("received battery change ....");
+                EV << " category is NF_BATTERY_CHANGED" << "\n";
                 Energy *energy = (Energy*) details;
                 double currentEnergyLevel = energy->GetEnergy();
 
-                if(currentEnergyLevel == 0) {
+                if(currentEnergyLevel <= 0) {
                    /// deactivate the node
-
+                   hasEnoughBattery = false;
                    /// draw the node in a different color
-                   cDisplayString& displayString = getParentModule()->getDisplayString(); 
-                   displayString.parse("i=device/wifilaptop,red,80;bgb=366,335");
+            //       cDisplayString& displayString = getParentModule()->getDisplayString(); 
+             //      displayString.parse("i=device/wifilaptop,red,80;bgb=366,335");
                 } else {
                    /// set the energy value for the hello messages
 

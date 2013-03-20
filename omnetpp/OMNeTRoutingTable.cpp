@@ -7,7 +7,6 @@ namespace ARA {
 
         void OMNeTRoutingTable::initialize(){
 
-
 		}
 
         void OMNeTRoutingTable::handleMessage(cMessage *msg){
@@ -45,7 +44,7 @@ namespace ARA {
                 const int nrOfFields = 4;
         };
 
-        //Register_ClassDescriptor(OMNeTRoutingTableDescriptor);
+        Register_ClassDescriptor(OMNeTRoutingTableDescriptor);
 
         OMNeTRoutingTableDescriptor::OMNeTRoutingTableDescriptor() : cClassDescriptor("OMNeTRoutingTable", "cObject"){}
 

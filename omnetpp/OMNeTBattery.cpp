@@ -56,7 +56,7 @@ namespace ARA {
             /// battery is depleted
             if (residualCapacity <= 0.0 ){
                 EV << "[BATTERY]: " << getParentModule()->getFullName() <<" 's battery exhausted" << "\n";
-                display_string->setTagArg("i", 1, "#ff0000");
+            //    display_string->setTagArg("i", 1, "#ff0000");
                 Energy* p_ene = new Energy(0.0);
                 /// we inform via the notification board that the battery is depleted
                 mpNb->fireChangeNotification(NF_BATTERY_CHANGED, p_ene);
