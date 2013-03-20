@@ -17,7 +17,7 @@ package ara;
 
 import inet.base.NotificationBoard;
 import ara.ARANetworkLayer;
-//import ara.OMNeTBattery;
+import ara.OMNeTBattery;
 import inet.battery.InetSimpleBattery;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
@@ -69,8 +69,8 @@ module ARAClient
                 @display("p=50,287");
         }
 
-//        battery : OMNeTBattery {
-        battery : InetSimpleBattery {
+        battery : OMNeTBattery {
+//        battery : InetSimpleBattery {
 	        parameters:
 		        @display("p=65,310;i=block/plug");
         }

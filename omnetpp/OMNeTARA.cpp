@@ -38,6 +38,7 @@ namespace ARA {
             if(stage == 4) {
                 NotificationBoard* notificationBoard = NotificationBoardAccess().get();
                 notificationBoard->subscribe(this, NF_LINK_BREAK);
+                notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
 
                 OMNeTConfiguration config = OMNeTConfiguration(this);
                 setLogger(config.getLogger());
@@ -104,6 +105,23 @@ namespace ARA {
                     //handleRouteFailure(omnetPacket, omnetAddress, interface);
                 }
                 EV << "\nFOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
+            }
+
+            if(category == NF_BATTERY_CHANGED) {
+                logTrace("received battery change ....");
+                Energy *energy = (Energy*) details;
+                double currentEnergyLevel = energy->GetEnergy();
+
+                if(currentEnergyLevel == 0) {
+                   /// deactivate the node
+
+                   /// draw the node in a different color
+                   cDisplayString& displayString = getParentModule()->getDisplayString(); 
+                   displayString.parse("i=device/wifilaptop,red,80;bgb=366,335");
+                } else {
+                   /// set the energy value for the hello messages
+
+                }
             }
         }
 
