@@ -59,6 +59,11 @@ namespace ARA {
             cGate* gateToARP = gate("arpOut");
 
             int nrOfInterfaces = interfaceTable->getNumInterfaces();
+            if(nrOfInterfaces > 2) { // loopback + 1 other NIC
+                // TODO remove this constraint
+                throw cRuntimeError("OMNeTARA does currently not implement handling of more than one network card.");
+            }
+
             for (int i=0; i < nrOfInterfaces; i++)         {
                 InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
                 if (interfaceEntry->isLoopback() == false) {
@@ -94,7 +99,7 @@ namespace ARA {
 
         void OMNeTARA::receiveChangeNotification(int category, const cObject* details) {
             if(category == NF_LINK_BREAK) {
-                Ieee80211DataOrMgmtFrame* frame = (Ieee80211DataOrMgmtFrame*) details;
+                Ieee80211DataOrMgmtFrame* frame = check_and_cast<Ieee80211DataOrMgmtFrame*>(details);
                 cPacket* encapsulatedPacket = frame->decapsulate();
 
                 if(messageDispatcher->isARAMessage(encapsulatedPacket)) {
@@ -105,10 +110,10 @@ namespace ARA {
 
                     OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
 
-                    //TODO somehow get the NetworkInterface*
-                    //handleRouteFailure(omnetPacket, omnetAddress, interface);
+                    // TODO this does only work if we have only one network interface card
+                    NetworkInterface* interface = getNetworkInterface(0);
+                    handleRouteFailure(omnetPacket, omnetAddress, interface);
                 }
-                EV << "\nFOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n";
             }
 
             if(category == NF_BATTERY_CHANGED) {
