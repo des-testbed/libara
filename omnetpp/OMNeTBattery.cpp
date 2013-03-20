@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "omnetpp/OMNeTBattery.h"
 
 namespace ARA {

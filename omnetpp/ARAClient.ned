@@ -37,17 +37,17 @@ module ARAClient
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=50,94");
+                @display("p=49,37");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=50,163");
+                @display("p=49,106");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "";
-                @display("p=50,228;i=block/table");
+                @display("p=49,171;i=block/table");
         }
         app: PingApp {
             parameters:
@@ -66,13 +66,13 @@ module ARAClient
         // Stationary node
         mobility: NullMobility {
             parameters:
-                @display("p=50,287");
+                @display("p=49,230");
         }
 
-        battery : OMNeTBattery {
-//        battery : InetSimpleBattery {
-	        parameters:
-		        @display("p=65,310;i=block/plug");
+        battery: OMNeTBattery {
+            //        battery : InetSimpleBattery {
+            parameters:
+                @display("p=49,293;i=block/plug");
         }
 
     connections allowunconnected:
