@@ -4,8 +4,6 @@
 
 #include "StochasticForwardingPolicy.h"
 
-#include <deque>
-#include <numeric>
 
 using namespace ARA;
 
@@ -47,8 +45,9 @@ NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet, RoutingTab
     return result;
 }
 
-void StochasticForwardingPolicy::initializeRandomNumberGenerator(){
-    srand((unsigned)time(0));
+void StochasticForwardingPolicy::initializeRandomNumberGenerator(unsigned int seed){
+    //srand((unsigned)time(0));
+    srand(seed);
 }
 
 float StochasticForwardingPolicy::getRandomNumber(){

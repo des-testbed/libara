@@ -4,5 +4,7 @@ package ara;
 import inet.battery.InetSimpleBattery;
 
 simple OMNeTBattery extends InetSimpleBattery {
-    
+    parameters:
+	    @class(OMNeTBattery);
+        ConsumedVector = true;
 }

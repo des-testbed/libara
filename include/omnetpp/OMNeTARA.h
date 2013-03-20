@@ -76,6 +76,7 @@ namespace ARA {
                 MessageDispatcher* messageDispatcher;
                 IInterfaceTable* interfaceTable;
                 ARP* arp;
+                bool hasEnoughBattery;
 
             friend class OMNeTGate;
             friend class OMNeTConfiguration;

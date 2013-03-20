@@ -3,8 +3,8 @@
  */
 
 #include "CppUTest/TestHarness.h"
-#include "RoutingTable.h"
-#include "StochasticForwardingPolicy.h"
+#include "EnergyAwareRoutingTable.h"
+#include "EnergyAwareStochasticForwardingPolicy.h"
 #include "RoutingTableEntry.h"
 #include "NextHop.h"
 #include "PacketType.h"
@@ -13,7 +13,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/StochasticForwardingPolicyMock.h"
+#include "testAPI/mocks/EnergyAwareStochasticForwardingPolicyMock.h"
 
 #include <iostream>
 
@@ -21,11 +21,11 @@ using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-TEST_GROUP(StochasticForwardingPolicyTest) {};
+TEST_GROUP(EnergyAwareStochasticForwardingPolicyTest) {};
 
-TEST(StochasticForwardingPolicyTest, testGetNextHop) {
+TEST(EnergyAwareStochasticForwardingPolicyTest, testGetNextHop) {
     EvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicyMock();
-    RoutingTable routingTable = RoutingTable();
+    EnergyAwareRoutingTable routingTable = EnergyAwareRoutingTable();
     routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
@@ -35,12 +35,15 @@ TEST(StochasticForwardingPolicyTest, testGetNextHop) {
 
     PacketMock packet = PacketMock();
 
-    routingTable.update(destination, nextHopA, &interface, 1.2);
-    routingTable.update(destination, nextHopB, &interface, 2.1);
+    routingTable.update(destination, nextHopA, &interface, 1.2, 0.8);
+    routingTable.update(destination, nextHopB, &interface, 2.1, 0.6);
 
-    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock(42);
-
+    EnergyAwareStochasticForwardingPolicyMock policy = EnergyAwareStochasticForwardingPolicyMock(23);
     NextHop* result = policy.getNextHop(&packet, &routingTable);
+    CHECK(result->getAddress()->equals(nextHopB));
+
+    policy = EnergyAwareStochasticForwardingPolicyMock(42);
+    result = policy.getNextHop(&packet, &routingTable);
     CHECK(result->getAddress()->equals(nextHopA));
 
     delete evaporationPolicy;
