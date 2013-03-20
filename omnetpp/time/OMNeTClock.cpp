@@ -54,7 +54,6 @@ void OMNeTClock::startTimer(unsigned int timerID, unsigned long timeoutInMicroSe
 
 void OMNeTClock::stopTimer(unsigned int timerID) {
     cancelTimerEvents(timerID);
-    runningTimers.erase(timerID);
     EV << "Timer " << timerID << " has been stopped\n";
 }
 
@@ -77,14 +76,12 @@ void OMNeTClock::handleMessage(cMessage* msg) {
     unsigned int timerID = timerMessage->getTimerID();
     EV << "Timer " << timerID << " has timed out\n";
 
+    // remove the pending self messages from the local map
+    pendingSelfMessages.erase(timerID);
+
     // dispatch the message
     OMNeTTimer* expiredTimer = runningTimers[timerID];
     expiredTimer->notifyTimeExpired();
 
-    // remove the timer and pending self messages from the local maps
-    runningTimers.erase(timerID);
-    if (pendingSelfMessages.find(timerID) != pendingSelfMessages.end()) {
-        pendingSelfMessages.erase(timerID);
-    }
     delete msg;
 }

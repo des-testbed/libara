@@ -14,7 +14,7 @@ OMNeTTimer::OMNeTTimer(unsigned int id, OMNeTClock* clock) {
 
 OMNeTTimer::~OMNeTTimer() {
     // notify the clock so all pending messages are canceled
-    clock->timerHasBeenDeleted(this->id);
+    clock->timerHasBeenDeleted(id);
 }
 
 void OMNeTTimer::run(unsigned long timeoutInMicroSeconds) {
