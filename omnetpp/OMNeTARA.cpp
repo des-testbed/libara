@@ -119,7 +119,7 @@ namespace ARA {
                    /// deactivate the node
                    hasEnoughBattery = false;
                    /// draw the node in a different color
-                   cDisplayString& displayString = getDisplayString(); 
+                   cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString(); 
                    displayString.parse("i=device/wifilaptop,red,80;bgb=366,335");
                 } else {
                    /// set the energy value for the hello messages
