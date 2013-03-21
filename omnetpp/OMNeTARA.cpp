@@ -6,7 +6,6 @@
 #include "omnetpp/OMNeTPacket.h"
 #include "NotificationBoard.h"
 #include "ModuleAccess.h"
-#include "Ieee80211Frame_m.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -99,37 +98,37 @@ namespace ARA {
 
         void OMNeTARA::receiveChangeNotification(int category, const cObject* details) {
             if(category == NF_LINK_BREAK) {
-                Ieee80211DataOrMgmtFrame* frame = check_and_cast<Ieee80211DataOrMgmtFrame*>(details);
-                cPacket* encapsulatedPacket = frame->decapsulate();
-
-                if(messageDispatcher->isARAMessage(encapsulatedPacket)) {
-                    // extract the receiver address
-                    MACAddress receiverMACAddress = frame->getReceiverAddress();
-                    const IPAddress receiverIPAddress = arp->getInverseAddressResolution(receiverMACAddress);
-                    AddressPtr omnetAddress (new OMNeTAddress(receiverIPAddress));
-
-                    OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
-
-                    // TODO this does only work if we have only one network interface card
-                    NetworkInterface* interface = getNetworkInterface(0);
-                    handleRouteFailure(omnetPacket, omnetAddress, interface);
-                }
+                handleLinkBreak(check_and_cast<Ieee80211DataOrMgmtFrame*>(details));
             }
+            else if(category == NF_BATTERY_CHANGED) {
+                handleBatteryStatusChange(check_and_cast<Energy*>(details));
+            }
+        }
 
-            if(category == NF_BATTERY_CHANGED) {
-                Energy *energy = (Energy*) details;
-                double currentEnergyLevel = energy->GetEnergy();
+        void OMNeTARA::handleLinkBreak(Ieee80211DataOrMgmtFrame* frame) {
+            cPacket* encapsulatedPacket = frame->decapsulate();
 
-                if(currentEnergyLevel <= 0) {
-                   /// deactivate the node
-                   hasEnoughBattery = false;
-                   /// draw the node in a different color
-                   cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString(); 
-                   displayString.parse("i=device/wifilaptop,red,80;bgb=366,335");
-                } else {
-                   /// set the energy value for the hello messages
+            if(messageDispatcher->isARAMessage(encapsulatedPacket)) {
+                // extract the receiver address
+                MACAddress receiverMACAddress = frame->getReceiverAddress();
+                const IPAddress receiverIPAddress = arp->getInverseAddressResolution(receiverMACAddress);
+                AddressPtr omnetAddress (new OMNeTAddress(receiverIPAddress));
 
-                }
+                OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
+
+                // TODO this does only work if we have only one network interface card
+                NetworkInterface* interface = getNetworkInterface(0);
+                handleRouteFailure(omnetPacket, omnetAddress, interface);
+            }
+        }
+
+        void OMNeTARA::handleBatteryStatusChange(Energy* energyInformation) {
+            if (energyInformation->GetEnergy() <= 0) {
+               hasEnoughBattery = false;
+
+               // change the node color
+               cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
+               displayString.setTagArg("i", 1, "#FF0000");
             }
         }
 

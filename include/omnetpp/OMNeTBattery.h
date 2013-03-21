@@ -22,8 +22,17 @@ namespace ARA {
                 OMNeTBattery(){};
                 virtual ~OMNeTBattery(){};
 
+                void initialize(int stage);
+
             protected:
                 void deductAndCheck();
+
+            private:
+                void calculateConsumedEnergy();
+                void evaluateCurrentEnergyLevel();
+                void publishEnergyInformation(double publishedEnergyLevel);
+                bool hasBatteryCapacityChangedEnough();
+                void recordStatistics();
         };
     }
 }

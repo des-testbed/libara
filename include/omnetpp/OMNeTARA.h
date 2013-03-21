@@ -17,6 +17,7 @@
 #include "IInterfaceTable.h"
 #include "INotifiable.h"
 #include "ARP.h"
+#include "Ieee80211Frame_m.h"
 
 namespace ARA {
     namespace omnetpp {
@@ -72,6 +73,9 @@ namespace ARA {
                 void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
 
                 void initializeNetworkInterfacesOf(OMNeTConfiguration& config);
+
+                void handleLinkBreak(Ieee80211DataOrMgmtFrame* frame);
+                void handleBatteryStatusChange(Energy* energyInformation);
 
                 MessageDispatcher* messageDispatcher;
                 IInterfaceTable* interfaceTable;
