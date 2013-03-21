@@ -16,9 +16,10 @@
 package ara;
 
 import ara.OMNeTARA;
-import ara.OMNeTLinearEvaporationPolicy;
 import ara.OMNeTRoutingTable;
-import ara.OMNeTStochasticForwardingPolicy;
+import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
+import ara.evaporation.OMNeTLinearEvaporationPolicy;
+import ara.forwarding.OMNeTStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
 module ARANetworkLayer

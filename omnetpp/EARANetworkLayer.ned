@@ -16,10 +16,11 @@
 package ara;
 
 import ara.OMNeTARA;
-import ara.OMNeTLinearEvaporationPolicy;
 // TODO!!
 import ara.OMNeTEnergyAwareRoutingTable; 
-import ara.OMNeTEnergyAwareStochasticForwardingPolicy;
+import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
+import ara.evaporation.OMNeTLinearEvaporationPolicy;
+import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
 module EARANetworkLayer 

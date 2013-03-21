@@ -1,5 +1,5 @@
 @namespace(ARA::omnetpp);
-package ara;
+package ara.reinforcement;
 
 simple OMNeTLinearPathReinforcementPolicy
 {
