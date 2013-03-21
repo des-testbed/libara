@@ -16,14 +16,15 @@
 package ara;
 
 import inet.base.NotificationBoard;
-import ara.ARANetworkLayer;
+import ara.EARANetworkLayer;
+import ara.OMNeTBattery;
 import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
 import inet.mobility.NullMobility;
 import inet.applications.pingapp.PingApp;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 
-module NetworkNode {
+module EnergyAwareNetworkNode {
     parameters:
         @display("i=device/wifilaptop;bgb=366,335");
         int nrOfNetworkInterfaces = default(1);
@@ -49,7 +50,7 @@ module NetworkNode {
             parameters:
                 @display("b=40,24;p=239,29,col");
         }
-        ara: ARANetworkLayer {
+        ara: EARANetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
@@ -63,6 +64,12 @@ module NetworkNode {
         mobility: NullMobility {
             parameters:
                 @display("p=49,230");
+        }
+
+        battery: OMNeTBattery {
+            //        battery : InetSimpleBattery {
+            parameters:
+                @display("p=49,293;i=block/plug");
         }
 
     connections allowunconnected:

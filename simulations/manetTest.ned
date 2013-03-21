@@ -16,6 +16,7 @@
 package ara.simulations;
 
 import ara.NetworkNode;
+import ara.EnergyAwareNetworkNode;
 import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
 import inet.world.ChannelControl;
@@ -54,7 +55,7 @@ network ManetTest
         node3: NetworkNode {
             @display("p=697,182");
         }
-        node4: NetworkNode {
+        node4: EnergyAwareNetworkNode {
             @display("p=305,125");
         }
         node5: NetworkNode {

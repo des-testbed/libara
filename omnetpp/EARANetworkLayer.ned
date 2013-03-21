@@ -15,10 +15,10 @@
 
 package ara;
 
-import ara.ARA;
+import ara.EARA;
 // TODO!!
 import ara.OMNeTBattery;
-import ara.OMNeTEnergyAwareRoutingTable; 
+//import ara.OMNeTEnergyAwareRoutingTable; 
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 import ara.evaporation.OMNeTExponentialEvaporationPolicy;
 import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
@@ -37,7 +37,7 @@ module EARANetworkLayer
         output ifOut[nrOfNetworkInterfaces];	// output to  NIC interface (INET/MANET needs this to be named this way)
 
     submodules:
-        eara: ARA {
+        eara: EARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=138,102");
@@ -53,7 +53,7 @@ module EARANetworkLayer
             @display("p=72,30");
         }
 
-        routingTableStatistics: OMNeTEnergyAwareRoutingTable {
+        routingTableStatistics: OMNeTRoutingTable {
 
            @display("p=210,122");
  	    }
@@ -76,10 +76,10 @@ module EARANetworkLayer
         }
 
     connections allowunconnected:
-        upperLayerGate <--> ara.upperLayerGate;
-        arp.ipIn <-- ara.arpOut;
+        upperLayerGate <--> eara.upperLayerGate;
+        arp.ipIn <-- eara.arpOut;
 
         for i=0..nrOfNetworkInterfaces-1 {
-            ifIn[i] --> ara.ifIn[i];
+            ifIn[i] --> eara.ifIn[i];
         }
 }

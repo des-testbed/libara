@@ -15,7 +15,6 @@ namespace ARA {
         Define_Module(ARA);
 
         ARA::ARA() {
-            hasEnoughBattery = true;
             messageDispatcher = new MessageDispatcher(this);
         }
 
@@ -38,7 +37,6 @@ namespace ARA {
             if(stage == 4) {
                 NotificationBoard* notificationBoard = NotificationBoardAccess().get();
                 notificationBoard->subscribe(this, NF_LINK_BREAK);
-                notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
 
                 OMNeTConfiguration config = OMNeTConfiguration(this);
                 setLogger(config.getLogger());
@@ -50,7 +48,6 @@ namespace ARA {
 
                 AbstractARAClient::initialize(config, routingTable);
                 initializeNetworkInterfacesOf(config);
-                WATCH(hasEnoughBattery);
             }
         }
 
@@ -72,9 +69,7 @@ namespace ARA {
         }
 
         void ARA::handleMessage(cMessage* message) {
-            if (hasEnoughBattery) {
-                messageDispatcher->dispatch(message);
-            }
+            messageDispatcher->dispatch(message);
         }
 
         void ARA::deliverToSystem(const Packet* packet) {
@@ -100,9 +95,6 @@ namespace ARA {
             if(category == NF_LINK_BREAK) {
                 handleLinkBreak(check_and_cast<Ieee80211DataOrMgmtFrame*>(details));
             }
-            else if(category == NF_BATTERY_CHANGED) {
-                handleBatteryStatusChange(check_and_cast<Energy*>(details));
-            }
         }
 
         void ARA::handleLinkBreak(Ieee80211DataOrMgmtFrame* frame) {
@@ -119,16 +111,6 @@ namespace ARA {
                 // TODO this does only work if we have only one network interface card
                 NetworkInterface* interface = getNetworkInterface(0);
                 handleRouteFailure(omnetPacket, omnetAddress, interface);
-            }
-        }
-
-        void ARA::handleBatteryStatusChange(Energy* energyInformation) {
-            if (energyInformation->GetEnergy() <= 0) {
-               hasEnoughBattery = false;
-
-               // change the node color
-               cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
-               displayString.setTagArg("i", 1, "#FF0000");
             }
         }
 

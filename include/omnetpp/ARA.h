@@ -63,7 +63,6 @@ namespace ARA {
                  */
                 void packetNotDeliverable(const Packet* packet);
 
-            private:
                 /**
                  * Method for friend class OMNeTGate.
                  * It switches the context to the ARAClient,
@@ -75,12 +74,10 @@ namespace ARA {
                 void initializeNetworkInterfacesOf(OMNeTConfiguration& config);
 
                 void handleLinkBreak(Ieee80211DataOrMgmtFrame* frame);
-                void handleBatteryStatusChange(Energy* energyInformation);
 
                 MessageDispatcher* messageDispatcher;
                 IInterfaceTable* interfaceTable;
                 ARP* arp;
-                bool hasEnoughBattery;
 
             friend class OMNeTGate;
             friend class OMNeTConfiguration;
