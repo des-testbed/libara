@@ -42,19 +42,19 @@ module ARANetworkLayer
         }
 
         evaporationPolicy: OMNeTLinearEvaporationPolicy {
-
-            @display("p=210,30");
+            parameters:
+                @display("p=210,30");
         }
 
         forwardingPolicy: OMNeTStochasticForwardingPolicy {
-
-            @display("p=72,30");
+            parameters:
+                @display("p=72,30");
         }
 
         routingTableStatistics: OMNeTRoutingTable {
-
-           @display("p=210,122");
- 	    }
+           parameters:
+               @display("p=210,122");
+ 	}
 
         pathReinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
 
