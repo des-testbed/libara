@@ -56,4 +56,5 @@ void RoutingTableEntry::setPheromoneValue(float newPheromoneValue) {
     this->pheromoneValue = newPheromoneValue;
 }
 
+
 } /* namespace ARA */

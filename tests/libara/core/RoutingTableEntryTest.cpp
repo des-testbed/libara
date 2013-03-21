@@ -46,6 +46,16 @@ TEST(RoutingTableEntryTest, testGetters) {
     CHECK_EQUAL(pheromoneValue, entry.getPheromoneValue());
 }
 
+/// the method tests the overloaded output stream operator
+TEST(RoutingTableEntryTest, testOutputStreamOperator) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    std::shared_ptr<AddressMock> address;
+    float pheromoneValue = 1.234;
+    RoutingTableEntry entry = RoutingTableEntry(address, &interface, pheromoneValue);
+/// TODO: find a better way to test the ostream
+    std::cout << entry << std::endl;
+}
+
 TEST(RoutingTableEntryTest, testSetPheromoneValue) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr address (new AddressMock());

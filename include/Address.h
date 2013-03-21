@@ -26,8 +26,10 @@
 #ifndef ADDRESS_H_
 #define ADDRESS_H_
 
-#include <stddef.h>
 #include <memory>
+#include <sstream>
+#include <stddef.h>
+#include <iostream>
 
 namespace ARA {
 
@@ -55,6 +57,11 @@ public:
 
     bool operator==(const std::shared_ptr<Address> otherAddress) const {
         return this->equals(otherAddress);
+    }
+    
+    friend std::ostream& operator<<(std::ostream& out, Address& address){
+        out << "[address] " << address.toString(); 
+        return out;
     }
 
 };
