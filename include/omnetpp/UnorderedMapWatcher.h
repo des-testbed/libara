@@ -58,7 +58,7 @@ class UnorderedMapWatcher : public cStdVectorWatcherBase {
 };
 
 template <class KeyType, class MappedType, class Hasher, class Predicate, class AllocatorType>
-void createStdUnorderedMapWatcher(const char *varname, std::map<KeyT,ValueT,CmpT>& m) {
+void createStdUnorderedMapWatcher(const char *varname, std::unordered_map<KeyType, MappedType, Hasher, Predicate, AllocatorType>& m) {
      new UnorderedMapWatcher<KeyType, MappedType, Hasher, Predicate, AllocatorType>(varname, m);
 }
 

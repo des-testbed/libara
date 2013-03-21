@@ -1,12 +1,13 @@
 #include "omnetpp/OMNeTRoutingTable.h"
 #include "omnetpp/OMNeTClock.h"
+#include "omnetpp/UnorderedMapWatcher.h"
 
 namespace ARA {
     namespace omnetpp {
         Define_Module(OMNeTRoutingTable);
 
         void OMNeTRoutingTable::initialize(){
-
+            WATCH_UNORDEREDMAP(table);
 		}
 
         void OMNeTRoutingTable::handleMessage(cMessage *msg){
