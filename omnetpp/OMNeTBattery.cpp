@@ -4,6 +4,8 @@
 
 #include "omnetpp/OMNeTBattery.h"
 
+#include <cstdio>
+
 namespace ARA {
     namespace omnetpp {
         Define_Module(OMNeTBattery);
@@ -65,6 +67,7 @@ namespace ARA {
         }
 
         void OMNeTBattery::evaluateCurrentEnergyLevel() {
+            updateBatteryIcon();
             if (residualCapacity <= 0.0 ) {
                 EV << "[BATTERY]: " << getParentModule()->getFullName() <<" 's battery exhausted" << "\n";
                 publishEnergyInformation(0.0);
@@ -75,6 +78,14 @@ namespace ARA {
                     publishEnergyInformation(residualCapacity);
                 }
             }
+        }
+
+        void OMNeTBattery::updateBatteryIcon() {
+            char buffer[64];
+            std::sprintf(buffer, "c: %.1f", residualCapacity);
+
+            cDisplayString& displayString = getDisplayString();
+            displayString.setTagArg("t", 0, buffer);
         }
 
         void OMNeTBattery::publishEnergyInformation(double publishedEnergyLevel) {

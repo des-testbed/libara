@@ -30,6 +30,7 @@ namespace ARA {
             private:
                 void calculateConsumedEnergy();
                 void evaluateCurrentEnergyLevel();
+                void updateBatteryIcon();
                 void publishEnergyInformation(double publishedEnergyLevel);
                 bool hasBatteryCapacityChangedEnough();
                 void recordStatistics();
