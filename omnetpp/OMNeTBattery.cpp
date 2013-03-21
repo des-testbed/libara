@@ -14,6 +14,7 @@ namespace ARA {
             InetSimpleBattery::initialize(stage);
             if(stage == 0) {
                 WATCH(residualCapacity);
+                updateBatteryIcon();
             }
         }
 

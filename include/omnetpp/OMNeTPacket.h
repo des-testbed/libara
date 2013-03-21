@@ -1,6 +1,6 @@
-//
-// Generated file, do not edit! Created by opp_msgc 4.2 from OMNeTPacket.msg.
-//
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef _OMNETPACKET_H_
 #define _OMNETPACKET_H_
