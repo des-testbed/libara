@@ -34,7 +34,7 @@
 namespace ARA {
 namespace omnetpp {
 
-class OMNeTAddress : public ARA::Address, public IPAddress {
+class OMNeTAddress : public Address, public IPAddress {
 public:
 
     /**

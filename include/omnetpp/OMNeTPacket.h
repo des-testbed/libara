@@ -15,7 +15,7 @@
 namespace ARA {
 namespace omnetpp {
 
-class OMNeTPacket : public ::cPacket, public ARA::Packet {
+class OMNeTPacket : public cPacket, public Packet {
   private:
     void copy(const OMNeTPacket& other);
 

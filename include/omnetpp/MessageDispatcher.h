@@ -5,7 +5,7 @@
 #ifndef OMNET_MESSAGE_DISPATCHER_H_
 #define OMNET_MESSAGE_DISPATCHER_H_
 
-#include "OMNeTARA.h"
+#include "ARA.h"
 #include "InterfaceEntry.h"
 
 #include <omnetpp.h>
@@ -13,11 +13,11 @@
 namespace ARA {
 namespace omnetpp {
 
-    class OMNeTARA;
+    class ARA;
 
     class MessageDispatcher {
         public:
-            MessageDispatcher(OMNeTARA* araClient);
+            MessageDispatcher(ARA* araClient);
             void dispatch(cMessage* message);
 
             bool isFromUpperLayer(cMessage* message);
@@ -31,7 +31,7 @@ namespace omnetpp {
 
             InterfaceEntry* getSourceInterfaceFrom(cMessage* message);
 
-            OMNeTARA* araClient;
+            ARA* araClient;
     };
 }
 }

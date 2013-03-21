@@ -6,7 +6,7 @@
 #define OMNETGATE_H_
 
 #include "AbstractNetworkInterface.h"
-#include "OMNeTARA.h"
+#include "ARA.h"
 #include "OMNeTAddress.h"
 #include "InterfaceEntry.h"
 
@@ -16,12 +16,12 @@
 namespace ARA {
 namespace omnetpp {
 
-class OMNeTARA;
+class ARA;
 
 //TODO write some more documentation for this class
     class OMNeTGate: public AbstractNetworkInterface {
     public:
-        OMNeTGate(OMNeTARA* module, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay);
+        OMNeTGate(ARA* module, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay);
 
         void send(const Packet* packet, std::shared_ptr<Address> recipient);
         void send(const Packet* packet, std::shared_ptr<Address> recipient, double sendDelay);
@@ -33,7 +33,7 @@ class OMNeTARA;
         std::shared_ptr<OMNeTAddress> getNextHopAddress(std::shared_ptr<Address> recipient);
 
     private:
-        OMNeTARA* omnetARAClient;
+        ARA* omnetARAClient;
         cGate* gateToARP;
         int interfaceID;
 

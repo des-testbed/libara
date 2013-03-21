@@ -15,7 +15,7 @@
 
 package ara;
 
-import ara.OMNeTARA;
+import ara.ARA;
 // TODO!!
 import ara.OMNeTEnergyAwareRoutingTable; 
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
@@ -36,7 +36,7 @@ module EARANetworkLayer
         output ifOut[nrOfNetworkInterfaces];	// output to  NIC interface (INET/MANET needs this to be named this way)
 
     submodules:
-        eara: OMNeTARA {
+        eara: ARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=138,102");

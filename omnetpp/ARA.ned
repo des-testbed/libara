@@ -1,7 +1,7 @@
 @namespace(ARA::omnetpp);
 package ara;
 
-simple OMNeTARA {
+simple ARA {
     
     parameters:
         double initialPhi;

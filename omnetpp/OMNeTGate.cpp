@@ -18,7 +18,7 @@ namespace omnetpp {
 
 typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
 
-OMNeTGate::OMNeTGate(OMNeTARA* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : AbstractNetworkInterface(araClient) {
+OMNeTGate::OMNeTGate(ARA* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : AbstractNetworkInterface(araClient) {
     this->omnetARAClient = araClient;
     this->gateToARP = gateToARP;
     this->broadCastDelay = broadCastDelay;

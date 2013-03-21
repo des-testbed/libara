@@ -14,7 +14,7 @@
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-MessageDispatcher::MessageDispatcher(OMNeTARA* araClient) {
+MessageDispatcher::MessageDispatcher(ARA* araClient) {
     this->araClient = araClient;
 }
 

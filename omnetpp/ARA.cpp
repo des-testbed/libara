@@ -2,7 +2,7 @@
  * $FU-Copyright$
  */
 
-#include "omnetpp/OMNeTARA.h"
+#include "omnetpp/ARA.h"
 #include "omnetpp/OMNeTPacket.h"
 #include "NotificationBoard.h"
 #include "ModuleAccess.h"
@@ -12,18 +12,18 @@ namespace ARA {
         typedef std::shared_ptr<Address> AddressPtr;
 
         // Register the class with the OMNeT++ simulation
-        Define_Module(OMNeTARA);
+        Define_Module(ARA);
 
-        OMNeTARA::OMNeTARA() {
+        ARA::ARA() {
             hasEnoughBattery = true;
             messageDispatcher = new MessageDispatcher(this);
         }
 
-        OMNeTARA::~OMNeTARA() {
+        ARA::~ARA() {
             delete messageDispatcher;
         }
 
-        int OMNeTARA::numInitStages() const {
+        int ARA::numInitStages() const {
             return 5;
         }
 
@@ -34,7 +34,7 @@ namespace ARA {
          * constructors 'untouched'). The method parses the parameters
          * specified in the NED file and initializes the gates.
          */
-        void OMNeTARA::initialize(int stage) {
+        void ARA::initialize(int stage) {
             if(stage == 4) {
                 NotificationBoard* notificationBoard = NotificationBoardAccess().get();
                 notificationBoard->subscribe(this, NF_LINK_BREAK);
@@ -54,13 +54,13 @@ namespace ARA {
             }
         }
 
-        void OMNeTARA::initializeNetworkInterfacesOf(OMNeTConfiguration& config) {
+        void ARA::initializeNetworkInterfacesOf(OMNeTConfiguration& config) {
             cGate* gateToARP = gate("arpOut");
 
             int nrOfInterfaces = interfaceTable->getNumInterfaces();
             if(nrOfInterfaces > 2) { // loopback + 1 other NIC
                 // TODO remove this constraint
-                throw cRuntimeError("OMNeTARA does currently not implement handling of more than one network card.");
+                throw cRuntimeError("ARA does currently not implement handling of more than one network card.");
             }
 
             for (int i=0; i < nrOfInterfaces; i++)         {
@@ -71,13 +71,13 @@ namespace ARA {
             }
         }
 
-        void OMNeTARA::handleMessage(cMessage* message) {
+        void ARA::handleMessage(cMessage* message) {
             if (hasEnoughBattery) {
                 messageDispatcher->dispatch(message);
             }
         }
 
-        void OMNeTARA::deliverToSystem(const Packet* packet) {
+        void ARA::deliverToSystem(const Packet* packet) {
             Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
             OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
             ASSERT(omnetPacket);
@@ -86,17 +86,17 @@ namespace ARA {
             send(encapsulatedData, "upperLayerGate$o");
         }
 
-        void OMNeTARA::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
+        void ARA::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
             Enter_Method_Silent("takeAndSend(msg)");
             take(msg);
             sendDelayed(msg, sendDelay, gate);
         }
 
-        void OMNeTARA::packetNotDeliverable(const Packet* packet) {
+        void ARA::packetNotDeliverable(const Packet* packet) {
             //TODO report to upper layer
         }
 
-        void OMNeTARA::receiveChangeNotification(int category, const cObject* details) {
+        void ARA::receiveChangeNotification(int category, const cObject* details) {
             if(category == NF_LINK_BREAK) {
                 handleLinkBreak(check_and_cast<Ieee80211DataOrMgmtFrame*>(details));
             }
@@ -105,7 +105,7 @@ namespace ARA {
             }
         }
 
-        void OMNeTARA::handleLinkBreak(Ieee80211DataOrMgmtFrame* frame) {
+        void ARA::handleLinkBreak(Ieee80211DataOrMgmtFrame* frame) {
             cPacket* encapsulatedPacket = frame->decapsulate();
 
             if(messageDispatcher->isARAMessage(encapsulatedPacket)) {
@@ -122,7 +122,7 @@ namespace ARA {
             }
         }
 
-        void OMNeTARA::handleBatteryStatusChange(Energy* energyInformation) {
+        void ARA::handleBatteryStatusChange(Energy* energyInformation) {
             if (energyInformation->GetEnergy() <= 0) {
                hasEnoughBattery = false;
 
