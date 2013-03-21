@@ -52,8 +52,9 @@ TEST(RoutingTableEntryTest, testOutputStreamOperator) {
     std::shared_ptr<AddressMock> address;
     float pheromoneValue = 1.234;
     RoutingTableEntry entry = RoutingTableEntry(address, &interface, pheromoneValue);
-/// TODO: find a better way to test the ostream
-    std::cout << entry << std::endl;
+    std::ostringstream stream;
+    stream << entry;
+    STRCMP_EQUAL(stream.str().c_str(), "[next hop] 0 [phi] 1.234");
 }
 
 TEST(RoutingTableEntryTest, testSetPheromoneValue) {
