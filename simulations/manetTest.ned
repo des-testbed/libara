@@ -15,7 +15,7 @@
 
 package ara.simulations;
 
-import ara.ARAClient;
+import ara.NetworkNode;
 import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
 import inet.world.ChannelControl;
@@ -45,19 +45,19 @@ network ManetTest
                 netmask = "255.255.0.0";
                 @display("p=78,97");
         }
-        node1: ARAClient {
+        node1: NetworkNode {
             @display("p=515,69");
         }
-        node2: ARAClient {
+        node2: NetworkNode {
             @display("p=195,215");
         }
-        node3: ARAClient {
+        node3: NetworkNode {
             @display("p=697,182");
         }
-        node4: ARAClient {
+        node4: NetworkNode {
             @display("p=305,125");
         }
-        node5: ARAClient {
+        node5: NetworkNode {
             @display("p=496,267");
         }
 }

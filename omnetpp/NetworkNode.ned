@@ -26,7 +26,7 @@ import inet.applications.pingapp.PingApp;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 
-module ARAClient
+module NetworkNode
 {
     parameters:
         @display("i=device/wifilaptop;bgb=366,335");
