@@ -15,6 +15,7 @@
 
 NAMESPACE_BEGIN
 
+
 class RoutingTableWatcher : public cStdVectorWatcherBase {
     protected:
         std::unordered_map<std::shared_ptr<ARA::Address>, std::deque<ARA::RoutingTableEntry*>*, ARA::AddressHash, ARA::AddressPredicate>& m;
