@@ -8,7 +8,7 @@ namespace ARA {
         Define_Module(OMNeTRoutingTable);
 
         void OMNeTRoutingTable::initialize(){
-            new RoutingTableWatcher("test",table);
+            new RoutingTableWatcher<RoutingTableEntry>("test",table);
 		}
 
         void OMNeTRoutingTable::handleMessage(cMessage *msg){

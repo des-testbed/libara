@@ -27,6 +27,16 @@ TEST(EnergyAwareRoutingTableEntryTest, testGetters) {
     CHECK_EQUAL(energyValue, entry.getEnergyValue());
 }
 
+/// the method tests the overloaded output stream operator
+TEST(EnergyAwareRoutingTableEntryTest, testOutputStreamOperator) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    std::shared_ptr<AddressMock> address(new AddressMock);
+    EnergyAwareRoutingTableEntry entry = EnergyAwareRoutingTableEntry(address, &interface, 1.234, 5.678);
+    std::ostringstream stream;
+    stream << entry;
+    STRCMP_EQUAL(stream.str().c_str(), "[next hop] Foo [phi] 1.234 [energy] 5.678");
+}
+
 TEST(EnergyAwareRoutingTableEntryTest, testSetPheromoneValue) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr address(new AddressMock());
