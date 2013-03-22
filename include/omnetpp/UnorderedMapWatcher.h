@@ -52,7 +52,7 @@ class UnorderedMapWatcher : public cStdVectorWatcherBase {
 
         virtual std::string atIt() const {
             std::stringstream out;
-            out << it->first << " ==> " << it->second;
+            out << (it->first).get() << " ==> " << (it->second);
             return out.str();
         }
 };
