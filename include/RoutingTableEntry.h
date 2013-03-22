@@ -46,8 +46,7 @@ namespace ARA {
             void setPheromoneValue(float newPheromoneValue);
 
             friend std::ostream& operator<<(std::ostream& out, RoutingTableEntry& entry){
-                Address* address = entry.getAddress().get();
-                out << "[next hop] " << address->toString() << " [phi] " << entry.getPheromoneValue();
+                out << "[next hop] " << *(entry.getAddress().get()) << " [phi] " << entry.getPheromoneValue();
                 return out;
             }
 

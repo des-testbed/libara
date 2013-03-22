@@ -60,7 +60,7 @@ public:
     }
     
     friend std::ostream& operator<<(std::ostream& out, Address& address){
-        out << "[address] " << address.toString(); 
+        out << address.toString(); 
         return out;
     }
 

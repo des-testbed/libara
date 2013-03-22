@@ -46,7 +46,7 @@ TEST(AddressMockTest, testOutputOperator) {
     AddressMock mock = AddressMock();
     std::ostringstream stream;
     stream << mock;
-    STRCMP_EQUAL(stream.str().c_str(), "[address] Foo");
+    STRCMP_EQUAL(stream.str().c_str(), "Foo");
 }
 
 TEST(AddressMockTest, testEqualsToItself) {
