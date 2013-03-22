@@ -29,7 +29,8 @@ public:
         PANT,
         DUPLICATE_ERROR,
         ACK,
-        ROUTE_FAILURE
+        ROUTE_FAILURE,
+        ENERGY_INFO
     };
 
     static bool isAntPacket(char type);
