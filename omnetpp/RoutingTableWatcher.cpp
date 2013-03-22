@@ -4,6 +4,8 @@ NAMESPACE_BEGIN
 
 RoutingTableWatcher::RoutingTableWatcher(const char *name, std::unordered_map<std::shared_ptr<ARA::Address>, std::deque<ARA::RoutingTableEntry*>*, ARA::AddressHash, ARA::AddressPredicate>& var) : cStdVectorWatcherBase(name), m(var) {
     itPos = -1;
+    // set iterator at least to a useful position
+    it = m.begin();
     classname = std::string(name);
 }
 
