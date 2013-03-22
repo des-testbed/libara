@@ -11,11 +11,10 @@
 
 namespace ARA {
     namespace omnetpp {
-
         class OMNeTRoutingTable : public ARA::RoutingTable, public cSimpleModule {
-        protected:
-             virtual void initialize();
-             virtual void handleMessage(cMessage *msg);
+             protected:
+                 virtual void initialize();
+                 virtual void handleMessage(cMessage *msg);
         };
     } 
 } 
