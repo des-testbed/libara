@@ -20,6 +20,10 @@ namespace ARA {
             float getEnergyValue();
             void setEnergyValue(float newEnergyValue);
 
+            friend std::ostream& operator<<(std::ostream& out, EnergyAwareRoutingTableEntry& entry){
+                out << "[next hop] " << *(entry.getAddress().get()) << " [phi] " << entry.getPheromoneValue() << " [energy] " << entry.getEnergyValue();
+                return out;
+            }
         private:
             float energyValue;
 };

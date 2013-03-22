@@ -50,7 +50,6 @@ protected:
     virtual void updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTableEntry *newEntry);
     Time *lastAccessTime;
 
-private:
     std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table;
     /**
      * The memory management of the evaporationPolicy member is handled in class

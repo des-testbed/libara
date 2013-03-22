@@ -38,7 +38,16 @@ TEST(AddressMockTest, testCreateWithoutName) {
 TEST(AddressMockTest, testCreateWithName) {
         AddressMock mock = AddressMock("Hello");
         CHECK_EQUAL("Hello", mock.getAddress());
-    }
+}
+
+
+/// test the overloaded << operator
+TEST(AddressMockTest, testOutputOperator) {
+    AddressMock mock = AddressMock();
+    std::ostringstream stream;
+    stream << mock;
+    STRCMP_EQUAL(stream.str().c_str(), "Foo");
+}
 
 TEST(AddressMockTest, testEqualsToItself) {
     AddressMock mock = AddressMock();

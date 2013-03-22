@@ -17,6 +17,7 @@ package ara;
 
 import ara.ARA;
 // TODO!!
+import ara.OMNeTBattery;
 import ara.OMNeTEnergyAwareRoutingTable; 
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 import ara.evaporation.OMNeTLinearEvaporationPolicy;
@@ -67,6 +68,11 @@ module EARANetworkLayer
                 @display("p=138,215;q=pendingQueue");
             gates:
                 nicOut[nrOfNetworkInterfaces];
+        }
+
+        battery: OMNeTBattery {
+            parameters:
+                @display("p=49,293;i=block/plug");
         }
 
     connections allowunconnected:
