@@ -6,7 +6,7 @@
 #include "RoutingTableEntry.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
-#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
 #include <sstream>
@@ -19,7 +19,7 @@ ARAClientMock::ARAClientMock() {
     float initialPhi = 10.0;
     float deltaPhi = 5.0;
     Configuration configuration = Configuration(
-            new LinearEvaporationPolicyMock(),
+            new ExponentialEvaporationPolicyMock(),
             new LinearPathReinforcementPolicy(deltaPhi),
             new BestPheromoneForwardingPolicy(),
             initialPhi

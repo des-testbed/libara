@@ -10,7 +10,7 @@
 #include "NextHop.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 
 using namespace ARA;
 

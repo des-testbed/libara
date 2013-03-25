@@ -2,19 +2,19 @@
  * $FU-Copyright$
  */
 
-#include "LinearEvaporationPolicy.h"
+#include "ExponentialEvaporationPolicy.h"
 
 #include <cmath>
 #include <iostream>
 
 using namespace ARA;
 
-LinearEvaporationPolicy::LinearEvaporationPolicy(float evaporationFactor, float threshold, unsigned int timeIntervalInMilliSeconds) : EvaporationPolicy(timeIntervalInMilliSeconds) {
+ExponentialEvaporationPolicy::ExponentialEvaporationPolicy(float evaporationFactor, float threshold, unsigned int timeIntervalInMilliSeconds) : EvaporationPolicy(timeIntervalInMilliSeconds) {
     this->evaporationFactor = evaporationFactor;
     this->threshold = threshold;
 }
 
-float LinearEvaporationPolicy::evaporate(float oldPheromoneValue, int millisecondsSinceLastEvaporation){
+float ExponentialEvaporationPolicy::evaporate(float oldPheromoneValue, int millisecondsSinceLastEvaporation){
     if(millisecondsSinceLastEvaporation == 0) {
         return oldPheromoneValue;
     } else {

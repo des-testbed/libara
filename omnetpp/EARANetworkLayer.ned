@@ -20,7 +20,7 @@ import ara.ARA;
 import ara.OMNeTBattery;
 import ara.OMNeTEnergyAwareRoutingTable; 
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
-import ara.evaporation.OMNeTLinearEvaporationPolicy;
+import ara.evaporation.OMNeTExponentialEvaporationPolicy;
 import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
@@ -43,7 +43,7 @@ module EARANetworkLayer
                 @display("i=ara;p=138,102");
         }
 
-        evaporationPolicy: OMNeTLinearEvaporationPolicy {
+        evaporationPolicy: OMNeTExponentialEvaporationPolicy {
 
             @display("p=210,30");
         }

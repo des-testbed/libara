@@ -1,7 +1,7 @@
 @namespace(ARA::omnetpp);
 package ara.evaporation;
 
-simple OMNeTLinearEvaporationPolicy
+simple OMNeTExponentialEvaporationPolicy
 {
     parameters:
         double evaporationFactor = default(0.9);

@@ -9,7 +9,7 @@
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 
 #include <memory>
 #include <deque>
@@ -25,7 +25,7 @@ TEST_GROUP(PacketTrapTest) {
     EvaporationPolicy* evaporationPolicy;
 
     void setup() {
-        evaporationPolicy = new LinearEvaporationPolicyMock();
+        evaporationPolicy = new ExponentialEvaporationPolicyMock();
         routingTable = new RoutingTable();
         routingTable->setEvaporationPolicy(evaporationPolicy);
         packetTrap = new PacketTrap(routingTable);

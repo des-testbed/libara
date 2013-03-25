@@ -6,17 +6,17 @@
 #include <unistd.h>
 #include "CppUTest/TestHarness.h"
 
-#include "LinearEvaporationPolicy.h" 
+#include "ExponentialEvaporationPolicy.h" 
 
 using namespace ARA;
 
-TEST_GROUP(LinearEvaporationPolicyTest) {};
+TEST_GROUP(ExponentialEvaporationPolicyTest) {};
 
-TEST(LinearEvaporationPolicyTest, evaporate) {
+TEST(ExponentialEvaporationPolicyTest, evaporate) {
     float evaporationFactor = 0.9;
     float threshold = 0.75;
     unsigned int timeIntervalInMillis = 2000;
-    LinearEvaporationPolicy policy = LinearEvaporationPolicy(evaporationFactor, threshold, timeIntervalInMillis);
+    ExponentialEvaporationPolicy policy = ExponentialEvaporationPolicy(evaporationFactor, threshold, timeIntervalInMillis);
 
     float pheromone = 1;
 
@@ -37,11 +37,11 @@ TEST(LinearEvaporationPolicyTest, evaporate) {
     DOUBLES_EQUAL(0.0, pheromone, 0.00001);
 }
 
-TEST(LinearEvaporationPolicyTest, evaporateWithZeroTimeInterval) {
+TEST(ExponentialEvaporationPolicyTest, evaporateWithZeroTimeInterval) {
     float evaporationFactor = 0.9;
     float threshold = 0.75;
     unsigned int timeIntervalInMillis = 2000;
-    LinearEvaporationPolicy policy = LinearEvaporationPolicy(evaporationFactor, threshold, timeIntervalInMillis);
+    ExponentialEvaporationPolicy policy = ExponentialEvaporationPolicy(evaporationFactor, threshold, timeIntervalInMillis);
 
     float pheromone = 10;
 

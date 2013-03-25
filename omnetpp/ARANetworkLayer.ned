@@ -18,7 +18,7 @@ package ara;
 import ara.ARA;
 import ara.OMNeTRoutingTable;
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
-import ara.evaporation.OMNeTLinearEvaporationPolicy;
+import ara.evaporation.OMNeTExponentialEvaporationPolicy;
 import ara.forwarding.OMNeTStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
@@ -41,7 +41,7 @@ module ARANetworkLayer
                 @display("i=ara;p=138,102");
         }
 
-        evaporationPolicy: OMNeTLinearEvaporationPolicy {
+        evaporationPolicy: OMNeTExponentialEvaporationPolicy {
             parameters:
                 @display("p=210,30");
         }
