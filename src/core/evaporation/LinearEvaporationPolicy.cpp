@@ -5,6 +5,7 @@
 #include "LinearEvaporationPolicy.h"
 
 #include <cmath>
+#include <iostream>
 
 using namespace ARA;
 
@@ -16,10 +17,9 @@ LinearEvaporationPolicy::LinearEvaporationPolicy(float evaporationFactor, float 
 float LinearEvaporationPolicy::evaporate(float oldPheromoneValue, int millisecondsSinceLastEvaporation){
     if(millisecondsSinceLastEvaporation == 0) {
         return oldPheromoneValue;
-    }
-    else {
+    } else {
         float multiplicator = millisecondsSinceLastEvaporation / timeInterval;
-        float newPheromoneValue = pow(evaporationFactor * oldPheromoneValue, multiplicator);
+        float newPheromoneValue = oldPheromoneValue * pow(evaporationFactor, multiplicator);
 
         if (newPheromoneValue < threshold) {
             newPheromoneValue = 0;

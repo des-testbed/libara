@@ -755,28 +755,33 @@ TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
     CHECK(!(routingTable->exists(source, sender, interface)));
     CHECK(!(routingTable->exists(destination, anotherSender, interface)));
 
-    /// send fant
+    /// send fant (A --> B --> _C_ .... -> E)
     Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 123, 1);
     client->receivePacket(fant, interface);
     CHECK(routingTable->exists(source, sender, interface));
 
-    /// send bant
+    /// send bant (E --> D --> _C_ .... -> A) 
     Packet* bant = new Packet(destination, source, anotherSender, PacketType::BANT, 124, 1);
     client->receivePacket(bant, interface);
-    std::cout << " 2a: " << routingTable->getPheromoneValue(source, sender, interface) << std::endl;
-    std::cout << " 2b: " << routingTable->getPheromoneValue(destination , anotherSender, interface) << std::endl;
     CHECK(routingTable->exists(destination, anotherSender, interface));
     float currentPhi = routingTable->getPheromoneValue(destination, anotherSender, interface);
 
+    /// send data packet (A --> B --> C .... -> E)
     Packet* data = new Packet(source, destination, sender, PacketType::DATA, 125, 1);
     client->receivePacket(data, interface);
-    std::cout << " 3a: " << routingTable->getPheromoneValue(source, sender, interface) << std::endl;
-    std::cout << " 3b: " << routingTable->getPheromoneValue(destination , anotherSender, interface) << std::endl;
 
-    float newPhi = routingTable->getPheromoneValue(destination, sender, interface);
-    float newPhi2 = routingTable->getPheromoneValue(source, sender, interface);
-    std::cout << " 1: " << currentPhi << ", " << newPhi << ", " << newPhi2 << std::endl;
+    /// check if the reinforcement has worked on both sides of the route
+    float newPhiToDest = routingTable->getPheromoneValue(destination, anotherSender, interface);
+    float newPhiToSrc = routingTable->getPheromoneValue(source, sender, interface);
+    CHECK((newPhiToDest > currentPhi) && (newPhiToSrc > currentPhi));
 
+    /// let's pass 100 milliseconds
+    TimeMock::letTimePass(2000);
+
+    newPhiToDest = routingTable->getPheromoneValue(destination, anotherSender, interface);
+    newPhiToSrc = routingTable->getPheromoneValue(source, sender, interface);
+    /// check if the evaporation has taken place
+    CHECK((newPhiToDest < currentPhi) && (newPhiToSrc < currentPhi));
 }
 
 IGNORE_TEST(AbstractARAClientTest, duplicatePacketsDoNotUpdateTheRoutingTable) {

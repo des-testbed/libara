@@ -206,7 +206,7 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
         AddressPtr source = packet->getSource();
         if (routingTable->isDeliverable(source)) {
             // update an existing pheromone value
-            //reinforcePheromoneValue(source, packet->getSender(), interface);
+            reinforcePheromoneValue(source, packet->getSender(), interface);
         } else {
             // initialize a new pheromone value
             float initialPheromoneValue = calculateInitialPheromoneValue(packet->getHopCount());
