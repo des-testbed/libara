@@ -711,17 +711,17 @@ TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
 }
 
 TEST(AbstractARAClientTest, pathToSourceIsReinforced) {
-    NetworkInterface* interface = client->createNewNetworkInterfaceMock("X");
-    AddressPtr source(new AddressMock("a"));
-    AddressPtr sender(new AddressMock("b"));
-    AddressPtr destination(new AddressMock("c"));
+    NetworkInterface* interface = client->createNewNetworkInterfaceMock("C");
+    AddressPtr source(new AddressMock("A"));
+    AddressPtr sender(new AddressMock("B"));
+    AddressPtr destination(new AddressMock("D"));
 
     CHECK(!(routingTable->exists(source, sender, interface)));
     Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 123, 1);
     client->receivePacket(fant, interface);
     CHECK(routingTable->exists(source, sender, interface));
     float currentPhi = routingTable->getPheromoneValue(source, sender, interface);
-    Packet* data = new Packet(source, destination, sender, PacketType::DATA, 124, 1);
+    Packet* data = new Packet(destination, source, sender, PacketType::DATA, 124, 1);
     client->receivePacket(data, interface);
     float newPhi = routingTable->getPheromoneValue(source, sender, interface);
     CHECK(newPhi > currentPhi);
@@ -729,9 +729,9 @@ TEST(AbstractARAClientTest, pathToSourceIsReinforced) {
 
 TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("X");
-    AddressPtr source(new AddressMock("a"));
-    AddressPtr sender(new AddressMock("b"));
-    AddressPtr destination(new AddressMock("c"));
+    AddressPtr source(new AddressMock("A"));
+    AddressPtr sender(new AddressMock("B"));
+    AddressPtr destination(new AddressMock("C"));
 
     CHECK(!(routingTable->exists(destination, sender, interface)));
     Packet* bant = new Packet(destination, source, sender, PacketType::BANT, 123, 1);
@@ -745,25 +745,33 @@ TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
 }
 
 TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
-    NetworkInterface* interface = client->createNewNetworkInterfaceMock("X");
-    AddressPtr source(new AddressMock("a"));
-    AddressPtr sender(new AddressMock("b"));
-    AddressPtr destination(new AddressMock("c"));
+    NetworkInterface* interface = client->createNewNetworkInterfaceMock("C");
+    AddressPtr source(new AddressMock("A"));
+    AddressPtr sender(new AddressMock("B"));
+    AddressPtr anotherSender(new AddressMock("D"));
+    AddressPtr destination(new AddressMock("E"));
 
+    /// check if routing table entries exist
     CHECK(!(routingTable->exists(source, sender, interface)));
-    CHECK(!(routingTable->exists(destination, sender, interface)));
-    Packet* bant = new Packet(destination, source, sender, PacketType::BANT, 123, 1);
-    client->receivePacket(bant, interface);
-    CHECK(routingTable->exists(destination, sender, interface));
-    float currentPhi = routingTable->getPheromoneValue(destination, sender, interface);
+    CHECK(!(routingTable->exists(destination, anotherSender, interface)));
 
-
-    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 124, 1);
+    /// send fant
+    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 123, 1);
     client->receivePacket(fant, interface);
     CHECK(routingTable->exists(source, sender, interface));
 
+    /// send bant
+    Packet* bant = new Packet(destination, source, anotherSender, PacketType::BANT, 124, 1);
+    client->receivePacket(bant, interface);
+    std::cout << " 2a: " << routingTable->getPheromoneValue(source, sender, interface) << std::endl;
+    std::cout << " 2b: " << routingTable->getPheromoneValue(destination , anotherSender, interface) << std::endl;
+    CHECK(routingTable->exists(destination, anotherSender, interface));
+    float currentPhi = routingTable->getPheromoneValue(destination, anotherSender, interface);
+
     Packet* data = new Packet(source, destination, sender, PacketType::DATA, 125, 1);
     client->receivePacket(data, interface);
+    std::cout << " 3a: " << routingTable->getPheromoneValue(source, sender, interface) << std::endl;
+    std::cout << " 3b: " << routingTable->getPheromoneValue(destination , anotherSender, interface) << std::endl;
 
     float newPhi = routingTable->getPheromoneValue(destination, sender, interface);
     float newPhi2 = routingTable->getPheromoneValue(source, sender, interface);

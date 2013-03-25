@@ -206,9 +206,8 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
         AddressPtr source = packet->getSource();
         if (routingTable->isDeliverable(source)) {
             // update an existing pheromone value
-            reinforcePheromoneValue(source, packet->getSender(), interface);
-        }
-        else {
+            //reinforcePheromoneValue(source, packet->getSender(), interface);
+        } else {
             // initialize a new pheromone value
             float initialPheromoneValue = calculateInitialPheromoneValue(packet->getHopCount());
             routingTable->update(source, packet->getSender(), interface, initialPheromoneValue);
@@ -217,17 +216,13 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 
     if (packet->isDataPacket()) {
         handleDataPacket(packet);
-    }
-    else if(packet->isAntPacket()) {
+    } else if(packet->isAntPacket()) {
         handleAntPacket(packet);
-    }
-    else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
+    } else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
-    }
-    else if (packet->getType() == PacketType::ROUTE_FAILURE) {
+    } else if (packet->getType() == PacketType::ROUTE_FAILURE) {
         handleRouteFailurePacket(packet, interface);
-    }
-    else {
+    } else {
         throw Exception("Can not handle packet");
     }
 }
