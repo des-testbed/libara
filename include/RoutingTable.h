@@ -10,7 +10,7 @@
 #include "NetworkInterface.h"
 #include "EvaporationPolicy.h"
 #include "RoutingTableEntry.h"
-#include "LinearEvaporationPolicy.h"
+#include "ExponentialEvaporationPolicy.h"
 #include "Clock.h"
 
 #include <deque>

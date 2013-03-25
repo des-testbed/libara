@@ -12,7 +12,7 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/StochasticForwardingPolicyMock.h"
 
 #include <iostream>
@@ -24,7 +24,7 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(StochasticForwardingPolicyTest) {};
 
 TEST(StochasticForwardingPolicyTest, testGetNextHop) {
-    EvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicyMock();
+    EvaporationPolicy* evaporationPolicy = new ExponentialEvaporationPolicyMock();
     RoutingTable routingTable = RoutingTable();
     routingTable.setEvaporationPolicy(evaporationPolicy);
     AddressPtr destination (new AddressMock("Destination"));

@@ -4,13 +4,13 @@
 
 #include "CppUTest/TestHarness.h"
 #include "RoutingTable.h"
-#include "LinearEvaporationPolicy.h"
+#include "ExponentialEvaporationPolicy.h"
 #include "RoutingTableEntry.h"
 #include "PacketType.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
+#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/TimeMock.h"
 
 #include <deque>
@@ -21,10 +21,10 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(RoutingTableTest) {
     RoutingTable* routingTable;
-    LinearEvaporationPolicyMock* evaporationPolicy;
+    ExponentialEvaporationPolicyMock* evaporationPolicy;
 
     void setup() {
-        evaporationPolicy = new LinearEvaporationPolicyMock();
+        evaporationPolicy = new ExponentialEvaporationPolicyMock();
         routingTable = new RoutingTable();
         routingTable->setEvaporationPolicy(evaporationPolicy);
     }
