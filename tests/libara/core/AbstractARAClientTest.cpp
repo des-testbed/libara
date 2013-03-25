@@ -710,12 +710,78 @@ TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
     CHECK(routingTable->isDeliverable(source) == false);
 }
 
-IGNORE_TEST(AbstractARAClientTest, pathToSourceIsReinforced) {
-    FAIL("Not implemented yet");
+TEST(AbstractARAClientTest, pathToSourceIsReinforced) {
+    NetworkInterface* interface = client->createNewNetworkInterfaceMock("C");
+    AddressPtr source(new AddressMock("A"));
+    AddressPtr sender(new AddressMock("B"));
+    AddressPtr destination(new AddressMock("D"));
+
+    CHECK(!(routingTable->exists(source, sender, interface)));
+    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 123, 1);
+    client->receivePacket(fant, interface);
+    CHECK(routingTable->exists(source, sender, interface));
+    float currentPhi = routingTable->getPheromoneValue(source, sender, interface);
+    Packet* data = new Packet(destination, source, sender, PacketType::DATA, 124, 1);
+    client->receivePacket(data, interface);
+    float newPhi = routingTable->getPheromoneValue(source, sender, interface);
+    CHECK(newPhi > currentPhi);
 }
 
-IGNORE_TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
-    FAIL("Not implemented yet");
+TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
+    NetworkInterface* interface = client->createNewNetworkInterfaceMock("X");
+    AddressPtr source(new AddressMock("A"));
+    AddressPtr sender(new AddressMock("B"));
+    AddressPtr destination(new AddressMock("C"));
+
+    CHECK(!(routingTable->exists(destination, sender, interface)));
+    Packet* bant = new Packet(destination, source, sender, PacketType::BANT, 123, 1);
+    client->receivePacket(bant, interface);
+    CHECK(routingTable->exists(destination, sender, interface));
+    float currentPhi = routingTable->getPheromoneValue(destination, sender, interface);
+    Packet* data = new Packet(source, destination, sender, PacketType::DATA, 124, 1);
+    client->receivePacket(data, interface);
+    float newPhi = routingTable->getPheromoneValue(destination, sender, interface);
+    CHECK(newPhi > currentPhi);
+}
+
+TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
+    NetworkInterface* interface = client->createNewNetworkInterfaceMock("C");
+    AddressPtr source(new AddressMock("A"));
+    AddressPtr sender(new AddressMock("B"));
+    AddressPtr anotherSender(new AddressMock("D"));
+    AddressPtr destination(new AddressMock("E"));
+
+    /// check if routing table entries exist
+    CHECK(!(routingTable->exists(source, sender, interface)));
+    CHECK(!(routingTable->exists(destination, anotherSender, interface)));
+
+    /// send fant (A --> B --> _C_ .... -> E)
+    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 123, 1);
+    client->receivePacket(fant, interface);
+    CHECK(routingTable->exists(source, sender, interface));
+
+    /// send bant (E --> D --> _C_ .... -> A) 
+    Packet* bant = new Packet(destination, source, anotherSender, PacketType::BANT, 124, 1);
+    client->receivePacket(bant, interface);
+    CHECK(routingTable->exists(destination, anotherSender, interface));
+    float currentPhi = routingTable->getPheromoneValue(destination, anotherSender, interface);
+
+    /// send data packet (A --> B --> C .... -> E)
+    Packet* data = new Packet(source, destination, sender, PacketType::DATA, 125, 1);
+    client->receivePacket(data, interface);
+
+    /// check if the reinforcement has worked on both sides of the route
+    float newPhiToDest = routingTable->getPheromoneValue(destination, anotherSender, interface);
+    float newPhiToSrc = routingTable->getPheromoneValue(source, sender, interface);
+    CHECK((newPhiToDest > currentPhi) && (newPhiToSrc > currentPhi));
+
+    /// let's pass 100 milliseconds
+    TimeMock::letTimePass(2000);
+
+    newPhiToDest = routingTable->getPheromoneValue(destination, anotherSender, interface);
+    newPhiToSrc = routingTable->getPheromoneValue(source, sender, interface);
+    /// check if the evaporation has taken place
+    CHECK((newPhiToDest < currentPhi) && (newPhiToSrc < currentPhi));
 }
 
 IGNORE_TEST(AbstractARAClientTest, duplicatePacketsDoNotUpdateTheRoutingTable) {
