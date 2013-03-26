@@ -6,6 +6,9 @@
 #define ABSTRACT_EARA_CLIENT_H_
 
 #include "AbstractARAClient.h"
+#include "EARAConfiguration.h"
+#include "EnergyAwareRoutingTable.h"
+#include "Timer.h"
 
 namespace ARA {
 
@@ -17,7 +20,51 @@ typedef std::shared_ptr<Address> AddressPtr;
 class AbstractEARAClient : public AbstractARAClient {
 
 public:
+    /**
+     * This standard constructor is only provided for those concrete implementations that
+     * absolutely need a constructor without parameters (like in OMNeT++). If you use this
+     * constructor you must make sure to call AbstractARAClient::initialize before any call
+     * to AbstractARAClient::sendPacket or AbstractARAClient::receivePacket.
+     *
+     * The recommended way is the constructor that accepts a Configuration object which will
+     * handle initialization by default.
+     */
+    AbstractEARAClient() {}
 
+    /**
+     * This is the recommended constructor which should be used by all concrete implementation
+     * if possible. It will initialize the client with the given configuration so no additional
+     * call to AbstractARAClient::initialize is required.
+     */
+    AbstractEARAClient(Configuration& configuration, EnergyAwareRoutingTable *routingTable);
+
+    /**
+     * The standard virtual destructor of this abstract class.
+     */
+    virtual ~AbstractEARAClient();
+
+    void initialize(EARAConfiguration& configuration, RoutingTable *routingTable);
+
+    /**
+     * This method must be implemented by the concrete EARA client. It returns the current energy
+     * level in a range between 0 and 255. An energy level of 255 means full battery capactity
+     * and a level of 0 indicates that the energy is as good as depleted.
+     */
+    virtual char getCurrentEnergyLevel() = 0;
+
+    void timerHasExpired(Timer* responsibleTimer);
+
+private:
+    /**
+     * This method is private to prevent anyone from using it because we slightly changed
+     * the method signature to require an instance of EARAConfiguration.
+     */
+    void initialize(Configuration& configuration, RoutingTable *routingTable) {};
+
+    void sendEnergyDisseminationPacket();
+
+protected:
+    Timer* energyDisseminationTimer;
 };
 
 } /* namespace ARA */

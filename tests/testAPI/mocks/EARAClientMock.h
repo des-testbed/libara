@@ -11,6 +11,7 @@
 #include "NetworkInterfaceMock.h"
 #include "PacketTrap.h"
 #include "EnergyAwareRoutingTable.h"
+#include "testAPI/mocks/time/TimerMock.h"
 
 #include <string>
 
@@ -30,9 +31,19 @@ public:
     void deliverToSystem(const Packet* packet);
     void packetNotDeliverable(const Packet* packet);
 
+    char getCurrentEnergyLevel();
+
+    // Mocking methods
+    void setEnergy(char newEnergyLevel);
+
     PacketTrap* getPacketTrap();
     EnergyAwareRoutingTable* getRoutingTable();
+    TimerMock* getEnergyDisseminationTimer();
+
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
+
+private:
+    char currentEnergyLevel;
 };
 
 } /* namespace ARA */

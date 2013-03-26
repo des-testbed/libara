@@ -45,6 +45,7 @@ public:
             case PacketType::ACK: return "ACK";
             case PacketType::DUPLICATE_ERROR: return "DUPLICATE_ERROR";
             case PacketType::ROUTE_FAILURE: return "ROUTE_FAILURE";
+            case PacketType::ENERGY_INFO: return "ENERGY_INFO";
             default: return "UNKOWN";
         }
     }
