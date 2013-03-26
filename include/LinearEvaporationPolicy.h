@@ -23,13 +23,13 @@ namespace ARA {
              * @param threshold denotes at what point the pheromone level is set to 0
              * @param timeIntervalMillis denotes the time interval in milliseconds at which the evaporation periodically should take place
              */
-            LinearEvaporationPolicy(float adaptiveSlowDownFactor, float threshold, unsigned int timeIntervalMillis = 1000);
+            LinearEvaporationPolicy(float evaporationFactor, float threshold, unsigned int timeIntervalMillis = 1000);
 
             float evaporate(float oldPheromoneValue, int millisecondsSinceLastEvaporation);
 
         protected:
             float threshold;
-            float adaptiveSlowDownFactor;
+            float evaporationFactor;
     };
 } /* namespace ARA */
 
