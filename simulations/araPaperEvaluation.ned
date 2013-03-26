@@ -20,7 +20,7 @@ import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
 import inet.world.ChannelControl;
 
-network PaperEvaluation
+network ARAPaperEvaluation
 {
     parameters:
         double playgroundSizeX;
