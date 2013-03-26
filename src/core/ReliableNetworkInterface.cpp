@@ -16,6 +16,7 @@ ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, in
     unacknowledgedPackets = deque<const Packet*>();
     runningTimers = unordered_map<Timer*, AckTimerData>();
     this->ackTimeoutInMicroSeconds = ackTimeoutInMicroSeconds;
+    packetFactory = Environment::getPacketFactory();
 }
 
 ReliableNetworkInterface::~ReliableNetworkInterface() {
@@ -100,7 +101,7 @@ void ReliableNetworkInterface::handleNonAckPacket(Packet* packet) {
     AddressPtr destination = packet->getDestination();
 
     if(packet->isAntPacket() == false) { // TODO actually we want to test if the packet has been sent via a broadcast but this is currently not possible with the API
-        Packet* ackPacket = packet->createAcknowledgment();
+        Packet* ackPacket = packetFactory->makeAcknowledgmentPacket(packet);
         doSend(ackPacket, packet->getSender());
         delete ackPacket;
     }

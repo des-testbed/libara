@@ -106,30 +106,6 @@ bool Packet::equals(const Packet* otherPacket) const {
     return this->seqNr == otherPacket->getSequenceNumber() && this->source->equals(otherPacket->getSource());
 }
 
-Packet* Packet::clone() const {
-    return new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
-}
-
-Packet* Packet::createFANT(unsigned int sequenceNumber) const {
-    return new Packet(source, destination, sender, PacketType::FANT, sequenceNumber);
-}
-
-Packet* Packet::createBANT(unsigned int sequenceNumber) const {
-    return new Packet(destination, source, sender, PacketType::BANT, sequenceNumber);
-}
-
-Packet* Packet::createDuplicateWarning() const {
-    return new Packet(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, 1);
-}
-
-Packet* Packet::createAcknowledgment() const {
-    return new Packet(source, destination, sender, PacketType::ACK, seqNr, 1);
-}
-
-Packet* Packet::createRouteFailurePacket() const {
-    return new Packet(source, destination, sender, PacketType::ROUTE_FAILURE, seqNr, 1);
-}
-
 size_t Packet::getHashValue() const {
     // TODO Review and tweak this hash value generation (naiv implementation)
     size_t sourceHash = source->getHashValue();

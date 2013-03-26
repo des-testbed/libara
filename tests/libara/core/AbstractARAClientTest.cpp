@@ -28,11 +28,13 @@ TEST_GROUP(AbstractARAClientTest) {
     ARAClientMock* client;
     PacketTrap* packetTrap;
     RoutingTable* routingTable;
+    PacketFactory* packetFactory;
 
     void setup() {
         client = new ARAClientMock();
         packetTrap = client->getPacketTrap();
         routingTable = client->getRoutingTable();
+        packetFactory = Environment::getPacketFactory();
     }
 
     void teardown() {
@@ -68,7 +70,7 @@ TEST(AbstractARAClientTest, generalBroadCast) {
     NetworkInterfaceMock* interface3 = client->createNewNetworkInterfaceMock();
 
     Packet* packet = new PacketMock();
-    Packet* clone = packet->clone(); // we need to create this clone because the original packet will be deleted directly in the broadcast method
+    Packet* clone = packetFactory->makeClone(packet); // we need to create this clone because the original packet will be deleted directly in the broadcast method
     client->broadCast(packet);
 
     CHECK(interface1->hasPacketBeenBroadCasted(clone) == true);
@@ -475,7 +477,7 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
 
     // emulate that the neighbor does also broadcast the FANT and this client receives it
     AddressPtr neighborAddress (new AddressMock("B"));
-    Packet* answer = sentPacket->clone();
+    Packet* answer = packetFactory->makeClone(sentPacket);
     answer->increaseHopCount();
     answer->setSender(neighborAddress);
     client->receivePacket(answer, interface);
@@ -506,7 +508,7 @@ TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
 
     // emulate that the neighbor does also broadcast the BANT and this client receives it back
     AddressPtr neighborAddress (new AddressMock("Y"));
-    Packet* answer = sentPacket->clone();
+    Packet* answer = packetFactory->makeClone(sentPacket);
     answer->increaseHopCount();
     answer->setSender(neighborAddress);
     client->receivePacket(answer, interface);
@@ -883,7 +885,7 @@ IGNORE_TEST(AbstractARAClientTest, doSendDuplicateWarningToSameSender) {
 
     unsigned int sequenceNumber = 123;
     Packet* originalPacket = new PacketMock("source", "destination", "sender", sequenceNumber);
-    Packet* clone = originalPacket->clone();
+    Packet* clone = packetFactory->makeClone(originalPacket);
 
     // start the test
     client->receivePacket(originalPacket, interface);

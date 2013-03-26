@@ -162,58 +162,6 @@ public:
      */
     void decreaseHopCount();
 
-    virtual Packet* clone() const;
-
-    // TODO all createXYZ methods should be moved into a PacketFactory class which is part of the environment
-
-    /**
-     * Creates a new FANT based on this packet. The FANT inherits all the
-     * addresses of this packet. The hop count is also replicated.
-     *
-     * Note: The result of this method is a newly created object which must be
-     * deleted later by the calling class.
-     */
-	virtual Packet* createFANT(unsigned int sequenceNumber) const;
-
-	/**
-	 * Creates a new BANT based on this packet. This BANT has the destination of
-	 * this packet as its source and the destination of this as its source.
-	 * The hop count will be set to 0. The sequence number of the BANT is
-	 * given as argument of this method.
-	 *
-	 * Note: The result of this method is a newly created object which must be
-	 * deleted later by the calling class.
-	 */
-	virtual Packet* createBANT(unsigned int sequenceNumber) const;
-
-	/**
-     * Creates a new DUPLICATE_WARNING packet based on the information in this
-     * packet. The DUPLICATE_WARNING inherits all the addresses of this packet.
-     * The hop count is incremented.
-     *
-     * Note: The result of this method is a newly created object which must be
-     * deleted later by the calling class.
-     */
-    virtual Packet* createDuplicateWarning() const;
-
-    /**
-     * Creates a new acknowledgment packet based on this packet. The source,
-     * destination and sequence number will equal to this packet.
-     *
-     * Note: The result of this method is a newly created object which must be
-     * deleted later by the calling class.
-     */
-    virtual Packet* createAcknowledgment() const;
-
-    /**
-     * Creates a new route failure packet based on this packet. The source,
-     * destination and sequence number will equal to this packet.
-     *
-     * Note: The result of this method is a newly created object which must be
-     * deleted later by the calling class.
-     */
-    virtual Packet* createRouteFailurePacket() const;
-
 protected:
     std::shared_ptr<Address> source;
     std::shared_ptr<Address> destination;

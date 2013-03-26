@@ -32,6 +32,8 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable *r
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
+
+    packetFactory = Environment::getPacketFactory();
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -143,7 +145,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         packetTrap->trapPacket(packet);
 
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packet->createFANT(sequenceNr);
+        Packet* fant = packetFactory->makeFANT(packet, sequenceNr);
         broadCast(fant);
 
         startRouteDiscoveryTimer(packet);
@@ -195,7 +197,7 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
 }
 
 void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
-    Packet* duplicateWarningPacket = packet->createDuplicateWarning();
+    Packet* duplicateWarningPacket = packetFactory->makeDulicateWarningPacket(packet);
     duplicateWarningPacket->setSender(interface->getLocalAddress());
     interface->send(duplicateWarningPacket, packet->getSender());
 }
@@ -257,7 +259,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
-        Packet* bant = packet->createBANT(getNextSequenceNumber());
+        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber());
         broadCast(bant);
     }
     else if(packetType == PacketType::BANT) {
@@ -324,7 +326,7 @@ void AbstractARAClient::broadCast(Packet* packet) {
     packet->increaseHopCount();
 
     for(auto& interface: interfaces) {
-        Packet* packetClone = packet->clone();
+        Packet* packetClone = packetFactory->makeClone(packet);
         packetClone->setSender(interface->getLocalAddress());
         interface->broadcast(packetClone);
     }
@@ -399,7 +401,7 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
         discoveryInfo.nrOfRetries++;
         runningRouteDiscoveryTimers[routeDiscoveryTimer] = discoveryInfo;
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = discoveryInfo.originalPacket->createFANT(sequenceNr);
+        Packet* fant = packetFactory->makeFANT(discoveryInfo.originalPacket, sequenceNr);
         broadCast(fant);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
@@ -427,7 +429,7 @@ void AbstractARAClient::handleRouteFailure(Packet* packet, AddressPtr nextHop, N
         sendPacket(packet);
     }
     else {
-        Packet* routeFailurePacket = packet->createRouteFailurePacket();
+        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(packet);
         broadCast(routeFailurePacket);
         delete packet;
     }

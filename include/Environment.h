@@ -6,6 +6,7 @@
 #define ENVIRONMENT_H_
 
 #include "Clock.h"
+#include "PacketFactory.h"
 
 namespace ARA {
 
@@ -29,11 +30,18 @@ public:
      */
     static Clock* getClock();
 
+    /**
+     * TODO write some description
+     */
+    static PacketFactory* getPacketFactory();
+
     static void setClock(Clock* newClock);
+    static void setPacketFactory(PacketFactory* newFactory);
 
 private:
     static Environment* instance;
     Clock* clock;
+    PacketFactory* packetFactory;
 
     /**
      * Private singleton constructor.
@@ -45,6 +53,11 @@ private:
      * The non static variant of Environment::setClock()
      */
     void setTheClock(Clock* newClock);
+
+    /**
+     * The non static variant of Environment::setPacketFactory()
+     */
+    void setThePacketFactory(PacketFactory* newFactory);
 
     /**
      * Access from the outside should always be directly through the static methods

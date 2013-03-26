@@ -4,6 +4,7 @@
 
 #include "NetworkInterfaceMock.h"
 #include "AddressMock.h"
+#include "Environment.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ std::deque<Pair<const Packet*, AddressPtr>*>* NetworkInterfaceMock::getSentPacke
 }
 
 void NetworkInterfaceMock::doSend(const Packet* packet, AddressPtr recipient) {
-    Packet* clone = packet->clone();
+    Packet* clone = Environment::getPacketFactory()->makeClone(packet);
     sentPackets.push_back(new Pair<const Packet*, AddressPtr>(clone, recipient));
 }
 

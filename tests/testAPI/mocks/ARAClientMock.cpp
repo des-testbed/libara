@@ -60,7 +60,7 @@ void ARAClientMock::deliverToSystem(const Packet* packet) {
 
 void ARAClientMock::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     PacketInfo packetInfo;
-    packetInfo.packet = packet->clone();
+    packetInfo.packet = packetFactory->makeClone(packet);
     packetInfo.nextHop = nextHop;
     packetInfo.interface = interface;
     routeFailurePackets.push_back(packetInfo);

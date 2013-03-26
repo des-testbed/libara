@@ -8,6 +8,7 @@
 #include "AbstractNetworkInterface.h"
 #include "TimeoutEventListener.h"
 #include "AbstractARAClient.h"
+#include "PacketFactory.h"
 
 #include <memory>
 
@@ -78,6 +79,7 @@ namespace ARA {
 
 
         protected:
+            PacketFactory* packetFactory;
             std::deque<const Packet*> unacknowledgedPackets;
             std::unordered_map<Timer*, AckTimerData> runningTimers;
             double ackTimeoutInMicroSeconds;

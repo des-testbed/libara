@@ -97,54 +97,6 @@ TEST(PacketTest, createWithoutPayloadButWithHopCount) {
     CHECK(packet.getPayload() == false);
 }
 
-TEST(PacketTest, createFANT) {
-   AddressPtr source (new AddressMock("source"));
-   AddressPtr destination (new AddressMock("destination"));
-   AddressPtr sender (new AddressMock("sender"));
-   unsigned int type = PacketType::DATA;
-   int seqNr = 3;
-   const char* payload = "Hello World";
-
-   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), 123);
-   unsigned int newSequenceNumber = 242342;
-   Packet* fant = packet.createFANT(newSequenceNumber);
-
-   CHECK(fant->getSource()->equals(source));
-   CHECK(fant->getDestination()->equals(destination));
-   // The sender of a FANT will be determined when it is actually send by the ARA client
-   CHECK_EQUAL(PacketType::FANT, fant->getType());
-   LONGS_EQUAL(newSequenceNumber, fant->getSequenceNumber());
-   LONGS_EQUAL(0, fant->getPayloadLength());
-   LONGS_EQUAL(0, fant->getHopCount());
-
-   delete fant;
-}
-
-TEST(PacketTest, clone) {
-   AddressPtr source (new AddressMock("source"));
-   AddressPtr destination (new AddressMock("destination"));
-   AddressPtr sender (new AddressMock("sender"));
-   char type = PacketType::DATA;
-   unsigned int seqNr = 3;
-   const char* payload = "Hello World";
-   unsigned int hopCount = 123;
-
-   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
-   Packet* clone = packet.clone();
-
-   CHECK(clone->getSource()->equals(source));
-   CHECK(clone->getDestination()->equals(destination));
-   CHECK(clone->getSender()->equals(sender));
-   CHECK_EQUAL(type, clone->getType());
-   CHECK_EQUAL(seqNr, clone->getSequenceNumber());
-   LONGS_EQUAL(strlen(payload), clone->getPayloadLength());
-   CHECK_EQUAL(payload, clone->getPayload());
-   CHECK_EQUAL(hopCount, clone->getHopCount());
-   CHECK(packet.equals(clone));
-
-   delete clone;
-}
-
 TEST(PacketTest, setHopCount) {
    AddressPtr source (new AddressMock("source"));
    AddressPtr destination (new AddressMock("destination"));
@@ -236,29 +188,6 @@ TEST(PacketTest, increaseHopCount) {
     LONGS_EQUAL(hopCount+2, packet.getHopCount());
 }
 
-TEST(PacketTest, createBANT) {
-    AddressPtr originalSource (new AddressMock("source"));
-    AddressPtr originalDestination (new AddressMock("destination"));
-    AddressPtr originalSender (new AddressMock("sender"));
-    unsigned int type = PacketType::FANT;
-    int seqNr = 3;
-    unsigned int hopCount = 123;
-
-    Packet packet = Packet(originalSource, originalDestination, originalSender, type, seqNr, hopCount);
-    unsigned int newSequenceNumber = 12345;
-    Packet* bant = packet.createBANT(newSequenceNumber);
-
-    CHECK(bant->getSource()->equals(originalDestination));
-    CHECK(bant->getDestination()->equals(originalSource));
-    // The sender of the BANT will be determined when it is actually send by the ARA client
-    CHECK_EQUAL(PacketType::BANT, bant->getType());
-    LONGS_EQUAL(newSequenceNumber, bant->getSequenceNumber());
-    LONGS_EQUAL(0, bant->getPayloadLength());
-    LONGS_EQUAL(0, bant->getHopCount());
-
-    delete bant;
-}
-
 TEST(PacketTest, getHashValue) {
     AddressPtr address1 (new AddressMock("A"));
     AddressPtr address2 (new AddressMock("B"));
@@ -274,28 +203,6 @@ TEST(PacketTest, getHashValue) {
     CHECK(packet4.getHashValue() == packet5.getHashValue()); // same source - same seqNr
 }
 
-TEST(PacketTest, createDulicatePacket) {
-    AddressPtr originalSource (new AddressMock("source"));
-    AddressPtr originalDestination (new AddressMock("destination"));
-    AddressPtr originalSender (new AddressMock("sender"));
-    unsigned int type = PacketType::DATA;
-    unsigned int originalseqenceNumber = 3;
-    unsigned int originalHopCount = 123;
-
-    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalHopCount);
-    Packet* duplicateWarning = packet.createDuplicateWarning();
-
-    CHECK(duplicateWarning->getSource()->equals(originalSource));
-    CHECK(duplicateWarning->getDestination()->equals(originalDestination));
-    // The sender of the packet will be determined when it is actually send by the ARA client
-    CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
-    CHECK_EQUAL(originalseqenceNumber, duplicateWarning->getSequenceNumber());
-    CHECK_EQUAL(0, duplicateWarning->getPayloadLength());
-    CHECK_EQUAL(1, duplicateWarning->getHopCount());
-
-    delete duplicateWarning;
-}
-
 TEST(PacketTest, getAddressString) {
     AddressPtr originalSource (new AddressMock("source"));
     AddressPtr originalDestination (new AddressMock("destination"));
@@ -308,28 +215,6 @@ TEST(PacketTest, getAddressString) {
     STRCMP_EQUAL("source", packet.getSourceString());
     STRCMP_EQUAL("sender", packet.getSenderString());
     STRCMP_EQUAL("destination", packet.getDestinationString());
-}
-
-TEST(PacketTest, createAcknowledgment) {
-    AddressPtr originalSource (new AddressMock("source"));
-    AddressPtr originalDestination (new AddressMock("destination"));
-    AddressPtr originalSender (new AddressMock("sender"));
-    unsigned int type = PacketType::DATA;
-    unsigned int originalseqenceNumber = 123;
-    unsigned int originalHopCount = 3;
-
-    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalHopCount);
-    Packet* ackPacket = packet.createAcknowledgment();
-
-    CHECK(ackPacket->getSource()->equals(originalSource));
-    CHECK(ackPacket->getDestination()->equals(originalDestination));
-    // The sender of the packet will be determined when it is actually send by the ARA client
-    CHECK_EQUAL(PacketType::ACK, ackPacket->getType());
-    CHECK_EQUAL(originalseqenceNumber, ackPacket->getSequenceNumber());
-    CHECK_EQUAL(0, ackPacket->getPayloadLength());
-    CHECK_EQUAL(1, ackPacket->getHopCount());
-
-    delete ackPacket;
 }
 
 TEST(PacketTest, decreaseHopCount) {
@@ -349,26 +234,4 @@ TEST(PacketTest, decreaseHopCount) {
 
     packet.decreaseHopCount();
     LONGS_EQUAL(hopCount-2, packet.getHopCount());
-}
-
-TEST(PacketTest, createRouteFailurePacket) {
-    AddressPtr originalSource (new AddressMock("source"));
-    AddressPtr originalDestination (new AddressMock("destination"));
-    AddressPtr originalSender (new AddressMock("sender"));
-    unsigned int type = PacketType::DATA;
-    unsigned int originalseqenceNumber = 123;
-    unsigned int originalHopCount = 3;
-
-    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalHopCount);
-    Packet* routeFailurePacket = packet.createRouteFailurePacket();
-
-    CHECK(routeFailurePacket->getSource()->equals(originalSource));
-    CHECK(routeFailurePacket->getDestination()->equals(originalDestination));
-    // The sender of the packet will be determined when it is actually send by the ARA client
-    CHECK_EQUAL(PacketType::ROUTE_FAILURE, routeFailurePacket->getType());
-    CHECK_EQUAL(originalseqenceNumber, routeFailurePacket->getSequenceNumber());
-    CHECK_EQUAL(0, routeFailurePacket->getPayloadLength());
-    CHECK_EQUAL(1, routeFailurePacket->getHopCount());
-
-    delete routeFailurePacket;
 }

@@ -12,6 +12,7 @@
 #include "NextHop.h"
 #include "NetworkInterface.h"
 #include "PacketTrap.h"
+#include "PacketFactory.h"
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "ForwardingPolicy.h"
@@ -250,6 +251,7 @@ protected:
     std::deque<NetworkInterface*> interfaces;
     RoutingTable* routingTable;
     PacketTrap* packetTrap;
+    PacketFactory* packetFactory;
 
     double initialPheromoneValue;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
