@@ -2,6 +2,7 @@
  * $FU-Copyright$
  */
 
+#include "Environment.h"
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/OMNeTAddress.h"
@@ -32,6 +33,7 @@ OMNeTGate::OMNeTGate(ARA* araClient, cGate* gateToARP, InterfaceEntry* interface
     this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress));
     this->broadcastAddress = shared_ptr<Address>(new OMNeTAddress(broadcastAddress));
     this->interfaceID = interfaceEntry->getInterfaceId();
+    this->packetFactory = Environment::getPacketFactory();
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
@@ -41,7 +43,7 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
     // TODO somehow remove this ugly casting stuff
     OMNeTPacket* originalPacket = (OMNeTPacket*) packet;
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) originalPacket->clone();
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packetFactory->makeClone(originalPacket);
     OMNeTAddressPtr nextHopAddress = getNextHopAddress(recipient);
 
     // Get the encapsulated packet (if any)
