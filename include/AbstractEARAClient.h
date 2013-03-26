@@ -50,7 +50,7 @@ public:
      * level in a range between 0 and 255. An energy level of 255 means full battery capactity
      * and a level of 0 indicates that the energy is as good as depleted.
      */
-    virtual char getCurrentEnergyLevel() = 0;
+    virtual unsigned char getCurrentEnergyLevel() = 0;
 
     void timerHasExpired(Timer* responsibleTimer);
 

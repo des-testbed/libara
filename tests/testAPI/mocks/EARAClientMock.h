@@ -31,10 +31,10 @@ public:
     void deliverToSystem(const Packet* packet);
     void packetNotDeliverable(const Packet* packet);
 
-    char getCurrentEnergyLevel();
+    unsigned char getCurrentEnergyLevel();
 
     // Mocking methods
-    void setEnergy(char newEnergyLevel);
+    void setEnergy(unsigned char newEnergyLevel);
 
     PacketTrap* getPacketTrap();
     EnergyAwareRoutingTable* getRoutingTable();
@@ -43,7 +43,7 @@ public:
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
 
 private:
-    char currentEnergyLevel;
+    unsigned char currentEnergyLevel;
 };
 
 } /* namespace ARA */

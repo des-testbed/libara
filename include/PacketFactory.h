@@ -76,12 +76,20 @@ public:
       */
      Packet* makeRouteFailurePacket(const Packet* originalPacket);
 
+     /**
+       * Creates a new energy dissemination packet with the given parameters.
+       *
+       * Note: The result of this method is a newly created object which must be
+       * deleted later by the calling class.
+       */
+     Packet* makeEnergyDisseminationPacket(AddressPtr source, unsigned int seqNr, unsigned char energyLevel);
+
 protected:
      /**
       * This method is responsible for creating the actual packet instance.
       * It can be overridden if another other Packet class shall be used.
       */
-     virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 0);
+     virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload=nullptr, unsigned int payloadSize=0, unsigned int hopCount = 0);
 };
 
 } /* namespace ARA */

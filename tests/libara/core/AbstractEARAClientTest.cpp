@@ -57,7 +57,6 @@ TEST(AbstractEARAClientTest, sendPeriodicEnergyInformationMessages) {
     CHECK(interface->isBroadcastAddress(sentPacketInfo->getRight()));
     CHECK(sentPacket->getType() == PacketType::ENERGY_INFO);
     CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
-    CHECK(interface->isBroadcastAddress(sentPacket->getDestination()));
 
     // check the payload
     BYTES_EQUAL(1, sentPacket->getPayloadLength());

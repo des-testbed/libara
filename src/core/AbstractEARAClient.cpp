@@ -33,7 +33,13 @@ void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
 }
 
 void AbstractEARAClient::sendEnergyDisseminationPacket() {
-
+    for(auto& interface: interfaces) {
+        AddressPtr interfaceAddress = interface->getLocalAddress();
+        unsigned int seqNr = getNextSequenceNumber();
+        unsigned char currentEnergyLevel = getCurrentEnergyLevel();
+        Packet* energyPacket = packetFactory->makeEnergyDisseminationPacket(interfaceAddress, seqNr, currentEnergyLevel);
+        interface->broadcast(energyPacket);
+    }
 }
 
 } /* namespace ARA */

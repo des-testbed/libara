@@ -162,3 +162,25 @@ TEST(PacketFactoryTest, makeRouteFailurePacket) {
 
     delete routeFailurePacket;
 }
+
+TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
+    AddressPtr originalSource (new AddressMock("source"));
+    //???AddressPtr destination (new AddressMock("destination"));
+    unsigned int seqNr = 123;
+    unsigned char energyLevel = 255;
+    Packet* energyPacket = factory->makeEnergyDisseminationPacket(originalSource, seqNr, energyLevel);
+
+    CHECK(energyPacket->getSource()->equals(originalSource));
+    CHECK(energyPacket->getSender()->equals(originalSource));
+    // we do not need to check the destination field because it will be set to the broadcast address by the NIC
+
+    CHECK_EQUAL(PacketType::ENERGY_INFO, energyPacket->getType());
+    CHECK_EQUAL(seqNr, energyPacket->getSequenceNumber());
+    CHECK_EQUAL(1, energyPacket->getPayloadLength());
+    CHECK_EQUAL(1, energyPacket->getHopCount());
+
+    const char* payload = energyPacket->getPayload();
+    BYTES_EQUAL(energyLevel, payload[0]);
+
+    delete energyPacket;
+}

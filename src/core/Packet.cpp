@@ -17,7 +17,7 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
     this->type = type;
     this->seqNr = seqNr;
 
-    if(payload != NULL && payloadSize == 0) {
+    if(payload != nullptr && payloadSize == 0) {
         payloadSize = std::strlen(payload);
     }
 
@@ -34,7 +34,7 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
     this->seqNr = seqNr;
     this->hopCount = hopCount;
 
-    this->payload = NULL;
+    this->payload = nullptr;
     this->payloadSize = 0;
 }
 
@@ -46,12 +46,16 @@ Packet::Packet(AddressPtr source, AddressPtr destination, char type, unsigned in
     this->seqNr = seqNr;
 
     this->hopCount = 1;
-    this->payload = NULL;
+    this->payload = nullptr;
     this->payloadSize = 0;
 }
 
 Packet::~Packet() {
-    // Address cleanup is done by the shared_ptrs
+   if(type == PacketType::ENERGY_INFO) {
+        //FIXME this seems like a dirty hack.. How do we release  dynamically allocated payload?
+        delete payload;
+   }
+   // Address cleanup is done by the shared_ptrs
 }
 
 AddressPtr Packet::getSource() const {
