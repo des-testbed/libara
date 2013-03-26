@@ -54,7 +54,7 @@ module ARANetworkLayer
         routingTableStatistics: OMNeTRoutingTable {
            parameters:
                @display("p=210,122");
- 	}
+ 	    }
 
         pathReinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
 
