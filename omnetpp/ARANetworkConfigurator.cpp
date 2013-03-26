@@ -43,6 +43,11 @@ void ARANetworkConfigurator::extractTopology(cTopology& topology) {
     EV << "ARANetworkConfigurator is configuring " << topology.getNumNodes() << " ARAClient instances\n";
 
     int numberOfNodes = topology.getNumNodes();
+
+    if(numberOfNodes <= 0) {
+        throw cRuntimeError("Error while setting up the network configuration: Could not find any ara.NetworkNode");
+    }
+
     nodeInfo.resize(numberOfNodes);
     for (int i=0; i<numberOfNodes; i++) {
         cModule* module = topology.getNode(i)->getModule();
