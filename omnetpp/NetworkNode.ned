@@ -18,8 +18,9 @@ package ara;
 import inet.base.NotificationBoard;
 import ara.ARANetworkLayer;
 import ara.OMNeTBattery;
-import inet.linklayer.ieee80211.Ieee80211NicAdhoc;
-import inet.mobility.NullMobility;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.models.RandomWPMobility;
+import inet.mobility.IMobility;
 import inet.nodes.wireless.WirelessHost;
 import inet.applications.pingapp.PingApp;
 import inet.networklayer.common.InterfaceTable;
@@ -30,6 +31,8 @@ module NetworkNode
     parameters:
         @display("i=device/wifilaptop;bgb=366,335");
         int nrOfNetworkInterfaces = default(1);
+        string mobilityType = default("RandomWPMobility");
+
     gates:
         input radioIn @directIn;
 
@@ -57,13 +60,15 @@ module NetworkNode
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
         }
-        wlan[nrOfNetworkInterfaces]: Ieee80211NicAdhoc {
+        wlan[nrOfNetworkInterfaces]: Ieee80211Nic {
             parameters:
+                // there is now only one nic which is controlled in its behavior by various parameters
+                mgmtType = "Ieee80211MgmtAdhoc";
                 @display("p=239,222;q=queue");
         }
 
         // Stationary node
-        mobility: NullMobility {
+        mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=49,230");
         }
@@ -78,8 +83,8 @@ module NetworkNode
         app.pingIn <-- ara.upperLayerGate$o;
 
         for i=0..nrOfNetworkInterfaces-1 {
-            ara.ifOut[i] --> wlan[i].uppergateIn;
-            ara.ifIn[i] <-- wlan[i].uppergateOut;
+            ara.ifOut[i] --> wlan[i].upperLayerIn;
+            ara.ifIn[i] <-- wlan[i].upperLayerOut;
             wlan[i].radioIn <-- radioIn;
         }
 
