@@ -43,7 +43,7 @@ public:
      */
     virtual ~AbstractEARAClient();
 
-    void initialize(EARAConfiguration& configuration, RoutingTable *routingTable);
+    void initialize(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable);
 
     /**
      * This method must be implemented by the concrete EARA client. It returns the current energy
@@ -54,6 +54,13 @@ public:
 
     void timerHasExpired(Timer* responsibleTimer);
 
+protected:
+    /**
+     * Method is overriden to implement the handling of the energy information packets.
+     * @see AbstractARAClient::handlePacket
+     */
+    void handlePacket(Packet* packet, NetworkInterface* interface);
+
 private:
     /**
      * This method is private to prevent anyone from using it because we slightly changed
@@ -62,9 +69,11 @@ private:
     void initialize(Configuration& configuration, RoutingTable *routingTable) {};
 
     void sendEnergyDisseminationPacket();
+    void handleEnergyInfoPacket(Packet* packet);
 
 protected:
     Timer* energyDisseminationTimer;
+    EnergyAwareRoutingTable* routingTable;
 };
 
 } /* namespace ARA */

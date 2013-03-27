@@ -5,6 +5,8 @@
 #include "AbstractEARAClient.h"
 #include "Environment.h"
 
+#include <cassert>
+
 using namespace std;
 
 namespace ARA {
@@ -13,11 +15,12 @@ AbstractEARAClient::AbstractEARAClient(Configuration& configuration, EnergyAware
     initialize(configuration, routingTable);
 }
 
-void AbstractEARAClient::initialize(EARAConfiguration& configuration, RoutingTable *routingTable) {
+void AbstractEARAClient::initialize(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable) {
     AbstractARAClient::initialize(configuration, routingTable);
     energyDisseminationTimer = Environment::getClock()->getNewTimer();
     energyDisseminationTimer->addTimeoutListener(this);
     energyDisseminationTimer->run(configuration.getEnergyDisseminationTimeout());
+    this->routingTable = routingTable;
 }
 
 AbstractEARAClient::~AbstractEARAClient() {
@@ -41,6 +44,24 @@ void AbstractEARAClient::sendEnergyDisseminationPacket() {
         Packet* energyPacket = packetFactory->makeEnergyDisseminationPacket(interfaceAddress, seqNr, currentEnergyLevel);
         interface->broadcast(energyPacket);
     }
+}
+
+void AbstractEARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
+    if(packet->getType() == PacketType::ENERGY_INFO) {
+        handleEnergyInfoPacket(packet);
+    }
+    else {
+        AbstractARAClient::handlePacket(packet, interface);
+    }
+}
+
+void AbstractEARAClient::handleEnergyInfoPacket(Packet* packet) {
+    assert(packet->getPayloadLength() == 1);
+    AddressPtr nodeAddress = packet->getSource();
+    const char* payload = packet->getPayload();
+    unsigned char newEnergyLevel = payload[0];
+    routingTable->updateEnergyOfNode(nodeAddress, newEnergyLevel);
+    delete packet;
 }
 
 } /* namespace ARA */

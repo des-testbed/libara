@@ -15,7 +15,6 @@
 #include "NextHop.h"
 #include "RoutingTable.h"
 #include "RoutingTableEntry.h"
-#include "EnergyAwareRoutingTableEntry.h"
 #include "StochasticForwardingPolicy.h"
 
 namespace ARA {

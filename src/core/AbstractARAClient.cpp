@@ -185,6 +185,7 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
     }
     else {
         registerReceivedPacket(packet);
+        updateRoutingTable(packet, interface);
         handlePacket(packet, interface);
     }
 }
@@ -202,7 +203,7 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
     interface->send(duplicateWarningPacket, packet->getSender());
 }
 
-void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
+void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
     if (hasBeenSentByThisNode(packet) == false) {
         // do not insert values to self in the routing table
         AddressPtr source = packet->getSource();
@@ -215,16 +216,22 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
             routingTable->update(source, packet->getSender(), interface, initialPheromoneValue);
         }
     }
+}
 
+void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
     if (packet->isDataPacket()) {
         handleDataPacket(packet);
-    } else if(packet->isAntPacket()) {
+    }
+    else if(packet->isAntPacket()) {
         handleAntPacket(packet);
-    } else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
+    }
+    else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
-    } else if (packet->getType() == PacketType::ROUTE_FAILURE) {
+    }
+    else if (packet->getType() == PacketType::ROUTE_FAILURE) {
         handleRouteFailurePacket(packet, interface);
-    } else {
+    }
+    else {
         throw Exception("Can not handle packet");
     }
 }

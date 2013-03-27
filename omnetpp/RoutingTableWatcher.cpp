@@ -1,7 +1,6 @@
 #include "omnetpp/RoutingTableWatcher.h" 
 
 #include "RoutingTableEntry.h" 
-#include "EnergyAwareRoutingTableEntry.h" 
 
 NAMESPACE_BEGIN
 
@@ -68,7 +67,6 @@ std::string RoutingTableWatcher<T>::atIt() const {
 }
 
 template class RoutingTableWatcher<ARA::RoutingTableEntry>;
-template class RoutingTableWatcher<ARA::EnergyAwareRoutingTableEntry>;
 
 NAMESPACE_END
 

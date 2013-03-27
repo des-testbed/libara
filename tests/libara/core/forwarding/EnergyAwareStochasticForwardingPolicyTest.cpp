@@ -4,11 +4,7 @@
 
 #include "CppUTest/TestHarness.h"
 #include "EnergyAwareRoutingTable.h"
-#include "EnergyAwareStochasticForwardingPolicy.h"
-#include "RoutingTableEntry.h"
 #include "NextHop.h"
-#include "PacketType.h"
-#include "Exception.h" 
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
@@ -30,19 +26,24 @@ TEST(EnergyAwareStochasticForwardingPolicyTest, testGetNextHop) {
     AddressPtr destination (new AddressMock("Destination"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
-    AddressPtr nextHopA (new AddressMock("nextHopA"));
-    AddressPtr nextHopB (new AddressMock("nextHopB"));
+    AddressPtr nextHopA (new AddressMock("A"));
+    AddressPtr nextHopB (new AddressMock("B"));
 
     PacketMock packet = PacketMock();
 
-    routingTable.update(destination, nextHopA, &interface, 1.2, 0.8);
-    routingTable.update(destination, nextHopB, &interface, 2.1, 0.6);
+    routingTable.update(destination, nextHopA, &interface, 1.2, 250);
+    routingTable.update(destination, nextHopB, &interface, 2.1, 240);
 
-    EnergyAwareStochasticForwardingPolicyMock policy = EnergyAwareStochasticForwardingPolicyMock(23);
+    unsigned int randomNumberGeneratorSeed = 23; // the random number produced will be 0.727582
+    EnergyAwareStochasticForwardingPolicyMock policy = EnergyAwareStochasticForwardingPolicyMock(randomNumberGeneratorSeed);
+    policy.setPheromoneWeight(1.0);
+    policy.setEnergyWeight(1.0);
+
     NextHop* result = policy.getNextHop(&packet, &routingTable);
     CHECK(result->getAddress()->equals(nextHopB));
 
-    policy = EnergyAwareStochasticForwardingPolicyMock(42);
+    randomNumberGeneratorSeed = 42;
+    policy = EnergyAwareStochasticForwardingPolicyMock(randomNumberGeneratorSeed);
     result = policy.getNextHop(&packet, &routingTable);
     CHECK(result->getAddress()->equals(nextHopA));
 
