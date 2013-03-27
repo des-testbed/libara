@@ -1,3 +1,6 @@
 [submodule "tests/cpputest"]
 	path = tests/cpputest
 	url = git://github.com/FGrosse/cpputest.git
+[submodule "inetmanet"]
+	path = inetmanet
+	url = git@github.com:des-testbed/inetmanet-2.0.git
