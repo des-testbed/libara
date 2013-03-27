@@ -30,6 +30,8 @@ module NetworkNode
     parameters:
         @display("i=device/wifilaptop;bgb=366,335");
         int nrOfNetworkInterfaces = default(1);
+        string mobilityType = default("NullMobility");
+
     gates:
         input radioIn @directIn;
 
@@ -48,22 +50,24 @@ module NetworkNode
                 routerId = "";
                 @display("p=49,171;i=block/table");
         }
+
         app: PingApp {
             parameters:
                 @display("b=40,24;p=239,29,col");
         }
+
         ara: ARANetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
         }
+
         wlan[nrOfNetworkInterfaces]: Ieee80211NicAdhoc {
             parameters:
                 @display("p=239,222;q=queue");
         }
 
-        // Stationary node
-        mobility: NullMobility {
+        mobility: <mobilityType> like BasicMobility {
             parameters:
                 @display("p=49,230");
         }
