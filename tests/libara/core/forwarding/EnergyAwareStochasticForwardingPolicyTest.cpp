@@ -31,8 +31,8 @@ TEST(EnergyAwareStochasticForwardingPolicyTest, testGetNextHop) {
 
     PacketMock packet = PacketMock();
 
-    routingTable.update(destination, nextHopA, &interface, 1.2, 250);
-    routingTable.update(destination, nextHopB, &interface, 2.1, 240);
+    routingTable.update(destination, nextHopA, &interface, 1.2, 204);
+    routingTable.update(destination, nextHopB, &interface, 2.1, 153);
 
     unsigned int randomNumberGeneratorSeed = 23; // the random number produced will be 0.727582
     EnergyAwareStochasticForwardingPolicyMock policy = EnergyAwareStochasticForwardingPolicyMock(randomNumberGeneratorSeed);
