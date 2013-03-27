@@ -14,9 +14,9 @@
 // 
 
 #include "omnetpp/ARANetworkConfigurator.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "IPv4InterfaceData.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 #include <vector>
 
@@ -51,16 +51,16 @@ void ARANetworkConfigurator::extractTopology(cTopology& topology) {
     nodeInfo.resize(numberOfNodes);
     for (int i=0; i<numberOfNodes; i++) {
         cModule* module = topology.getNode(i)->getModule();
-        nodeInfo[i].hasInterfaceTable = IPAddressResolver().findInterfaceTableOf(module)!=NULL;
+        nodeInfo[i].hasInterfaceTable = IPvXAddressResolver().findInterfaceTableOf(module)!=NULL;
         if (nodeInfo[i].hasInterfaceTable) {
-            nodeInfo[i].interfaceTable = IPAddressResolver().interfaceTableOf(module);
+            nodeInfo[i].interfaceTable = IPvXAddressResolver().interfaceTableOf(module);
         }
     }
 }
 
 void ARANetworkConfigurator::assignAddresses(cTopology& topology) {
-    uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
-    uint32 netmask = IPAddress(par("netmask").stringValue()).getInt();
+    uint32 networkAddress = IPv4Address(par("networkAddress").stringValue()).getInt();
+    uint32 netmask = IPv4Address(par("netmask").stringValue()).getInt();
 
     int maximumNrOfNodes = (~netmask)-1;
     int nrOfNodes = topology.getNumNodes();
@@ -84,11 +84,11 @@ void ARANetworkConfigurator::assignAddresses(cTopology& topology) {
         for (int k=0; k < interfaceTable->getNumInterfaces(); k++)         {
             InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
             if (interfaceEntry->isLoopback() == false) {
-                IPAddress newIPAddress = IPAddress(address);
-                interfaceEntry->ipv4Data()->setIPAddress(newIPAddress);
-                interfaceEntry->ipv4Data()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
+                IPv4Address newIPv4Address = IPv4Address(address);
+                interfaceEntry->ipv4Data()->setIPAddress(newIPv4Address);
+                interfaceEntry->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
                 //TODO check the line above
-                EV << "Assigning IP " << newIPAddress << " to node " << i << "\n";
+                EV << "Assigning IP " << newIPv4Address << " to node " << i << "\n";
             }
         }
     }

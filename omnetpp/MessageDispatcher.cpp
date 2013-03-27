@@ -5,8 +5,8 @@
 #include "omnetpp/MessageDispatcher.h"
 #include "omnetpp/OMNeTAddress.h"
 #include "omnetpp/OMNeTPacket.h"
-#include "IPControlInfo.h"
-#include "IPAddress.h"
+#include "IPv4ControlInfo.h"
+#include "IPv4Address.h"
 #include "ARPPacket_m.h"
 
 #include <string>
@@ -38,9 +38,9 @@ bool MessageDispatcher::isFromUpperLayer(cMessage* message) {
 }
 
 void MessageDispatcher::handleUpperLayerMessage(cMessage* message) {
-    IPControlInfo* controlInfo = (IPControlInfo*)message->getControlInfo();
-    IPAddress sourceIP = controlInfo->getSrcAddr();
-    IPAddress destinationIP = controlInfo->getDestAddr();
+    IPv4ControlInfo* controlInfo = (IPv4ControlInfo*)message->getControlInfo();
+    IPv4Address sourceIP = controlInfo->getSrcAddr();
+    IPv4Address destinationIP = controlInfo->getDestAddr();
     EV << "Handling upper layer message from " << sourceIP << " to " << destinationIP << ": "<< message << "\n";
 
     AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
@@ -67,7 +67,7 @@ void MessageDispatcher::handleARP(cMessage* message) {
     InterfaceEntry* arrivalInterface = getSourceInterfaceFrom(message);
     ASSERT(arrivalInterface);
 
-    IPRoutingDecision* routingDecision = new IPRoutingDecision();
+    IPv4RoutingDecision* routingDecision = new IPv4RoutingDecision();
     routingDecision->setInterfaceId(arrivalInterface->getInterfaceId());
     message->setControlInfo(routingDecision);
 
