@@ -61,5 +61,5 @@ TEST(AbstractEARAClientTest, sendPeriodicEnergyInformationMessages) {
     // check the payload
     BYTES_EQUAL(1, sentPacket->getPayloadLength());
     const char* payload = sentPacket->getPayload();
-    CHECK_EQUAL(client->getCurrentEnergyLevel(), payload[0]);
+    BYTES_EQUAL(client->getCurrentEnergyLevel(), payload[0]);
 }

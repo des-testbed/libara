@@ -16,6 +16,7 @@ AbstractEARAClient::AbstractEARAClient(Configuration& configuration, EnergyAware
 void AbstractEARAClient::initialize(EARAConfiguration& configuration, RoutingTable *routingTable) {
     AbstractARAClient::initialize(configuration, routingTable);
     energyDisseminationTimer = Environment::getClock()->getNewTimer();
+    energyDisseminationTimer->addTimeoutListener(this);
     energyDisseminationTimer->run(configuration.getEnergyDisseminationTimeout());
 }
 
