@@ -26,7 +26,7 @@ namespace ARA {
 	 */
     class EnergyAwareStochasticForwardingPolicy : public StochasticForwardingPolicy {
         public:
-            EnergyAwareStochasticForwardingPolicy(){};
+            EnergyAwareStochasticForwardingPolicy(float pAlpha = 1.0, float pBeta = 2.0);
             virtual ~EnergyAwareStochasticForwardingPolicy(){};
             virtual NextHop* getNextHop(const Packet* packet, RoutingTable* routingTable);
 
