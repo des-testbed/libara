@@ -53,12 +53,12 @@ module NetworkNode
                 routerId = "";
                 @display("p=49,171;i=block/table");
         }
-        
+
         app: PingApp {
             parameters:
                 @display("b=40,24;p=239,29,col");
         }
-        
+
         ara: ARANetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
