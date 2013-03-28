@@ -32,7 +32,7 @@ network ManetTest
             @display("p=78,161");
         }
         
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
                 @display("p=78,36");
 // parameter is now set via mobility model (see also changlog in inetmanet/src/world/radio
