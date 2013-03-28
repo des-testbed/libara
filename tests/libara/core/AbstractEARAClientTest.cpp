@@ -42,7 +42,6 @@ TEST(AbstractEARAClientTest, sendPeriodicEnergyInformationMessages) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
     std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
     TimerMock* timer = client->getEnergyDisseminationTimer();
-
     // sanity check
     BYTES_EQUAL(0, sentPackets->size());
 

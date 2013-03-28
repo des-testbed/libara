@@ -53,7 +53,7 @@ Packet::Packet(AddressPtr source, AddressPtr destination, char type, unsigned in
 Packet::~Packet() {
    if(type == PacketType::ENERGY_INFO) {
         //FIXME this seems like a dirty hack.. How do we release  dynamically allocated payload?
-        delete payload;
+        delete[] payload;
    }
    // Address cleanup is done by the shared_ptrs
 }

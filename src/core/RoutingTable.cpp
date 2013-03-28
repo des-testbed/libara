@@ -12,7 +12,7 @@ namespace ARA {
     RoutingTable::RoutingTable() {
         lastAccessTime = nullptr;
     }
-
+ 
     RoutingTable::~RoutingTable() {
         std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
         for (iterator=table.begin(); iterator!=table.end(); iterator++) {
