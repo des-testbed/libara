@@ -16,15 +16,14 @@
 package ara;
 
 import inet.base.NotificationBoard;
-import ara.ARANetworkLayer;
-import ara.OMNeTBattery;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.mobility.models.RandomWPMobility;
-import inet.mobility.IMobility;
-import inet.nodes.wireless.WirelessHost;
-import inet.applications.pingapp.PingApp;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
+import inet.applications.pingapp.PingApp;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.IMobility;
+
+import ara.ARANetworkLayer;
+import ara.OMNeTBattery;
 
 module NetworkNode
 {
@@ -42,33 +41,36 @@ module NetworkNode
             parameters:
                 @display("p=49,37");
         }
+        
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=49,106");
         }
+        
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "";
                 @display("p=49,171;i=block/table");
         }
+        
         app: PingApp {
             parameters:
                 @display("b=40,24;p=239,29,col");
         }
+        
         ara: ARANetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
         }
+        
         wlan[nrOfNetworkInterfaces]: Ieee80211Nic {
             parameters:
-                // there is now only one nic which is controlled in its behavior by various parameters
                 mgmtType = "Ieee80211MgmtAdhoc";
                 @display("p=239,222;q=queue");
         }
 
-        // Stationary node
         mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=49,230");
