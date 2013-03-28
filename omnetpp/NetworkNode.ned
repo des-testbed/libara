@@ -29,6 +29,7 @@ import inet.networklayer.ipv4.RoutingTable;
 module NetworkNode
 {
     parameters:
+        @node;
         @display("i=device/wifilaptop;bgb=366,335");
         int nrOfNetworkInterfaces = default(1);
         string mobilityType = default("RandomWPMobility");
