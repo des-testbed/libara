@@ -6,6 +6,7 @@
 #define OMNETGATE_H_
 
 #include "AbstractNetworkInterface.h"
+#include "PacketFactory.h"
 #include "ARA.h"
 #include "OMNeTAddress.h"
 #include "InterfaceEntry.h"
@@ -34,6 +35,7 @@ class ARA;
 
     private:
         ARA* omnetARAClient;
+        ::ARA::PacketFactory* packetFactory;
         cGate* gateToARP;
         int interfaceID;
 

@@ -8,7 +8,7 @@
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
 #include "SimpleLogger.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "ModuleAccess.h"
 
 using namespace ARA;

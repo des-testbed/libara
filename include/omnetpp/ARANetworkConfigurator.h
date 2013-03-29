@@ -16,7 +16,7 @@
 #ifndef __ARA_SIMULATION_NETWORKCONFIGURATOR_H_
 #define __ARA_SIMULATION_NETWORKCONFIGURATOR_H_
 
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "IInterfaceTable.h"
 
 #include <omnetpp.h>
@@ -36,7 +36,7 @@ protected:
         NodeInfo() {hasInterfaceTable=false; interfaceTable=NULL;}
         bool hasInterfaceTable;
         IInterfaceTable* interfaceTable;
-        IPAddress address;
+        IPv4Address address;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 

@@ -19,7 +19,7 @@ import ara.NetworkNode;
 import ara.EnergyAwareNetworkNode;
 import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
-import inet.world.ChannelControl;
+import inet.world.radio.ChannelControl;
 
 network ManetTest
 {
@@ -33,11 +33,12 @@ network ManetTest
             @display("p=78,161");
         }
         
-        channelcontrol: ChannelControl {
+        channelControl: ChannelControl {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=78,36");
+// parameter is now set via mobility model (see also changlog in inetmanet/src/world/radio
+//                playgroundSizeX = playgroundSizeX;
+//                playgroundSizeY = playgroundSizeY;
         }
 
         networkConfigurator: ARANetworkConfigurator {
@@ -47,18 +48,28 @@ network ManetTest
                 @display("p=78,97");
         }
         node1: NetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
             @display("p=515,69");
         }
         node2: NetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
             @display("p=195,215");
         }
         node3: NetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
             @display("p=697,182");
         }
         node4: EnergyAwareNetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
             @display("p=305,125");
         }
         node5: NetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
             @display("p=496,267");
         }
 }

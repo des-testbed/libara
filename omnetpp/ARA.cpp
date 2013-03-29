@@ -2,6 +2,7 @@
  * $FU-Copyright$
  */
 
+#include "Environment.h"
 #include "omnetpp/ARA.h"
 #include "omnetpp/OMNeTPacket.h"
 #include "NotificationBoard.h"
@@ -9,6 +10,9 @@
 
 namespace ARA {
     namespace omnetpp {
+
+        bool ARA::isEnvironmentInitialized = false;
+
         typedef std::shared_ptr<Address> AddressPtr;
 
         // Register the class with the OMNeT++ simulation
@@ -35,6 +39,7 @@ namespace ARA {
          */
         void ARA::initialize(int stage) {
             if(stage == 4) {
+                initializeEnvironment();
                 NotificationBoard* notificationBoard = NotificationBoardAccess().get();
                 notificationBoard->subscribe(this, NF_LINK_BREAK);
 
@@ -48,6 +53,14 @@ namespace ARA {
 
                 AbstractARAClient::initialize(config, routingTable);
                 initializeNetworkInterfacesOf(config);
+            }
+        }
+
+        void ARA::initializeEnvironment() {
+            if(isEnvironmentInitialized == false) {
+                // The clock is initialized directly in the OMNeTClock
+                Environment::setPacketFactory(new ::ARA::omnetpp::PacketFactory());
+                isEnvironmentInitialized = true;
             }
         }
 
@@ -103,8 +116,8 @@ namespace ARA {
             if(messageDispatcher->isARAMessage(encapsulatedPacket)) {
                 // extract the receiver address
                 MACAddress receiverMACAddress = frame->getReceiverAddress();
-                const IPAddress receiverIPAddress = arp->getInverseAddressResolution(receiverMACAddress);
-                AddressPtr omnetAddress (new OMNeTAddress(receiverIPAddress));
+                const IPv4Address receiverIPv4Address = arp->getInverseAddressResolution(receiverMACAddress);
+                AddressPtr omnetAddress (new OMNeTAddress(receiverIPv4Address));
 
                 OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
 

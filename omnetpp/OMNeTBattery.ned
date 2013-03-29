@@ -1,7 +1,7 @@
 @namespace(ARA::omnetpp);
 package ara;
 
-import inet.battery.InetSimpleBattery;
+import inet.battery.models.InetSimpleBattery;
 
 simple OMNeTBattery extends InetSimpleBattery {
     parameters:

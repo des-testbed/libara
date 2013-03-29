@@ -2,14 +2,15 @@
  * $FU-Copyright$
  */
 
+#include "Environment.h"
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/OMNeTAddress.h"
 #include "IInterfaceTable.h"
 #include "IPv4InterfaceData.h"
-#include "IPAddressResolver.h"
-#include "IPControlInfo.h"
-#include "IPDatagram.h"
+#include "IPvXAddressResolver.h"
+#include "IPv4ControlInfo.h"
+#include "IPv4Datagram.h"
 
 using namespace std;
 
@@ -24,14 +25,15 @@ OMNeTGate::OMNeTGate(ARA* araClient, cGate* gateToARP, InterfaceEntry* interface
     this->broadCastDelay = broadCastDelay;
     this->uniCastDelay = uniCastDelay;
 
-    IPAddress localAddress = IPAddressResolver().getAddressFrom(interfaceEntry, IPAddressResolver::ADDR_IPv4).get4();
-    IPAddress netmask = interfaceEntry->ipv4Data()->getNetmask();
-    IPAddress networkAddress = localAddress.doAnd(netmask);
-    IPAddress broadcastAddress = networkAddress.getBroadcastAddress(netmask);
+    IPv4Address localAddress = IPvXAddressResolver().getAddressFrom(interfaceEntry, IPvXAddressResolver::ADDR_IPv4).get4();
+    IPv4Address netmask = interfaceEntry->ipv4Data()->getNetmask();
+    IPv4Address networkAddress = localAddress.doAnd(netmask);
+    IPv4Address broadcastAddress = networkAddress.getBroadcastAddress(netmask);
 
     this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress));
     this->broadcastAddress = shared_ptr<Address>(new OMNeTAddress(broadcastAddress));
     this->interfaceID = interfaceEntry->getInterfaceId();
+    this->packetFactory = Environment::getPacketFactory();
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
@@ -41,7 +43,7 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
     // TODO somehow remove this ugly casting stuff
     OMNeTPacket* originalPacket = (OMNeTPacket*) packet;
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) originalPacket->clone();
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packetFactory->makeClone(originalPacket);
     OMNeTAddressPtr nextHopAddress = getNextHopAddress(recipient);
 
     // Get the encapsulated packet (if any)
@@ -50,7 +52,7 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double
         omnetPacket->encapsulate(encapsulatedPacket);
     }
 
-    IPRoutingDecision* controlInfo = new IPRoutingDecision();
+    IPv4RoutingDecision* controlInfo = new IPv4RoutingDecision();
     controlInfo->setNextHopAddr(*(nextHopAddress.get()));
     controlInfo->setInterfaceId(interfaceID);
     omnetPacket->setControlInfo(controlInfo);

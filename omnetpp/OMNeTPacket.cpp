@@ -30,7 +30,7 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTPacket);
 
-OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, unsigned int hopCount) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, hopCount) {
+OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, unsigned int hopCount, const char* payload, unsigned int payloadSize) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
 
 }
 
@@ -74,26 +74,6 @@ std::shared_ptr<OMNeTAddress> OMNeTPacket::getDestination() const {
 
 std::shared_ptr<OMNeTAddress> OMNeTPacket::getSender() const {
     return std::dynamic_pointer_cast<OMNeTAddress>(this->sender);
-}
-
-Packet* OMNeTPacket::clone() const {
-    return new OMNeTPacket(source, destination, sender, type, seqNr, hopCount);
-}
-
-Packet* OMNeTPacket::createFANT(unsigned int sequenceNumber) const {
-    return new OMNeTPacket(source, destination, sender, PacketType::FANT, sequenceNumber);
-}
-
-Packet* OMNeTPacket::createBANT(unsigned int sequenceNumber) const {
-    return new OMNeTPacket(destination, source, sender, PacketType::BANT, sequenceNumber);
-}
-
-Packet* OMNeTPacket::createDuplicateWarning() const {
-    return new OMNeTPacket(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, hopCount+1);
-}
-
-Packet* OMNeTPacket::createAcknowledgment() const {
-    return new OMNeTPacket(source, destination, sender, PacketType::ACK, seqNr, 1);
 }
 
 class OMNeTPacketDescriptor : public cClassDescriptor {
