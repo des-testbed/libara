@@ -1,5 +1,5 @@
 #include "CppUTest/TestHarness.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 #include "OMNeTAddress.h"
 
 using namespace ARA::omnetpp;
@@ -7,7 +7,7 @@ using namespace ARA::omnetpp;
 TEST_GROUP(OMNeTAddressTest) {};
 
 TEST(OMNeTAddressTest, testCreateFromIPAddress) {
-    IPAddress ipAddress = IPAddress(192, 168, 0, 1);
+    IPv4Address ipAddress = IPv4Address(192, 168, 0, 1);
     OMNeTAddress omnetAddress = OMNeTAddress(ipAddress);
 
     CHECK(omnetAddress.equals(ipAddress));
