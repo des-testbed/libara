@@ -20,8 +20,8 @@ bool OMNeTAddress::equals(const Address* otherAddress) const {
         return false;
     }
     else {
-        // use the native implementation of IPAddress
-        return IPAddress::equals(*otherOMNeTAddress);
+        // use the native implementation of IPv4Address
+        return IPv4Address::equals(*otherOMNeTAddress);
     }
 }
 

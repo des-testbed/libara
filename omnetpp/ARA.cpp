@@ -124,8 +124,8 @@ namespace ARA {
             if(messageDispatcher->isARAMessage(encapsulatedPacket)) {
                 // extract the receiver address
                 MACAddress receiverMACAddress = frame->getReceiverAddress();
-                const IPAddress receiverIPAddress = arp->getInverseAddressResolution(receiverMACAddress);
-                AddressPtr omnetAddress (new OMNeTAddress(receiverIPAddress));
+                const IPv4Address receiverIPv4Address = arp->getInverseAddressResolution(receiverMACAddress);
+                AddressPtr omnetAddress (new OMNeTAddress(receiverIPv4Address));
 
                 OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
 

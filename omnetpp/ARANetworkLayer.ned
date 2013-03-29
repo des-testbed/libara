@@ -75,5 +75,6 @@ module ARANetworkLayer
 
         for i=0..nrOfNetworkInterfaces-1 {
             ifIn[i] --> ara.ifIn[i];
+            arp.nicOut[i] --> ifOut[i];
         }
 }
