@@ -18,14 +18,13 @@ package ara.simulations;
 import ara.NetworkNode;
 import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
-import inet.world.radio.ChannelControl;
+import inet.world.ChannelControl;
 
-network ARAPaperEvaluation
+network PaperEvaluation
 {
     parameters:
         double playgroundSizeX;
         double playgroundSizeY;
-        double playgroundSizeZ;
         @display("b=297,203;bgb=758,337");
 
     submodules:
@@ -33,8 +32,10 @@ network ARAPaperEvaluation
             @display("p=78,161");
         }
         
-        channelControl: ChannelControl {
+        channelcontrol: ChannelControl {
             parameters:
+                playgroundSizeX = playgroundSizeX;
+                playgroundSizeY = playgroundSizeY;
                 @display("p=78,36");
         }
 
@@ -45,11 +46,6 @@ network ARAPaperEvaluation
                 @display("p=78,97");
         }
 
-        node[50] : NetworkNode {
-            parameters:
-                mobility.constraintAreaX = playgroundSizeX;
-                mobility.constraintAreaY = playgroundSizeY;
-                mobility.constraintAreaZ = playgroundSizeZ;
-        }
+        node[50] : NetworkNode;
 }
 
