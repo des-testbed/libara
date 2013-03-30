@@ -21,6 +21,8 @@ import inet.networklayer.ipv4.RoutingTable;
 import inet.applications.pingapp.PingApp;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.IMobility;
+import inet.battery.IBattery;
+
 
 import ara.ARANetworkLayer;
 import ara.OMNeTBattery;
@@ -32,6 +34,8 @@ module NetworkNode
         @display("i=device/wifilaptop;bgb=366,335");
         int nrOfNetworkInterfaces = default(1);
         string mobilityType = default("RandomWPMobility");
+        string udpAppType = default("");
+        string batteryModel = default("OMNeTBattery");
 
     gates:
         input radioIn @directIn;
@@ -76,7 +80,7 @@ module NetworkNode
                 @display("p=49,230");
         }
 
-        battery: OMNeTBattery {
+        battery: <batteryModel> like IBattery if batteryModel != "" {
             parameters:
                 @display("p=49,293;i=block/plug");
         }
