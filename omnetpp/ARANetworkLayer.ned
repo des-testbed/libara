@@ -18,11 +18,16 @@ package ara;
 import ara.ARA;
 import ara.OMNeTRoutingTable;
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
+
+import ara.evaporation.EvaporationPolicy;
+import ara.evaporation.OMNeTCubicEvaporationPolicy;
 import ara.evaporation.OMNeTExponentialEvaporationPolicy;
+
 import ara.forwarding.ForwardingPolicy;
 import ara.forwarding.OMNeTStochasticForwardingPolicy;
 import ara.forwarding.OMNeTBestPheromoneForwardingPolicy;
 import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
+
 import inet.networklayer.arp.ARP;
 
 module ARANetworkLayer
@@ -30,6 +35,7 @@ module ARANetworkLayer
     parameters:
         int nrOfNetworkInterfaces = default(1);
         string forwardingPolicyModel @enum("OMNeTStochasticForwardingPolicy","OMNeTEnergyAwareStochasticForwardingPolicy","OMNeTBestPheromoneForwardingPolicy") = default("OMNeTStochasticForwardingPolicy");
+        string evaporationModel @enum("OMNeTExponentialEvaporationPolicy","OMNeTCubicEvaporationPolicy") = default("OMNeTExponentialEvaporationPolicy");
 
         @display("i=ara.png;bgb=273,275");
 
@@ -45,7 +51,7 @@ module ARANetworkLayer
                 @display("i=ara;p=138,102");
         }
 
-        evaporationPolicy: OMNeTExponentialEvaporationPolicy {
+        evaporationPolicy: <evaporationModel> like EvaporationPolicy if evaporationModel != "" {
             parameters:
                 @display("p=210,30");
         }

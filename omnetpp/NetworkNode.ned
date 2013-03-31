@@ -41,7 +41,9 @@ module NetworkNode
         string udpAppType = default("");
         string tcpAppType = default("");
         string batteryModel = default("OMNeTBattery");
+
         string forwardingPolicyModel = default("OMNeTStochasticForwardingPolicy");
+        string evaporationModel = default("OMNeTExponentialEvaporationPolicy");
 
     gates:
         input radioIn @directIn;
@@ -71,6 +73,7 @@ module NetworkNode
 
         ara: ARANetworkLayer {
             parameters:
+                evaporationModel = evaporationModel;
                 forwardingPolicyModel = forwardingPolicyModel;
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
