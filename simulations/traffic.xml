@@ -1,0 +1,14 @@
+<!-- this is a configuration for the TrafGen class -->
+<?xml version="1.0" ?>
+ <configurations>
+ <config id="0"
+    packetSize="uniform(20,40)"
+    interDepartureTime="1"
+    firstPacketTime="5"
+    trafDest="host[5]"
+    onLength="exponential(50)"
+    offLength="120"
+    offInterDepartureTime="truncnormal(50, 20)"
+    onIdenticalTrafDest="true" />
+ </configurations>
+
