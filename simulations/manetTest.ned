@@ -35,9 +35,6 @@ network ManetTest
         channelControl: ChannelControl {
             parameters:
                 @display("p=78,36");
-// parameter is now set via mobility model (see also changlog in inetmanet/src/world/radio
-//                playgroundSizeX = playgroundSizeX;
-//                playgroundSizeY = playgroundSizeY;
         }
 
         networkConfigurator: ARANetworkConfigurator {

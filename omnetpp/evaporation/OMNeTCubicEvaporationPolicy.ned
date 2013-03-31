@@ -1,7 +1,9 @@
 @namespace(ARA::omnetpp);
 package ara.evaporation;
 
-simple OMNeTCubicEvaporationPolicy
+import ara.evaporation.EvaporationPolicy;
+
+simple OMNeTCubicEvaporationPolicy like EvaporationPolicy
 {
     parameters:
         double plateau;

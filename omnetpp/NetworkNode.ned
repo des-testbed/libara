@@ -36,10 +36,14 @@ module NetworkNode
         int numTcpApps = default(0);
         int numUdpApps = default(0);
         int nrOfNetworkInterfaces = default(1);
+
         string mobilityType = default("RandomWPMobility");
         string udpAppType = default("");
         string tcpAppType = default("");
         string batteryModel = default("OMNeTBattery");
+
+        string forwardingPolicyModel = default("OMNeTStochasticForwardingPolicy");
+        string evaporationModel = default("OMNeTExponentialEvaporationPolicy");
 
     gates:
         input radioIn @directIn;
@@ -69,6 +73,8 @@ module NetworkNode
 
         ara: ARANetworkLayer {
             parameters:
+                evaporationModel = evaporationModel;
+                forwardingPolicyModel = forwardingPolicyModel;
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
         }

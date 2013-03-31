@@ -1,7 +1,9 @@
 @namespace(ARA::omnetpp);
 package ara.forwarding;
 
-simple OMNeTEnergyAwareStochasticForwardingPolicy
+import ara.forwarding.ForwardingPolicy;
+
+simple OMNeTEnergyAwareStochasticForwardingPolicy like ForwardingPolicy
 {
     parameters:
         double alpha = default(1.0);
