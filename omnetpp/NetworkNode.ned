@@ -21,6 +21,8 @@ import inet.networklayer.ipv4.RoutingTable;
 import inet.applications.pingapp.PingApp;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.IMobility;
+import inet.battery.IBattery;
+
 
 import ara.ARANetworkLayer;
 import ara.OMNeTBattery;
@@ -30,8 +32,14 @@ module NetworkNode
     parameters:
         @node;
         @display("i=device/wifilaptop;bgb=366,335");
+
+        int numTcpApps = default(0);
+        int numUdpApps = default(0);
         int nrOfNetworkInterfaces = default(1);
         string mobilityType = default("RandomWPMobility");
+        string udpAppType = default("");
+        string tcpAppType = default("");
+        string batteryModel = default("OMNeTBattery");
 
     gates:
         input radioIn @directIn;
@@ -53,12 +61,12 @@ module NetworkNode
                 routerId = "";
                 @display("p=49,171;i=block/table");
         }
-        
+
         app: PingApp {
             parameters:
                 @display("b=40,24;p=239,29,col");
         }
-        
+
         ara: ARANetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
@@ -76,12 +84,49 @@ module NetworkNode
                 @display("p=49,230");
         }
 
-        battery: OMNeTBattery {
+        battery: <batteryModel> like IBattery if batteryModel != "" {
             parameters:
                 @display("p=49,293;i=block/plug");
         }
 
+        tcpApp[numTcpApps]: <tcpAppType> like ITCPApp {
+            parameters:
+                @display("p=163,67;i=block/app");
+        }
+
+        tcp: TCP {
+            parameters:
+                @display("p=163,154;i=block/wheelbarrow");
+        }
+
+        udpApp[numUdpApps]: <udpAppType> like IUDPApp {
+            parameters:
+                @display("i=block/app;p=272,67");
+        }
+
+        udp: UDP {
+            parameters:
+                @display("p=272,154;i=block/transport");
+        }
+
+
     connections allowunconnected:
+//        for i=0..numTcpApps-1 {
+//            tcpApp[i].tcpOut --> tcp.appIn++;
+//            tcpApp[i].tcpIn <-- tcp.appOut++;
+//        }
+
+//        tcp.ipOut --> ara.tcpIn;
+//        tcp.ipIn <-- ara.tcpOut;
+
+//        for i=0..numUdpApps-1 {
+//            udpApp[i].udpOut --> udp.appIn++;
+//            udpApp[i].udpIn <-- udp.appOut++;
+//        }
+
+//        udp.ipOut --> ara.udpIn;
+//        udp.ipIn <-- ara.udpOut;
+
         app.pingOut --> ara.upperLayerGate$i;
         app.pingIn <-- ara.upperLayerGate$o;
 
