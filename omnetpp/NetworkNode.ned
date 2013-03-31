@@ -94,20 +94,20 @@ module NetworkNode
                 @display("p=163,67;i=block/app");
         }
 
-        tcp: TCP {
-            parameters:
-                @display("p=163,154;i=block/wheelbarrow");
-        }
+//        tcp: TCP {
+//            parameters:
+//                @display("p=163,154;i=block/wheelbarrow");
+//        }
 
         udpApp[numUdpApps]: <udpAppType> like IUDPApp {
             parameters:
                 @display("i=block/app;p=272,67");
         }
 
-        udp: UDP {
-            parameters:
-                @display("p=272,154;i=block/transport");
-        }
+//        udp: UDP {
+//            parameters:
+//                @display("p=272,154;i=block/transport");
+//        }
 
 
     connections allowunconnected:
