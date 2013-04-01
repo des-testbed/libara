@@ -8,10 +8,15 @@
 #include <omnetpp.h>
 #include <memory>
 
-#include "Address.h"
-typedef std::shared_ptr<ARA::Address> AddressPtr;
-
 #define OMNETARA_NAMESPACE_BEGIN namespace ARA { namespace omnetpp {
 #define OMNETARA_NAMESPACE_END }}
+
+#include "Address.h"
+#include "omnetpp/OMNeTAddress.h"
+
+OMNETARA_NAMESPACE_BEGIN
+typedef std::shared_ptr<Address> AddressPtr;
+typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
+OMNETARA_NAMESPACE_END
 
 #endif /* OMNET_ARA_MACROS_H_ */

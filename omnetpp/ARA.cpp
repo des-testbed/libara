@@ -2,130 +2,53 @@
  * $FU-Copyright$
  */
 
-#include "Environment.h"
 #include "omnetpp/ARA.h"
 #include "omnetpp/OMNeTPacket.h"
-#include "NotificationBoard.h"
-#include "ModuleAccess.h"
 
-namespace ARA {
-    namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
-        bool ARA::isEnvironmentInitialized = false;
+// Register the class with the OMNeT++ simulation
+Define_Module(ARA);
 
-        typedef std::shared_ptr<Address> AddressPtr;
+ARA::ARA() {
+    messageDispatcher = new MessageDispatcher(this, this);
+}
 
-        // Register the class with the OMNeT++ simulation
-        Define_Module(ARA);
+ARA::~ARA() {
+    delete messageDispatcher;
+}
 
-        ARA::ARA() {
-            messageDispatcher = new MessageDispatcher(this);
-        }
+int ARA::numInitStages() const {
+    return 5;
+}
 
-        ARA::~ARA() {
-            delete messageDispatcher;
-        }
+void ARA::initialize(int stage) {
+    if(stage == 4) {
+        AbstractOMNeTARAClient::initialize();
+        OMNeTConfiguration config = OMNeTConfiguration(this);
+        setLogger(config.getLogger());
 
-        int ARA::numInitStages() const {
-            return 5;
-        }
+        AbstractARAClient::initialize(config, config.getRoutingTable());
+        initializeNetworkInterfacesOf(this, config);
+    }
+}
 
-        /**
-         * The method initializes the ARA class. Typically, this is
-         * a task which would be provided by a constructor, but it is one of the
-         * main concepts of OMNeT++ to provide such a method (and to leave
-         * constructors 'untouched'). The method parses the parameters
-         * specified in the NED file and initializes the gates.
-         */
-        void ARA::initialize(int stage) {
-            if(stage == 4) {
-                initializeEnvironment();
-                NotificationBoard* notificationBoard = NotificationBoardAccess().get();
-                notificationBoard->subscribe(this, NF_LINK_BREAK);
+void ARA::handleMessage(cMessage* message) {
+    messageDispatcher->dispatch(message);
+}
 
-                OMNeTConfiguration config = OMNeTConfiguration(this);
-                setLogger(config.getLogger());
+void ARA::deliverToSystem(const Packet* packet) {
+    sendToUpperLayer(packet);
+}
 
-                interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
-                arp = ModuleAccess<ARP>("arp").get();
-                routingTable = ModuleAccess<RoutingTable>("araRoutingTable").get();
-                routingTable->setEvaporationPolicy(evaporationPolicy);
+void ARA::packetNotDeliverable(const Packet* packet) {
+    //TODO report to upper layer
+}
 
-                AbstractARAClient::initialize(config, routingTable);
-                initializeNetworkInterfacesOf(config);
-            }
-        }
+void ARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
+    // TODO this does only work if we have only one network interface card
+    NetworkInterface* interface = getNetworkInterface(0);
+    handleRouteFailure(packet, receiverAddress, interface);
+}
 
-        void ARA::initializeEnvironment() {
-            if(isEnvironmentInitialized == false) {
-                // The clock is initialized directly in the OMNeTClock
-                Environment::setPacketFactory(new ::ARA::omnetpp::PacketFactory());
-                isEnvironmentInitialized = true;
-            }
-        }
-
-        void ARA::initializeNetworkInterfacesOf(OMNeTConfiguration& config) {
-            cGate* gateToARP = gate("arpOut");
-
-            int nrOfInterfaces = interfaceTable->getNumInterfaces();
-            if(nrOfInterfaces > 2) { // loopback + 1 other NIC
-                // TODO remove this constraint
-                throw cRuntimeError("ARA does currently not implement handling of more than one network card.");
-            }
-
-            for (int i=0; i < nrOfInterfaces; i++)         {
-                InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
-                if (interfaceEntry->isLoopback() == false) {
-                    addNetworkInterface(new OMNeTGate(this, gateToARP, interfaceEntry, config.getBroadCastDelay(), config.getUniCastDelay()));
-                }
-            }
-        }
-
-        void ARA::handleMessage(cMessage* message) {
-            messageDispatcher->dispatch(message);
-        }
-
-        void ARA::deliverToSystem(const Packet* packet) {
-            Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
-            OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
-            ASSERT(omnetPacket);
-
-            cPacket* encapsulatedData = omnetPacket->decapsulate();
-            send(encapsulatedData, "upperLayerGate$o");
-        }
-
-        void ARA::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
-            Enter_Method_Silent("takeAndSend(msg)");
-            take(msg);
-            sendDelayed(msg, sendDelay, gate);
-        }
-
-        void ARA::packetNotDeliverable(const Packet* packet) {
-            //TODO report to upper layer
-        }
-
-        void ARA::receiveChangeNotification(int category, const cObject* details) {
-            if(category == NF_LINK_BREAK) {
-                handleBrokenLink(check_and_cast<Ieee80211DataOrMgmtFrame*>(details));
-            }
-        }
-
-        void ARA::handleBrokenLink(Ieee80211DataOrMgmtFrame* frame) {
-            cPacket* encapsulatedPacket = frame->decapsulate();
-
-            if(messageDispatcher->isARAMessage(encapsulatedPacket)) {
-                // extract the receiver address
-                MACAddress receiverMACAddress = frame->getReceiverAddress();
-                const IPv4Address receiverIPv4Address = arp->getInverseAddressResolution(receiverMACAddress);
-                AddressPtr omnetAddress (new OMNeTAddress(receiverIPv4Address));
-
-                OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
-
-                // TODO this does only work if we have only one network interface card
-                NetworkInterface* interface = getNetworkInterface(0);
-                handleRouteFailure(omnetPacket, omnetAddress, interface);
-            }
-        }
-
-    } /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END

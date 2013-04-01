@@ -5,30 +5,36 @@
 #ifndef OMNET_CONFIGURATION_H_
 #define OMNET_CONFIGURATION_H_
 
+#include "OMNeTARAMacros.h"
 #include "Configuration.h"
+#include "AbstractARAClient.h"
+#include "RoutingTable.h"
+#include "IInterfaceTable.h"
 #include "Logger.h"
 
-#include <omnetpp.h>
+OMNETARA_NAMESPACE_BEGIN
 
-namespace ARA {
-namespace omnetpp {
+class OMNeTConfiguration : public Configuration {
+    public:
+        OMNeTConfiguration(cModule* module);
+        void initializeNetworkInterfacesOf(AbstractARAClient* client);
 
-    class OMNeTConfiguration : public Configuration {
-        public:
-            OMNeTConfiguration(cModule* module);
+        RoutingTable* getRoutingTable();
 
-            Logger* getLogger();
-            double getUniCastDelay();
-            double getBroadCastDelay();
+        Logger* getLogger();
+        double getUniCastDelay();
+        double getBroadCastDelay();
 
-        private:
-            cModule* getHostModule(cModule* module);
+    private:
+        cModule* getHostModule();
 
-            Logger* logger;
+        cModule* module;
+        RoutingTable* routingTable;
+        Logger* logger;
 
-            double broadCastDelay;
-            double uniCastDelay;
-    };
-}
-}
+        double broadCastDelay;
+        double uniCastDelay;
+};
+
+OMNETARA_NAMESPACE_END
 #endif

@@ -9,6 +9,7 @@
 #include "ForwardingPolicy.h"
 #include "SimpleLogger.h"
 #include "IPvXAddressResolver.h"
+#include "IInterfaceTable.h"
 #include "ModuleAccess.h"
 
 using namespace ARA;
@@ -22,8 +23,11 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) : Configuration(
         maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue(),
         routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue()
     ) {
+    this->module = module;
+    logger = new SimpleLogger(getHostModule()->getName());
 
-    logger = new SimpleLogger(getHostModule(module)->getName());
+    routingTable = ModuleAccess<RoutingTable>("araRoutingTable").get();
+    routingTable->setEvaporationPolicy(evaporationPolicy);
 
     broadCastDelay = module->par("broadCastDelay").doubleValue();
     uniCastDelay = module->par("uniCastDelay").doubleValue();
@@ -41,7 +45,11 @@ double OMNeTConfiguration::getUniCastDelay() {
     return uniCastDelay;
 }
 
-cModule* OMNeTConfiguration::getHostModule(cModule* module) {
+RoutingTable* OMNeTConfiguration::getRoutingTable() {
+    return routingTable;
+}
+
+cModule* OMNeTConfiguration::getHostModule() {
     cModule* parent = module->getParentModule();
     cModule* grandParent = parent->getParentModule();
     return grandParent;

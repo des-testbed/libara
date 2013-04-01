@@ -9,20 +9,44 @@ OMNETARA_NAMESPACE_BEGIN
 // Register the class with the OMNeT++ simulation
 Define_Module(EARA);
 
-void EARA::initialize(int stage) {
-    ARA::initialize(stage);
+EARA::EARA() {
+    messageDispatcher = new MessageDispatcher(this, this);
+}
 
-    if(stage == 0) {
-        NotificationBoard* notificationBoard = NotificationBoardAccess().get();
-        notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
-        WATCH(hasEnoughBattery);
+EARA::~EARA() {
+    delete messageDispatcher;
+}
+
+int EARA::numInitStages() const {
+    return 5;
+}
+
+void EARA::initialize(int stage) {
+    if(stage == 4) {
+        AbstractOMNeTARAClient::initialize();
+        OMNeTConfiguration config = OMNeTConfiguration(this);
+        setLogger(config.getLogger());
+
+        AbstractEARAClient::initialize(config, config.getRoutingTable());
+        initializeNetworkInterfacesOf(this, config);
+
+        //FIXME subscribe for the battery event!!
+        notificationBoard->subscribe(this, NF_LINK_BREAK);
     }
 }
 
 void EARA::handleMessage(cMessage* message) {
     if (hasEnoughBattery) {
-        ARA::handleMessage(message);
+        messageDispatcher->dispatch(message);
     }
+}
+
+void EARA::deliverToSystem(const Packet* packet) {
+    sendToUpperLayer(packet);
+}
+
+void EARA::packetNotDeliverable(const Packet* packet) {
+    //TODO report to upper layer
 }
 
 void EARA::receiveChangeNotification(int category, const cObject* details) {
@@ -30,8 +54,14 @@ void EARA::receiveChangeNotification(int category, const cObject* details) {
         handleBatteryStatusChange(check_and_cast<Energy*>(details));
     }
     else {
-        ARA::receiveChangeNotification(category, details);
+        AbstractOMNeTARAClient::receiveChangeNotification(category, details);
     }
+}
+
+void EARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
+    // TODO this does only work if we have only one network interface card
+    NetworkInterface* interface = getNetworkInterface(0);
+    handleRouteFailure(packet, receiverAddress, interface);
 }
 
 void EARA::handleBatteryStatusChange(Energy* energyInformation) {
@@ -42,6 +72,11 @@ void EARA::handleBatteryStatusChange(Energy* energyInformation) {
        cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
        displayString.setTagArg("i", 1, "#FF0000");
     }
+}
+
+unsigned char EARA::getCurrentEnergyLevel() {
+    //FIXME implement this
+    return 255;
 }
 
 OMNETARA_NAMESPACE_END

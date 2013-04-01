@@ -5,24 +5,23 @@
 #ifndef OMNETGATE_H_
 #define OMNETGATE_H_
 
+#include "omnetpp/OMNeTARAMacros.h"
+
 #include "AbstractNetworkInterface.h"
-#include "PacketFactory.h"
-#include "ARA.h"
-#include "OMNeTAddress.h"
+#include "omnetpp/AbstractOMNeTARAClient.h"
+#include "omnetpp/OMNeTAddress.h"
+#include "AbstractARAClient.h"
 #include "InterfaceEntry.h"
+#include "PacketFactory.h"
 
-#include <omnetpp.h>
-#include <memory>
-
-namespace ARA {
-namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
 class ARA;
 
 //TODO write some more documentation for this class
-    class OMNeTGate: public AbstractNetworkInterface {
+class OMNeTGate: public AbstractNetworkInterface {
     public:
-        OMNeTGate(ARA* module, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay);
+        OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClient, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay);
 
         void send(const Packet* packet, std::shared_ptr<Address> recipient);
         void send(const Packet* packet, std::shared_ptr<Address> recipient, double sendDelay);
@@ -34,7 +33,7 @@ class ARA;
         std::shared_ptr<OMNeTAddress> getNextHopAddress(std::shared_ptr<Address> recipient);
 
     private:
-        ARA* omnetARAClient;
+        AbstractOMNeTARAClient* omnetARAModule;
         ::ARA::PacketFactory* packetFactory;
         cGate* gateToARP;
         int interfaceID;
@@ -51,9 +50,8 @@ class ARA;
          * event synchronization which would lead to packet collisions
          */
         double uniCastDelay;
-    };
+};
 
-} /* namespace ARA */
-} /* namespace omnetpp */
+OMNETARA_NAMESPACE_END
 
 #endif /* OMNETGATE_H_ */

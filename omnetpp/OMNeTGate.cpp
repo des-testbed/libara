@@ -2,10 +2,10 @@
  * $FU-Copyright$
  */
 
-#include "Environment.h"
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/OMNeTAddress.h"
+#include "Environment.h"
 #include "IInterfaceTable.h"
 #include "IPv4InterfaceData.h"
 #include "IPvXAddressResolver.h"
@@ -14,13 +14,10 @@
 
 using namespace std;
 
-namespace ARA {
-namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
-typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
-
-OMNeTGate::OMNeTGate(ARA* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : AbstractNetworkInterface(araClient) {
-    this->omnetARAClient = araClient;
+OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : AbstractNetworkInterface(araClient) {
+    this->omnetARAModule = module;
     this->gateToARP = gateToARP;
     this->broadCastDelay = broadCastDelay;
     this->uniCastDelay = uniCastDelay;
@@ -58,7 +55,7 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double
     omnetPacket->setControlInfo(controlInfo);
 
     // we might have switched the context from the OMNeTTimer
-    omnetARAClient->takeAndSend(omnetPacket, gateToARP, sendDelay);
+    omnetARAModule->takeAndSend(omnetPacket, gateToARP, sendDelay);
 }
 
 OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
@@ -79,10 +76,9 @@ bool OMNeTGate::equals(NetworkInterface* otherInterface) {
         return false;
     }
     else {
-        return strcmp(omnetARAClient->getFullName(), otherOMNeTInterface->omnetARAClient->getFullName()) == 0
+        return strcmp(omnetARAModule->getFullName(), otherOMNeTInterface->omnetARAModule->getFullName()) == 0
             && strcmp(gateToARP->getFullName(), otherOMNeTInterface->gateToARP->getFullName()) == 0;
     }
 }
 
-} /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END

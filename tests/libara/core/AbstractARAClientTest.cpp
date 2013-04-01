@@ -140,7 +140,7 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
     CHECK(originalDestination->equals(sentPacket->getDestination()));
     CHECK_EQUAL(originalSequenceNr, sentPacket->getSequenceNumber());
     STRCMP_EQUAL(originalPayload, sentPacket->getPayload());
-    CHECK_EQUAL(originalPayloadSize, sentPacket->getPayloadLength());
+    LONGS_EQUAL(originalPayloadSize, sentPacket->getPayloadLength());
 
     // only the hop count needs to be incremented by 1
     CHECK_EQUAL(originalHopCount + 1, sentPacket->getHopCount());

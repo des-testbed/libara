@@ -24,6 +24,7 @@ namespace ARA {
              * @param localAddress the Address which is returned when the interface is asked for its local address.
              * @param broadcastAddress the Address which is known to be the broadcast address of this interface.
              */
+            //TODO replace the first parameter by an interface "Receiver" (this is the only functionality this class requires)
             AbstractNetworkInterface(AbstractARAClient* client, std::shared_ptr<Address> localAddress = nullptr, std::shared_ptr<Address> broadcastAddress = nullptr);
             virtual ~AbstractNetworkInterface() {}
 
