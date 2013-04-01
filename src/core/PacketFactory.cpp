@@ -3,6 +3,7 @@
  */
 
 #include "PacketFactory.h"
+#include <cstring>
 
 namespace ARA {
 
@@ -31,10 +32,10 @@ Packet* PacketFactory::makeRouteFailurePacket(const Packet* originalPacket) {
 }
 
 Packet* PacketFactory::makeEnergyDisseminationPacket(AddressPtr source, unsigned int seqNr, unsigned char energyLevel) {
-    char* payload = new char[1]();
+    char payload[1];
     payload[0] = energyLevel;
     // FIXME the destination is set to source because we do not use or care for this field. However this seems not like a good idea
-    return makePacket(source, source, source, PacketType::ENERGY_INFO,seqNr, payload, 1, 1);
+    return makePacket(source, source, source, PacketType::ENERGY_INFO, seqNr, payload, 1, 1);
 }
 
 Packet* PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) {

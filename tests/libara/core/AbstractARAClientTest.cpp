@@ -113,7 +113,9 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
     AddressPtr originalSender (new AddressMock("sender"));
     unsigned int originalHopCount = 5;
     unsigned int originalSequenceNr = 123;
-    Packet* packet = new Packet(originalSource, originalDestination, originalSender, PacketType::DATA, originalSequenceNr, "Hello", 5, originalHopCount);
+    const char* originalPayload = "Hello";
+    int originalPayloadSize = std::strlen(originalPayload) + 1;
+    Packet* packet = new Packet(originalSource, originalDestination, originalSender, PacketType::DATA, originalSequenceNr, originalPayload, originalPayloadSize, originalHopCount);
 
     // make sure that a route to the packet destination is available
     routingTable->update(packet->getDestination(), nextHop, interface2, 1.0);
@@ -137,8 +139,8 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
     CHECK(originalSource->equals(sentPacket->getSource()));
     CHECK(originalDestination->equals(sentPacket->getDestination()));
     CHECK_EQUAL(originalSequenceNr, sentPacket->getSequenceNumber());
-    STRCMP_EQUAL("Hello", sentPacket->getPayload());
-    CHECK_EQUAL(5, sentPacket->getPayloadLength());
+    STRCMP_EQUAL(originalPayload, sentPacket->getPayload());
+    CHECK_EQUAL(originalPayloadSize, sentPacket->getPayloadLength());
 
     // only the hop count needs to be incremented by 1
     CHECK_EQUAL(originalHopCount + 1, sentPacket->getHopCount());
@@ -802,7 +804,7 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     AddressPtr destination (new AddressMock("destination"));
     unsigned int originalSeqNr = 123;
     unsigned int originalHopCount = 5;
-    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, originalSeqNr, "Foo", 3, originalHopCount);
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, originalSeqNr, "Foo", 4, originalHopCount);
     AddressPtr route1 (new AddressMock("route1"));
     AddressPtr route2 (new AddressMock("route2"));
 

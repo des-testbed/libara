@@ -11,5 +11,5 @@
     CHECK(packet->getSender()->equals(sender));\
     CHECK(packet->getDestination()->equals(destination));\
     CHECK(packet->getHopCount() == hopCount);\
-    BYTES_EQUAL(std::strlen(payload), packet->getPayloadLength());\
+    BYTES_EQUAL(std::strlen(payload)+1, packet->getPayloadLength());\
     STRCMP_EQUAL(payload, packet->getPayload());

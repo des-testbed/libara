@@ -56,9 +56,10 @@ TEST(PacketFactoryTest, makeClone) {
    char type = PacketType::DATA;
    unsigned int seqNr = 3;
    const char* payload = "Hello World";
+   unsigned int payloadSize = strlen(payload)+1; // don't forget the \0 byte for string termination
    unsigned int hopCount = 123;
 
-   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
+   Packet packet = Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
    Packet* clone = factory->makeClone(&packet);
 
    CHECK(clone->getSource()->equals(source));
@@ -66,8 +67,8 @@ TEST(PacketFactoryTest, makeClone) {
    CHECK(clone->getSender()->equals(sender));
    CHECK_EQUAL(type, clone->getType());
    CHECK_EQUAL(seqNr, clone->getSequenceNumber());
-   LONGS_EQUAL(strlen(payload), clone->getPayloadLength());
-   CHECK_EQUAL(payload, clone->getPayload());
+   LONGS_EQUAL(payloadSize, clone->getPayloadLength());
+   STRCMP_EQUAL(payload, clone->getPayload());
    CHECK_EQUAL(hopCount, clone->getHopCount());
    CHECK(packet.equals(clone));
 
@@ -165,7 +166,6 @@ TEST(PacketFactoryTest, makeRouteFailurePacket) {
 
 TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
     AddressPtr originalSource (new AddressMock("source"));
-    //???AddressPtr destination (new AddressMock("destination"));
     unsigned int seqNr = 123;
     unsigned char energyLevel = 255;
     Packet* energyPacket = factory->makeEnergyDisseminationPacket(originalSource, seqNr, energyLevel);

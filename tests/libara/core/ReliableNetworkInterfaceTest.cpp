@@ -195,7 +195,7 @@ TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
     AddressPtr destination (new AddressMock("destination"));
     unsigned int hopCount = 4;
     const char* payload = "Hello World";
-    int payloadSize = std::strlen(payload);
+    int payloadSize = std::strlen(payload)+1;
     Packet* packet = new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
     AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
 
@@ -236,7 +236,7 @@ TEST(ReliableNetworkInterfaceTest, routeFailuresAreReportedToARAClient) {
     AddressPtr destination (new AddressMock("destination"));
     unsigned int hopCount = 4;
     const char* payload = "Hello World";
-    int payloadSize = std::strlen(payload);
+    int payloadSize = std::strlen(payload)+1;
     Packet* packet = new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
     AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
     interface->setMaxNrOfRetransmissions(3);
