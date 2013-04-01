@@ -36,11 +36,9 @@ void ARANetworkConfigurator::initialize(int stage) {
 }
 
 void ARANetworkConfigurator::extractTopology(cTopology& topology) {
-    vector<string> nedTypeNames = vector<string>();
-    nedTypeNames.push_back("ara.NetworkNode");
-    topology.extractByNedTypeName(nedTypeNames);
+    topology.extractByProperty("node");
 
-    EV << "ARANetworkConfigurator is configuring " << topology.getNumNodes() << " ARAClient instances\n";
+    EV << "ARANetworkConfigurator is configuring " << topology.getNumNodes() << " nodes\n";
 
     int numberOfNodes = topology.getNumNodes();
 
