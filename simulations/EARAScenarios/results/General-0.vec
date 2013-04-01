@@ -1,0 +1,171 @@
+version 2
+run General-0-20130401-11:31:55-13672
+attr configname General
+attr datetime 20130401-11:31:55
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network EARAScenario01
+attr processid 13672
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+vector 9  EARAScenario01.node1.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 24  EARAScenario01.node2.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 39  EARAScenario01.node3.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 54  EARAScenario01.node4.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 69  EARAScenario01.node5.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 76  EARAScenario01.node1.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 75  EARAScenario01.node1.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 81  EARAScenario01.node1.battery  Consumed  ETV
+vector 84  EARAScenario01.node2.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 83  EARAScenario01.node2.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 89  EARAScenario01.node2.battery  Consumed  ETV
+vector 92  EARAScenario01.node3.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 91  EARAScenario01.node3.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 97  EARAScenario01.node3.battery  Consumed  ETV
+vector 100  EARAScenario01.node4.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 99  EARAScenario01.node4.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 105  EARAScenario01.node4.battery  Consumed  ETV
+vector 108  EARAScenario01.node5.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 107  EARAScenario01.node5.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 113  EARAScenario01.node5.battery  Consumed  ETV
+vector 11  EARAScenario01.node1.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 13  EARAScenario01.node1.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 12  EARAScenario01.node1.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 26  EARAScenario01.node2.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 28  EARAScenario01.node2.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 27  EARAScenario01.node2.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 41  EARAScenario01.node3.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 43  EARAScenario01.node3.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 42  EARAScenario01.node3.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 56  EARAScenario01.node4.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 58  EARAScenario01.node4.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 57  EARAScenario01.node4.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 71  EARAScenario01.node5.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 73  EARAScenario01.node5.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 72  EARAScenario01.node5.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 18  EARAScenario01.node2.app  pingTxSeq:vector  ETV
+attr interpolationmode  none
+attr title  "ping tx seq, vector"
+9	0	0	0
+11	0	0	54000000
+12	0	0	0
+13	0	0	0
+18	1	0.602763	0
+24	0	0	0
+26	0	0	54000000
+27	0	0	0
+28	0	0	0
+39	0	0	0
+41	0	0	54000000
+42	0	0	0
+43	0	0	0
+54	0	0	0
+56	0	0	54000000
+57	0	0	0
+58	0	0	0
+69	0	0	0
+71	0	0	54000000
+72	0	0	0
+73	0	0	0
+75	0	0	0
+75	0	0	0
+76	0	0	0
+76	0	0	0
+81	0	0	0
+81	3	0.602763	0.83181293999996
+83	0	0	0
+83	0	0	0
+84	0	0	0
+84	0	0	0
+89	0	0	0
+89	3	0.602763	0.83181293999996
+91	0	0	0
+91	0	0	0
+92	0	0	0
+92	0	0	0
+97	0	0	0
+97	3	0.602763	0.83181293999996
+99	0	0	0
+99	0	0	0
+100	0	0	0
+100	0	0	0
+105	0	0	0
+105	3	0.602763	0.83181293999996
+107	0	0	0
+107	0	0	0
+108	0	0	0
+108	0	0	0
+113	0	0	0
+113	3	0.602763	0.83181293999996

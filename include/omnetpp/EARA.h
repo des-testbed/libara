@@ -22,8 +22,6 @@ class EARA: public ARA {
         void handleBatteryStatusChange(Energy* energyInformation);
 
     private:
-        SimTime helloMessageTimeout;
-        cMessage* helloMessage;
         bool hasEnoughBattery = true;
 };
 

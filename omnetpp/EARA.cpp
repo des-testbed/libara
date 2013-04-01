@@ -15,23 +15,13 @@ void EARA::initialize(int stage) {
     if(stage == 0) {
         NotificationBoard* notificationBoard = NotificationBoardAccess().get();
         notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
-
-        helloMessageTimeout = par("helloMessageTimeout");
-        helloMessage = new cMessage("HELLO");
-        scheduleAt(simTime() + helloMessageTimeout, helloMessage);
-
         WATCH(hasEnoughBattery);
     }
 }
 
 void EARA::handleMessage(cMessage* message) {
     if (hasEnoughBattery) {
-        if(message == helloMessage) {
-            //TODO
-        }
-        else {
-            ARA::handleMessage(message);
-        }
+        ARA::handleMessage(message);
     }
 }
 

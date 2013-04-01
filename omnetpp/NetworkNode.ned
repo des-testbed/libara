@@ -23,9 +23,6 @@ import inet.networklayer.ipv4.RoutingTable;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.IMobility;
 
-import ara.ARANetworkLayer;
-import ara.OMNeTBattery;
-
 module NetworkNode {
     parameters:
         @node;
@@ -59,7 +56,7 @@ module NetworkNode {
                 @display("b=40,24;p=239,29,col");
         }
         
-        ara: ARANetworkLayer {
+        networkLayer: ARANetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
@@ -77,12 +74,12 @@ module NetworkNode {
         }
 
     connections allowunconnected:
-        app.pingOut --> ara.upperLayerGate$i;
-        app.pingIn <-- ara.upperLayerGate$o;
+        app.pingOut --> networkLayer.upperLayerGate$i;
+        app.pingIn <-- networkLayer.upperLayerGate$o;
 
         for i=0..nrOfNetworkInterfaces-1 {
-            ara.ifOut[i] --> wlan[i].upperLayerIn;
-            ara.ifIn[i] <-- wlan[i].upperLayerOut;
+            networkLayer.ifOut[i] --> wlan[i].upperLayerIn;
+            networkLayer.ifIn[i] <-- wlan[i].upperLayerOut;
             wlan[i].radioIn <-- radioIn;
         }
 

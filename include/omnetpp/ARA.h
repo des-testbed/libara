@@ -75,7 +75,7 @@ namespace ARA {
 
                 void initializeNetworkInterfacesOf(OMNeTConfiguration& config);
 
-                void handleLinkBreak(Ieee80211DataOrMgmtFrame* frame);
+                void handleBrokenLink(Ieee80211DataOrMgmtFrame* frame);
 
                 MessageDispatcher* messageDispatcher;
                 IInterfaceTable* interfaceTable;

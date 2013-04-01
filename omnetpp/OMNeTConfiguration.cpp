@@ -16,7 +16,7 @@ using namespace ARA::omnetpp;
 
 OMNeTConfiguration::OMNeTConfiguration(cModule* module) : Configuration(
         evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get(),
-        reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("pathReinforcementPolicy").get(),
+        reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("reinforcementPolicy").get(),
         forwardingPolicy = ModuleAccess<ForwardingPolicy>("forwardingPolicy").get(),
         initialPheromoneValue = module->par("initialPhi").doubleValue(),
         maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue(),

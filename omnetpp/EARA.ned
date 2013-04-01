@@ -4,5 +4,5 @@ package ara;
 simple EARA extends ARA {    
     parameters:
         @class(EARA);
-        double helloMessageTimeout @unit(s) = default(1s);
+        double helloMessageTimeout @unit(s) = default(0.01s);
 }

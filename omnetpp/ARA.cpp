@@ -48,7 +48,7 @@ namespace ARA {
 
                 interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
                 arp = ModuleAccess<ARP>("arp").get();
-                routingTable = ModuleAccess<RoutingTable>("routingTableStatistics").get();
+                routingTable = ModuleAccess<RoutingTable>("araRoutingTable").get();
                 routingTable->setEvaporationPolicy(evaporationPolicy);
 
                 AbstractARAClient::initialize(config, routingTable);
@@ -106,11 +106,11 @@ namespace ARA {
 
         void ARA::receiveChangeNotification(int category, const cObject* details) {
             if(category == NF_LINK_BREAK) {
-                handleLinkBreak(check_and_cast<Ieee80211DataOrMgmtFrame*>(details));
+                handleBrokenLink(check_and_cast<Ieee80211DataOrMgmtFrame*>(details));
             }
         }
 
-        void ARA::handleLinkBreak(Ieee80211DataOrMgmtFrame* frame) {
+        void ARA::handleBrokenLink(Ieee80211DataOrMgmtFrame* frame) {
             cPacket* encapsulatedPacket = frame->decapsulate();
 
             if(messageDispatcher->isARAMessage(encapsulatedPacket)) {

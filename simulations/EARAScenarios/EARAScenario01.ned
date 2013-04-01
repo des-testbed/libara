@@ -13,14 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara.simulations;
+package ara.simulations.EARAScenarios;
 
-import ara.NetworkNode;
+import ara.EnergyAwareNetworkNode;
 import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
 import inet.world.radio.ChannelControl;
 
-network ManetTest
+network EARAScenario01
 {
     parameters:
         double playgroundSizeX;
@@ -35,9 +35,6 @@ network ManetTest
         channelControl: ChannelControl {
             parameters:
                 @display("p=78,36");
-// parameter is now set via mobility model (see also changlog in inetmanet/src/world/radio
-//                playgroundSizeX = playgroundSizeX;
-//                playgroundSizeY = playgroundSizeY;
         }
 
         networkConfigurator: ARANetworkConfigurator {
@@ -46,27 +43,27 @@ network ManetTest
                 netmask = "255.255.0.0";
                 @display("p=78,97");
         }
-        node1: NetworkNode {
+        node1: EnergyAwareNetworkNode {
             mobility.constraintAreaX = playgroundSizeX;
             mobility.constraintAreaY = playgroundSizeY;
             @display("p=515,69");
         }
-        node2: NetworkNode {
+        node2: EnergyAwareNetworkNode {
             mobility.constraintAreaX = playgroundSizeX;
             mobility.constraintAreaY = playgroundSizeY;
             @display("p=195,215");
         }
-        node3: NetworkNode {
+        node3: EnergyAwareNetworkNode {
             mobility.constraintAreaX = playgroundSizeX;
             mobility.constraintAreaY = playgroundSizeY;
             @display("p=697,182");
         }
-        node4: NetworkNode {
+        node4: EnergyAwareNetworkNode {
             mobility.constraintAreaX = playgroundSizeX;
             mobility.constraintAreaY = playgroundSizeY;
             @display("p=305,125");
         }
-        node5: NetworkNode {
+        node5: EnergyAwareNetworkNode {
             mobility.constraintAreaX = playgroundSizeX;
             mobility.constraintAreaY = playgroundSizeY;
             @display("p=496,267");

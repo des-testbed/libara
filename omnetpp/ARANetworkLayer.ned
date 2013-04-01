@@ -27,7 +27,7 @@ module ARANetworkLayer
     parameters:
         int nrOfNetworkInterfaces = default(1);
 
-        @display("i=ara.png;bgb=273,275");
+        @display("i=ara.png;bgb=301,297");
 
     gates:
         inout upperLayerGate;
@@ -38,32 +38,33 @@ module ARANetworkLayer
         ara: ARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=138,102");
+                @display("i=ara;p=204,94");
         }
 
-        evaporationPolicy: OMNeTExponentialEvaporationPolicy {
+        araRoutingTable: OMNeTRoutingTable {
             parameters:
-                @display("p=210,30");
+                @display("p=72,40;i=block/table");
         }
 
         forwardingPolicy: OMNeTStochasticForwardingPolicy {
             parameters:
-                @display("p=72,30");
+                @display("p=72,111");
         }
 
-        routingTableStatistics: OMNeTRoutingTable {
-           parameters:
-               @display("p=210,122");
- 	}
+        reinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
+            parameters:
+                @display("p=72,185");
+        }
 
-        pathReinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
-
+        evaporationPolicy: OMNeTExponentialEvaporationPolicy {
+            parameters:
+                @display("p=72,254");
         }
 
         arp: ARP {
             parameters:
                 proxyARP = false;
-                @display("p=138,215;q=pendingQueue");
+                @display("p=204,215;q=pendingQueue");
             gates:
                 nicOut[nrOfNetworkInterfaces];
         }
