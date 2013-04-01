@@ -56,7 +56,9 @@ module ARANetworkLayer
                 @display("p=210,30");
         }
 
-        forwardingPolicy: <forwardingPolicyModel> like ForwardingPolicy if forwardingPolicyModel != "" {
+// FIXME
+        forwardingPolicy: OMNeTStochasticForwardingPolicy {
+//        forwardingPolicy: <forwardingPolicyModel> like ForwardingPolicy if forwardingPolicyModel != "" {
             parameters:
                 @display("p=72,30");
         }

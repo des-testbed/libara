@@ -16,6 +16,10 @@
 package ara;
 
 import inet.base.NotificationBoard;
+
+import inet.transport.tcp.TCP;
+import inet.transport.udp.UDP;
+
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.applications.pingapp.PingApp;
@@ -85,7 +89,7 @@ module NetworkNode
                 @display("p=239,222;q=queue");
         }
 
-        mobility: <mobilityType> like IMobility {
+        mobility: <mobilityType> like IMobility if mobilityType != "" {
             parameters:
                 @display("p=49,230");
         }
@@ -100,20 +104,20 @@ module NetworkNode
                 @display("p=163,67;i=block/app");
         }
 
-//        tcp: TCP {
-//            parameters:
-//                @display("p=163,154;i=block/wheelbarrow");
-//        }
+        tcp: TCP {
+            parameters:
+                @display("p=163,154;i=block/wheelbarrow");
+        }
 
         udpApp[numUdpApps]: <udpAppType> like IUDPApp {
             parameters:
                 @display("i=block/app;p=272,67");
         }
 
-//        udp: UDP {
-//            parameters:
-//                @display("p=272,154;i=block/transport");
-//        }
+        udp: UDP {
+            parameters:
+                @display("p=272,154;i=block/transport");
+        }
 
 
     connections allowunconnected:
