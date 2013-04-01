@@ -19,6 +19,9 @@ import inet.base.NotificationBoard;
 
 import inet.transport.tcp.TCP;
 import inet.transport.udp.UDP;
+import inet.applications.IUDPApp;
+import inet.applications.udpapp.UDPBasicBurst;
+import inet.applications.udpapp.UDPSink;
 
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
@@ -129,16 +132,19 @@ module NetworkNode
 //        tcp.ipOut --> ara.tcpIn;
 //        tcp.ipIn <-- ara.tcpOut;
 
-//        for i=0..numUdpApps-1 {
-//            udpApp[i].udpOut --> udp.appIn++;
-//            udpApp[i].udpIn <-- udp.appOut++;
-//        }
+          for i=0..numUdpApps-1 {
+            udpApp[i].udpOut --> udp.appIn++;
+            udpApp[i].udpIn <-- udp.appOut++;
+          }
 
 //        udp.ipOut --> ara.udpIn;
 //        udp.ipIn <-- ara.udpOut;
 
-        app.pingOut --> ara.upperLayerGate$i;
-        app.pingIn <-- ara.upperLayerGate$o;
+          udp.ipOut --> ara.upperLayerGate$i;
+          udp.ipIn <-- ara.upperLayerGate$o;
+
+//        app.pingOut --> ara.upperLayerGate$i;
+//        app.pingIn <-- ara.upperLayerGate$o;
 
         for i=0..nrOfNetworkInterfaces-1 {
             ara.ifOut[i] --> wlan[i].upperLayerIn;
