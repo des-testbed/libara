@@ -155,6 +155,11 @@ protected:
     virtual void packetNotDeliverable(const Packet* packet) = 0;
 
     /**
+     * This method either initializes or reinforces a route in the routing table.
+     */
+    void updateRoutingTable(Packet* packet, NetworkInterface* interface);
+
+    /**
      * Calculates an initial pheromone value based on the initialPhi value from the Configuration
      * and the given hopCount with the fomula
      * result = initialPhi / hopCount
@@ -165,6 +170,12 @@ protected:
      * Handles path reinforcement using the currently set PathReinforcementPolicy.
      */
     void reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
+    /**
+     * Handles a packet depending on its type. This method is protected virtual to enable
+     * other ARA implementations (like EARA) to override it to add new packet types.
+     */
+    virtual void handlePacket(Packet* packet, NetworkInterface* interface);
 
     /**
      * Checks if a logger has been assigned to this ARA client and if so
@@ -227,7 +238,6 @@ protected:
 private:
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
-    void handlePacket(Packet* packet, NetworkInterface* interface);
     void handleDataPacket(Packet* packet);
     void handleAntPacket(Packet* packet);
     void handleAntPacketForThisNode(Packet* packet);

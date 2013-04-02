@@ -1,0 +1,72 @@
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+// 
+
+package ara.simulations.EARAScenarios;
+
+import ara.EnergyAwareNetworkNode;
+import ara.ARANetworkConfigurator;
+import ara.time.OMNeTClock;
+import inet.world.radio.ChannelControl;
+
+network EARAScenario01
+{
+    parameters:
+        double playgroundSizeX;
+        double playgroundSizeY;
+        @display("b=297,203;bgb=758,337");
+
+    submodules:
+        clock: OMNeTClock {
+            @display("p=78,161");
+        }
+        
+        channelControl: ChannelControl {
+            parameters:
+                @display("p=78,36");
+        }
+
+        networkConfigurator: ARANetworkConfigurator {
+            parameters:
+                networkAddress = "192.168.0.0";
+                netmask = "255.255.0.0";
+                @display("p=78,97");
+        }
+        node1: EnergyAwareNetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
+            @display("p=515,69");
+        }
+        node2: EnergyAwareNetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
+            @display("p=195,215");
+        }
+        node3: EnergyAwareNetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
+            @display("p=697,182");
+        }
+        node4: EnergyAwareNetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
+            @display("p=305,125");
+        }
+        node5: EnergyAwareNetworkNode {
+            mobility.constraintAreaX = playgroundSizeX;
+            mobility.constraintAreaY = playgroundSizeY;
+            @display("p=496,267");
+        }
+}
+

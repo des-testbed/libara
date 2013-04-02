@@ -15,10 +15,9 @@
 
 package ara;
 
-import ara.ARA;
-// TODO!!
-import ara.OMNeTBattery;
-import ara.OMNeTEnergyAwareRoutingTable; 
+import ara.EARA;
+
+import ara.EnergyAwareRoutingTable; 
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 import ara.evaporation.OMNeTExponentialEvaporationPolicy;
 import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
@@ -29,7 +28,7 @@ module EARANetworkLayer
     parameters:
         int nrOfNetworkInterfaces = default(1);
 
-        @display("i=ara.png;bgb=273,275");
+        @display("i=ara.png;bgb=301,297");
 
     gates:
         inout upperLayerGate;
@@ -37,49 +36,46 @@ module EARANetworkLayer
         output ifOut[nrOfNetworkInterfaces];	// output to  NIC interface (INET/MANET needs this to be named this way)
 
     submodules:
-        eara: ARA {
+        eara: EARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=138,102");
+                @display("i=ara;p=204,94");
         }
 
-        evaporationPolicy: OMNeTExponentialEvaporationPolicy {
-
-            @display("p=210,30");
+        araRoutingTable: EnergyAwareRoutingTable {
+            parameters:
+                @display("p=72,40;i=block/table");
         }
 
         forwardingPolicy: OMNeTEnergyAwareStochasticForwardingPolicy {
-
-            @display("p=72,30");
+            parameters:
+                @display("p=72,111");
         }
 
-        routingTableStatistics: OMNeTEnergyAwareRoutingTable {
+        reinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
+            parameters:
+                @display("p=72,185");
+        }
 
-           @display("p=210,122");
- 	    }
-
-        pathReinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
-
+        evaporationPolicy: OMNeTExponentialEvaporationPolicy {
+            parameters:
+                @display("p=72,254");
         }
 
         arp: ARP {
             parameters:
                 proxyARP = false;
-                @display("p=138,215;q=pendingQueue");
+                @display("p=204,215;q=pendingQueue");
             gates:
                 nicOut[nrOfNetworkInterfaces];
         }
 
-        battery: OMNeTBattery {
-            parameters:
-                @display("p=49,293;i=block/plug");
-        }
-
     connections allowunconnected:
-        upperLayerGate <--> ara.upperLayerGate;
-        arp.ipIn <-- ara.arpOut;
+        upperLayerGate <--> eara.upperLayerGate;
+        arp.ipIn <-- eara.arpOut;
 
         for i=0..nrOfNetworkInterfaces-1 {
-            ifIn[i] --> ara.ifIn[i];
+            ifIn[i] --> eara.ifIn[i];
+            arp.nicOut[i] --> ifOut[i];
         }
 }

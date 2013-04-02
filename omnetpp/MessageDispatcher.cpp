@@ -5,16 +5,17 @@
 #include "omnetpp/MessageDispatcher.h"
 #include "omnetpp/OMNeTAddress.h"
 #include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/OMNeTGate.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4Address.h"
 #include "ARPPacket_m.h"
 
 #include <string>
 
-using namespace ARA;
-using namespace ARA::omnetpp;
+OMNETARA_NAMESPACE_BEGIN
 
-MessageDispatcher::MessageDispatcher(ARA* araClient) {
+MessageDispatcher::MessageDispatcher(AbstractOMNeTARAClient* module, AbstractARAClient* araClient) {
+    this->module = module;
     this->araClient = araClient;
 }
 
@@ -71,13 +72,13 @@ void MessageDispatcher::handleARP(cMessage* message) {
     routingDecision->setInterfaceId(arrivalInterface->getInterfaceId());
     message->setControlInfo(routingDecision);
 
-    araClient->send(message, "arpOut");
+    module->send(message, "arpOut");
 }
 
 InterfaceEntry* MessageDispatcher::getSourceInterfaceFrom(cMessage* message) {
     cGate* arrivalGate = message->getArrivalGate();
     if(arrivalGate != NULL) {
-        return araClient->interfaceTable->getInterfaceByNetworkLayerGateIndex(arrivalGate->getIndex());
+        return module->getInterfaceTable()->getInterfaceByNetworkLayerGateIndex(arrivalGate->getIndex());
     }
     else {
         return NULL;
@@ -89,3 +90,5 @@ void MessageDispatcher::handleARA(cMessage* message) {
     OMNeTGate* arrivalGate = (OMNeTGate*) araClient->getNetworkInterface(message->getArrivalGate()->getIndex());
     arrivalGate->receive(omnetPacket);
 }
+
+OMNETARA_NAMESPACE_END

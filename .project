@@ -3,7 +3,6 @@
 	<name>ARA-Simulation</name>
 	<comment></comment>
 	<projects>
-		<project>inetmanet</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

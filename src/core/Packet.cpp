@@ -17,11 +17,19 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
     this->type = type;
     this->seqNr = seqNr;
 
-    if(payload != NULL && payloadSize == 0) {
-        payloadSize = std::strlen(payload);
+    if(payload != nullptr) {
+        if(payloadSize == 0) {
+            // assume this is a string and calculate the size
+            payloadSize = std::strlen(payload)+1;
+        }
+        char* tmpPayload = new char[payloadSize];
+        memcpy(tmpPayload, payload, payloadSize);
+        this->payload = tmpPayload;
+    }
+    else {
+        this->payload = nullptr;
     }
 
-    this->payload = payload;
     this->payloadSize = payloadSize;
     this->hopCount = hopCount;
 }
@@ -34,7 +42,7 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
     this->seqNr = seqNr;
     this->hopCount = hopCount;
 
-    this->payload = NULL;
+    this->payload = nullptr;
     this->payloadSize = 0;
 }
 
@@ -46,12 +54,14 @@ Packet::Packet(AddressPtr source, AddressPtr destination, char type, unsigned in
     this->seqNr = seqNr;
 
     this->hopCount = 1;
-    this->payload = NULL;
+    this->payload = nullptr;
     this->payloadSize = 0;
 }
 
 Packet::~Packet() {
-    // Address cleanup is done by the shared_ptrs
+   if(payload != nullptr) {
+        delete[] payload;
+   }
 }
 
 AddressPtr Packet::getSource() const {

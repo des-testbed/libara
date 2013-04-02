@@ -5,23 +5,23 @@
 #ifndef ENERGY_AWARE_ROUTINGTABLE_H_
 #define ENERGY_AWARE_ROUTINGTABLE_H_
 
-#include "Packet.h"
-#include "Address.h"
-#include "NetworkInterface.h"
 #include "RoutingTable.h"
-#include "EnergyAwareRoutingTableEntry.h"
+#include "Address.h"
 
-#include <deque>
 #include <unordered_map>
 
 namespace ARA {
+    typedef std::shared_ptr<Address> AddressPtr;
+
     class EnergyAwareRoutingTable : public RoutingTable {
         public:
-           float getEnergyValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
-           void update(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface, float pheromoneValue, float energyValue);
+            void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue, unsigned char energyValue);
+            void updateEnergyOfNode(AddressPtr nodeAddress, unsigned char newEnergyLevel);
+            bool hasEnergyInformationFor(AddressPtr nodeAddress);
+            unsigned char getEnergyValueOf(AddressPtr nodeAddress);
 
         protected:
-           void updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTableEntry *newEntry);
+            std::unordered_map<AddressPtr, unsigned char, AddressHash, AddressPredicate> neighborEnergyValues;
 };
 
 } /* namespace ARA */

@@ -56,9 +56,10 @@ TEST(PacketFactoryTest, makeClone) {
    char type = PacketType::DATA;
    unsigned int seqNr = 3;
    const char* payload = "Hello World";
+   unsigned int payloadSize = strlen(payload)+1; // don't forget the \0 byte for string termination
    unsigned int hopCount = 123;
 
-   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
+   Packet packet = Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
    Packet* clone = factory->makeClone(&packet);
 
    CHECK(clone->getSource()->equals(source));
@@ -66,8 +67,8 @@ TEST(PacketFactoryTest, makeClone) {
    CHECK(clone->getSender()->equals(sender));
    CHECK_EQUAL(type, clone->getType());
    CHECK_EQUAL(seqNr, clone->getSequenceNumber());
-   LONGS_EQUAL(strlen(payload), clone->getPayloadLength());
-   CHECK_EQUAL(payload, clone->getPayload());
+   LONGS_EQUAL(payloadSize, clone->getPayloadLength());
+   STRCMP_EQUAL(payload, clone->getPayload());
    CHECK_EQUAL(hopCount, clone->getHopCount());
    CHECK(packet.equals(clone));
 
@@ -161,4 +162,25 @@ TEST(PacketFactoryTest, makeRouteFailurePacket) {
     CHECK_EQUAL(1, routeFailurePacket->getHopCount());
 
     delete routeFailurePacket;
+}
+
+TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
+    AddressPtr originalSource (new AddressMock("source"));
+    unsigned int seqNr = 123;
+    unsigned char energyLevel = 255;
+    Packet* energyPacket = factory->makeEnergyDisseminationPacket(originalSource, seqNr, energyLevel);
+
+    CHECK(energyPacket->getSource()->equals(originalSource));
+    CHECK(energyPacket->getSender()->equals(originalSource));
+    // we do not need to check the destination field because it will be set to the broadcast address by the NIC
+
+    CHECK_EQUAL(PacketType::ENERGY_INFO, energyPacket->getType());
+    CHECK_EQUAL(seqNr, energyPacket->getSequenceNumber());
+    CHECK_EQUAL(1, energyPacket->getPayloadLength());
+    CHECK_EQUAL(1, energyPacket->getHopCount());
+
+    const char* payload = energyPacket->getPayload();
+    BYTES_EQUAL(energyLevel, payload[0]);
+
+    delete energyPacket;
 }

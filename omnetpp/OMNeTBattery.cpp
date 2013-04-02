@@ -110,5 +110,9 @@ namespace ARA {
                 mCurrEnergy->record(capacity-residualCapacity);
             }
         }
+
+        double OMNeTBattery::getNominalValue() {
+            return nominalCapmAh;
+        }
     }
 }

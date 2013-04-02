@@ -5,7 +5,6 @@
 #include "CppUTest/TestHarness.h"
 #include "EnergyAwareRoutingTable.h"
 #include "ExponentialEvaporationPolicy.h"
-#include "EnergyAwareRoutingTableEntry.h"
 #include "PacketType.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
@@ -35,15 +34,33 @@ TEST_GROUP(EnergyAwareRoutingTableTest) {
     }
 };
 
-TEST(EnergyAwareRoutingTableTest, getEnergyValue) {
-    AddressPtr sourceAddress (new AddressMock("Source"));
-    AddressPtr destination (new AddressMock("Destination"));
-    AddressPtr nextHopAddress (new AddressMock("nextHop"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
+TEST(EnergyAwareRoutingTableTest, updateEnergyOfNode) {
+    AddressPtr node1 (new AddressMock("A"));
+    AddressPtr node2 (new AddressMock("B"));
 
-    // Should be zero because there is no known route to this destination
-    LONGS_EQUAL(0, routingTable->getPheromoneValue(destination, nextHopAddress, &interface));
+    // start the test
+    unsigned char initialEnergyValue = 255;
+    routingTable->updateEnergyOfNode(node1, initialEnergyValue);
+    routingTable->updateEnergyOfNode(node2, initialEnergyValue);
+    BYTES_EQUAL(initialEnergyValue, routingTable->getEnergyValueOf(node1));
+    BYTES_EQUAL(initialEnergyValue, routingTable->getEnergyValueOf(node2));
 
-    routingTable->update(destination, nextHopAddress, &interface, 123, 234);
-    LONGS_EQUAL(234, routingTable->getEnergyValue(destination, nextHopAddress, &interface));
+    unsigned char newEnergyValue1 = 120;
+    routingTable->updateEnergyOfNode(node1, newEnergyValue1);
+
+    BYTES_EQUAL(newEnergyValue1, routingTable->getEnergyValueOf(node1));
+    BYTES_EQUAL(initialEnergyValue, routingTable->getEnergyValueOf(node2));
+
+    unsigned char newEnergyValue2 = 55;
+    routingTable->updateEnergyOfNode(node2, newEnergyValue2);
+
+    BYTES_EQUAL(newEnergyValue1, routingTable->getEnergyValueOf(node1));
+    BYTES_EQUAL(newEnergyValue2, routingTable->getEnergyValueOf(node2));
+}
+
+TEST(EnergyAwareRoutingTableTest, hasEnergyInformationFor) {
+    AddressPtr someNode (new AddressMock("A"));
+    CHECK_FALSE(routingTable->hasEnergyInformationFor(someNode));
+    routingTable->updateEnergyOfNode(someNode, 123);
+    CHECK_TRUE(routingTable->hasEnergyInformationFor(someNode));
 }

@@ -41,8 +41,9 @@ TEST(PacketTest, createWithPayload) {
     char type = PacketType::DATA;
     unsigned int seqNr = 2;
     const char* payload = "Hello World!";
+    int payloadSize = strlen(payload)+1;
 
-    Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload));
+    Packet packet = Packet(source, destination, sender, type, seqNr, payload, payloadSize);
 
     CHECK(packet.getSource()->equals(source));
     CHECK(packet.getDestination()->equals(destination));
@@ -51,8 +52,8 @@ TEST(PacketTest, createWithPayload) {
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
     LONGS_EQUAL(0, packet.getHopCount());
 
-    LONGS_EQUAL(strlen(payload), packet.getPayloadLength());
-    LONGS_EQUAL(payload, packet.getPayload());
+    LONGS_EQUAL(payloadSize, packet.getPayloadLength());
+    STRCMP_EQUAL(payload, packet.getPayload());
 }
 
 TEST(PacketTest, createWithPayloadAndHopCount) {
@@ -62,17 +63,18 @@ TEST(PacketTest, createWithPayloadAndHopCount) {
     char type = PacketType::DATA;
     unsigned int seqNr = 3;
     const char* payload = "Hello World";
+    int payloadSize = strlen(payload)+1;
     unsigned int hopCount = 123;
 
-    Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
+    Packet packet = Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
 
     CHECK(packet.getSource()->equals(source));
     CHECK(packet.getDestination()->equals(destination));
     CHECK(packet.getSender()->equals(sender));
     CHECK_EQUAL(type, packet.getType());
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    LONGS_EQUAL(strlen(payload), packet.getPayloadLength());
-    CHECK_EQUAL(payload, packet.getPayload());
+    LONGS_EQUAL(payloadSize, packet.getPayloadLength());
+    STRCMP_EQUAL(payload, packet.getPayload());
     CHECK_EQUAL(hopCount, packet.getHopCount());
 }
 
@@ -145,7 +147,7 @@ TEST(PacketTest, calculatePayloadLength) {
     const char* payload = "Hello World";
 
     Packet packet = Packet(source, destination, sender, type, seqNr, payload);
-    LONGS_EQUAL(11, packet.getPayloadLength())
+    LONGS_EQUAL(strlen(payload)+1, packet.getPayloadLength())
 }
 
 TEST(PacketTest, setSender) {

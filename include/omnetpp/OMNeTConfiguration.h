@@ -5,30 +5,49 @@
 #ifndef OMNET_CONFIGURATION_H_
 #define OMNET_CONFIGURATION_H_
 
+#include "OMNeTARAMacros.h"
 #include "Configuration.h"
+#include "AbstractARAClient.h"
+#include "RoutingTable.h"
+#include "IInterfaceTable.h"
 #include "Logger.h"
 
-#include <omnetpp.h>
+OMNETARA_NAMESPACE_BEGIN
 
-namespace ARA {
-namespace omnetpp {
+class OMNeTConfiguration : public Configuration {
+    public:
+        OMNeTConfiguration(cModule* module);
+        void initializeNetworkInterfacesOf(AbstractARAClient* client);
 
-    class OMNeTConfiguration : public Configuration {
-        public:
-            OMNeTConfiguration(cModule* module);
+        virtual EvaporationPolicy* getEvaporationPolicy();
+        virtual PathReinforcementPolicy* getReinforcementPolicy();
+        virtual ForwardingPolicy* getForwardingPolicy();
+        virtual float getInitialPheromoneValue();
+        virtual int getMaxNrOfRouteDiscoveryRetries();
+        virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
 
-            Logger* getLogger();
-            double getUniCastDelay();
-            double getBroadCastDelay();
+        virtual RoutingTable* getRoutingTable();
+        Logger* getLogger();
+        double getUniCastDelay();
+        double getBroadCastDelay();
 
-        private:
-            cModule* getHostModule(cModule* module);
+    protected:
+        cModule* getHostModule();
 
-            Logger* logger;
+    protected:
+        EvaporationPolicy* evaporationPolicy;
+        PathReinforcementPolicy* reinforcementPolicy;
+        ForwardingPolicy* forwardingPolicy;
+        float initialPheromoneValue;
+        int maxNrOfRouteDiscoveryRetries;
+        unsigned int routeDiscoveryTimeoutInMilliSeconds;
 
-            double broadCastDelay;
-            double uniCastDelay;
-    };
-}
-}
+        cModule* simpleModule;
+        Logger* logger;
+
+        double broadCastDelay;
+        double uniCastDelay;
+};
+
+OMNETARA_NAMESPACE_END
 #endif

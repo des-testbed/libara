@@ -15,6 +15,9 @@
 
 package ara;
 
+import ara.ARANetworkLayer;
+import ara.TrafficGenerator;
+import inet.applications.pingapp.PingApp;
 import inet.base.NotificationBoard;
 
 import inet.transport.tcp.TCP;
@@ -25,18 +28,11 @@ import inet.applications.udpapp.UDPSink;
 
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
-import inet.applications.pingapp.PingApp;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.IMobility;
 import inet.battery.IBattery;
 
-
-import ara.ARANetworkLayer;
-import ara.OMNeTBattery;
-import ara.TrafficGenerator;
-
-module NetworkNode
-{
+module NetworkNode {
     parameters:
         @node;
         @display("i=device/wifilaptop;bgb=366,335");
@@ -74,8 +70,8 @@ module NetworkNode
             parameters:
                 @display("b=40,24;p=239,29,col");
         }
-
-        ara: ARANetworkLayer {
+        
+        networkLayer: ARANetworkLayer {
             parameters:
                 evaporationModel = evaporationModel;
                 forwardingPolicyModel = forwardingPolicyModel;
@@ -94,19 +90,13 @@ module NetworkNode
                 @display("p=49,230");
         }
 
-        battery: <batteryModel> like IBattery if batteryModel != "" {
-            parameters:
-                @display("p=49,293;i=block/plug");
-        }
-
-
     connections allowunconnected:
-        app.lowerLayerOut --> ara.upperLayerGate$i;
-        app.lowerLayerIn  <-- ara.upperLayerGate$o;
+        app.lowerLayerOut --> networkLayer.upperLayerGate$i;
+        app.lowerLayerIn <-- networkLayer.upperLayerGate$o;
 
         for i=0..nrOfNetworkInterfaces-1 {
-            ara.ifOut[i] --> wlan[i].upperLayerIn;
-            ara.ifIn[i] <-- wlan[i].upperLayerOut;
+            networkLayer.ifOut[i] --> wlan[i].upperLayerIn;
+            networkLayer.ifIn[i] <-- wlan[i].upperLayerOut;
             wlan[i].radioIn <-- radioIn;
         }
 }

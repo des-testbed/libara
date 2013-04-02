@@ -21,6 +21,9 @@ namespace ARA {
             * pseudo-random number generator provided by OMNeT++.
             */
            class OMNeTEnergyAwareStochasticForwardingPolicy : public cSimpleModule, public EnergyAwareStochasticForwardingPolicy {
+              public:
+                 OMNeTEnergyAwareStochasticForwardingPolicy(){};
+                 ~OMNeTEnergyAwareStochasticForwardingPolicy(){};
               protected:
                  /// The method returns a random number wich uses OMNeT++ pseudo random number generators
                  float getRandomNumber();
