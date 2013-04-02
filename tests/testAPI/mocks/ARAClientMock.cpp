@@ -3,6 +3,7 @@
  */
 
 #include "ARAClientMock.h"
+#include "BasicConfiguration.h"
 #include "RoutingTableEntry.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
@@ -18,7 +19,7 @@ typedef std::shared_ptr<Address> AddressPtr;
 ARAClientMock::ARAClientMock() {
     float initialPhi = 10.0;
     float deltaPhi = 5.0;
-    Configuration configuration = Configuration(
+    BasicConfiguration configuration = BasicConfiguration(
             new ExponentialEvaporationPolicyMock(),
             new LinearPathReinforcementPolicy(deltaPhi),
             new BestPheromoneForwardingPolicy(),

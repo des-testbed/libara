@@ -17,7 +17,7 @@ package ara;
 
 import ara.EARA;
 
-//import ara.OMNeTEnergyAwareRoutingTable; 
+import ara.EnergyAwareRoutingTable; 
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 import ara.evaporation.OMNeTExponentialEvaporationPolicy;
 import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
@@ -42,7 +42,7 @@ module EARANetworkLayer
                 @display("i=ara;p=204,94");
         }
 
-        araRoutingTable: OMNeTRoutingTable {
+        araRoutingTable: EnergyAwareRoutingTable {
             parameters:
                 @display("p=72,40;i=block/table");
         }

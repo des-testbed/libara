@@ -37,6 +37,8 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
     private:
         MessageDispatcher* messageDispatcher;
         bool hasEnoughBattery = true;
+        double maximumBatteryLevel;
+        int currentEnergyLevel;
 };
 
 OMNETARA_NAMESPACE_END

@@ -1,0 +1,785 @@
+version 2
+run General-0-20130402-15:02:05-9500
+attr configname General
+attr datetime 20130402-15:02:05
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network EARAScenario01
+attr processid 9500
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+scalar EARAScenario01.node1.app 	pingRxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping rx seq, count"
+scalar EARAScenario01.node1.app 	pingTxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping tx seq, count"
+scalar EARAScenario01.node1.app 	numOutOfOrderArrivals:last 	-nan
+attr interpolationmode  none
+attr title  "ping out-of-order arrivals, last"
+scalar EARAScenario01.node1.app 	numLost:last 	-nan
+attr interpolationmode  none
+attr title  "pings lost, last"
+statistic EARAScenario01.node1.app 	rtt:histogram
+field count 0
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  none
+attr title  "ping round-trip time, histogram"
+attr unit  s
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	0
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node1.networkLayer.arp 	failedResolution:count 	0
+attr title  "ARP failed resolutions, count"
+scalar EARAScenario01.node1.networkLayer.arp 	initiatedResolution:count 	0
+attr title  "ARP initiated resolutions, count"
+scalar EARAScenario01.node1.networkLayer.arp 	sentReplies:count 	0
+attr title  "ARP replies sent, count"
+scalar EARAScenario01.node1.networkLayer.arp 	sentReq:count 	0
+attr title  "ARP request sent, count"
+scalar EARAScenario01.node1.wlan[0].mgmt 	dropPkByQueue:count 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, count"
+scalar EARAScenario01.node1.wlan[0].mgmt 	dropPkByQueue:sum(packetBytes) 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, sum(packetBytes)"
+scalar EARAScenario01.node1.wlan[0].mgmt 	dataQueueLen:max 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, max"
+scalar EARAScenario01.node1.wlan[0].mgmt 	dataQueueLen:timeavg 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, timeavg"
+scalar EARAScenario01.node1.wlan[0].mac 	"number of received packets" 	0
+scalar EARAScenario01.node1.wlan[0].mac 	"number of collisions" 	2
+scalar EARAScenario01.node1.wlan[0].mac 	"number of internal collisions" 	0
+scalar EARAScenario01.node1.wlan[0].mac 	"number of retry for AC 0" 	0
+scalar EARAScenario01.node1.wlan[0].mac 	"sent and receive bites" 	336
+scalar EARAScenario01.node1.wlan[0].mac 	"sent packet within AC 0" 	0
+scalar EARAScenario01.node1.wlan[0].mac 	"sent in TXOP " 	0
+scalar EARAScenario01.node1.wlan[0].mac 	"sentWithoutRetry AC 0" 	0
+scalar EARAScenario01.node1.wlan[0].mac 	"numGivenUp AC 0" 	0
+scalar EARAScenario01.node1.wlan[0].mac 	"numDropped AC 0" 	0
+scalar EARAScenario01.node1.wlan[0].radio 	lossRate:min 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, min"
+scalar EARAScenario01.node1.wlan[0].radio 	lossRate:max 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, max"
+scalar EARAScenario01.node1.wlan[0].radio 	lossRate:timeavg 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, timeavg"
+scalar EARAScenario01.node1.wlan[0].radio 	radioState:count 	17
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), count"
+statistic EARAScenario01.node1.wlan[0].radio 	channelNo:histogram
+field count 1
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  sample-hold
+attr title  "channel no, histogram"
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	1
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node1.wlan[0].radio 	bitrate:min 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, min"
+attr unit  bps
+scalar EARAScenario01.node1.wlan[0].radio 	bitrate:max 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, max"
+attr unit  bps
+scalar EARAScenario01.node1.wlan[0].radio 	bitrate:timeavg 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, timeavg"
+attr unit  bps
+scalar EARAScenario01.node2.app 	"Pings sent" 	1
+scalar EARAScenario01.node2.app 	"ping loss rate (%)" 	100
+scalar EARAScenario01.node2.app 	"ping out-of-order rate (%)" 	0
+scalar EARAScenario01.node2.app 	pingRxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping rx seq, count"
+scalar EARAScenario01.node2.app 	pingTxSeq:count 	1
+attr interpolationmode  none
+attr title  "ping tx seq, count"
+scalar EARAScenario01.node2.app 	numOutOfOrderArrivals:last 	-nan
+attr interpolationmode  none
+attr title  "ping out-of-order arrivals, last"
+scalar EARAScenario01.node2.app 	numLost:last 	-nan
+attr interpolationmode  none
+attr title  "pings lost, last"
+statistic EARAScenario01.node2.app 	rtt:histogram
+field count 0
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  none
+attr title  "ping round-trip time, histogram"
+attr unit  s
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	0
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node2.networkLayer.arp 	failedResolution:count 	0
+attr title  "ARP failed resolutions, count"
+scalar EARAScenario01.node2.networkLayer.arp 	initiatedResolution:count 	0
+attr title  "ARP initiated resolutions, count"
+scalar EARAScenario01.node2.networkLayer.arp 	sentReplies:count 	0
+attr title  "ARP replies sent, count"
+scalar EARAScenario01.node2.networkLayer.arp 	sentReq:count 	0
+attr title  "ARP request sent, count"
+scalar EARAScenario01.node2.wlan[0].mgmt 	dropPkByQueue:count 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, count"
+scalar EARAScenario01.node2.wlan[0].mgmt 	dropPkByQueue:sum(packetBytes) 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, sum(packetBytes)"
+scalar EARAScenario01.node2.wlan[0].mgmt 	dataQueueLen:max 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, max"
+scalar EARAScenario01.node2.wlan[0].mgmt 	dataQueueLen:timeavg 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, timeavg"
+scalar EARAScenario01.node2.wlan[0].mac 	"number of received packets" 	0
+scalar EARAScenario01.node2.wlan[0].mac 	"number of collisions" 	0
+scalar EARAScenario01.node2.wlan[0].mac 	"number of internal collisions" 	0
+scalar EARAScenario01.node2.wlan[0].mac 	"number of retry for AC 0" 	0
+scalar EARAScenario01.node2.wlan[0].mac 	"sent and receive bites" 	672
+scalar EARAScenario01.node2.wlan[0].mac 	"sent packet within AC 0" 	0
+scalar EARAScenario01.node2.wlan[0].mac 	"sent in TXOP " 	0
+scalar EARAScenario01.node2.wlan[0].mac 	"sentWithoutRetry AC 0" 	0
+scalar EARAScenario01.node2.wlan[0].mac 	"numGivenUp AC 0" 	0
+scalar EARAScenario01.node2.wlan[0].mac 	"numDropped AC 0" 	0
+scalar EARAScenario01.node2.wlan[0].radio 	lossRate:min 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, min"
+scalar EARAScenario01.node2.wlan[0].radio 	lossRate:max 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, max"
+scalar EARAScenario01.node2.wlan[0].radio 	lossRate:timeavg 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, timeavg"
+scalar EARAScenario01.node2.wlan[0].radio 	radioState:count 	17
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), count"
+statistic EARAScenario01.node2.wlan[0].radio 	channelNo:histogram
+field count 1
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  sample-hold
+attr title  "channel no, histogram"
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	1
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node2.wlan[0].radio 	bitrate:min 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, min"
+attr unit  bps
+scalar EARAScenario01.node2.wlan[0].radio 	bitrate:max 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, max"
+attr unit  bps
+scalar EARAScenario01.node2.wlan[0].radio 	bitrate:timeavg 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, timeavg"
+attr unit  bps
+scalar EARAScenario01.node3.app 	pingRxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping rx seq, count"
+scalar EARAScenario01.node3.app 	pingTxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping tx seq, count"
+scalar EARAScenario01.node3.app 	numOutOfOrderArrivals:last 	-nan
+attr interpolationmode  none
+attr title  "ping out-of-order arrivals, last"
+scalar EARAScenario01.node3.app 	numLost:last 	-nan
+attr interpolationmode  none
+attr title  "pings lost, last"
+statistic EARAScenario01.node3.app 	rtt:histogram
+field count 0
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  none
+attr title  "ping round-trip time, histogram"
+attr unit  s
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	0
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node3.networkLayer.arp 	failedResolution:count 	0
+attr title  "ARP failed resolutions, count"
+scalar EARAScenario01.node3.networkLayer.arp 	initiatedResolution:count 	0
+attr title  "ARP initiated resolutions, count"
+scalar EARAScenario01.node3.networkLayer.arp 	sentReplies:count 	0
+attr title  "ARP replies sent, count"
+scalar EARAScenario01.node3.networkLayer.arp 	sentReq:count 	0
+attr title  "ARP request sent, count"
+scalar EARAScenario01.node3.wlan[0].mgmt 	dropPkByQueue:count 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, count"
+scalar EARAScenario01.node3.wlan[0].mgmt 	dropPkByQueue:sum(packetBytes) 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, sum(packetBytes)"
+scalar EARAScenario01.node3.wlan[0].mgmt 	dataQueueLen:max 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, max"
+scalar EARAScenario01.node3.wlan[0].mgmt 	dataQueueLen:timeavg 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, timeavg"
+scalar EARAScenario01.node3.wlan[0].mac 	"number of received packets" 	0
+scalar EARAScenario01.node3.wlan[0].mac 	"number of collisions" 	1
+scalar EARAScenario01.node3.wlan[0].mac 	"number of internal collisions" 	0
+scalar EARAScenario01.node3.wlan[0].mac 	"number of retry for AC 0" 	0
+scalar EARAScenario01.node3.wlan[0].mac 	"sent and receive bites" 	336
+scalar EARAScenario01.node3.wlan[0].mac 	"sent packet within AC 0" 	0
+scalar EARAScenario01.node3.wlan[0].mac 	"sent in TXOP " 	0
+scalar EARAScenario01.node3.wlan[0].mac 	"sentWithoutRetry AC 0" 	0
+scalar EARAScenario01.node3.wlan[0].mac 	"numGivenUp AC 0" 	0
+scalar EARAScenario01.node3.wlan[0].mac 	"numDropped AC 0" 	0
+scalar EARAScenario01.node3.wlan[0].radio 	lossRate:min 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, min"
+scalar EARAScenario01.node3.wlan[0].radio 	lossRate:max 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, max"
+scalar EARAScenario01.node3.wlan[0].radio 	lossRate:timeavg 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, timeavg"
+scalar EARAScenario01.node3.wlan[0].radio 	radioState:count 	13
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), count"
+statistic EARAScenario01.node3.wlan[0].radio 	channelNo:histogram
+field count 1
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  sample-hold
+attr title  "channel no, histogram"
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	1
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node3.wlan[0].radio 	bitrate:min 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, min"
+attr unit  bps
+scalar EARAScenario01.node3.wlan[0].radio 	bitrate:max 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, max"
+attr unit  bps
+scalar EARAScenario01.node3.wlan[0].radio 	bitrate:timeavg 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, timeavg"
+attr unit  bps
+scalar EARAScenario01.node4.app 	pingRxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping rx seq, count"
+scalar EARAScenario01.node4.app 	pingTxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping tx seq, count"
+scalar EARAScenario01.node4.app 	numOutOfOrderArrivals:last 	-nan
+attr interpolationmode  none
+attr title  "ping out-of-order arrivals, last"
+scalar EARAScenario01.node4.app 	numLost:last 	-nan
+attr interpolationmode  none
+attr title  "pings lost, last"
+statistic EARAScenario01.node4.app 	rtt:histogram
+field count 0
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  none
+attr title  "ping round-trip time, histogram"
+attr unit  s
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	0
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node4.networkLayer.arp 	failedResolution:count 	0
+attr title  "ARP failed resolutions, count"
+scalar EARAScenario01.node4.networkLayer.arp 	initiatedResolution:count 	0
+attr title  "ARP initiated resolutions, count"
+scalar EARAScenario01.node4.networkLayer.arp 	sentReplies:count 	0
+attr title  "ARP replies sent, count"
+scalar EARAScenario01.node4.networkLayer.arp 	sentReq:count 	0
+attr title  "ARP request sent, count"
+scalar EARAScenario01.node4.wlan[0].mgmt 	dropPkByQueue:count 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, count"
+scalar EARAScenario01.node4.wlan[0].mgmt 	dropPkByQueue:sum(packetBytes) 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, sum(packetBytes)"
+scalar EARAScenario01.node4.wlan[0].mgmt 	dataQueueLen:max 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, max"
+scalar EARAScenario01.node4.wlan[0].mgmt 	dataQueueLen:timeavg 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, timeavg"
+scalar EARAScenario01.node4.wlan[0].mac 	"number of received packets" 	0
+scalar EARAScenario01.node4.wlan[0].mac 	"number of collisions" 	1
+scalar EARAScenario01.node4.wlan[0].mac 	"number of internal collisions" 	0
+scalar EARAScenario01.node4.wlan[0].mac 	"number of retry for AC 0" 	0
+scalar EARAScenario01.node4.wlan[0].mac 	"sent and receive bites" 	672
+scalar EARAScenario01.node4.wlan[0].mac 	"sent packet within AC 0" 	0
+scalar EARAScenario01.node4.wlan[0].mac 	"sent in TXOP " 	0
+scalar EARAScenario01.node4.wlan[0].mac 	"sentWithoutRetry AC 0" 	0
+scalar EARAScenario01.node4.wlan[0].mac 	"numGivenUp AC 0" 	0
+scalar EARAScenario01.node4.wlan[0].mac 	"numDropped AC 0" 	0
+scalar EARAScenario01.node4.wlan[0].radio 	lossRate:min 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, min"
+scalar EARAScenario01.node4.wlan[0].radio 	lossRate:max 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, max"
+scalar EARAScenario01.node4.wlan[0].radio 	lossRate:timeavg 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, timeavg"
+scalar EARAScenario01.node4.wlan[0].radio 	radioState:count 	21
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), count"
+statistic EARAScenario01.node4.wlan[0].radio 	channelNo:histogram
+field count 1
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  sample-hold
+attr title  "channel no, histogram"
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	1
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node4.wlan[0].radio 	bitrate:min 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, min"
+attr unit  bps
+scalar EARAScenario01.node4.wlan[0].radio 	bitrate:max 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, max"
+attr unit  bps
+scalar EARAScenario01.node4.wlan[0].radio 	bitrate:timeavg 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, timeavg"
+attr unit  bps
+scalar EARAScenario01.node5.app 	pingRxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping rx seq, count"
+scalar EARAScenario01.node5.app 	pingTxSeq:count 	0
+attr interpolationmode  none
+attr title  "ping tx seq, count"
+scalar EARAScenario01.node5.app 	numOutOfOrderArrivals:last 	-nan
+attr interpolationmode  none
+attr title  "ping out-of-order arrivals, last"
+scalar EARAScenario01.node5.app 	numLost:last 	-nan
+attr interpolationmode  none
+attr title  "pings lost, last"
+statistic EARAScenario01.node5.app 	rtt:histogram
+field count 0
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  none
+attr title  "ping round-trip time, histogram"
+attr unit  s
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	0
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node5.networkLayer.arp 	failedResolution:count 	0
+attr title  "ARP failed resolutions, count"
+scalar EARAScenario01.node5.networkLayer.arp 	initiatedResolution:count 	0
+attr title  "ARP initiated resolutions, count"
+scalar EARAScenario01.node5.networkLayer.arp 	sentReplies:count 	0
+attr title  "ARP replies sent, count"
+scalar EARAScenario01.node5.networkLayer.arp 	sentReq:count 	0
+attr title  "ARP request sent, count"
+scalar EARAScenario01.node5.wlan[0].mgmt 	dropPkByQueue:count 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, count"
+scalar EARAScenario01.node5.wlan[0].mgmt 	dropPkByQueue:sum(packetBytes) 	0
+attr interpolationmode  none
+attr source  dropPkByQueue
+attr title  "packets dropped by queue, sum(packetBytes)"
+scalar EARAScenario01.node5.wlan[0].mgmt 	dataQueueLen:max 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, max"
+scalar EARAScenario01.node5.wlan[0].mgmt 	dataQueueLen:timeavg 	0
+attr interpolationmode  sample-hold
+attr title  "data queue length, timeavg"
+scalar EARAScenario01.node5.wlan[0].mac 	"number of received packets" 	0
+scalar EARAScenario01.node5.wlan[0].mac 	"number of collisions" 	1
+scalar EARAScenario01.node5.wlan[0].mac 	"number of internal collisions" 	0
+scalar EARAScenario01.node5.wlan[0].mac 	"number of retry for AC 0" 	0
+scalar EARAScenario01.node5.wlan[0].mac 	"sent and receive bites" 	336
+scalar EARAScenario01.node5.wlan[0].mac 	"sent packet within AC 0" 	0
+scalar EARAScenario01.node5.wlan[0].mac 	"sent in TXOP " 	0
+scalar EARAScenario01.node5.wlan[0].mac 	"sentWithoutRetry AC 0" 	0
+scalar EARAScenario01.node5.wlan[0].mac 	"numGivenUp AC 0" 	0
+scalar EARAScenario01.node5.wlan[0].mac 	"numDropped AC 0" 	0
+scalar EARAScenario01.node5.wlan[0].radio 	lossRate:min 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, min"
+scalar EARAScenario01.node5.wlan[0].radio 	lossRate:max 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, max"
+scalar EARAScenario01.node5.wlan[0].radio 	lossRate:timeavg 	-nan
+attr interpolationmode  backward-sample-hold
+attr title  "packet loss rate, timeavg"
+scalar EARAScenario01.node5.wlan[0].radio 	radioState:count 	17
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), count"
+statistic EARAScenario01.node5.wlan[0].radio 	channelNo:histogram
+field count 1
+field mean 0
+field stddev -nan
+field sum 0
+field sqrsum 0
+field min 0
+field max 0
+attr interpolationmode  sample-hold
+attr title  "channel no, histogram"
+bin	-INF	0
+bin	-0.5	0
+bin	-0.46666666666667	0
+bin	-0.43333333333333	0
+bin	-0.4	0
+bin	-0.36666666666667	0
+bin	-0.33333333333333	0
+bin	-0.3	0
+bin	-0.26666666666667	0
+bin	-0.23333333333333	0
+bin	-0.2	0
+bin	-0.16666666666667	0
+bin	-0.13333333333333	0
+bin	-0.1	0
+bin	-0.066666666666667	0
+bin	-0.033333333333333	0
+bin	0	1
+bin	0.033333333333333	0
+bin	0.066666666666667	0
+bin	0.1	0
+bin	0.13333333333333	0
+bin	0.16666666666667	0
+bin	0.2	0
+bin	0.23333333333333	0
+bin	0.26666666666667	0
+bin	0.3	0
+bin	0.33333333333333	0
+bin	0.36666666666667	0
+bin	0.4	0
+bin	0.43333333333333	0
+bin	0.46666666666667	0
+bin	0.5	0
+scalar EARAScenario01.node5.wlan[0].radio 	bitrate:min 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, min"
+attr unit  bps
+scalar EARAScenario01.node5.wlan[0].radio 	bitrate:max 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, max"
+attr unit  bps
+scalar EARAScenario01.node5.wlan[0].radio 	bitrate:timeavg 	54000000
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, timeavg"
+attr unit  bps

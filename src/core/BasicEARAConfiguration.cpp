@@ -2,24 +2,24 @@
  * $FU-Copyright$
  */
 
-#include "EARAConfiguration.h"
+#include "BasicEARAConfiguration.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
-EARAConfiguration::EARAConfiguration(
+BasicEARAConfiguration::BasicEARAConfiguration(
         EvaporationPolicy* evaporationPolicy,
         PathReinforcementPolicy* reinforcementPolicy,
         ForwardingPolicy* forwardingPolicy,
         float initialPheromoneValue,
         int maxNrOfRouteDiscoveryRetries,
         unsigned int routeDiscoveryTimeoutInMilliSeconds,
-        unsigned int energyDisseminationTimeoutInMilliSeconds) : Configuration(evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds) {
+        unsigned int energyDisseminationTimeoutInMilliSeconds) : BasicConfiguration(evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds) {
 
     this->energyDisseminationTimeout = energyDisseminationTimeoutInMilliSeconds;
 }
 
-unsigned int EARAConfiguration::getEnergyDisseminationTimeout() const {
+unsigned int BasicEARAConfiguration::getEnergyDisseminationTimeout() const {
     return energyDisseminationTimeout;
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END

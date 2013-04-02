@@ -23,6 +23,7 @@ namespace ARA {
                 virtual ~OMNeTBattery(){};
 
                 void initialize(int stage);
+                double getNominalValue();
 
             protected:
                 void deductAndCheck();

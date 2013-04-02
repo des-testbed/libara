@@ -5,29 +5,25 @@
 #ifndef EARA_CONFIGURATION_H_
 #define EARA_CONFIGURATION_H_
 
+#include "ARAMacros.h"
 #include "Configuration.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
-    class EARAConfiguration : public Configuration {
-    public:
-        EARAConfiguration(EvaporationPolicy* evaporationPolicy,
-                          PathReinforcementPolicy* reinforcementPolicy,
-                          ForwardingPolicy* forwardingPolicy,
-                          float initialPheromoneValue,
-                          int maxNrOfRouteDiscoveryRetries=2,
-                          unsigned int routeDiscoveryTimeoutInMilliSeconds=1000,
-                          unsigned int energyDisseminationTimeoutInMilliSeconds=1000);
+/**
+ * This interface extends the ~Configuration interface and is used to retrieve the EARA specific configuration parameters.
+ * A default implementation is available in ~BasicEARAConfiguration
+ */
+class EARAConfiguration : public Configuration {
+public:
+    virtual ~EARAConfiguration() {};
 
-        /**
-         * Returns the time in milliseconds that shall pass between the
-         * periodic sending of the energy dissemination packets.
-         */
-        unsigned int getEnergyDisseminationTimeout() const;
+    /**
+     * Returns the time in milliseconds that shall pass between the
+     * periodic sending of the energy dissemination packets.
+     */
+    virtual unsigned int getEnergyDisseminationTimeout() const = 0;
+};
 
-    private:
-        unsigned int energyDisseminationTimeout;
-    };
-
-} /* namespace ARA */
-#endif /* CONFIGURATION_H_ */
+ARA_NAMESPACE_END
+#endif

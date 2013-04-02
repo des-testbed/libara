@@ -3,6 +3,7 @@
  */
 
 #include "omnetpp/EARA.h"
+#include "omnetpp/OMNeTEARAConfiguration.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -24,14 +25,16 @@ int EARA::numInitStages() const {
 void EARA::initialize(int stage) {
     if(stage == 4) {
         AbstractOMNeTARAClient::initialize();
-        OMNeTConfiguration config = OMNeTConfiguration(this);
+        OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
 
-        AbstractEARAClient::initialize(config, config.getRoutingTable());
+        AbstractEARAClient::initializeEARA(config, config.getRoutingTable());
         initializeNetworkInterfacesOf(this, config);
 
-        //FIXME subscribe for the battery event!!
-        notificationBoard->subscribe(this, NF_LINK_BREAK);
+        notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
+        maximumBatteryLevel = config.getMaximumBatteryLevel();
+        currentEnergyLevel =  255;
+        WATCH(currentEnergyLevel);
     }
 }
 
@@ -65,7 +68,9 @@ void EARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
 }
 
 void EARA::handleBatteryStatusChange(Energy* energyInformation) {
-    if (energyInformation->GetEnergy() <= 0) {
+    currentEnergyLevel = (energyInformation->GetEnergy() / maximumBatteryLevel) * 255;
+
+    if (currentEnergyLevel <= 0) {
        hasEnoughBattery = false;
 
        // change the node color
@@ -75,8 +80,7 @@ void EARA::handleBatteryStatusChange(Energy* energyInformation) {
 }
 
 unsigned char EARA::getCurrentEnergyLevel() {
-    //FIXME implement this
-    return 255;
+    return currentEnergyLevel;
 }
 
 OMNETARA_NAMESPACE_END

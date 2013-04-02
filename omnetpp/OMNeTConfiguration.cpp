@@ -15,22 +15,43 @@
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-OMNeTConfiguration::OMNeTConfiguration(cModule* module) : Configuration(
-        evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get(),
-        reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("reinforcementPolicy").get(),
-        forwardingPolicy = ModuleAccess<ForwardingPolicy>("forwardingPolicy").get(),
-        initialPheromoneValue = module->par("initialPhi").doubleValue(),
-        maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue(),
-        routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue()
-    ) {
-    this->module = module;
-    logger = new SimpleLogger(getHostModule()->getName());
+OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
+    simpleModule = module;
+    evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get();
+    reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("reinforcementPolicy").get();
+    forwardingPolicy = ModuleAccess<ForwardingPolicy>("forwardingPolicy").get();
+    initialPheromoneValue = module->par("initialPhi").doubleValue();
+    maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
+    routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
 
-    routingTable = ModuleAccess<RoutingTable>("araRoutingTable").get();
-    routingTable->setEvaporationPolicy(evaporationPolicy);
+    logger = new SimpleLogger(getHostModule()->getName());
 
     broadCastDelay = module->par("broadCastDelay").doubleValue();
     uniCastDelay = module->par("uniCastDelay").doubleValue();
+}
+
+EvaporationPolicy* OMNeTConfiguration::getEvaporationPolicy() {
+    return evaporationPolicy;
+}
+
+PathReinforcementPolicy* OMNeTConfiguration::getReinforcementPolicy() {
+    return reinforcementPolicy;
+}
+
+ForwardingPolicy* OMNeTConfiguration::getForwardingPolicy() {
+    return forwardingPolicy;
+}
+
+float OMNeTConfiguration::getInitialPheromoneValue() {
+    return initialPheromoneValue;
+}
+
+int OMNeTConfiguration::getMaxNrOfRouteDiscoveryRetries() {
+    return maxNrOfRouteDiscoveryRetries;
+}
+
+unsigned int OMNeTConfiguration::getRouteDiscoveryTimeoutInMilliSeconds() {
+    return routeDiscoveryTimeoutInMilliSeconds;
 }
 
 Logger* OMNeTConfiguration::getLogger() {
@@ -46,11 +67,13 @@ double OMNeTConfiguration::getUniCastDelay() {
 }
 
 RoutingTable* OMNeTConfiguration::getRoutingTable() {
+    RoutingTable* routingTable = ModuleAccess<RoutingTable>("araRoutingTable").get();
+    routingTable->setEvaporationPolicy(evaporationPolicy);
     return routingTable;
 }
 
 cModule* OMNeTConfiguration::getHostModule() {
-    cModule* parent = module->getParentModule();
+    cModule* parent = simpleModule->getParentModule();
     cModule* grandParent = parent->getParentModule();
     return grandParent;
 }

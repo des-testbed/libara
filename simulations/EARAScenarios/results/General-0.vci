@@ -1,0 +1,175 @@
+file 13985 1364907762                                           
+version 2
+run General-0-20130402-15:02:05-9500
+attr configname General
+attr datetime 20130402-15:02:05
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvars2 $repetition=0
+attr measurement ""
+attr network EARAScenario01
+attr processid 9500
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+
+vector 9  EARAScenario01.node1.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 24  EARAScenario01.node2.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 39  EARAScenario01.node3.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 54  EARAScenario01.node4.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 69  EARAScenario01.node5.wlan[0].mgmt  dataQueueLen:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "data queue length, vector"
+vector 76  EARAScenario01.node1.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 75  EARAScenario01.node1.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 81  EARAScenario01.node1.battery  Consumed  ETV
+vector 84  EARAScenario01.node2.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 83  EARAScenario01.node2.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 89  EARAScenario01.node2.battery  Consumed  ETV
+vector 92  EARAScenario01.node3.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 91  EARAScenario01.node3.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 97  EARAScenario01.node3.battery  Consumed  ETV
+vector 100  EARAScenario01.node4.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 99  EARAScenario01.node4.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 105  EARAScenario01.node4.battery  Consumed  ETV
+vector 108  EARAScenario01.node5.wlan[0].mac  RadioState  ETV
+attr enum  "IDLE=0, RECV=1, SLEEP=3, TRANSMIT=2"
+attr enumname  RadioState
+vector 107  EARAScenario01.node5.wlan[0].mac  State  ETV
+attr enum  "BACKOFF=3, DEFER=1, IDLE=0, RECEIVE=8, WAITACK=4, WAITAIFS=2, WAITCTS=6, WAITMULTICAST=5, WAITSIFS=7"
+attr enumname  Ieee80211Mac
+vector 113  EARAScenario01.node5.battery  Consumed  ETV
+vector 11  EARAScenario01.node1.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 13  EARAScenario01.node1.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 12  EARAScenario01.node1.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 26  EARAScenario01.node2.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 28  EARAScenario01.node2.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 27  EARAScenario01.node2.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 41  EARAScenario01.node3.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 43  EARAScenario01.node3.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 42  EARAScenario01.node3.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 56  EARAScenario01.node4.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 58  EARAScenario01.node4.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 57  EARAScenario01.node4.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 71  EARAScenario01.node5.wlan[0].radio  bitrate:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "tx bitrate, vector"
+attr unit  bps
+vector 73  EARAScenario01.node5.wlan[0].radio  radioState:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "radio state (enum), vector"
+vector 72  EARAScenario01.node5.wlan[0].radio  channelNo:vector  ETV
+attr interpolationmode  sample-hold
+attr title  "channel no, vector"
+vector 80  EARAScenario01.node1.wlan[0].radio  snirVector  ETV
+vector 88  EARAScenario01.node2.wlan[0].radio  snirVector  ETV
+vector 112  EARAScenario01.node5.wlan[0].radio  snirVector  ETV
+vector 104  EARAScenario01.node4.wlan[0].radio  snirVector  ETV
+vector 96  EARAScenario01.node3.wlan[0].radio  snirVector  ETV
+vector 18  EARAScenario01.node2.app  pingTxSeq:vector  ETV
+attr interpolationmode  none
+attr title  "ping tx seq, vector"
+vector 86  EARAScenario01.node2.wlan[0].mac  "throughput AC0"  ETV
+vector 102  EARAScenario01.node4.wlan[0].mac  "throughput AC0"  ETV
+vector 78  EARAScenario01.node1.wlan[0].mac  "throughput AC0"  ETV
+vector 110  EARAScenario01.node5.wlan[0].mac  "throughput AC0"  ETV
+9	5943 8 0 0 0 0 1 0 0 0 0
+11	5951 16 0 0 0 0 1 54000000 54000000 54000000 2.916e+15
+12	5967 9 0 0 0 0 1 0 0 0 0
+13	5976 285 0 143 0 0.609996 17 0 2 10 14
+18	6261 18 110 110 0.602763 0.602763 1 0 0 0 0
+24	6279 9 0 0 0 0 1 0 0 0 0
+26	6288 16 0 0 0 0 1 54000000 54000000 54000000 2.916e+15
+27	6304 9 0 0 0 0 1 0 0 0 0
+28	6313 287 0 144 0 0.609996 17 0 2 12 20
+39	6600 9 0 0 0 0 1 0 0 0 0
+41	6609 16 0 0 0 0 1 54000000 54000000 54000000 2.916e+15
+42	6625 9 0 0 0 0 1 0 0 0 0
+43	6634 213 0 95 0 0.007208 13 0 2 8 12
+54	6847 9 0 0 0 0 1 0 0 0 0
+56	6856 16 0 0 0 0 1 54000000 54000000 54000000 2.916e+15
+57	6872 9 0 0 0 0 1 0 0 0 0
+58	6881 355 0 142 0 0.609996 21 0 2 14 22
+69	7236 9 0 0 0 0 1 0 0 0 0
+71	7245 16 0 0 0 0 1 54000000 54000000 54000000 2.916e+15
+72	7261 9 0 0 0 0 1 0 0 0 0
+73	7270 285 0 145 0 0.609996 17 0 2 10 14
+75	7555 606 0 146 0 0.609996 36 0 5 52 172
+76	8161 294 0 143 0 0.609996 18 0 2 10 14
+78	8455 32 137 137 0.609637 0.609637 1 551.14765015903 551.14765015903 551.14765015903 303763.73227582
+80	8487 33 26 26 0.003786 0.003786 1 -0.13534056047082 -0.13534056047082 -0.13534056047082 0.018317067308555
+81	8520 298 0 148 0 0.609996 10 0 8.5232745000394 26.314975800342 217.46578817222
+83	8818 708 0 147 0 0.609996 42 0 5 72 272
+84	9526 296 0 144 0 0.609996 18 0 2 12 20
+86	9822 32 114 114 0.606823 0.606823 1 553.70346872152 553.70346872152 553.70346872152 306587.53127425
+88	9854 31 27 27 0.003786 0.003786 1 10.924020252477 10.924020252477 10.924020252477 119.33421847654
+89	9885 299 0 148 0 0.609996 10 0 8.4702869999455 42.5095554 355.85493577247
+91	10184 460 0 98 0 0.007208 28 0 5 36 136
+92	10644 222 0 95 0 0.007208 14 0 2 8 12
+96	10866 31 78 78 0.005588 0.005588 1 7.1990928706218 7.1990928706218 7.1990928706218 51.826938159837
+97	10897 236 0 148 0 0.609996 8 0 8.4736257001059 9.0245340005495 71.861676112955
+99	11133 740 0 142 0 0.609996 44 0 5 64 250
+100	11873 386 0 142 0 0.609996 22 0 2 14 22
+102	12259 33 117 117 0.606851 0.606851 1 553.67792093941 553.67792093941 553.67792093941 306559.24013578
+104	12292 32 69 69 0.005447 0.005447 1 4.4656714330434 4.4656714330434 4.4656714330434 19.9422213479
+105	12324 375 0 148 0 0.609996 12 0 8.5113869999768 43.02761040011 360.48276854981
+107	12699 600 0 145 0 0.609996 34 0 5 44 156
+108	13299 312 0 145 0 0.609996 18 0 2 10 14
+110	13611 33 139 139 0.609637 0.609637 1 551.14765015903 551.14765015903 551.14765015903 303763.73227582
+112	13644 34 28 28 0.003786 0.003786 1 -0.76362858902549 -0.76362858902549 -0.76362858902549 0.58312862197705
+113	13678 307 0 148 0 0.609996 10 0 8.5232745000394 26.249278800213 217.44626963946

@@ -11,11 +11,11 @@ using namespace std;
 
 namespace ARA {
 
-AbstractEARAClient::AbstractEARAClient(Configuration& configuration, EnergyAwareRoutingTable* routingTable) {
-    initialize(configuration, routingTable);
+AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable) {
+    initializeEARA(configuration, routingTable);
 }
 
-void AbstractEARAClient::initialize(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable) {
+void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable) {
     AbstractARAClient::initialize(configuration, routingTable);
     energyDisseminationTimer = Environment::getClock()->getNewTimer();
     energyDisseminationTimer->addTimeoutListener(this);

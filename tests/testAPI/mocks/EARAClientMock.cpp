@@ -3,6 +3,7 @@
  */
 
 #include "EARAClientMock.h"
+#include "BasicEARAConfiguration.h"
 #include "EnergyAwareRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
@@ -18,13 +19,13 @@ typedef std::shared_ptr<Address> AddressPtr;
 EARAClientMock::EARAClientMock() {
     float initialPhi = 10.0;
     float deltaPhi = 5.0;
-    EARAConfiguration configuration = EARAConfiguration(
+    BasicEARAConfiguration configuration = BasicEARAConfiguration(
             new ExponentialEvaporationPolicyMock(),
             new LinearPathReinforcementPolicy(deltaPhi),
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initialize(configuration, new EnergyAwareRoutingTable());
+    initializeEARA(configuration, new EnergyAwareRoutingTable());
     currentEnergyLevel = 255;
 }
 

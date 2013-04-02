@@ -19,17 +19,30 @@ class OMNeTConfiguration : public Configuration {
         OMNeTConfiguration(cModule* module);
         void initializeNetworkInterfacesOf(AbstractARAClient* client);
 
-        RoutingTable* getRoutingTable();
+        virtual EvaporationPolicy* getEvaporationPolicy();
+        virtual PathReinforcementPolicy* getReinforcementPolicy();
+        virtual ForwardingPolicy* getForwardingPolicy();
+        virtual float getInitialPheromoneValue();
+        virtual int getMaxNrOfRouteDiscoveryRetries();
+        virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
 
+        virtual RoutingTable* getRoutingTable();
         Logger* getLogger();
         double getUniCastDelay();
         double getBroadCastDelay();
 
-    private:
+    protected:
         cModule* getHostModule();
 
-        cModule* module;
-        RoutingTable* routingTable;
+    protected:
+        EvaporationPolicy* evaporationPolicy;
+        PathReinforcementPolicy* reinforcementPolicy;
+        ForwardingPolicy* forwardingPolicy;
+        float initialPheromoneValue;
+        int maxNrOfRouteDiscoveryRetries;
+        unsigned int routeDiscoveryTimeoutInMilliSeconds;
+
+        cModule* simpleModule;
         Logger* logger;
 
         double broadCastDelay;
