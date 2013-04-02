@@ -6,7 +6,9 @@
 #define TRAFFIC_GENERATOR_H_
 
 #include "TrafGen.h"
+#include "IPv4Address.h"
 #include "IPv4Datagram.h"
+#include "IPv4ControlInfo.h"
 
 namespace ARA {
     namespace omnetpp {

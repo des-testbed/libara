@@ -16,6 +16,8 @@ namespace ARA {
                 WATCH(residualCapacity);
                 updateBatteryIcon();
             }
+            /// enable the residual energy vector (since it is hard disabled in class InetSimpleBattery)
+            this->residualVec.enable();
         }
 
         void OMNeTBattery::deductAndCheck(){
