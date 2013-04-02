@@ -23,10 +23,14 @@ import inet.world.radio.ChannelControl;
 network ARAPaperEvaluation
 {
     parameters:
-        double playgroundSizeX;
-        double playgroundSizeY;
-        double playgroundSizeZ;
         @display("b=297,203;bgb=758,337");
+        double playgroundSizeX @unit(m) = default(1500m);
+        double playgroundSizeY @unit(m) = default(300m);
+        double playgroundSizeZ = default(0) @unit(m);
+        int numberOfNodes = default(50);
+        volatile double nodeSpeed @unit(mps) = default(10mps);
+        volatile double nodePauseTime @unit(s) = uniform(3s,8s);
+        
 
     submodules:
         clock: OMNeTClock {
@@ -45,11 +49,18 @@ network ARAPaperEvaluation
                 @display("p=78,97");
         }
 
-        node[50] : NetworkNode {
+        node[numberOfNodes] : NetworkNode {
             parameters:
-                mobility.constraintAreaX = playgroundSizeX;
-                mobility.constraintAreaY = playgroundSizeY;
-                mobility.constraintAreaZ = playgroundSizeZ;
+                mobilityType = "RandomWPMobility";
+                mobility.speed = nodeSpeed; // I'm not sure if this works
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = 100ms;
+                mobility.constraintAreaMinX = 0m;
+                mobility.constraintAreaMinY = 0m;
+                mobility.constraintAreaMinZ = 0m;
+                mobility.constraintAreaMaxX = playgroundSizeX;
+                mobility.constraintAreaMaxY = playgroundSizeY;
+                mobility.constraintAreaMaxZ = playgroundSizeZ;
         }
 }
 

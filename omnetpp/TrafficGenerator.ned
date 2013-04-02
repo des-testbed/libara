@@ -1,12 +1,15 @@
 @namespace(ARA::omnetpp);
 package ara;
 
-simple TrafficGenerator {
+import inet.applications.trafgen.TrafGen;
+
+simple TrafficGenerator like TrafGen {
     parameters:
-	    int defaultTrafConfigId;
+        @class(TrafficGenerator);
+	    int defaultTrafConfigId = default(0);
         xml trafConfig;
 
     gates:
-        input lowerLayerIn;
-        output lowerLayerOut;
+        inout lowergate;
+
 }

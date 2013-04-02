@@ -91,8 +91,7 @@ module NetworkNode {
         }
 
     connections allowunconnected:
-        app.lowerLayerOut --> networkLayer.upperLayerGate$i;
-        app.lowerLayerIn <-- networkLayer.upperLayerGate$o;
+        app.lowergate <--> networkLayer.upperLayerGate;
 
         for i=0..nrOfNetworkInterfaces-1 {
             networkLayer.ifOut[i] --> wlan[i].upperLayerIn;

@@ -2,8 +2,8 @@
  <configurations>
  <config id="0"
     packetSize="uniform(20,40)"
-    interDepartureTime="1"
-    firstPacketTime="5"
+    interDepartureTime="0.2"
+    firstPacketTime="0"
     trafDest="192.168.0.6"
     onLength="exponential(50)"
     offLength="120"

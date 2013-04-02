@@ -5,42 +5,30 @@
 #ifndef TRAFFIC_GENERATOR_H_
 #define TRAFFIC_GENERATOR_H_
 
+#include "OMNeTARAMacros.h"
 #include "TrafGen.h"
 #include "IPv4Address.h"
 #include "IPv4Datagram.h"
 #include "IPv4ControlInfo.h"
 
-namespace ARA {
-    namespace omnetpp {
-	    /**
-		 * The class provides a traffic generator for the ARA/EARA routing 
-		 * protocols. It is based on the class TrafGen which is provided by
-		 * the INETMANET framework in src/applications/trafgen/
-		 */
-        class TrafficGenerator : public TrafGen {
-		    public:
-			    virtual void initialize(int);
-				virtual void finish();
+OMNETARA_NAMESPACE_BEGIN
 
-			protected:
-                virtual void handleSelfMsg(cPacket *);
-                virtual void handleLowerMsg(cPacket *);
-				
-                virtual void SendTraf(cPacket *msg, const char *dest);
+/**
+ * The class provides a traffic generator for the ARA/EARA routing
+ * protocols. It is based on the INETMANET class TrafGen.
+ */
+class TrafficGenerator : public TrafGen {
+    public:
+        virtual void finish();
 
-            private:
-                int lowerLayerIn;
-                int lowerLayerOut;
+    protected:
+        virtual void handleLowerMsg(cPacket *);
+        virtual void SendTraf(cPacket *msg, const char *dest);
 
-                int currentTrafficPattern;
+    private:
+        int numTrafficMsgs = 0;
+        int numTrafficMsgsRecv = 0;
+};
 
-                double numTrafficMsgs;
-                double numTrafficMsgsRecv;
-
-     //           ip_traffic_types ipTrafficType;
-                double interDepartureTime, packetSize;
-        };
-    }
-}
-
+OMNETARA_NAMESPACE_END
 #endif

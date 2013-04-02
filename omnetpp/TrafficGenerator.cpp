@@ -1,53 +1,36 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "omnetpp/TrafficGenerator.h"
 
-namespace ARA {
-    namespace omnetpp {
-        Define_Module(TrafficGenerator);
+OMNETARA_NAMESPACE_BEGIN
 
-        void TrafficGenerator::initialize(int stage) {
-		    TrafGen::initialize(stage);
+Define_Module(TrafficGenerator);
 
-			if (stage == 0) {
-                lowerLayerIn = findGate("lowerLayerIn");
-                lowerLayerOut = findGate("lowerLayerOut");
+void TrafficGenerator::SendTraf(cPacket *message, const char *destination) {
+    IPv4ControlInfo* controlInfo = new  IPv4ControlInfo();
+    IPv4Address sourceAddress("192.168.0.1"); //TODO get this from the interface table or via a configuration parameter
+    IPv4Address destinationAddress(destination);
+    controlInfo->setSrcAddr(sourceAddress);
+    controlInfo->setDestAddr(destinationAddress);
 
-                numTrafficMsgs = numTrafficMsgsRecv = 0;
-            }
-        }
 
-        void TrafficGenerator::handleLowerMsg(cPacket *message) {
-            numTrafficMsgsRecv++;
-            delete message;
-		}
-
-        void TrafficGenerator::finish() {
-            recordScalar("trafficSent", numTrafficMsgs);
-            recordScalar("trafficReceived", numTrafficMsgsRecv);
-//            recordScalar("Bitrate of generated traffic", (1 / interDepartureTime * packetSize) + 0.5);
-        }
-
-		void TrafficGenerator::handleSelfMsg(cPacket *message){
-            TrafGen::handleSelfMsg(message);
-		}
-
-		void TrafficGenerator::SendTraf(cPacket *message, const char *destination) {
-            IPv4Datagram *datagram = new IPv4Datagram("ip_datagram");
-            datagram->encapsulate(message);
-
-            IPv4ControlInfo* controlInfo = new  IPv4ControlInfo();
-            IPv4Address sourceAddress("192.168.0.1");
-            IPv4Address destinationAddress(destination);
-            /// set source
-            controlInfo->setSrcAddr(sourceAddress);
-            /// set destination
-            controlInfo->setDestAddr(destinationAddress);
-			/// increment the message counter
-            numTrafficMsgs++;
-            /// send the IPv4 datagram to the lower layer 
-
-            datagram->setControlInfo(controlInfo);
-
-            send(datagram, lowerLayerOut); 
-        }
-    }
+    IPv4Datagram* datagram = new IPv4Datagram("Traffic");
+    datagram->encapsulate(message);
+    datagram->setControlInfo(controlInfo);
+    send(datagram, "lowergate$o");
+    numTrafficMsgs++;
 }
+
+void TrafficGenerator::handleLowerMsg(cPacket *message) {
+    numTrafficMsgsRecv++;
+    delete message;
+}
+
+void TrafficGenerator::finish() {
+    recordScalar("trafficSent", numTrafficMsgs);
+    recordScalar("trafficReceived", numTrafficMsgsRecv);
+}
+
+OMNETARA_NAMESPACE_END
