@@ -30,15 +30,23 @@ namespace ARA {
 		}
 
 		void TrafficGenerator::SendTraf(cPacket *message, const char *destination) {
-		    /// we create a new IPv4 datagram
             IPv4Datagram *datagram = new IPv4Datagram("ip_datagram");
-			/// encapsulate the message 
-			datagram->encapsulate(message);
+            datagram->encapsulate(message);
 
+            IPv4ControlInfo* controlInfo = new  IPv4ControlInfo();
+            IPv4Address sourceAddress("192.168.0.1");
+            IPv4Address destinationAddress(destination);
+            /// set source
+            controlInfo->setSrcAddr(sourceAddress);
+            /// set destination
+            controlInfo->setDestAddr(destinationAddress);
 			/// increment the message counter
             numTrafficMsgs++;
             /// send the IPv4 datagram to the lower layer 
+
+            datagram->setControlInfo(controlInfo);
+
             send(datagram, lowerLayerOut); 
         }
     }
-
+}

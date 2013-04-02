@@ -33,6 +33,7 @@ import inet.battery.IBattery;
 
 import ara.ARANetworkLayer;
 import ara.OMNeTBattery;
+import ara.TrafficGenerator;
 
 module NetworkNode
 {
@@ -69,7 +70,7 @@ module NetworkNode
                 @display("p=49,171;i=block/table");
         }
 
-        app: PingApp {
+        app: TrafficGenerator {
             parameters:
                 @display("b=40,24;p=239,29,col");
         }
@@ -100,8 +101,8 @@ module NetworkNode
 
 
     connections allowunconnected:
-        app.pingOut --> ara.upperLayerGate$i;
-        app.pingIn <-- ara.upperLayerGate$o;
+        app.lowerLayerOut --> ara.upperLayerGate$i;
+        app.lowerLayerIn  <-- ara.upperLayerGate$o;
 
         for i=0..nrOfNetworkInterfaces-1 {
             ara.ifOut[i] --> wlan[i].upperLayerIn;
