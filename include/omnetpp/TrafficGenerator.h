@@ -35,6 +35,7 @@ namespace ARA {
                 int currentTrafficPattern;
 
                 double numTrafficMsgs;
+                double numTrafficMsgsRecv;
 
      //           ip_traffic_types ipTrafficType;
                 double interDepartureTime, packetSize;

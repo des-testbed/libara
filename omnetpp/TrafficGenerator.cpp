@@ -11,17 +11,18 @@ namespace ARA {
                 lowerLayerIn = findGate("lowerLayerIn");
                 lowerLayerOut = findGate("lowerLayerOut");
 
-                numTrafficMsgs = 0;
-
+                numTrafficMsgs = numTrafficMsgsRecv = 0;
             }
         }
 
         void TrafficGenerator::handleLowerMsg(cPacket *message) {
+            numTrafficMsgsRecv++;
             delete message;
 		}
 
         void TrafficGenerator::finish() {
             recordScalar("trafficSent", numTrafficMsgs);
+            recordScalar("trafficReceived", numTrafficMsgsRecv);
 //            recordScalar("Bitrate of generated traffic", (1 / interDepartureTime * packetSize) + 0.5);
         }
 
