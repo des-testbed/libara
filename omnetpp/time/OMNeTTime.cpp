@@ -18,7 +18,7 @@ long OMNeTTime::getDifferenceInMilliSeconds(const Time* otherTime) const {
     const OMNeTTime* omnetTime = dynamic_cast<const OMNeTTime*>(otherTime);
     if(omnetTime) {
         SimTime result = this->timestamp - omnetTime->timestamp;
-        return convertSimulationTime(result, SimTime::SCALEEXP_MS);
+        return convertSimulationTime(result, SIMTIME_MS);
     }
     else {
         throw cRuntimeError("Can only subtract other OMNeTTime instances from this OMNeTTime instance");

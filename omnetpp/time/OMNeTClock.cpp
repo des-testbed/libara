@@ -38,7 +38,7 @@ void OMNeTClock::startTimer(unsigned int timerID, unsigned long timeoutInMicroSe
 
     // transform the time to the wanted time scale resolution
     SimTime currentTime = simTime();
-    int64 timeDeltaRaw = timeoutInMicroSeconds * pow(10, SimTime::SCALEEXP_US - currentTime.getScaleExp());
+    int64 timeDeltaRaw = timeoutInMicroSeconds * pow(10, SIMTIME_US - currentTime.getScaleExp());
 
     SimTime scheduledTime = SimTime();
     scheduledTime.setRaw(currentTime.raw() + timeDeltaRaw);
