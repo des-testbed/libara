@@ -33,6 +33,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         virtual int numInitStages() const;
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
+        virtual void finish();
 
         /**
          * The packet should be directed to this node and must be delivered to the local system.
@@ -51,6 +52,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress);
 
     private:
+        int nrOfNotDeliverablePackets = 0;
         MessageDispatcher* messageDispatcher;
 
     friend class OMNeTGate;

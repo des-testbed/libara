@@ -42,8 +42,14 @@ void ARA::deliverToSystem(const Packet* packet) {
 }
 
 void ARA::packetNotDeliverable(const Packet* packet) {
+    nrOfNotDeliverablePackets++;
     //TODO report to upper layer
 }
+
+void ARA::finish() {
+    recordScalar("nrOfNotDeliverablePackets", nrOfNotDeliverablePackets);
+}
+
 
 void ARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
     // TODO this does only work if we have only one network interface card
