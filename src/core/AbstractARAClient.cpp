@@ -180,12 +180,13 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
+    updateRoutingTable(packet, interface);
+
     if(hasBeenReceivedEarlier(packet)) {
         handleDuplicatePacket(packet, interface);
     }
     else {
         registerReceivedPacket(packet);
-        updateRoutingTable(packet, interface);
         handlePacket(packet, interface);
     }
 }
@@ -205,15 +206,15 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
 
 void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
     if (hasBeenSentByThisNode(packet) == false) {
-        // do not insert values to self in the routing table
         AddressPtr source = packet->getSource();
-        if (routingTable->isDeliverable(source)) {
-            // update an existing pheromone value
-            reinforcePheromoneValue(source, packet->getSender(), interface);
-        } else {
-            // initialize a new pheromone value
+        AddressPtr destination = packet->getDestination();
+        AddressPtr sender = packet->getSender();
+        if (routingTable->isNewRoute(destination, sender, interface)) {
             float initialPheromoneValue = calculateInitialPheromoneValue(packet->getHopCount());
-            routingTable->update(source, packet->getSender(), interface, initialPheromoneValue);
+            routingTable->update(source, sender, interface, initialPheromoneValue);
+        }
+        else {
+            reinforcePheromoneValue(source, packet->getSender(), interface);
         }
     }
 }

@@ -46,13 +46,18 @@ TEST_GROUP(AbstractARAClientTest) {
      */
     bool aRouteToDestinationIsKnown(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
         std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(destination);
-        for(auto& possibleHop: *possibleNextHops) {
-            if(possibleHop->getAddress()->equals(nextHop) && possibleHop->getNetworkInterface()->equals(interface)) {
-                return true;
-            }
+        if(possibleNextHops->empty()) {
+            delete possibleNextHops;
+            return false;
         }
-
-        return false;
+        else {
+            for(auto& possibleHop: *possibleNextHops) {
+                if(possibleHop->getAddress()->equals(nextHop) && possibleHop->getNetworkInterface()->equals(interface)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 };
 
@@ -881,6 +886,9 @@ TEST(AbstractARAClientTest, clientsDeleteRoutingTableEntryWhenTheyReceiveRouting
     CHECK(routingTable->exists(destination, sender, interface) == false);
 }
 
+/**
+ * TODO This test checks if issue #25 has been resolved
+ */
 IGNORE_TEST(AbstractARAClientTest, doSendDuplicateWarningToSameSender) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
     std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
@@ -906,4 +914,35 @@ IGNORE_TEST(AbstractARAClientTest, doSendDuplicateWarningToSameSender) {
     sentPacketInfo = sentPackets->back();
     const Packet* secondAck = sentPacketInfo->getLeft();
     CHECK(secondAck->getType() == PacketType::ACK);
+}
+
+/**
+ * Simply check if a node remembers multiple routes to a specific destination.
+ *
+ *        /--(A)--\
+ * (source)       (testNode)--(C)
+ *        \--(B)--/
+ *
+ */
+TEST(AbstractARAClientTest, rememberMultipleRoutes) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("testNode");
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr destination (new AddressMock("B"));
+    Packet* packet1 = new Packet(source, destination, nodeA, PacketType::FANT, 123);
+    Packet* packet2 = packetFactory->makeClone(packet1);
+
+    // sanity check
+    CHECK_FALSE(aRouteToDestinationIsKnown(source, nodeA, interface));
+    CHECK_FALSE(aRouteToDestinationIsKnown(source, nodeB, interface));
+
+    // start the test
+    client->receivePacket(packet1, interface);
+    CHECK_TRUE(aRouteToDestinationIsKnown(source, nodeA, interface));
+    CHECK_FALSE(aRouteToDestinationIsKnown(source, nodeB, interface));
+
+    client->receivePacket(packet2, interface);
+    CHECK_TRUE(aRouteToDestinationIsKnown(source, nodeA, interface));
+    CHECK_TRUE(aRouteToDestinationIsKnown(source, nodeB, interface));
 }

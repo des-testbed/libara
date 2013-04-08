@@ -305,3 +305,31 @@ TEST(RoutingTableTest, removeAllEntries) {
 
     CHECK(routingTable->isDeliverable(destination) == false);
 }
+
+TEST(RoutingTableTest, isNewRoute) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr source (new AddressMock("Source"));
+    AddressPtr destination (new AddressMock("Destination"));
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+
+    // start the test
+    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == true);
+    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == true);
+
+    routingTable->update(destination, nodeA, &interface, 2.5);
+    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == false);
+    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == true);
+
+    routingTable->update(destination, nodeB, &interface, 4.1);
+    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == false);
+    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == false);
+
+    routingTable->removeEntry(destination, nodeA, &interface);
+    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == true);
+    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == false);
+
+    routingTable->removeEntry(destination, nodeB, &interface);
+    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == true);
+    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == true);
+}

@@ -5,6 +5,7 @@
 #ifndef ROUTINGTABLE_H_
 #define ROUTINGTABLE_H_
 
+#include "ARAMacros.h"
 #include "Packet.h"
 #include "Address.h"
 #include "NetworkInterface.h"
@@ -16,7 +17,7 @@
 #include <deque>
 #include <unordered_map>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 class RoutingTable {
 
@@ -40,6 +41,7 @@ public:
      * The method checks if an destination/nextHop/interface entry already exists.
      */
     bool exists(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    bool isNewRoute(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
 
     void setEvaporationPolicy(EvaporationPolicy *policy);
     EvaporationPolicy *getEvaporationPolicy() const;
@@ -58,5 +60,5 @@ protected:
     EvaporationPolicy *evaporationPolicy;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
 #endif /* ROUTINGTABLE_H_ */
