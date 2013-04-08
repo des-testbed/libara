@@ -1,72 +1,52 @@
+/*
+ * $FU-Copyright$
+ */
 #include "omnetpp/RoutingTableWatcher.h" 
 
-#include "RoutingTableEntry.h" 
+OMNETARA_NAMESPACE_BEGIN
+using namespace std;
 
-NAMESPACE_BEGIN
+RoutingTableWatcher::RoutingTableWatcher(unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>& table) : cStdVectorWatcherBase("table"), table(table) {}
 
-template<class T>
-RoutingTableWatcher<T>::RoutingTableWatcher(const char *name, std::unordered_map<std::shared_ptr<ARA::Address>, std::deque<T*>*, ARA::AddressHash, ARA::AddressPredicate>& var) : cStdVectorWatcherBase(name), m(var) {
-    itPos = -1;
-    // set iterator at least to a useful position
-    it = m.begin();
-    classname = std::string(name);
+const char* RoutingTableWatcher::getClassName() const {
+    return "RoutingTableWatcher";
 }
 
-template<class T>
-const char* RoutingTableWatcher<T>::getClassName() const { 
-    return classname.c_str(); 
+const char* RoutingTableWatcher::getElemTypeName() const {
+    return "RoutingTableEntry";
 }
 
-template<class T>
-const char* RoutingTableWatcher<T>::getElemTypeName() const { 
-    return "struct pair<*,*>"; 
+int RoutingTableWatcher::size() const {
+    unsigned int tableSize = 0;
+    unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>::iterator iterator;
+    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+        RoutingTableEntryList entryList = iterator->second;
+        tableSize += entryList->size();
+    }
+    return tableSize;
 }
 
-template<class T>
-int RoutingTableWatcher<T>::size() const { 
-    return m.size(); 
+string RoutingTableWatcher::at(int wantedPosition) const {
+    stringstream out;
+
+    int currentPosition = 0;
+    unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>::iterator iterator;
+    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+        AddressPtr address = iterator->first;
+        RoutingTableEntryList entryList = iterator->second;
+        for (auto& entry: *entryList) {
+
+            if(currentPosition == wantedPosition) {
+                out << "[destination] " << address.get()->toString() << " " << *(entry);
+                return out.str();
+            }
+            else {
+                currentPosition++;
+            }
+        }
+    }
+
+    return "Index out of bounds";
 }
 
-template<class T>
-std::string RoutingTableWatcher<T>::at(int i) const {
-     if (i==0) {
-         it = m.begin(); 
-         itPos = 0;
-     } else if (i == itPos+1 && it != m.end()) {
-         ++it; 
-         ++itPos;
-     } else {
-         it = m.begin();
-
-         for (int k=0; k<i && it!=m.end(); k++){ 
-             ++it;
-         }
-
-         itPos = i;
-     }
- 
-     if (it == m.end()) {
-         return std::string("out of bounds");
-     }
-
-     return atIt();
-}
-
-template<class T>
-std::string RoutingTableWatcher<T>::atIt() const {
-    std::stringstream out;
-    std::shared_ptr<ARA::Address> first = it->first;
-    std::deque<T*>* second = it->second;     
-    out << "[destination] " << first.get()->toString() << " ";
-    typename std::deque<T*>::iterator i;     
-
-    for(i = second->begin(); i != second->end(); i++){
-        out << *(*i);
-    } 
-    return out.str();
-}
-
-template class RoutingTableWatcher<ARA::RoutingTableEntry>;
-
-NAMESPACE_END
-
+OMNETARA_NAMESPACE_END

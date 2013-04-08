@@ -8,7 +8,7 @@ OMNETARA_NAMESPACE_BEGIN
 Define_Module(EnergyAwareRoutingTable);
 
 void EnergyAwareRoutingTable::initialize(){
-    new RoutingTableWatcher<RoutingTableEntry>("test", table);
+    new RoutingTableWatcher(table);
 }
 
 void EnergyAwareRoutingTable::handleMessage(cMessage *msg){
