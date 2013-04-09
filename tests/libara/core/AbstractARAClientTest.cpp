@@ -553,11 +553,15 @@ TEST(AbstractARAClientTest, receiveDuplicateErrorPacket) {
     routingTable->update(destination, nodeD, interface, 3.3);
 
     // Check some basic assumptions about this test setup
+    CHECK(routeIsKnown(destination, nodeB, interface));
     CHECK(routeIsKnown(destination, nodeC, interface));
+    CHECK(routeIsKnown(destination, nodeD, interface));
 
     // start the test
     client->receivePacket(&duplicateErrorPacket, interface);
+    CHECK(routeIsKnown(destination, nodeB, interface));
     CHECK(routeIsKnown(destination, nodeC, interface) == false);
+    CHECK(routeIsKnown(destination, nodeD, interface));
 }
 
 TEST(AbstractARAClientTest, deleteAssignedLogger) {

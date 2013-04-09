@@ -235,13 +235,12 @@ protected:
      */
     void logFatal(const std::string &logMessage, ...) const;
 
-private:
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
     void handleDataPacket(Packet* packet);
     void handleAntPacket(Packet* packet);
     void handleAntPacketForThisNode(Packet* packet);
-    void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
+    virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;

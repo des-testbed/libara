@@ -30,6 +30,8 @@ void ARA::initialize(int stage) {
 
         AbstractARAClient::initialize(config, config.getRoutingTable());
         initializeNetworkInterfacesOf(this, config);
+        WATCH(nrOfNotDeliverablePackets);
+        WATCH(nrOfDetectedLoops);
     }
 }
 
@@ -46,8 +48,14 @@ void ARA::packetNotDeliverable(const Packet* packet) {
     //TODO report to upper layer
 }
 
+void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
+    AbstractARAClient::handleDuplicateErrorPacket(packet, interface);
+    nrOfDetectedLoops++;
+}
+
 void ARA::finish() {
     recordScalar("nrOfNotDeliverablePackets", nrOfNotDeliverablePackets);
+    recordScalar("nrOfDetectedLoops", nrOfDetectedLoops);
 }
 
 

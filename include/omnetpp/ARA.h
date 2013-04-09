@@ -49,10 +49,13 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
          */
         virtual void packetNotDeliverable(const Packet* packet);
 
+        virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
+
         virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress);
 
     private:
         int nrOfNotDeliverablePackets = 0;
+        int nrOfDetectedLoops = 0;
         MessageDispatcher* messageDispatcher;
 
     friend class OMNeTGate;
