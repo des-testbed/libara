@@ -16,7 +16,7 @@ OMNETARA_NAMESPACE_BEGIN
  */
 class PacketFactory : public ::ARA::PacketFactory {
 protected:
-    Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload=nullptr, unsigned int payloadSize=0, unsigned int hopCount = 0);
+    Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
 };
 
 OMNETARA_NAMESPACE_END

@@ -33,6 +33,9 @@ class OMNeTEARAConfiguration : public OMNeTConfiguration, public EARAConfigurati
         virtual int getMaxNrOfRouteDiscoveryRetries() {
             return OMNeTConfiguration::getMaxNrOfRouteDiscoveryRetries();
         }
+        virtual int getMaxTTL() {
+                    return OMNeTConfiguration::getMaxTTL();
+                }
         virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds() {
             return OMNeTConfiguration::getRouteDiscoveryTimeoutInMilliSeconds();
         }

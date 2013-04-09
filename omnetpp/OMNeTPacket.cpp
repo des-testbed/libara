@@ -30,11 +30,11 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTPacket);
 
-OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, unsigned int hopCount, const char* payload, unsigned int payloadSize) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount) {
+OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, ttl, nullptr, 0) {
 
 }
 
-OMNeTPacket::OMNeTPacket(const OMNeTPacket& other) : cPacket(other), ARA::Packet(other.source, other.destination, other.sender, other.type, other.seqNr, other.payload, other.payloadSize, other.hopCount) {
+OMNeTPacket::OMNeTPacket(const OMNeTPacket& other) : cPacket(other), ARA::Packet(other.source, other.destination, other.sender, other.type, other.seqNr, other.ttl, other.payload, other.payloadSize) {
 
 }
 
@@ -53,7 +53,7 @@ void OMNeTPacket::copy(const OMNeTPacket& other) {
     this->seqNr = other.seqNr;
     this->payload = other.payload;
     this->payloadSize = other.payloadSize;
-    this->hopCount = other.hopCount;
+    this->ttl = other.ttl;
 }
 
 void OMNeTPacket::parsimPack(cCommBuffer *b) {
@@ -140,7 +140,7 @@ unsigned int OMNeTPacketDescriptor::getFieldTypeFlags(void *object, int field) c
         FD_NONE,                        // unsigned int seqNr;
         FD_NONE,                        // const char* payload;
         FD_NONE,                        // unsigned int payloadSize;
-        FD_NONE                         // unsigned int hopCount;
+        FD_NONE                         // int TTL;
     };
     return (field>=0 && field<nrOfFields) ? fieldTypeFlags[field] : 0;
 }
@@ -161,7 +161,7 @@ const char *OMNeTPacketDescriptor::getFieldName(void *object, int field) const {
         "seqNr",
         "payload",
         "payloadSize",
-        "hopCount"
+        "TTL"
     };
     return (field>=0 && field<nrOfFields) ? fieldNames[field] : NULL;
 }
@@ -176,7 +176,7 @@ int OMNeTPacketDescriptor::findField(void *object, const char *fieldName) const 
     if (fieldName[0]=='s' && strcmp(fieldName, "seqNr")==0) return base+4;
     if (fieldName[0]=='p' && strcmp(fieldName, "payload")==0) return base+5;
     if (fieldName[0]=='p' && strcmp(fieldName, "payloadSize")==0) return base+6;
-    if (fieldName[0]=='h' && strcmp(fieldName, "hopCount")==0) return base+7;
+    if (fieldName[0]=='T' && strcmp(fieldName, "TTL")==0) return base+7;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -195,7 +195,7 @@ const char *OMNeTPacketDescriptor::getFieldTypeString(void *object, int field) c
         "unsigned int",
         "string",
         "unsigned int",
-        "unsigned int"
+        "int"
     };
     return (field>=0 && field<nrOfFields) ? fieldTypeStrings[field] : NULL;
 }
@@ -256,7 +256,7 @@ std::string OMNeTPacketDescriptor::getFieldAsString(void *object, int field, int
         case 4: return long2string(pp->getSequenceNumber());
         case 5: return pp->getPayload() == NULL ? "NULL" : pp->getPayload();
         case 6: return long2string(pp->getPayloadLength());
-        case 7: return long2string(pp->getHopCount());
+        case 7: return long2string(pp->getTTL());
         default: return "NOT IMPLEMENTED";
     }
 }

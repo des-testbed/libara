@@ -24,6 +24,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable *r
     evaporationPolicy = configuration.getEvaporationPolicy();
     initialPheromoneValue = configuration.getInitialPheromoneValue();
     maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
+    maxHopCount = configuration.getMaxTTL();
     routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
 
     this->routingTable = routingTable;
@@ -134,7 +135,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         NetworkInterface* interface = nextHop->getInterface();
         AddressPtr nextHopAddress = nextHop->getAddress();
         packet->setSender(interface->getLocalAddress());
-        packet->increaseHopCount();
+        packet->decreaseTTL();
 
         logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
         reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
@@ -145,7 +146,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         packetTrap->trapPacket(packet);
 
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packetFactory->makeFANT(packet, sequenceNr);
+        Packet* fant = packetFactory->makeFANT(packet, sequenceNr, maxHopCount);
         broadCast(fant);
 
         startRouteDiscoveryTimer(packet);
@@ -210,7 +211,7 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
         AddressPtr destination = packet->getDestination();
         AddressPtr sender = packet->getSender();
         if (routingTable->isNewRoute(source, sender, interface)) {
-            float initialPheromoneValue = calculateInitialPheromoneValue(packet->getHopCount());
+            float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
             routingTable->update(source, sender, interface, initialPheromoneValue);
         }
         else {
@@ -267,7 +268,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
-        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber());
+        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber(), maxHopCount);
         broadCast(bant);
     }
     else if(packetType == PacketType::BANT) {
@@ -331,7 +332,7 @@ bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
 }
 
 void AbstractARAClient::broadCast(Packet* packet) {
-    packet->increaseHopCount();
+    packet->decreaseTTL();
 
     for(auto& interface: interfaces) {
         Packet* packetClone = packetFactory->makeClone(packet);
@@ -409,7 +410,7 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
         discoveryInfo.nrOfRetries++;
         runningRouteDiscoveryTimers[routeDiscoveryTimer] = discoveryInfo;
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packetFactory->makeFANT(discoveryInfo.originalPacket, sequenceNr);
+        Packet* fant = packetFactory->makeFANT(discoveryInfo.originalPacket, sequenceNr, maxHopCount);
         broadCast(fant);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
@@ -433,7 +434,7 @@ void AbstractARAClient::handleRouteFailure(Packet* packet, AddressPtr nextHop, N
     routingTable->removeEntry(destination, nextHop, interface);
 
     if (routingTable->isDeliverable(destination)) {
-        packet->decreaseHopCount(); // has been increased when it has been unsuccessfully been sent the first time and will be increased again in sendpacket()
+        packet->increaseTTL(); // has been decreased when it has been unsuccessfully been sent the first time and will be decreased again in sendPacket()
         sendPacket(packet);
     }
     else {

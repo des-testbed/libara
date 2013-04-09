@@ -6,12 +6,13 @@
 
 ARA_NAMESPACE_BEGIN
 
-BasicConfiguration::BasicConfiguration(EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, unsigned int routeDiscoveryTimeoutInMilliSeconds) {
+BasicConfiguration::BasicConfiguration(EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, int maxTTL, unsigned int routeDiscoveryTimeoutInMilliSeconds) {
     this->evaporationPolicy = evaporationPolicy;
     this->reinforcementPolicy = reinforcementPolicy;
     this->forwardingPolicy = forwardingPolicy;
     this->initialPheromoneValue = initialPheromoneValue;
     this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
+    this->maxTTL = maxTTL;
     this->routeDiscoveryTimeoutInMilliSeconds = routeDiscoveryTimeoutInMilliSeconds;
 }
 
@@ -33,6 +34,10 @@ float BasicConfiguration::getInitialPheromoneValue() {
 
 int BasicConfiguration::getMaxNrOfRouteDiscoveryRetries() {
     return maxNrOfRouteDiscoveryRetries;
+}
+
+int BasicConfiguration::getMaxTTL() {
+    return maxTTL;
 }
 
 unsigned int BasicConfiguration::getRouteDiscoveryTimeoutInMilliSeconds() {

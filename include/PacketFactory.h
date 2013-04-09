@@ -30,29 +30,29 @@ public:
 
     /**
      * Creates a new FANT based on the given packet. The FANT inherits all the
-     * addresses of this packet. The hop count is also replicated.
+     * addresses of this packet.
      *
      * Note: The result of this method is a newly created object which must be
      * deleted later by the calling class.
      */
-    Packet* makeFANT(const Packet* originalPacket, unsigned int newSequenceNumber);
+    Packet* makeFANT(const Packet* originalPacket, unsigned int newSequenceNumber, int maxHopCount);
 
     /**
      * Creates a new BANT based on the given packet. This BANT has the destination of
      * this packet as its source and the destination of this as its source.
-     * The hop count will be set to 0. The sequence number of the BANT is
+     * The sequence number of the BANT is
      * given as argument of this method.
      *
      * Note: The result of this method is a newly created object which must be
      * deleted later by the calling class.
      */
-     Packet* makeBANT(const Packet* originalPacket, unsigned int sequenceNumber);
+     Packet* makeBANT(const Packet* originalPacket, unsigned int sequenceNumber, int maxHopCount);
 
      /**
       * Creates a new DUPLICATE_WARNING packet based on the information of the
       * given packet. The DUPLICATE_WARNING inherits all the addresses of this
-      * packet. The hop count is incremented. The sequence number is given as
-      * argument of this method.
+      * packet. As this packet is only destined for the immediate neighbor, the
+      * TTL is set to 1. The sequence number is given as argument of this method.
       *
       * Note: The result of this method is a newly created object which must be
       * deleted later by the calling class.
@@ -61,7 +61,8 @@ public:
 
      /**
       * Creates a new acknowledgment packet based on this packet. The source,
-      * destination and sequence number will equal to this packet.
+      * destination and sequence number will equal to this packet. As this
+      * packet is only destined for the immediate neighbor, the TTL is set to 1.
       *
       * Note: The result of this method is a newly created object which must be
       * deleted later by the calling class.
@@ -70,7 +71,9 @@ public:
 
      /**
       * Creates a new route failure packet based on this packet. The source,
-      * destination and sequence number will equal to this packet.
+      * destination and sequence number will equal to this packet. As this
+      * packet is only destined for the immediate neighbor, the TTL is set
+      * to 1.
       *
       * Note: The result of this method is a newly created object which must be
       * deleted later by the calling class.
@@ -79,6 +82,8 @@ public:
 
      /**
        * Creates a new energy dissemination packet with the given parameters.
+       * As this packet is only destined for the immediate neighbor, the TTL
+       * is set to 1.
        *
        * Note: The result of this method is a newly created object which must be
        * deleted later by the calling class.
@@ -90,7 +95,7 @@ protected:
       * This method is responsible for creating the actual packet instance.
       * It can be overridden if another other Packet class shall be used.
       */
-     virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload=nullptr, unsigned int payloadSize=0, unsigned int hopCount = 0);
+     virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
 };
 
 } /* namespace ARA */
