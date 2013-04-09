@@ -51,12 +51,13 @@ public:
      /**
       * Creates a new DUPLICATE_WARNING packet based on the information of the
       * given packet. The DUPLICATE_WARNING inherits all the addresses of this
-      * packet. The hop count is incremented.
+      * packet. The hop count is incremented. The sequence number is given as
+      * argument of this method.
       *
       * Note: The result of this method is a newly created object which must be
       * deleted later by the calling class.
       */
-     Packet* makeDulicateWarningPacket(const Packet* originalPacket);
+     Packet* makeDulicateWarningPacket(const Packet* originalPacket, unsigned int newSequenceNumber);
 
      /**
       * Creates a new acknowledgment packet based on this packet. The source,

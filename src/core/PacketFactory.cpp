@@ -19,8 +19,8 @@ Packet* PacketFactory::makeBANT(const Packet* originalPacket, unsigned int newSe
     return makePacket(originalPacket->getDestination(), originalPacket->getSource(), originalPacket->getSender(), PacketType::BANT, newSequenceNumber);
 }
 
-Packet* PacketFactory::makeDulicateWarningPacket(const Packet* originalPacket) {
-    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), PacketType::DUPLICATE_ERROR, originalPacket->getSequenceNumber(), nullptr, 0, 1);
+Packet* PacketFactory::makeDulicateWarningPacket(const Packet* originalPacket, unsigned int newSequenceNumber) {
+    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), PacketType::DUPLICATE_ERROR, newSequenceNumber, nullptr, 0, 1);
 }
 
 Packet* PacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket) {

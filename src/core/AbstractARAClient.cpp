@@ -199,7 +199,7 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
 }
 
 void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
-    Packet* duplicateWarningPacket = packetFactory->makeDulicateWarningPacket(packet);
+    Packet* duplicateWarningPacket = packetFactory->makeDulicateWarningPacket(packet, getNextSequenceNumber());
     duplicateWarningPacket->setSender(interface->getLocalAddress());
     interface->send(duplicateWarningPacket, packet->getSender());
 }

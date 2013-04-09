@@ -807,10 +807,6 @@ TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
     CHECK(newPhiToSrc < oldPhiToSrc);
 }
 
-IGNORE_TEST(AbstractARAClientTest, duplicatePacketsDoNotUpdateTheRoutingTable) {
-    FAIL("Not implemented yet");
-}
-
 /**
  * In this test we check if a client who knows two (or more routes) to a destination is
  * able to fall back to another route if one of the known routes is failing.
