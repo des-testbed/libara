@@ -44,7 +44,7 @@ TEST_GROUP(AbstractARAClientTest) {
     /**
      * Returns true iff a route to destination via nextHop and interface is known in the RoutingTable.
      */
-    bool aRouteToDestinationIsKnown(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    bool routeIsKnown(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
         std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(destination);
         if(possibleNextHops->empty()) {
             delete possibleNextHops;
@@ -553,11 +553,11 @@ TEST(AbstractARAClientTest, receiveDuplicateErrorPacket) {
     routingTable->update(destination, nodeD, interface, 3.3);
 
     // Check some basic assumptions about this test setup
-    CHECK(aRouteToDestinationIsKnown(destination, nodeC, interface));
+    CHECK(routeIsKnown(destination, nodeC, interface));
 
     // start the test
     client->receivePacket(&duplicateErrorPacket, interface);
-    CHECK(aRouteToDestinationIsKnown(destination, nodeC, interface) == false);
+    CHECK(routeIsKnown(destination, nodeC, interface) == false);
 }
 
 TEST(AbstractARAClientTest, deleteAssignedLogger) {
@@ -754,43 +754,53 @@ TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
 }
 
 TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
-    NetworkInterface* interface = client->createNewNetworkInterfaceMock("C");
-    AddressPtr source(new AddressMock("A"));
-    AddressPtr sender(new AddressMock("B"));
-    AddressPtr anotherSender(new AddressMock("D"));
-    AddressPtr destination(new AddressMock("E"));
+    NetworkInterface* interface = client->createNewNetworkInterfaceMock("B");
+    AddressPtr source(new AddressMock("source"));
+    AddressPtr destination(new AddressMock("destination"));
+    AddressPtr nodeA(new AddressMock("A"));
+    AddressPtr nodeC(new AddressMock("C"));
 
-    /// check if routing table entries exist
-    CHECK(!(routingTable->exists(source, sender, interface)));
-    CHECK(!(routingTable->exists(destination, anotherSender, interface)));
+    // sanity check
+    CHECK(routeIsKnown(source, nodeA, interface) == false);
+    CHECK(routeIsKnown(destination, nodeC, interface) == false);
 
-    /// send fant (A --> B --> _C_ .... -> E)
-    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 123, 1);
+    // send FANT (source --> A --> _B_ --> C --> destination)
+    Packet* fant = new Packet(source, destination, nodeA, PacketType::FANT, 123, 1);
     client->receivePacket(fant, interface);
-    CHECK(routingTable->exists(source, sender, interface));
+    CHECK(routeIsKnown(source, nodeA, interface));
 
-    /// send bant (E --> D --> _C_ .... -> A) 
-    Packet* bant = new Packet(destination, source, anotherSender, PacketType::BANT, 124, 1);
+    // send BANT (source <-- A <-- _B_ <-- C <-- destination)
+    Packet* bant = new Packet(destination, source, nodeC, PacketType::BANT, 124, 1);
     client->receivePacket(bant, interface);
-    CHECK(routingTable->exists(destination, anotherSender, interface));
-    float currentPhi = routingTable->getPheromoneValue(destination, anotherSender, interface);
+    CHECK(routeIsKnown(destination, nodeC, interface));
 
-    /// send data packet (A --> B --> C .... -> E)
-    Packet* data = new Packet(source, destination, sender, PacketType::DATA, 125, 1);
+    float oldPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
+    float oldPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);
+
+    // send DATA (source --> A --> _B_ --> C --> destination)
+    CHECK(routingTable->isNewRoute(source, nodeA, interface) == false);
+    Packet* data = new Packet(source, destination, nodeA, PacketType::DATA, 125, 1);
     client->receivePacket(data, interface);
 
-    /// check if the reinforcement has worked on both sides of the route
-    float newPhiToDest = routingTable->getPheromoneValue(destination, anotherSender, interface);
-    float newPhiToSrc = routingTable->getPheromoneValue(source, sender, interface);
-    CHECK((newPhiToDest > currentPhi) && (newPhiToSrc > currentPhi));
+    // check if the reinforcement has worked on both sides of the route
+    float newPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
+    float newPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);
 
-    /// let's pass 100 milliseconds
+    CHECK(newPhiToDest > oldPhiToDest);
+    CHECK(newPhiToSrc > oldPhiToSrc);
+
+    // update the values so we can check the evaporation
+    oldPhiToDest = newPhiToDest;
+    oldPhiToSrc = newPhiToSrc;
+
     TimeMock::letTimePass(2000);
 
-    newPhiToDest = routingTable->getPheromoneValue(destination, anotherSender, interface);
-    newPhiToSrc = routingTable->getPheromoneValue(source, sender, interface);
-    /// check if the evaporation has taken place
-    CHECK((newPhiToDest < currentPhi) && (newPhiToSrc < currentPhi));
+    newPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
+    newPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);
+
+    // check if the evaporation has taken place
+    CHECK(newPhiToDest < oldPhiToDest);
+    CHECK(newPhiToSrc < oldPhiToSrc);
 }
 
 IGNORE_TEST(AbstractARAClientTest, duplicatePacketsDoNotUpdateTheRoutingTable) {
@@ -929,20 +939,21 @@ TEST(AbstractARAClientTest, rememberMultipleRoutes) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr destination (new AddressMock("B"));
-    Packet* packet1 = new Packet(source, destination, nodeA, PacketType::FANT, 123);
-    Packet* packet2 = packetFactory->makeClone(packet1);
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* packetFromA = new Packet(source, destination, nodeA, PacketType::FANT, 123);
+    Packet* packetFromB = packetFactory->makeClone(packetFromA);
+    packetFromB->setSender(nodeB);
 
     // sanity check
-    CHECK_FALSE(aRouteToDestinationIsKnown(source, nodeA, interface));
-    CHECK_FALSE(aRouteToDestinationIsKnown(source, nodeB, interface));
+    CHECK_FALSE(routeIsKnown(source, nodeA, interface));
+    CHECK_FALSE(routeIsKnown(source, nodeB, interface));
 
     // start the test
-    client->receivePacket(packet1, interface);
-    CHECK_TRUE(aRouteToDestinationIsKnown(source, nodeA, interface));
-    CHECK_FALSE(aRouteToDestinationIsKnown(source, nodeB, interface));
+    client->receivePacket(packetFromA, interface);
+    CHECK_TRUE(routeIsKnown(source, nodeA, interface));
+    CHECK_FALSE(routeIsKnown(source, nodeB, interface));
 
-    client->receivePacket(packet2, interface);
-    CHECK_TRUE(aRouteToDestinationIsKnown(source, nodeA, interface));
-    CHECK_TRUE(aRouteToDestinationIsKnown(source, nodeB, interface));
+    client->receivePacket(packetFromB, interface);
+    CHECK_TRUE(routeIsKnown(source, nodeA, interface));
+    CHECK_TRUE(routeIsKnown(source, nodeB, interface));
 }

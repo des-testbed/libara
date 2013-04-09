@@ -209,7 +209,7 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
         AddressPtr source = packet->getSource();
         AddressPtr destination = packet->getDestination();
         AddressPtr sender = packet->getSender();
-        if (routingTable->isNewRoute(destination, sender, interface)) {
+        if (routingTable->isNewRoute(source, sender, interface)) {
             float initialPheromoneValue = calculateInitialPheromoneValue(packet->getHopCount());
             routingTable->update(source, sender, interface, initialPheromoneValue);
         }
