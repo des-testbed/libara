@@ -1028,3 +1028,39 @@ TEST(AbstractARAClientTest, doNotRelayPacketIfTTLBecomesZero) {
     client->receivePacket(bant, interface);
     BYTES_EQUAL(0, sentPackets->size());
 }
+
+TEST(AbstractARAClientTest, initialzePheromoneValue) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("X");
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr route1 (new AddressMock("1"));
+    AddressPtr route2 (new AddressMock("2"));
+    AddressPtr route3 (new AddressMock("3"));
+    AddressPtr route4 (new AddressMock("4"));
+
+    int ttl1 = 10;
+    int ttl2 = 8;
+    int ttl3 = 5;
+    int ttl4 = 1;
+    Packet* fant1 = new Packet(source, destination, route1, PacketType::FANT, 123, ttl1);
+    Packet* fant2 = new Packet(source, destination, route2, PacketType::FANT, 123, ttl2);
+    Packet* fant3 = new Packet(source, destination, route3, PacketType::FANT, 123, ttl3);
+    Packet* fant4 = new Packet(source, destination, route4, PacketType::FANT, 123, ttl4);
+
+    // sanity check
+    CHECK_FALSE(routingTable->isDeliverable(destination));
+
+    // start test
+    double initialPhi = client->getInitialPhi();
+    client->receivePacket(fant1, interface);
+    DOUBLES_EQUAL(1 * (ttl1-1) + initialPhi, routingTable->getPheromoneValue(source, route1, interface), 0.000001);
+
+    client->receivePacket(fant2, interface);
+    DOUBLES_EQUAL(1 * (ttl2-1) + initialPhi, routingTable->getPheromoneValue(source, route2, interface), 0.000001);
+
+    client->receivePacket(fant3, interface);
+    DOUBLES_EQUAL(1 * (ttl3-1) + initialPhi, routingTable->getPheromoneValue(source, route3, interface), 0.000001);
+
+    client->receivePacket(fant4, interface);
+    DOUBLES_EQUAL(1 * (ttl4-1) + initialPhi, routingTable->getPheromoneValue(source, route4, interface), 0.000001);
+}

@@ -17,7 +17,7 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 ARAClientMock::ARAClientMock() {
-    float initialPhi = 10.0;
+    float initialPhi = 5.0;
     float deltaPhi = 5.0;
     BasicConfiguration configuration = BasicConfiguration(
             new ExponentialEvaporationPolicyMock(),
@@ -62,6 +62,10 @@ RoutingTable* ARAClientMock::getRoutingTable() {
 
 void ARAClientMock::setMaxHopCount(int n) {
     maxHopCount = n;
+}
+
+double ARAClientMock::getInitialPhi() const {
+    return initialPheromoneValue;
 }
 
 } /* namespace ARA */

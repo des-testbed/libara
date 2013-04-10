@@ -384,8 +384,9 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     }
 }
 
-float AbstractARAClient::calculateInitialPheromoneValue(unsigned int hopCount) {
-    return initialPheromoneValue / (float) hopCount;
+float AbstractARAClient::calculateInitialPheromoneValue(unsigned int ttl) {
+    int alpha = 1; // may change in the future implementations
+    return alpha * ttl + initialPheromoneValue;
 }
 
 void AbstractARAClient::setRoutingTable(RoutingTable* newRoutingTable){
