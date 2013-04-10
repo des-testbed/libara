@@ -29,6 +29,6 @@ TEST(EnvironmentTest, getClock) {
 TEST(EnvironmentTest, getPacketFactory) {
     PacketFactory* factory = Environment::getPacketFactory();
     PacketMock somePacket = PacketMock();
-    Packet* anotherPacket = factory->makeFANT(&somePacket, 345);
+    Packet* anotherPacket = factory->makeFANT(&somePacket, 345, 10);
     delete anotherPacket;
 }

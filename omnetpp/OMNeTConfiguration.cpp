@@ -50,6 +50,10 @@ int OMNeTConfiguration::getMaxNrOfRouteDiscoveryRetries() {
     return maxNrOfRouteDiscoveryRetries;
 }
 
+int OMNeTConfiguration::getMaxTTL() {
+    return maxTTL;
+}
+
 unsigned int OMNeTConfiguration::getRouteDiscoveryTimeoutInMilliSeconds() {
     return routeDiscoveryTimeoutInMilliSeconds;
 }

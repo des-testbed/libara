@@ -193,10 +193,10 @@ TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr sender (new AddressMock("sender"));
     AddressPtr destination (new AddressMock("destination"));
-    unsigned int hopCount = 4;
+    unsigned int ttl = 15;
     const char* payload = "Hello World";
     int payloadSize = std::strlen(payload)+1;
-    Packet* packet = new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
+    Packet* packet = new Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
     AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
 
     // start the test
@@ -224,7 +224,7 @@ TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
     CHECK(recipientOfSentPacket->equals(originalRecipient));
-    CHECK_PACKET(sentPacket, type, seqNr, source, sender, destination, hopCount, payload);
+    CHECK_PACKET(sentPacket, type, seqNr, ttl, source, sender, destination, payload);
 }
 
 TEST(ReliableNetworkInterfaceTest, routeFailuresAreReportedToARAClient) {
@@ -234,10 +234,10 @@ TEST(ReliableNetworkInterfaceTest, routeFailuresAreReportedToARAClient) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr sender (new AddressMock("sender"));
     AddressPtr destination (new AddressMock("destination"));
-    unsigned int hopCount = 4;
+    unsigned int ttl = 10;
     const char* payload = "Hello World";
     int payloadSize = std::strlen(payload)+1;
-    Packet* packet = new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
+    Packet* packet = new Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
     AddressPtr originalRecipient = AddressPtr(new AddressMock("recipient"));
     interface->setMaxNrOfRetransmissions(3);
 
@@ -264,7 +264,7 @@ TEST(ReliableNetworkInterfaceTest, routeFailuresAreReportedToARAClient) {
         AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
         CHECK(recipientOfSentPacket->equals(originalRecipient));
-        CHECK_PACKET(sentPacket, type, seqNr, source, sender, destination, hopCount, payload);
+        CHECK_PACKET(sentPacket, type, seqNr, ttl, source, sender, destination, payload);
     }
 
     // now if we let the timer expire one more time the packet should be reported route failure to the client
@@ -272,7 +272,7 @@ TEST(ReliableNetworkInterfaceTest, routeFailuresAreReportedToARAClient) {
 
     BYTES_EQUAL(1, client->getNumberOfRouteFailures());
     ARAClientMock::PacketInfo routeFailurePacketInfo = client->getRouteFailurePackets().front();
-    CHECK_PACKET(routeFailurePacketInfo.packet, type, seqNr, source, sender, destination, hopCount, payload);
+    CHECK_PACKET(routeFailurePacketInfo.packet, type, seqNr, ttl, source, sender, destination, payload);
     CHECK(routeFailurePacketInfo.nextHop == originalRecipient);
     CHECK(routeFailurePacketInfo.interface == interface);
 }

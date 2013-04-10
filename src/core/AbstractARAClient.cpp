@@ -24,6 +24,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable *r
     evaporationPolicy = configuration.getEvaporationPolicy();
     initialPheromoneValue = configuration.getInitialPheromoneValue();
     maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
+    maxHopCount = configuration.getMaxTTL();
     routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
 
     this->routingTable = routingTable;
@@ -129,26 +130,30 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
-    if(routingTable->isDeliverable(packet)) {
-        NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
-        NetworkInterface* interface = nextHop->getInterface();
-        AddressPtr nextHopAddress = nextHop->getAddress();
-        packet->setSender(interface->getLocalAddress());
-        packet->increaseHopCount();
+    if(packet->getTTL() > 0) {
+        if(routingTable->isDeliverable(packet)) {
+            NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
+            NetworkInterface* interface = nextHop->getInterface();
+            AddressPtr nextHopAddress = nextHop->getAddress();
+            packet->setSender(interface->getLocalAddress());
 
-        logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
-        reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
+            logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
+            reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
 
-        interface->send(packet, nextHopAddress);
-    } else {
-        logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
-        packetTrap->trapPacket(packet);
+            interface->send(packet, nextHopAddress);
+        } else {
+            logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
+            packetTrap->trapPacket(packet);
 
-        unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packetFactory->makeFANT(packet, sequenceNr);
-        broadCast(fant);
+            unsigned int sequenceNr = getNextSequenceNumber();
+            Packet* fant = packetFactory->makeFANT(packet, sequenceNr, maxHopCount);
+            broadCast(fant);
 
-        startRouteDiscoveryTimer(packet);
+            startRouteDiscoveryTimer(packet);
+        }
+    }
+    else {
+        delete packet;
     }
 }
 
@@ -180,6 +185,7 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
+    packet->decreaseTTL();
     updateRoutingTable(packet, interface);
 
     if(hasBeenReceivedEarlier(packet)) {
@@ -210,7 +216,7 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
         AddressPtr destination = packet->getDestination();
         AddressPtr sender = packet->getSender();
         if (routingTable->isNewRoute(source, sender, interface)) {
-            float initialPheromoneValue = calculateInitialPheromoneValue(packet->getHopCount());
+            float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
             routingTable->update(source, sender, interface, initialPheromoneValue);
         }
         else {
@@ -247,15 +253,18 @@ void AbstractARAClient::handleDataPacket(Packet* packet) {
 }
 
 void AbstractARAClient::handleAntPacket(Packet* packet) {
-    if(hasBeenSentByThisNode(packet) == false) {
+    if (hasBeenSentByThisNode(packet)) {
+        // do not process ant packets we have sent ourselves
+        delete packet;
+        return;
+    }
 
-        if(isDirectedToThisNode(packet) == false) {
-            logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
-            broadCast(packet);
-        }
-        else {
-            handleAntPacketForThisNode(packet);
-        }
+    if (isDirectedToThisNode(packet)) {
+        handleAntPacketForThisNode(packet);
+    }
+    else if (packet->getTTL() > 0) {
+        logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
+        broadCast(packet);
     }
     else {
         delete packet;
@@ -267,7 +276,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
-        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber());
+        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber(), maxHopCount);
         broadCast(bant);
     }
     else if(packetType == PacketType::BANT) {
@@ -331,8 +340,6 @@ bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
 }
 
 void AbstractARAClient::broadCast(Packet* packet) {
-    packet->increaseHopCount();
-
     for(auto& interface: interfaces) {
         Packet* packetClone = packetFactory->makeClone(packet);
         packetClone->setSender(interface->getLocalAddress());
@@ -377,8 +384,9 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     }
 }
 
-float AbstractARAClient::calculateInitialPheromoneValue(unsigned int hopCount) {
-    return initialPheromoneValue / (float) hopCount;
+float AbstractARAClient::calculateInitialPheromoneValue(unsigned int ttl) {
+    int alpha = 1; // may change in the future implementations
+    return alpha * ttl + initialPheromoneValue;
 }
 
 void AbstractARAClient::setRoutingTable(RoutingTable* newRoutingTable){
@@ -409,7 +417,7 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
         discoveryInfo.nrOfRetries++;
         runningRouteDiscoveryTimers[routeDiscoveryTimer] = discoveryInfo;
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packetFactory->makeFANT(discoveryInfo.originalPacket, sequenceNr);
+        Packet* fant = packetFactory->makeFANT(discoveryInfo.originalPacket, sequenceNr, maxHopCount);
         broadCast(fant);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
@@ -433,7 +441,6 @@ void AbstractARAClient::handleRouteFailure(Packet* packet, AddressPtr nextHop, N
     routingTable->removeEntry(destination, nextHop, interface);
 
     if (routingTable->isDeliverable(destination)) {
-        packet->decreaseHopCount(); // has been increased when it has been unsuccessfully been sent the first time and will be increased again in sendpacket()
         sendPacket(packet);
     }
     else {

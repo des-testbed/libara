@@ -116,11 +116,11 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
     AddressPtr originalSource (new AddressMock("source"));
     AddressPtr originalDestination (new AddressMock("destination"));
     AddressPtr originalSender (new AddressMock("sender"));
-    unsigned int originalHopCount = 5;
+    unsigned int originalTTL = 5;
     unsigned int originalSequenceNr = 123;
     const char* originalPayload = "Hello";
     int originalPayloadSize = std::strlen(originalPayload) + 1;
-    Packet* packet = new Packet(originalSource, originalDestination, originalSender, PacketType::DATA, originalSequenceNr, originalPayload, originalPayloadSize, originalHopCount);
+    Packet* packet = new Packet(originalSource, originalDestination, originalSender, PacketType::DATA, originalSequenceNr, originalTTL, originalPayload, originalPayloadSize);
 
     // make sure that a route to the packet destination is available
     routingTable->update(packet->getDestination(), nextHop, interface2, 1.0);
@@ -147,8 +147,8 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
     STRCMP_EQUAL(originalPayload, sentPacket->getPayload());
     LONGS_EQUAL(originalPayloadSize, sentPacket->getPayloadLength());
 
-    // only the hop count needs to be incremented by 1
-    CHECK_EQUAL(originalHopCount + 1, sentPacket->getHopCount());
+    // the TTL would be decremented on receive of the next hop
+    CHECK_EQUAL(originalTTL, sentPacket->getTTL());
 }
 
 TEST(AbstractARAClientTest, getNumberOfNetworkInterfaces) {
@@ -209,13 +209,13 @@ TEST(AbstractARAClientTest, respondWithDuplicateError) {
     AddressPtr source (new AddressMock("A"));
     AddressPtr destination (new AddressMock("B"));
     AddressPtr sender (new AddressMock("C"));
-    Packet* firstPacket = new Packet(source, destination, sender, PacketType::DATA, 123, 1);
-    Packet* secondPacket = new Packet(source, destination, sender, PacketType::DATA, 123, 1);
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123, 10);
+    Packet* clone = packetFactory->makeClone(packet);
 
     // let client receive the packet over the same interface twice
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("X");
-    client->receivePacket(firstPacket, interface);
-    client->receivePacket(secondPacket, interface);
+    client->receivePacket(packet, interface);
+    client->receivePacket(clone, interface);
 
     // the client should have relayed the first packet and sent a duplicate warning back for the second packet
     LONGS_EQUAL(2, interface->getNumberOfSentPackets());
@@ -229,7 +229,7 @@ TEST(AbstractARAClientTest, respondWithDuplicateError) {
     CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
     CHECK(sentPacket->getSource()->equals(source));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_ERROR);
-    LONGS_EQUAL(1, sentPacket->getHopCount());
+    LONGS_EQUAL(1, sentPacket->getTTL());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
 }
 
@@ -240,8 +240,8 @@ TEST(AbstractARAClientTest, respondWithDuplicateError) {
  */
 TEST(AbstractARAClientTest, ignoreDuplicateAntPackets) {
     // prepare the ant packets
-    Packet* fant1 = new PacketMock("A", "B", "C", 123, 1, PacketType::FANT);
-    Packet* fant2 = new PacketMock("A", "B", "C", 123, 1, PacketType::FANT);
+    Packet* fant1 = new PacketMock("A", "B", "C", 123, 3, PacketType::FANT);
+    Packet* fant2 = new PacketMock("A", "B", "C", 123, 3, PacketType::FANT);
     Packet* bant1 = new PacketMock("B", "A", "C", 456, 4, PacketType::BANT);
     Packet* bant2 = new PacketMock("B", "A", "C", 456, 4, PacketType::BANT);
     Packet* bant3 = new PacketMock("B", "A", "C", 456, 4, PacketType::BANT);
@@ -254,7 +254,7 @@ TEST(AbstractARAClientTest, ignoreDuplicateAntPackets) {
     client->receivePacket(bant2, interface);
     client->receivePacket(bant3, interface);
 
-    LONGS_EQUAL(2, interface->getNumberOfSentPackets()); // only two broadcasts of the ANT packets and nothing more
+    LONGS_EQUAL(2, interface->getNumberOfSentPackets()); // only two broadcasts (1 FANT & 1 BANT) and nothing more
     std::deque<Pair<const Packet*, AddressPtr>*>* sendPackets = interface->getSentPackets();
     CHECK_EQUAL(PacketType::FANT, sendPackets->at(0)->getLeft()->getType());
     CHECK_EQUAL(PacketType::BANT, sendPackets->at(1)->getLeft()->getType());
@@ -276,7 +276,7 @@ TEST(AbstractARAClientTest, routingTableIsUpdated) {
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
-    Packet* packet = new Packet(nodeA, nodeB, nodeC, PacketType::DATA, 123);
+    Packet* packet = new Packet(nodeA, nodeB, nodeC, PacketType::DATA, 123, 10);
 
     CHECK(routingTable->isDeliverable(nodeA) == false);
     client->receivePacket(packet, interface);
@@ -323,8 +323,8 @@ TEST(AbstractARAClientTest, dataPacketIsRelayedIfRouteIsKnown) {
     AddressPtr source (new AddressMock("B"));
     AddressPtr destination (new AddressMock("C"));
     AddressPtr sender = source;
-    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123, "Hello World");
-    packet->increaseHopCount();
+    int ttl = 10;
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123, ttl, "Hello World");
 
     // create a route to the destination
     routingTable->update(destination, destination, interface, 10);
@@ -343,7 +343,7 @@ TEST(AbstractARAClientTest, dataPacketIsRelayedIfRouteIsKnown) {
     CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
     STRCMP_EQUAL("Hello World", sentPacket->getPayload());
     LONGS_EQUAL(123, sentPacket->getSequenceNumber());
-    LONGS_EQUAL(2, sentPacket->getHopCount());
+    LONGS_EQUAL(ttl-1, sentPacket->getTTL());
 }
 
 /**
@@ -359,8 +359,9 @@ TEST(AbstractARAClientTest, receivedAntPacketsAreBroadcasted) {
 
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
-    Packet* fantPacket = new Packet(nodeB, nodeC, nodeB, PacketType::FANT, 123, 1);
-    Packet* bantPacket = new Packet(nodeC, nodeB, nodeC, PacketType::BANT, 345, 1);
+    int maxHopCount = 10;
+    Packet* fantPacket = new Packet(nodeB, nodeC, nodeB, PacketType::FANT, 123, maxHopCount);
+    Packet* bantPacket = new Packet(nodeC, nodeB, nodeC, PacketType::BANT, 345, maxHopCount);
 
     // start the test
     client->receivePacket(fantPacket, interface);
@@ -377,7 +378,7 @@ TEST(AbstractARAClientTest, receivedAntPacketsAreBroadcasted) {
     CHECK(sentPacket1->getDestination()->equals(nodeC));
     CHECK(sentPacket1->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::FANT, sentPacket1->getType());
-    LONGS_EQUAL(2, sentPacket1->getHopCount());
+    LONGS_EQUAL(maxHopCount-1, sentPacket1->getTTL());
 
     // check the first sent packet
     const Packet* sentPacket2 = sentPacketInfo2->getLeft();
@@ -385,7 +386,7 @@ TEST(AbstractARAClientTest, receivedAntPacketsAreBroadcasted) {
     CHECK(sentPacket2->getDestination()->equals(nodeB));
     CHECK(sentPacket2->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::BANT, sentPacket2->getType());
-    LONGS_EQUAL(2, sentPacket2->getHopCount());
+    LONGS_EQUAL(maxHopCount-1, sentPacket2->getTTL());
 }
 
 /**
@@ -401,14 +402,16 @@ TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
     unsigned int lastSequenceNumber = client->getNextSequenceNumber();
+    int maxHopCount = 15;
+    client->setMaxHopCount(maxHopCount);
 
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeC (new AddressMock("C"));
-    Packet* packet = new Packet(nodeB, nodeA, nodeC, PacketType::FANT, 123);
+    Packet* fant = new Packet(nodeB, nodeA, nodeC, PacketType::FANT, 123, maxHopCount);
 
     // start the test
-    client->receivePacket(packet, interface);
+    client->receivePacket(fant, interface);
 
     // check the sent packet
     CHECK(sentPackets->size() == 1);
@@ -419,7 +422,7 @@ TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
     CHECK(sentPacket->getDestination()->equals(nodeB));
     CHECK(sentPacket->getSender()->equals(nodeA));
     CHECK_EQUAL(PacketType::BANT, sentPacket->getType());
-    LONGS_EQUAL(1, sentPacket->getHopCount());
+    LONGS_EQUAL(maxHopCount, sentPacket->getTTL());
     LONGS_EQUAL(lastSequenceNumber+1, sentPacket->getSequenceNumber());
 }
 
@@ -438,10 +441,11 @@ TEST(AbstractARAClientTest, receivedBANTTriggersSendingOfTrappedPackets) {
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr destination (new AddressMock("C"));
     AddressPtr sender = source;
-    Packet* dataPacket = new Packet(source, destination, sender, PacketType::DATA, 123, "Hello World");
+    int ttl = 15;
+    Packet* dataPacket = new Packet(source, destination, sender, PacketType::DATA, 123, ttl, "Hello World");
     packetTrap->trapPacket(dataPacket);
 
-    Packet* bant = new Packet(destination, source, nodeB, PacketType::BANT, 123, 2);
+    Packet* bant = new Packet(destination, source, nodeB, PacketType::BANT, 123, 5);
 
     // start the test
     client->receivePacket(bant, interface);
@@ -455,7 +459,7 @@ TEST(AbstractARAClientTest, receivedBANTTriggersSendingOfTrappedPackets) {
     CHECK(sentPacket->getDestination()->equals(destination));
     CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
-    LONGS_EQUAL(1, sentPacket->getHopCount());
+    LONGS_EQUAL(ttl, sentPacket->getTTL());
 
     // packet trap must now be empty
     CHECK(packetTrap->isEmpty());
@@ -469,7 +473,7 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
-    Packet* data = new PacketMock("A", "Z", "A", 123, 1, PacketType::DATA);
+    Packet* data = new PacketMock("A", "Z", "A", 123, 10, PacketType::DATA);
 
     // sending the initial packet should trigger a FANT broadcast
     client->sendPacket(data);
@@ -485,7 +489,7 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
     // emulate that the neighbor does also broadcast the FANT and this client receives it
     AddressPtr neighborAddress (new AddressMock("B"));
     Packet* answer = packetFactory->makeClone(sentPacket);
-    answer->increaseHopCount();
+    answer->decreaseTTL();
     answer->setSender(neighborAddress);
     client->receivePacket(answer, interface);
 
@@ -500,7 +504,7 @@ TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("Z");
     std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
-    Packet* fant = new PacketMock("A", "Z", "A", 123, 1, PacketType::FANT);
+    Packet* fant = new PacketMock("A", "Z", "A", 123, 10, PacketType::FANT);
 
     // client receives the FANT that is directed to him (should trigger BANt broadcast)
     client->receivePacket(fant, interface);
@@ -516,7 +520,7 @@ TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
     // emulate that the neighbor does also broadcast the BANT and this client receives it back
     AddressPtr neighborAddress (new AddressMock("Y"));
     Packet* answer = packetFactory->makeClone(sentPacket);
-    answer->increaseHopCount();
+    answer->decreaseTTL();
     answer->setSender(neighborAddress);
     client->receivePacket(answer, interface);
 
@@ -542,7 +546,7 @@ TEST(AbstractARAClientTest, receiveDuplicateErrorPacket) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
 
-    PacketMock duplicateErrorPacket = PacketMock("A", "X", "C", 123, 1, PacketType::DUPLICATE_ERROR);
+    PacketMock duplicateErrorPacket = PacketMock("A", "X", "C", 123, 10, PacketType::DUPLICATE_ERROR);
 
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
@@ -592,7 +596,7 @@ TEST(AbstractARAClientTest, deleteTrappedPacketsInDestructor) {
  */
 TEST(AbstractARAClientTest, packetIsNotDeletedOutsideOfDeliverToSystem) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("destination");
-    Packet* dataPacket = new PacketMock("source", "destination", 123, 1, PacketType::DATA);
+    Packet* dataPacket = new PacketMock("source", "destination", 123, 10, PacketType::DATA);
 
     client->receivePacket(dataPacket, interface);
     try {
@@ -711,7 +715,7 @@ TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("source");
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
-    Packet* fant = new Packet(source, source, destination, PacketType::FANT, 123);
+    Packet* fant = new Packet(source, source, destination, PacketType::FANT, 123, 10);
 
     // sanity check
     CHECK(routingTable->isDeliverable(source) == false);
@@ -723,36 +727,74 @@ TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
     CHECK(routingTable->isDeliverable(source) == false);
 }
 
+/**
+ * In this test we check that the path to the source is reinforced.
+ *
+ * Test Topology:
+ *
+ *     (A)-->(B)-->(C)-->(D)
+ *                  |
+ *                  --current (tested) node
+ */
 TEST(AbstractARAClientTest, pathToSourceIsReinforced) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("C");
     AddressPtr source(new AddressMock("A"));
     AddressPtr sender(new AddressMock("B"));
     AddressPtr destination(new AddressMock("D"));
+    int maxHopCount = 10;
 
-    CHECK(!(routingTable->exists(source, sender, interface)));
-    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 123, 1);
+    // sanity check
+    CHECK_FALSE(routeIsKnown(source, sender, interface));
+
+    // start the test
+    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 123, maxHopCount);
     client->receivePacket(fant, interface);
-    CHECK(routingTable->exists(source, sender, interface));
+
+    // first of all a route should have been created
+    CHECK_TRUE(routeIsKnown(source, sender, interface));
     float currentPhi = routingTable->getPheromoneValue(source, sender, interface);
-    Packet* data = new Packet(destination, source, sender, PacketType::DATA, 124, 1);
+
+    // now we receive the first data packet
+    Packet* data = new Packet(destination, source, sender, PacketType::DATA, 124, maxHopCount);
     client->receivePacket(data, interface);
+
+    // this should reinforce the path to the source
     float newPhi = routingTable->getPheromoneValue(source, sender, interface);
     CHECK(newPhi > currentPhi);
 }
 
+/**
+ * In this test we check that the path to the destination is reinforced.
+ *
+ * Test Topology:
+ *
+ *     (A)<--(X)<--(B)-->(C)
+ *            |
+ *            --current (tested) node
+ */
 TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("X");
     AddressPtr source(new AddressMock("A"));
     AddressPtr sender(new AddressMock("B"));
     AddressPtr destination(new AddressMock("C"));
+    int maxHopCount = 10;
 
-    CHECK(!(routingTable->exists(destination, sender, interface)));
-    Packet* bant = new Packet(destination, source, sender, PacketType::BANT, 123, 1);
+    // sanity check
+    CHECK_FALSE(routeIsKnown(destination, sender, interface));
+
+    // start the test
+    Packet* bant = new Packet(destination, source, sender, PacketType::BANT, 123, maxHopCount);
     client->receivePacket(bant, interface);
-    CHECK(routingTable->exists(destination, sender, interface));
+
+    // first of all a route should have been created
+    CHECK_TRUE(routeIsKnown(destination, sender, interface));
     float currentPhi = routingTable->getPheromoneValue(destination, sender, interface);
-    Packet* data = new Packet(source, destination, sender, PacketType::DATA, 124, 1);
+
+    // now we receive a data packet
+    Packet* data = new Packet(source, destination, sender, PacketType::DATA, 124, maxHopCount);
     client->receivePacket(data, interface);
+
+    // this should reinforce the path to the destination
     float newPhi = routingTable->getPheromoneValue(destination, sender, interface);
     CHECK(newPhi > currentPhi);
 }
@@ -763,18 +805,19 @@ TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
     AddressPtr destination(new AddressMock("destination"));
     AddressPtr nodeA(new AddressMock("A"));
     AddressPtr nodeC(new AddressMock("C"));
+    int maxHopCount = 10;
 
     // sanity check
     CHECK(routeIsKnown(source, nodeA, interface) == false);
     CHECK(routeIsKnown(destination, nodeC, interface) == false);
 
     // send FANT (source --> A --> _B_ --> C --> destination)
-    Packet* fant = new Packet(source, destination, nodeA, PacketType::FANT, 123, 1);
+    Packet* fant = new Packet(source, destination, nodeA, PacketType::FANT, 123, maxHopCount);
     client->receivePacket(fant, interface);
     CHECK(routeIsKnown(source, nodeA, interface));
 
     // send BANT (source <-- A <-- _B_ <-- C <-- destination)
-    Packet* bant = new Packet(destination, source, nodeC, PacketType::BANT, 124, 1);
+    Packet* bant = new Packet(destination, source, nodeC, PacketType::BANT, 124, maxHopCount);
     client->receivePacket(bant, interface);
     CHECK(routeIsKnown(destination, nodeC, interface));
 
@@ -783,7 +826,7 @@ TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
 
     // send DATA (source --> A --> _B_ --> C --> destination)
     CHECK(routingTable->isNewRoute(source, nodeA, interface) == false);
-    Packet* data = new Packet(source, destination, nodeA, PacketType::DATA, 125, 1);
+    Packet* data = new Packet(source, destination, nodeA, PacketType::DATA, 125, maxHopCount);
     client->receivePacket(data, interface);
 
     // check if the reinforcement has worked on both sides of the route
@@ -818,8 +861,8 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     AddressPtr sender = source;
     AddressPtr destination (new AddressMock("destination"));
     unsigned int originalSeqNr = 123;
-    unsigned int originalHopCount = 5;
-    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, originalSeqNr, "Foo", 4, originalHopCount);
+    int originalTTL = 5;
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, originalSeqNr, originalTTL, "Foo", 4);
     AddressPtr route1 (new AddressMock("route1"));
     AddressPtr route2 (new AddressMock("route2"));
 
@@ -842,16 +885,16 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     CHECK(sentPacketInfo->getRight()->equals(route2));
 
-    CHECK_PACKET(sentPacketInfo->getLeft(), PacketType::DATA, originalSeqNr, source, sender, destination, originalHopCount, "Foo");
+    CHECK_PACKET(sentPacketInfo->getLeft(), PacketType::DATA, originalSeqNr, originalTTL, source, sender, destination, "Foo");
 }
 
-TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRouteAreKownOnRouteFailure) {
+TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRoutesAreKownOnRouteFailure) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("sender");
     std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
     AddressPtr source (new AddressMock("source"));
     AddressPtr sender = interface->getLocalAddress();
     AddressPtr destination (new AddressMock("destination"));
-    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123);
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123, 10);
     AddressPtr nextHop (new AddressMock("nextHop"));
 
     // create a known route to the destination
@@ -875,6 +918,7 @@ TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRouteAreKownOnRo
     CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
     CHECK(sentPacket->getSource()->equals(source));
     CHECK(sentPacket->getDestination()->equals(destination));
+    BYTES_EQUAL(1, sentPacket->getTTL());
 }
 
 TEST(AbstractARAClientTest, clientsDeleteRoutingTableEntryWhenTheyReceiveRoutingFailurePacket) {
@@ -882,7 +926,7 @@ TEST(AbstractARAClientTest, clientsDeleteRoutingTableEntryWhenTheyReceiveRouting
     AddressPtr source (new AddressMock("source"));
     AddressPtr sender (new AddressMock("sender"));
     AddressPtr destination (new AddressMock("destination"));
-    Packet* routeFailurePacket = new Packet(source, destination, sender, PacketType::ROUTE_FAILURE, 123);
+    Packet* routeFailurePacket = new Packet(source, destination, sender, PacketType::ROUTE_FAILURE, 123, 10);
 
     routingTable->update(destination, sender, interface, 10);
 
@@ -940,7 +984,7 @@ TEST(AbstractARAClientTest, rememberMultipleRoutes) {
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr destination (new AddressMock("destination"));
-    Packet* packetFromA = new Packet(source, destination, nodeA, PacketType::FANT, 123);
+    Packet* packetFromA = new Packet(source, destination, nodeA, PacketType::FANT, 123, 10);
     Packet* packetFromB = packetFactory->makeClone(packetFromA);
     packetFromB->setSender(nodeB);
 
@@ -956,4 +1000,67 @@ TEST(AbstractARAClientTest, rememberMultipleRoutes) {
     client->receivePacket(packetFromB, interface);
     CHECK_TRUE(routeIsKnown(source, nodeA, interface));
     CHECK_TRUE(routeIsKnown(source, nodeB, interface));
+}
+
+TEST(AbstractARAClientTest, doNotRelayPacketIfTTLBecomesZero) {
+    // initial test setup
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+
+    AddressPtr source (new AddressMock("B"));
+    AddressPtr destination (new AddressMock("C"));
+    AddressPtr sender = source;
+    int ttl = 1; // only one last hop allowed
+    Packet* data = new Packet(source, destination, sender, PacketType::DATA, 1, ttl, "Hello World");
+    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 2, ttl);
+    Packet* bant = new Packet(source, destination, sender, PacketType::BANT, 3, ttl);
+
+    // create a route to the destination so the packet could theoretically be relayed
+    routingTable->update(destination, destination, interface, 10);
+
+    // start the test
+    client->receivePacket(data, interface);
+    BYTES_EQUAL(0, sentPackets->size());
+
+    client->receivePacket(fant, interface);
+    BYTES_EQUAL(0, sentPackets->size());
+
+    client->receivePacket(bant, interface);
+    BYTES_EQUAL(0, sentPackets->size());
+}
+
+TEST(AbstractARAClientTest, initialzePheromoneValue) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("X");
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr route1 (new AddressMock("1"));
+    AddressPtr route2 (new AddressMock("2"));
+    AddressPtr route3 (new AddressMock("3"));
+    AddressPtr route4 (new AddressMock("4"));
+
+    int ttl1 = 10;
+    int ttl2 = 8;
+    int ttl3 = 5;
+    int ttl4 = 1;
+    Packet* fant1 = new Packet(source, destination, route1, PacketType::FANT, 123, ttl1);
+    Packet* fant2 = new Packet(source, destination, route2, PacketType::FANT, 123, ttl2);
+    Packet* fant3 = new Packet(source, destination, route3, PacketType::FANT, 123, ttl3);
+    Packet* fant4 = new Packet(source, destination, route4, PacketType::FANT, 123, ttl4);
+
+    // sanity check
+    CHECK_FALSE(routingTable->isDeliverable(destination));
+
+    // start test
+    double initialPhi = client->getInitialPhi();
+    client->receivePacket(fant1, interface);
+    DOUBLES_EQUAL(1 * (ttl1-1) + initialPhi, routingTable->getPheromoneValue(source, route1, interface), 0.000001);
+
+    client->receivePacket(fant2, interface);
+    DOUBLES_EQUAL(1 * (ttl2-1) + initialPhi, routingTable->getPheromoneValue(source, route2, interface), 0.000001);
+
+    client->receivePacket(fant3, interface);
+    DOUBLES_EQUAL(1 * (ttl3-1) + initialPhi, routingTable->getPheromoneValue(source, route3, interface), 0.000001);
+
+    client->receivePacket(fant4, interface);
+    DOUBLES_EQUAL(1 * (ttl4-1) + initialPhi, routingTable->getPheromoneValue(source, route4, interface), 0.000001);
 }

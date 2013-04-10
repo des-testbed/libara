@@ -30,6 +30,8 @@ public:
     void deliverToSystem(const Packet* packet);
     void packetNotDeliverable(const Packet* packet);
 
+    void setMaxHopCount(int n);
+    double getInitialPhi() const;
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");

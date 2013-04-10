@@ -24,6 +24,7 @@ class OMNeTConfiguration : public Configuration {
         virtual ForwardingPolicy* getForwardingPolicy();
         virtual float getInitialPheromoneValue();
         virtual int getMaxNrOfRouteDiscoveryRetries();
+        virtual int getMaxTTL();
         virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
 
         virtual RoutingTable* getRoutingTable();
@@ -40,6 +41,7 @@ class OMNeTConfiguration : public Configuration {
         ForwardingPolicy* forwardingPolicy;
         float initialPheromoneValue;
         int maxNrOfRouteDiscoveryRetries;
+        int maxTTL;
         unsigned int routeDiscoveryTimeoutInMilliSeconds;
 
         cModule* simpleModule;

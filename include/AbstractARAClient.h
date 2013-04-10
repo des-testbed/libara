@@ -161,10 +161,10 @@ protected:
 
     /**
      * Calculates an initial pheromone value based on the initialPhi value from the Configuration
-     * and the given hopCount with the fomula
-     * result = initialPhi / hopCount
+     * and the given TTL with the formula with alpha=1.
+     * result = alpha * TTL + initialPheromoneValue
      */
-    float calculateInitialPheromoneValue(unsigned int hopCount);
+    float calculateInitialPheromoneValue(unsigned int ttl);
 
     /**
      * Handles path reinforcement using the currently set PathReinforcementPolicy.
@@ -265,6 +265,7 @@ protected:
     double initialPheromoneValue;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
     int maxNrOfRouteDiscoveryRetries;
+    int maxHopCount;
 
 private:
     Logger* logger = nullptr;
