@@ -30,10 +30,11 @@ namespace ARA {
              * Creates a new ReliableNetworkInterface.
              *
              * @param client the AbstractARAClient to which all received packets are route and which is informed if a packet is not deliverable.
+             * @param packetFactory the PacketFactory which will be used to create acknowledgment packets
              * @param localAddress the Address which is returned when the interface is asked for its local address.
              * @param broadcastAddress the Address which is known to be the broadcast address of this interface.
              */
-            ReliableNetworkInterface(AbstractARAClient* client, int ackTimeoutInMicroSeconds, std::shared_ptr<Address> localAddress=nullptr, std::shared_ptr<Address> broadcastAddress=nullptr);
+            ReliableNetworkInterface(AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds, std::shared_ptr<Address> localAddress=nullptr, std::shared_ptr<Address> broadcastAddress=nullptr);
             virtual ~ReliableNetworkInterface();
 
             /**

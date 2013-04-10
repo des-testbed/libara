@@ -23,7 +23,6 @@ class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
 
     protected:
         virtual void initialize();
-        virtual void initializeEnvironment();
         void initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& configuration);
 
         /**
@@ -51,8 +50,6 @@ class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
         virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) = 0;
 
     protected:
-        static bool isEnvironmentInitialized;
-
         NotificationBoard* notificationBoard;
         IInterfaceTable* interfaceTable;
 

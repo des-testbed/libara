@@ -297,7 +297,7 @@ TEST(ReliableNetworkInterfaceTest, packetAcknowledgmentStopsTimer) {
     BYTES_EQUAL(1, interface->getNrOfRunningTimers());
 
     // let the interface receive the acknowledgment
-    Packet* acknowledgment = Environment::getPacketFactory()->makeAcknowledgmentPacket(originalPacket);
+    Packet* acknowledgment = client->getPacketFactory()->makeAcknowledgmentPacket(originalPacket);
     interface->receive(acknowledgment);
 
     BYTES_EQUAL(0, interface->getNrOfRunningTimers());

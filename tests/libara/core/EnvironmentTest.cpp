@@ -22,13 +22,3 @@ TEST(EnvironmentTest, getClock) {
     time->setToCurrentTime();
     delete time;
 }
-
-/**
- * We test if we can retrieve some instance of PacketFactory and make sure it can be used.
- */
-TEST(EnvironmentTest, getPacketFactory) {
-    PacketFactory* factory = Environment::getPacketFactory();
-    PacketMock somePacket = PacketMock();
-    Packet* anotherPacket = factory->makeFANT(&somePacket, 345, 10);
-    delete anotherPacket;
-}

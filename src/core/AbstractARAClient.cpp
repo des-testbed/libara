@@ -14,11 +14,11 @@ using namespace std;
 
 namespace ARA {
 
-AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable *routingTable) {
-    initialize(configuration, routingTable);
+AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) {
+    initialize(configuration, routingTable, packetFactory);
 }
 
-void AbstractARAClient::initialize(Configuration& configuration, RoutingTable *routingTable) {
+void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* routingTable, PacketFactory* packetFactory) {
     forwardingPolicy = configuration.getForwardingPolicy();
     pathReinforcementPolicy = configuration.getReinforcementPolicy();
     evaporationPolicy = configuration.getEvaporationPolicy();
@@ -27,14 +27,13 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable *r
     maxHopCount = configuration.getMaxTTL();
     routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
 
+    this->packetFactory = packetFactory;
     this->routingTable = routingTable;
     routingTable->setEvaporationPolicy(evaporationPolicy);
 
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
-
-    packetFactory = Environment::getPacketFactory();
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -58,6 +57,7 @@ AbstractARAClient::~AbstractARAClient() {
     }
     runningRouteDiscoveryTimers.clear();
 
+    delete packetFactory;
     delete packetTrap;
     delete routingTable;
     delete pathReinforcementPolicy;
@@ -127,6 +127,10 @@ NetworkInterface* AbstractARAClient::getNetworkInterface(unsigned int index) {
 
 unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
     return interfaces.size();
+}
+
+PacketFactory* AbstractARAClient::getPacketFactory() const{
+    return packetFactory;
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {

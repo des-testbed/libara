@@ -13,21 +13,10 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-bool AbstractOMNeTARAClient::isEnvironmentInitialized = false;
-
 void AbstractOMNeTARAClient::initialize() {
-    initializeEnvironment();
     notificationBoard = NotificationBoardAccess().get();
     notificationBoard->subscribe(this, NF_LINK_BREAK);
     interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
-}
-
-void AbstractOMNeTARAClient::initializeEnvironment() {
-    if(isEnvironmentInitialized == false) {
-        // The clock is initialized directly in the OMNeTClock
-        Environment::setPacketFactory(new ::ARA::omnetpp::PacketFactory());
-        isEnvironmentInitialized = true;
-    }
 }
 
 void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& config) {

@@ -16,6 +16,8 @@
 
 namespace ARA {
 
+class NetworkInterfaceMock;
+
 /**
  * A ARAClientMock implements the abstract ARA Client and holds references to
  * other mocks for testing the routing table, packet trap and network interfaces.

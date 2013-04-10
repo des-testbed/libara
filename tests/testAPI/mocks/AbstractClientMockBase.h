@@ -9,11 +9,14 @@
 #include "NetworkInterfaceMock.h"
 #include "Configuration.h"
 #include "RoutingTable.h"
+#include "PacketFactory.h"
 
 #include <string>
 #include <deque>
 
 namespace ARA {
+
+class NetworkInterfaceMock;
 
 /**
  * The abstract AbstractClientMockBase supplies several mocking methods that can be

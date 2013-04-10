@@ -4,6 +4,7 @@
 
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
+#include "omnetpp/PacketFactory.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -29,7 +30,7 @@ void EARA::initialize(int stage) {
         setLogger(config.getLogger());
         messageDispatcher->setMaxTTL(config.getMaxTTL());
 
-        AbstractEARAClient::initializeEARA(config, config.getRoutingTable());
+        AbstractEARAClient::initializeEARA(config, config.getRoutingTable(), new PacketFactory());
         initializeNetworkInterfacesOf(this, config);
 
         notificationBoard->subscribe(this, NF_BATTERY_CHANGED);

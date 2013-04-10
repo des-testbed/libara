@@ -12,11 +12,11 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, int ackTimeoutInMicroSeconds, AddressPtr localAddress, AddressPtr broadcastAddress) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
+ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds, AddressPtr localAddress, AddressPtr broadcastAddress) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
     unacknowledgedPackets = deque<const Packet*>();
     runningTimers = unordered_map<Timer*, AckTimerData>();
     this->ackTimeoutInMicroSeconds = ackTimeoutInMicroSeconds;
-    packetFactory = Environment::getPacketFactory();
+    this->packetFactory = packetFactory;
 }
 
 ReliableNetworkInterface::~ReliableNetworkInterface() {

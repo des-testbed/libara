@@ -56,7 +56,7 @@ public:
      * if possible. It will initialize the client with the given configuration so no additional
      * call to AbstractARAClient::initialize is required.
      */
-    AbstractARAClient(Configuration& configuration, RoutingTable *routingTable);
+    AbstractARAClient(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory);
 
     /**
      * The standard virtual destructor of this abstract class.
@@ -94,12 +94,12 @@ public:
     virtual void handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
     /**
-     * This method will initialize this client with the given configuration.
+     * This method will initialize this client with the given configuration, ~RoutingTable and ~PacketFactory.
      * It must be called before any call to AbstractARAClient::sendPacket or
      * AbstractARAClient::receivePacket. If this object has been created by the
      * standard constructor this method must be called manually.
      */
-    void initialize(Configuration& configuration, RoutingTable *routingTable);
+    void initialize(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory);
 
     /**
      * Sets a logger for this ARA client.
@@ -123,6 +123,8 @@ public:
      * Returns the amount of registered network interfaces of this client.
      */
     unsigned int getNumberOfNetworkInterfaces();
+
+    PacketFactory* getPacketFactory() const;
 
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     void broadCast(Packet* packet);

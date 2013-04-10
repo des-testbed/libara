@@ -29,7 +29,7 @@ TEST_GROUP(AbstractEARAClientTest) {
         client = new EARAClientMock();
         packetTrap = client->getPacketTrap();
         routingTable = client->getRoutingTable();
-        packetFactory = Environment::getPacketFactory();
+        packetFactory = client->getPacketFactory();
     }
 
     void teardown() {

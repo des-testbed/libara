@@ -25,7 +25,7 @@ EARAClientMock::EARAClientMock() {
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initializeEARA(configuration, new EnergyAwareRoutingTable());
+    initializeEARA(configuration, new EnergyAwareRoutingTable(), new PacketFactory());
     currentEnergyLevel = 255;
 }
 
@@ -35,7 +35,7 @@ void EARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) 
 }
 
 void EARAClientMock::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
-    storeRouteFailurePacket(packet, nextHop, interface);
+    storeRouteFailurePacket(packetFactory->makeClone(packet), nextHop, interface);
     AbstractEARAClient::handleRouteFailure(packet, nextHop, interface);
 }
 

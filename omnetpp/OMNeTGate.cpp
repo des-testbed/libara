@@ -30,7 +30,7 @@ OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClien
     this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress));
     this->broadcastAddress = shared_ptr<Address>(new OMNeTAddress(broadcastAddress));
     this->interfaceID = interfaceEntry->getInterfaceId();
-    this->packetFactory = Environment::getPacketFactory();
+    this->packetFactory = araClient->getPacketFactory();
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {

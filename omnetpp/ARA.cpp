@@ -4,6 +4,7 @@
 
 #include "omnetpp/ARA.h"
 #include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/PacketFactory.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -29,7 +30,7 @@ void ARA::initialize(int stage) {
         setLogger(config.getLogger());
         messageDispatcher->setMaxTTL(config.getMaxTTL());
 
-        AbstractARAClient::initialize(config, config.getRoutingTable());
+        AbstractARAClient::initialize(config, config.getRoutingTable(), new PacketFactory());
         initializeNetworkInterfacesOf(this, config);
         WATCH(nrOfNotDeliverablePackets);
         WATCH(nrOfDetectedLoops);

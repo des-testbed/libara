@@ -34,7 +34,7 @@ TEST_GROUP(AbstractARAClientTest) {
         client = new ARAClientMock();
         packetTrap = client->getPacketTrap();
         routingTable = client->getRoutingTable();
-        packetFactory = Environment::getPacketFactory();
+        packetFactory = client->getPacketFactory();
     }
 
     void teardown() {
