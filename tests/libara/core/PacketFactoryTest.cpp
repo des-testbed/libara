@@ -105,17 +105,18 @@ TEST(PacketFactoryTest, makeDulicateErrorPacket) {
     AddressPtr originalSource (new AddressMock("source"));
     AddressPtr originalDestination (new AddressMock("destination"));
     AddressPtr originalSender (new AddressMock("sender"));
+    AddressPtr senderOfDuplicateWarning (new AddressMock("foo"));
     unsigned int type = PacketType::DATA;
     unsigned int originalseqenceNumber = 3;
     unsigned int originalTTL = 20;
 
     Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalTTL);
     unsigned int newSequenceNumber = 12345;
-    Packet* duplicateWarning = factory->makeDulicateWarningPacket(&packet, newSequenceNumber);
+    Packet* duplicateWarning = factory->makeDulicateWarningPacket(&packet, senderOfDuplicateWarning, newSequenceNumber);
 
-    CHECK(duplicateWarning->getSource()->equals(originalSource));
+    CHECK(duplicateWarning->getSource()->equals(senderOfDuplicateWarning));
     CHECK(duplicateWarning->getDestination()->equals(originalDestination));
-    // The sender of the packet will be determined when it is actually send by the ARA client
+    CHECK(duplicateWarning->getSender()->equals(senderOfDuplicateWarning));
     CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
     CHECK_EQUAL(newSequenceNumber, duplicateWarning->getSequenceNumber());
     CHECK_EQUAL(0, duplicateWarning->getPayloadLength());

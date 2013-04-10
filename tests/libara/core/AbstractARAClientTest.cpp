@@ -199,35 +199,43 @@ TEST(AbstractARAClientTest, registerReceivedPacket) {
 }
 
 /**
- * In this test we simulate that the same data packet has been received
- * twice at node x. The packet is directed from node A to node B and
- * has been relayed via node C to node X.
- * Node x must respond to node C with a DUPLICATE_ERROR packet.
+ * In this test we simulate that a loop occurred in the routing:
+ * At first A receives a packet from node src and relays it to B
+ * Than it receives the same packet from C which is where the loop
+ * must be detected
+ * Node A must respond to node C with a DUPLICATE_ERROR packet.
+ *
+ * Test topology:
+ *
+ * (src)--->(A)--->(B)--->(C)--->(dest)
+ *           └-----------<-┘
  */
 TEST(AbstractARAClientTest, respondWithDuplicateError) {
-    // prepare a packet
-    AddressPtr source (new AddressMock("A"));
-    AddressPtr destination (new AddressMock("B"));
-    AddressPtr sender (new AddressMock("C"));
-    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123, 10);
-    Packet* clone = packetFactory->makeClone(packet);
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr destination (new AddressMock("dest"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    Packet* packet1 = new Packet(source, destination, source, PacketType::DATA, 123, 10);
+    Packet* packet2 = new Packet(source, destination, nodeC, PacketType::DATA, 123, 10);
+    routingTable->update(destination, nodeB, interface, 10.0);
 
-    // let client receive the packet over the same interface twice
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("X");
-    client->receivePacket(packet, interface);
-    client->receivePacket(clone, interface);
+    // start the test
+    client->receivePacket(packet1, interface);
+    client->receivePacket(packet2, interface);
 
     // the client should have relayed the first packet and sent a duplicate warning back for the second packet
     LONGS_EQUAL(2, interface->getNumberOfSentPackets());
 
-    Pair<const Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->at(1); // we only check the warning
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->back(); // we only check the warning
     const Packet* sentPacket = sentPacketInfo->getLeft();
     AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
 
     // check the contents of the duplicate warning packet
-    CHECK(recipientOfSentPacket->equals(sender));
+    CHECK(recipientOfSentPacket->equals(nodeC));
     CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
-    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getDestination()->equals(destination));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_ERROR);
     LONGS_EQUAL(1, sentPacket->getTTL());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
@@ -535,37 +543,37 @@ TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
  * In this test we check if a client deletes the routing table entry to
  * another note if he receives a duplicate warning from this node.
  *
- * Test setup
- * Before test:        After test:
+ * Test setup:
+ *  - we test at node B
+ *  - B receives the duplicate warning from A and is required to delete
+ *    the link to A for the destination givenin the packet
  *
- *    /--> (B)            /--> (B)
- *  (A)--> (C)          (A)
- *    \--> (D)            \--> (D)
+ * Before test:                      After test:
+ *
+ * (src)--->(A)--->(B)--->(dest)     (src)--->(A)--->(B)--->(dest)
+ *           └----<-┘
  */
 TEST(AbstractARAClientTest, receiveDuplicateErrorPacket) {
     // initial test setup
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-
-    PacketMock duplicateErrorPacket = PacketMock("A", "X", "C", 123, 10, PacketType::DUPLICATE_ERROR);
-
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("B");
+    AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
-    AddressPtr nodeD (new AddressMock("D"));
-    AddressPtr destination (new AddressMock("X"));
-    routingTable->update(destination, nodeB, interface, 1.1);
-    routingTable->update(destination, nodeC, interface, 2.2);
-    routingTable->update(destination, nodeD, interface, 3.3);
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr destination (new AddressMock("dest"));
+
+    Packet duplicateErrorPacket = Packet(nodeA, destination, nodeA, PacketType::DUPLICATE_ERROR, 123, 1);
+
+    routingTable->update(destination, destination, interface, 2.2);
+    routingTable->update(destination, nodeA, interface, 2.2);
 
     // Check some basic assumptions about this test setup
-    CHECK(routeIsKnown(destination, nodeB, interface));
-    CHECK(routeIsKnown(destination, nodeC, interface));
-    CHECK(routeIsKnown(destination, nodeD, interface));
+    CHECK(routeIsKnown(destination, destination, interface));
+    CHECK(routeIsKnown(destination, nodeA, interface));
 
     // start the test
     client->receivePacket(&duplicateErrorPacket, interface);
-    CHECK(routeIsKnown(destination, nodeB, interface));
-    CHECK(routeIsKnown(destination, nodeC, interface) == false);
-    CHECK(routeIsKnown(destination, nodeD, interface));
+    CHECK(routeIsKnown(destination, destination, interface));
+    CHECK(routeIsKnown(destination, nodeA, interface) == false);
 }
 
 TEST(AbstractARAClientTest, deleteAssignedLogger) {
@@ -1063,4 +1071,11 @@ TEST(AbstractARAClientTest, initialzePheromoneValue) {
 
     client->receivePacket(fant4, interface);
     DOUBLES_EQUAL(1 * (ttl4-1) + initialPhi, routingTable->getPheromoneValue(source, route4, interface), 0.000001);
+}
+
+/**
+ * TODO
+ */
+TEST(AbstractARAClientTest, loopPreventionInRouteDiscovery) {
+
 }

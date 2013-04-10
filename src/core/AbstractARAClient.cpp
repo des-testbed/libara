@@ -205,8 +205,8 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
 }
 
 void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
-    Packet* duplicateWarningPacket = packetFactory->makeDulicateWarningPacket(packet, getNextSequenceNumber());
-    duplicateWarningPacket->setSender(interface->getLocalAddress());
+    AddressPtr sender = interface->getLocalAddress();
+    Packet* duplicateWarningPacket = packetFactory->makeDulicateWarningPacket(packet, sender, getNextSequenceNumber());
     interface->send(duplicateWarningPacket, packet->getSender());
 }
 
@@ -314,9 +314,8 @@ void AbstractARAClient::sendDeliverablePackets(const Packet* packet) {
     delete deliverablePackets;
 }
 
-void AbstractARAClient::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
-    routingTable->removeEntry(packet->getDestination(), packet->getSender(), interface);
-    // TODO we can also invalidate the ack timer for the packet
+void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket, NetworkInterface* interface) {
+    routingTable->removeEntry(duplicateErrorPacket->getDestination(), duplicateErrorPacket->getSender(), interface);
 }
 
 bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) const {
