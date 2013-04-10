@@ -27,6 +27,7 @@ void EARA::initialize(int stage) {
         AbstractOMNeTARAClient::initialize();
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
+        messageDispatcher->setMaxTTL(config.getMaxTTL());
 
         AbstractEARAClient::initializeEARA(config, config.getRoutingTable());
         initializeNetworkInterfacesOf(this, config);

@@ -19,6 +19,10 @@ MessageDispatcher::MessageDispatcher(AbstractOMNeTARAClient* module, AbstractARA
     this->araClient = araClient;
 }
 
+void MessageDispatcher::setMaxTTL(int n) {
+    maxTTL = n;
+}
+
 void MessageDispatcher::dispatch(cMessage* message) {
     if(isFromUpperLayer(message)) {
         handleUpperLayerMessage(message);
@@ -47,7 +51,7 @@ void MessageDispatcher::handleUpperLayerMessage(cMessage* message) {
     AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
     AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
     AddressPtr sender = source;
-    OMNeTPacket* omnetPacket = new OMNeTPacket(source, destination, sender, PacketType::DATA, araClient->getNextSequenceNumber());
+    OMNeTPacket* omnetPacket = new OMNeTPacket(source, destination, sender, PacketType::DATA, araClient->getNextSequenceNumber(), maxTTL);
     omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
 
     araClient->sendPacket(omnetPacket);

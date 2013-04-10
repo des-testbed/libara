@@ -23,6 +23,8 @@ class MessageDispatcher {
         bool isARPMessage(cMessage* message);
         bool isARAMessage(cMessage* message);
 
+        void setMaxTTL(int n);
+
     private:
         void handleUpperLayerMessage(cMessage* message);
         void handleARP(cMessage* message);
@@ -32,6 +34,7 @@ class MessageDispatcher {
 
         AbstractOMNeTARAClient* module;
         AbstractARAClient* araClient;
+        int maxTTL= 20;
 };
 
 OMNETARA_NAMESPACE_END

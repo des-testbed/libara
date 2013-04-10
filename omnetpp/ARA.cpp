@@ -27,6 +27,7 @@ void ARA::initialize(int stage) {
         AbstractOMNeTARAClient::initialize();
         OMNeTConfiguration config = OMNeTConfiguration(this);
         setLogger(config.getLogger());
+        messageDispatcher->setMaxTTL(config.getMaxTTL());
 
         AbstractARAClient::initialize(config, config.getRoutingTable());
         initializeNetworkInterfacesOf(this, config);
