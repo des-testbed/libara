@@ -135,7 +135,6 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         NetworkInterface* interface = nextHop->getInterface();
         AddressPtr nextHopAddress = nextHop->getAddress();
         packet->setSender(interface->getLocalAddress());
-        packet->decreaseTTL();
 
         logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
         reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
@@ -181,6 +180,8 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
+    packet->decreaseTTL();
+    //TODO process TTL
     updateRoutingTable(packet, interface);
 
     if(hasBeenReceivedEarlier(packet)) {
@@ -332,8 +333,6 @@ bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
 }
 
 void AbstractARAClient::broadCast(Packet* packet) {
-    packet->decreaseTTL();
-
     for(auto& interface: interfaces) {
         Packet* packetClone = packetFactory->makeClone(packet);
         packetClone->setSender(interface->getLocalAddress());
@@ -434,7 +433,6 @@ void AbstractARAClient::handleRouteFailure(Packet* packet, AddressPtr nextHop, N
     routingTable->removeEntry(destination, nextHop, interface);
 
     if (routingTable->isDeliverable(destination)) {
-        packet->increaseTTL(); // has been decreased when it has been unsuccessfully been sent the first time and will be decreased again in sendPacket()
         sendPacket(packet);
     }
     else {

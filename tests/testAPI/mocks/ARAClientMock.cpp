@@ -60,4 +60,8 @@ RoutingTable* ARAClientMock::getRoutingTable() {
     return routingTable;
 }
 
+void ARAClientMock::setMaxHopCount(int n) {
+    maxHopCount = n;
+}
+
 } /* namespace ARA */
