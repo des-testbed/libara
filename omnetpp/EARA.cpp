@@ -28,8 +28,9 @@ void EARA::initialize(int stage) {
         AbstractOMNeTARAClient::initialize();
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
-        packetFactory = new PacketFactory(config.getMaxTTL());
+        PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
 
+        messageDispatcher->setPacketFactory(packetFactory);
         AbstractEARAClient::initializeEARA(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
 

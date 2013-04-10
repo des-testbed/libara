@@ -7,6 +7,9 @@
 OMNETARA_NAMESPACE_BEGIN
 
 OMNeTPacket* PacketFactory::createOMNetPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl) {
+    if(ttl == -1) {
+        ttl = maxHopCount;
+    }
     return new OMNeTPacket(source, destination, sender, type, seqNr, ttl);
 }
 

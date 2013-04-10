@@ -9,6 +9,7 @@
 #include "omnetpp/AbstractOMNeTARAClient.h"
 #include "AbstractARAClient.h"
 #include "InterfaceEntry.h"
+#include "PacketFactory.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -23,7 +24,7 @@ class MessageDispatcher {
         bool isARPMessage(cMessage* message);
         bool isARAMessage(cMessage* message);
 
-        void setMaxTTL(int n);
+        void setPacketFactory(PacketFactory* factory);
 
     private:
         void handleUpperLayerMessage(cMessage* message);
@@ -34,7 +35,7 @@ class MessageDispatcher {
 
         AbstractOMNeTARAClient* module;
         AbstractARAClient* araClient;
-        int maxTTL= 20;
+        PacketFactory* packetFactory;
 };
 
 OMNETARA_NAMESPACE_END

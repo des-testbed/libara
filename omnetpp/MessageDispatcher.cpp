@@ -19,8 +19,8 @@ MessageDispatcher::MessageDispatcher(AbstractOMNeTARAClient* module, AbstractARA
     this->araClient = araClient;
 }
 
-void MessageDispatcher::setMaxTTL(int n) {
-    maxTTL = n;
+void MessageDispatcher::setPacketFactory(PacketFactory* factory) {
+    packetFactory = factory;
 }
 
 void MessageDispatcher::dispatch(cMessage* message) {
@@ -51,7 +51,7 @@ void MessageDispatcher::handleUpperLayerMessage(cMessage* message) {
     AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
     AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
     AddressPtr sender = source;
-    OMNeTPacket* omnetPacket = new OMNeTPacket(source, destination, sender, PacketType::DATA, araClient->getNextSequenceNumber(), maxTTL);
+    OMNeTPacket* omnetPacket = packetFactory->createOMNetPacket(source, destination, sender, PacketType::DATA, araClient->getNextSequenceNumber());
     omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
 
     araClient->sendPacket(omnetPacket);
