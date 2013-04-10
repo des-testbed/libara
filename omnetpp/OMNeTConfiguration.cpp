@@ -22,6 +22,7 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     forwardingPolicy = ModuleAccess<ForwardingPolicy>("forwardingPolicy").get();
     initialPheromoneValue = module->par("initialPhi").doubleValue();
     maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
+    maxTTL = module->par("maxTTL").longValue();
     routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
 
     logger = new SimpleLogger(getHostModule()->getName());

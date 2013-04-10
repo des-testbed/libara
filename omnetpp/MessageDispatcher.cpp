@@ -87,6 +87,7 @@ InterfaceEntry* MessageDispatcher::getSourceInterfaceFrom(cMessage* message) {
 
 void MessageDispatcher::handleARA(cMessage* message) {
     OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(message);
+    ASSERT(omnetPacket->getTTL() > 0);
     OMNeTGate* arrivalGate = (OMNeTGate*) araClient->getNetworkInterface(message->getArrivalGate()->getIndex());
     arrivalGate->receive(omnetPacket);
 }
