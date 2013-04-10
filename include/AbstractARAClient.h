@@ -267,7 +267,6 @@ protected:
     double initialPheromoneValue;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
     int maxNrOfRouteDiscoveryRetries;
-    int maxHopCount;
 
 private:
     Logger* logger = nullptr;

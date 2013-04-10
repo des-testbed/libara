@@ -7,6 +7,7 @@
 
 #include "OMNeTARAMacros.h"
 #include "../PacketFactory.h"
+#include "omnetpp/OMNeTPacket.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -15,6 +16,10 @@ OMNETARA_NAMESPACE_BEGIN
  * OMneTPackets.
  */
 class PacketFactory : public ::ARA::PacketFactory {
+public:
+    PacketFactory(int maxHopCount) : ::ARA::PacketFactory(maxHopCount) {};
+    OMNeTPacket* createOMNetPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl);
+
 protected:
     Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
 };

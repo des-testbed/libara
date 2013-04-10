@@ -26,7 +26,7 @@ ARAClientMock::ARAClientMock() {
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initialize(configuration, new RoutingTable(), new PacketFactory());
+    initialize(configuration, new RoutingTable(), new PacketFactory(15));
 }
 
 void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
@@ -62,7 +62,7 @@ RoutingTable* ARAClientMock::getRoutingTable() {
 }
 
 void ARAClientMock::setMaxHopCount(int n) {
-    maxHopCount = n;
+    packetFactory->setMaxHopCount(n);
 }
 
 double ARAClientMock::getInitialPhi() const {

@@ -24,7 +24,6 @@ public:
     virtual ForwardingPolicy* getForwardingPolicy() = 0;
     virtual float getInitialPheromoneValue() = 0;
     virtual int getMaxNrOfRouteDiscoveryRetries() = 0;
-    virtual int getMaxTTL() = 0;
     virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds() = 0;
 };
 

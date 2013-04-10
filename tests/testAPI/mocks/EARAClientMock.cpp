@@ -25,7 +25,7 @@ EARAClientMock::EARAClientMock() {
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initializeEARA(configuration, new EnergyAwareRoutingTable(), new PacketFactory());
+    initializeEARA(configuration, new EnergyAwareRoutingTable(), new PacketFactory(15));
     currentEnergyLevel = 255;
 }
 

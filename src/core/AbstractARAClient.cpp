@@ -24,7 +24,6 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     evaporationPolicy = configuration.getEvaporationPolicy();
     initialPheromoneValue = configuration.getInitialPheromoneValue();
     maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
-    maxHopCount = configuration.getMaxTTL();
     routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
 
     this->packetFactory = packetFactory;
@@ -150,7 +149,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             packetTrap->trapPacket(packet);
 
             unsigned int sequenceNr = getNextSequenceNumber();
-            Packet* fant = packetFactory->makeFANT(packet, sequenceNr, maxHopCount);
+            Packet* fant = packetFactory->makeFANT(packet, sequenceNr);
             broadCast(fant);
 
             startRouteDiscoveryTimer(packet);
@@ -280,7 +279,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
-        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber(), maxHopCount);
+        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber());
         broadCast(bant);
     }
     else if(packetType == PacketType::BANT) {
@@ -420,7 +419,7 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
         discoveryInfo.nrOfRetries++;
         runningRouteDiscoveryTimers[routeDiscoveryTimer] = discoveryInfo;
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packetFactory->makeFANT(discoveryInfo.originalPacket, sequenceNr, maxHopCount);
+        Packet* fant = packetFactory->makeFANT(discoveryInfo.originalPacket, sequenceNr);
         broadCast(fant);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }

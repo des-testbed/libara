@@ -16,9 +16,10 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(PacketFactoryTest) {
     PacketFactory* factory;
+    int maximumHopCount= 15;
 
     void setup() {
-        factory = new PacketFactory();
+        factory = new PacketFactory(maximumHopCount);
     }
 
     void teardown() {
@@ -32,13 +33,12 @@ TEST(PacketFactoryTest, makeFANT) {
    AddressPtr sender (new AddressMock("sender"));
    unsigned int type = PacketType::DATA;
    int seqNr = 3;
-   int maximumHopCount = 20;
    int ttl = 15;
    const char* payload = "Hello World";
 
    Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload, strlen(payload));
    unsigned int newSequenceNumber = 242342;
-   Packet* fant = factory->makeFANT(&packet, newSequenceNumber, maximumHopCount);
+   Packet* fant = factory->makeFANT(&packet, newSequenceNumber);
 
    CHECK(fant->getSource()->equals(source));
    CHECK(fant->getDestination()->equals(destination));
@@ -83,12 +83,11 @@ TEST(PacketFactoryTest, makeBANT) {
     AddressPtr originalSender (new AddressMock("sender"));
     unsigned int type = PacketType::FANT;
     int seqNr = 3;
-    int maximumHopCount = 20;
     int ttl = 15;
 
     Packet packet = Packet(originalSource, originalDestination, originalSender, type, seqNr, ttl);
     unsigned int newSequenceNumber = 12345;
-    Packet* bant = factory->makeBANT(&packet, newSequenceNumber, maximumHopCount);
+    Packet* bant = factory->makeBANT(&packet, newSequenceNumber);
 
     CHECK(bant->getSource()->equals(originalDestination));
     CHECK(bant->getDestination()->equals(originalSource));
@@ -119,8 +118,8 @@ TEST(PacketFactoryTest, makeDulicateErrorPacket) {
     CHECK(duplicateWarning->getSender()->equals(senderOfDuplicateWarning));
     CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
     CHECK_EQUAL(newSequenceNumber, duplicateWarning->getSequenceNumber());
+    CHECK_EQUAL(maximumHopCount, duplicateWarning->getTTL());
     CHECK_EQUAL(0, duplicateWarning->getPayloadLength());
-    CHECK_EQUAL(1, duplicateWarning->getTTL());
 
     delete duplicateWarning;
 }
@@ -141,8 +140,8 @@ TEST(PacketFactoryTest, makeAcknowledgmentPacket) {
     // The sender of the packet will be determined when it is actually send by the ARA client
     CHECK_EQUAL(PacketType::ACK, ackPacket->getType());
     CHECK_EQUAL(originalseqenceNumber, ackPacket->getSequenceNumber());
+    CHECK_EQUAL(maximumHopCount, ackPacket->getTTL());
     CHECK_EQUAL(0, ackPacket->getPayloadLength());
-    CHECK_EQUAL(1, ackPacket->getTTL());
 
     delete ackPacket;
 }
@@ -163,8 +162,8 @@ TEST(PacketFactoryTest, makeRouteFailurePacket) {
     // The sender of the packet will be determined when it is actually send by the ARA client
     CHECK_EQUAL(PacketType::ROUTE_FAILURE, routeFailurePacket->getType());
     CHECK_EQUAL(originalseqenceNumber, routeFailurePacket->getSequenceNumber());
+    CHECK_EQUAL(maximumHopCount, routeFailurePacket->getTTL());
     CHECK_EQUAL(0, routeFailurePacket->getPayloadLength());
-    CHECK_EQUAL(1, routeFailurePacket->getTTL());
 
     delete routeFailurePacket;
 }
@@ -181,11 +180,15 @@ TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
 
     CHECK_EQUAL(PacketType::ENERGY_INFO, energyPacket->getType());
     CHECK_EQUAL(seqNr, energyPacket->getSequenceNumber());
-    CHECK_EQUAL(1, energyPacket->getPayloadLength());
-    CHECK_EQUAL(1, energyPacket->getTTL());
+    BYTES_EQUAL(maximumHopCount, energyPacket->getTTL());
+    BYTES_EQUAL(1, energyPacket->getPayloadLength());
 
     const char* payload = energyPacket->getPayload();
     BYTES_EQUAL(energyLevel, payload[0]);
 
     delete energyPacket;
+}
+
+TEST(PacketFactoryTest, getMaximumNrOfHops){
+    BYTES_EQUAL(maximumHopCount, factory->getMaximumNrOfHops());
 }

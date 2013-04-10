@@ -39,9 +39,6 @@ public:
     virtual int getMaxNrOfRouteDiscoveryRetries() {
         return BasicConfiguration::getMaxNrOfRouteDiscoveryRetries();
     }
-    virtual int getMaxTTL() {
-        return BasicConfiguration::getMaxTTL();
-    }
     virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds() {
         return BasicConfiguration::getRouteDiscoveryTimeoutInMilliSeconds();
     }

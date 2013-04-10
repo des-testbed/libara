@@ -218,6 +218,7 @@ TEST(AbstractARAClientTest, respondWithDuplicateError) {
     AddressPtr nodeC (new AddressMock("C"));
     Packet* packet1 = new Packet(source, destination, source, PacketType::DATA, 123, 10);
     Packet* packet2 = new Packet(source, destination, nodeC, PacketType::DATA, 123, 10);
+    int maxNrOfHops = packetFactory->getMaximumNrOfHops();
     routingTable->update(destination, nodeB, interface, 10.0);
 
     // start the test
@@ -237,7 +238,7 @@ TEST(AbstractARAClientTest, respondWithDuplicateError) {
     CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
     CHECK(sentPacket->getDestination()->equals(destination));
     CHECK(sentPacket->getType() == PacketType::DUPLICATE_ERROR);
-    LONGS_EQUAL(1, sentPacket->getTTL());
+    LONGS_EQUAL(maxNrOfHops, sentPacket->getTTL());
     CHECK_EQUAL(0, sentPacket->getPayloadLength());
 }
 
@@ -904,6 +905,7 @@ TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRoutesAreKownOnR
     AddressPtr destination (new AddressMock("destination"));
     Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123, 10);
     AddressPtr nextHop (new AddressMock("nextHop"));
+    int maxNrOfHops = packetFactory->getMaximumNrOfHops();
 
     // create a known route to the destination
     routingTable->update(destination, nextHop, interface, 10);
@@ -926,7 +928,7 @@ TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRoutesAreKownOnR
     CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
     CHECK(sentPacket->getSource()->equals(source));
     CHECK(sentPacket->getDestination()->equals(destination));
-    BYTES_EQUAL(1, sentPacket->getTTL());
+    BYTES_EQUAL(maxNrOfHops, sentPacket->getTTL());
 }
 
 TEST(AbstractARAClientTest, clientsDeleteRoutingTableEntryWhenTheyReceiveRoutingFailurePacket) {

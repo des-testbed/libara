@@ -28,9 +28,8 @@ void ARA::initialize(int stage) {
         AbstractOMNeTARAClient::initialize();
         OMNeTConfiguration config = OMNeTConfiguration(this);
         setLogger(config.getLogger());
-        messageDispatcher->setMaxTTL(config.getMaxTTL());
-
-        AbstractARAClient::initialize(config, config.getRoutingTable(), new PacketFactory());
+        packetFactory = new PacketFactory(config.getMaxTTL());
+        AbstractARAClient::initialize(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
         WATCH(nrOfNotDeliverablePackets);
         WATCH(nrOfDetectedLoops);

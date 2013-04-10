@@ -13,11 +13,14 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 /**
- * Packets encapsulate a payload that has to be transmitted from
- * a source node to a destination node.
+ * The PacketFactory is responsible for creating the packet instances for an ~AbstractARAClient.
+ * This class is necessary so we can decide at runtime what the concrete Packet class shall be.
+ * If you do not want to use another Packet implementation class than the standard implementation
+ * you need to override PacketFactory::makePacket(...) to return something that inherits from packet.
  */
 class PacketFactory {
 public:
+    PacketFactory(int maxHopCount);
     virtual ~PacketFactory() {};
 
     /**
@@ -35,18 +38,17 @@ public:
      * Note: The result of this method is a newly created object which must be
      * deleted later by the calling class.
      */
-    Packet* makeFANT(const Packet* originalPacket, unsigned int newSequenceNumber, int maxHopCount);
+    Packet* makeFANT(const Packet* originalPacket, unsigned int newSequenceNumber);
 
     /**
      * Creates a new BANT based on the given packet. This BANT has the destination of
      * this packet as its source and the destination of this as its source.
-     * The sequence number of the BANT is
-     * given as argument of this method.
+     * The sequence number of the BANT is given as argument of this method.
      *
      * Note: The result of this method is a newly created object which must be
      * deleted later by the calling class.
      */
-     Packet* makeBANT(const Packet* originalPacket, unsigned int sequenceNumber, int maxHopCount);
+     Packet* makeBANT(const Packet* originalPacket, unsigned int sequenceNumber);
 
      /**
       * Creates a new DUPLICATE_WARNING packet based on the information of the
@@ -90,12 +92,18 @@ public:
        */
      Packet* makeEnergyDisseminationPacket(AddressPtr source, unsigned int seqNr, unsigned char energyLevel);
 
+
+     void setMaxHopCount(int n);
+     int getMaximumNrOfHops();
 protected:
      /**
       * This method is responsible for creating the actual packet instance.
       * It can be overridden if another other Packet class shall be used.
       */
      virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
+
+private:
+     int maxHopCount;
 };
 
 } /* namespace ARA */
