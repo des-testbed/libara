@@ -209,13 +209,13 @@ TEST(AbstractARAClientTest, respondWithDuplicateError) {
     AddressPtr source (new AddressMock("A"));
     AddressPtr destination (new AddressMock("B"));
     AddressPtr sender (new AddressMock("C"));
-    Packet* firstPacket = new Packet(source, destination, sender, PacketType::DATA, 123, 1);
-    Packet* secondPacket = new Packet(source, destination, sender, PacketType::DATA, 123, 1);
+    Packet* packet = new Packet(source, destination, sender, PacketType::DATA, 123, 10);
+    Packet* clone = packetFactory->makeClone(packet);
 
     // let client receive the packet over the same interface twice
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("X");
-    client->receivePacket(firstPacket, interface);
-    client->receivePacket(secondPacket, interface);
+    client->receivePacket(packet, interface);
+    client->receivePacket(clone, interface);
 
     // the client should have relayed the first packet and sent a duplicate warning back for the second packet
     LONGS_EQUAL(2, interface->getNumberOfSentPackets());
@@ -240,8 +240,8 @@ TEST(AbstractARAClientTest, respondWithDuplicateError) {
  */
 TEST(AbstractARAClientTest, ignoreDuplicateAntPackets) {
     // prepare the ant packets
-    Packet* fant1 = new PacketMock("A", "B", "C", 123, 1, PacketType::FANT);
-    Packet* fant2 = new PacketMock("A", "B", "C", 123, 1, PacketType::FANT);
+    Packet* fant1 = new PacketMock("A", "B", "C", 123, 3, PacketType::FANT);
+    Packet* fant2 = new PacketMock("A", "B", "C", 123, 3, PacketType::FANT);
     Packet* bant1 = new PacketMock("B", "A", "C", 456, 4, PacketType::BANT);
     Packet* bant2 = new PacketMock("B", "A", "C", 456, 4, PacketType::BANT);
     Packet* bant3 = new PacketMock("B", "A", "C", 456, 4, PacketType::BANT);
@@ -254,7 +254,7 @@ TEST(AbstractARAClientTest, ignoreDuplicateAntPackets) {
     client->receivePacket(bant2, interface);
     client->receivePacket(bant3, interface);
 
-    LONGS_EQUAL(2, interface->getNumberOfSentPackets()); // only two broadcasts of the ANT packets and nothing more
+    LONGS_EQUAL(2, interface->getNumberOfSentPackets()); // only two broadcasts (1 FANT & 1 BANT) and nothing more
     std::deque<Pair<const Packet*, AddressPtr>*>* sendPackets = interface->getSentPackets();
     CHECK_EQUAL(PacketType::FANT, sendPackets->at(0)->getLeft()->getType());
     CHECK_EQUAL(PacketType::BANT, sendPackets->at(1)->getLeft()->getType());
@@ -1002,6 +1002,29 @@ TEST(AbstractARAClientTest, rememberMultipleRoutes) {
     CHECK_TRUE(routeIsKnown(source, nodeB, interface));
 }
 
-TEST(AbstractARAClientTest, doNotRelayPacketIfTTLIsZero) {
-    FAIL("NOT IMPLEMENTED YET");
+TEST(AbstractARAClientTest, doNotRelayPacketIfTTLBecomesZero) {
+    // initial test setup
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+
+    AddressPtr source (new AddressMock("B"));
+    AddressPtr destination (new AddressMock("C"));
+    AddressPtr sender = source;
+    int ttl = 1; // only one last hop allowed
+    Packet* data = new Packet(source, destination, sender, PacketType::DATA, 1, ttl, "Hello World");
+    Packet* fant = new Packet(source, destination, sender, PacketType::FANT, 2, ttl);
+    Packet* bant = new Packet(source, destination, sender, PacketType::BANT, 3, ttl);
+
+    // create a route to the destination so the packet could theoretically be relayed
+    routingTable->update(destination, destination, interface, 10);
+
+    // start the test
+    client->receivePacket(data, interface);
+    BYTES_EQUAL(0, sentPackets->size());
+
+    client->receivePacket(fant, interface);
+    BYTES_EQUAL(0, sentPackets->size());
+
+    client->receivePacket(bant, interface);
+    BYTES_EQUAL(0, sentPackets->size());
 }

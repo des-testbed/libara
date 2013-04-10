@@ -130,25 +130,30 @@ unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
-    if(routingTable->isDeliverable(packet)) {
-        NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
-        NetworkInterface* interface = nextHop->getInterface();
-        AddressPtr nextHopAddress = nextHop->getAddress();
-        packet->setSender(interface->getLocalAddress());
+    if(packet->getTTL() > 0) {
+        if(routingTable->isDeliverable(packet)) {
+            NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
+            NetworkInterface* interface = nextHop->getInterface();
+            AddressPtr nextHopAddress = nextHop->getAddress();
+            packet->setSender(interface->getLocalAddress());
 
-        logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
-        reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
+            logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
+            reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
 
-        interface->send(packet, nextHopAddress);
-    } else {
-        logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
-        packetTrap->trapPacket(packet);
+            interface->send(packet, nextHopAddress);
+        } else {
+            logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
+            packetTrap->trapPacket(packet);
 
-        unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packetFactory->makeFANT(packet, sequenceNr, maxHopCount);
-        broadCast(fant);
+            unsigned int sequenceNr = getNextSequenceNumber();
+            Packet* fant = packetFactory->makeFANT(packet, sequenceNr, maxHopCount);
+            broadCast(fant);
 
-        startRouteDiscoveryTimer(packet);
+            startRouteDiscoveryTimer(packet);
+        }
+    }
+    else {
+        delete packet;
     }
 }
 
@@ -181,7 +186,6 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
     packet->decreaseTTL();
-    //TODO process TTL
     updateRoutingTable(packet, interface);
 
     if(hasBeenReceivedEarlier(packet)) {
@@ -249,15 +253,18 @@ void AbstractARAClient::handleDataPacket(Packet* packet) {
 }
 
 void AbstractARAClient::handleAntPacket(Packet* packet) {
-    if(hasBeenSentByThisNode(packet) == false) {
+    if (hasBeenSentByThisNode(packet)) {
+        // do not process ant packets we have sent ourselves
+        delete packet;
+        return;
+    }
 
-        if(isDirectedToThisNode(packet) == false) {
-            logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
-            broadCast(packet);
-        }
-        else {
-            handleAntPacketForThisNode(packet);
-        }
+    if (isDirectedToThisNode(packet)) {
+        handleAntPacketForThisNode(packet);
+    }
+    else if (packet->getTTL() > 0) {
+        logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
+        broadCast(packet);
     }
     else {
         delete packet;
