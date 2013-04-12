@@ -93,17 +93,17 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
     }
 }
 
-std::deque<RoutingTableEntry*>* RoutingTable::getPossibleNextHops(AddressPtr destination) {
+std::deque<RoutingTableEntry*> RoutingTable::getPossibleNextHops(AddressPtr destination) {
     if(isDeliverable(destination)) {
-        // FIXME this should return a copy of this list (to avoid that entries in this list are accidentally removed from or added)
-        return table[destination];
+        return *(table[destination]);
     }
     else {
-        return new std::deque<RoutingTableEntry*>();
+        // return empty list
+        return std::deque<RoutingTableEntry*>();
     }
 }
 
-std::deque<RoutingTableEntry*>* RoutingTable::getPossibleNextHops(const Packet* packet) {
+std::deque<RoutingTableEntry*> RoutingTable::getPossibleNextHops(const Packet* packet) {
     triggerEvaporation();
     return getPossibleNextHops(packet->getDestination());
 }

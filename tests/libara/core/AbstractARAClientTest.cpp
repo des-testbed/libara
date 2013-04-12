@@ -45,13 +45,12 @@ TEST_GROUP(AbstractARAClientTest) {
      * Returns true iff a route to destination via nextHop and interface is known in the RoutingTable.
      */
     bool routeIsKnown(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-        std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(destination);
-        if(possibleNextHops->empty()) {
-            delete possibleNextHops;
+        std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
+        if(possibleNextHops.empty()) {
             return false;
         }
         else {
-            for(auto& possibleHop: *possibleNextHops) {
+            for(auto& possibleHop: possibleNextHops) {
                 if(possibleHop->getAddress()->equals(nextHop) && possibleHop->getNetworkInterface()->equals(interface)) {
                     return true;
                 }
@@ -302,10 +301,10 @@ TEST(AbstractARAClientTest, routingTableIsUpdated) {
     CHECK(routingTable->isDeliverable(nodeA) == false);
     client->receivePacket(packet, interface);
     CHECK(routingTable->isDeliverable(nodeA) == true);
-    std::deque<RoutingTableEntry*>* possibleHops = routingTable->getPossibleNextHops(nodeA);
-    LONGS_EQUAL(1, possibleHops->size());
-    CHECK(possibleHops->front()->getAddress()->equals(nodeC));
-    CHECK(possibleHops->front()->getNetworkInterface()->equals(interface));
+    std::deque<RoutingTableEntry*> possibleHops = routingTable->getPossibleNextHops(nodeA);
+    LONGS_EQUAL(1, possibleHops.size());
+    CHECK(possibleHops.front()->getAddress()->equals(nodeC));
+    CHECK(possibleHops.front()->getNetworkInterface()->equals(interface));
 }
 
 /**
@@ -1085,11 +1084,4 @@ TEST(AbstractARAClientTest, initialzePheromoneValue) {
 
     client->receivePacket(fant4, interface);
     DOUBLES_EQUAL(1 * (ttl4-1) + initialPhi, routingTable->getPheromoneValue(source, route4, interface), 0.000001);
-}
-
-/**
- * TODO
- */
-TEST(AbstractARAClientTest, loopPreventionInRouteDiscovery) {
-
 }

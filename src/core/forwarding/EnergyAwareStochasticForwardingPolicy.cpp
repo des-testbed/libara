@@ -11,8 +11,8 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet *packet,
     try {
         EnergyAwareRoutingTable* energyAwareRoutingTable = static_cast<EnergyAwareRoutingTable*>(routingTable);
 
-        std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(packet);
-        unsigned int nrOfPossibleNextHops = possibleNextHops->size();
+        std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
+        unsigned int nrOfPossibleNextHops = possibleNextHops.size();
 
         float sum = 0.0;
 
@@ -23,7 +23,7 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet *packet,
         float energyValues[nrOfPossibleNextHops];
 
         for(unsigned int i = 0; i < nrOfPossibleNextHops; i++){
-            RoutingTableEntry* entry = possibleNextHops->at(i);
+            RoutingTableEntry* entry = possibleNextHops.at(i);
             pheromoneValues[i] = entry->getPheromoneValue();
             energyValues[i] = energyAwareRoutingTable->getEnergyValueOf(entry->getAddress()); //FIXME what if we do not have any energy information for this node
             sum += (pow(pheromoneValues[i], alpha) * pow(energyValues[i], beta));
@@ -42,7 +42,7 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet *packet,
             nodeIndex += 1;
         }
 
-        NextHop* result = possibleNextHops->at(nodeIndex)->getNextHop();
+        NextHop* result = possibleNextHops.at(nodeIndex)->getNextHop();
         //FIXME possibleNextHops muss noch gelöscht werden!
         return result;
     } catch (std::bad_cast& exp) {

@@ -94,3 +94,22 @@ TEST(StochasticForwardingPolicyTest, stochasticBehaviour) {
     CHECK(nrOfTimesRoute3IsChosen > (nrOfIterations*0.1 - allowedDeviation));
     CHECK(nrOfTimesRoute3IsChosen < (nrOfIterations*0.1 + allowedDeviation));
 }
+
+TEST(StochasticForwardingPolicyTest, neverChooseTheSenderOfAPacket) {
+    PacketMock packet = PacketMock();
+    AddressPtr route1 (new AddressMock("A"));
+    AddressPtr route2 (new AddressMock("B"));
+    AddressPtr route3 (new AddressMock("C"));
+
+    routingTable->update(packet.getDestination(), route1, interface, 3.0);
+    routingTable->update(packet.getDestination(), route2, interface, 6.0);
+    routingTable->update(packet.getDestination(), packet.getSender(), interface, 5.0);
+
+    int nrOfIterations = 100;
+
+    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock();
+    for (int i = 0; i < nrOfIterations; i++) {
+        NextHop* nextHop = policy.getNextHop(&packet, routingTable);
+        CHECK(nextHop->getAddress()->equals(packet.getSender()) == false);
+    }
+}

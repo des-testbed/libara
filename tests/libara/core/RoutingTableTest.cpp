@@ -38,10 +38,8 @@ TEST_GROUP(RoutingTableTest) {
 TEST(RoutingTableTest, getPossibleNextHopsReturnsEmptyList) {
     AddressPtr destination (new AddressMock());
 
-    std::deque<RoutingTableEntry*>* list = routingTable->getPossibleNextHops(destination);
-    CHECK(list->empty());
-
-    delete list;
+    std::deque<RoutingTableEntry*> list = routingTable->getPossibleNextHops(destination);
+    CHECK(list.empty());
 }
 
 TEST(RoutingTableTest, unregisteredAddressIsNotDeliverable) {
@@ -67,9 +65,9 @@ TEST(RoutingTableTest, updateRoutingTable) {
     routingTable->update(destination, nextHop, &interface, pheromoneValue);
 
     CHECK(routingTable->isDeliverable(&packet));
-    std::deque<RoutingTableEntry*>* nextHops = routingTable->getPossibleNextHops(&packet);
-    CHECK(nextHops->size() == 1);
-    RoutingTableEntry* possibleHop = nextHops->front();
+    std::deque<RoutingTableEntry*> nextHops = routingTable->getPossibleNextHops(&packet);
+    CHECK(nextHops.size() == 1);
+    RoutingTableEntry* possibleHop = nextHops.front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
@@ -86,9 +84,9 @@ TEST(RoutingTableTest, overwriteExistingEntryWithUpdate) {
     routingTable->update(destination, nextHop, &interface, pheromoneValue);
 
     CHECK(routingTable->isDeliverable(&packet));
-    std::deque<RoutingTableEntry*>* nextHops = routingTable->getPossibleNextHops(&packet);
-    BYTES_EQUAL(1, nextHops->size());
-    RoutingTableEntry* possibleHop = nextHops->front();
+    std::deque<RoutingTableEntry*> nextHops = routingTable->getPossibleNextHops(&packet);
+    BYTES_EQUAL(1, nextHops.size());
+    RoutingTableEntry* possibleHop = nextHops.front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
@@ -96,8 +94,8 @@ TEST(RoutingTableTest, overwriteExistingEntryWithUpdate) {
     // now we want to update the pheromone value of this route
     routingTable->update(destination, nextHop, &interface, 42);
     nextHops = routingTable->getPossibleNextHops(&packet);
-    BYTES_EQUAL(1, nextHops->size());
-    possibleHop = nextHops->front();
+    BYTES_EQUAL(1, nextHops.size());
+    possibleHop = nextHops.front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(42, possibleHop->getPheromoneValue());
@@ -130,10 +128,10 @@ TEST(RoutingTableTest, getPossibleNextHops) {
     routingTable->update(destination2, nextHop3, &interface3, pheromoneValue3);
     routingTable->update(destination2, nextHop4, &interface1, pheromoneValue4);
 
-    std::deque<RoutingTableEntry*>* nextHopsForDestination1 = routingTable->getPossibleNextHops(destination1);
-    BYTES_EQUAL(3, nextHopsForDestination1->size());
-    for (unsigned int i = 0; i < nextHopsForDestination1->size(); i++) {
-        RoutingTableEntry* possibleHop = nextHopsForDestination1->at(i);
+    std::deque<RoutingTableEntry*> nextHopsForDestination1 = routingTable->getPossibleNextHops(destination1);
+    BYTES_EQUAL(3, nextHopsForDestination1.size());
+    for (unsigned int i = 0; i < nextHopsForDestination1.size(); i++) {
+        RoutingTableEntry* possibleHop = nextHopsForDestination1.at(i);
         AddressPtr hopAddress = possibleHop->getAddress();
         if(hopAddress->equals(nextHop1a)) {
             CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
@@ -152,10 +150,10 @@ TEST(RoutingTableTest, getPossibleNextHops) {
         }
     }
 
-    std::deque<RoutingTableEntry*>* nextHopsForDestination2 = routingTable->getPossibleNextHops(destination2);
-    BYTES_EQUAL(2, nextHopsForDestination2->size());
-    for (unsigned int i = 0; i < nextHopsForDestination2->size(); i++) {
-        RoutingTableEntry* possibleHop = nextHopsForDestination2->at(i);
+    std::deque<RoutingTableEntry*> nextHopsForDestination2 = routingTable->getPossibleNextHops(destination2);
+    BYTES_EQUAL(2, nextHopsForDestination2.size());
+    for (unsigned int i = 0; i < nextHopsForDestination2.size(); i++) {
+        RoutingTableEntry* possibleHop = nextHopsForDestination2.at(i);
         AddressPtr hopAddress = possibleHop->getAddress();
         if(hopAddress->equals(nextHop3)) {
             CHECK_EQUAL(&interface3, possibleHop->getNetworkInterface());
@@ -200,8 +198,8 @@ TEST(RoutingTableTest, removeEntry) {
     // start the test
     routingTable->removeEntry(destination, nodeB, &interface);
 
-    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(destination);
-    for(auto& entry: *possibleNextHops) {
+    std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
+    for(auto& entry: possibleNextHops) {
         if(entry->getAddress()->equals(nodeB)) {
             FAIL("The deleted hop should not longer be in the list of possible next hops");
         }

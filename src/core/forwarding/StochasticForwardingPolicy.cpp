@@ -3,27 +3,36 @@
  */
 
 #include "StochasticForwardingPolicy.h"
-
+#include "Exception.h"
 
 using namespace ARA;
 
-// todo: add exception for "no hop available", are not yet interfaces are not yet considered
 NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet, RoutingTable* routingTable) {
-    std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(packet);
-    unsigned int nrOfPossibleNextHops = possibleNextHops->size();
+    std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
+    if(possibleNextHops.empty()) {
+        throw Exception("Could not determine next hop: there are no known routes to the destination");
+    }
 
-    float sumOfPheromoneValues = .0;
+    // check if the sender is among the possible next hops and remove it
+    for (std::deque<RoutingTableEntry*>::iterator entry = possibleNextHops.begin(); entry != possibleNextHops.end(); entry++) {
+        if ((*entry)->getAddress()->equals(packet->getSender())) {
+            possibleNextHops.erase(entry);
+            break;
+        }
+    }
+
+    unsigned int nrOfPossibleNextHops = possibleNextHops.size();
     float cumulativeSum[nrOfPossibleNextHops];
     float probabilities[nrOfPossibleNextHops];
     float pheromoneValues[nrOfPossibleNextHops];
 
-    // create the sumOfPheromoneValues of pheromone values
+    float sumOfPheromoneValues = 0;
     for(unsigned int i = 0; i < nrOfPossibleNextHops; i++){
-        pheromoneValues[i] = possibleNextHops->at(i)->getPheromoneValue();
+        pheromoneValues[i] = possibleNextHops.at(i)->getPheromoneValue();
         sumOfPheromoneValues += pheromoneValues[i];
     }
 
-    // determine the probabilities
+    // calculate the probabilities
     for(unsigned int i = 0; i < nrOfPossibleNextHops; i++){
         probabilities[i] = pheromoneValues[i] / sumOfPheromoneValues;
     }
@@ -40,17 +49,15 @@ NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet, RoutingTab
         nodeIndex += 1;
     }
 
-    NextHop* result = possibleNextHops->at(nodeIndex)->getNextHop();
-    //FIXME possibleNextHops muss noch gelöscht werden!
+    NextHop* result = possibleNextHops.at(nodeIndex)->getNextHop();
     return result;
 }
 
-void StochasticForwardingPolicy::initializeRandomNumberGenerator(unsigned int seed){
-    //srand((unsigned)time(0));
+void StochasticForwardingPolicy::initializeRandomNumberGenerator(unsigned int seed) {
     srand(seed);
 }
 
-float StochasticForwardingPolicy::getRandomNumber(){
+float StochasticForwardingPolicy::getRandomNumber() {
     // not sure if this really works
-    return ((float)rand()/(float)RAND_MAX);
+    return (float)rand() / (float)RAND_MAX;
 }

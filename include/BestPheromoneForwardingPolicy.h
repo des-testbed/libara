@@ -15,6 +15,10 @@ ARA_NAMESPACE_BEGIN
 
 class BestPheromoneForwardingPolicy : public ForwardingPolicy {
     public:
+        /**
+         * Returns the next hop with the highest corresponding pheromone
+         * value but never the sender of the given packet.
+         */
         NextHop* getNextHop(const Packet*, RoutingTable* routingTable);
 };
 

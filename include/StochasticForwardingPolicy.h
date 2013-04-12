@@ -16,6 +16,10 @@
 namespace ARA {
     class StochasticForwardingPolicy : public ForwardingPolicy {
         public:
+            /**
+             * Stochastically selects the next hop according to their pheromone value
+             * but never the sender of the given packet.
+             */
             NextHop* getNextHop(const Packet*, RoutingTable* routingTable);
 
         protected:

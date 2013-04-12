@@ -32,8 +32,8 @@ public:
     void update(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface, float pheromoneValue);
 
     void removeEntry(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
-    std::deque<RoutingTableEntry*>* getPossibleNextHops(std::shared_ptr<Address> destination);
-    std::deque<RoutingTableEntry*>* getPossibleNextHops(const Packet* packet);
+    std::deque<RoutingTableEntry*> getPossibleNextHops(std::shared_ptr<Address> destination);
+    std::deque<RoutingTableEntry*> getPossibleNextHops(const Packet* packet);
     bool isDeliverable(std::shared_ptr<Address> destination);
 
     /**
