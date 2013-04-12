@@ -3,25 +3,36 @@
  */
 
 #include "BestPheromoneForwardingPolicy.h"
+#include "Exception.h"
 
 #include <deque>
 
 using namespace ARA;
 
-// todo: add exception for "no hop available", are not yet interfaces are not yet considered
-NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet, RoutingTable* routingTable){
+NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet, RoutingTable* routingTable) {
     std::deque<RoutingTableEntry*>* possibleNextHops = routingTable->getPossibleNextHops(packet);
+    AddressPtr sender = packet->getSender();
 
-    RoutingTableEntry* bestEntry = NULL;
+    RoutingTableEntry* bestEntry = nullptr;
     float globalMaximum = 0;
     for(auto& possibleNextHop: *possibleNextHops) {
-        if(possibleNextHop->getPheromoneValue() > globalMaximum) {
-            bestEntry = possibleNextHop;
-            globalMaximum = bestEntry->getPheromoneValue();
+        if(possibleNextHop->getAddress()->equals(sender)== false) {
+            if(possibleNextHop->getPheromoneValue() > globalMaximum) {
+                bestEntry = possibleNextHop;
+                globalMaximum = bestEntry->getPheromoneValue();
+            }
         }
     }
 
-    NextHop* result = bestEntry->getNextHop();
-    //FIXME possibleNextHops muss noch gelöscht werden!
-    return result;
+    if(bestEntry == nullptr) {
+        if(possibleNextHops->empty()) {
+            throw new Exception("Could not determine next hop: there are no known routes to the destination");
+        }
+        else {
+            throw new Exception("Could not determine next hop: only possible route to destination leads back to the sender");
+        }
+    }
+    else {
+        return bestEntry->getNextHop();
+    }
 }

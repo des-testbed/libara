@@ -21,31 +21,60 @@ using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-TEST_GROUP(BestPheromoneForwardingPolicyTest) {};
+TEST_GROUP(BestPheromoneForwardingPolicyTest) {
+    BestPheromoneForwardingPolicy* policy;
+    EvaporationPolicy* evaporationPolicy;
+    RoutingTable* routingTable;
+    NetworkInterfaceMock* interface;
+
+    void setup() {
+        policy = new BestPheromoneForwardingPolicy();
+        evaporationPolicy = new ExponentialEvaporationPolicyMock();
+        routingTable = new RoutingTable();
+        routingTable->setEvaporationPolicy(evaporationPolicy);
+        interface = new NetworkInterfaceMock();
+    }
+
+    void teardown() {
+        delete routingTable;
+        delete evaporationPolicy;
+        delete policy;
+        delete interface;
+    }
+};
 
 TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
-    EvaporationPolicy* evaporationPolicy = new ExponentialEvaporationPolicyMock();
-    RoutingTable routingTable = RoutingTable();
-    routingTable.setEvaporationPolicy(evaporationPolicy);
-    AddressPtr destination (new AddressMock("Destination"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
-
-    // create multiple next hops
-    AddressPtr nextHopA (new AddressMock("nextHopA"));
-    AddressPtr nextHopB (new AddressMock("nextHopB"));
-    AddressPtr nextHopC (new AddressMock("nextHopC"));
-
     PacketMock packet = PacketMock();
+    AddressPtr route1 (new AddressMock("A"));
+    AddressPtr route2 (new AddressMock("B"));
+    AddressPtr route3 (new AddressMock("C"));
 
     // start the test
-    routingTable.update(destination, nextHopA, &interface, 1.2);
-    routingTable.update(destination, nextHopB, &interface, 2.1);
-    routingTable.update(destination, nextHopC, &interface, 2.3);
+    routingTable->update(packet.getDestination(), route1, interface, 1.2);
+    routingTable->update(packet.getDestination(), route2, interface, 2.1);
+    routingTable->update(packet.getDestination(), route3, interface, 2.3);
     
-    BestPheromoneForwardingPolicy policy = BestPheromoneForwardingPolicy();
-    NextHop* node = policy.getNextHop(&packet, &routingTable);
+    NextHop* nextHop = policy->getNextHop(&packet, routingTable);
 
     // check if the chosen node matches the node with the highest pheromone value
-    CHECK(nextHopC->equals(node->getAddress()));
-    delete evaporationPolicy;
+    CHECK(nextHop->getAddress()->equals(route3));
+    CHECK(nextHop->getInterface()->equals(interface));
+}
+
+TEST(BestPheromoneForwardingPolicyTest, neverChooseTheSenderOfAPacket) {
+    PacketMock packet = PacketMock();
+    AddressPtr route1 (new AddressMock("A"));
+    AddressPtr route2 (new AddressMock("C"));
+    AddressPtr route3 = packet.getSender();
+
+    // start the test
+    routingTable->update(packet.getDestination(), route1, interface, 1.2);
+    routingTable->update(packet.getDestination(), route2, interface, 2.1);
+    routingTable->update(packet.getDestination(), route3, interface, 3.0);
+
+    NextHop* nextHop = policy->getNextHop(&packet, routingTable);
+
+    // check if the chosen node matches the node with the highest pheromone value
+    CHECK(nextHop->getAddress()->equals(route2));
+    CHECK(nextHop->getInterface()->equals(interface));
 }
