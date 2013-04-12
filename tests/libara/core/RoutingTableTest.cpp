@@ -333,3 +333,17 @@ TEST(RoutingTableTest, isNewRoute) {
     CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == true);
     CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == true);
 }
+
+/**
+ * In this test we check that RoutingTable::isDeliverable(Packet packet)
+ * returns false if the only known route do a packet.destination leads
+ * over the packet.sender.
+ *
+ */
+TEST(RoutingTableTest, packetIsNotDeliverableIfOnlyRouteLeadsBackToTheSender) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    PacketMock packet = PacketMock();
+    routingTable->update(packet.getDestination(), packet.getSender(), &interface, 10.0);
+
+    CHECK_FALSE(routingTable->isDeliverable(&packet));
+}

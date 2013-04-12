@@ -114,7 +114,22 @@ bool RoutingTable::isDeliverable(AddressPtr destination) {
 }
 
 bool RoutingTable::isDeliverable(const Packet* packet) {
-    return isDeliverable(packet->getDestination());
+    AddressPtr destination = packet->getDestination();
+    if(isDeliverable(destination)) {
+        std::deque<RoutingTableEntry*>* entries = table[destination];
+        if(entries->size() > 1) {
+            // more than one route
+            return true;
+        }
+        else {
+            // check if the only available route leads to where we've got the packets from
+            AddressPtr availableAddress = entries->front()->getAddress();
+            return availableAddress->equals(packet->getSender()) == false;
+        }
+    }
+    else {
+        return false;
+    }
 }
 
 float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {

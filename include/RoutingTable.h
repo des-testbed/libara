@@ -35,6 +35,11 @@ public:
     std::deque<RoutingTableEntry*>* getPossibleNextHops(std::shared_ptr<Address> destination);
     std::deque<RoutingTableEntry*>* getPossibleNextHops(const Packet* packet);
     bool isDeliverable(std::shared_ptr<Address> destination);
+
+    /**
+     * Checks if a route to the packet destination exists, that does *not* lead
+     * over the packets sender.
+     */
     bool isDeliverable(const Packet* packet);
 
     /**
