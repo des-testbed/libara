@@ -29,11 +29,14 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         ARA();
         ~ARA();
 
+        static simsignal_t PACKET_DELIVERED_SIGNAL;
+        static simsignal_t PACKET_NOT_DELIVERED_SIGNAL;
+        static simsignal_t ARA_LOOP_DETECTION_SIGNAL;
+
     protected:
         virtual int numInitStages() const;
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
-        virtual void finish();
 
         /**
          * The packet should be directed to this node and must be delivered to the local system.
@@ -54,6 +57,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress);
 
     private:
+        int nrOfDeliverablePackets = 0;
         int nrOfNotDeliverablePackets = 0;
         int nrOfDetectedLoops = 0;
         MessageDispatcher* messageDispatcher;
