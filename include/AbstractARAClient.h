@@ -246,7 +246,9 @@ protected:
     void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
+    void startNewRouteDiscovery(const Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
+    void sendFANT(AddressPtr destination);
     bool isRouteDiscoveryRunning(AddressPtr destination);
     void stopRouteDiscoveryTimer(AddressPtr destination);
     void sendDeliverablePackets(const Packet* packet);

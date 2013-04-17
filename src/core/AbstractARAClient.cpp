@@ -133,26 +133,23 @@ PacketFactory* AbstractARAClient::getPacketFactory() const{
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
-    if(packet->getTTL() > 0) {
-        if(routingTable->isDeliverable(packet)) {
+    if (packet->getTTL() > 0) {
+        AddressPtr destination = packet->getDestination();
+        if (routingTable->isDeliverable(packet)) {
             NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
             packet->setSender(interface->getLocalAddress());
 
             logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
-            reinforcePheromoneValue(packet->getDestination(), nextHopAddress, interface);
+            reinforcePheromoneValue(destination, nextHopAddress, interface);
 
             interface->send(packet, nextHopAddress);
         } else {
-            logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
             packetTrap->trapPacket(packet);
-
-            unsigned int sequenceNr = getNextSequenceNumber();
-            Packet* fant = packetFactory->makeFANT(packet, sequenceNr);
-            broadCast(fant);
-
-            startRouteDiscoveryTimer(packet);
+            if (isRouteDiscoveryRunning(destination) == false) {
+                startNewRouteDiscovery(packet);
+            }
         }
     }
     else {
@@ -166,21 +163,33 @@ void AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressP
     routingTable->update(destination, nextHop, interface, newPheromoneValue);
 }
 
-void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
-        AddressPtr destination = packet->getDestination();
-    if (isRouteDiscoveryRunning(destination) == false) {
-        Timer* timer = Environment::getClock()->getNewTimer();
-        timer->addTimeoutListener(this);
-        timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
+void AbstractARAClient::startNewRouteDiscovery(const Packet* packet) {
+    logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
+    startRouteDiscoveryTimer(packet);
+    sendFANT(packet->getDestination());
+}
 
-        RouteDiscoveryInfo discoveryInfo;
-        discoveryInfo.nrOfRetries = 0;
-        discoveryInfo.timer = timer;
-        discoveryInfo.originalPacket = packet;
+void AbstractARAClient::sendFANT(AddressPtr destination) {
+    unsigned int sequenceNr = getNextSequenceNumber();
 
-        runningRouteDiscoveries[destination] = timer;
-        runningRouteDiscoveryTimers[timer] = discoveryInfo;
+    for(auto& interface: interfaces) {
+        Packet* fant = packetFactory->makeFANT(interface->getLocalAddress(), destination, sequenceNr);
+        interface->broadcast(fant);
     }
+}
+
+void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
+    Timer* timer = Environment::getClock()->getNewTimer();
+    timer->addTimeoutListener(this);
+    timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
+
+    RouteDiscoveryInfo discoveryInfo;
+    discoveryInfo.nrOfRetries = 0;
+    discoveryInfo.timer = timer;
+    discoveryInfo.originalPacket = packet;
+
+    runningRouteDiscoveries[packet->getDestination()] = timer;
+    runningRouteDiscoveryTimers[timer] = discoveryInfo;
 }
 
 bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
@@ -423,9 +432,7 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
     if(discoveryInfo.nrOfRetries < maxNrOfRouteDiscoveryRetries) {
         discoveryInfo.nrOfRetries++;
         runningRouteDiscoveryTimers[routeDiscoveryTimer] = discoveryInfo;
-        unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* fant = packetFactory->makeFANT(discoveryInfo.originalPacket, sequenceNr);
-        broadCast(fant);
+        sendFANT(discoveryInfo.originalPacket->getDestination());
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
     else {

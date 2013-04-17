@@ -38,11 +38,11 @@ TEST(PacketFactoryTest, makeFANT) {
 
    Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload, strlen(payload));
    unsigned int newSequenceNumber = 242342;
-   Packet* fant = factory->makeFANT(&packet, newSequenceNumber);
+   Packet* fant = factory->makeFANT(source, destination, newSequenceNumber);
 
    CHECK(fant->getSource()->equals(source));
    CHECK(fant->getDestination()->equals(destination));
-   // The sender of a FANT will be determined when it is actually send by the ARA client
+   CHECK(fant->getSender()->equals(source));
    CHECK_EQUAL(PacketType::FANT, fant->getType());
    LONGS_EQUAL(newSequenceNumber, fant->getSequenceNumber());
    LONGS_EQUAL(maximumHopCount, fant->getTTL());

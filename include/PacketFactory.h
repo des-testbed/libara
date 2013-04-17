@@ -32,13 +32,12 @@ public:
     Packet* makeClone(const Packet* originalPacket);
 
     /**
-     * Creates a new FANT based on the given packet. The FANT inherits all the
-     * addresses of this packet.
+     * Creates a new FANT based on the given addresses and sequence number.
      *
      * Note: The result of this method is a newly created object which must be
      * deleted later by the calling class.
      */
-    Packet* makeFANT(const Packet* originalPacket, unsigned int newSequenceNumber);
+    Packet* makeFANT(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber);
 
     /**
      * Creates a new BANT based on the given packet. This BANT has the destination of
