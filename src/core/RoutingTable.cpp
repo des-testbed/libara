@@ -4,6 +4,7 @@
 
 #include "RoutingTable.h"
 #include "Environment.h"
+#include "Exception.h"
 #include <utility>
 
 ARA_NAMESPACE_BEGIN
@@ -205,8 +206,38 @@ void RoutingTable::setEvaporationPolicy(EvaporationPolicy* policy) {
     this->evaporationPolicy = policy;
 }
 
-EvaporationPolicy *RoutingTable::getEvaporationPolicy() const{
+EvaporationPolicy* RoutingTable::getEvaporationPolicy() const{
     return this->evaporationPolicy;
+}
+
+unsigned int RoutingTable::getTotalNumberOfEntries() const {
+    unsigned int tableSize = 0;
+    std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::const_iterator iterator;
+    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+        RoutingTableEntryList entryList = iterator->second;
+        tableSize += entryList->size();
+    }
+    return tableSize;
+}
+
+RoutingTableEntry* RoutingTable::getEntryAt(int wantedPosition) const {
+    int currentPosition = 0;
+    std::unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>::const_iterator iterator;
+    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+        AddressPtr address = iterator->first;
+        RoutingTableEntryList entryList = iterator->second;
+        for (auto& entry: *entryList) {
+
+            if(currentPosition == wantedPosition) {
+                return entry;
+            }
+            else {
+                currentPosition++;
+            }
+        }
+    }
+
+    throw Exception("RoutingTable::getEntryAt: Index out of bounds");
 }
 
 ARA_NAMESPACE_END

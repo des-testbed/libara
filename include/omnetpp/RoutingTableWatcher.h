@@ -6,23 +6,13 @@
 #define __ROUTINGTABLE_WATCH_H
 
 #include "OMNeTARAMacros.h"
-#include "RoutingTableEntry.h"
-
-#include "cwatch.h"
-#include "cstlwatch.h" 
-#include "cownedobject.h"
-
-#include <deque>
-#include <unordered_map>
-#include "Address.h" 
+#include "RoutingTable.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
-#define RoutingTableEntryList std::deque<RoutingTableEntry*>*
-
 class RoutingTableWatcher : public cStdVectorWatcherBase {
     public:
-        RoutingTableWatcher(std::unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>& table);
+        RoutingTableWatcher(RoutingTable* table);
 
         const char* getClassName() const;
         virtual const char* getElemTypeName() const;
@@ -30,7 +20,7 @@ class RoutingTableWatcher : public cStdVectorWatcherBase {
         virtual std::string at(int i) const;
 
     protected:
-        std::unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>& table;
+        RoutingTable* table;
 };
 
 OMNETARA_NAMESPACE_END

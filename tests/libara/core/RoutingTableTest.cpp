@@ -345,3 +345,25 @@ TEST(RoutingTableTest, packetIsNotDeliverableIfOnlyRouteLeadsBackToTheSender) {
 
     CHECK_FALSE(routingTable->isDeliverable(&packet));
 }
+
+TEST(RoutingTableTest, getTotalNumberOfEntries) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+
+    // empty at the beginning
+    BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
+
+    // one known route to A
+    routingTable->update(nodeA, nodeB, &interface, 10);
+    BYTES_EQUAL(1, routingTable->getTotalNumberOfEntries());
+
+    // two known routes to A
+    routingTable->update(nodeA, nodeC, &interface, 20);
+    BYTES_EQUAL(2, routingTable->getTotalNumberOfEntries());
+
+    // and another route to B
+    routingTable->update(nodeB, nodeC, &interface, 1.2);
+    BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
+}

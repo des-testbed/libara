@@ -23,15 +23,15 @@ import inet.world.radio.ChannelControl;
 network ManetTest
 {
     parameters:
-        double playgroundSizeX;
-        double playgroundSizeY;
+        double playgroundSizeX @unit(m);
+        double playgroundSizeY @unit(m);
         @display("b=297,203;bgb=758,337");
 
     submodules:
         clock: OMNeTClock {
             @display("p=78,161");
         }
-        
+
         channelControl: ChannelControl {
             parameters:
                 @display("p=78,36");
@@ -56,7 +56,7 @@ network ManetTest
         node3: NetworkNode {
             mobility.constraintAreaX = playgroundSizeX;
             mobility.constraintAreaY = playgroundSizeY;
-            @display("p=697,182");
+            @display("p=515,277");
         }
         node4: NetworkNode {
             mobility.constraintAreaX = playgroundSizeX;
@@ -66,7 +66,7 @@ network ManetTest
         node5: NetworkNode {
             mobility.constraintAreaX = playgroundSizeX;
             mobility.constraintAreaY = playgroundSizeY;
-            @display("p=496,267");
+            @display("p=698,161");
         }
 }
 

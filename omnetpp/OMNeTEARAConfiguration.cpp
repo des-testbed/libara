@@ -19,7 +19,7 @@ unsigned int OMNeTEARAConfiguration::getEnergyDisseminationTimeout() const {
 }
 
 EnergyAwareRoutingTable* OMNeTEARAConfiguration::getRoutingTable() {
-    EnergyAwareRoutingTable* routingTable = ModuleAccess<EnergyAwareRoutingTable>("araRoutingTable").get();
+    EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
     return routingTable;
 }

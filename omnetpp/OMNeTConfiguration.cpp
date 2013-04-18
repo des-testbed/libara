@@ -72,7 +72,7 @@ double OMNeTConfiguration::getUniCastDelay() {
 }
 
 RoutingTable* OMNeTConfiguration::getRoutingTable() {
-    RoutingTable* routingTable = ModuleAccess<RoutingTable>("araRoutingTable").get();
+    RoutingTable* routingTable = new RoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
     return routingTable;
 }

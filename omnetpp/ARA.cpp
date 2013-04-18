@@ -5,6 +5,7 @@
 #include "omnetpp/ARA.h"
 #include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/PacketFactory.h"
+#include "omnetpp/RoutingTableWatcher.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -38,6 +39,7 @@ void ARA::initialize(int stage) {
         AbstractARAClient::initialize(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
 
+        new RoutingTableWatcher(routingTable);
         WATCH(nrOfDeliverablePackets);
         WATCH(nrOfNotDeliverablePackets);
         WATCH(nrOfDetectedLoops);

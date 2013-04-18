@@ -21,6 +21,8 @@ ARA_NAMESPACE_BEGIN
 
 class RoutingTable {
 
+#define RoutingTableEntryList std::deque<RoutingTableEntry*>*
+
 public:
     RoutingTable();
     virtual ~RoutingTable();
@@ -51,13 +53,20 @@ public:
     void setEvaporationPolicy(EvaporationPolicy *policy);
     EvaporationPolicy *getEvaporationPolicy() const;
 
+    unsigned int getTotalNumberOfEntries() const;
+
+    /**
+     * This method is only used to display the routing table entries to the user.
+     */
+    RoutingTableEntry* getEntryAt(int wantedPosition) const;
+
 protected:
     bool hasTableBeenAccessedEarlier();
     void triggerEvaporation();
     virtual void updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTableEntry *newEntry);
     Time *lastAccessTime;
 
-    std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table;
+    std::unordered_map<std::shared_ptr<Address>, RoutingTableEntryList, AddressHash, AddressPredicate> table;
     /**
      * The memory management of the evaporationPolicy member is handled in class
      * ARA. Thus, there is no delete call to the evaporationPolicy member.

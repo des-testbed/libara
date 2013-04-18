@@ -6,10 +6,10 @@
 OMNETARA_NAMESPACE_BEGIN
 using namespace std;
 
-RoutingTableWatcher::RoutingTableWatcher(unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>& table) : cStdVectorWatcherBase("table"), table(table) {}
+RoutingTableWatcher::RoutingTableWatcher(RoutingTable* table) : cStdVectorWatcherBase("routingTable"), table(table) {}
 
 const char* RoutingTableWatcher::getClassName() const {
-    return "RoutingTableWatcher";
+    return "RoutingTable*";
 }
 
 const char* RoutingTableWatcher::getElemTypeName() const {
@@ -17,36 +17,16 @@ const char* RoutingTableWatcher::getElemTypeName() const {
 }
 
 int RoutingTableWatcher::size() const {
-    unsigned int tableSize = 0;
-    unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>::iterator iterator;
-    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-        RoutingTableEntryList entryList = iterator->second;
-        tableSize += entryList->size();
-    }
-    return tableSize;
+    return table->getTotalNumberOfEntries();
 }
 
 string RoutingTableWatcher::at(int wantedPosition) const {
     stringstream out;
 
-    int currentPosition = 0;
-    unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>::iterator iterator;
-    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-        AddressPtr address = iterator->first;
-        RoutingTableEntryList entryList = iterator->second;
-        for (auto& entry: *entryList) {
-
-            if(currentPosition == wantedPosition) {
-                out << "[destination] " << address.get()->toString() << " " << *(entry);
-                return out.str();
-            }
-            else {
-                currentPosition++;
-            }
-        }
-    }
-
-    return "Index out of bounds";
+    RoutingTableEntry* entry = table->getEntryAt(wantedPosition);
+    AddressPtr address = entry->getAddress();
+    out << "[destination] " << address.get()->toString() << " " << *(entry);
+    return out.str();
 }
 
 OMNETARA_NAMESPACE_END

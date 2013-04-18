@@ -16,7 +16,6 @@
 package ara;
 
 import ara.ARA;
-import ara.OMNeTRoutingTable;
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 
 import ara.evaporation.EvaporationPolicy;
@@ -38,7 +37,7 @@ module ARANetworkLayer
         string forwardingPolicyModel @enum("OMNeTStochasticForwardingPolicy","OMNeTEnergyAwareStochasticForwardingPolicy","OMNeTBestPheromoneForwardingPolicy") = default("OMNeTStochasticForwardingPolicy");
         string evaporationModel @enum("OMNeTExponentialEvaporationPolicy","OMNeTCubicEvaporationPolicy","OMNeTLinearEvaporationPolicy") = default("OMNeTExponentialEvaporationPolicy");
 
-        @display("i=ara.png;bgb=301,297");
+        @display("i=ara.png;bgb=301,241");
 
     gates:
         inout upperLayerGate;
@@ -49,35 +48,30 @@ module ARANetworkLayer
         ara: ARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=204,94");
+                @display("i=ara;p=204,72");
         }
 
-        araRoutingTable: OMNeTRoutingTable {
-            parameters:
-                @display("p=72,40;i=block/table");
-        }
-
-// FIXME
+        // FIXME
         forwardingPolicy: OMNeTStochasticForwardingPolicy {
-        //forwardingPolicy: <forwardingPolicyModel> like ForwardingPolicy if forwardingPolicyModel != "" {
+            //forwardingPolicy: <forwardingPolicyModel> like ForwardingPolicy if forwardingPolicyModel != "" {
             parameters:
-                @display("p=72,111");
+                @display("p=71,33");
         }
 
         reinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
             parameters:
-                @display("p=72,185");
+                @display("p=71,107");
         }
 
         evaporationPolicy: <evaporationModel> like EvaporationPolicy if evaporationModel != "" {
             parameters:
-                @display("p=72,254");
+                @display("p=71,176");
         }
 
         arp: ARP {
             parameters:
                 proxyARP = false;
-                @display("p=204,215;q=pendingQueue");
+                @display("p=204,160;q=pendingQueue");
             gates:
                 nicOut[nrOfNetworkInterfaces];
         }
