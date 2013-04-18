@@ -38,17 +38,13 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
-    // TODO somehow remove this ugly casting stuff
-    OMNeTPacket* originalPacket = (OMNeTPacket*) packet;
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) packetFactory->makeClone(originalPacket);
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet;
     OMNeTAddressPtr nextHopAddress = getNextHopAddress(recipient);
 
-    // Get the encapsulated packet (if any)
-    if(originalPacket->getEncapsulatedPacket()) {
-        cPacket* encapsulatedPacket = originalPacket->decapsulate();
-        omnetPacket->encapsulate(encapsulatedPacket);
-    }
+    // first remove the control info from the lower level (Ieee802Ctrl)
+    omnetPacket->removeControlInfo();
 
+    // then fill in the control info (our routing decision) for ARP
     IPv4RoutingDecision* controlInfo = new IPv4RoutingDecision();
     controlInfo->setNextHopAddr(*(nextHopAddress.get()));
     controlInfo->setInterfaceId(interfaceID);

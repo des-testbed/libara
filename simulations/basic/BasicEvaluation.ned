@@ -42,15 +42,15 @@ network BasicEvaluation
                 @display("p=78,97");
         }
 
-        node0: NetworkNode {
+        node1: NetworkNode {
             @display("p=330,161");
         }
 
-        node1: NetworkNode {
+        node2: NetworkNode {
             @display("p=475,161");
         }
 
-        node2: NetworkNode {
+        node3: NetworkNode {
             @display("p=600,161");
         }
 }
