@@ -74,4 +74,9 @@ void ARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
     handleRouteFailure(packet, receiverAddress, interface);
 }
 
+void ARA::timerHasExpired(Timer* responsibleTimer) {
+    bubble("Route Discovery expired");
+    AbstractARAClient::timerHasExpired(responsibleTimer);
+}
+
 OMNETARA_NAMESPACE_END

@@ -137,7 +137,7 @@ public:
 
     void setRoutingTable(RoutingTable *routingTable);
 
-    void timerHasExpired(Timer* responsibleTimer);
+    virtual void timerHasExpired(Timer* responsibleTimer);
 
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
