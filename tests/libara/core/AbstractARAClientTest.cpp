@@ -226,8 +226,8 @@ TEST(AbstractARAClientTest, loopDetection) {
     LONGS_EQUAL(1, interface->getNumberOfSentPackets());
 
     client->receivePacket(packet2, interface);
-    // the client should have sent a duplicate warning to C and the packet via B or C
-    LONGS_EQUAL(3, interface->getNumberOfSentPackets());
+    // the client should have sent a duplicate warning to C
+    LONGS_EQUAL(2, interface->getNumberOfSentPackets());
 
     // check the contents of the duplicate warning packet
     Pair<const Packet*, AddressPtr>* duplicateWarningPacketInfo = interface->getSentPackets()->at(1);
@@ -240,17 +240,6 @@ TEST(AbstractARAClientTest, loopDetection) {
     CHECK(duplicateWarning->getType() == PacketType::DUPLICATE_ERROR);
     LONGS_EQUAL(maxNrOfHops, duplicateWarning->getTTL());
     CHECK_EQUAL(0, duplicateWarning->getPayloadLength());
-
-    // check the relayed data packet
-    Pair<const Packet*, AddressPtr>* relayedPacketInfo = interface->getSentPackets()->at(2);
-    const Packet* relayedPacket = relayedPacketInfo->getLeft();
-    AddressPtr recipientOfRelayedPacket = relayedPacketInfo->getRight();
-    CHECK(recipientOfRelayedPacket->equals(nodeB) || recipientOfRelayedPacket->equals(nodeC));
-    CHECK(relayedPacket->getSender()->equals(interface->getLocalAddress()));
-    CHECK(relayedPacket->getSource()->equals(source));
-    CHECK(relayedPacket->getDestination()->equals(destination));
-    CHECK(relayedPacket->getType() == PacketType::DATA);
-    LONGS_EQUAL(6, relayedPacket->getTTL());
 }
 
 /**

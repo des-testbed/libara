@@ -212,13 +212,9 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
 void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* interface) {
     if(packet->isDataPacket()) {
         sendDuplicateWarning(packet, interface);
-        sendPacket(packet); // try to deliver the packet again (TTL will prevent infinite loops)
-        //FIXME sending the packet again to the next hop may easily result in another loop detection at the next hop
-        //      because the packet has been seen when it was relayed the first time :(
     }
-    else {
-        delete packet;
-    }
+
+    delete packet;
 }
 
 void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
