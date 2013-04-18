@@ -6,6 +6,6 @@ import ara.evaporation.EvaporationPolicy;
 simple OMNeTExponentialEvaporationPolicy like EvaporationPolicy
 {
     parameters:
-        double evaporationFactor = default(0.9);
-        double threshold = default(1000.0);
+        double evaporationFactor;
+        double threshold;
 }
