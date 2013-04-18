@@ -67,6 +67,7 @@ void OMNeTClock::cancelTimerEvents(unsigned int timerID) {
     std::unordered_map<unsigned int, cMessage*>::iterator pendingSelfMessage = pendingSelfMessages.find(timerID);
     if (pendingSelfMessage != pendingSelfMessages.end()) {
         cancelEvent(pendingSelfMessage->second);
+        delete pendingSelfMessage->second;
         pendingSelfMessages.erase(timerID);
     }
 }
