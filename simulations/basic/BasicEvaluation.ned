@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara.simulations;
+package ara.simulations.basic;
 
 import ara.NetworkNode;
 import ara.ARANetworkConfigurator;
@@ -23,9 +23,6 @@ import inet.world.radio.ChannelControl;
 network BasicEvaluation
 {
     parameters:
-        double playgroundSizeX;
-        double playgroundSizeY;
-        double playgroundSizeZ;
         @display("b=297,203;bgb=758,337");
 
     submodules:

@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara.simulations;
+package ara.simulations.basic;
 
 import ara.NetworkNode;
 import ara.ARANetworkConfigurator;
@@ -23,10 +23,7 @@ import inet.world.radio.ChannelControl;
 network ExtendedBasicEvaluation
 {
     parameters:
-        double playgroundSizeX;
-        double playgroundSizeY;
-        double playgroundSizeZ;
-        @display("b=297,203;bgb=758,337");
+        @display("b=297,203;bgb=924,337");
 
     submodules:
         clock: OMNeTClock {
@@ -45,24 +42,24 @@ network ExtendedBasicEvaluation
                 @display("p=78,97");
         }
 
-        node0: NetworkNode {
-            @display("p=330,161");
-        }
-
         node1: NetworkNode {
-            @display("p=475,161");
+            @display("p=189,161");
         }
 
         node2: NetworkNode {
-            @display("p=600,161");
+            @display("p=362,161");
         }
 
         node3: NetworkNode {
-            @display("p=745,161");
+            @display("p=504,161");
         }
 
         node4: NetworkNode {
-            @display("p=890,161");
+            @display("p=672,161");
+        }
+
+        node5: NetworkNode {
+            @display("p=833,161");
         }
 }
 
