@@ -99,7 +99,7 @@ protected:
       * This method is responsible for creating the actual packet instance.
       * It can be overridden if another other Packet class shall be used.
       */
-     virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
+     virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr penultimateHop=nullptr);
 
      int maxHopCount;
 };
