@@ -1074,3 +1074,40 @@ TEST(AbstractARAClientTest, initialzePheromoneValue) {
     client->receivePacket(fant4, interface);
     DOUBLES_EQUAL(1 * (ttl4-1) + initialPhi, routingTable->getPheromoneValue(source, route4, interface), 0.000001);
 }
+
+/**
+ * In this test we check that a client sets the address of the node from which
+ * it received a packet as penultimate hop for the relayed packet.
+ *
+ * We test as Node (C)
+ * 1.                    2.
+ *  (A)-->(B)--p-->(C)    (A)-->(B)-->(C)--p-->(D)
+ *        |                      |
+ *        └ sender               └ now this is the penultimate hop for node (D)
+ */
+TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
+    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeD (new AddressMock("D"));
+
+    // first test this with a FANT
+    Packet* fant = new Packet(nodeA, nodeD, nodeB, PacketType::FANT, 1, 10);
+    client->receivePacket(fant, interface);
+
+    // check the penultimate hop of the relayed packet
+    BYTES_EQUAL(1, sentPackets->size());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
+    const Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(nodeB->equals(sentPacket->getPenultimateHop()));
+
+    // the same should work if the route has been established and a DATA packet is relayed
+    Packet* data = new Packet(nodeD, nodeA, nodeD, PacketType::DATA, 2, 10);
+    client->receivePacket(data, interface);
+
+    BYTES_EQUAL(2, sentPackets->size());
+    sentPacketInfo = sentPackets->back();
+    sentPacket = sentPacketInfo->getLeft();
+    CHECK(nodeD->equals(sentPacket->getPenultimateHop()));
+}

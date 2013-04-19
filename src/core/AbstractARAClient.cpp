@@ -139,6 +139,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
+            packet->setPenultimateHop(packet->getSender());
             packet->setSender(interface->getLocalAddress());
 
             logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
@@ -354,6 +355,7 @@ bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
 void AbstractARAClient::broadCast(Packet* packet) {
     for(auto& interface: interfaces) {
         Packet* packetClone = packetFactory->makeClone(packet);
+        packetClone->setPenultimateHop(packet->getSender());
         packetClone->setSender(interface->getLocalAddress());
         interface->broadcast(packetClone);
     }
