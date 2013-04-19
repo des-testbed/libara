@@ -214,7 +214,7 @@ unsigned int RoutingTable::getTotalNumberOfEntries() const {
     unsigned int tableSize = 0;
     std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::const_iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-        RoutingTableEntryList entryList = iterator->second;
+        RoutingTableEntryList* entryList = iterator->second;
         tableSize += entryList->size();
     }
     return tableSize;
@@ -222,10 +222,10 @@ unsigned int RoutingTable::getTotalNumberOfEntries() const {
 
 RoutingTableEntry* RoutingTable::getEntryAt(int wantedPosition) const {
     int currentPosition = 0;
-    std::unordered_map<AddressPtr, RoutingTableEntryList, AddressHash, AddressPredicate>::const_iterator iterator;
+    std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::const_iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
         AddressPtr address = iterator->first;
-        RoutingTableEntryList entryList = iterator->second;
+        RoutingTableEntryList* entryList = iterator->second;
         for (auto& entry: *entryList) {
 
             if(currentPosition == wantedPosition) {
