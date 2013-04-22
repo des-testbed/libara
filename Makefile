@@ -32,7 +32,7 @@ test: all
 	@echo -e "\n~~~ BUILDING ALL TESTS ~~~~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runTests	
 	
-libaratest: arasource
+libaratest: libARA 
 	@echo -e "\n~~~ BUILDING LIB ARA TESTS ~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runLibAraTests NO_OMNET=TRUE
 
