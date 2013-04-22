@@ -43,6 +43,7 @@ TEST(PacketFactoryTest, makeFANT) {
    CHECK(fant->getSource()->equals(source));
    CHECK(fant->getDestination()->equals(destination));
    CHECK(fant->getSender()->equals(source));
+   CHECK(fant->getPenultimateHop() == nullptr);
    CHECK_EQUAL(PacketType::FANT, fant->getType());
    LONGS_EQUAL(newSequenceNumber, fant->getSequenceNumber());
    LONGS_EQUAL(maximumHopCount, fant->getTTL());
@@ -55,6 +56,7 @@ TEST(PacketFactoryTest, makeClone) {
    AddressPtr source (new AddressMock("source"));
    AddressPtr destination (new AddressMock("destination"));
    AddressPtr sender (new AddressMock("sender"));
+   AddressPtr penultimateHop (new AddressMock("penultimate"));
    char type = PacketType::DATA;
    unsigned int seqNr = 3;
    int ttl = 15;
@@ -62,11 +64,14 @@ TEST(PacketFactoryTest, makeClone) {
    unsigned int payloadSize = strlen(payload)+1; // don't forget the \0 byte for string termination
 
    Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
+   packet.setPenultimateHop(penultimateHop);
    Packet* clone = factory->makeClone(&packet);
 
    CHECK(clone->getSource()->equals(source));
    CHECK(clone->getDestination()->equals(destination));
    CHECK(clone->getSender()->equals(sender));
+   CHECK(clone->getPenultimateHop() != nullptr);
+   CHECK(clone->getPenultimateHop()->equals(penultimateHop));
    CHECK_EQUAL(type, clone->getType());
    CHECK_EQUAL(seqNr, clone->getSequenceNumber());
    LONGS_EQUAL(payloadSize, clone->getPayloadLength());
@@ -92,6 +97,7 @@ TEST(PacketFactoryTest, makeBANT) {
     CHECK(bant->getSource()->equals(originalDestination));
     CHECK(bant->getDestination()->equals(originalSource));
     // The sender of the BANT will be determined when it is actually send by the ARA client
+    CHECK(bant->getPenultimateHop() == nullptr);
     CHECK_EQUAL(PacketType::BANT, bant->getType());
     LONGS_EQUAL(newSequenceNumber, bant->getSequenceNumber());
     LONGS_EQUAL(maximumHopCount, bant->getTTL());
@@ -116,6 +122,7 @@ TEST(PacketFactoryTest, makeDulicateErrorPacket) {
     CHECK(duplicateWarning->getSource()->equals(senderOfDuplicateWarning));
     CHECK(duplicateWarning->getDestination()->equals(originalDestination));
     CHECK(duplicateWarning->getSender()->equals(senderOfDuplicateWarning));
+    CHECK(duplicateWarning->getPenultimateHop() == nullptr);
     CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
     CHECK_EQUAL(newSequenceNumber, duplicateWarning->getSequenceNumber());
     CHECK_EQUAL(maximumHopCount, duplicateWarning->getTTL());
@@ -138,6 +145,7 @@ TEST(PacketFactoryTest, makeAcknowledgmentPacket) {
     CHECK(ackPacket->getSource()->equals(originalSource));
     CHECK(ackPacket->getDestination()->equals(originalDestination));
     // The sender of the packet will be determined when it is actually send by the ARA client
+    CHECK(ackPacket->getPenultimateHop() == nullptr);
     CHECK_EQUAL(PacketType::ACK, ackPacket->getType());
     CHECK_EQUAL(originalseqenceNumber, ackPacket->getSequenceNumber());
     CHECK_EQUAL(maximumHopCount, ackPacket->getTTL());
@@ -160,6 +168,7 @@ TEST(PacketFactoryTest, makeRouteFailurePacket) {
     CHECK(routeFailurePacket->getSource()->equals(originalSource));
     CHECK(routeFailurePacket->getDestination()->equals(originalDestination));
     // The sender of the packet will be determined when it is actually send by the ARA client
+    CHECK(routeFailurePacket->getPenultimateHop() == nullptr);
     CHECK_EQUAL(PacketType::ROUTE_FAILURE, routeFailurePacket->getType());
     CHECK_EQUAL(originalseqenceNumber, routeFailurePacket->getSequenceNumber());
     CHECK_EQUAL(maximumHopCount, routeFailurePacket->getTTL());
@@ -177,6 +186,7 @@ TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
     CHECK(energyPacket->getSource()->equals(originalSource));
     CHECK(energyPacket->getSender()->equals(originalSource));
     // we do not need to check the destination field because it will be set to the broadcast address by the NIC
+    CHECK(energyPacket->getPenultimateHop() == nullptr);
 
     CHECK_EQUAL(PacketType::ENERGY_INFO, energyPacket->getType());
     CHECK_EQUAL(seqNr, energyPacket->getSequenceNumber());

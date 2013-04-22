@@ -31,6 +31,7 @@
 namespace ARA {
 
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
+typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
 
 //TODO fix the visibility: most of the methods should be protected instead of public
 //TODO fix the indent
@@ -253,6 +254,8 @@ protected:
     bool isRouteDiscoveryRunning(AddressPtr destination);
     void stopRouteDiscoveryTimer(AddressPtr destination);
     void sendDeliverablePackets(const Packet* packet);
+    void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
+    bool hasPenultimateNodeBeenSeenBefore(const Packet* packet);
 
 protected:
     std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
@@ -274,7 +277,15 @@ protected:
 private:
     Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
+
+    //TODO the knownIntermediateHops and lastReceivedPackets may be merged into a single hashmap
     LastReceivedPacketsMap lastReceivedPackets;
+
+    /**
+     * This hashmap records the seen hops to a specific destination. This includes direct neighbors as well as indirect
+     * nodes this client has learned from the penultimate packet field.
+     */
+    KnownIntermediateHopsMap knownIntermediateHops;
 };
 
 } /* namespace ARA */
