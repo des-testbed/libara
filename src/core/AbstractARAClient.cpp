@@ -232,29 +232,35 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
 }
 
 void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
-    if (hasBeenSentByThisNode(packet) == false && intermediateNodesHaveBeenSeenBefore(packet) == false) {
+    if (hasBeenSentByThisNode(packet) == false) {
         AddressPtr source = packet->getSource();
-        AddressPtr destination = packet->getDestination();
         AddressPtr sender = packet->getSender();
         if (routingTable->isNewRoute(source, sender, interface)) {
-            float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
-            routingTable->update(source, sender, interface, initialPheromoneValue);
+            createNewRouteFrom(packet, interface);
         }
         else {
-            reinforcePheromoneValue(source, packet->getSender(), interface);
+            reinforcePheromoneValue(source, sender, interface);
         }
     }
 }
 
-bool AbstractARAClient::intermediateNodesHaveBeenSeenBefore(const Packet* packet) {
+void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {
+    if(hasPenultimateNodeBeenSeenBefore(packet) == false) {
+        float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
+        routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
+    }
+}
+
+bool AbstractARAClient::hasPenultimateNodeBeenSeenBefore(const Packet* packet) {
     unordered_map<AddressPtr, unordered_set<AddressPtr>*>::const_iterator found = knownIntermediateHops.find(packet->getSource());
     if(found == knownIntermediateHops.end()) {
+        // we have never seen any packet for this source address
         return false;
     }
 
     unordered_set<AddressPtr>* listOfKnownNodes = found->second;
 
-    // have we seen the sender, or the penultimate hop for this source before?
+    // have we seen this sender, or the penultimate hop before?
     return listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end()
            || listOfKnownNodes->find(packet->getPenultimateHop()) != listOfKnownNodes->end();
 }

@@ -252,7 +252,8 @@ protected:
     bool isRouteDiscoveryRunning(AddressPtr destination);
     void stopRouteDiscoveryTimer(AddressPtr destination);
     void sendDeliverablePackets(const Packet* packet);
-    bool intermediateNodesHaveBeenSeenBefore(const Packet* packet);
+    void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
+    bool hasPenultimateNodeBeenSeenBefore(const Packet* packet);
 
 protected:
     std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;

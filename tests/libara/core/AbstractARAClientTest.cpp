@@ -808,10 +808,15 @@ TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
     CHECK(newPhi > currentPhi);
 }
 
+/**
+ * Test setup:                           | Description:
+ * (source)---(A)---(B*)---(C)---(dest)  |   * We test from the perspective of node B
+ *                                       |
+ */
 TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("B");
     AddressPtr source(new AddressMock("source"));
-    AddressPtr destination(new AddressMock("destination"));
+    AddressPtr destination(new AddressMock("dest"));
     AddressPtr nodeA(new AddressMock("A"));
     AddressPtr nodeC(new AddressMock("C"));
     int maxHopCount = 10;
@@ -820,30 +825,29 @@ TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
     CHECK(routeIsKnown(source, nodeA, interface) == false);
     CHECK(routeIsKnown(destination, nodeC, interface) == false);
 
-    // send FANT (source --> A --> _B_ --> C --> destination)
+    // receive FANT: (source)-->(A)-->(B*)-->(C)-->(dest)
     Packet* fant = new Packet(source, destination, nodeA, PacketType::FANT, 123, maxHopCount);
     client->receivePacket(fant, interface);
     CHECK(routeIsKnown(source, nodeA, interface));
 
-    // send BANT (source <-- A <-- _B_ <-- C <-- destination)
+    // receive BANT: (source)<--(A)<--(B*)<--(C)<--(dest)
     Packet* bant = new Packet(destination, source, nodeC, PacketType::BANT, 124, maxHopCount);
     client->receivePacket(bant, interface);
     CHECK(routeIsKnown(destination, nodeC, interface));
 
-    float oldPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
     float oldPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);
+    float oldPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
 
-    // send DATA (source --> A --> _B_ --> C --> destination)
-    CHECK(routingTable->isNewRoute(source, nodeA, interface) == false);
+    // receive DATA: (source)-->(A)-->(B*)-->(C)-->(dest)
     Packet* data = new Packet(source, destination, nodeA, PacketType::DATA, 125, maxHopCount);
     client->receivePacket(data, interface);
 
     // check if the reinforcement has worked on both sides of the route
-    float newPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
     float newPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);
+    float newPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
 
-    CHECK(newPhiToDest > oldPhiToDest);
     CHECK(newPhiToSrc > oldPhiToSrc);
+    CHECK(newPhiToDest > oldPhiToDest);
 
     // update the values so we can check the evaporation
     oldPhiToDest = newPhiToDest;
@@ -1127,25 +1131,26 @@ TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
  */
 TEST(AbstractARAClientTest, noRouteOverPenultimateHop) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
-    AddressPtr source (new AddressMock("d"));
+    AddressPtr nodeD (new AddressMock("d"));
     AddressPtr destination (new AddressMock("..."));
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
 
     // we test from the perspective of node C
-    CHECK(routingTable->isDeliverable(source) == false);
+    CHECK(routingTable->isDeliverable(nodeD) == false);
 
     // at first we receive the broadcast from A
-    Packet* fantFromA = new Packet(source, destination, nodeA, PacketType::FANT, 1, 10);
+    Packet* fantFromA = new Packet(nodeD, destination, nodeA, PacketType::FANT, 1, 10);
     client->receivePacket(fantFromA, interface);
 
     // this should have created a route to (d) via (A)
-    CHECK_TRUE(routeIsKnown(source, nodeA, interface));
+    CHECK_TRUE(routeIsKnown(nodeD, nodeA, interface));
 
     // now we receive the broadcast from (B)
-    Packet* fantFromB = new Packet(source, destination, nodeB, PacketType::FANT, 1, 9);
+    Packet* fantFromB = new Packet(nodeD, destination, nodeB, PacketType::FANT, 1, 9);
+    fantFromB->setPenultimateHop(nodeA);
     client->receivePacket(fantFromB, interface);
 
-    // this should *not* create the route (d) via (B)
-    CHECK_FALSE(routeIsKnown(source, nodeB, interface));
+    // this should *not* create the route to (d) via (B)
+    CHECK_FALSE(routeIsKnown(nodeD, nodeB, interface));
 }
