@@ -5,6 +5,7 @@
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "ARAMacros.h"
 #include "TimeoutEventListener.h"
 #include "Configuration.h"
 #include "Logger.h"
@@ -29,7 +30,7 @@
 
 namespace ARA {
 
-typedef std::shared_ptr<Address> AddressPtr;
+typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
 
 //TODO fix the visibility: most of the methods should be protected instead of public
 //TODO fix the indent
@@ -273,7 +274,7 @@ protected:
 private:
     Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
-    std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
+    LastReceivedPacketsMap lastReceivedPackets;
 };
 
 } /* namespace ARA */

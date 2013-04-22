@@ -42,7 +42,7 @@ AbstractARAClient::~AbstractARAClient() {
     }
 
     // delete the sequence number lists of the last received packets
-    unordered_map<AddressPtr, unordered_set<unsigned int>*>::iterator iterator1;
+    LastReceivedPacketsMap::iterator iterator1;
     for (iterator1=lastReceivedPackets.begin(); iterator1!=lastReceivedPackets.end(); iterator1++) {
         // the addresses are disposed of automatically by shared_ptr
         delete iterator1->second;
@@ -368,7 +368,7 @@ bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
     AddressPtr source = packet->getSource();
     unsigned int sequenceNumber = packet->getSequenceNumber();
 
-    unordered_map<AddressPtr, unordered_set<unsigned int>*>::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
+    LastReceivedPacketsMap::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
     if(receivedPacketSeqNumbersFromSource != lastReceivedPackets.end()) {
         unordered_set<unsigned int>* sequenceNumbers = receivedPacketSeqNumbersFromSource->second;
         unordered_set<unsigned int>::const_iterator got = sequenceNumbers->find(sequenceNumber);
@@ -381,7 +381,7 @@ bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 
 void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     AddressPtr source = packet->getSource();
-    unordered_map<AddressPtr, unordered_set<unsigned int>*>::const_iterator foundPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
+    LastReceivedPacketsMap::const_iterator foundPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
 
     unordered_set<unsigned int>* listOfSequenceNumbers;
     if(foundPacketSeqNumbersFromSource == lastReceivedPackets.end()) {
