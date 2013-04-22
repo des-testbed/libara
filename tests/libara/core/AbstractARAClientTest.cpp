@@ -1111,3 +1111,41 @@ TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
     sentPacket = sentPacketInfo->getLeft();
     CHECK(nodeD->equals(sentPacket->getPenultimateHop()));
 }
+
+/**
+ * In this test we want to check that a client does not record a route to a destination (d)
+ * if he already knows a route to (d) which goes over the same penultimate hop (A).
+ *
+ * Test setup:                   | Description:
+ * (d)<--(A)<--(B)<--(...)       |   * (B) and (C) know a route to (d) via (A) from a previous broadcast
+ *        |     |                |   * if either (B) or (C) broadcast a FANT, each of the other will receive it,
+ *        |     |                |     but should not create the route via the other.
+ *        └-<--(C)<--(...)       |   * this means, there shall not be the route (C)->(B)->(A)->(d) or
+ *                               |                                              (B)->(C)->(A)->(d)
+ *                               |   * the only allowed routes are:  (B)->(A)->(d) and
+ *                               |                                   (C)->(A)->(d)
+ */
+TEST(AbstractARAClientTest, noRouteOverPenultimateHop) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
+    AddressPtr source (new AddressMock("d"));
+    AddressPtr destination (new AddressMock("..."));
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+
+    // we test from the perspective of node C
+    CHECK(routingTable->isDeliverable(source) == false);
+
+    // at first we receive the broadcast from A
+    Packet* fantFromA = new Packet(source, destination, nodeA, PacketType::FANT, 1, 10);
+    client->receivePacket(fantFromA, interface);
+
+    // this should have created a route to (d) via (A)
+    CHECK_TRUE(routeIsKnown(source, nodeA, interface));
+
+    // now we receive the broadcast from (B)
+    Packet* fantFromB = new Packet(source, destination, nodeB, PacketType::FANT, 1, 9);
+    client->receivePacket(fantFromB, interface);
+
+    // this should *not* create the route (d) via (B)
+    CHECK_FALSE(routeIsKnown(source, nodeB, interface));
+}

@@ -252,6 +252,7 @@ protected:
     bool isRouteDiscoveryRunning(AddressPtr destination);
     void stopRouteDiscoveryTimer(AddressPtr destination);
     void sendDeliverablePackets(const Packet* packet);
+    bool intermediateNodesHaveBeenSeenBefore(const Packet* packet);
 
 protected:
     std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
@@ -273,7 +274,15 @@ protected:
 private:
     Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
+
+    //TODO the knownIntermediateHops and lastReceivedPackets may be merged into a single hashmap
     std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
+
+    /**
+     * This hashmap records the seen hops to a specific destination. This includes direct neighbors as well as indirect
+     * nodes this client has learned from the penultimate packet field.
+     */
+    std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> knownIntermediateHops;
 };
 
 } /* namespace ARA */
