@@ -51,8 +51,7 @@ network ARAPaperEvaluation
 
         node[numberOfNodes] : NetworkNode {
             parameters:
-                //mobilityType = "RandomWPMobility";
-                mobilityType = "StationaryMobility";
+                mobilityType = "RandomWPMobility";
                 mobility.speed = nodeSpeed; // I'm not sure if this works
                 mobility.waitTime = nodePauseTime;
                 mobility.updateInterval = 100ms;
