@@ -1156,3 +1156,32 @@ TEST(AbstractARAClientTest, noRouteOverPenultimateHop) {
     // this should *not* create the route to (d) via (B)
     CHECK_FALSE(routeIsKnown(nodeD, nodeB, interface));
 }
+
+/**
+ * In this test we want to check that a client does not record a route to a destination (d)
+ * if he one of his own interface addresses equals the penultimate hop of the received packet.
+ * This will prevent the host from creating routes that will lead over him self which would
+ * create a loop.
+ *
+ * Test setup:                   | Description:
+ * (src)<--(A)<--(B)<--(dest)    |   * We test from the perspective of node (A)
+
+ */
+TEST(AbstractARAClientTest, doNotCreateRouteOverSelf) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr destination (new AddressMock("dest"));
+    AddressPtr nodeB (new AddressMock("B"));
+
+    // lets assume we have already broadcasted a FANT to (B).
+    // we now simulate that (B) rebroadcasts this FANT again and we receive this packet as well
+    Packet* fantFromB =  new Packet(source, destination, nodeB, PacketType::FANT, 1, 10);
+    // of course (A) is now the penultimate hop from the perspective of (B)
+    fantFromB->setPenultimateHop(interface->getLocalAddress());
+
+    // start the test
+    client->receivePacket(fantFromB, interface);
+
+    // we do *not* want to remember this route over the own address
+    CHECK(routeIsKnown(source, nodeB, interface) == false);
+}

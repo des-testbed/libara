@@ -245,7 +245,8 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
 }
 
 void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {
-    if(hasPenultimateNodeBeenSeenBefore(packet) == false) {
+    if(isLocalAddress(packet->getPenultimateHop()) == false
+    && hasPenultimateNodeBeenSeenBefore(packet) == false) {
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
         routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
     }
@@ -359,9 +360,12 @@ void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket,
 }
 
 bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) const {
-    AddressPtr destination = packet->getDestination();
+    return isLocalAddress(packet->getDestination());
+}
+
+bool AbstractARAClient::isLocalAddress(AddressPtr address) const {
     for(auto& interface: interfaces) {
-        if(interface->getLocalAddress()->equals(destination)) {
+        if(interface->getLocalAddress()->equals(address)) {
             return true;
         }
     }
@@ -369,13 +373,7 @@ bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) const {
 }
 
 bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
-    AddressPtr source = packet->getSource();
-    for(auto& interface: interfaces) {
-        if(interface->getLocalAddress()->equals(source)) {
-            return true;
-        }
-    }
-    return false;
+    return isLocalAddress(packet->getSource());
 }
 
 void AbstractARAClient::broadCast(Packet* packet) {

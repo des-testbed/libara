@@ -247,6 +247,7 @@ protected:
     virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
+    bool isLocalAddress(AddressPtr address) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
     void startNewRouteDiscovery(const Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
