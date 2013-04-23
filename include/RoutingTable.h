@@ -19,9 +19,14 @@
 
 ARA_NAMESPACE_BEGIN
 
-class RoutingTable {
+struct RoutingTableEntryTupel {
+    AddressPtr destination;
+    RoutingTableEntry* entry;
+};
 
 #define RoutingTableEntryList std::deque<RoutingTableEntry*>
+
+class RoutingTable {
 
 public:
     RoutingTable();
@@ -74,7 +79,7 @@ public:
      * Returns the n'th ~RoutingTableEntry.
      * This method is only used to display the routing table entries to the user.
      */
-    RoutingTableEntry* getEntryAt(int wantedPosition) const;
+    RoutingTableEntryTupel getEntryAt(int wantedPosition) const;
 
 protected:
     bool hasTableBeenAccessedEarlier();

@@ -220,16 +220,18 @@ unsigned int RoutingTable::getTotalNumberOfEntries() const {
     return tableSize;
 }
 
-RoutingTableEntry* RoutingTable::getEntryAt(int wantedPosition) const {
+RoutingTableEntryTupel RoutingTable::getEntryAt(int wantedPosition) const {
     int currentPosition = 0;
     std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::const_iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-        AddressPtr address = iterator->first;
+        AddressPtr destination = iterator->first;
         RoutingTableEntryList* entryList = iterator->second;
         for (auto& entry: *entryList) {
-
             if(currentPosition == wantedPosition) {
-                return entry;
+                RoutingTableEntryTupel tupel;
+                tupel.destination = destination;
+                tupel.entry = entry;
+                return tupel;
             }
             else {
                 currentPosition++;

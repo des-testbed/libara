@@ -10,8 +10,8 @@ using namespace std;
 namespace ARA {
 namespace omnetpp {
 
-const char* OMNeTAddress::toString() const {
-    return this->str().c_str();
+std::string OMNeTAddress::toString() const {
+    return this->str();
 }
 
 bool OMNeTAddress::equals(const Address* otherAddress) const {

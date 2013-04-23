@@ -149,7 +149,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             packet->setPenultimateHop(packet->getSender());
             packet->setSender(interface->getLocalAddress());
 
-            logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString(), nextHopAddress->toString());
+            logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str());
             reinforcePheromoneValue(destination, nextHopAddress, interface);
 
             interface->send(packet, nextHopAddress);
@@ -172,7 +172,7 @@ void AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressP
 }
 
 void AbstractARAClient::startNewRouteDiscovery(const Packet* packet) {
-    logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString(), packet->getDestinationString());
+    logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
     startRouteDiscoveryTimer(packet);
     sendFANT(packet->getDestination());
 }
@@ -303,7 +303,7 @@ void AbstractARAClient::handleAntPacket(Packet* packet) {
         handleAntPacketForThisNode(packet);
     }
     else if (packet->getTTL() > 0) {
-        logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString());
+        logTrace("Broadcasting %s %u from %s", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
         broadCast(packet);
     }
     else {
@@ -315,7 +315,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     char packetType = packet->getType();
 
     if(packetType == PacketType::FANT) {
-        logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString());
+        logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString().c_str());
         Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber());
         broadCast(bant);
     }
@@ -345,7 +345,7 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
 
 void AbstractARAClient::sendDeliverablePackets(const Packet* packet) {
     deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
-    logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString(), deliverablePackets->size());
+    logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString().c_str(), deliverablePackets->size());
 
     for(auto& deliverablePacket : *deliverablePackets) {
         packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back

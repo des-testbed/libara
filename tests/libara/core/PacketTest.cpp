@@ -141,9 +141,9 @@ TEST(PacketTest, getAddressString) {
     int ttl = 20;
 
     Packet packet = Packet(originalSource, originalDestination, originalSender, type, seqenceNumber, ttl);
-    STRCMP_EQUAL("source", packet.getSourceString());
-    STRCMP_EQUAL("sender", packet.getSenderString());
-    STRCMP_EQUAL("destination", packet.getDestinationString());
+    STRCMP_EQUAL("source", packet.getSourceString().c_str());
+    STRCMP_EQUAL("sender", packet.getSenderString().c_str());
+    STRCMP_EQUAL("destination", packet.getDestinationString().c_str());
 }
 
 TEST(PacketTest, setPenultimateHop) {

@@ -23,9 +23,10 @@ int RoutingTableWatcher::size() const {
 string RoutingTableWatcher::at(int wantedPosition) const {
     stringstream out;
 
-    RoutingTableEntry* entry = table->getEntryAt(wantedPosition);
-    AddressPtr address = entry->getAddress();
-    out << "[destination] " << address.get()->toString() << " " << *(entry);
+    RoutingTableEntryTupel entryTupel = table->getEntryAt(wantedPosition);
+    AddressPtr destination = entryTupel.destination;
+    RoutingTableEntry* entry = entryTupel.entry;
+    out << "[destination] " << destination->toString() << " " << *entry;
     return out.str();
 }
 

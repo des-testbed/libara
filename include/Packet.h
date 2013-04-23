@@ -11,6 +11,7 @@
 
 #include <stddef.h>
 #include <memory>
+#include <string>
 
 ARA_NAMESPACE_BEGIN
 
@@ -75,7 +76,7 @@ public:
      *
      * @see Packet::getSource()
      */
-    const char* getSourceString() const {
+    std::string getSourceString() const {
         return getSource()->toString();
     }
 
@@ -86,7 +87,7 @@ public:
      *
      * @see Packet::getSender()
      */
-    const char* getSenderString() const {
+    std::string getSenderString() const {
         return getSender()->toString();
     }
 
@@ -97,7 +98,7 @@ public:
      *
      * @see Packet::getDestination()
      */
-    const char* getDestinationString() const {
+    std::string getDestinationString() const {
         return getDestination()->toString();
     }
 
