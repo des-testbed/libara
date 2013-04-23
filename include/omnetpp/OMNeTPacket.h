@@ -32,6 +32,7 @@ class OMNeTPacket : public cPacket, public Packet {
     std::shared_ptr<OMNeTAddress> getSource() const;
     std::shared_ptr<OMNeTAddress> getDestination() const;
     std::shared_ptr<OMNeTAddress> getSender() const;
+    std::shared_ptr<OMNeTAddress> getPenultimateHop() const;
 
     IPv4Address getSourceIP() const { return *(getSource().get()); }
     IPv4Address getDestinationIP() const { return *(getDestination().get()); }

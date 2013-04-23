@@ -1086,8 +1086,8 @@ TEST(AbstractARAClientTest, initialzePheromoneValue) {
  * We test as Node (C)
  * 1.                    2.
  *  (A)-->(B)--p-->(C)    (A)-->(B)-->(C)--p-->(D)
- *        |                      |
- *        └ sender               └ now this is the penultimate hop for node (D)
+ *         |                     |
+ *         └ sender              └ now this is the penultimate hop for node (D)
  */
 TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
@@ -1104,7 +1104,8 @@ TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
     BYTES_EQUAL(1, sentPackets->size());
     Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     const Packet* sentPacket = sentPacketInfo->getLeft();
-    CHECK(nodeB->equals(sentPacket->getPenultimateHop()));
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(sentPacket->getPenultimateHop()->equals(nodeB));
 
     // the same should work if the route has been established and a DATA packet is relayed
     Packet* data = new Packet(nodeD, nodeA, nodeD, PacketType::DATA, 2, 10);
@@ -1113,7 +1114,8 @@ TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
     BYTES_EQUAL(2, sentPackets->size());
     sentPacketInfo = sentPackets->back();
     sentPacket = sentPacketInfo->getLeft();
-    CHECK(nodeD->equals(sentPacket->getPenultimateHop()));
+    CHECK(sentPacket->getType() == PacketType::DATA);
+    CHECK(sentPacket->getPenultimateHop()->equals(nodeD));
 }
 
 /**

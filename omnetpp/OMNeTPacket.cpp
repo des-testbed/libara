@@ -35,7 +35,7 @@ OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr s
 }
 
 OMNeTPacket::OMNeTPacket(const OMNeTPacket& other) : cPacket(other), ARA::Packet(other.source, other.destination, other.sender, other.type, other.seqNr, other.ttl, other.payload, other.payloadSize) {
-
+    this->penultimateHop = other.penultimateHop;
 }
 
 OMNeTPacket& OMNeTPacket::operator=(const OMNeTPacket& other) {
@@ -49,6 +49,7 @@ void OMNeTPacket::copy(const OMNeTPacket& other) {
     this->source = other.source;
     this->destination = other.destination;
     this->sender = other.sender;
+    this->penultimateHop = other.penultimateHop;
     this->type = other.type;
     this->seqNr = other.seqNr;
     this->payload = other.payload;
@@ -76,6 +77,10 @@ std::shared_ptr<OMNeTAddress> OMNeTPacket::getSender() const {
     return std::dynamic_pointer_cast<OMNeTAddress>(this->sender);
 }
 
+std::shared_ptr<OMNeTAddress> OMNeTPacket::getPenultimateHop() const {
+    return std::dynamic_pointer_cast<OMNeTAddress>(this->penultimateHop);
+}
+
 class OMNeTPacketDescriptor : public cClassDescriptor {
 public:
     OMNeTPacketDescriptor();
@@ -98,7 +103,7 @@ public:
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 
 private:
-    const int nrOfFields = 8;
+    const int nrOfFields = 9;
 };
 
 Register_ClassDescriptor(OMNeTPacketDescriptor);
@@ -136,6 +141,7 @@ unsigned int OMNeTPacketDescriptor::getFieldTypeFlags(void *object, int field) c
         FD_ISCOMPOUND | FD_ISPOINTER,   // Address* source
         FD_ISCOMPOUND | FD_ISPOINTER,   // Address* destination
         FD_ISCOMPOUND | FD_ISPOINTER,   // Address* sender
+        FD_ISCOMPOUND | FD_ISPOINTER,   // Address* prevHop
         FD_NONE,                        // char type;
         FD_NONE,                        // unsigned int seqNr;
         FD_NONE,                        // const char* payload;
@@ -157,6 +163,7 @@ const char *OMNeTPacketDescriptor::getFieldName(void *object, int field) const {
         "source",
         "destination",
         "sender",
+        "prevHop",
         "type",
         "seqNr",
         "payload",
@@ -172,11 +179,12 @@ int OMNeTPacketDescriptor::findField(void *object, const char *fieldName) const 
     if (fieldName[0]=='s' && strcmp(fieldName, "source")==0) return base+0;
     if (fieldName[0]=='d' && strcmp(fieldName, "destination")==0) return base+1;
     if (fieldName[0]=='s' && strcmp(fieldName, "sender")==0) return base+2;
-    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+3;
-    if (fieldName[0]=='s' && strcmp(fieldName, "seqNr")==0) return base+4;
-    if (fieldName[0]=='p' && strcmp(fieldName, "payload")==0) return base+5;
-    if (fieldName[0]=='p' && strcmp(fieldName, "payloadSize")==0) return base+6;
-    if (fieldName[0]=='T' && strcmp(fieldName, "TTL")==0) return base+7;
+    if (fieldName[0]=='p' && strcmp(fieldName, "prevHop")==0) return base+3;
+    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+4;
+    if (fieldName[0]=='s' && strcmp(fieldName, "seqNr")==0) return base+5;
+    if (fieldName[0]=='p' && strcmp(fieldName, "payload")==0) return base+6;
+    if (fieldName[0]=='p' && strcmp(fieldName, "payloadSize")==0) return base+7;
+    if (fieldName[0]=='T' && strcmp(fieldName, "TTL")==0) return base+8;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -188,6 +196,7 @@ const char *OMNeTPacketDescriptor::getFieldTypeString(void *object, int field) c
         field -= basedesc->getFieldCount(object);
     }
     static const char *fieldTypeStrings[] = {
+        "Address*",
         "Address*",
         "Address*",
         "Address*",
@@ -235,16 +244,17 @@ std::string OMNeTPacketDescriptor::getFieldAsString(void *object, int field, int
     }
     OMNeTPacket *pp = (OMNeTPacket *)object; (void)pp;
 
-    if(field >= 0 && field < 3) {
+    if(field >= 0 && field < 4) {
         std::shared_ptr<OMNeTAddress> address;
         switch (field) {
             case 0: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getSource())); break;
             case 1: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getDestination())); break;
             case 2: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getSender())); break;
+            case 3: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getPenultimateHop())); break;
         }
 
         if(address == nullptr) {
-            return "NULL";
+            return "NULL (nullptr)";
         }
         else {
             return address->str();
@@ -252,11 +262,11 @@ std::string OMNeTPacketDescriptor::getFieldAsString(void *object, int field, int
     }
 
     switch (field) {
-        case 3: return PacketType::getAsString(pp->getType());
-        case 4: return long2string(pp->getSequenceNumber());
-        case 5: return pp->getPayload() == NULL ? "NULL" : pp->getPayload();
-        case 6: return long2string(pp->getPayloadLength());
-        case 7: return long2string(pp->getTTL());
+        case 4: return PacketType::getAsString(pp->getType());
+        case 5: return long2string(pp->getSequenceNumber());
+        case 6: return pp->getPayload() == NULL ? "NULL" : pp->getPayload();
+        case 7: return long2string(pp->getPayloadLength());
+        case 8: return long2string(pp->getTTL());
         default: return "NOT IMPLEMENTED";
     }
 }
@@ -288,6 +298,7 @@ const char *OMNeTPacketDescriptor::getFieldStructName(void *object, int field) c
         "Address",
         "Address",
         "Address",
+        "Address",
         NULL,
         NULL,
         NULL,
@@ -310,6 +321,7 @@ void *OMNeTPacketDescriptor::getFieldStructPointer(void *object, int field, int 
         case 0: return pp->getSource().get();
         case 1: return pp->getDestination().get();
         case 2: return pp->getSender().get();
+        case 3: return pp->getPenultimateHop().get();
         default: return NULL;
     }
 }
