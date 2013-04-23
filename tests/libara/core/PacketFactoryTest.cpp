@@ -96,7 +96,7 @@ TEST(PacketFactoryTest, makeBANT) {
 
     CHECK(bant->getSource()->equals(originalDestination));
     CHECK(bant->getDestination()->equals(originalSource));
-    // The sender of the BANT will be determined when it is actually send by the ARA client
+    CHECK(bant->getSender()->equals(originalDestination));
     CHECK(bant->getPenultimateHop() == nullptr);
     CHECK_EQUAL(PacketType::BANT, bant->getType());
     LONGS_EQUAL(newSequenceNumber, bant->getSequenceNumber());

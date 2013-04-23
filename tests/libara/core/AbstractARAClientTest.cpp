@@ -430,6 +430,7 @@ TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
     CHECK(sentPacket->getSource()->equals(nodeA));
     CHECK(sentPacket->getDestination()->equals(nodeB));
     CHECK(sentPacket->getSender()->equals(nodeA));
+    CHECK(sentPacket->getPenultimateHop()->equals(nodeA));
     CHECK_EQUAL(PacketType::BANT, sentPacket->getType());
     LONGS_EQUAL(maxHopCount, sentPacket->getTTL());
     LONGS_EQUAL(lastSequenceNumber+1, sentPacket->getSequenceNumber());

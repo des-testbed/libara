@@ -19,7 +19,7 @@ Packet* PacketFactory::makeFANT(AddressPtr source, AddressPtr destination, unsig
 }
 
 Packet* PacketFactory::makeBANT(const Packet* originalPacket, unsigned int newSequenceNumber) {
-    return makePacket(originalPacket->getDestination(), originalPacket->getSource(), originalPacket->getSender(), PacketType::BANT, newSequenceNumber, maxHopCount);
+    return makePacket(originalPacket->getDestination(), originalPacket->getSource(), originalPacket->getDestination(), PacketType::BANT, newSequenceNumber, maxHopCount);
 }
 
 Packet* PacketFactory::makeDulicateWarningPacket(const Packet* originalPacket, AddressPtr senderOfDuplicateWarning, unsigned int newSequenceNumber) {
