@@ -889,7 +889,7 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     CHECK(sentPackets->empty());
 
     // start the test
-    client->handleRouteFailure(packet, route1, interface);
+    client->handleBrokenLink(packet, route1, interface);
 
     // the client is expected to delete the route from the routing table
     CHECK(routingTable->exists(destination, route1, interface) == false);
@@ -920,7 +920,7 @@ TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRoutesAreKownOnR
     CHECK(sentPackets->empty());
 
     // start the test
-    client->handleRouteFailure(packet, nextHop, interface);
+    client->handleBrokenLink(packet, nextHop, interface);
 
     // the client is expected to delete the route from the routing table
     CHECK(routingTable->exists(destination, nextHop, interface) == false);

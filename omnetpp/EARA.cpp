@@ -67,7 +67,7 @@ void EARA::receiveChangeNotification(int category, const cObject* details) {
 void EARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
     // TODO this does only work if we have only one network interface card
     NetworkInterface* interface = getNetworkInterface(0);
-    handleRouteFailure(packet, receiverAddress, interface);
+    AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
 }
 
 void EARA::handleBatteryStatusChange(Energy* energyInformation) {

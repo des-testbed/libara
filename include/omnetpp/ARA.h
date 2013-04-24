@@ -32,6 +32,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         static simsignal_t PACKET_DELIVERED_SIGNAL;
         static simsignal_t PACKET_NOT_DELIVERED_SIGNAL;
         static simsignal_t ARA_LOOP_DETECTION_SIGNAL;
+        static simsignal_t ARA_BROKEN_LINK_SIGNAL;
 
     protected:
         virtual int numInitStages() const;

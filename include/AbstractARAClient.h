@@ -93,7 +93,7 @@ public:
      * This is the case if this client never receives an acknowledgment in the timeout period
      * and has tried too many times.
      */
-    virtual void handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
+    virtual void handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
     /**
      * This method will initialize this client with the given configuration, ~RoutingTable and ~PacketFactory.

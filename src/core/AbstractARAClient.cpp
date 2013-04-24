@@ -493,9 +493,8 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
     }
 }
 
-void AbstractARAClient::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     AddressPtr destination = packet->getDestination();
-
     routingTable->removeEntry(destination, nextHop, interface);
 
     if (routingTable->isDeliverable(destination)) {
