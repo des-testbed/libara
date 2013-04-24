@@ -14,8 +14,8 @@ Define_Module(ARA);
 
 simsignal_t ARA::PACKET_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::PACKET_NOT_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
-simsignal_t ARA::ARA_LOOP_DETECTION_SIGNAL = SIMSIGNAL_NULL;
-simsignal_t ARA::ARA_BROKEN_LINK_SIGNAL = SIMSIGNAL_NULL;
+simsignal_t ARA::LOOP_DETECTION_SIGNAL = SIMSIGNAL_NULL;
+simsignal_t ARA::ROUTE_FAILURE_SIGNAL = SIMSIGNAL_NULL;
 
 ARA::ARA() {
     messageDispatcher = new MessageDispatcher(this, this);
@@ -46,8 +46,8 @@ void ARA::initialize(int stage) {
         WATCH(nrOfDetectedLoops);
         PACKET_DELIVERED_SIGNAL = registerSignal("packetDelivered");
         PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
-        ARA_LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
-        ARA_BROKEN_LINK_SIGNAL = registerSignal("brokenLink");
+        LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
+        ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
     }
 }
 
@@ -70,14 +70,18 @@ void ARA::packetNotDeliverable(const Packet* packet) {
 void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
     AbstractARAClient::handleDuplicateErrorPacket(packet, interface);
     nrOfDetectedLoops++;
-    emit(ARA_LOOP_DETECTION_SIGNAL, 1);
+    emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
 void ARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
     // TODO this does only work if we have only one network interface card
     NetworkInterface* interface = getNetworkInterface(0);
     AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
-    emit(ARA_BROKEN_LINK_SIGNAL, 1);
+}
+
+void ARA::handleCompleteRouteFailure(Packet* packet) {
+    AbstractARAClient::handleCompleteRouteFailure(packet);
+    emit(ROUTE_FAILURE_SIGNAL, 1);
 }
 
 void ARA::timerHasExpired(Timer* responsibleTimer) {

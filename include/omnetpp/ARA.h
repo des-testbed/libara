@@ -31,8 +31,8 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
 
         static simsignal_t PACKET_DELIVERED_SIGNAL;
         static simsignal_t PACKET_NOT_DELIVERED_SIGNAL;
-        static simsignal_t ARA_LOOP_DETECTION_SIGNAL;
-        static simsignal_t ARA_BROKEN_LINK_SIGNAL;
+        static simsignal_t LOOP_DETECTION_SIGNAL;
+        static simsignal_t ROUTE_FAILURE_SIGNAL;
 
     protected:
         virtual int numInitStages() const;
@@ -56,6 +56,8 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
 
         virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress);
+
+        virtual void handleCompleteRouteFailure(Packet* packet);
 
         /**
          * This method is called when the route discovery timer expires.

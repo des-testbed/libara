@@ -8,6 +8,7 @@
 #include "PacketFactory.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
+#include "testAPI/mocks/RoutingTableMock.h"
 #include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
@@ -26,7 +27,7 @@ ARAClientMock::ARAClientMock() {
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initialize(configuration, new RoutingTable(), new PacketFactory(15));
+    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
 }
 
 void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {

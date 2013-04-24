@@ -257,6 +257,7 @@ protected:
     void sendDeliverablePackets(const Packet* packet);
     void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
     bool hasPenultimateNodeBeenSeenBefore(const Packet* packet);
+    virtual void handleCompleteRouteFailure(Packet* packet);
 
 protected:
     std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;

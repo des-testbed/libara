@@ -41,19 +41,18 @@ public:
     void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
 
     void removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
-    RoutingTableEntryList getPossibleNextHops(AddressPtr destination);
     RoutingTableEntryList getPossibleNextHops(const Packet* packet);
-
-    /**
-     * Returns true if there is a known route to a given destination, else false
-     */
-    bool isDeliverable(AddressPtr destination);
 
     /**
      * Checks if a route to the packet destination exists, that does *not* lead
      * over the packets sender.
      */
     bool isDeliverable(const Packet* packet);
+
+    /**
+     * Returns true if there is at least one stored route for the given destination in this routing table.
+     */
+    bool isDeliverable(AddressPtr destination);
 
     /**
      * The method checks if an destination/nextHop/interface entry already exists.

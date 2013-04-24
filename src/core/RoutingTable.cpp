@@ -40,13 +40,14 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
 
 
 void RoutingTable::update(AddressPtr destination, RoutingTableEntry *pEntry) {
-    if(isDeliverable(destination) == false) {
+    if(table.find(destination) == table.end()) {
+        // this is a new entry
         std::deque<RoutingTableEntry*>* entryList = new std::deque<RoutingTableEntry*>();
         entryList->push_back(pEntry);
         table[destination] = entryList;
     } else {
         // there is at least one registered route for this destination
-        std::deque<RoutingTableEntry*>* entryList = table[destination];
+        RoutingTableEntryList* entryList = table[destination];
         bool entryHasBeenUpdated = false;
         for (auto& entry: *entryList) {
             if(entry->getAddress()->equals(pEntry->getAddress()) && entry->getNetworkInterface()->equals(pEntry->getNetworkInterface())) {
@@ -69,7 +70,7 @@ void RoutingTable::updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTable
 }
 
 void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-    if(isDeliverable(destination)) {
+    if(table.find(destination) != table.end()) {
         std::deque<RoutingTableEntry*>* entryList = table[destination];
         std::deque<RoutingTableEntry*>::iterator iterator = entryList->begin();
         if(entryList->size() == 1) {
@@ -94,19 +95,14 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
     }
 }
 
-std::deque<RoutingTableEntry*> RoutingTable::getPossibleNextHops(AddressPtr destination) {
-    if(isDeliverable(destination)) {
-        return *(table[destination]);
+std::deque<RoutingTableEntry*> RoutingTable::getPossibleNextHops(const Packet* packet) {
+    if(isDeliverable(packet)) {
+        return *(table[packet->getDestination()]);
     }
     else {
         // return empty list
         return std::deque<RoutingTableEntry*>();
     }
-}
-
-std::deque<RoutingTableEntry*> RoutingTable::getPossibleNextHops(const Packet* packet) {
-    triggerEvaporation();
-    return getPossibleNextHops(packet->getDestination());
 }
 
 bool RoutingTable::isDeliverable(AddressPtr destination) {
@@ -133,11 +129,9 @@ bool RoutingTable::isDeliverable(const Packet* packet) {
     }
 }
 
-float RoutingTable::getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface) {
-    triggerEvaporation();
-
+float RoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
     if(isDeliverable(destination)) {
-        std::deque<RoutingTableEntry*>* entryList = table[destination];
+        RoutingTableEntryList* entryList = table[destination];
         for (auto& entry: *entryList) {
             if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
                 return entry->getPheromoneValue();
@@ -157,6 +151,7 @@ bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInt
             }
         }
     }
+
     return false;
 }
 

@@ -14,6 +14,7 @@
 #include "Environment.h"
 
 #include "testAPI/mocks/ARAClientMock.h"
+#include "testAPI/mocks/RoutingTableMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/AddressMock.h"
@@ -27,13 +28,13 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(AbstractARAClientTest) {
     ARAClientMock* client;
     PacketTrap* packetTrap;
-    RoutingTable* routingTable;
+    RoutingTableMock* routingTable;
     PacketFactory* packetFactory;
 
     void setup() {
         client = new ARAClientMock();
         packetTrap = client->getPacketTrap();
-        routingTable = client->getRoutingTable();
+        routingTable = (RoutingTableMock*) client->getRoutingTable();
         packetFactory = client->getPacketFactory();
     }
 
@@ -45,18 +46,7 @@ TEST_GROUP(AbstractARAClientTest) {
      * Returns true iff a route to destination via nextHop and interface is known in the RoutingTable.
      */
     bool routeIsKnown(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-        std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
-        if(possibleNextHops.empty()) {
-            return false;
-        }
-        else {
-            for(auto& possibleHop: possibleNextHops) {
-                if(possibleHop->getAddress()->equals(nextHop) && possibleHop->getNetworkInterface()->equals(interface)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        return routingTable->exists(destination, nextHop, interface);
     }
 };
 

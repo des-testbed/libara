@@ -91,9 +91,9 @@ deque<Packet*>* PacketTrap::getDeliverablePackets() {
     TrappedPacketsMap::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
         pair<AddressPtr, PacketSet*> entryPair = *iterator;
-        AddressPtr address = entryPair.first;
+        AddressPtr destination = entryPair.first;
 
-        if(routingTable->isDeliverable(address)) {
+        if(routingTable->isDeliverable(destination)) {
             // Add all packets for this destination
             PacketSet* packets = entryPair.second;
             for(auto& trappedPacket: *packets) {
