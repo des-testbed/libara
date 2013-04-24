@@ -11,7 +11,7 @@ PacketFactory::PacketFactory(int maxHopCount) {
 }
 
 Packet* PacketFactory::makeClone(const Packet* originalPacket) {
-    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), originalPacket->getType(), originalPacket->getSequenceNumber(), originalPacket->getTTL(), originalPacket->getPayload(), originalPacket->getPayloadLength(), originalPacket->getPenultimateHop());
+    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), originalPacket->getType(), originalPacket->getSequenceNumber(), originalPacket->getTTL(), originalPacket->getPayload(), originalPacket->getPayloadLength(), originalPacket->getPreviousHop());
 }
 
 Packet* PacketFactory::makeFANT(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber) {
@@ -41,9 +41,9 @@ Packet* PacketFactory::makeEnergyDisseminationPacket(AddressPtr source, unsigned
     return makePacket(source, source, source, PacketType::ENERGY_INFO, seqNr, maxHopCount, payload, 1);
 }
 
-Packet* PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr penultimateHop) {
+Packet* PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {
     Packet* packet = new Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
-    packet->setPenultimateHop(penultimateHop);
+    packet->setPreviousHop(previousHop);
     return packet;
 }
 

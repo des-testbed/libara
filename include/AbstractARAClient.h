@@ -256,7 +256,7 @@ protected:
     void stopRouteDiscoveryTimer(AddressPtr destination);
     void sendDeliverablePackets(const Packet* packet);
     void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
-    bool hasPenultimateNodeBeenSeenBefore(const Packet* packet);
+    bool hasPreviousNodeBeenSeenBefore(const Packet* packet);
     virtual void handleCompleteRouteFailure(Packet* packet);
 
 protected:

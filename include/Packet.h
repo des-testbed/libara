@@ -67,7 +67,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getSender()
      */
-    AddressPtr getPenultimateHop() const;
+    AddressPtr getPreviousHop() const;
 
     /**
      * Returns the null-terminated string representation of the address of the source.
@@ -110,7 +110,7 @@ public:
     /**
      * Assigns a new penultimate hop to this packet.
      */
-    void setPenultimateHop(AddressPtr newPenultimateHop);
+    void setPreviousHop(AddressPtr newPreviousHop);
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
@@ -179,7 +179,7 @@ protected:
     AddressPtr source;
     AddressPtr destination;
     AddressPtr sender;
-    AddressPtr penultimateHop;
+    AddressPtr previousHop;
     char type;
     unsigned int seqNr;
     const char* payload;

@@ -146,23 +146,23 @@ TEST(PacketTest, getAddressString) {
     STRCMP_EQUAL("destination", packet.getDestinationString().c_str());
 }
 
-TEST(PacketTest, setPenultimateHop) {
+TEST(PacketTest, setPreviousHop) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr sender (new AddressMock("sender"));
-    AddressPtr penultimateHop1 (new AddressMock("A"));
-    AddressPtr penultimateHop2 (new AddressMock("B"));
+    AddressPtr prevHop1 (new AddressMock("A"));
+    AddressPtr prevHop2 (new AddressMock("B"));
     char type = PacketType::DATA;
     unsigned int seqNr = 1;
     int ttl = 15;
     const char* payload = "Hello World";
 
     Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload);
-    CHECK(packet.getPenultimateHop() == nullptr);
+    CHECK(packet.getPreviousHop() == nullptr);
 
-    packet.setPenultimateHop(penultimateHop1);
-    CHECK(packet.getPenultimateHop()->equals(penultimateHop1));
+    packet.setPreviousHop(prevHop1);
+    CHECK(packet.getPreviousHop()->equals(prevHop1));
 
-    packet.setPenultimateHop(penultimateHop2);
-    CHECK(packet.getPenultimateHop()->equals(penultimateHop2));
+    packet.setPreviousHop(prevHop2);
+    CHECK(packet.getPreviousHop()->equals(prevHop2));
 }

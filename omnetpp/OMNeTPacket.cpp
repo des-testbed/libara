@@ -35,7 +35,7 @@ OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr s
 }
 
 OMNeTPacket::OMNeTPacket(const OMNeTPacket& other) : cPacket(other), ARA::Packet(other.source, other.destination, other.sender, other.type, other.seqNr, other.ttl, other.payload, other.payloadSize) {
-    this->penultimateHop = other.penultimateHop;
+    this->previousHop = other.previousHop;
 }
 
 OMNeTPacket& OMNeTPacket::operator=(const OMNeTPacket& other) {
@@ -49,7 +49,7 @@ void OMNeTPacket::copy(const OMNeTPacket& other) {
     this->source = other.source;
     this->destination = other.destination;
     this->sender = other.sender;
-    this->penultimateHop = other.penultimateHop;
+    this->previousHop = other.previousHop;
     this->type = other.type;
     this->seqNr = other.seqNr;
     this->payload = other.payload;
@@ -77,8 +77,8 @@ std::shared_ptr<OMNeTAddress> OMNeTPacket::getSender() const {
     return std::dynamic_pointer_cast<OMNeTAddress>(this->sender);
 }
 
-std::shared_ptr<OMNeTAddress> OMNeTPacket::getPenultimateHop() const {
-    return std::dynamic_pointer_cast<OMNeTAddress>(this->penultimateHop);
+std::shared_ptr<OMNeTAddress> OMNeTPacket::getPreviousHop() const {
+    return std::dynamic_pointer_cast<OMNeTAddress>(this->previousHop);
 }
 
 class OMNeTPacketDescriptor : public cClassDescriptor {
@@ -250,7 +250,7 @@ std::string OMNeTPacketDescriptor::getFieldAsString(void *object, int field, int
             case 0: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getSource())); break;
             case 1: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getDestination())); break;
             case 2: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getSender())); break;
-            case 3: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getPenultimateHop())); break;
+            case 3: address = (std::dynamic_pointer_cast<OMNeTAddress>(pp->getPreviousHop())); break;
         }
 
         if(address == nullptr) {
@@ -321,7 +321,7 @@ void *OMNeTPacketDescriptor::getFieldStructPointer(void *object, int field, int 
         case 0: return pp->getSource().get();
         case 1: return pp->getDestination().get();
         case 2: return pp->getSender().get();
-        case 3: return pp->getPenultimateHop().get();
+        case 3: return pp->getPreviousHop().get();
         default: return NULL;
     }
 }

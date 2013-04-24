@@ -420,7 +420,7 @@ TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
     CHECK(sentPacket->getSource()->equals(nodeA));
     CHECK(sentPacket->getDestination()->equals(nodeB));
     CHECK(sentPacket->getSender()->equals(nodeA));
-    CHECK(sentPacket->getPenultimateHop()->equals(nodeA));
+    CHECK(sentPacket->getPreviousHop()->equals(nodeA));
     CHECK_EQUAL(PacketType::BANT, sentPacket->getType());
     LONGS_EQUAL(maxHopCount, sentPacket->getTTL());
     LONGS_EQUAL(lastSequenceNumber+1, sentPacket->getSequenceNumber());
@@ -713,9 +713,10 @@ TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
  */
 TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("source");
-    AddressPtr source (new AddressMock("source"));
+    AddressPtr source = interface->getLocalAddress();
     AddressPtr destination (new AddressMock("destination"));
-    Packet* fant = new Packet(source, source, destination, PacketType::FANT, 123, 10);
+    Packet* fant = packetFactory->makeFANT(source, destination, 123);
+    fant->setPreviousHop(source);
 
     // sanity check
     CHECK(routingTable->isDeliverable(source) == false);
@@ -1072,15 +1073,15 @@ TEST(AbstractARAClientTest, initialzePheromoneValue) {
 
 /**
  * In this test we check that a client sets the address of the node from which
- * it received a packet as penultimate hop for the relayed packet.
+ * it received a packet as previous hop for the relayed packet.
  *
  * We test as Node (C)
  * 1.                    2.
  *  (A)-->(B)--p-->(C)    (A)-->(B)-->(C)--p-->(D)
  *         |                     |
- *         └ sender              └ now this is the penultimate hop for node (D)
+ *         └ sender              └ now this is the previous hop for node (D)
  */
-TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
+TEST(AbstractARAClientTest, addPreviousHopToPacket) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
     std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
     AddressPtr nodeA (new AddressMock("A"));
@@ -1091,12 +1092,12 @@ TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
     Packet* fant = new Packet(nodeA, nodeD, nodeB, PacketType::FANT, 1, 10);
     client->receivePacket(fant, interface);
 
-    // check the penultimate hop of the relayed packet
+    // check the previous hop of the relayed packet
     BYTES_EQUAL(1, sentPackets->size());
     Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
     const Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getType() == PacketType::FANT);
-    CHECK(sentPacket->getPenultimateHop()->equals(nodeB));
+    CHECK(sentPacket->getPreviousHop()->equals(nodeB));
 
     // the same should work if the route has been established and a DATA packet is relayed
     Packet* data = new Packet(nodeD, nodeA, nodeD, PacketType::DATA, 2, 10);
@@ -1106,12 +1107,12 @@ TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
     sentPacketInfo = sentPackets->back();
     sentPacket = sentPacketInfo->getLeft();
     CHECK(sentPacket->getType() == PacketType::DATA);
-    CHECK(sentPacket->getPenultimateHop()->equals(nodeD));
+    CHECK(sentPacket->getPreviousHop()->equals(nodeD));
 }
 
 /**
  * In this test we want to check that a client does not record a route to a destination (d)
- * if he already knows a route to (d) which goes over the same penultimate hop (A).
+ * if he already knows a route to (d) which goes over the same previous hop (A).
  *
  * Test setup:                   | Description:
  * (d)<--(A)<--(B)<--(...)       |   * (B) and (C) know a route to (d) via (A) from a previous broadcast
@@ -1122,7 +1123,7 @@ TEST(AbstractARAClientTest, addPenultimateHopToPacket) {
  *                               |   * the only allowed routes are:  (B)->(A)->(d) and
  *                               |                                   (C)->(A)->(d)
  */
-TEST(AbstractARAClientTest, noRouteOverPenultimateHop) {
+TEST(AbstractARAClientTest, noRouteOverPreviousHop) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
     AddressPtr nodeD (new AddressMock("d"));
     AddressPtr destination (new AddressMock("..."));
@@ -1141,7 +1142,7 @@ TEST(AbstractARAClientTest, noRouteOverPenultimateHop) {
 
     // now we receive the broadcast from (B)
     Packet* fantFromB = new Packet(nodeD, destination, nodeB, PacketType::FANT, 1, 9);
-    fantFromB->setPenultimateHop(nodeA);
+    fantFromB->setPreviousHop(nodeA);
     client->receivePacket(fantFromB, interface);
 
     // this should *not* create the route to (d) via (B)
@@ -1150,7 +1151,7 @@ TEST(AbstractARAClientTest, noRouteOverPenultimateHop) {
 
 /**
  * In this test we want to check that a client does not record a route to a destination (d)
- * if he one of his own interface addresses equals the penultimate hop of the received packet.
+ * if he one of his own interface addresses equals the previous hop of the received packet.
  * This will prevent the host from creating routes that will lead over him self which would
  * create a loop.
  *
@@ -1167,8 +1168,8 @@ TEST(AbstractARAClientTest, doNotCreateRouteOverSelf) {
     // lets assume we have already broadcasted a FANT to (B).
     // we now simulate that (B) rebroadcasts this FANT again and we receive this packet as well
     Packet* fantFromB =  new Packet(source, destination, nodeB, PacketType::FANT, 1, 10);
-    // of course (A) is now the penultimate hop from the perspective of (B)
-    fantFromB->setPenultimateHop(interface->getLocalAddress());
+    // of course (A) is now the previous hop from the perspective of (B)
+    fantFromB->setPreviousHop(interface->getLocalAddress());
 
     // start the test
     client->receivePacket(fantFromB, interface);

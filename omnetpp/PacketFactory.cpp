@@ -11,7 +11,7 @@ OMNeTPacket* PacketFactory::createOMNetPacket(AddressPtr source, AddressPtr dest
         ttl = maxHopCount;
     }
     OMNeTPacket* packet = new OMNeTPacket(source, destination, sender, type, seqNr, ttl);
-    packet->setPenultimateHop(penultimateHop);
+    packet->setPreviousHop(penultimateHop);
     return packet;
 }
 

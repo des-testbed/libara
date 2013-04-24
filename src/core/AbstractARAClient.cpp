@@ -146,7 +146,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
-            packet->setPenultimateHop(packet->getSender());
+            packet->setPreviousHop(packet->getSender());
             packet->setSender(interface->getLocalAddress());
 
             logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str());
@@ -232,7 +232,8 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
 }
 
 void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
-    if (hasBeenSentByThisNode(packet) == false) {
+    // we do not want to send/reinforce routes that would send the packet back over ourselves
+    if (isLocalAddress(packet->getPreviousHop()) == false) {
         AddressPtr source = packet->getSource();
         AddressPtr sender = packet->getSender();
         if (routingTable->isNewRoute(source, sender, interface)) {
@@ -245,14 +246,13 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
 }
 
 void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {
-    if(isLocalAddress(packet->getPenultimateHop()) == false
-    && hasPenultimateNodeBeenSeenBefore(packet) == false) {
+    if(hasPreviousNodeBeenSeenBefore(packet) == false) {
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
         routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
     }
 }
 
-bool AbstractARAClient::hasPenultimateNodeBeenSeenBefore(const Packet* packet) {
+bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
     KnownIntermediateHopsMap::const_iterator found = knownIntermediateHops.find(packet->getSource());
     if(found == knownIntermediateHops.end()) {
         // we have never seen any packet for this source address
@@ -261,9 +261,9 @@ bool AbstractARAClient::hasPenultimateNodeBeenSeenBefore(const Packet* packet) {
 
     unordered_set<AddressPtr>* listOfKnownNodes = found->second;
 
-    // have we seen this sender, or the penultimate hop before?
+    // have we seen this sender, or the previous hop before?
     return listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end()
-           || listOfKnownNodes->find(packet->getPenultimateHop()) != listOfKnownNodes->end();
+           || listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
 }
 
 void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
@@ -379,7 +379,7 @@ bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
 void AbstractARAClient::broadCast(Packet* packet) {
     for(auto& interface: interfaces) {
         Packet* packetClone = packetFactory->makeClone(packet);
-        packetClone->setPenultimateHop(packet->getSender());
+        packetClone->setPreviousHop(packet->getSender());
         packetClone->setSender(interface->getLocalAddress());
         interface->broadcast(packetClone);
     }
@@ -407,7 +407,7 @@ bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 
 void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     AddressPtr source = packet->getSource();
-    AddressPtr penUltimateHop = packet->getPenultimateHop();
+    AddressPtr previousHop = packet->getPreviousHop();
 
     // first check the lastReceived sequence numbers for this source
     LastReceivedPacketsMap::const_iterator foundPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
@@ -430,16 +430,16 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
         // There is no record of any known intermediate node for this source address ~> create new
         listOfKnownIntermediateNodes = new unordered_set<AddressPtr>();
         listOfKnownIntermediateNodes->insert(packet->getSender());
-        if(penUltimateHop != nullptr) {
-            listOfKnownIntermediateNodes->insert(penUltimateHop);
+        if(previousHop != nullptr) {
+            listOfKnownIntermediateNodes->insert(previousHop);
         }
         knownIntermediateHops[source] = listOfKnownIntermediateNodes;
     }
     else {
         listOfKnownIntermediateNodes = foundIntermediateHopsForSource->second;
         listOfKnownIntermediateNodes->insert(packet->getSender());
-        if(penUltimateHop != nullptr) {
-            listOfKnownIntermediateNodes->insert(penUltimateHop);
+        if(previousHop != nullptr) {
+            listOfKnownIntermediateNodes->insert(previousHop);
         }
     }
 }

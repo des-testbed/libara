@@ -14,7 +14,7 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
     this->source = source;
     this->destination = destination;
     this->sender = sender;
-    this->penultimateHop = nullptr;
+    this->previousHop = nullptr;
     this->type = type;
     this->seqNr = seqNr;
 
@@ -53,8 +53,8 @@ AddressPtr Packet::getSender() const {
     return sender;
 }
 
-AddressPtr Packet::getPenultimateHop() const {
-    return penultimateHop;
+AddressPtr Packet::getPreviousHop() const {
+    return previousHop;
 }
 
 char Packet::getType() const {
@@ -81,8 +81,8 @@ void Packet::setSender(AddressPtr newSender) {
     sender = newSender;
 }
 
-void Packet::setPenultimateHop(AddressPtr newPenultimateHop) {
-    penultimateHop = newPenultimateHop;
+void Packet::setPreviousHop(AddressPtr newPreviousHop) {
+    previousHop = newPreviousHop;
 }
 
 void Packet::increaseTTL() {
