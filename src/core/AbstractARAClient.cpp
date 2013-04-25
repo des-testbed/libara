@@ -227,6 +227,7 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
 
 void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
     AddressPtr sender = interface->getLocalAddress();
+    logWarn("Routing loop for packet %u from %s detected. Sending duplicate warning back to %s", packet->getSourceString().c_str(), packet->getSequenceNumber(), packet->getSenderString().c_str());
     Packet* duplicateWarningPacket = packetFactory->makeDulicateWarningPacket(packet, sender, getNextSequenceNumber());
     interface->send(duplicateWarningPacket, packet->getSender());
 }
@@ -473,8 +474,11 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
     }
 
     RouteDiscoveryInfo discoveryInfo = discovery->second;
+    const char* destinationString = discoveryInfo.originalPacket->getDestinationString().c_str();
+    logInfo("Route discovery for destination %s timed out", destinationString);
     if(discoveryInfo.nrOfRetries < maxNrOfRouteDiscoveryRetries) {
         discoveryInfo.nrOfRetries++;
+        logInfo("Restarting discovery for destination %s (%u/%u)", destinationString, discoveryInfo.nrOfRetries, maxNrOfRouteDiscoveryRetries);
         runningRouteDiscoveryTimers[routeDiscoveryTimer] = discoveryInfo;
         sendFANT(discoveryInfo.originalPacket->getDestination());
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
@@ -487,6 +491,7 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
         delete routeDiscoveryTimer;
 
         deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);
+        logWarn("Route discovery for destination %s unsuccessful. Dropping %u packet(s)", destinationString, undeliverablePackets.size());
         for(auto& packet: undeliverablePackets) {
             packetNotDeliverable(packet);
         }
