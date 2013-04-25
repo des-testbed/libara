@@ -16,11 +16,9 @@ using namespace std;
 
 OMNETARA_NAMESPACE_BEGIN
 
-OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay) : AbstractNetworkInterface(araClient) {
+OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClient, cGate* gateToARP, InterfaceEntry* interfaceEntry) : AbstractNetworkInterface(araClient) {
     this->omnetARAModule = module;
     this->gateToARP = gateToARP;
-    this->broadCastDelay = broadCastDelay;
-    this->uniCastDelay = uniCastDelay;
 
     IPv4Address localAddress = IPvXAddressResolver().getAddressFrom(interfaceEntry, IPvXAddressResolver::ADDR_IPv4).get4();
     IPv4Address netmask = interfaceEntry->ipv4Data()->getNetmask();
@@ -34,7 +32,7 @@ OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClien
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
-    send(packet, recipient, uniCastDelay);
+    send(packet, recipient, omnetARAModule->par("uniCastDelay").doubleValue());
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
@@ -63,7 +61,7 @@ OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {
 }
 
 void OMNeTGate::broadcast(const Packet* packet) {
-    send(packet, broadcastAddress, broadCastDelay);
+    send(packet, broadcastAddress, omnetARAModule->par("broadCastDelay").doubleValue());
 }
 
 bool OMNeTGate::equals(NetworkInterface* otherInterface) {

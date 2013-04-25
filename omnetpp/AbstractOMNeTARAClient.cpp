@@ -32,7 +32,7 @@ void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* cl
     for (int i=0; i < nrOfInterfaces; i++)         {
         InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
         if (interfaceEntry->isLoopback() == false) {
-            client->addNetworkInterface(new OMNeTGate(this, client, gateToARP, interfaceEntry, config.getBroadCastDelay(), config.getUniCastDelay()));
+            client->addNetworkInterface(new OMNeTGate(this, client, gateToARP, interfaceEntry));
         }
     }
 }

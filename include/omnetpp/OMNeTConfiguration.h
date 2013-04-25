@@ -17,7 +17,6 @@ OMNETARA_NAMESPACE_BEGIN
 class OMNeTConfiguration : public Configuration {
     public:
         OMNeTConfiguration(cModule* module);
-        void initializeNetworkInterfacesOf(AbstractARAClient* client);
 
         virtual EvaporationPolicy* getEvaporationPolicy();
         virtual PathReinforcementPolicy* getReinforcementPolicy();
@@ -29,8 +28,6 @@ class OMNeTConfiguration : public Configuration {
 
         virtual RoutingTable* getRoutingTable();
         Logger* getLogger();
-        double getUniCastDelay();
-        double getBroadCastDelay();
 
     protected:
         cModule* getHostModule();
@@ -46,9 +43,6 @@ class OMNeTConfiguration : public Configuration {
 
         cModule* simpleModule;
         Logger* logger;
-
-        double broadCastDelay;
-        double uniCastDelay;
 };
 
 OMNETARA_NAMESPACE_END
