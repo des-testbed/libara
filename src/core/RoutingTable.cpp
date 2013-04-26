@@ -106,7 +106,6 @@ std::deque<RoutingTableEntry*> RoutingTable::getPossibleNextHops(const Packet* p
 }
 
 bool RoutingTable::isDeliverable(AddressPtr destination) {
-    triggerEvaporation();
     return table.find(destination) != table.end();
 }
 

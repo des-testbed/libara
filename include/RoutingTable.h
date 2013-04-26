@@ -80,9 +80,13 @@ public:
      */
     RoutingTableEntryTupel getEntryAt(int wantedPosition) const;
 
+    /**
+     * Triggers the evaporation process if enough time since the last evaporation has passed.
+     */
+    void triggerEvaporation();
+
 protected:
     bool hasTableBeenAccessedEarlier();
-    void triggerEvaporation();
     virtual void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
     Time* lastAccessTime;
 
