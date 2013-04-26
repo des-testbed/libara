@@ -408,6 +408,7 @@ bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 
 void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     AddressPtr source = packet->getSource();
+    AddressPtr sender = packet->getSender();
     AddressPtr previousHop = packet->getPreviousHop();
 
     // first check the lastReceived sequence numbers for this source
@@ -431,14 +432,14 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
         // There is no record of any known intermediate node for this source address ~> create new
         listOfKnownIntermediateNodes = new unordered_set<AddressPtr>();
         listOfKnownIntermediateNodes->insert(packet->getSender());
-        if(previousHop != nullptr) {
+        if(previousHop != nullptr && previousHop->equals(sender) == false) {
             listOfKnownIntermediateNodes->insert(previousHop);
         }
         knownIntermediateHops[source] = listOfKnownIntermediateNodes;
     }
     else {
         listOfKnownIntermediateNodes = foundIntermediateHopsForSource->second;
-        listOfKnownIntermediateNodes->insert(packet->getSender());
+        listOfKnownIntermediateNodes->insert(sender);
         if(previousHop != nullptr) {
             listOfKnownIntermediateNodes->insert(previousHop);
         }
