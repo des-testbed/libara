@@ -10,6 +10,7 @@
 #include "IInterfaceTable.h"
 
 #include <omnetpp.h>
+#include <string>
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -24,8 +25,10 @@ protected:
     struct NodeInfo {
         NodeInfo() {hasInterfaceTable=false; interfaceTable=NULL;}
         bool hasInterfaceTable;
+        std::string name;
         IInterfaceTable* interfaceTable;
         IPv4Address address;
+        bool isVectorNode = false;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 
@@ -36,6 +39,7 @@ protected:
     void extractTopology(cTopology& topo);
     void assignAddresses(cTopology& topology);
     void assignAddressToNode(unsigned int i, unsigned int n, uint32 networkAddress);
+    int extractNodeNumber(int i);
 
 private:
     NodeInfoVector nodeInfo;
