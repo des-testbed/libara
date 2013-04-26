@@ -1,17 +1,6 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ * $FU-Copyright$
+ */
 
 #include "omnetpp/ARANetworkConfigurator.h"
 #include "IPvXAddressResolver.h"
@@ -22,8 +11,7 @@
 
 using namespace std;
 
-namespace ARA {
-namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
 Define_Module(ARANetworkConfigurator);
 
@@ -67,27 +55,33 @@ void ARANetworkConfigurator::assignAddresses(cTopology& topology) {
     }
 
     int numberOfAssignedNodes = 0;
-    for (int i=0; i < nrOfNodes; i++) {
-
+    for (int i=1; i < nrOfNodes; i++) {
         if (nodeInfo[i].hasInterfaceTable == false) {
             EV << "Skipping node " << i;
             continue;
         }
+        else {
+            assignAddressToNode(i, ++numberOfAssignedNodes, networkAddress);
+        }
+    }
 
-        uint32 address = networkAddress | uint32(++numberOfAssignedNodes);
-        nodeInfo[i].address.set(address);
+    // assign node[0] at last so every other node[i] has an address like 192.168.0.i
+    assignAddressToNode(0, ++numberOfAssignedNodes, networkAddress);
+}
 
-        // find interface table and assign address to all (non-loopback) interfaces
-        IInterfaceTable* interfaceTable = nodeInfo[i].interfaceTable;
-        for (int k=0; k < interfaceTable->getNumInterfaces(); k++)         {
-            InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
-            if (interfaceEntry->isLoopback() == false) {
-                IPv4Address newIPv4Address = IPv4Address(address);
-                interfaceEntry->ipv4Data()->setIPAddress(newIPv4Address);
-                interfaceEntry->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
-                //TODO check the line above
-                EV << "Assigning IP " << newIPv4Address << " to node " << i << "\n";
-            }
+void ARANetworkConfigurator::assignAddressToNode(unsigned int i, unsigned int n, uint32 networkAddress) {
+    uint32 address = networkAddress | uint32(n);
+    nodeInfo[i].address.set(address);
+
+    // find interface table and assign address to all (non-loopback) interfaces
+    IInterfaceTable* interfaceTable = nodeInfo[i].interfaceTable;
+    for (int k=0; k < interfaceTable->getNumInterfaces(); k++)         {
+        InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
+        if (interfaceEntry->isLoopback() == false) {
+            IPv4Address newIPv4Address = IPv4Address(address);
+            interfaceEntry->ipv4Data()->setIPAddress(newIPv4Address);
+            interfaceEntry->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
+            EV << "Assigning IP " << newIPv4Address << " to node " << i << "\n";
         }
     }
 }
@@ -96,5 +90,4 @@ void ARANetworkConfigurator::handleMessage(cMessage *msg) {
     throw cRuntimeError("The ARA::NetworkConfigurator does not use handle messages. Please do not connect anything directly to this module.");
 }
 
-} /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END
