@@ -10,7 +10,7 @@
 namespace ARA {
     class ExponentialEvaporationPolicyMock : public ExponentialEvaporationPolicy {
         public:
-            ExponentialEvaporationPolicyMock(float evaporationFactor = 0.8, float threshold = 0.5, int timeIntervalMillis = 1000);
+            ExponentialEvaporationPolicyMock(float evaporationFactor = 0.8, int timeIntervalMillis = 1000, float threshold = 0.5);
             float getEvaporationFactor() const;
     };
 }

@@ -18,7 +18,7 @@ namespace ARA {
      */
     class EvaporationPolicy {
         public:
-            EvaporationPolicy(unsigned int timeIntervalInMilliSeconds = 1000, unsigned int minimumTimeDifferenceBeforeEvaporation = 50) : timeInterval(timeIntervalInMilliSeconds), minimumTimeDifferenceBeforeEvaporation(minimumTimeDifferenceBeforeEvaporation) {}
+            EvaporationPolicy(unsigned int timeIntervalInMilliSeconds=1000, unsigned int minimumTimeDifferenceBeforeEvaporation=20) : timeInterval(timeIntervalInMilliSeconds), minimumTimeDifferenceBeforeEvaporation(minimumTimeDifferenceBeforeEvaporation) {}
             virtual ~EvaporationPolicy() {}
 
             /**
