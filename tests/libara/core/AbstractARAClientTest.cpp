@@ -846,6 +846,7 @@ TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
     oldPhiToSrc = newPhiToSrc;
 
     TimeMock::letTimePass(2000);
+    routingTable->triggerEvaporation();
 
     newPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
     newPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);

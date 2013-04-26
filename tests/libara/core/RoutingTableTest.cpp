@@ -219,12 +219,14 @@ TEST(RoutingTableTest, evaporatePheromones) {
     routingTable->update(destination, nodeC, &interface, pheromoneValueC);
 
     // no time has passed so nothing is evaporated
+    routingTable->triggerEvaporation();
     CHECK_EQUAL(pheromoneValueA, routingTable->getPheromoneValue(destination, nodeA, &interface));
     CHECK_EQUAL(pheromoneValueB, routingTable->getPheromoneValue(destination, nodeB, &interface));
     CHECK_EQUAL(pheromoneValueC, routingTable->getPheromoneValue(destination, nodeC, &interface));
 
     // let some time pass to trigger the evaporation
     TimeMock::letTimePass(evaporationPolicy->getTimeInterval());
+    routingTable->triggerEvaporation();
     float evaporationFactor = evaporationPolicy->getEvaporationFactor();
     DOUBLES_EQUAL(pheromoneValueA * evaporationFactor, routingTable->getPheromoneValue(destination, nodeA, &interface), 0.00001);
     DOUBLES_EQUAL(pheromoneValueB * evaporationFactor, routingTable->getPheromoneValue(destination, nodeB, &interface), 0.00001);
