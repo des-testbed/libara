@@ -23,7 +23,7 @@ namespace ARA {
              * @param threshold denotes at what point the pheromone level is set to 0
              * @param timeIntervalMillis denotes the time interval in milliseconds at which the evaporation periodically should take place
              */
-            ExponentialEvaporationPolicy(float evaporationFactor, float threshold, unsigned int timeIntervalMillis = 1000);
+            ExponentialEvaporationPolicy(float evaporationFactor, float threshold, unsigned int timeIntervalMillis = 10);
 
             float evaporate(float oldPheromoneValue, int millisecondsSinceLastEvaporation);
 
