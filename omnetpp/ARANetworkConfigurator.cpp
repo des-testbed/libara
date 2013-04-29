@@ -112,7 +112,10 @@ void ARANetworkConfigurator::assignAddressToNode(unsigned int i, unsigned int n,
             interfaceEntry->ipv4Data()->setIPAddress(newIPv4Address);
             interfaceEntry->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
             EV << "Assigning IP " << newIPv4Address << " to node " << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "]" : "") << endl;
-            ipMACMapping[newIPv4Address] = interfaceEntry->getMacAddress();
+
+            MACAddress macAddress = MACAddress((interfaceEntry->getMacAddress().getInt() & 0xFFFF00000000) | n);
+            interfaceEntry->setMACAddress(macAddress);
+            ipMACMapping[newIPv4Address] = macAddress;
         }
     }
 }
