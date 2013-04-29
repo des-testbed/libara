@@ -158,6 +158,9 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             if (isRouteDiscoveryRunning(destination) == false) {
                 startNewRouteDiscovery(packet);
             }
+            else {
+                logTrace("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
+            }
         }
     }
     else {
@@ -350,7 +353,7 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
 
 void AbstractARAClient::sendDeliverablePackets(const Packet* packet) {
     deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
-    logDebug("BANT %u came back from %s. %u trapped packet can now be delivered", packet->getSequenceNumber(), packet->getSourceString().c_str(), deliverablePackets->size());
+    logDebug("BANT %u came back from %s. %u trapped packet(s) can now be delivered", packet->getSequenceNumber(), packet->getSourceString().c_str(), deliverablePackets->size());
 
     for(auto& deliverablePacket : *deliverablePackets) {
         packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
@@ -506,9 +509,11 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
     routingTable->removeEntry(packet->getDestination(), nextHop, interface);
 
     if (routingTable->isDeliverable(packet)) {
+        logWarn("Link over %s is broken. Sending over alternative route", nextHop->toString().c_str());
         sendPacket(packet);
     }
     else {
+        logWarn("Link over %s is broken and can not be repaired. Dropping packet %u from %s.", nextHop->toString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
         handleCompleteRouteFailure(packet);
     }
 }

@@ -25,7 +25,7 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     maxTTL = module->par("maxTTL").longValue();
     routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
 
-    logger = new SimpleLogger(getHostModule()->getName());
+    logger = new SimpleLogger(getHostModule()->getFullName());
 }
 
 EvaporationPolicy* OMNeTConfiguration::getEvaporationPolicy() {
