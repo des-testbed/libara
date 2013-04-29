@@ -112,12 +112,17 @@ void ARANetworkConfigurator::assignAddressToNode(unsigned int i, unsigned int n,
             interfaceEntry->ipv4Data()->setIPAddress(newIPv4Address);
             interfaceEntry->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
             EV << "Assigning IP " << newIPv4Address << " to node " << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "]" : "") << endl;
+            ipMACMapping[newIPv4Address] = interfaceEntry->getMacAddress();
         }
     }
 }
 
 void ARANetworkConfigurator::handleMessage(cMessage *msg) {
     throw cRuntimeError("The ARA::NetworkConfigurator does not use handle messages. Please do not connect anything directly to this module.");
+}
+
+MACAddress ARANetworkConfigurator::getMACAddressByIP(IPv4Address address) {
+    return ipMACMapping[address];
 }
 
 OMNETARA_NAMESPACE_END
