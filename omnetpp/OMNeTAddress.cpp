@@ -10,9 +10,9 @@ using namespace std;
 OMNETARA_NAMESPACE_BEGIN
 
 std::string OMNeTAddress::toString() const {
-    char buffer[4];
+    char buffer[6];
     char* string = buffer;
-    sprintf(string, "%u", getAddressByte(5));
+    sprintf(string, "[%u]", getAddressByte(5));
     *(string-1) = '\0';
     return std::string(buffer);
 }
