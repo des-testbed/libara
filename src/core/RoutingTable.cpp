@@ -172,20 +172,32 @@ void RoutingTable::triggerEvaporation() {
         if(evaporationPolicy->isEvaporationNecessary(timeDifference)) {
             lastAccessTime->setToCurrentTime();
 
-            std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator i;
-            for (i=table.begin(); i!=table.end(); i++) {
-                std::pair<AddressPtr const, std::deque<RoutingTableEntry*>*> entryPair = *i;
-                std::deque<RoutingTableEntry*>* entryList = entryPair.second;
+            std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::iterator i = table.begin();
+            while(i!=table.end()) {
+                std::pair<AddressPtr const, RoutingTableEntryList*> entryPair = *i;
+                AddressPtr destination = entryPair.first;
+                RoutingTableEntryList* entryList = entryPair.second;
 
-                for (auto& entry: *entryList) {
+                RoutingTableEntryList::iterator j = entryList->begin();
+                while(j != entryList->end()) {
+                    RoutingTableEntry* entry = *j;
                     float newPheromoneValue = evaporationPolicy->evaporate(entry->getPheromoneValue(), timeDifference);
                     if(newPheromoneValue > 0) {
                         entry->setPheromoneValue(newPheromoneValue);
+                        j++;
                     }
                     else {
-                        //TODO delete entry from table
-                        entry->setPheromoneValue(newPheromoneValue);
+                        delete entry;
+                        j = entryList->erase(j);
                     }
+                }
+
+                if(entryList->empty()) {
+                    delete entryList;
+                    i = table.erase(i);
+                }
+                else {
+                    i++;
                 }
             }
         }

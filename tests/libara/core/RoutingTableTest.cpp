@@ -366,3 +366,25 @@ TEST(RoutingTableTest, getTotalNumberOfEntries) {
     routingTable->update(nodeB, nodeC, &interface, 1.2);
     BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
 }
+
+TEST(RoutingTableTest, TableEntriesAreDeletedIfEvaporationReachesZero) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+
+    // empty at the beginning
+    routingTable->triggerEvaporation();
+    BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
+
+    // create some routes
+    routingTable->update(nodeA, nodeB, &interface, 2);
+    routingTable->update(nodeA, nodeC, &interface, 2);
+    routingTable->update(nodeB, nodeC, &interface, 2);
+    BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
+
+    // now let them all evaporate
+    TimeMock::letTimePass(100000);
+    routingTable->triggerEvaporation();
+    BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
+}
