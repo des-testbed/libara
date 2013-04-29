@@ -92,7 +92,7 @@ TEST(ARAClientMockTest, getNumberOfRouteFailures) {
     AddressPtr nextHop (new AddressMock("foo"));
 
     BYTES_EQUAL(0, client->getNumberOfRouteFailures());
-    client->handleRouteFailure(packet, nextHop, interface);
+    client->handleBrokenLink(packet, nextHop, interface);
     BYTES_EQUAL(1, client->getNumberOfRouteFailures());
 }
 

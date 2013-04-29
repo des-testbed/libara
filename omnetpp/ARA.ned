@@ -15,6 +15,7 @@ simple ARA {
         @statistic[packetDelivered](title="Packets devlivered";record=count,vector);
         @statistic[packetUnDeliverable](title="Packets undevliverable";record=count,vector);
         @statistic[routingLoopDetected](title="Routing loops";record=count,vector);
+        @statistic[routeFailure](title="Route Failures";record=count,vector);
 
     gates:
         inout  upperLayerGate;

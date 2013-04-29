@@ -14,6 +14,7 @@
 #include "Environment.h"
 
 #include "testAPI/mocks/ARAClientMock.h"
+#include "testAPI/mocks/RoutingTableMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/AddressMock.h"
@@ -27,13 +28,13 @@ typedef std::shared_ptr<Address> AddressPtr;
 TEST_GROUP(AbstractARAClientTest) {
     ARAClientMock* client;
     PacketTrap* packetTrap;
-    RoutingTable* routingTable;
+    RoutingTableMock* routingTable;
     PacketFactory* packetFactory;
 
     void setup() {
         client = new ARAClientMock();
         packetTrap = client->getPacketTrap();
-        routingTable = client->getRoutingTable();
+        routingTable = (RoutingTableMock*) client->getRoutingTable();
         packetFactory = client->getPacketFactory();
     }
 
@@ -45,18 +46,7 @@ TEST_GROUP(AbstractARAClientTest) {
      * Returns true iff a route to destination via nextHop and interface is known in the RoutingTable.
      */
     bool routeIsKnown(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-        std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
-        if(possibleNextHops.empty()) {
-            return false;
-        }
-        else {
-            for(auto& possibleHop: possibleNextHops) {
-                if(possibleHop->getAddress()->equals(nextHop) && possibleHop->getNetworkInterface()->equals(interface)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        return routingTable->exists(destination, nextHop, interface);
     }
 };
 
@@ -430,6 +420,7 @@ TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
     CHECK(sentPacket->getSource()->equals(nodeA));
     CHECK(sentPacket->getDestination()->equals(nodeB));
     CHECK(sentPacket->getSender()->equals(nodeA));
+    CHECK(sentPacket->getPreviousHop()->equals(nodeA));
     CHECK_EQUAL(PacketType::BANT, sentPacket->getType());
     LONGS_EQUAL(maxHopCount, sentPacket->getTTL());
     LONGS_EQUAL(lastSequenceNumber+1, sentPacket->getSequenceNumber());
@@ -722,9 +713,10 @@ TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
  */
 TEST(AbstractARAClientTest, doNotSaveRoutesToSelf) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("source");
-    AddressPtr source (new AddressMock("source"));
+    AddressPtr source = interface->getLocalAddress();
     AddressPtr destination (new AddressMock("destination"));
-    Packet* fant = new Packet(source, source, destination, PacketType::FANT, 123, 10);
+    Packet* fant = packetFactory->makeFANT(source, destination, 123);
+    fant->setPreviousHop(source);
 
     // sanity check
     CHECK(routingTable->isDeliverable(source) == false);
@@ -808,10 +800,15 @@ TEST(AbstractARAClientTest, pathToDestinationIsReinforced) {
     CHECK(newPhi > currentPhi);
 }
 
+/**
+ * Test setup:                           | Description:
+ * (source)---(A)---(B*)---(C)---(dest)  |   * We test from the perspective of node B
+ *                                       |
+ */
 TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
     NetworkInterface* interface = client->createNewNetworkInterfaceMock("B");
     AddressPtr source(new AddressMock("source"));
-    AddressPtr destination(new AddressMock("destination"));
+    AddressPtr destination(new AddressMock("dest"));
     AddressPtr nodeA(new AddressMock("A"));
     AddressPtr nodeC(new AddressMock("C"));
     int maxHopCount = 10;
@@ -820,36 +817,36 @@ TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
     CHECK(routeIsKnown(source, nodeA, interface) == false);
     CHECK(routeIsKnown(destination, nodeC, interface) == false);
 
-    // send FANT (source --> A --> _B_ --> C --> destination)
+    // receive FANT: (source)-->(A)-->(B*)-->(C)-->(dest)
     Packet* fant = new Packet(source, destination, nodeA, PacketType::FANT, 123, maxHopCount);
     client->receivePacket(fant, interface);
     CHECK(routeIsKnown(source, nodeA, interface));
 
-    // send BANT (source <-- A <-- _B_ <-- C <-- destination)
+    // receive BANT: (source)<--(A)<--(B*)<--(C)<--(dest)
     Packet* bant = new Packet(destination, source, nodeC, PacketType::BANT, 124, maxHopCount);
     client->receivePacket(bant, interface);
     CHECK(routeIsKnown(destination, nodeC, interface));
 
-    float oldPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
     float oldPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);
+    float oldPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
 
-    // send DATA (source --> A --> _B_ --> C --> destination)
-    CHECK(routingTable->isNewRoute(source, nodeA, interface) == false);
+    // receive DATA: (source)-->(A)-->(B*)-->(C)-->(dest)
     Packet* data = new Packet(source, destination, nodeA, PacketType::DATA, 125, maxHopCount);
     client->receivePacket(data, interface);
 
     // check if the reinforcement has worked on both sides of the route
-    float newPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
     float newPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);
+    float newPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
 
-    CHECK(newPhiToDest > oldPhiToDest);
     CHECK(newPhiToSrc > oldPhiToSrc);
+    CHECK(newPhiToDest > oldPhiToDest);
 
     // update the values so we can check the evaporation
     oldPhiToDest = newPhiToDest;
     oldPhiToSrc = newPhiToSrc;
 
     TimeMock::letTimePass(2000);
+    routingTable->triggerEvaporation();
 
     newPhiToDest = routingTable->getPheromoneValue(destination, nodeC, interface);
     newPhiToSrc = routingTable->getPheromoneValue(source, nodeA, interface);
@@ -884,7 +881,7 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     CHECK(sentPackets->empty());
 
     // start the test
-    client->handleRouteFailure(packet, route1, interface);
+    client->handleBrokenLink(packet, route1, interface);
 
     // the client is expected to delete the route from the routing table
     CHECK(routingTable->exists(destination, route1, interface) == false);
@@ -915,7 +912,7 @@ TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRoutesAreKownOnR
     CHECK(sentPackets->empty());
 
     // start the test
-    client->handleRouteFailure(packet, nextHop, interface);
+    client->handleBrokenLink(packet, nextHop, interface);
 
     // the client is expected to delete the route from the routing table
     CHECK(routingTable->exists(destination, nextHop, interface) == false);
@@ -1073,4 +1070,111 @@ TEST(AbstractARAClientTest, initialzePheromoneValue) {
 
     client->receivePacket(fant4, interface);
     DOUBLES_EQUAL(1 * (ttl4-1) + initialPhi, routingTable->getPheromoneValue(source, route4, interface), 0.000001);
+}
+
+/**
+ * In this test we check that a client sets the address of the node from which
+ * it received a packet as previous hop for the relayed packet.
+ *
+ * We test as Node (C)
+ * 1.                    2.
+ *  (A)-->(B)--p-->(C)    (A)-->(B)-->(C)--p-->(D)
+ *         |                     |
+ *         └ sender              └ now this is the previous hop for node (D)
+ */
+TEST(AbstractARAClientTest, addPreviousHopToPacket) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
+    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeD (new AddressMock("D"));
+
+    // first test this with a FANT
+    Packet* fant = new Packet(nodeA, nodeD, nodeB, PacketType::FANT, 1, 10);
+    client->receivePacket(fant, interface);
+
+    // check the previous hop of the relayed packet
+    BYTES_EQUAL(1, sentPackets->size());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
+    const Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(sentPacket->getPreviousHop()->equals(nodeB));
+
+    // the same should work if the route has been established and a DATA packet is relayed
+    Packet* data = new Packet(nodeD, nodeA, nodeD, PacketType::DATA, 2, 10);
+    client->receivePacket(data, interface);
+
+    BYTES_EQUAL(2, sentPackets->size());
+    sentPacketInfo = sentPackets->back();
+    sentPacket = sentPacketInfo->getLeft();
+    CHECK(sentPacket->getType() == PacketType::DATA);
+    CHECK(sentPacket->getPreviousHop()->equals(nodeD));
+}
+
+/**
+ * In this test we want to check that a client does not record a route to a destination (d)
+ * if he already knows a route to (d) which goes over the same previous hop (A).
+ *
+ * Test setup:                   | Description:
+ * (d)<--(A)<--(B)<--(...)       |   * (B) and (C) know a route to (d) via (A) from a previous broadcast
+ *        |     |                |   * if either (B) or (C) broadcast a FANT, each of the other will receive it,
+ *        |     |                |     but should not create the route via the other.
+ *        └-<--(C)<--(...)       |   * this means, there shall not be the route (C)->(B)->(A)->(d) or
+ *                               |                                              (B)->(C)->(A)->(d)
+ *                               |   * the only allowed routes are:  (B)->(A)->(d) and
+ *                               |                                   (C)->(A)->(d)
+ */
+TEST(AbstractARAClientTest, noRouteOverPreviousHop) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
+    AddressPtr nodeD (new AddressMock("d"));
+    AddressPtr destination (new AddressMock("..."));
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+
+    // we test from the perspective of node C
+    CHECK(routingTable->isDeliverable(nodeD) == false);
+
+    // at first we receive the broadcast from A
+    Packet* fantFromA = new Packet(nodeD, destination, nodeA, PacketType::FANT, 1, 10);
+    client->receivePacket(fantFromA, interface);
+
+    // this should have created a route to (d) via (A)
+    CHECK_TRUE(routeIsKnown(nodeD, nodeA, interface));
+
+    // now we receive the broadcast from (B)
+    Packet* fantFromB = new Packet(nodeD, destination, nodeB, PacketType::FANT, 1, 9);
+    fantFromB->setPreviousHop(nodeA);
+    client->receivePacket(fantFromB, interface);
+
+    // this should *not* create the route to (d) via (B)
+    CHECK_FALSE(routeIsKnown(nodeD, nodeB, interface));
+}
+
+/**
+ * In this test we want to check that a client does not record a route to a destination (d)
+ * if he one of his own interface addresses equals the previous hop of the received packet.
+ * This will prevent the host from creating routes that will lead over him self which would
+ * create a loop.
+ *
+ * Test setup:                   | Description:
+ * (src)<--(A)<--(B)<--(dest)    |   * We test from the perspective of node (A)
+
+ */
+TEST(AbstractARAClientTest, doNotCreateRouteOverSelf) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr destination (new AddressMock("dest"));
+    AddressPtr nodeB (new AddressMock("B"));
+
+    // lets assume we have already broadcasted a FANT to (B).
+    // we now simulate that (B) rebroadcasts this FANT again and we receive this packet as well
+    Packet* fantFromB =  new Packet(source, destination, nodeB, PacketType::FANT, 1, 10);
+    // of course (A) is now the previous hop from the perspective of (B)
+    fantFromB->setPreviousHop(interface->getLocalAddress());
+
+    // start the test
+    client->receivePacket(fantFromB, interface);
+
+    // we do *not* want to remember this route over the own address
+    CHECK(routeIsKnown(source, nodeB, interface) == false);
 }

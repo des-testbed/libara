@@ -5,6 +5,7 @@
 #ifndef ABSTRACTARACLIENT_H_
 #define ABSTRACTARACLIENT_H_
 
+#include "ARAMacros.h"
 #include "TimeoutEventListener.h"
 #include "Configuration.h"
 #include "Logger.h"
@@ -29,7 +30,8 @@
 
 namespace ARA {
 
-typedef std::shared_ptr<Address> AddressPtr;
+typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
+typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
 
 //TODO fix the visibility: most of the methods should be protected instead of public
 //TODO fix the indent
@@ -91,7 +93,7 @@ public:
      * This is the case if this client never receives an acknowledgment in the timeout period
      * and has tried too many times.
      */
-    virtual void handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
+    virtual void handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
     /**
      * This method will initialize this client with the given configuration, ~RoutingTable and ~PacketFactory.
@@ -245,6 +247,7 @@ protected:
     virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;
+    bool isLocalAddress(AddressPtr address) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
     void startNewRouteDiscovery(const Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
@@ -252,6 +255,9 @@ protected:
     bool isRouteDiscoveryRunning(AddressPtr destination);
     void stopRouteDiscoveryTimer(AddressPtr destination);
     void sendDeliverablePackets(const Packet* packet);
+    void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
+    bool hasPreviousNodeBeenSeenBefore(const Packet* packet);
+    virtual void handleCompleteRouteFailure(Packet* packet);
 
 protected:
     std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
@@ -273,7 +279,15 @@ protected:
 private:
     Logger* logger = nullptr;
     unsigned int nextSequenceNumber = 1;
-    std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> lastReceivedPackets;
+
+    //TODO the knownIntermediateHops and lastReceivedPackets may be merged into a single hashmap
+    LastReceivedPacketsMap lastReceivedPackets;
+
+    /**
+     * This hashmap records the seen hops to a specific destination. This includes direct neighbors as well as indirect
+     * nodes this client has learned from the penultimate packet field.
+     */
+    KnownIntermediateHopsMap knownIntermediateHops;
 };
 
 } /* namespace ARA */

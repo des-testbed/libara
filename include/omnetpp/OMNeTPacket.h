@@ -22,7 +22,7 @@ class OMNeTPacket : public cPacket, public Packet {
     bool operator==(const OMNeTPacket&);
 
   public:
-    OMNeTPacket(std::shared_ptr<Address> source=nullptr, std::shared_ptr<Address> destination=nullptr, std::shared_ptr<Address> sender=nullptr, char type=0, unsigned int seqNr=0, int ttl=50);
+    OMNeTPacket(AddressPtr source=nullptr, AddressPtr destination=nullptr, AddressPtr sender=nullptr, char type=0, unsigned int seqNr=0, int ttl=50);
     OMNeTPacket(const OMNeTPacket& other);
     OMNeTPacket& operator=(const OMNeTPacket& other);
     virtual OMNeTPacket *dup() const {return new OMNeTPacket(*this);}
@@ -32,6 +32,7 @@ class OMNeTPacket : public cPacket, public Packet {
     std::shared_ptr<OMNeTAddress> getSource() const;
     std::shared_ptr<OMNeTAddress> getDestination() const;
     std::shared_ptr<OMNeTAddress> getSender() const;
+    std::shared_ptr<OMNeTAddress> getPreviousHop() const;
 
     IPv4Address getSourceIP() const { return *(getSource().get()); }
     IPv4Address getDestinationIP() const { return *(getDestination().get()); }

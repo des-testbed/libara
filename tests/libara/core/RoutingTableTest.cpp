@@ -36,21 +36,13 @@ TEST_GROUP(RoutingTableTest) {
 };
 
 TEST(RoutingTableTest, getPossibleNextHopsReturnsEmptyList) {
-    AddressPtr destination (new AddressMock());
-
-    std::deque<RoutingTableEntry*> list = routingTable->getPossibleNextHops(destination);
+    PacketMock packet = PacketMock();
+    std::deque<RoutingTableEntry*> list = routingTable->getPossibleNextHops(&packet);
     CHECK(list.empty());
-}
-
-TEST(RoutingTableTest, unregisteredAddressIsNotDeliverable) {
-    AddressPtr destinationAddress (new AddressMock());
-
-    CHECK(routingTable->isDeliverable(destinationAddress) == false);
 }
 
 TEST(RoutingTableTest, packetWithUnregisteredAddressIsNotDeliverable) {
     PacketMock packet = PacketMock();
-
     CHECK(routingTable->isDeliverable(&packet) == false);
 }
 
@@ -128,7 +120,10 @@ TEST(RoutingTableTest, getPossibleNextHops) {
     routingTable->update(destination2, nextHop3, &interface3, pheromoneValue3);
     routingTable->update(destination2, nextHop4, &interface1, pheromoneValue4);
 
-    std::deque<RoutingTableEntry*> nextHopsForDestination1 = routingTable->getPossibleNextHops(destination1);
+    Packet packet1 = Packet(sourceAddress, destination1, sourceAddress, PacketType::DATA, 123, 10);
+    Packet packet2 = Packet(sourceAddress, destination2, sourceAddress, PacketType::DATA, 124, 10);
+
+    std::deque<RoutingTableEntry*> nextHopsForDestination1 = routingTable->getPossibleNextHops(&packet1);
     BYTES_EQUAL(3, nextHopsForDestination1.size());
     for (unsigned int i = 0; i < nextHopsForDestination1.size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination1.at(i);
@@ -150,7 +145,7 @@ TEST(RoutingTableTest, getPossibleNextHops) {
         }
     }
 
-    std::deque<RoutingTableEntry*> nextHopsForDestination2 = routingTable->getPossibleNextHops(destination2);
+    std::deque<RoutingTableEntry*> nextHopsForDestination2 = routingTable->getPossibleNextHops(&packet2);
     BYTES_EQUAL(2, nextHopsForDestination2.size());
     for (unsigned int i = 0; i < nextHopsForDestination2.size(); i++) {
         RoutingTableEntry* possibleHop = nextHopsForDestination2.at(i);
@@ -196,11 +191,13 @@ TEST(RoutingTableTest, removeEntry) {
     routingTable->update(destination, nodeC, &interface, 2.5);
 
     // start the test
+    BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
     routingTable->removeEntry(destination, nodeB, &interface);
+    BYTES_EQUAL(2, routingTable->getTotalNumberOfEntries());
 
-    std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
-    for(auto& entry: possibleNextHops) {
-        if(entry->getAddress()->equals(nodeB)) {
+    for (unsigned int i = 0; i < 2; i++) {
+        RoutingTableEntryTupel tupel = routingTable->getEntryAt(i);
+        if(tupel.entry->getAddress()->equals(nodeB)) {
             FAIL("The deleted hop should not longer be in the list of possible next hops");
         }
     }
@@ -222,12 +219,14 @@ TEST(RoutingTableTest, evaporatePheromones) {
     routingTable->update(destination, nodeC, &interface, pheromoneValueC);
 
     // no time has passed so nothing is evaporated
+    routingTable->triggerEvaporation();
     CHECK_EQUAL(pheromoneValueA, routingTable->getPheromoneValue(destination, nodeA, &interface));
     CHECK_EQUAL(pheromoneValueB, routingTable->getPheromoneValue(destination, nodeB, &interface));
     CHECK_EQUAL(pheromoneValueC, routingTable->getPheromoneValue(destination, nodeC, &interface));
 
     // let some time pass to trigger the evaporation
     TimeMock::letTimePass(evaporationPolicy->getTimeInterval());
+    routingTable->triggerEvaporation();
     float evaporationFactor = evaporationPolicy->getEvaporationFactor();
     DOUBLES_EQUAL(pheromoneValueA * evaporationFactor, routingTable->getPheromoneValue(destination, nodeA, &interface), 0.00001);
     DOUBLES_EQUAL(pheromoneValueB * evaporationFactor, routingTable->getPheromoneValue(destination, nodeB, &interface), 0.00001);

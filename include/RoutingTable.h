@@ -19,9 +19,14 @@
 
 ARA_NAMESPACE_BEGIN
 
-class RoutingTable {
+struct RoutingTableEntryTupel {
+    AddressPtr destination;
+    RoutingTableEntry* entry;
+};
 
 #define RoutingTableEntryList std::deque<RoutingTableEntry*>
+
+class RoutingTable {
 
 public:
     RoutingTable();
@@ -36,19 +41,18 @@ public:
     void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
 
     void removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
-    RoutingTableEntryList getPossibleNextHops(AddressPtr destination);
     RoutingTableEntryList getPossibleNextHops(const Packet* packet);
-
-    /**
-     * Returns true if there is a known route to a given destination, else false
-     */
-    bool isDeliverable(AddressPtr destination);
 
     /**
      * Checks if a route to the packet destination exists, that does *not* lead
      * over the packets sender.
      */
     bool isDeliverable(const Packet* packet);
+
+    /**
+     * Returns true if there is at least one stored route for the given destination in this routing table.
+     */
+    bool isDeliverable(AddressPtr destination);
 
     /**
      * The method checks if an destination/nextHop/interface entry already exists.
@@ -74,11 +78,15 @@ public:
      * Returns the n'th ~RoutingTableEntry.
      * This method is only used to display the routing table entries to the user.
      */
-    RoutingTableEntry* getEntryAt(int wantedPosition) const;
+    RoutingTableEntryTupel getEntryAt(int wantedPosition) const;
+
+    /**
+     * Triggers the evaporation process if enough time since the last evaporation has passed.
+     */
+    void triggerEvaporation();
 
 protected:
     bool hasTableBeenAccessedEarlier();
-    void triggerEvaporation();
     virtual void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
     Time* lastAccessTime;
 

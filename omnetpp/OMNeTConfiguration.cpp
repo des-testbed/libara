@@ -26,9 +26,6 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
 
     logger = new SimpleLogger(getHostModule()->getName());
-
-    broadCastDelay = module->par("broadCastDelay").doubleValue();
-    uniCastDelay = module->par("uniCastDelay").doubleValue();
 }
 
 EvaporationPolicy* OMNeTConfiguration::getEvaporationPolicy() {
@@ -61,14 +58,6 @@ unsigned int OMNeTConfiguration::getRouteDiscoveryTimeoutInMilliSeconds() {
 
 Logger* OMNeTConfiguration::getLogger() {
     return logger;
-}
-
-double OMNeTConfiguration::getBroadCastDelay() {
-    return broadCastDelay;
-}
-
-double OMNeTConfiguration::getUniCastDelay() {
-    return uniCastDelay;
 }
 
 RoutingTable* OMNeTConfiguration::getRoutingTable() {

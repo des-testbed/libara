@@ -16,6 +16,8 @@
 
 namespace ARA {
 
+typedef std::unordered_map<std::shared_ptr<Address>, std::unordered_set<Packet*, PacketHash, PacketPredicate>*, AddressHash, AddressPredicate> TrappedPacketsMap;
+
 class PacketTrap {
 public:
     PacketTrap(RoutingTable* routingTable);
@@ -69,7 +71,7 @@ private:
      * The Values are hashsets themselves because we also have to find individual
      * packets everytime we want to untrap a packet (i.e. after acknowledgment).
      */
-    std::unordered_map<std::shared_ptr<Address>, std::unordered_set<Packet*, PacketHash, PacketPredicate>*, AddressHash, AddressPredicate> trappedPackets;
+    TrappedPacketsMap trappedPackets;
 
     RoutingTable* routingTable;
 

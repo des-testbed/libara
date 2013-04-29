@@ -14,6 +14,7 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
     this->source = source;
     this->destination = destination;
     this->sender = sender;
+    this->previousHop = nullptr;
     this->type = type;
     this->seqNr = seqNr;
 
@@ -52,6 +53,10 @@ AddressPtr Packet::getSender() const {
     return sender;
 }
 
+AddressPtr Packet::getPreviousHop() const {
+    return previousHop;
+}
+
 char Packet::getType() const {
     return type;
 }
@@ -74,6 +79,10 @@ unsigned int Packet::getPayloadLength() const {
 
 void Packet::setSender(AddressPtr newSender) {
     sender = newSender;
+}
+
+void Packet::setPreviousHop(AddressPtr newPreviousHop) {
+    previousHop = newPreviousHop;
 }
 
 void Packet::increaseTTL() {

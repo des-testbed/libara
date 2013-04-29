@@ -17,7 +17,7 @@ PacketTrap::PacketTrap(RoutingTable* routingTable) {
 
 PacketTrap::~PacketTrap() {
     // delete all packets that might still be trapped
-    unordered_map<AddressPtr, PacketSet*>::iterator iterator;
+    TrappedPacketsMap::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
         pair<AddressPtr, PacketSet*> entryPair = *iterator;
         PacketSet* packetSet = entryPair.second;
@@ -46,7 +46,7 @@ void PacketTrap::trapPacket(Packet* packet) {
 
 void PacketTrap::untrapPacket(Packet* packet) {
     AddressPtr packetDestination = packet->getDestination();
-    unordered_map<AddressPtr, PacketSet*>::const_iterator found = trappedPackets.find(packetDestination);
+    TrappedPacketsMap::const_iterator found = trappedPackets.find(packetDestination);
     if(found != trappedPackets.end()) {
         PacketSet* packetSet = found->second;
         PacketSet::const_iterator storedPacketIterator = packetSet->find(packet);
@@ -71,7 +71,7 @@ void PacketTrap::untrapPacket(Packet* packet) {
 
 bool PacketTrap::contains(Packet* packet) {
     AddressPtr packetDestination = packet->getDestination();
-    unordered_map<AddressPtr, PacketSet*>::const_iterator found = trappedPackets.find(packetDestination);
+    TrappedPacketsMap::const_iterator found = trappedPackets.find(packetDestination);
     if(found != trappedPackets.end()) {
         PacketSet* packetSet = found->second;
         return packetSet->find(packet) != packetSet->end();
@@ -88,12 +88,12 @@ bool PacketTrap::isEmpty() {
 deque<Packet*>* PacketTrap::getDeliverablePackets() {
     deque<Packet*>* deliverablePackets = new deque<Packet*>();
 
-    unordered_map<AddressPtr, PacketSet*>::iterator iterator;
+    TrappedPacketsMap::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
         pair<AddressPtr, PacketSet*> entryPair = *iterator;
-        AddressPtr address = entryPair.first;
+        AddressPtr destination = entryPair.first;
 
-        if(routingTable->isDeliverable(address)) {
+        if(routingTable->isDeliverable(destination)) {
             // Add all packets for this destination
             PacketSet* packets = entryPair.second;
             for(auto& trappedPacket: *packets) {
@@ -112,7 +112,7 @@ void PacketTrap::setRoutingTable(RoutingTable *routingTable){
 
 std::deque<Packet*> PacketTrap::removePacketsForDestination(std::shared_ptr<Address> destination) {
     std::deque<Packet*> removedPackets = std::deque<Packet*>();
-    unordered_map<AddressPtr, PacketSet*>::const_iterator packetsForDestination = trappedPackets.find(destination);
+    TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
 
     if(packetsForDestination != trappedPackets.end()) {
         PacketSet* packetSet = packetsForDestination->second;

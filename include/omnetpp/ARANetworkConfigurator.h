@@ -1,28 +1,18 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef __ARA_SIMULATION_NETWORKCONFIGURATOR_H_
 #define __ARA_SIMULATION_NETWORKCONFIGURATOR_H_
 
+#include "OMNeTARAMacros.h"
 #include "IPv4Address.h"
 #include "IInterfaceTable.h"
 
 #include <omnetpp.h>
+#include <string>
 
-namespace ARA {
-namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
 /**
  * The NetworkConfigurator assigns IPv4 addresses to all nodes in the network.
@@ -35,8 +25,10 @@ protected:
     struct NodeInfo {
         NodeInfo() {hasInterfaceTable=false; interfaceTable=NULL;}
         bool hasInterfaceTable;
+        std::string name;
         IInterfaceTable* interfaceTable;
         IPv4Address address;
+        bool isVectorNode = false;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 
@@ -46,12 +38,13 @@ protected:
 
     void extractTopology(cTopology& topo);
     void assignAddresses(cTopology& topology);
+    void assignAddressToNode(unsigned int i, unsigned int n, uint32 networkAddress);
+    int extractNodeNumber(int i);
 
 private:
     NodeInfoVector nodeInfo;
 };
 
-} /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END
 
 #endif

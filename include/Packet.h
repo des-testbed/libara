@@ -5,12 +5,15 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
+#include "ARAMacros.h"
 #include "Address.h"
 #include "PacketType.h"
+
 #include <stddef.h>
 #include <memory>
+#include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 /**
  * Packets encapsulate a payload that has to be transmitted from
@@ -18,8 +21,8 @@ namespace ARA {
  */
 class Packet {
 public:
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, char type, unsigned int seqNr, int ttl);
+    Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
+    Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr, int ttl);
     virtual ~Packet();
 
     /**
@@ -30,8 +33,9 @@ public:
      *
      * @see Packet::getDestination()
      * @see Packet::getSender()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getSource() const;
+    AddressPtr getSource() const;
 
     /**
      * Returns the address of the node to whom the payload of this packet is directed.
@@ -40,8 +44,9 @@ public:
      *
      * @see Packet::getSource()
      * @see Packet::getSender()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getDestination() const;
+    AddressPtr getDestination() const;
 
     /**
      * Returns the address of the node from which this packet has been received (layer 2).
@@ -50,8 +55,19 @@ public:
      *
      * @see Packet::getSource()
      * @see Packet::getDestination()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getSender() const;
+    AddressPtr getSender() const;
+
+    /**
+     * Returns the address of the node from which the sender has received this packet.
+     * This may be nullptr if the sender equals the source.
+     *
+     * @see Packet::getSource()
+     * @see Packet::getDestination()
+     * @see Packet::getSender()
+     */
+    AddressPtr getPreviousHop() const;
 
     /**
      * Returns the null-terminated string representation of the address of the source.
@@ -60,7 +76,7 @@ public:
      *
      * @see Packet::getSource()
      */
-    const char* getSourceString() const {
+    std::string getSourceString() const {
         return getSource()->toString();
     }
 
@@ -71,7 +87,7 @@ public:
      *
      * @see Packet::getSender()
      */
-    const char* getSenderString() const {
+    std::string getSenderString() const {
         return getSender()->toString();
     }
 
@@ -82,14 +98,19 @@ public:
      *
      * @see Packet::getDestination()
      */
-    const char* getDestinationString() const {
+    std::string getDestinationString() const {
         return getDestination()->toString();
     }
 
     /**
      * Assigns a new sender to this packet.
      */
-    void setSender(std::shared_ptr<Address> newSender);
+    void setSender(AddressPtr newSender);
+
+    /**
+     * Assigns a new penultimate hop to this packet.
+     */
+    void setPreviousHop(AddressPtr newPreviousHop);
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
@@ -155,9 +176,10 @@ public:
     }
 
 protected:
-    std::shared_ptr<Address> source;
-    std::shared_ptr<Address> destination;
-    std::shared_ptr<Address> sender;
+    AddressPtr source;
+    AddressPtr destination;
+    AddressPtr sender;
+    AddressPtr previousHop;
     char type;
     unsigned int seqNr;
     const char* payload;
@@ -186,5 +208,6 @@ struct PacketPredicate {
     }
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif // PACKET_H_

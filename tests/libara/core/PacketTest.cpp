@@ -97,8 +97,8 @@ TEST(PacketTest, calculatePayloadLength) {
 TEST(PacketTest, setSender) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
-    AddressPtr sender1 (new AddressMock("originalSender"));
-    AddressPtr sender2 (new AddressMock("originalSender"));
+    AddressPtr sender1 (new AddressMock("A"));
+    AddressPtr sender2 (new AddressMock("B"));
     char type = PacketType::DATA;
     unsigned int seqNr = 1;
     int ttl = 15;
@@ -141,7 +141,28 @@ TEST(PacketTest, getAddressString) {
     int ttl = 20;
 
     Packet packet = Packet(originalSource, originalDestination, originalSender, type, seqenceNumber, ttl);
-    STRCMP_EQUAL("source", packet.getSourceString());
-    STRCMP_EQUAL("sender", packet.getSenderString());
-    STRCMP_EQUAL("destination", packet.getDestinationString());
+    STRCMP_EQUAL("source", packet.getSourceString().c_str());
+    STRCMP_EQUAL("sender", packet.getSenderString().c_str());
+    STRCMP_EQUAL("destination", packet.getDestinationString().c_str());
+}
+
+TEST(PacketTest, setPreviousHop) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr prevHop1 (new AddressMock("A"));
+    AddressPtr prevHop2 (new AddressMock("B"));
+    char type = PacketType::DATA;
+    unsigned int seqNr = 1;
+    int ttl = 15;
+    const char* payload = "Hello World";
+
+    Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload);
+    CHECK(packet.getPreviousHop() == nullptr);
+
+    packet.setPreviousHop(prevHop1);
+    CHECK(packet.getPreviousHop()->equals(prevHop1));
+
+    packet.setPreviousHop(prevHop2);
+    CHECK(packet.getPreviousHop()->equals(prevHop2));
 }

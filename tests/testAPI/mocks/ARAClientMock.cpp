@@ -8,6 +8,7 @@
 #include "PacketFactory.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
+#include "testAPI/mocks/RoutingTableMock.h"
 #include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
@@ -26,7 +27,7 @@ ARAClientMock::ARAClientMock() {
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initialize(configuration, new RoutingTable(), new PacketFactory(15));
+    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
 }
 
 void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
@@ -34,9 +35,9 @@ void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
     AbstractARAClient::receivePacket(packet, interface);
 }
 
-void ARAClientMock::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+void ARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     storeRouteFailurePacket(packetFactory->makeClone(packet), nextHop, interface);
-    AbstractARAClient::handleRouteFailure(packet, nextHop, interface);
+    AbstractARAClient::handleBrokenLink(packet, nextHop, interface);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {

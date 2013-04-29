@@ -27,3 +27,5 @@ undeliverable
 omnetpp
 dest
 src
+penultimate
+pheromones
