@@ -17,6 +17,7 @@ OMNETARA_NAMESPACE_BEGIN
 MessageDispatcher::MessageDispatcher(AbstractOMNeTARAClient* module, AbstractARAClient* araClient) {
     this->module = module;
     this->araClient = araClient;
+    this->networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
 }
 
 void MessageDispatcher::setPacketFactory(PacketFactory* factory) {
@@ -44,13 +45,15 @@ bool MessageDispatcher::isFromUpperLayer(cMessage* message) {
 
 void MessageDispatcher::handleUpperLayerMessage(cMessage* message) {
     IPv4ControlInfo* controlInfo = (IPv4ControlInfo*)message->getControlInfo();
-    IPv4Address sourceIP = controlInfo->getSrcAddr();
     IPv4Address destinationIP = controlInfo->getDestAddr();
-    EV << "Handling upper layer message from " << sourceIP << " to " << destinationIP << ": "<< message << "\n";
+    MACAddress destinationMAC = networkConfig->getMACAddressByIP(destinationIP);
+    AddressPtr destination = AddressPtr(new OMNeTAddress(destinationMAC));
 
-    AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));
-    AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
+    IPv4Address sourceIP = controlInfo->getSrcAddr();
+    MACAddress sourceMAC = networkConfig->getMACAddressByIP(sourceIP);
+    AddressPtr source = AddressPtr(new OMNeTAddress(sourceMAC));;
     AddressPtr sender = source;
+
     OMNeTPacket* omnetPacket = packetFactory->createOMNetPacket(source, destination, sender, PacketType::DATA, araClient->getNextSequenceNumber());
     omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
 

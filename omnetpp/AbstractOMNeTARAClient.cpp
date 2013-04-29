@@ -20,8 +20,6 @@ void AbstractOMNeTARAClient::initialize() {
 }
 
 void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& config) {
-    cGate* gateToARP = gate("arpOut");
-
     ASSERT(interfaceTable);
     int nrOfInterfaces = interfaceTable->getNumInterfaces();
     if(nrOfInterfaces > 2) { // loopback + 1 other NIC
@@ -29,10 +27,12 @@ void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* cl
         throw cRuntimeError("ARA does currently not implement handling of more than one network card.");
     }
 
+    int nrOfAssignedInterfaces = 0;
     for (int i=0; i < nrOfInterfaces; i++)         {
         InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
         if (interfaceEntry->isLoopback() == false) {
-            client->addNetworkInterface(new OMNeTGate(this, client, gateToARP, interfaceEntry));
+            client->addNetworkInterface(new OMNeTGate(this, client, gate("ifOut", nrOfAssignedInterfaces), interfaceEntry));
+            nrOfAssignedInterfaces++;
         }
     }
 }
@@ -61,8 +61,7 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
             // extract the receiver address
             ARP* arp = ModuleAccess<ARP>("arp").get();
             MACAddress receiverMACAddress = frame->getReceiverAddress();
-            const IPv4Address receiverIPv4Address = arp->getInverseAddressResolution(receiverMACAddress);
-            AddressPtr omnetAddress (new OMNeTAddress(receiverIPv4Address));
+            AddressPtr omnetAddress (new OMNeTAddress(receiverMACAddress));
 
             OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
             handleBrokenLink(omnetPacket, omnetAddress);

@@ -35,7 +35,7 @@ class OMNeTGate: public AbstractNetworkInterface {
     private:
         AbstractOMNeTARAClient* omnetARAModule;
         ::ARA::PacketFactory* packetFactory;
-        cGate* gateToARP;
+        cGate* outGate;
         int interfaceID;
 };
 

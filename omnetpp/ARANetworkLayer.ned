@@ -28,8 +28,6 @@ import ara.forwarding.OMNeTStochasticForwardingPolicy;
 import ara.forwarding.OMNeTBestPheromoneForwardingPolicy;
 import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
 
-import inet.networklayer.arp.ARP;
-
 module ARANetworkLayer
 {
     parameters:
@@ -66,21 +64,11 @@ module ARANetworkLayer
                 @display("p=71,176");
         }
 
-        arp: ARP {
-            parameters:
-                proxyARP = false;
-                @display("p=204,160;q=pendingQueue");
-            gates:
-                nicOut[nrOfNetworkInterfaces];
-        }
-
-
     connections allowunconnected:
         upperLayerGate <--> ara.upperLayerGate;
-        arp.ipIn <-- ara.arpOut;
 
         for i=0..nrOfNetworkInterfaces-1 {
             ifIn[i] --> ara.ifIn[i];
-            arp.nicOut[i] --> ifOut[i];
+            ara.ifOut[i] --> ifOut[i];
         }
 }

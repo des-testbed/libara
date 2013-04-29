@@ -9,7 +9,7 @@
 #include "Packet.h"
 #include "Address.h"
 #include "OMNeTAddress.h"
-#include "IPv4Address.h"
+#include "MACAddress.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -29,14 +29,14 @@ class OMNeTPacket : public cPacket, public Packet {
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
-    std::shared_ptr<OMNeTAddress> getSource() const;
-    std::shared_ptr<OMNeTAddress> getDestination() const;
-    std::shared_ptr<OMNeTAddress> getSender() const;
-    std::shared_ptr<OMNeTAddress> getPreviousHop() const;
+    OMNeTAddressPtr getSource() const;
+    OMNeTAddressPtr getDestination() const;
+    OMNeTAddressPtr getSender() const;
+    OMNeTAddressPtr getPreviousHop() const;
 
-    IPv4Address getSourceIP() const { return *(getSource().get()); }
-    IPv4Address getDestinationIP() const { return *(getDestination().get()); }
-    IPv4Address getSenderIP() const { return *(getSender().get()); }
+    MACAddress getSourceIP() const { return *(getSource().get()); }
+    MACAddress getDestinationIP() const { return *(getDestination().get()); }
+    MACAddress getSenderIP() const { return *(getSender().get()); }
 };
 
 inline void doPacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimPack(b);}

@@ -14,6 +14,8 @@
 #include "Address.h"
 #include "omnetpp/OMNeTAddress.h"
 
+class OMNeTAddress;
+
 OMNETARA_NAMESPACE_BEGIN
 typedef std::shared_ptr<Address> AddressPtr;
 typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
