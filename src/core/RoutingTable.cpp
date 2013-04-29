@@ -167,11 +167,6 @@ void RoutingTable::triggerEvaporation() {
     }
     else {
         long timeDifference = currentTime->getDifferenceInMilliSeconds(lastAccessTime);
-
-        if(timeDifference > 0){
-            int a = 42;
-        }
-
         delete currentTime;
 
         if(evaporationPolicy->isEvaporationNecessary(timeDifference)) {
