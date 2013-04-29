@@ -59,7 +59,6 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
 
         if(dynamic_cast<OMNeTPacket*>(encapsulatedPacket) != NULL) {
             // extract the receiver address
-            ARP* arp = ModuleAccess<ARP>("arp").get();
             MACAddress receiverMACAddress = frame->getReceiverAddress();
             AddressPtr omnetAddress (new OMNeTAddress(receiverMACAddress));
 

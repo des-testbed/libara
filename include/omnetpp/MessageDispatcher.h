@@ -22,14 +22,12 @@ class MessageDispatcher {
         void dispatch(cMessage* message);
 
         bool isFromUpperLayer(cMessage* message);
-        bool isARPMessage(cMessage* message);
         bool isARAMessage(cMessage* message);
 
         void setPacketFactory(PacketFactory* factory);
 
     private:
         void handleUpperLayerMessage(cMessage* message);
-        void handleARP(cMessage* message);
         void handleARA(cMessage* message);
 
         InterfaceEntry* getSourceInterfaceFrom(cMessage* message);

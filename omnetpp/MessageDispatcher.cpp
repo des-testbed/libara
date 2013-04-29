@@ -8,7 +8,7 @@
 #include "omnetpp/OMNeTGate.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4Address.h"
-#include "ARPPacket_m.h"
+#include "MACAddress.h"
 
 #include <string>
 
@@ -27,9 +27,6 @@ void MessageDispatcher::setPacketFactory(PacketFactory* factory) {
 void MessageDispatcher::dispatch(cMessage* message) {
     if(isFromUpperLayer(message)) {
         handleUpperLayerMessage(message);
-    }
-    else if (isARPMessage(message)) {
-        handleARP(message);
     }
     else {
         handleARA(message);
@@ -58,28 +55,6 @@ void MessageDispatcher::handleUpperLayerMessage(cMessage* message) {
     omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
 
     araClient->sendPacket(omnetPacket);
-}
-
-bool MessageDispatcher::isARPMessage(cMessage* message) {
-    return dynamic_cast<ARPPacket*>(message) != NULL;
-}
-
-bool MessageDispatcher::isARAMessage(cMessage* message) {
-    return dynamic_cast<OMNeTPacket*>(message) != NULL;
-}
-
-void MessageDispatcher::handleARP(cMessage* message) {
-    // FIXME hasBitError() check  missing!
-    delete message->removeControlInfo();
-
-    InterfaceEntry* arrivalInterface = getSourceInterfaceFrom(message);
-    ASSERT(arrivalInterface);
-
-    IPv4RoutingDecision* routingDecision = new IPv4RoutingDecision();
-    routingDecision->setInterfaceId(arrivalInterface->getInterfaceId());
-    message->setControlInfo(routingDecision);
-
-    module->send(message, "arpOut");
 }
 
 InterfaceEntry* MessageDispatcher::getSourceInterfaceFrom(cMessage* message) {
