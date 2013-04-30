@@ -10,7 +10,11 @@ using namespace std;
 OMNETARA_NAMESPACE_BEGIN
 
 std::string OMNeTAddress::toString() const {
-    return this->str();
+    char buffer[6];
+    char* string = buffer;
+    sprintf(string, "[%u]", getDByte(3));
+    *(string-1) = '\0';
+    return std::string(buffer);
 }
 
 bool OMNeTAddress::equals(const Address* otherAddress) const {
