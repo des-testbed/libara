@@ -25,6 +25,7 @@ class OMNeTConfiguration : public Configuration {
         virtual int getMaxNrOfRouteDiscoveryRetries();
         virtual int getMaxTTL();
         virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
+        virtual unsigned int getPacketDeliveryDelayInMilliSeconds();
 
         virtual RoutingTable* getRoutingTable();
         Logger* getLogger();
@@ -40,6 +41,7 @@ class OMNeTConfiguration : public Configuration {
         int maxNrOfRouteDiscoveryRetries;
         int maxTTL;
         unsigned int routeDiscoveryTimeoutInMilliSeconds;
+        unsigned int packetDeliveryDelayInMilliSeconds;
 
         cModule* simpleModule;
         Logger* logger;

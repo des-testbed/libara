@@ -24,6 +24,7 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
     maxTTL = module->par("maxTTL").longValue();
     routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
+    packetDeliveryDelayInMilliSeconds = module->par("packetDeliveryDelay").longValue();
 
     logger = new SimpleLogger(getHostModule()->getFullName());
 }
@@ -54,6 +55,10 @@ int OMNeTConfiguration::getMaxTTL() {
 
 unsigned int OMNeTConfiguration::getRouteDiscoveryTimeoutInMilliSeconds() {
     return routeDiscoveryTimeoutInMilliSeconds;
+}
+
+unsigned int OMNeTConfiguration::getPacketDeliveryDelayInMilliSeconds() {
+    return packetDeliveryDelayInMilliSeconds;
 }
 
 Logger* OMNeTConfiguration::getLogger() {

@@ -34,10 +34,13 @@ class OMNeTEARAConfiguration : public OMNeTConfiguration, public EARAConfigurati
             return OMNeTConfiguration::getMaxNrOfRouteDiscoveryRetries();
         }
         virtual int getMaxTTL() {
-                    return OMNeTConfiguration::getMaxTTL();
-                }
+                return OMNeTConfiguration::getMaxTTL();
+            }
         virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds() {
             return OMNeTConfiguration::getRouteDiscoveryTimeoutInMilliSeconds();
+        }
+        virtual unsigned int getPacketDeliveryDelayInMilliSeconds() {
+            return OMNeTConfiguration::getPacketDeliveryDelayInMilliSeconds();
         }
 
         virtual EnergyAwareRoutingTable* getRoutingTable();

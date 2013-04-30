@@ -25,6 +25,7 @@ public:
     virtual float getInitialPheromoneValue() = 0;
     virtual int getMaxNrOfRouteDiscoveryRetries() = 0;
     virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds() = 0;
+    virtual unsigned int getPacketDeliveryDelayInMilliSeconds() = 0;
 };
 
 ARA_NAMESPACE_END
