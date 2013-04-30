@@ -1186,7 +1186,6 @@ TEST(AbstractARAClientTest, clientWaitsBeforeSendingTheDATA) {
     // Let the send timer expire
     ClockMock* clock = (ClockMock*) Environment::getClock();
     TimerMock* sendTimer = clock->getLastTimer();
-    packetTrap->
     sendTimer->expire();
     BYTES_EQUAL(2, sentPackets->size());
     CHECK(packetTrap->isEmpty());

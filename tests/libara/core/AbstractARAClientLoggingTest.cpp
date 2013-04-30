@@ -88,8 +88,8 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
     client->receivePacket(bantPacket, interface);
 
     // check that the log message is generated
-    CHECK(hasLoggedMessage("First BANT 123 came back from destination. Waiting 5ms until delivering the trapped packets", Logger::LEVEL_INFO));
     BYTES_EQUAL(5, client->getPacketDeliveryDelay());
+    CHECK(hasLoggedMessage("First BANT 123 came back from destination via destination. Waiting 5ms until delivering the trapped packets", Logger::LEVEL_INFO));
 }
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
