@@ -10,11 +10,7 @@ using namespace std;
 OMNETARA_NAMESPACE_BEGIN
 
 std::string OMNeTAddress::toString() const {
-    char buffer[6];
-    char* string = buffer;
-    sprintf(string, "[%u]", getAddressByte(5));
-    *(string-1) = '\0';
-    return std::string(buffer);
+    return this->str();
 }
 
 bool OMNeTAddress::equals(const Address* otherAddress) const {
@@ -24,7 +20,7 @@ bool OMNeTAddress::equals(const Address* otherAddress) const {
     }
     else {
         // use the native implementation of IPv4Address
-        return MACAddress::equals(*otherOMNeTAddress);
+        return IPv4Address::equals(*otherOMNeTAddress);
     }
 }
 
@@ -33,7 +29,9 @@ bool OMNeTAddress::equals(const AddressPtr otherAddress) const {
 }
 
 size_t OMNeTAddress::getHashValue() const {
-    return getInt() % sizeof(size_t);
+    int firstByte = getDByte(0);
+    int secondByte = getDByte(1);
+    return firstByte * 256 + secondByte;  // integer value between 0 and 65535
 }
 
 Address* OMNeTAddress::clone() {

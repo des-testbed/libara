@@ -125,4 +125,15 @@ MACAddress ARANetworkConfigurator::getMACAddressByIP(IPv4Address address) {
     return ipMACMapping[address];
 }
 
+IPv4Address ARANetworkConfigurator::getIPAddressFromMAC(MACAddress address) {
+    std::unordered_map<IPv4Address, MACAddress, IPv4AddressHash, IPv4AddressPredicate>::iterator iterator;
+    for (iterator=ipMACMapping.begin(); iterator!=ipMACMapping.end(); iterator++) {
+        if(iterator->second.equals(address)) {
+            return iterator->first;
+        }
+    }
+
+    throw cRuntimeError("Can not find IPv4 address to given MAC address");
+}
+
 OMNETARA_NAMESPACE_END

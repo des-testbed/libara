@@ -17,7 +17,6 @@ OMNETARA_NAMESPACE_BEGIN
 MessageDispatcher::MessageDispatcher(AbstractOMNeTARAClient* module, AbstractARAClient* araClient) {
     this->module = module;
     this->araClient = araClient;
-    this->networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
 }
 
 void MessageDispatcher::setPacketFactory(PacketFactory* factory) {
@@ -43,12 +42,10 @@ bool MessageDispatcher::isFromUpperLayer(cMessage* message) {
 void MessageDispatcher::handleUpperLayerMessage(cMessage* message) {
     IPv4ControlInfo* controlInfo = (IPv4ControlInfo*)message->getControlInfo();
     IPv4Address destinationIP = controlInfo->getDestAddr();
-    MACAddress destinationMAC = networkConfig->getMACAddressByIP(destinationIP);
-    AddressPtr destination = AddressPtr(new OMNeTAddress(destinationMAC));
+    AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
 
     IPv4Address sourceIP = controlInfo->getSrcAddr();
-    MACAddress sourceMAC = networkConfig->getMACAddressByIP(sourceIP);
-    AddressPtr source = AddressPtr(new OMNeTAddress(sourceMAC));;
+    AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));;
     AddressPtr sender = source;
 
     OMNeTPacket* omnetPacket = packetFactory->createOMNetPacket(source, destination, sender, PacketType::DATA, araClient->getNextSequenceNumber());

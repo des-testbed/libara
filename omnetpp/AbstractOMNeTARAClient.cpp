@@ -17,6 +17,7 @@ void AbstractOMNeTARAClient::initialize() {
     notificationBoard = NotificationBoardAccess().get();
     notificationBoard->subscribe(this, NF_LINK_BREAK);
     interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
+    networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
 }
 
 void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& config) {
@@ -60,7 +61,8 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
         if(dynamic_cast<OMNeTPacket*>(encapsulatedPacket) != NULL) {
             // extract the receiver address
             MACAddress receiverMACAddress = frame->getReceiverAddress();
-            AddressPtr omnetAddress (new OMNeTAddress(receiverMACAddress));
+            IPv4Address receiverIPv4Address = networkConfig->getIPAddressFromMAC(receiverMACAddress);
+            AddressPtr omnetAddress (new OMNeTAddress(receiverIPv4Address));
 
             OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
             handleBrokenLink(omnetPacket, omnetAddress);

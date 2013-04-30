@@ -7,8 +7,10 @@
 #include "omnetpp/OMNeTAddress.h"
 #include "Environment.h"
 #include "IInterfaceTable.h"
+#include "IPv4InterfaceData.h"
+#include "IPvXAddressResolver.h"
+#include "IPv4ControlInfo.h"
 #include "Ieee802Ctrl_m.h"
-#include "MACAddress.h"
 
 using namespace std;
 
@@ -18,10 +20,16 @@ OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClien
     this->omnetARAModule = module;
     this->outGate = outGate;
 
-    this->localAddress = AddressPtr(new OMNeTAddress(interfaceEntry->getMacAddress()));
-    this->broadcastAddress = shared_ptr<Address>(new OMNeTAddress(MACAddress::BROADCAST_ADDRESS));
+    IPv4Address localAddress = IPvXAddressResolver().getAddressFrom(interfaceEntry, IPvXAddressResolver::ADDR_IPv4).get4();
+    IPv4Address netmask = interfaceEntry->ipv4Data()->getNetmask();
+    IPv4Address networkAddress = localAddress.doAnd(netmask);
+    IPv4Address broadcastAddress = networkAddress.getBroadcastAddress(netmask);
+
+    this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress));
+    this->broadcastAddress = shared_ptr<Address>(new OMNeTAddress(broadcastAddress));
     this->interfaceID = interfaceEntry->getInterfaceId();
     this->packetFactory = araClient->getPacketFactory();
+    this->networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
@@ -35,9 +43,10 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double
     // first remove the control info from the lower level (Ieee802Ctrl)
     omnetPacket->removeControlInfo();
 
-    // then fill in the control info (our routing decision) for ARP
+    // then fill in the control info (our routing decision)
+    MACAddress macOfNextHop = networkConfig->getMACAddressByIP(*(nextHopAddress.get()));
     Ieee802Ctrl* controlInfo = new Ieee802Ctrl();
-    controlInfo->setDest(*(nextHopAddress.get()));
+    controlInfo->setDest(macOfNextHop);
     omnetPacket->setControlInfo(controlInfo);
 
     // we might have switched the context from the OMNeTTimer

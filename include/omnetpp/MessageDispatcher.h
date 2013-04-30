@@ -10,7 +10,6 @@
 #include "AbstractARAClient.h"
 #include "InterfaceEntry.h"
 #include "PacketFactory.h"
-#include "ARANetworkConfigurator.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -35,7 +34,6 @@ class MessageDispatcher {
         AbstractOMNeTARAClient* module;
         AbstractARAClient* araClient;
         PacketFactory* packetFactory;
-        ARANetworkConfigurator* networkConfig;
 };
 
 OMNETARA_NAMESPACE_END

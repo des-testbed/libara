@@ -7,6 +7,7 @@
 
 #include "omnetpp/OMNeTARAMacros.h"
 #include "omnetpp/OMNeTConfiguration.h"
+#include "omnetpp/ARANetworkConfigurator.h"
 #include "omnetpp/OMNeTPacket.h"
 
 #include "Packet.h"
@@ -52,6 +53,7 @@ class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
     protected:
         NotificationBoard* notificationBoard;
         IInterfaceTable* interfaceTable;
+        ARANetworkConfigurator* networkConfig;
 
     friend class OMNeTGate;
 };

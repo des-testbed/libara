@@ -6,6 +6,7 @@
 #define OMNETGATE_H_
 
 #include "omnetpp/OMNeTARAMacros.h"
+#include "omnetpp/ARANetworkConfigurator.h"
 
 #include "AbstractNetworkInterface.h"
 #include "omnetpp/AbstractOMNeTARAClient.h"
@@ -35,6 +36,7 @@ class OMNeTGate: public AbstractNetworkInterface {
     private:
         AbstractOMNeTARAClient* omnetARAModule;
         ::ARA::PacketFactory* packetFactory;
+        ARANetworkConfigurator* networkConfig;
         cGate* outGate;
         int interfaceID;
 };

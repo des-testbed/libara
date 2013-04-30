@@ -45,6 +45,7 @@ struct IPv4AddressPredicate {
 class ARANetworkConfigurator : public cSimpleModule {
 public:
     MACAddress getMACAddressByIP(IPv4Address address);
+    IPv4Address getIPAddressFromMAC(MACAddress address);
 
 protected:
     struct NodeInfo {
