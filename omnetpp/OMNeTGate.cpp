@@ -44,7 +44,14 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double
     omnetPacket->removeControlInfo();
 
     // then fill in the control info (our routing decision)
-    MACAddress macOfNextHop = networkConfig->getMACAddressByIP(*(nextHopAddress.get()));
+    MACAddress macOfNextHop;
+    if (isBroadcastAddress(nextHopAddress)) {
+        macOfNextHop = MACAddress::BROADCAST_ADDRESS;
+    }
+    else {
+        macOfNextHop = networkConfig->getMACAddressByIP(*(nextHopAddress.get()));
+    }
+
     Ieee802Ctrl* controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macOfNextHop);
     omnetPacket->setControlInfo(controlInfo);
