@@ -14,6 +14,9 @@ using namespace std;
 
 namespace ARA {
 
+typedef std::unordered_map<Timer*, RouteDiscoveryInfo> DiscoveryTimerInfo;
+typedef std::unordered_map<Timer*, AddressPtr> DeliveryTimerInfo;
+
 AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) {
     initialize(configuration, routingTable, packetFactory);
 }
@@ -25,6 +28,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     initialPheromoneValue = configuration.getInitialPheromoneValue();
     maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
     routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
+    packetDeliveryDelayInMilliSeconds = configuration.getPacketDeliveryDelayInMilliSeconds();
 
     this->packetFactory = packetFactory;
     this->routingTable = routingTable;
@@ -33,6 +37,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
+    runningDeliveryTimers = unordered_map<Timer*, AddressPtr>();
 }
 
 AbstractARAClient::~AbstractARAClient() {
@@ -42,26 +47,29 @@ AbstractARAClient::~AbstractARAClient() {
     }
 
     // delete the sequence number lists of the last received packets
-    LastReceivedPacketsMap::iterator iterator1;
-    for (iterator1=lastReceivedPackets.begin(); iterator1!=lastReceivedPackets.end(); iterator1++) {
+    for (LastReceivedPacketsMap::iterator iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
         // the addresses are disposed of automatically by shared_ptr
-        delete iterator1->second;
+        delete iterator->second;
     }
     lastReceivedPackets.clear();
 
     // delete the known intermediate hop addresses for all sources
-    KnownIntermediateHopsMap::iterator iterator2;
-    for (iterator2=knownIntermediateHops.begin(); iterator2!=knownIntermediateHops.end(); iterator2++) {
-        delete iterator2->second;
+    for (KnownIntermediateHopsMap::iterator iterator=knownIntermediateHops.begin(); iterator!=knownIntermediateHops.end(); iterator++) {
+        delete iterator->second;
     }
     knownIntermediateHops.clear();
 
     // delete running route discovery timers
-    unordered_map<Timer*, RouteDiscoveryInfo>::iterator iterator3;
-    for (iterator3=runningRouteDiscoveryTimers.begin(); iterator3!=runningRouteDiscoveryTimers.end(); iterator3++) {
-        delete iterator3->first;
+    for (DiscoveryTimerInfo::iterator iterator=runningRouteDiscoveryTimers.begin(); iterator!=runningRouteDiscoveryTimers.end(); iterator++) {
+        delete iterator->first;
     }
     runningRouteDiscoveryTimers.clear();
+
+    // delete running delivery timers
+    for (DeliveryTimerInfo::iterator iterator=runningDeliveryTimers.begin(); iterator!=runningDeliveryTimers.end(); iterator++) {
+        delete iterator->first;
+    }
+    runningDeliveryTimers.clear();
 
     delete packetFactory;
     delete packetTrap;
@@ -224,6 +232,9 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
     if(packet->isDataPacket()) {
         sendDuplicateWarning(packet, interface);
     }
+    else if(packet->getType() == PacketType::BANT && isDirectedToThisNode(packet)) {
+        logInfo("Another BANT %u came back from %s via %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
+    }
 
     delete packet;
 }
@@ -328,8 +339,10 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
         broadCast(bant);
     }
     else if(packetType == PacketType::BANT) {
-        stopRouteDiscoveryTimer(packet->getSource());
-        sendDeliverablePackets(packet);
+        logInfo("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
+        AddressPtr routeDiscoveryDestination = packet->getSource();
+        stopRouteDiscoveryTimer(routeDiscoveryDestination);
+        startDeliveryTimer(routeDiscoveryDestination);
     }
     else {
         delete packet;
@@ -347,16 +360,24 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
         Timer* timer = discovery->second;
         timer->interrupt();
         runningRouteDiscoveries.erase(discovery);
+        runningRouteDiscoveryTimers.erase(timer);
         delete timer;
     }
 }
 
-void AbstractARAClient::sendDeliverablePackets(const Packet* packet) {
-    deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets();
-    logDebug("BANT %u came back from %s. %u trapped packet(s) can now be delivered", packet->getSequenceNumber(), packet->getSourceString().c_str(), deliverablePackets->size());
+void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
+    Timer* timer = Environment::getClock()->getNewTimer();
+    timer->addTimeoutListener(this);
+    timer->run(packetDeliveryDelayInMilliSeconds * 1000);
+    runningDeliveryTimers[timer] = destination;
+}
+
+void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
+    deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets(destination);
+    logDebug("Sending %u trapped packet(s) for destination %s", deliverablePackets->size(), destination->toString().c_str());
 
     for(auto& deliverablePacket : *deliverablePackets) {
-        packetTrap->untrapPacket(deliverablePacket); //TODO We want to remove the packet from the trap only if we got an acknowledgment back
+        packetTrap->untrapPacket(deliverablePacket); // TODO packets could already be removed from the trap in packetTrap->getDeliverablePackets(..)
         sendPacket(deliverablePacket);
     }
     delete deliverablePackets;
@@ -471,16 +492,24 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
     this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
 }
 
-void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
-    unordered_map<Timer*, RouteDiscoveryInfo>::const_iterator discovery;
-    discovery = runningRouteDiscoveryTimers.find(routeDiscoveryTimer);
-
-    if(discovery == runningRouteDiscoveryTimers.end()) {
-        // if this happens its a bug in our code
-        throw new Exception("AbstractARAClient::timerHasExpired : Could not find running route discovery timer");
+void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
+    DiscoveryTimerInfo::iterator discoveryTimerInfo = runningRouteDiscoveryTimers.find(responsibleTimer);
+    if(discoveryTimerInfo != runningRouteDiscoveryTimers.end()) {
+        handleExpiredRouteDiscoveryTimer(responsibleTimer, discoveryTimerInfo->second);
     }
+    else {
+        DeliveryTimerInfo::iterator deliveryTimerInfo = runningDeliveryTimers.find(responsibleTimer);
+        if(deliveryTimerInfo != runningDeliveryTimers.end()) {
+            handleExpiredDeliveryTimer(responsibleTimer, deliveryTimerInfo->second);
+        }
+        else {
+            // if this happens its a bug in our code
+            throw new Exception("AbstractARAClient::timerHasExpired : Could not identify expired timer");
+        }
+    }
+}
 
-    RouteDiscoveryInfo discoveryInfo = discovery->second;
+void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo) {
     const char* destinationString = discoveryInfo.originalPacket->getDestinationString().c_str();
     logInfo("Route discovery for destination %s timed out", destinationString);
     if(discoveryInfo.nrOfRetries < maxNrOfRouteDiscoveryRetries) {
@@ -503,6 +532,12 @@ void AbstractARAClient::timerHasExpired(Timer* routeDiscoveryTimer) {
             packetNotDeliverable(packet);
         }
     }
+}
+
+void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination) {
+    sendDeliverablePackets(destination);
+    runningDeliveryTimers.erase(deliveryTimer);
+    delete deliveryTimer;
 }
 
 void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {

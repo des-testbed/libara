@@ -85,17 +85,14 @@ bool PacketTrap::isEmpty() {
     return trappedPackets.size() == 0;
 }
 
-deque<Packet*>* PacketTrap::getDeliverablePackets() {
+deque<Packet*>* PacketTrap::getDeliverablePackets(AddressPtr destination) {
     deque<Packet*>* deliverablePackets = new deque<Packet*>();
 
-    TrappedPacketsMap::iterator iterator;
-    for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
-        pair<AddressPtr, PacketSet*> entryPair = *iterator;
-        AddressPtr destination = entryPair.first;
-
+    TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
+    if(packetsForDestination != trappedPackets.end()) {
         if(routingTable->isDeliverable(destination)) {
             // Add all packets for this destination
-            PacketSet* packets = entryPair.second;
+            PacketSet* packets = packetsForDestination->second;
             for(auto& trappedPacket: *packets) {
                 deliverablePackets->push_back(trappedPacket);
             }
@@ -105,7 +102,6 @@ deque<Packet*>* PacketTrap::getDeliverablePackets() {
     return deliverablePackets;
 }
 
-// TODO: checks if this is a problem
 void PacketTrap::setRoutingTable(RoutingTable *routingTable){
     this->routingTable = routingTable;
 }

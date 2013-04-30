@@ -24,6 +24,7 @@
 using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
+typedef std::deque<Pair<const Packet*, AddressPtr>*> SendPacketsList;
 
 TEST_GROUP(AbstractARAClientTest) {
     ARAClientMock* client;
@@ -254,7 +255,7 @@ TEST(AbstractARAClientTest, ignoreDuplicateAntPackets) {
     client->receivePacket(bant3, interface);
 
     LONGS_EQUAL(2, interface->getNumberOfSentPackets()); // only two broadcasts (1 FANT & 1 BANT) and nothing more
-    std::deque<Pair<const Packet*, AddressPtr>*>* sendPackets = interface->getSentPackets();
+    SendPacketsList* sendPackets = interface->getSentPackets();
     CHECK_EQUAL(PacketType::FANT, sendPackets->at(0)->getLeft()->getType());
     CHECK_EQUAL(PacketType::BANT, sendPackets->at(1)->getLeft()->getType());
 }
@@ -317,7 +318,7 @@ TEST(AbstractARAClientTest, dataPacketIsDeliveredToSystem) {
 TEST(AbstractARAClientTest, dataPacketIsRelayedIfRouteIsKnown) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
 
     AddressPtr source (new AddressMock("B"));
     AddressPtr destination (new AddressMock("C"));
@@ -354,7 +355,7 @@ TEST(AbstractARAClientTest, dataPacketIsRelayedIfRouteIsKnown) {
 TEST(AbstractARAClientTest, receivedAntPacketsAreBroadcasted) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
 
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
@@ -399,7 +400,7 @@ TEST(AbstractARAClientTest, receivedAntPacketsAreBroadcasted) {
 TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
     unsigned int lastSequenceNumber = client->getNextSequenceNumber();
     int maxHopCount = 15;
     client->setMaxHopCount(maxHopCount);
@@ -427,52 +428,13 @@ TEST(AbstractARAClientTest, receivedFANTTriggersNewBANT) {
 }
 
 /**
- * In this test node A has initiated a route discovery for a trapped data packet
- * Now it has received a BANT that has come back from the data packets destination.
- * It is expected that the trapped packet is send over the discovered route and is
- * no longer trapped in the PacketTrap.
- */
-TEST(AbstractARAClientTest, receivedBANTTriggersSendingOfTrappedPackets) {
-    // initial test setup
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
-
-    AddressPtr source (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr destination (new AddressMock("C"));
-    AddressPtr sender = source;
-    int ttl = 15;
-    Packet* dataPacket = new Packet(source, destination, sender, PacketType::DATA, 123, ttl, "Hello World");
-    packetTrap->trapPacket(dataPacket);
-
-    Packet* bant = new Packet(destination, source, nodeB, PacketType::BANT, 123, 5);
-
-    // start the test
-    client->receivePacket(bant, interface);
-
-    // check the sent packet
-    LONGS_EQUAL(1, sentPackets->size());
-    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
-    CHECK(sentPacketInfo->getRight()->equals(nodeB));
-    const Packet* sentPacket = sentPacketInfo->getLeft();
-    CHECK(sentPacket->getSource()->equals(source));
-    CHECK(sentPacket->getDestination()->equals(destination));
-    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
-    CHECK_EQUAL(PacketType::DATA, sentPacket->getType());
-    LONGS_EQUAL(ttl, sentPacket->getTTL());
-
-    // packet trap must now be empty
-    CHECK(packetTrap->isEmpty());
-}
-
-/**
  * In this test we check if a client broadcasts a FANT again that he has
  * initially created and sent in the first place.
  */
 TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
     Packet* data = new PacketMock("A", "Z", "A", 123, 10, PacketType::DATA);
 
     // sending the initial packet should trigger a FANT broadcast
@@ -503,7 +465,7 @@ TEST(AbstractARAClientTest, doNotReBroadcastFANT) {
 TEST(AbstractARAClientTest, doNotReBroadcastBANT) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("Z");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
     Packet* fant = new PacketMock("A", "Z", "A", 123, 10, PacketType::FANT);
 
     // client receives the FANT that is directed to him (should trigger BANt broadcast)
@@ -614,7 +576,7 @@ TEST(AbstractARAClientTest, packetIsNotDeletedOutsideOfDeliverToSystem) {
  */
 TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
     Packet* packet = new PacketMock();
 
     // sanity check
@@ -862,7 +824,7 @@ TEST(AbstractARAClientTest, pathToDestinationEvaporates) {
  */
 TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr source (new AddressMock("source"));
     AddressPtr sender = source;
     AddressPtr destination (new AddressMock("destination"));
@@ -896,7 +858,7 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
 
 TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRoutesAreKownOnRouteFailure) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("sender");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr source (new AddressMock("source"));
     AddressPtr sender = interface->getLocalAddress();
     AddressPtr destination (new AddressMock("destination"));
@@ -952,7 +914,7 @@ TEST(AbstractARAClientTest, clientsDeleteRoutingTableEntryWhenTheyReceiveRouting
  */
 IGNORE_TEST(AbstractARAClientTest, doSendDuplicateWarningToSameSender) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
 
     unsigned int sequenceNumber = 123;
     Packet* originalPacket = new PacketMock("source", "destination", "sender", sequenceNumber);
@@ -1012,7 +974,7 @@ TEST(AbstractARAClientTest, rememberMultipleRoutes) {
 TEST(AbstractARAClientTest, doNotRelayPacketIfTTLBecomesZero) {
     // initial test setup
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
 
     AddressPtr source (new AddressMock("B"));
     AddressPtr destination (new AddressMock("C"));
@@ -1084,7 +1046,7 @@ TEST(AbstractARAClientTest, initialzePheromoneValue) {
  */
 TEST(AbstractARAClientTest, addPreviousHopToPacket) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
-    std::deque<Pair<const Packet*, AddressPtr>*>* sentPackets = interface->getSentPackets();
+    SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeD (new AddressMock("D"));
@@ -1177,4 +1139,60 @@ TEST(AbstractARAClientTest, doNotCreateRouteOverSelf) {
 
     // we do *not* want to remember this route over the own address
     CHECK(routeIsKnown(source, nodeB, interface) == false);
+}
+
+/**
+ * In this test we check that a client waits the configured amount of time before
+ * it actually starts to send DATA packets after it received the first BANT from
+ * the destination.
+ */
+TEST(AbstractARAClientTest, clientWaitsBeforeSendingTheDATA) {
+    unsigned int packetDeliveryDelay = client->getPacketDeliveryDelay();
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("S");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("D"));
+    AddressPtr nodeI (new AddressMock("i"));
+    AddressPtr nodeJ (new AddressMock("j"));
+
+    // sanity check
+    Packet* packet = new Packet(source, destination, source, PacketType::DATA, 123, 10);
+    CHECK(routingTable->isDeliverable(packet) == false);
+
+    // start the test
+    client->sendPacket(packet);
+
+    // should have triggered a new route discovery
+    BYTES_EQUAL(1, sentPackets->size());
+    const Packet* sentPacket = sentPackets->back()->getLeft();
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(packetTrap->contains(packet) == true);
+
+    // receive the first BANT back from the destination
+    Packet* bant1 =  new Packet(destination, source, nodeI, PacketType::BANT, 1, 10);
+    client->receivePacket(bant1, interface);
+    CHECK(routingTable->isDeliverable(packet) == true);
+
+    // the client is required to wait some time for other BANTs coming back from D until it starts sending packets
+    BYTES_EQUAL(1, sentPackets->size());
+
+    // Hurray! another BANT just came back so we have now two available routes :)
+    Packet* bant2 =  new Packet(destination, source, nodeJ, PacketType::BANT, 1, 10);
+    client->receivePacket(bant2, interface);
+
+    // Still the timer has not expired yet so nothing should have been sent
+    BYTES_EQUAL(1, sentPackets->size());
+
+    // Let the send timer expire
+    ClockMock* clock = (ClockMock*) Environment::getClock();
+    TimerMock* sendTimer = clock->getLastTimer();
+    packetTrap->
+    sendTimer->expire();
+    BYTES_EQUAL(2, sentPackets->size());
+    CHECK(packetTrap->isEmpty());
+
+    // lets check the last send packet
+    sentPacket = sentPackets->back()->getLeft();
+    CHECK(sentPacket->getType() == PacketType::DATA);
+    BYTES_EQUAL(123, sentPacket->getSequenceNumber());
 }

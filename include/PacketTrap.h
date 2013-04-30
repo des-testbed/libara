@@ -5,6 +5,7 @@
 #ifndef PACKETTRAP_H_
 #define PACKETTRAP_H_
 
+#include "ARAMacros.h"
 #include "RoutingTable.h"
 #include "Packet.h"
 #include "Address.h"
@@ -14,9 +15,9 @@
 #include <unordered_set>
 #include <deque>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
-typedef std::unordered_map<std::shared_ptr<Address>, std::unordered_set<Packet*, PacketHash, PacketPredicate>*, AddressHash, AddressPredicate> TrappedPacketsMap;
+typedef std::unordered_map<AddressPtr, std::unordered_set<Packet*, PacketHash, PacketPredicate>*, AddressHash, AddressPredicate> TrappedPacketsMap;
 
 class PacketTrap {
 public:
@@ -36,29 +37,39 @@ public:
      */
     void untrapPacket(Packet* packet);
 
+    /**
+     * Returns true if this packet trap contains a given packet.
+     * False otherwise.
+     */
     bool contains(Packet* packet);
+
+    /**
+     * Returns true if the number of trapped packets equals zero.
+     * False otherwise.
+     */
     bool isEmpty();
 
     /**
      * TODO maybe this should untrap the packets by default!
-     * Returns a new list of packets that are deliverable according to the
-     * routing table associated with this packet trap.
+     * Returns a new list of packets that are deliverable to a given destination
+     * according to the routing table associated with this packet trap.
      *
      * Note: The LinkedList must be deleted by the caller of this method
      */
-    std::deque<Packet*>* getDeliverablePackets();
+    std::deque<Packet*>* getDeliverablePackets(AddressPtr destination);
 
     /**
      * This will remove all packets for the given destination address from this packet trap
      * and return them in a list object.
      */
-    std::deque<Packet*> removePacketsForDestination(std::shared_ptr<Address> destination);
+    std::deque<Packet*> removePacketsForDestination(AddressPtr destination);
 
+    //TODO maybe remove this? do we really need to set the table dynamically?
     void setRoutingTable(RoutingTable *routingTable);
 
 private:
 
-    bool thereIsAHashSetFor(std::shared_ptr<Address> destination);
+    bool thereIsAHashSetFor(AddressPtr destination);
 
     /**
      * This hashmap stores all trapped packets.
@@ -73,9 +84,14 @@ private:
      */
     TrappedPacketsMap trappedPackets;
 
+    /**
+     * The associated routing table.
+     * Please not that this is managed by the ARAClient and must not be deleted
+     * by the packet trap.
+     */
     RoutingTable* routingTable;
-
 };
 
-} /* namespace ARA */
-#endif /* PACKETTRAP_H_ */
+ARA_NAMESPACE_END
+
+#endif

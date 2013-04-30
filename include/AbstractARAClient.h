@@ -254,14 +254,19 @@ protected:
     void sendFANT(AddressPtr destination);
     bool isRouteDiscoveryRunning(AddressPtr destination);
     void stopRouteDiscoveryTimer(AddressPtr destination);
-    void sendDeliverablePackets(const Packet* packet);
+    void startDeliveryTimer(AddressPtr destination);
+    void sendDeliverablePackets(AddressPtr destination);
     void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
     bool hasPreviousNodeBeenSeenBefore(const Packet* packet);
     virtual void handleCompleteRouteFailure(Packet* packet);
 
+    void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo);
+    void handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination);
+
 protected:
     std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
     std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
+    std::unordered_map<Timer*, AddressPtr> runningDeliveryTimers;
 
     ForwardingPolicy* forwardingPolicy;
     PathReinforcementPolicy* pathReinforcementPolicy;
@@ -274,6 +279,7 @@ protected:
 
     double initialPheromoneValue;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
+    unsigned int packetDeliveryDelayInMilliSeconds;
     int maxNrOfRouteDiscoveryRetries;
 
 private:

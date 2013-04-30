@@ -70,4 +70,8 @@ double ARAClientMock::getInitialPhi() const {
     return initialPheromoneValue;
 }
 
+unsigned int ARAClientMock::getPacketDeliveryDelay() const {
+    return packetDeliveryDelayInMilliSeconds;
+}
+
 } /* namespace ARA */

@@ -37,6 +37,7 @@ public:
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
+    unsigned int getPacketDeliveryDelay() const;
 };
 
 } /* namespace ARA */
