@@ -33,11 +33,13 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         static simsignal_t PACKET_NOT_DELIVERED_SIGNAL;
         static simsignal_t LOOP_DETECTION_SIGNAL;
         static simsignal_t ROUTE_FAILURE_SIGNAL;
+        static simsignal_t DROP_PACKET_WITH_ZERO_TTL;
 
     protected:
         virtual int numInitStages() const;
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
+        virtual void finish();
 
         /**
          * The packet should be directed to this node and must be delivered to the local system.
@@ -58,6 +60,8 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress);
 
         virtual void handleCompleteRouteFailure(Packet* packet);
+
+        virtual void handlePacketWithZeroTTL(Packet* packet);
 
         /**
          * This method is called when the route discovery timer expires.

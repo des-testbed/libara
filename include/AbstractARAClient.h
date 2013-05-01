@@ -253,6 +253,7 @@ protected:
     void startRouteDiscoveryTimer(const Packet* packet);
     void sendFANT(AddressPtr destination);
     bool isRouteDiscoveryRunning(AddressPtr destination);
+    virtual void handlePacketWithZeroTTL(Packet* packet);
     void stopRouteDiscoveryTimer(AddressPtr destination);
     void startDeliveryTimer(AddressPtr destination);
     void sendDeliverablePackets(AddressPtr destination);

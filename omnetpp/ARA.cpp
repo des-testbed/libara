@@ -16,6 +16,7 @@ simsignal_t ARA::PACKET_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::PACKET_NOT_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::LOOP_DETECTION_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::ROUTE_FAILURE_SIGNAL = SIMSIGNAL_NULL;
+simsignal_t ARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
 
 ARA::ARA() {
     messageDispatcher = new MessageDispatcher(this, this);
@@ -48,6 +49,7 @@ void ARA::initialize(int stage) {
         PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
         ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
+        DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
     }
 }
 
@@ -87,6 +89,18 @@ void ARA::handleCompleteRouteFailure(Packet* packet) {
 void ARA::timerHasExpired(Timer* responsibleTimer) {
     bubble("Route Discovery expired");
     AbstractARAClient::timerHasExpired(responsibleTimer);
+}
+
+void ARA::handlePacketWithZeroTTL(Packet* packet) {
+    AbstractARAClient::handlePacketWithZeroTTL(packet);
+
+    if(packet->isDataPacket()) {
+        emit(DROP_PACKET_WITH_ZERO_TTL, 1);
+    }
+}
+
+void ARA::finish() {
+    recordScalar("nrOfTrappedPacketsAfterFinish", packetTrap->getNumberOfTrappedPackets());
 }
 
 OMNETARA_NAMESPACE_END

@@ -172,7 +172,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         }
     }
     else {
-        delete packet;
+        handlePacketWithZeroTTL(packet);
     }
 }
 
@@ -184,8 +184,15 @@ void AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressP
 
 void AbstractARAClient::startNewRouteDiscovery(const Packet* packet) {
     logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
+
+    AddressPtr destination = packet->getDestination();
+    if(knownIntermediateHops.find(destination) != knownIntermediateHops.end()) {
+        std::unordered_set<AddressPtr>* seenNodesForThisDestination = knownIntermediateHops[packet->getDestination()];
+        seenNodesForThisDestination->clear();
+    }
+
     startRouteDiscoveryTimer(packet);
-    sendFANT(packet->getDestination());
+    sendFANT(destination);
 }
 
 void AbstractARAClient::sendFANT(AddressPtr destination) {
@@ -213,6 +220,11 @@ void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
 
 bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
     return runningRouteDiscoveries.find(destination) != runningRouteDiscoveries.end();
+}
+
+void AbstractARAClient::handlePacketWithZeroTTL(Packet* packet) {
+    logWarn("Dropping packet %u from %s because TTL reached zero", packet->getSequenceNumber(), packet->getSourceString().c_str());
+    delete packet;
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {

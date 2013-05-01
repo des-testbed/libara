@@ -4,11 +4,9 @@
 
 #include "PacketTrap.h"
 
+ARA_NAMESPACE_BEGIN
+
 using namespace std;
-
-namespace ARA {
-
-typedef std::shared_ptr<Address> AddressPtr;
 typedef unordered_set<Packet*, PacketHash, PacketPredicate> PacketSet;
 
 PacketTrap::PacketTrap(RoutingTable* routingTable) {
@@ -124,4 +122,15 @@ std::deque<Packet*> PacketTrap::removePacketsForDestination(std::shared_ptr<Addr
     return removedPackets;
 }
 
-} /* namespace ARA */
+unsigned int PacketTrap::getNumberOfTrappedPackets() {
+    unsigned int result = 0;
+
+    for (TrappedPacketsMap::iterator entryPair=trappedPackets.begin(); entryPair!=trappedPackets.end(); entryPair++) {
+        PacketSet* packetSet = entryPair->second;
+        result += packetSet->size();
+    }
+
+    return result;
+}
+
+ARA_NAMESPACE_END
