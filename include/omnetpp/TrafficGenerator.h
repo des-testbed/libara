@@ -23,10 +23,12 @@ class TrafficGenerator : public TrafGen {
         virtual void finish();
 
     protected:
-        virtual void handleLowerMsg(cPacket *);
-        virtual void SendTraf(cPacket *msg, const char *dest);
+        virtual void handleLowerMsg(cPacket* packet);
+        virtual void SendTraf(cPacket* msg, const char* destination);
+        void sendTraffic(cPacket* message, const char* destination);
 
     private:
+        int nrOfPacketsToSend;
         int nrOfSentMessages = 0;
         int nrOfReceivedMessages = 0;
 };

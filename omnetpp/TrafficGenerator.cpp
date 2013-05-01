@@ -11,12 +11,28 @@ Define_Module(TrafficGenerator);
 void TrafficGenerator::initialize(int level) {
     TrafGen::initialize(level);
     if(level == 0) {
+        nrOfPacketsToSend = par("nrOfPackets").longValue();
         WATCH(nrOfSentMessages);
         WATCH(nrOfReceivedMessages);
     }
 }
 
-void TrafficGenerator::SendTraf(cPacket *message, const char *destination) {
+void TrafficGenerator::SendTraf(cPacket* message, const char* destination) {
+    if(nrOfPacketsToSend > 0) {
+        if(nrOfSentMessages < nrOfPacketsToSend) {
+            sendTraffic(message, destination);
+        }
+        else {
+            delete message;
+        }
+    }
+    else {
+        sendTraffic(message, destination);
+    }
+
+}
+
+void TrafficGenerator::sendTraffic(cPacket* message, const char* destination) {
     IPv4ControlInfo* controlInfo = new  IPv4ControlInfo();
     IPv4Address sourceAddress("192.168.0.1"); //TODO get this from the interface table or via a configuration parameter
     IPv4Address destinationAddress(destination);
