@@ -28,7 +28,7 @@
 <config id="3"
     packetSize="20"
     interDepartureTime="1"
-    firstPacketTime="5"
+    firstPacketTime="0"
     trafDest="192.168.0.8"
     onLength="10"
     offLength="2"
