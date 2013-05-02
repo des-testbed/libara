@@ -1147,7 +1147,6 @@ TEST(AbstractARAClientTest, doNotCreateRouteOverSelf) {
  * the destination.
  */
 TEST(AbstractARAClientTest, clientWaitsBeforeSendingTheDATA) {
-    unsigned int packetDeliveryDelay = client->getPacketDeliveryDelay();
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("S");
     SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr source = interface->getLocalAddress();

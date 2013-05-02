@@ -26,18 +26,18 @@ network Scenario05
         @display("b=297,203;bgb=758,337");
         double playgroundSizeX @unit(m) = default(1000m);
         double playgroundSizeY @unit(m) = default(1000m);
-        double playgroundSizeZ = default(0) @unit(m);
+        double playgroundSizeZ @unit(m) = default(0);
         int numberOfNodes = default(20);
-        string mobilityType @enum("RandomWPMobility", "StationaryMobility") = default("StationaryMobility");
+        string mobilityType @enum("RandomWPMobility","StationaryMobility") = default("StationaryMobility");
         volatile double nodeSpeed @unit(mps) = default(10mps);
         volatile double nodePauseTime @unit(s) = uniform(3s,8s);
-        
+
 
     submodules:
         clock: OMNeTClock {
-            @display("p=78,161");
+            @display("p=153,41;is=s");
         }
-        
+
         channelControl: ChannelControl {
             parameters:
                 @display("p=78,36");
@@ -50,7 +50,7 @@ network Scenario05
                 @display("p=78,97");
         }
 
-        node[numberOfNodes] : NetworkNode {
+        node[numberOfNodes]: NetworkNode {
             parameters:
                 mobilityType = mobilityType;
                 mobility.speed = nodeSpeed;
@@ -62,6 +62,7 @@ network Scenario05
                 mobility.constraintAreaMaxX = playgroundSizeX;
                 mobility.constraintAreaMaxY = playgroundSizeY;
                 mobility.constraintAreaMaxZ = playgroundSizeZ;
+                @display("p=402,155");
         }
 }
 
