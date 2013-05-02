@@ -24,6 +24,14 @@ ARA::ARA() {
 
 ARA::~ARA() {
     delete messageDispatcher;
+
+    /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
+     * This is necessary because the surround omnetpp simulation will attempt to delete those modules
+     * because they are SimpleModules which are owned by other compound modules*/
+
+    forwardingPolicy = nullptr;
+    evaporationPolicy = nullptr;
+    pathReinforcementPolicy = nullptr;
 }
 
 int ARA::numInitStages() const {

@@ -17,4 +17,6 @@ ARA_NAMESPACE_BEGIN
 typedef std::shared_ptr<Address> AddressPtr;
 ARA_NAMESPACE_END
 
+#define DELETE_IF_NOT_NULL(someThing) if(someThing!=nullptr) delete someThing;
+
 #endif

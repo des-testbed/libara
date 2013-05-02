@@ -71,12 +71,13 @@ AbstractARAClient::~AbstractARAClient() {
     }
     runningDeliveryTimers.clear();
 
-    delete packetFactory;
-    delete packetTrap;
-    delete routingTable;
-    delete pathReinforcementPolicy;
-    delete evaporationPolicy;
-    delete forwardingPolicy;
+    /* The following members may have be deleted earlier, depending on the destructor of the implementing class */
+    DELETE_IF_NOT_NULL(packetFactory);
+    DELETE_IF_NOT_NULL(packetTrap);
+    DELETE_IF_NOT_NULL(routingTable);
+    DELETE_IF_NOT_NULL(pathReinforcementPolicy);
+    DELETE_IF_NOT_NULL(evaporationPolicy);
+    DELETE_IF_NOT_NULL(forwardingPolicy);
 }
 
 void AbstractARAClient::setLogger(Logger* logger) {

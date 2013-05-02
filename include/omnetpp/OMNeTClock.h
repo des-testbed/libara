@@ -28,6 +28,7 @@ namespace omnetpp {
 
             void initialize();
             void handleMessage(cMessage *msg);
+            void finish();
 
         private:
             bool isInitialized = false;

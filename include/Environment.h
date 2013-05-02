@@ -5,9 +5,10 @@
 #ifndef ENVIRONMENT_H_
 #define ENVIRONMENT_H_
 
+#include "ARAMacros.h"
 #include "Clock.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 /**
  * The Environment class represents a static point of access to environment related
@@ -31,6 +32,15 @@ public:
 
     static void setClock(Clock* newClock);
 
+    /**
+     * This notifies the environment that the clock has been (or will shortly be) deleted
+     * by another class which will make the Environment completely forget about the clock.
+     * This mechanism has become necessary to support external memory management constraints
+     * like OMNeT++ which needs to delete its object by itself. If someone has any suggestions
+     * on how to tackle this problem please let me now -FG
+     */
+    static void notifyClockHasBeenDeleted();
+
 private:
     static Environment* instance;
     Clock* clock;
@@ -53,5 +63,6 @@ private:
     static Environment& getInstance();
 };
 
-} /* namespace ARA */
-#endif // ENVIRONMENT_H_
+ARA_NAMESPACE_END
+
+#endif

@@ -5,7 +5,7 @@
 #include "Environment.h"
 #include "UnixClock.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 Environment* Environment::instance = nullptr;
 
@@ -14,12 +14,16 @@ Environment::Environment() {
 }
 
 Environment::~Environment() {
-    delete clock;
+    DELETE_IF_NOT_NULL(clock);
 }
 
 void Environment::setTheClock(Clock* newClock) {
     delete clock;
     clock = newClock;
+}
+
+void Environment::notifyClockHasBeenDeleted() {
+    getInstance().clock = nullptr;
 }
 
 Environment& Environment::getInstance() {
@@ -37,4 +41,4 @@ void Environment::setClock(Clock* newClock) {
     getInstance().setTheClock(newClock);
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END

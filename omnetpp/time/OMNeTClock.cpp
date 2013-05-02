@@ -86,3 +86,9 @@ void OMNeTClock::handleMessage(cMessage* msg) {
 
     delete msg;
 }
+
+void OMNeTClock::finish() {
+    /* We need to let the environment know that it must not delete this module
+     * because this will be done by the simulation itself */
+    ARA::Environment::notifyClockHasBeenDeleted();
+}
