@@ -62,7 +62,6 @@ network Scenario05
                 mobility.constraintAreaMaxX = playgroundSizeX;
                 mobility.constraintAreaMaxY = playgroundSizeY;
                 mobility.constraintAreaMaxZ = playgroundSizeZ;
-                @display("p=402,155");
         }
 }
 
