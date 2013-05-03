@@ -10,7 +10,8 @@
 
 namespace ARA { 
    /**
-    * This class provides the linear evaporation function of the ant routing algorithm (ARA).
+    * This class provides the cubic evaporation function for an ant 
+	* routing algorithm.
     */
     class CubicEvaporationPolicy : public EvaporationPolicy {
         public:
@@ -29,6 +30,6 @@ namespace ARA {
             float reduction;
             float threshold;
     };
-} /* namespace ARA */
+} 
 
 #endif 
