@@ -244,6 +244,7 @@ protected:
     void handleDataPacket(Packet* packet);
     void handleAntPacket(Packet* packet);
     void handleAntPacketForThisNode(Packet* packet);
+    void handleBANTForThisNode(Packet* bant);
     virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
     bool isDirectedToThisNode(const Packet* packet) const;

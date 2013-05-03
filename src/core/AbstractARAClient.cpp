@@ -352,10 +352,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
         broadCast(bant);
     }
     else if(packetType == PacketType::BANT) {
-        logInfo("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
-        AddressPtr routeDiscoveryDestination = packet->getSource();
-        stopRouteDiscoveryTimer(routeDiscoveryDestination);
-        startDeliveryTimer(routeDiscoveryDestination);
+        handleBANTForThisNode(packet);
     }
     else {
         delete packet;
@@ -363,6 +360,18 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     }
 
     delete packet;
+}
+
+void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
+    AddressPtr routeDiscoveryDestination = bant->getSource();
+    if(packetTrap->getNumberOfTrappedPackets(routeDiscoveryDestination) == 0) {
+        logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.");
+    }
+    else {
+        logInfo("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
+        stopRouteDiscoveryTimer(routeDiscoveryDestination);
+        startDeliveryTimer(routeDiscoveryDestination);
+    }
 }
 
 void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {

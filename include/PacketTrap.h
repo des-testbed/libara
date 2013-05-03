@@ -65,10 +65,11 @@ public:
     std::deque<Packet*> removePacketsForDestination(AddressPtr destination);
 
     /**
-     * Returns the total number of trapped packets. This will most likely only be used
-     * for statistics and performance analysis.
+     * Returns the number of trapped packets for a given destination or the
+     * total number of all trapped packets if destination is the nullptr.
+     * This will most likely only be used for statistics and performance analysis.
      */
-    unsigned int getNumberOfTrappedPackets();
+    unsigned int getNumberOfTrappedPackets(AddressPtr destination=nullptr);
 
     //TODO maybe remove this? do we really need to set the table dynamically?
     void setRoutingTable(RoutingTable *routingTable);

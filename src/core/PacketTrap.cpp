@@ -8,6 +8,7 @@ ARA_NAMESPACE_BEGIN
 
 using namespace std;
 typedef unordered_set<Packet*, PacketHash, PacketPredicate> PacketSet;
+typedef std::deque<Packet*> PacketList;
 
 PacketTrap::PacketTrap(RoutingTable* routingTable) {
     this->routingTable = routingTable;
@@ -104,8 +105,8 @@ void PacketTrap::setRoutingTable(RoutingTable *routingTable){
     this->routingTable = routingTable;
 }
 
-std::deque<Packet*> PacketTrap::removePacketsForDestination(std::shared_ptr<Address> destination) {
-    std::deque<Packet*> removedPackets = std::deque<Packet*>();
+PacketList PacketTrap::removePacketsForDestination(AddressPtr destination) {
+    PacketList removedPackets = PacketList();
     TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
 
     if(packetsForDestination != trappedPackets.end()) {
@@ -122,12 +123,14 @@ std::deque<Packet*> PacketTrap::removePacketsForDestination(std::shared_ptr<Addr
     return removedPackets;
 }
 
-unsigned int PacketTrap::getNumberOfTrappedPackets() {
+unsigned int PacketTrap::getNumberOfTrappedPackets(AddressPtr destination) {
     unsigned int result = 0;
 
     for (TrappedPacketsMap::iterator entryPair=trappedPackets.begin(); entryPair!=trappedPackets.end(); entryPair++) {
-        PacketSet* packetSet = entryPair->second;
-        result += packetSet->size();
+        if(destination == nullptr || destination->equals(entryPair->first)) {
+            PacketSet* packetSet = entryPair->second;
+            result += packetSet->size();
+        }
     }
 
     return result;
