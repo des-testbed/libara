@@ -11,13 +11,54 @@
 #include "MACAddress.h"
 #include "IPv4Address.h"
 
+#include <cstring>
+
 OMNETARA_NAMESPACE_BEGIN
 
 void AbstractOMNeTARAClient::initialize() {
     notificationBoard = NotificationBoardAccess().get();
     notificationBoard->subscribe(this, NF_LINK_BREAK);
+    mobility = ModuleAccess<MobilityBase>("mobility").get();
     interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
     networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
+    setPositionFromParameters();
+}
+
+void AbstractOMNeTARAClient::setPositionFromParameters() {
+    cModule* hostModule = findHost();
+
+    const char* posX = hostModule->par("posX").stringValue();
+    const char* posY = hostModule->par("posY").stringValue();
+
+    if(std::strcmp(posX, "auto") != 0) {
+        long x = getNewNodePosition(posX, mobility->par("constraintAreaMaxX").longValue(), mobility->par("constraintAreaMinX").longValue());
+        hostModule->getDisplayString().setTagArg("p", 0, x);
+    }
+
+    if(std::strcmp(posY, "auto") != 0) {
+        long y = getNewNodePosition(posY, mobility->par("constraintAreaMaxY").longValue(), mobility->par("constraintAreaMinY").longValue());
+        hostModule->getDisplayString().setTagArg("p", 1, y);
+    }
+}
+
+int AbstractOMNeTARAClient::getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition) {
+    int margin = 160;
+
+    long newPosition;
+    if(std::strcmp(positionParameter, "center") == 0) {
+        newPosition = (maxPosition - minPosition) / 2;
+    }
+    else if(std::strcmp(positionParameter, "left") == 0 || std::strcmp(positionParameter, "top") == 0) {
+        newPosition = minPosition + margin;
+    }
+    else if(std::strcmp(positionParameter, "right") == 0 || std::strcmp(positionParameter, "bottom") == 0) {
+        newPosition = maxPosition - margin;
+    }
+    else {
+        newPosition = atoi(positionParameter);
+    }
+
+    return newPosition;
 }
 
 void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& config) {
@@ -72,6 +113,18 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
 
 IInterfaceTable* AbstractOMNeTARAClient::getInterfaceTable() {
     return interfaceTable;
+}
+
+cModule* AbstractOMNeTARAClient::findHost() const {
+    cModule* module;
+    for (module = getParentModule(); module != 0; module = module->getParentModule()) {
+        cProperties* properties = module->getProperties();
+        if (properties && properties->getAsBool("node")) {
+            return module;
+        }
+    }
+
+    throw cRuntimeError("Could not determine the host module (should have a property named @node)");
 }
 
 OMNETARA_NAMESPACE_END

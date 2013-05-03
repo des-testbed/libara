@@ -14,6 +14,7 @@
 #include "INotifiable.h"
 #include "NotificationBoard.h"
 #include "IInterfaceTable.h"
+#include "MobilityBase.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -50,9 +51,21 @@ class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
 
         virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) = 0;
 
+        /**
+         * Determines the host module which acts as a container to this simple module.
+         * A host module is defined as the next compound module up the model hierarchy
+         * that has a @node property set
+         */
+        cModule* findHost() const;
+
+    private:
+        void setPositionFromParameters();
+        int getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition);
+
     protected:
         NotificationBoard* notificationBoard;
         IInterfaceTable* interfaceTable;
+        MobilityBase* mobility;
         ARANetworkConfigurator* networkConfig;
 
     friend class OMNeTGate;
