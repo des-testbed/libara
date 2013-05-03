@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "omnetpp/OMNeTBestPheromoneForwardingPolicy.h"
 
 namespace ARA {

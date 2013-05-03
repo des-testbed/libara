@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "omnetpp/OMNeTEnergyAwareStochasticForwardingPolicy.h"
 
 namespace ARA {
