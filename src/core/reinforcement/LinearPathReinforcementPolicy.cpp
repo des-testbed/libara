@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "LinearPathReinforcementPolicy.h"
 
 using namespace ARA;

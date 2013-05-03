@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "EnergyAwareStochasticForwardingPolicy.h"
 #include "EnergyAwareRoutingTable.h"
 #include "RoutingTableEntry.h"
