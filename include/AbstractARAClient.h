@@ -250,7 +250,7 @@ protected:
     bool isDirectedToThisNode(const Packet* packet) const;
     bool isLocalAddress(AddressPtr address) const;
     bool hasBeenSentByThisNode(const Packet* packet) const;
-    void startNewRouteDiscovery(const Packet* packet);
+    virtual void startNewRouteDiscovery(const Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
     void sendFANT(AddressPtr destination);
     bool isRouteDiscoveryRunning(AddressPtr destination);

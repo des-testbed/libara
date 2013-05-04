@@ -188,7 +188,7 @@ void AbstractARAClient::startNewRouteDiscovery(const Packet* packet) {
 
     AddressPtr destination = packet->getDestination();
     if(knownIntermediateHops.find(destination) != knownIntermediateHops.end()) {
-        std::unordered_set<AddressPtr>* seenNodesForThisDestination = knownIntermediateHops[packet->getDestination()];
+        std::unordered_set<AddressPtr>* seenNodesForThisDestination = knownIntermediateHops[destination];
         seenNodesForThisDestination->clear();
     }
 
