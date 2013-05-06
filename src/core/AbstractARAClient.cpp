@@ -229,7 +229,7 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 }
 
 void AbstractARAClient::handleNonSourceRouteDiscovery(Packet* packet) {
-    logWarn("Dropping packet %u from %s because all known routes have evaporated (non-source RT)", packet->getSequenceNumber(), packet->getSourceString().c_str());
+    logWarn("Dropping packet %u from %s because all known routes have evaporated (non-source RD)", packet->getSequenceNumber(), packet->getSourceString().c_str());
     handleCompleteRouteFailure(packet);
 }
 
