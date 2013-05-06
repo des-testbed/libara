@@ -30,8 +30,8 @@ Packet* PacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket) {
     return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), PacketType::ACK, originalPacket->getSequenceNumber(), maxHopCount);
 }
 
-Packet* PacketFactory::makeRouteFailurePacket(const Packet* originalPacket) {
-    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), PacketType::ROUTE_FAILURE, originalPacket->getSequenceNumber(), maxHopCount);
+Packet* PacketFactory::makeRouteFailurePacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
+    return makePacket(source, destination, source, PacketType::ROUTE_FAILURE, sequenceNumber, maxHopCount);
 }
 
 Packet* PacketFactory::makeEnergyDisseminationPacket(AddressPtr source, unsigned int seqNr, unsigned char energyLevel) {

@@ -71,15 +71,14 @@ public:
      Packet* makeAcknowledgmentPacket(const Packet* originalPacket);
 
      /**
-      * Creates a new route failure packet based on this packet. The source,
-      * destination and sequence number will equal to this packet. As this
-      * packet is only destined for the immediate neighbor, the TTL is set
+      * Creates a new route failure packet based on the given addresses and sequence number.
+      * As this packet is only destined for the immediate neighbor, the TTL is set
       * to 1.
       *
       * Note: The result of this method is a newly created object which must be
       * deleted later by the calling class.
       */
-     Packet* makeRouteFailurePacket(const Packet* originalPacket);
+     Packet* makeRouteFailurePacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber);
 
      /**
        * Creates a new energy dissemination packet with the given parameters.

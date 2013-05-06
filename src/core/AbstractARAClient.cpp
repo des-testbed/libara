@@ -588,8 +588,14 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
 }
 
 void AbstractARAClient::handleCompleteRouteFailure(Packet* packet) {
-    Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(packet);
-    broadCast(routeFailurePacket);
+    AddressPtr destination = packet->getDestination();
+    for(auto& interface: interfaces) {
+        AddressPtr source = interface->getLocalAddress();
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+        interface->broadcast(routeFailurePacket);
+    }
+
     delete packet;
 }
 
