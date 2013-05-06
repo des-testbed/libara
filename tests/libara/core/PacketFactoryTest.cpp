@@ -155,22 +155,18 @@ TEST(PacketFactoryTest, makeAcknowledgmentPacket) {
 }
 
 TEST(PacketFactoryTest, makeRouteFailurePacket) {
-    AddressPtr originalSource (new AddressMock("source"));
-    AddressPtr originalDestination (new AddressMock("destination"));
-    AddressPtr originalSender (new AddressMock("sender"));
-    unsigned int type = PacketType::DATA;
-    unsigned int originalseqenceNumber = 123;
-    unsigned int originalTTL = 30;
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    unsigned int seqenceNumber = 123;
 
-    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalTTL);
-    Packet* routeFailurePacket = factory->makeRouteFailurePacket(&packet);
+    Packet* routeFailurePacket = factory->makeRouteFailurePacket(source, destination, seqenceNumber);
 
-    CHECK(routeFailurePacket->getSource()->equals(originalSource));
-    CHECK(routeFailurePacket->getDestination()->equals(originalDestination));
-    // The sender of the packet will be determined when it is actually send by the ARA client
+    CHECK(routeFailurePacket->getSource()->equals(source));
+    CHECK(routeFailurePacket->getDestination()->equals(destination));
+    CHECK(routeFailurePacket->getSender()->equals(source));
     CHECK(routeFailurePacket->getPreviousHop() == nullptr);
     CHECK_EQUAL(PacketType::ROUTE_FAILURE, routeFailurePacket->getType());
-    CHECK_EQUAL(originalseqenceNumber, routeFailurePacket->getSequenceNumber());
+    CHECK_EQUAL(seqenceNumber, routeFailurePacket->getSequenceNumber());
     CHECK_EQUAL(maximumHopCount, routeFailurePacket->getTTL());
     CHECK_EQUAL(0, routeFailurePacket->getPayloadLength());
 

@@ -18,6 +18,7 @@ simple ARA {
         @statistic[routingLoopDetected](title="Routing loops";record=count,vector);
         @statistic[routeFailure](title="Route Failures";record=count,vector);
         @statistic[dropZeroTTLPacket](title="Zero TTL drops";record=count,vector);
+        @statistic[nonSourceRouteDiscovery](title="Non-source Route Discovery";record=count);
 
     gates:
         inout  upperLayerGate;

@@ -22,6 +22,7 @@ public:
     }
 
     void setSender(std::shared_ptr<Address> newSenderAddress);
+    void setSource(std::shared_ptr<Address> newSourceAddress);
 };
 
 } /* namespace ARA */

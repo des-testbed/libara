@@ -52,7 +52,9 @@ TEST_GROUP(AbstractARAClientTest) {
 };
 
 TEST(AbstractARAClientTest, packetGetsTrappedIfNotDeliverable) {
-    Packet* packet = new PacketMock();
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    PacketMock* packet = new PacketMock();
+    packet->setSource(interface->getLocalAddress());
 
     CHECK(routingTable->isDeliverable(packet) == false);
     client->sendPacket(packet);
@@ -83,7 +85,9 @@ TEST(AbstractARAClientTest, getNextSequenceNumber) {
 
 TEST(AbstractARAClientTest, broadcastFANTIfPacketNotDeliverable) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
-    Packet* packet = new PacketMock();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* packet = new Packet(source, destination, source, PacketType::DATA, 123, 10);
 
     CHECK(routingTable->isDeliverable(packet) == false);
     client->sendPacket(packet);
@@ -577,7 +581,9 @@ TEST(AbstractARAClientTest, packetIsNotDeletedOutsideOfDeliverToSystem) {
 TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     SendPacketsList* sentPackets = interface->getSentPackets();
-    Packet* packet = new PacketMock();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* packet = new Packet(source, destination, source, PacketType::DATA, 1, 10);
 
     // sanity check
     CHECK(routingTable->isDeliverable(packet) == false);
@@ -615,10 +621,14 @@ TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
 }
 
 TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
-    Packet* packetToOtherDestiantion = new PacketMock("source", "otherDestination", 4);
-    Packet* packet1 = new PacketMock("source", "destination", 1);
-    Packet* packet2 = new PacketMock("source", "destination", 2);
-    Packet* packet3 = new PacketMock("source", "destination", 3);
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr otherDestination (new AddressMock("otherDestination"));
+    Packet* packet1 = new Packet(source, destination, source, PacketType::DATA, 1, 10);
+    Packet* packet2 = new Packet(source, destination, source, PacketType::DATA, 2, 10);
+    Packet* packet3 = new Packet(source, destination, source, PacketType::DATA, 3, 10);
+    Packet* packetToOtherDestiantion = new Packet(source, otherDestination, source, PacketType::DATA, 4, 10);
 
     int maxNrOfRouteDiscoveryRetries = 4;
     client->setMaxNrOfRouteDiscoveryRetries(maxNrOfRouteDiscoveryRetries);
@@ -885,7 +895,7 @@ TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRoutesAreKownOnR
     const Packet* sentPacket = sentPacketInfo->getLeft();
     CHECK(interface->isBroadcastAddress(sentPacketInfo->getRight()));
     CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
-    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
     CHECK(sentPacket->getDestination()->equals(destination));
     BYTES_EQUAL(maxNrOfHops, sentPacket->getTTL());
 }
@@ -1193,4 +1203,56 @@ TEST(AbstractARAClientTest, clientWaitsBeforeSendingTheDATA) {
     sentPacket = sentPackets->back()->getLeft();
     CHECK(sentPacket->getType() == PacketType::DATA);
     BYTES_EQUAL(123, sentPacket->getSequenceNumber());
+}
+
+/**
+ * This test checks if the route failure mechanism works correctly
+ *
+ * Test setup:                   | Description:
+ * (src)---(A)---(B)   (dest)    |   * B receives a packet to dest from A
+ *                               |   * B has no route so it broadcasts a ROUTE_FAILURE
+ *                               |   * A should delete the route via B
+ */
+TEST(AbstractARAClientTest, routeFailurePacketIsCorrectlyProcessed) {
+    ARAClientMock* nodeA = client;
+    ARAClientMock nodeB = ARAClientMock();
+    NetworkInterfaceMock* interfaceOfA = nodeA->createNewNetworkInterfaceMock("A");
+    NetworkInterfaceMock* interfaceOfB = nodeB.createNewNetworkInterfaceMock("B");
+    SendPacketsList* sentPacketsOfA = interfaceOfA->getSentPackets();
+    SendPacketsList* sentPacketsOfB = interfaceOfB->getSentPackets();
+
+    AddressPtr addressOfnodeA = interfaceOfA->getLocalAddress();
+    AddressPtr addressOfnodeB = interfaceOfB->getLocalAddress();
+    AddressPtr destination (new AddressMock("dest"));
+    AddressPtr source (new AddressMock("src"));
+
+    routingTable->update(destination, addressOfnodeB, interfaceOfA, 2);
+
+    // sanity check
+    CHECK_TRUE(routeIsKnown(destination, addressOfnodeB, interfaceOfA));
+    CHECK_FALSE(nodeB.getRoutingTable()->isDeliverable(destination));
+
+    Packet* dataPacket = new Packet(source, destination, source, PacketType::DATA, 1, 10);
+
+    // start the test
+    nodeA->receivePacket(dataPacket, interfaceOfA);
+
+    // (A) should have relayed the packet to B
+    BYTES_EQUAL(1, sentPacketsOfA->size())
+    const Packet* sentPacket1FromA = sentPacketsOfA->back()->getLeft();
+    CHECK(sentPacket1FromA->getType() == PacketType::DATA);
+    CHECK(sentPacketsOfA->back()->getRight()->equals(addressOfnodeB));
+
+    nodeB.receivePacket(packetFactory->makeClone(sentPacket1FromA), interfaceOfB);
+
+    // (B) should have sent the route failure packet
+    BYTES_EQUAL(1, sentPacketsOfB->size())
+    const Packet* sentPacket1FromB = sentPacketsOfB->back()->getLeft();
+    CHECK(sentPacket1FromB->getType() == PacketType::ROUTE_FAILURE);
+
+    // now (A) receives the route failure from (B)
+    nodeA->receivePacket(packetFactory->makeClone(sentPacket1FromB), interfaceOfA);
+
+    // the route via (B) should now have been removed
+    CHECK_FALSE(routeIsKnown(destination, addressOfnodeB, interfaceOfA));
 }

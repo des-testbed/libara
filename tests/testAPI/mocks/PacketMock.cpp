@@ -31,4 +31,8 @@ void PacketMock::setSender(std::shared_ptr<Address> newSenderAddress) {
     sender = newSenderAddress;
 }
 
+void PacketMock::setSource(std::shared_ptr<Address> newSourceAddress) {
+    source = newSourceAddress;
+}
+
 } /* namespace ARA */
