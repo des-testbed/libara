@@ -418,6 +418,7 @@ void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
 }
 
 void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket, NetworkInterface* interface) {
+    logWarn("Received DUPLICATE_ERROR from %s. Deleting route to %s via %s", duplicateErrorPacket->getSourceString().c_str(), duplicateErrorPacket->getDestinationString().c_str(), duplicateErrorPacket->getSenderString().c_str());
     routingTable->removeEntry(duplicateErrorPacket->getDestination(), duplicateErrorPacket->getSender(), interface);
 }
 
