@@ -163,12 +163,17 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
             interface->send(packet, nextHopAddress);
         } else {
-            packetTrap->trapPacket(packet);
-            if (isRouteDiscoveryRunning(destination) == false) {
-                startNewRouteDiscovery(packet);
+            if(isLocalAddress(packet->getSource())) {
+                packetTrap->trapPacket(packet);
+                if (isRouteDiscoveryRunning(destination) == false) {
+                    startNewRouteDiscovery(packet);
+                }
+                else {
+                    logTrace("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
+                }
             }
             else {
-                logTrace("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
+                handleNonSourceRouteDiscovery(packet);
             }
         }
     }
@@ -221,6 +226,11 @@ void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
 
 bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
     return runningRouteDiscoveries.find(destination) != runningRouteDiscoveries.end();
+}
+
+void AbstractARAClient::handleNonSourceRouteDiscovery(Packet* packet) {
+    logWarn("Dropping packet %u from %s because all known routes have evaporated (non-source RT)", packet->getSequenceNumber(), packet->getSourceString().c_str());
+    handleCompleteRouteFailure(packet);
 }
 
 void AbstractARAClient::handlePacketWithZeroTTL(Packet* packet) {

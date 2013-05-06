@@ -109,11 +109,9 @@ void ARA::handlePacketWithZeroTTL(Packet* packet) {
     }
 }
 
-void ARA::startNewRouteDiscovery(const Packet* packet) {
-    if (isLocalAddress(packet->getSource()) == false) {
-        emit(NON_SOURCE_ROUTE_DISCOVERY, 1);
-    }
-    AbstractARAClient::startNewRouteDiscovery(packet);
+void ARA::handleNonSourceRouteDiscovery(Packet* packet) {
+    emit(NON_SOURCE_ROUTE_DISCOVERY, 1);
+    AbstractARAClient::handleNonSourceRouteDiscovery(packet);
 }
 
 void ARA::finish() {
