@@ -27,7 +27,7 @@
     onIdenticalTrafDest="true" />
 <config id="3"
     packetSize="20"
-    interDepartureTime="1"
+    interDepartureTime="0.1"
     firstPacketTime="0"
     trafDest="192.168.0.8"
     onLength="10"
