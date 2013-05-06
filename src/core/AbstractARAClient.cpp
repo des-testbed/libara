@@ -272,6 +272,9 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
 void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
     // we do not want to send/reinforce routes that would send the packet back over ourselves
     if (isLocalAddress(packet->getPreviousHop()) == false) {
+        // trigger the evaporation first so this does not effect the new route or update
+        routingTable->triggerEvaporation();
+
         AddressPtr source = packet->getSource();
         AddressPtr sender = packet->getSender();
         if (routingTable->isNewRoute(source, sender, interface)) {
@@ -281,7 +284,6 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
             reinforcePheromoneValue(source, sender, interface);
         }
 
-        routingTable->triggerEvaporation();
     }
 
 }
