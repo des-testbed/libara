@@ -114,7 +114,7 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
 
     // check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    checkHasLoggedMessage("Broadcasting FANT 123 from source", Logger::LEVEL_TRACE);
+    checkHasLoggedMessage("Broadcasting FANT 123 from source (via source)", Logger::LEVEL_TRACE);
 }
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfDataPacketIsRelayed) {
