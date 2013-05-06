@@ -52,7 +52,9 @@ TEST_GROUP(AbstractARAClientTest) {
 };
 
 TEST(AbstractARAClientTest, packetGetsTrappedIfNotDeliverable) {
-    Packet* packet = new PacketMock();
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    PacketMock* packet = new PacketMock();
+    packet->setSource(interface->getLocalAddress());
 
     CHECK(routingTable->isDeliverable(packet) == false);
     client->sendPacket(packet);
@@ -83,7 +85,9 @@ TEST(AbstractARAClientTest, getNextSequenceNumber) {
 
 TEST(AbstractARAClientTest, broadcastFANTIfPacketNotDeliverable) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
-    Packet* packet = new PacketMock();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* packet = new Packet(source, destination, source, PacketType::DATA, 123, 10);
 
     CHECK(routingTable->isDeliverable(packet) == false);
     client->sendPacket(packet);
@@ -577,7 +581,9 @@ TEST(AbstractARAClientTest, packetIsNotDeletedOutsideOfDeliverToSystem) {
 TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     SendPacketsList* sentPackets = interface->getSentPackets();
-    Packet* packet = new PacketMock();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* packet = new Packet(source, destination, source, PacketType::DATA, 1, 10);
 
     // sanity check
     CHECK(routingTable->isDeliverable(packet) == false);
@@ -615,10 +621,14 @@ TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
 }
 
 TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
-    Packet* packetToOtherDestiantion = new PacketMock("source", "otherDestination", 4);
-    Packet* packet1 = new PacketMock("source", "destination", 1);
-    Packet* packet2 = new PacketMock("source", "destination", 2);
-    Packet* packet3 = new PacketMock("source", "destination", 3);
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("source");
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr otherDestination (new AddressMock("otherDestination"));
+    Packet* packet1 = new Packet(source, destination, source, PacketType::DATA, 1, 10);
+    Packet* packet2 = new Packet(source, destination, source, PacketType::DATA, 2, 10);
+    Packet* packet3 = new Packet(source, destination, source, PacketType::DATA, 3, 10);
+    Packet* packetToOtherDestiantion = new Packet(source, otherDestination, source, PacketType::DATA, 4, 10);
 
     int maxNrOfRouteDiscoveryRetries = 4;
     client->setMaxNrOfRouteDiscoveryRetries(maxNrOfRouteDiscoveryRetries);
