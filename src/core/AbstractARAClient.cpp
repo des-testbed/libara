@@ -351,6 +351,7 @@ void AbstractARAClient::handleAntPacket(Packet* packet) {
         broadCast(packet);
     }
     else {
+        // do not broadcast this ANT packet any further (TTL = 0)
         delete packet;
     }
 }
@@ -367,8 +368,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
         handleBANTForThisNode(packet);
     }
     else {
-        delete packet;
-        throw Exception("Can not handle ANT packet (unknown type)");
+        logError("Can not handle ANT packet %u from %s (unknown type %u)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packetType);
     }
 
     delete packet;
@@ -396,6 +396,9 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
         runningRouteDiscoveries.erase(discovery);
         runningRouteDiscoveryTimers.erase(timer);
         delete timer;
+    }
+    else {
+        logError("Could not stop route discovery timer (not found for destination %s)", destination->toString().c_str());
     }
 }
 
