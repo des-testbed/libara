@@ -9,7 +9,7 @@ import ara.evaporation.EvaporationPolicy;
 simple OMNeTExponentialEvaporationPolicy like EvaporationPolicy {
     parameters:
         double evaporationFactor; // The factor which is used to evaporate the pheromone values
-        int timeInterval @unit(ms) = default(1000ms); // denotes the time interval in milliseconds at which the full evaporation factor should be applied
-        int minTimeDifferenceBeforeEvaporation @unit(ms) = default(30ms); // the minimum time that must have been passed before the evaporation function is partially applied
-        double threshold = default(0); // denotes the smallest allowed pheromone value before it is set to 0
+        int timeInterval @unit(ms); // denotes the time interval in milliseconds at which the full evaporation factor should be applied
+        int minTimeDifferenceBeforeEvaporation @unit(ms) = default(10ms); // the minimum time that must have been passed before the evaporation function is partially applied
+        double threshold = default(1); // denotes the smallest allowed pheromone value before it is set to 0
 }
