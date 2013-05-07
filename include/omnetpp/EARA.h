@@ -29,7 +29,7 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         virtual void deliverToSystem(const Packet* packet);
         virtual void packetNotDeliverable(const Packet* packet);
         virtual void receiveChangeNotification(int category, const cObject* details);
-        virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress);
+        virtual void handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress);
         virtual unsigned char getCurrentEnergyLevel();
     private:
         void handleBatteryStatusChange(Energy* energyInformation);

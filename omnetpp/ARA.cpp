@@ -85,7 +85,7 @@ void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface
     emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
-void ARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
+void ARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
     // TODO this does only work if we have only one network interface card
     NetworkInterface* interface = getNetworkInterface(0);
     AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);

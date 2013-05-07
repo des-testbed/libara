@@ -49,7 +49,7 @@ class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
          */
         virtual void receiveChangeNotification(int category, const cObject* details);
 
-        virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) = 0;
+        virtual void handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) = 0;
 
         /**
          * Determines the host module which acts as a container to this simple module.
