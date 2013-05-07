@@ -36,6 +36,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         static simsignal_t ROUTE_FAILURE_SIGNAL;
         static simsignal_t DROP_PACKET_WITH_ZERO_TTL;
         static simsignal_t NON_SOURCE_ROUTE_DISCOVERY;
+        static simsignal_t NEW_ROUTE_DISCOVERY;
 
     protected:
         virtual int numInitStages() const;
@@ -66,6 +67,8 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         virtual void handlePacketWithZeroTTL(Packet* packet);
 
         virtual void handleNonSourceRouteDiscovery(Packet* packet);
+
+        virtual void startNewRouteDiscovery(const Packet* packet);
 
         /**
          * This method is called when the route discovery timer expires.

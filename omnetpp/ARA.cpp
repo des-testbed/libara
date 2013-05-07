@@ -18,6 +18,7 @@ simsignal_t ARA::LOOP_DETECTION_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::ROUTE_FAILURE_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
 simsignal_t ARA::NON_SOURCE_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
+simsignal_t ARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
 
 ARA::ARA() {
     messageDispatcher = new MessageDispatcher(this, this);
@@ -60,6 +61,7 @@ void ARA::initialize(int stage) {
         ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
         DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
         NON_SOURCE_ROUTE_DISCOVERY = registerSignal("nonSourceRouteDiscovery");
+        NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
     }
 }
 
@@ -112,6 +114,11 @@ void ARA::handlePacketWithZeroTTL(Packet* packet) {
 void ARA::handleNonSourceRouteDiscovery(Packet* packet) {
     emit(NON_SOURCE_ROUTE_DISCOVERY, 1);
     AbstractARAClient::handleNonSourceRouteDiscovery(packet);
+}
+
+void ARA::startNewRouteDiscovery(const Packet* packet) {
+    emit(NEW_ROUTE_DISCOVERY, 1);
+    AbstractARAClient::startNewRouteDiscovery(packet);
 }
 
 void ARA::finish() {

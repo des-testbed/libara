@@ -19,6 +19,7 @@ simple ARA {
         @statistic[routeFailure](title="Route Failures";record=count,vector);
         @statistic[dropZeroTTLPacket](title="Zero TTL drops";record=count,vector);
         @statistic[nonSourceRouteDiscovery](title="Non-source Route Discovery";record=count);
+        @statistic[newRouteDiscovery](title="Nr of Route Discoveries";record=count);
 
     gates:
         inout  upperLayerGate;
