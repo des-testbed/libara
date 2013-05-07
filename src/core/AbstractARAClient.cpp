@@ -149,6 +149,9 @@ PacketFactory* AbstractARAClient::getPacketFactory() const{
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
+    // at first we need to trigger the evaporation (this has no effect if this has been done before in receivePacket(..) )
+    routingTable->triggerEvaporation();
+
     if (packet->getTTL() > 0) {
         AddressPtr destination = packet->getDestination();
         if (routingTable->isDeliverable(packet)) {
