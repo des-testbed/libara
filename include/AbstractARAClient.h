@@ -172,8 +172,9 @@ protected:
 
     /**
      * Handles path reinforcement using the currently set PathReinforcementPolicy.
+     * The new pheromone value is returned.
      */
-    void reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+    float reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
 
     /**
      * Handles a packet depending on its type. This method is protected virtual to enable

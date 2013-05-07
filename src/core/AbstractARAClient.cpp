@@ -4,7 +4,6 @@
 
 #include "AbstractARAClient.h"
 #include "PacketType.h"
-#include "LinearPathReinforcementPolicy.h"
 #include "Timer.h"
 #include "Environment.h"
 #include "Exception.h"
@@ -12,7 +11,7 @@
 #include "sstream"
 using namespace std;
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 typedef std::unordered_map<Timer*, RouteDiscoveryInfo> DiscoveryTimerInfo;
 typedef std::unordered_map<Timer*, AddressPtr> DeliveryTimerInfo;
@@ -161,8 +160,8 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             packet->setPreviousHop(packet->getSender());
             packet->setSender(interface->getLocalAddress());
 
-            logTrace("Forwarding DATA packet %u from %s to %s via %s", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str());
-            reinforcePheromoneValue(destination, nextHopAddress, interface);
+            float newPheromoneValue = reinforcePheromoneValue(destination, nextHopAddress, interface);
+            logTrace("Forwarding DATA packet %u from %s to %s via %s (phi=%.2f)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str(), newPheromoneValue);
 
             interface->send(packet, nextHopAddress);
         } else {
@@ -185,10 +184,11 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     }
 }
 
-void AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
     float currentPheromoneValue = routingTable->getPheromoneValue(destination, nextHop, interface);
     float newPheromoneValue = pathReinforcementPolicy->calculateReinforcedValue(currentPheromoneValue);
     routingTable->update(destination, nextHop, interface, newPheromoneValue);
+    return newPheromoneValue;
 }
 
 void AbstractARAClient::startNewRouteDiscovery(const Packet* packet) {
@@ -259,7 +259,7 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
         sendDuplicateWarning(packet, interface);
     }
     else if(packet->getType() == PacketType::BANT && isDirectedToThisNode(packet)) {
-        logInfo("Another BANT %u came back from %s via %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
+        logDebug("Another BANT %u came back from %s via %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
     }
 
     delete packet;
@@ -383,7 +383,7 @@ void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
         logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.");
     }
     else {
-        logInfo("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
+        logDebug("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
         stopRouteDiscoveryTimer(routeDiscoveryDestination);
         startDeliveryTimer(routeDiscoveryDestination);
     }
@@ -424,7 +424,7 @@ void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
 }
 
 void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket, NetworkInterface* interface) {
-    logWarn("Received DUPLICATE_ERROR from %s. Deleting route to %s via %s", duplicateErrorPacket->getSourceString().c_str(), duplicateErrorPacket->getDestinationString().c_str(), duplicateErrorPacket->getSenderString().c_str());
+    logInfo("Received DUPLICATE_ERROR from %s. Deleting route to %s via %s", duplicateErrorPacket->getSourceString().c_str(), duplicateErrorPacket->getDestinationString().c_str(), duplicateErrorPacket->getSenderString().c_str());
     routingTable->removeEntry(duplicateErrorPacket->getDestination(), duplicateErrorPacket->getSender(), interface);
 }
 
@@ -545,7 +545,7 @@ void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
         }
         else {
             // if this happens its a bug in our code
-            throw new Exception("AbstractARAClient::timerHasExpired : Could not identify expired timer");
+            logError("Could not identify expired timer");
         }
     }
 }
@@ -585,11 +585,11 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
     routingTable->removeEntry(packet->getDestination(), nextHop, interface);
 
     if (routingTable->isDeliverable(packet)) {
-        logWarn("Link over %s is broken. Sending over alternative route", nextHop->toString().c_str());
+        logInfo("Link over %s is broken. Sending over alternative route", nextHop->toString().c_str());
         sendPacket(packet);
     }
     else {
-        logWarn("Link over %s is broken and can not be repaired. Dropping packet %u from %s.", nextHop->toString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
+        logInfo("Link over %s is broken and can not be repaired. Dropping packet %u from %s.", nextHop->toString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
         handleCompleteRouteFailure(packet);
     }
 }
@@ -613,4 +613,4 @@ void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterfac
     delete packet;
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
