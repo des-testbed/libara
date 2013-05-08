@@ -106,7 +106,7 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
             AddressPtr omnetAddress (new OMNeTAddress(receiverIPv4Address));
 
             OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
-            handleBrokenLink(omnetPacket, omnetAddress);
+            handleBrokenOMNeTLink(omnetPacket, omnetAddress);
         }
     }
 }
