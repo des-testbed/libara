@@ -4,10 +4,10 @@
 
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/OMNeTGate.h"
+#include "omnetpp/OMNeTLogger.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
-#include "SimpleLogger.h"
 #include "IPvXAddressResolver.h"
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
@@ -26,7 +26,7 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
     packetDeliveryDelayInMilliSeconds = module->par("packetDeliveryDelay").longValue();
 
-    logger = new SimpleLogger(getHostModule()->getFullName());
+    logger = new OMNeTLogger(getHostModule()->getFullName());
 }
 
 EvaporationPolicy* OMNeTConfiguration::getEvaporationPolicy() {
