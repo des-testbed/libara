@@ -30,11 +30,11 @@ inetmanet/.git:
 
 test: libARA
 	@echo -e "\n~~~ BUILDING ALL TESTS ~~~~~~~~~~~~~~\n"
-	@cd tests && $(MAKE) runTests	
+	@cd tests && $(MAKE) runTests NO_OMNET=TRUE
 	
 omnetTest: all 
 	@echo -e "\n~~~ BUILDING libARA TESTS ~~~~~~~~~~~\n"
-	@cd tests && $(MAKE) runLibAraTests NO_OMNET=TRUE
+	@cd tests && $(MAKE) runLibAraTests
 
 runSingleTest: all
 	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"
