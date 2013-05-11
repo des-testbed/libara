@@ -49,8 +49,14 @@ TEST_GROUP(AbstractARAClientLoggerTest) {
     void checkHasLoggedMessage(string message, Logger::Level level) {
         deque<LogMessage>* loggedMessages = logger->getLoggedMessages();
         for(auto& loggedMessage: *loggedMessages) {
-            if(loggedMessage.level == level && loggedMessage.text == message) {
-                return;
+            if(loggedMessage.text == message) {
+                if(loggedMessage.level == level) {
+                    return;
+                }
+                else {
+                    FAIL("Message has been logged but with wrong log level");
+                    return;
+                }
             }
         }
 
@@ -104,7 +110,7 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
 
     // check that the log message is generated
     BYTES_EQUAL(5, client->getPacketDeliveryDelay());
-    checkHasLoggedMessage("First BANT 123 came back from destination via destination. Waiting 5ms until delivering the trapped packets", Logger::LEVEL_INFO);
+    checkHasLoggedMessage("First BANT 123 came back from destination via destination. Waiting 5ms until delivering the trapped packets", Logger::LEVEL_DEBUG);
 }
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
@@ -128,7 +134,10 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfDataPacketIsRelayed) {
     CHECK(routingTable->isDeliverable(dataPacket));
     client->receivePacket(dataPacket, interface);
 
-    // check that the log message is generated
+    // first check that the pheromone value has been updated to 15 (need this in the logged message)
+    CHECK_EQUAL(15.0, routingTable->getPheromoneValue(dataPacket->getDestination(), nextHop, interface));
+
+    // then actually check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    checkHasLoggedMessage("Forwarding DATA packet 123 from 192.168.0.1 to 192.168.0.10 via 192.168.0.3", Logger::LEVEL_TRACE);
+    checkHasLoggedMessage("Forwarding DATA packet 123 from 192.168.0.1 to 192.168.0.10 via 192.168.0.3 (phi=15.00)", Logger::LEVEL_TRACE);
 }
