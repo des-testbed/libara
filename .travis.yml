@@ -2,7 +2,6 @@
 # See http://about.travis-ci.org/docs/user/getting-started/
 language: cpp
 compiler:
-  - gcc
   - clang
 script: "make test"
 install:
