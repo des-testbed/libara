@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 ifneq ("$(NO_OMNET)", "TRUE")
 # Pull in OMNeT++ configuration (Makefile.inc or configuser.vc) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ifneq ("$(OMNETPP_CONFIGFILE)","")
@@ -27,7 +29,7 @@ INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
 ifneq ("$(NO_OMNET)", "TRUE")
 ADDITIONAL_INCLUDES = $(OMNETPP_INCLUDE_PATH)
 endif 
-LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -llog4cxx -lm -lstdc++
+LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -lm -lstdc++
 LINKFLAGS += -Wl,-rpath,$(ARA_LIB_DIR)
 
 # libARA stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
