@@ -24,7 +24,10 @@ CONFIGNAME = $(CXX)-$(MODE)
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11
 INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
-LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -llog4cxx -lm
+ifneq ("$(NO_OMNET)", "TRUE")
+ADDITIONAL_INCLUDES = $(OMNETPP_INCLUDE_PATH)
+endif 
+LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -llog4cxx -lm -lstdc++
 LINKFLAGS += -Wl,-rpath,$(ARA_LIB_DIR)
 
 # libARA stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,7 +73,7 @@ TESTAPI_TESTS_SRC = $(shell find ./testAPI/tests -type f -name '*Test.cpp')
 TESTAPI_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(TESTAPI_TESTS_SRC)))
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-runTests: all
+runTests: runLibAraTests
 	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"	
 	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
@@ -110,7 +113,7 @@ $(LIBARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(TESTAPI_T
 # Tests only the omnetpp ARA sources
 #
 $(OMNETPP_ARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN)
-	@echo "Building the libara test suit (./$(OMNETPP_ARA_TEST_EXECUTABLE))"
+	@echo "Building the omnetara test suit (./$(OMNETPP_ARA_TEST_EXECUTABLE))"
 	@$(CXX) $(CFLAGS) $(OMNETPP_INCLUDE_PATH) $(OMNETPP_ARA_BIN) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN) $(OMNETPP_LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 	@ln -s -f $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
 
@@ -125,7 +128,7 @@ $(TESTS_OUTPUT_DIR)/%.o: %.cpp
 	else  \
 		echo "Compiling $*.cpp"; \
 	fi
-	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $(OMNETPP_INCLUDE_PATH) $*.cpp -o $@
+	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $*.cpp -o $@
 
 #
 # Builds the CppUTest Framework

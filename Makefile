@@ -28,12 +28,12 @@ inetmanet/.git:
 	git submodule update inetmanet; \
     fi
 
-test: all
+test: libARA
 	@echo -e "\n~~~ BUILDING ALL TESTS ~~~~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runTests	
 	
-libaratest: libARA 
-	@echo -e "\n~~~ BUILDING LIB ARA TESTS ~~~~~~~~~~\n"
+omnetTest: all 
+	@echo -e "\n~~~ BUILDING libARA TESTS ~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runLibAraTests NO_OMNET=TRUE
 
 runSingleTest: all
