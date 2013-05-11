@@ -5,8 +5,6 @@ compiler:
   - clang
 script: "make test"
 install:
-# libstdc++-4.8-dev
-  - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
 # clang++-3.2
   - sudo add-apt-repository --yes ppa:h-rayflood/llvm
   - sudo apt-get -qq update
@@ -15,7 +13,6 @@ branches:
   only:
     - master
     - develop
-    - travis
 git:
   submodules: false
 notifications:
