@@ -27,6 +27,7 @@ $(ARA_LIB_NAME): $(LIBARA_O)
 # Builds all cpp files
 #
 $(LIBARA_OUTPUT_DIR)/%.o: %.cpp
+	locate c++config.h 
 	@$(MKPATH) $(dir $@)
 	@echo "Compiling $*.cpp";
 	@$(CXX) $(COPTS) -c $*.cpp -o $@
