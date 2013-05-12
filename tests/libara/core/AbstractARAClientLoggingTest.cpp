@@ -96,7 +96,6 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfFANTReachedItsDestination) {
     client->receivePacket(packet, interface);
 
     // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
     checkHasLoggedMessage("FANT 123 from source reached its destination. Broadcasting BANT", Logger::LEVEL_DEBUG);
 }
 
@@ -119,7 +118,6 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
     client->receivePacket(antPacket, interface);
 
     // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
     checkHasLoggedMessage("Broadcasting FANT 123 from source (via source)", Logger::LEVEL_TRACE);
 }
 
@@ -138,6 +136,5 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfDataPacketIsRelayed) {
     CHECK_EQUAL(15.0, routingTable->getPheromoneValue(dataPacket->getDestination(), nextHop, interface));
 
     // then actually check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
     checkHasLoggedMessage("Forwarding DATA packet 123 from 192.168.0.1 to 192.168.0.10 via 192.168.0.3 (phi=15.00)", Logger::LEVEL_TRACE);
 }

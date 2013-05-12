@@ -295,21 +295,27 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
     if(hasPreviousNodeBeenSeenBefore(packet) == false) {
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
         routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
+        logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
+    }
+    else {
+        logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
     }
 }
 
 bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
     KnownIntermediateHopsMap::const_iterator found = knownIntermediateHops.find(packet->getSource());
     if(found == knownIntermediateHops.end()) {
-        // we have never seen any packet for this source address
+        // we have never seen any packet for this source address so we can not have seen this previous node before
         return false;
     }
 
     unordered_set<AddressPtr>* listOfKnownNodes = found->second;
 
     // have we seen this sender, or the previous hop before?
-    return listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end()
-           || listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
+    bool senderHasBeenSeen = listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end();
+    bool prevHopHasBeenSeen = listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
+
+    return senderHasBeenSeen || prevHopHasBeenSeen;
 }
 
 void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
@@ -508,7 +514,7 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     else {
         listOfKnownIntermediateNodes = foundIntermediateHopsForSource->second;
         listOfKnownIntermediateNodes->insert(sender);
-        if(previousHop != nullptr) {
+        if(previousHop != nullptr && previousHop->equals(sender) == false) {
             listOfKnownIntermediateNodes->insert(previousHop);
         }
     }

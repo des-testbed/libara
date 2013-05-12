@@ -12,7 +12,7 @@ OMNETARA_NAMESPACE_BEGIN
 
     class OMNeTLogger : public Logger {
     public:
-        OMNeTLogger(const char* instanceName, Level logLevel=Level::LEVEL_WARN) : instanceName(instanceName), currentlogLevel(logLevel) {};
+        OMNeTLogger(const char* instanceName, Level logLevel=Level::LEVEL_WARN) : currentlogLevel(logLevel), instanceName(instanceName) {};
         void setLogLevel(Level newLevel);
 
     protected:

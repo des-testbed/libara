@@ -5,6 +5,7 @@
 #include "RoutingTable.h"
 #include "Environment.h"
 #include "Exception.h"
+
 #include <utility>
 
 ARA_NAMESPACE_BEGIN
