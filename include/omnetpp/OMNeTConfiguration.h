@@ -10,7 +10,7 @@
 #include "AbstractARAClient.h"
 #include "RoutingTable.h"
 #include "IInterfaceTable.h"
-#include "Logger.h"
+#include "OMNeTLogger.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -44,7 +44,7 @@ class OMNeTConfiguration : public Configuration {
         unsigned int packetDeliveryDelayInMilliSeconds;
 
         cModule* simpleModule;
-        Logger* logger;
+        OMNeTLogger* logger;
 };
 
 OMNETARA_NAMESPACE_END

@@ -4,7 +4,6 @@
 
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/OMNeTGate.h"
-#include "omnetpp/OMNeTLogger.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
@@ -27,6 +26,11 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     packetDeliveryDelayInMilliSeconds = module->par("packetDeliveryDelay").longValue();
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
+
+    //FIXME make this more generic via a module parameter
+    if(strcmp(getHostModule()->getFullName(), "node[1]") == 0) {
+        logger->setLogLevel(Logger::LEVEL_TRACE);
+    }
 }
 
 EvaporationPolicy* OMNeTConfiguration::getEvaporationPolicy() {
