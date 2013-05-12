@@ -12,12 +12,14 @@ OMNETARA_NAMESPACE_BEGIN
 
     class OMNeTLogger : public Logger {
     public:
-        OMNeTLogger(const char* instanceName) : instanceName(instanceName) {};
+        OMNeTLogger(const char* instanceName, Level logLevel=Level::LEVEL_WARN) : instanceName(instanceName), currentlogLevel(logLevel) {};
+        void setLogLevel(Level newLevel);
 
     protected:
         void performLoggingAction(const std::string &logMessage, Level level, va_list args) const;
 
     private:
+        Level currentlogLevel;
         const char* instanceName;
     };
 
