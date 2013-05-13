@@ -9,6 +9,7 @@ nedPath="$RELATIVE_PATH_TO_ROOT/inetmanet/src:$RELATIVE_PATH_TO_ROOT/inetmanet/e
 if [ "$#" -lt "1" ]; then
 	echo "ERROR: too few arguments for rum script"
 	echo "Usage: runCmdEnv.sh <experiment_name> <optional_number_of_runs>"
+	exit 1
 fi
 
 experimentName=$1
