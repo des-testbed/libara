@@ -42,7 +42,7 @@ void AbstractOMNeTARAClient::setPositionFromParameters() {
 }
 
 int AbstractOMNeTARAClient::getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition) {
-    int margin = 160;
+    int margin = 80;
 
     long newPosition;
     if(std::strcmp(positionParameter, "center") == 0) {
