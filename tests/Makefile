@@ -50,6 +50,7 @@ OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -I../include/omnetpp -I../include/inetman
 OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet
 OMNETPP_LINKFLAGS += -Wl,-rpath,$(INETMANET_LIB_DIR)
 OMNETPP_LIB_PATH = $(OMNETPP_LIB_DIR)
+OMNETPP_LD_LIB_PATH = LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH) #:$$LD_LIBRARY_PATH
 
 # Output directory and files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
@@ -75,25 +76,34 @@ TESTAPI_TESTS_SRC = $(shell find ./testAPI/tests -type f -name '*Test.cpp')
 TESTAPI_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(TESTAPI_TESTS_SRC)))
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-runTests: runLibAraTests
-	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE); then \
-		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi
-
-runLibAraTests: $(LIBARA_TEST_EXECUTABLE)
-	@echo -e "\n~~~ RUNNING libARA TEST SUIT ~~~~~~~~\n"	
-	@if ./$(LIBARA_TEST_EXECUTABLE); then \
-		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi
-
-runOmnetAraTests: $(OMNETPP_ARA_TEST_EXECUTABLE)
-	@echo -e "\n~~~ RUNNING OMNET ARA TEST SUIT ~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH):$$LD_LIBRARY_PATH ./$(OMNETPP_ARA_TEST_EXECUTABLE); then \
-		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi
 
 all: $(TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING complete TEST SUIT ~~~~~~"
+	@if $(OMNETPP_LD_LIB_PATH) ./$(TEST_EXECUTABLE); then \
+ 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+	else \
+		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
+		exit 1; \
+	fi
+
+
+runLibAraTests: $(LIBARA_TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING libARA TEST SUIT ~~~~~~~~"	
+	@if ./$(LIBARA_TEST_EXECUTABLE); then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+	else \
+		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
+		exit 1; \
+	fi
+
+runOmnetAraTests: $(OMNETPP_ARA_TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING OMNET ARA TEST SUIT ~~~~~"	
+	@if $(OMNETPP_LD_LIB_PATH) ./$(OMNETPP_ARA_TEST_EXECUTABLE); then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+	else \
+		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
+		exit 1; \
+	fi
 
 #
 # Builds all available tests (libara and omnet ARA)

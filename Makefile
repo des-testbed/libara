@@ -29,12 +29,16 @@ inetmanet/.git:
     fi
 
 test: libARA
-	@echo -e "\n~~~ BUILDING ALL TESTS ~~~~~~~~~~~~~~\n"
-	@cd tests && $(MAKE) runTests NO_OMNET=TRUE
-	
-omnetTest: all 
 	@echo -e "\n~~~ BUILDING libARA TESTS ~~~~~~~~~~~\n"
-	@cd tests && $(MAKE) runLibAraTests
+	@cd tests && $(MAKE) runLibAraTests NO_OMNET=TRUE
+	
+omnetTests: all 
+	@echo -e "\n~~~ BUILDING omnetARA TESTS ~~~~~~~~~\n"
+	@cd tests && $(MAKE) runOmnetAraTests 
+
+allTests: all
+	@echo -e "\n~~~ BUILDING all TESTS ~~~~~~~~~~~~~~\n"
+	@cd tests && $(MAKE) all
 
 runSingleTest: all
 	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"
