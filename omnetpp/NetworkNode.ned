@@ -46,6 +46,7 @@ module NetworkNode {
 
         string forwardingPolicyModel = default("OMNeTStochasticForwardingPolicy");
         string evaporationModel = default("OMNeTExponentialEvaporationPolicy");
+        string reinforcementModel = default("OMNeTLinearPathReinforcementPolicy");
 
     gates:
         input radioIn @directIn;
@@ -77,6 +78,7 @@ module NetworkNode {
             parameters:
                 evaporationModel = evaporationModel;
                 forwardingPolicyModel = forwardingPolicyModel;
+                reinforcementModel = reinforcementModel;
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
         }

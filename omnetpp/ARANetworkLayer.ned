@@ -19,14 +19,8 @@ import ara.ARA;
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 
 import ara.evaporation.EvaporationPolicy;
-import ara.evaporation.OMNeTCubicEvaporationPolicy;
-import ara.evaporation.OMNeTLinearEvaporationPolicy;
-import ara.evaporation.OMNeTExponentialEvaporationPolicy;
-
 import ara.forwarding.ForwardingPolicy;
-import ara.forwarding.OMNeTStochasticForwardingPolicy;
-import ara.forwarding.OMNeTBestPheromoneForwardingPolicy;
-import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
+import ara.reinforcement.ReinforcementPolicy;
 
 module ARANetworkLayer
 {
@@ -34,6 +28,7 @@ module ARANetworkLayer
         int nrOfNetworkInterfaces = default(1);
         string forwardingPolicyModel @enum("OMNeTStochasticForwardingPolicy","OMNeTEnergyAwareStochasticForwardingPolicy","OMNeTBestPheromoneForwardingPolicy") = default("OMNeTStochasticForwardingPolicy");
         string evaporationModel @enum("OMNeTExponentialEvaporationPolicy","OMNeTCubicEvaporationPolicy","OMNeTLinearEvaporationPolicy") = default("OMNeTExponentialEvaporationPolicy");
+        string reinforcementModel @enum("OMNeTLinearPathReinforcementPolicy") = default("OMNeTLinearPathReinforcementPolicy");
 
         @display("i=ara.png;bgb=301,241");
 
@@ -54,7 +49,7 @@ module ARANetworkLayer
                 @display("p=71,33");
         }
 
-        reinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
+        reinforcementPolicy: <reinforcementModel> like ReinforcementPolicy if reinforcementModel != "" {
             parameters:
                 @display("p=71,107");
         }
