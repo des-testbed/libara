@@ -6,7 +6,7 @@ simple ARA {
     parameters:
         double initialPhi = default(0);
         int nrOfRouteDiscoveryRetries = default(5);
-        int routeDiscoveryTimeout @unit("ms") = default(300ms);
+        int routeDiscoveryTimeout @unit("ms");
         int packetDeliveryDelay @unit("ms") = default(8ms); // the time a client waits after the first received BANT for additional BANTs coming back from the destination before it starts to send DATA packets
         int maxTTL = default(20); // the maximum number of hops all packets are allowed to travel
         int nrOfNetworkInterfaces = default(1);
