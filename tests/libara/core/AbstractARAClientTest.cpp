@@ -519,7 +519,7 @@ TEST(AbstractARAClientTest, receiveLoopWarning) {
     AddressPtr source (new AddressMock("src"));
     AddressPtr destination (new AddressMock("dest"));
 
-    Packet duplicateErrorPacket = Packet(nodeA, destination, nodeA, PacketType::DUPLICATE_ERROR, 123, 1);
+    Packet* duplicateErrorPacket = new Packet(nodeA, destination, nodeA, PacketType::DUPLICATE_ERROR, 123, 1);
 
     routingTable->update(destination, destination, interface, 2.2);
     routingTable->update(destination, nodeA, interface, 2.2);
@@ -529,7 +529,7 @@ TEST(AbstractARAClientTest, receiveLoopWarning) {
     CHECK(routeIsKnown(destination, nodeA, interface));
 
     // start the test
-    client->receivePacket(&duplicateErrorPacket, interface);
+    client->receivePacket(duplicateErrorPacket, interface);
     CHECK(routeIsKnown(destination, destination, interface));
     CHECK(routeIsKnown(destination, nodeA, interface) == false);
 }
