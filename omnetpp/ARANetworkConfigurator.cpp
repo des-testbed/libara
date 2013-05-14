@@ -10,6 +10,9 @@
 #include <vector>
 #include <regex>
 #include <sstream>
+#include <iostream>
+#include <fstream>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -22,6 +25,9 @@ void ARANetworkConfigurator::initialize(int stage) {
         cTopology topology ("topology");
         extractTopology(topology);
         assignAddresses(topology);
+        if(par("persistStartPositions").boolValue() == true) {
+            persistStartPositions(topology);
+        }
     }
 }
 
@@ -49,6 +55,8 @@ void ARANetworkConfigurator::extractTopology(cTopology& topology) {
         if (nodeInfo[i].hasInterfaceTable) {
             nodeInfo[i].interfaceTable = IPvXAddressResolver().interfaceTableOf(module);
         }
+
+        nodeInfo[i].mobility = ModuleAccess<IMobility>("mobility").get(module);
     }
 }
 
@@ -89,7 +97,6 @@ void ARANetworkConfigurator::assignAddresses(cTopology& topology) {
 }
 
 int ARANetworkConfigurator::extractNodeNumber(int i) {
-    int nodeNumber = i;
     size_t last_index = nodeInfo[i].name.find_last_not_of("0123456789");
     string result = nodeInfo[i].name.substr(last_index + 1);
     if(result.empty()) {
@@ -134,6 +141,21 @@ IPv4Address ARANetworkConfigurator::getIPAddressFromMAC(MACAddress address) {
     }
 
     throw cRuntimeError("Can not find IPv4 address to given MAC address");
+}
+
+void ARANetworkConfigurator::persistStartPositions(cTopology& topology) {
+    mkdir("results", 0777);
+    stringstream fileName;
+    ofstream file;
+    fileName << "results/" << ev.getConfigEx()->getActiveConfigName() << "-StartPositions.txt";
+    file.open(fileName.str());
+
+    int nrOfNodes = topology.getNumNodes();
+    for (int i=0; i < nrOfNodes; i++) {
+        Coord coordinations = nodeInfo[i].mobility->getCurrentPosition();
+        file << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "] " : " ") << coordinations.x << " " << coordinations.y << endl;
+    }
+    file.close();
 }
 
 OMNETARA_NAMESPACE_END
