@@ -1262,3 +1262,62 @@ TEST(AbstractARAClientTest, routeFailurePacketIsCorrectlyProcessed) {
     // the route via (B) should now have been removed
     CHECK_FALSE(routeIsKnown(destination, addressOfnodeB, interfaceOfA));
 }
+
+/**
+ * In this test two packets shall be delivered to one destination.
+ * For the first one a route discovery has just finished but the delivery timer is still
+ * running. The second packet shall not start a new discovery now because it will be
+ * delivered as well as soon as the delivery timer times out.
+ */
+TEST(AbstractARAClientTest, routeDiscoveryIsStartedTwice) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    SendPacketsList* sentPackets = interface->getSentPackets();
+
+    // start the test
+    Packet* packet1 = new Packet(source, destination, source, PacketType::DATA, 1, 10);
+    client->sendPacket(packet1);
+
+    ClockMock* clock = (ClockMock*) Environment::getClock();
+    TimerMock* routeDiscoveryTimer = clock->getLastTimer();
+
+    // a route discovery should have been started for packet1
+    CHECK(routeDiscoveryTimer->isRunning());
+
+    // the packet is trapped until delivery
+    CHECK(packetTrap->contains(packet1));
+
+    // check if the FANT has been sent just to be sure
+    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
+    const Packet* sentPacket1 = sentPackets->back()->getLeft();
+    CHECK(sentPacket1->getType() == PacketType::FANT);
+    CHECK(sentPacket1->getDestination()->equals(destination));
+
+    // the client now receives the BANT which should end the route discovery timer and start the delivery timer
+    Packet* bant = new Packet(destination, source, destination, PacketType::BANT, 1, 10);
+    client->receivePacket(bant, interface);
+
+    // now a delivery timer should be running as long as the client waits for other BANTs to come back from the destination
+    TimerMock* deliveryTimer = clock->getLastTimer();
+
+    // meanwhile the upper layer has generated another packet to send to the destination
+    Packet* packet2 = new Packet(source, destination, source, PacketType::DATA, 2, 10);
+    client->sendPacket(packet2);
+
+    // this packet needs to be stored until the delivery timer expires
+    CHECK(packetTrap->contains(packet2));
+
+    // the client should *not* have started a new route discovery so still only one FANT has been sent
+    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
+
+    // also no new timer could have been started
+    CHECK(clock->getLastTimer() == deliveryTimer);
+
+    // both packets are sent together when the delivery timer expires
+    deliveryTimer->expire();
+
+    BYTES_EQUAL(1 + 2, interface->getNumberOfSentPackets());
+    CHECK(packet1->equals(sentPackets->at(1)->getLeft()) || packet1->equals(sentPackets->at(2)->getLeft()));
+    CHECK(packet2->equals(sentPackets->at(1)->getLeft()) || packet2->equals(sentPackets->at(2)->getLeft()));
+}

@@ -153,7 +153,11 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
     if (packet->getTTL() > 0) {
         AddressPtr destination = packet->getDestination();
-        if (routingTable->isDeliverable(packet)) {
+        if (isRouteDiscoveryRunning(destination)) {
+            logTrace("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
+            packetTrap->trapPacket(packet);
+        }
+        else if (routingTable->isDeliverable(packet)) {
             NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
@@ -165,14 +169,10 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
             interface->send(packet, nextHopAddress);
         } else {
+            // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
                 packetTrap->trapPacket(packet);
-                if (isRouteDiscoveryRunning(destination) == false) {
-                    startNewRouteDiscovery(packet);
-                }
-                else {
-                    logTrace("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
-                }
+                startNewRouteDiscovery(packet);
             }
             else {
                 handleNonSourceRouteDiscovery(packet);
@@ -402,7 +402,8 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
     if(discovery != runningRouteDiscoveries.end()) {
         Timer* timer = discovery->second;
         timer->interrupt();
-        runningRouteDiscoveries.erase(discovery);
+        // the route discovery is not completely finished until the delivery timer expired.
+        // only then is runningRouteDiscoveries.erase(discovery) called!
         runningRouteDiscoveryTimers.erase(timer);
         delete timer;
     }
@@ -583,9 +584,21 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
 }
 
 void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination) {
-    sendDeliverablePackets(destination);
-    runningDeliveryTimers.erase(deliveryTimer);
-    delete deliveryTimer;
+    unordered_map<AddressPtr, Timer*>::const_iterator discovery;
+    discovery = runningRouteDiscoveries.find(destination);
+
+    if(discovery != runningRouteDiscoveries.end()) {
+        // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
+        runningRouteDiscoveries.erase(discovery);
+        runningDeliveryTimers.erase(deliveryTimer);
+        delete deliveryTimer;
+
+        sendDeliverablePackets(destination);
+    }
+    else {
+        logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
+    }
+
 }
 
 void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
