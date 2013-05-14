@@ -232,7 +232,7 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 }
 
 void AbstractARAClient::handleNonSourceRouteDiscovery(Packet* packet) {
-    logWarn("Dropping packet %u from %s because all known routes have evaporated (non-source RD)", packet->getSequenceNumber(), packet->getSourceString().c_str());
+    logWarn("Dropping packet %u from %s because no route is known (non-source RD disabled)", packet->getSequenceNumber(), packet->getSourceString().c_str());
     handleCompleteRouteFailure(packet);
 }
 
@@ -242,8 +242,8 @@ void AbstractARAClient::handlePacketWithZeroTTL(Packet* packet) {
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
-    packet->decreaseTTL();
     updateRoutingTable(packet, interface);
+    packet->decreaseTTL();
 
     if(hasBeenReceivedEarlier(packet)) {
         handleDuplicatePacket(packet, interface);
