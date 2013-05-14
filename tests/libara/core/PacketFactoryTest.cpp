@@ -43,7 +43,7 @@ TEST(PacketFactoryTest, makeFANT) {
    CHECK(fant->getSource()->equals(source));
    CHECK(fant->getDestination()->equals(destination));
    CHECK(fant->getSender()->equals(source));
-   CHECK(fant->getPreviousHop() == nullptr);
+   CHECK(fant->getPreviousHop()->equals(source));
    CHECK_EQUAL(PacketType::FANT, fant->getType());
    LONGS_EQUAL(newSequenceNumber, fant->getSequenceNumber());
    LONGS_EQUAL(maximumHopCount, fant->getTTL());
@@ -97,7 +97,7 @@ TEST(PacketFactoryTest, makeBANT) {
     CHECK(bant->getSource()->equals(originalDestination));
     CHECK(bant->getDestination()->equals(originalSource));
     CHECK(bant->getSender()->equals(originalDestination));
-    CHECK(bant->getPreviousHop() == nullptr);
+    CHECK(bant->getPreviousHop()->equals(originalDestination));
     CHECK_EQUAL(PacketType::BANT, bant->getType());
     LONGS_EQUAL(newSequenceNumber, bant->getSequenceNumber());
     LONGS_EQUAL(maximumHopCount, bant->getTTL());
@@ -122,7 +122,7 @@ TEST(PacketFactoryTest, makeDulicateErrorPacket) {
     CHECK(duplicateWarning->getSource()->equals(senderOfDuplicateWarning));
     CHECK(duplicateWarning->getDestination()->equals(originalDestination));
     CHECK(duplicateWarning->getSender()->equals(senderOfDuplicateWarning));
-    CHECK(duplicateWarning->getPreviousHop() == nullptr);
+    CHECK(duplicateWarning->getPreviousHop()->equals(senderOfDuplicateWarning));
     CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
     CHECK_EQUAL(newSequenceNumber, duplicateWarning->getSequenceNumber());
     CHECK_EQUAL(maximumHopCount, duplicateWarning->getTTL());
@@ -140,12 +140,12 @@ TEST(PacketFactoryTest, makeAcknowledgmentPacket) {
     unsigned int originalTTL = 10;
 
     Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalTTL);
-    Packet* ackPacket = factory->makeAcknowledgmentPacket(&packet);
+    Packet* ackPacket = factory->makeAcknowledgmentPacket(&packet, originalSender);
 
     CHECK(ackPacket->getSource()->equals(originalSource));
     CHECK(ackPacket->getDestination()->equals(originalDestination));
-    // The sender of the packet will be determined when it is actually send by the ARA client
-    CHECK(ackPacket->getPreviousHop() == nullptr);
+    CHECK(ackPacket->getSender()->equals(originalSender));
+    CHECK(ackPacket->getPreviousHop()->equals(originalSender));
     CHECK_EQUAL(PacketType::ACK, ackPacket->getType());
     CHECK_EQUAL(originalseqenceNumber, ackPacket->getSequenceNumber());
     CHECK_EQUAL(maximumHopCount, ackPacket->getTTL());
@@ -164,7 +164,7 @@ TEST(PacketFactoryTest, makeRouteFailurePacket) {
     CHECK(routeFailurePacket->getSource()->equals(source));
     CHECK(routeFailurePacket->getDestination()->equals(destination));
     CHECK(routeFailurePacket->getSender()->equals(source));
-    CHECK(routeFailurePacket->getPreviousHop() == nullptr);
+    CHECK(routeFailurePacket->getPreviousHop()->equals(source));
     CHECK_EQUAL(PacketType::ROUTE_FAILURE, routeFailurePacket->getType());
     CHECK_EQUAL(seqenceNumber, routeFailurePacket->getSequenceNumber());
     CHECK_EQUAL(maximumHopCount, routeFailurePacket->getTTL());
@@ -182,7 +182,7 @@ TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
     CHECK(energyPacket->getSource()->equals(originalSource));
     CHECK(energyPacket->getSender()->equals(originalSource));
     // we do not need to check the destination field because it will be set to the broadcast address by the NIC
-    CHECK(energyPacket->getPreviousHop() == nullptr);
+    CHECK(energyPacket->getPreviousHop()->equals(originalSource));
 
     CHECK_EQUAL(PacketType::ENERGY_INFO, energyPacket->getType());
     CHECK_EQUAL(seqNr, energyPacket->getSequenceNumber());

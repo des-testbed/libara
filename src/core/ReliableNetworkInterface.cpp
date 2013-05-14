@@ -101,7 +101,7 @@ void ReliableNetworkInterface::handleNonAckPacket(Packet* packet) {
     AddressPtr destination = packet->getDestination();
 
     if(packet->isAntPacket() == false) { // TODO actually we want to test if the packet has been sent via a broadcast but this is currently not possible with the API
-        Packet* ackPacket = packetFactory->makeAcknowledgmentPacket(packet);
+        Packet* ackPacket = packetFactory->makeAcknowledgmentPacket(packet, getLocalAddress());
         doSend(ackPacket, packet->getSender());
         delete ackPacket;
     }

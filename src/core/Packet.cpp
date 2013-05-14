@@ -14,7 +14,7 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
     this->source = source;
     this->destination = destination;
     this->sender = sender;
-    this->previousHop = nullptr;
+    this->previousHop = sender;
     this->type = type;
     this->seqNr = seqNr;
 

@@ -158,7 +158,7 @@ TEST(PacketTest, setPreviousHop) {
     const char* payload = "Hello World";
 
     Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload);
-    CHECK(packet.getPreviousHop() == nullptr);
+    CHECK(packet.getPreviousHop()->equals(sender));
 
     packet.setPreviousHop(prevHop1);
     CHECK(packet.getPreviousHop()->equals(prevHop1));

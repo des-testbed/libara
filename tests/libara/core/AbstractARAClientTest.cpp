@@ -952,9 +952,9 @@ IGNORE_TEST(AbstractARAClientTest, doSendDuplicateWarningToSameSender) {
 /**
  * Simply check if a node remembers multiple routes to a specific destination.
  *
- *        /--(A)--\
- * (source)       (testNode)--(C)
- *        \--(B)--/
+ *        /--(A)-------\
+ * (source)            (testNode)--(destination)
+ *        \--(B)--(C)--/
  *
  */
 TEST(AbstractARAClientTest, rememberMultipleRoutes) {
@@ -962,23 +962,29 @@ TEST(AbstractARAClientTest, rememberMultipleRoutes) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
     AddressPtr destination (new AddressMock("destination"));
+
+    // create packet from (source) via (A)
     Packet* packetFromA = new Packet(source, destination, nodeA, PacketType::FANT, 123, 10);
-    Packet* packetFromB = packetFactory->makeClone(packetFromA);
-    packetFromB->setSender(nodeB);
+
+    // packet from (C) is the same but differs in the sender and prevHop
+    Packet* packetFromC = packetFactory->makeClone(packetFromA);
+    packetFromC->setPreviousHop(nodeB);
+    packetFromC->setSender(nodeC);
 
     // sanity check
     CHECK_FALSE(routeIsKnown(source, nodeA, interface));
-    CHECK_FALSE(routeIsKnown(source, nodeB, interface));
+    CHECK_FALSE(routeIsKnown(source, nodeC, interface));
 
     // start the test
     client->receivePacket(packetFromA, interface);
     CHECK_TRUE(routeIsKnown(source, nodeA, interface));
-    CHECK_FALSE(routeIsKnown(source, nodeB, interface));
+    CHECK_FALSE(routeIsKnown(source, nodeC, interface));
 
-    client->receivePacket(packetFromB, interface);
+    client->receivePacket(packetFromC, interface);
     CHECK_TRUE(routeIsKnown(source, nodeA, interface));
-    CHECK_TRUE(routeIsKnown(source, nodeB, interface));
+    CHECK_TRUE(routeIsKnown(source, nodeC, interface));
 }
 
 TEST(AbstractARAClientTest, doNotRelayPacketIfTTLBecomesZero) {

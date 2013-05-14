@@ -506,7 +506,7 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
         // There is no record of any known intermediate node for this source address ~> create new
         listOfKnownIntermediateNodes = new unordered_set<AddressPtr>();
         listOfKnownIntermediateNodes->insert(packet->getSender());
-        if(previousHop != nullptr && previousHop->equals(sender) == false) {
+        if(previousHop->equals(sender) == false) {
             listOfKnownIntermediateNodes->insert(previousHop);
         }
         knownIntermediateHops[source] = listOfKnownIntermediateNodes;
@@ -514,7 +514,7 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     else {
         listOfKnownIntermediateNodes = foundIntermediateHopsForSource->second;
         listOfKnownIntermediateNodes->insert(sender);
-        if(previousHop != nullptr && previousHop->equals(sender) == false) {
+        if(previousHop->equals(sender) == false) {
             listOfKnownIntermediateNodes->insert(previousHop);
         }
     }

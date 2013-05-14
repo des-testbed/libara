@@ -18,10 +18,10 @@ OMNETARA_NAMESPACE_BEGIN
 class PacketFactory : public ::ARA::PacketFactory {
 public:
     PacketFactory(int maxHopCount) : ::ARA::PacketFactory(maxHopCount) {};
-    OMNeTPacket* createOMNetPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl=-1, AddressPtr penultimateHop=nullptr);
+    OMNeTPacket* createOMNetPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl=-1, AddressPtr previousHop=nullptr);
 
 protected:
-    Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr penultimateHop=nullptr);
+    Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
 };
 
 OMNETARA_NAMESPACE_END

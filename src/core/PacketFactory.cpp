@@ -26,8 +26,8 @@ Packet* PacketFactory::makeDulicateWarningPacket(const Packet* originalPacket, A
     return makePacket(senderOfDuplicateWarning, originalPacket->getDestination(), senderOfDuplicateWarning, PacketType::DUPLICATE_ERROR, newSequenceNumber, maxHopCount);
 }
 
-Packet* PacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket) {
-    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), PacketType::ACK, originalPacket->getSequenceNumber(), maxHopCount);
+Packet* PacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender) {
+    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), sender, PacketType::ACK, originalPacket->getSequenceNumber(), maxHopCount);
 }
 
 Packet* PacketFactory::makeRouteFailurePacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
@@ -43,7 +43,9 @@ Packet* PacketFactory::makeEnergyDisseminationPacket(AddressPtr source, unsigned
 
 Packet* PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {
     Packet* packet = new Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
-    packet->setPreviousHop(previousHop);
+    if(previousHop != nullptr) {
+        packet->setPreviousHop(previousHop);
+    }
     return packet;
 }
 
