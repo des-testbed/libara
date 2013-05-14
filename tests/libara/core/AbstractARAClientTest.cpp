@@ -1038,16 +1038,16 @@ TEST(AbstractARAClientTest, initialzePheromoneValue) {
     // start test
     double initialPhi = client->getInitialPhi();
     client->receivePacket(fant1, interface);
-    DOUBLES_EQUAL(1 * (ttl1-1) + initialPhi, routingTable->getPheromoneValue(source, route1, interface), 0.000001);
+    DOUBLES_EQUAL(1 * (ttl1) + initialPhi, routingTable->getPheromoneValue(source, route1, interface), 0.000001);
 
     client->receivePacket(fant2, interface);
-    DOUBLES_EQUAL(1 * (ttl2-1) + initialPhi, routingTable->getPheromoneValue(source, route2, interface), 0.000001);
+    DOUBLES_EQUAL(1 * (ttl2) + initialPhi, routingTable->getPheromoneValue(source, route2, interface), 0.000001);
 
     client->receivePacket(fant3, interface);
-    DOUBLES_EQUAL(1 * (ttl3-1) + initialPhi, routingTable->getPheromoneValue(source, route3, interface), 0.000001);
+    DOUBLES_EQUAL(1 * (ttl3) + initialPhi, routingTable->getPheromoneValue(source, route3, interface), 0.000001);
 
     client->receivePacket(fant4, interface);
-    DOUBLES_EQUAL(1 * (ttl4-1) + initialPhi, routingTable->getPheromoneValue(source, route4, interface), 0.000001);
+    DOUBLES_EQUAL(1 * (ttl4) + initialPhi, routingTable->getPheromoneValue(source, route4, interface), 0.000001);
 }
 
 /**
