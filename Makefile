@@ -50,7 +50,9 @@ clean:
 	@cd tests && $(MAKE) clean
 	rm -R -f out/$(CONFIGNAME)
 
-release: clean test	
+release: allTests
+	@echo -e "\n~~~ PUSHING TO GIT ORIGIN ~~~~~~~~~~~\n"
+	git push
 		
 doc: all
 	@if type doxygen >/dev/null 2>&1; then \
