@@ -1,12 +1,46 @@
 include Makefile.inc
 
+# Source folder ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LIBARA_SRC_FOLDER = src
+
+# Output directory and files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PROJECT_OUTPUT_DIR = out/$(CONFIGNAME)
+LIBARA_SRC = $(shell find $(LIBARA_SRC_FOLDER)/ -type f -name '*.cpp')
+LIBARA_O = $(subst .cpp,.o, $(addprefix $(PROJECT_OUTPUT_DIR)/, $(LIBARA_SRC)))
+LIBARA_DEPENDENCIES = $(LIBARA_O:.o=.d)
+
+# Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CFLAGS += -std=c++11 -fPIC
+INCLUDE_PATH = -Iinclude
+COPTS = $(CFLAGS) $(INCLUDE_PATH)
+
+# Build targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 all: libARA inetmanet_headers
 	@echo -e "\n~~~ BUILDING OMNeT++ SIMULATIONS ~~~~\n"
 	@cd omnetpp && $(MAKE)
 
-libARA: 
-	@echo -e "\n~~~ BUILDING libARA ~~~~~~~~~~~~~~~~~\n"
-	@cd src && $(MAKE)
+libARA: $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)
+
+#
+# Build the ARA library (libARA)
+#
+$(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
+	@echo "Linking $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)"
+	@$(CXX) -shared -Wl,-soname,$(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(COPTS) $(LINKFLAGS) $(LIBARA_O) \
+		-o $(PROJECT_OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
+	@cd $(LIBARA_SRC_FOLDER) && ln -s -f ../$(PROJECT_OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION) $(ARA_LIB_NAME)
+
+# pull in dependeny file (if existing) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-include $(LIBARA_DEPENDENCIES)
+
+#
+# Builds all cpp files
+#
+$(PROJECT_OUTPUT_DIR)/%.o: %.cpp
+	@$(MKPATH) $(dir $@)
+	@echo "Compiling $*.cpp";
+	@$(CXX) $(COPTS) -c $*.cpp -o $@
+	@$(CXX) $(COPTS) -MM -MT $(PROJECT_OUTPUT_DIR)/$*.o $*.cpp > $(PROJECT_OUTPUT_DIR)/$*.d;
 
 inetmanet_headers: inetmanet/src/libinet.so
 	@if [ ! -d include/inetmanet ]; then \
@@ -45,7 +79,9 @@ runSingleTest: all
 	@cd tests && $(MAKE) runSingleTest
 
 clean:
-	@cd src && $(MAKE) clean
+	rm -f $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(PROJECT_OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
+	rm -f $(LIBARA_O)
+	rm -f $(LIBARA_DEPENDENCIES)
 	@cd omnetpp && $(MAKE) clean
 	@cd tests && $(MAKE) clean
 	rm -R -f out/$(CONFIGNAME)
