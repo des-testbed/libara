@@ -15,16 +15,55 @@ ifneq ("$(NO_OMNET)", "TRUE")
     endif
 
     include $(CONFIGFILE)
+else
+    $(info Running without OMNeT++ support)
 endif
 
-# our makefile needs to be included after the omnet stuff (otherwise $(CXX) is overridden ~~~~~~~~~
-include Makefile.inc
+# Make "debug" the default mode
+ifndef MODE
+MODE = debug
+endif
+
+# TODO we might want to make this more generic (i.e. enable compiling with gcc)
+# A simple ifndef does not work because this will always be set by the OMNeT+ makefile.inc to gcc
+CXX = clang
+
+# Configname determines where (in which subdirectory of out/)
+# makemake-generated makefiles create object files and other
+# build artifacts.
 CONFIGNAME = $(CXX)-$(MODE)
+
+ARA_MAJOR_VERSION = 0
+ARA_MINOR_VERSION = 5
+ARA_TARGET_NAME = ARA
+ARA_LIB_NAME = lib$(ARA_TARGET_NAME).so
+ARA_SONAME = $(ARA_LIB_NAME).$(ARA_MAJOR_VERSION)
+
+# Various tools and options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ifeq ($(MODE),debug)
+    CFLAGS=$(CFLAGS_DEBUG)
+    D=d
+else
+    CFLAGS=$(CFLAGS_RELEASE)
+    D=
+endif
+
+CFLAGS_DEBUG = -g -Wall
+CFLAGS_RELEASE = -O2 -DNDEBUG=1
+
+MKPATH = mkdir -p
+
+ifeq ("$(NO_OMNET)", "TRUE")
+    LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER)
+else
+    LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER):$(OMNETPP_LIB_DIR):./$(INETMANET_LIB_DIR)
+endif
 
 # Source folder ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_SRC_FOLDER = src
-OMNETARA_SRC_FOLDER = omnetpp
 TESTS_FOLDER = tests
+OMNETARA_SRC_FOLDER = omnetpp
+INET_MANET_SRC_FOLDER = inetmanet
 OUTPUT_DIR = out/$(CONFIGNAME)
 
 # libARA files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,6 +74,9 @@ LIBARA_DEPENDENCIES = $(LIBARA_O:.o=.d)
 # omnetARA files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 OMNETARA_SRC = $(shell find $(OMNETARA_SRC_FOLDER)/ -type f -name '*.cpp')
 OMNETARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(OMNETARA_SRC)))
+OMNETARA_DEPENDENCIES = $(OMNETARA_O:.o=.d)
+OMNETARA_EXECUTABLE_NAME = ara-sim
+OMNETARA_EXECUTABLE = $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME)
 
 # Tests files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_TESTS_SRC = $(shell find $(TESTS_FOLDER)/libara -type f -name '*Test.cpp')
@@ -54,39 +96,37 @@ ALL_TEST_BINARIES = $(LIBARA_TESTS_BIN) $(OMNETPP_ARA_TESTS_BIN) $(TESTAPI_BIN) 
 TESTS_DEPENDENCIES = $(ALL_TEST_BINARIES:.o=.d)
 
 TEST_EXECUTABLE = runAllTests
-LIBARA_TEST_EXECUTABLE = libAraTests
-OMNETPP_ARA_TEST_EXECUTABLE = omnetAraTests
+LIBARA_TEST_EXECUTABLE = runLibAraTests
+OMNETPP_ARA_TEST_EXECUTABLE = runOmnetAraTests
 
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11 -fPIC
-INCLUDE_PATH = -Iinclude
-INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include
-ifneq ("$(NO_OMNET)", "TRUE")
-    ADDITIONAL_INCLUDES = $(OMNETPP_INCLUDE_PATH)
+ifeq ("$(NO_OMNET)", "TRUE")
+    INCLUDE_PATH = -Iinclude
+else
+    INCLUDE_PATH += -Iinclude -Iinclude/omnetpp -Iinclude/inetmanet -I$(OMNETPP_INCL_DIR)
 endif
+INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include
+LINK_TO_LIB_ARA = -L$(LIBARA_SRC_FOLDER) -l$(ARA_TARGET_NAME)
 
 # Tests configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CPPUTEST_BASE_DIR = $(TESTS_FOLDER)/cpputest
 CPPUTEST_LIB_DIR = $(CPPUTEST_BASE_DIR)/lib
 CPPUTEST_LIB = $(CPPUTEST_LIB_DIR)/libCppUTest.a
 TESTS_CFLAGS = $(CFLAGS) -include $(CPPUTEST_BASE_DIR)/include/CppUTest/MemoryLeakDetectorNewMacros.h
-TESTS_LINKFLAGS = -L$(LIBARA_SRC_FOLDER) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -lm -lstdc++
+TESTS_LINKFLAGS = $(LINK_TO_LIB_ARA) -L$(CPPUTEST_LIB_DIR) -lCppUTest -lm -lstdc++
 
 # Simulation kernel and user interface libraries ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
 OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
-INETMANET_LIB_DIR = inetmanet/src
-OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -Iinclude/omnetpp -Iinclude/inetmanet -I$(OMNETPP_INCL_DIR)
-OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet
-OMNETPP_LINKFLAGS += -Wl,-rpath,$(INETMANET_LIB_DIR)
-OMNETPP_LIB_PATH = $(OMNETPP_LIB_DIR)
-OMNETPP_LD_LIB_PATH = LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH)
+INETMANET_LIB_DIR = $(INET_MANET_SRC_FOLDER)/src
+INETMANET_LIB = $(INETMANET_LIB_DIR)/libinet.so
+OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet -lm
+USERIF_LIBS = $(AS_NEEDED_OFF) -loppcmdenv$D -loppenvir$D $(AS_NEEDED_OFF) -lopptkenv$D -loppenvir$D -lopplayout$D
 
 # Build targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: all
-all: libARA inetmanet_headers
-	@echo -e "\n~~~ BUILDING OMNeT++ SIMULATIONS ~~~~\n"
-	@cd omnetpp && $(MAKE)
+all: libARA omnetARA
 
 .PHONY: libARA
 libARA: $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)
@@ -96,7 +136,7 @@ libARA: $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)
 #
 $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 	@echo "Linking $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)"
-	@$(CXX) -shared -Wl,-soname,$(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(CFLAGS) $(INCLUDE_PATH) $(LINKFLAGS) $(LIBARA_O) \
+	@$(CXX) -shared $(CFLAGS) $(INCLUDE_PATH) $(LINKFLAGS) $(LIBARA_O) \
 		-o $(OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
 	@cd $(LIBARA_SRC_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION) $(ARA_LIB_NAME)
 
@@ -112,8 +152,27 @@ $(OUTPUT_DIR)/%.o: %.cpp
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $*.cpp -o $@
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $(OUTPUT_DIR)/$*.o $*.cpp > $(OUTPUT_DIR)/$*.d;
 
-.PHONY: inetmanet_headers
-inetmanet_headers: inetmanet/src/libinet.so
+# OMNeTARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.PHONY: omnetARA
+omnetARA: $(OMNETARA_EXECUTABLE)
+
+#
+# Build the OMNeT++ simulations
+#
+$(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(OMNETARA_O)
+	@echo "Linking $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME)"
+	@$(CXX) $(LINK_TO_LIB_ARA) $(OMNETPP_LINKFLAGS) -loppmain$D $(OMNETARA_O) -o $(OMNETARA_EXECUTABLE)
+	@cd $(OMNETARA_SRC_FOLDER) && ln -s -f ../$(OMNETARA_EXECUTABLE) $(OMNETARA_EXECUTABLE_NAME)
+	@echo "You can start the simulation now with the individual run scripts in the simulations folder"
+
+#
+# Build the inetmanet simulation library
+#
+$(INETMANET_LIB): $(INET_MANET_SRC_FOLDER)/.git
+	@echo -e "\n~~~ BUILDING INET/MANET FRAMEWORK ~~~\n"
+	@cd $(INET_MANET_SRC_FOLDER) && $(MAKE) makefiles
+	@cd $(INET_MANET_SRC_FOLDER) && $(MAKE)
 	@if [ ! -d include/inetmanet ]; then \
 		echo -e "\n~~~ UPDATING INETMANET HEADERS ~~~"; \
 		mkdir include/inetmanet; \
@@ -121,17 +180,13 @@ inetmanet_headers: inetmanet/src/libinet.so
 		echo "updating include/inetmanet/........done"; \
 	fi
 
-inetmanet/src/libinet.so: inetmanet/.git
-	@echo -e "\n~~~ BUILDING INET/MANET FRAMEWORK ~~~\n"
-	@cd inetmanet && $(MAKE) makefiles;
-	@cd inetmanet && $(MAKE)
-
-inetmanet/.git:
-	@if [ ! -d inetmanet/src ]; then \
-	echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n"; \
-	git submodule init inetmanet; \
-	git submodule update inetmanet; \
-    fi
+#
+# Checkout the inetmanet git submodule
+#
+$(INET_MANET_SRC_FOLDER)/.git:
+	echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n" \
+	git submodule init $(INET_MANET_SRC_FOLDER) \
+	git submodule update $(INET_MANET_SRC_FOLDER) \
 
 # Test targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: test
@@ -140,7 +195,7 @@ test: libAraTests
 .PHONY: allTests
 allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING complete TEST SUIT ~~~~~~"
-	@if $(OMNETPP_LD_LIB_PATH) $(TESTS_FOLDER)/$(TEST_EXECUTABLE); then \
+	@if $(LD_LIBRARY_PATH) $(TESTS_FOLDER)/$(TEST_EXECUTABLE); then \
  		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
 	else \
 		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
@@ -150,7 +205,7 @@ allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE)
 .PHONY: libAraTests
 libAraTests: $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING libARA TEST SUIT ~~~~~~~~"	
-	@if $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE); then \
+	@if $(LD_LIBRARY_PATH) $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
 	else \
 		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
@@ -160,7 +215,7 @@ libAraTests: $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE)
 .PHONY: omnetTests
 omnetTests: $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING OMNET ARA TEST SUIT ~~~~~"	
-	@if $(OMNETPP_LD_LIB_PATH) $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE); then \
+	@if $(LD_LIBRARY_PATH) $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE); then \
 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
 	else \
 		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
@@ -176,7 +231,7 @@ $(TESTS_FOLDER)/$(TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) \
                                     $(ALL_TEST_BINARIES)
 	@echo "Building the comlete test suit ($(TESTS_FOLDER)/$(TEST_EXECUTABLE))"
 	@$(CXX) $(TESTS_CFLAGS) $(OMNETARA_O) $(ALL_TEST_BINARIES) \
-                $(INCLUDE_PATH) $(OMNETPP_INCLUDE_PATH) $(TESTS_LINKFLAGS) $(OMNETPP_LINKFLAGS) \
+                $(INCLUDE_PATH) $(TESTS_LINKFLAGS) $(OMNETPP_LINKFLAGS) \
                 -o $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TEST_EXECUTABLE)
 	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(TEST_EXECUTABLE)
 
@@ -197,10 +252,11 @@ $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) 
 #
 $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) \
                                                 $(CPPUTEST_LIB) \
+                                                $(OMNETARA_O) \
                                                 $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN)
 	@echo "Building the omnetara test suit ($(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE))"
-	@$(CXX) $(TESTS_CFLAGS) $(OMNETARA_O) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN) \
-                $(INCLUDE_PATH) $(OMNETPP_INCLUDE_PATH) $(TESTS_LINKFLAGS) $(OMNETPP_LINKFLAGS) \
+	@$(CXX) $(TESTS_CFLAGS) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN) $(OMNETARA_O) \
+                $(INCLUDE_PATH) $(TESTS_LINKFLAGS) $(OMNETPP_LINKFLAGS) \
                 -o $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
 
@@ -214,9 +270,9 @@ $(CPPUTEST_LIB): $(CPPUTEST_BASE_DIR)/.git
 	@cd $(CPPUTEST_BASE_DIR) && $(MAKE)
 
 $(CPPUTEST_BASE_DIR)/.git:
-	@echo -e "\n~~~ INITIALIZING CPPUTEST SUBMODULE ~\n";
-	@git submodule init tests/cpputest;
-	@git submodule update tests/cpputest;
+	@echo -e "\n~~~ INITIALIZING CPPUTEST SUBMODULE ~\n"
+	@git submodule init $(CPPUTEST_BASE_DIR)
+	@git submodule update $(CPPUTEST_BASE_DIR)
 
 #
 # Clean up (delete) all generated files
@@ -228,7 +284,9 @@ clean:
 	@rm -f $(LIBARA_O)
 	@rm -f $(LIBARA_DEPENDENCIES)
 	@echo "Cleaning omnetARA.."
-	@cd omnetpp && $(MAKE) clean
+	@rm -f $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME) $(OMNETARA_EXECUTABLE)
+	@rm -f $(OMNETARA_O)
+	@rm -f $(OMNETARA_DEPENDENCIES)
 	@echo "Cleaning tests.."
 	@rm -f $(ALL_TEST_BINARIES)
 	@rm -f $(TESTS_DEPENDENCIES)
@@ -238,8 +296,10 @@ clean:
 
 .PHONY: cleanall
 cleanall: clean
-	@echo "Deleting submodule $($CPPUTEST_BASE_DIR)"
+	@echo "Deleting submodule $(CPPUTEST_BASE_DIR)"
 	@rm -R -f $(CPPUTEST_BASE_DIR)
+	@echo "Deleting submodule $(INET_MANET_SRC_FOLDER)"
+	@rm -R -f $(INET_MANET_SRC_FOLDER)
 	@echo "Deleting out/$(CONFIGNAME)"
 	@rm -R -f out/$(CONFIGNAME)
 

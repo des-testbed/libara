@@ -16,8 +16,8 @@ include/inetmanet/*
 # Test output files #
 tests/TestResults.xml
 tests/runAllTests
-tests/libAraTests
-tests/omnetAraTests
+tests/runLibAraTests
+tests/runOmnetAraTests
 
 # CppUTest
 extern/cpputest
