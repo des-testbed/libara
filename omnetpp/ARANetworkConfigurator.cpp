@@ -1,29 +1,22 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ * $FU-Copyright$
+ */
 
-#include "ARANetworkConfigurator.h"
-#include "IPAddressResolver.h"
+#include "omnetpp/ARANetworkConfigurator.h"
+#include "IPvXAddressResolver.h"
 #include "IPv4InterfaceData.h"
-#include "IPAddress.h"
+#include "IPv4Address.h"
 
 #include <vector>
+#include <regex>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <sys/stat.h>
 
 using namespace std;
 
-namespace ARA {
-namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
 Define_Module(ARANetworkConfigurator);
 
@@ -32,30 +25,44 @@ void ARANetworkConfigurator::initialize(int stage) {
         cTopology topology ("topology");
         extractTopology(topology);
         assignAddresses(topology);
-    }
-}
-
-void ARANetworkConfigurator::extractTopology(cTopology& topology) {
-    vector<string> nedTypeNames = vector<string>();
-    nedTypeNames.push_back("ara.ARAClient");
-    topology.extractByNedTypeName(nedTypeNames);
-
-    EV << "ARANetworkConfigurator is configuring " << topology.getNumNodes() << " ARAClient instances\n";
-
-    int numberOfNodes = topology.getNumNodes();
-    nodeInfo.resize(numberOfNodes);
-    for (int i=0; i<numberOfNodes; i++) {
-        cModule* module = topology.getNode(i)->getModule();
-        nodeInfo[i].hasInterfaceTable = IPAddressResolver().findInterfaceTableOf(module)!=NULL;
-        if (nodeInfo[i].hasInterfaceTable) {
-            nodeInfo[i].interfaceTable = IPAddressResolver().interfaceTableOf(module);
+        if(par("persistStartPositions").boolValue() == true) {
+            persistStartPositions(topology);
         }
     }
 }
 
+void ARANetworkConfigurator::extractTopology(cTopology& topology) {
+    topology.extractByProperty("node");
+
+    EV << "ARANetworkConfigurator is configuring " << topology.getNumNodes() << " nodes\n";
+
+    int numberOfNodes = topology.getNumNodes();
+
+    if(numberOfNodes <= 0) {
+        throw cRuntimeError("Error while setting up the network configuration: Could not find any ara.NetworkNode");
+    }
+
+    nodeInfo.resize(numberOfNodes);
+    for (int i=0; i<numberOfNodes; i++) {
+        cModule* module = topology.getNode(i)->getModule();
+        nodeInfo[i].name = module->getFullName();
+        if(nodeInfo[i].name.back() == ']') {
+            nodeInfo[i].name = nodeInfo[i].name.substr(0, nodeInfo[i].name.length()-1);
+            nodeInfo[i].isVectorNode = true;
+        }
+
+        nodeInfo[i].hasInterfaceTable = IPvXAddressResolver().findInterfaceTableOf(module)!=NULL;
+        if (nodeInfo[i].hasInterfaceTable) {
+            nodeInfo[i].interfaceTable = IPvXAddressResolver().interfaceTableOf(module);
+        }
+
+        nodeInfo[i].mobility = ModuleAccess<IMobility>("mobility").get(module);
+    }
+}
+
 void ARANetworkConfigurator::assignAddresses(cTopology& topology) {
-    uint32 networkAddress = IPAddress(par("networkAddress").stringValue()).getInt();
-    uint32 netmask = IPAddress(par("netmask").stringValue()).getInt();
+    uint32 networkAddress = IPv4Address(par("networkAddress").stringValue()).getInt();
+    uint32 netmask = IPv4Address(par("netmask").stringValue()).getInt();
 
     int maximumNrOfNodes = (~netmask)-1;
     int nrOfNodes = topology.getNumNodes();
@@ -63,28 +70,56 @@ void ARANetworkConfigurator::assignAddresses(cTopology& topology) {
         error("ARANetworkConfigurator: Netmask does not fit. There are not enough available addresses for all %d nodes", nrOfNodes);
     }
 
-    int numberOfAssignedNodes = 0;
+    int indexOfNodeNumberZero = -1;
+    int nrOfAssignedAddresses = 0;
     for (int i=0; i < nrOfNodes; i++) {
-
         if (nodeInfo[i].hasInterfaceTable == false) {
             EV << "Skipping node " << i;
             continue;
         }
-
-        uint32 address = networkAddress | uint32(++numberOfAssignedNodes);
-        nodeInfo[i].address.set(address);
-
-        // find interface table and assign address to all (non-loopback) interfaces
-        IInterfaceTable* interfaceTable = nodeInfo[i].interfaceTable;
-        for (int k=0; k < interfaceTable->getNumInterfaces(); k++)         {
-            InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
-            if (interfaceEntry->isLoopback() == false) {
-                IPAddress newIPAddress = IPAddress(address);
-                interfaceEntry->ipv4Data()->setIPAddress(newIPAddress);
-                interfaceEntry->ipv4Data()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
-                //TODO check the line above
-                EV << "Assigning IP " << newIPAddress << " to node " << i << "\n";
+        else {
+            int nodeNumber = extractNodeNumber(i);
+            if(nodeNumber != 0) {
+                assignAddressToNode(i, nodeNumber, networkAddress);
+                nrOfAssignedAddresses++;
             }
+            else {
+                // vector nodes start with index 0 but we do not want a node
+                // to get the standard network address so we assign this later
+                indexOfNodeNumberZero = i;
+            }
+        }
+    }
+
+    if(indexOfNodeNumberZero >= 0) {
+        assignAddressToNode(indexOfNodeNumberZero, ++nrOfAssignedAddresses, networkAddress);
+    }
+}
+
+int ARANetworkConfigurator::extractNodeNumber(int i) {
+    size_t last_index = nodeInfo[i].name.find_last_not_of("0123456789");
+    string result = nodeInfo[i].name.substr(last_index + 1);
+    if(result.empty()) {
+        throw cRuntimeError("Can not parse node name: %s. Please let all node names end with an integer!", nodeInfo[i].name.c_str());
+    }
+
+    return atoi(result.c_str());
+}
+
+void ARANetworkConfigurator::assignAddressToNode(unsigned int i, unsigned int n, uint32 networkAddress) {
+    uint32 address = networkAddress | uint32(n);
+    nodeInfo[i].address.set(address);
+
+    // find interface table and assign address to all (non-loopback) interfaces
+    IInterfaceTable* interfaceTable = nodeInfo[i].interfaceTable;
+    for (int k=0; k < interfaceTable->getNumInterfaces(); k++) {
+        InterfaceEntry* interfaceEntry = interfaceTable->getInterface(k);
+        if (interfaceEntry->isLoopback() == false) {
+            IPv4Address newIPv4Address = IPv4Address(address);
+            interfaceEntry->ipv4Data()->setIPAddress(newIPv4Address);
+            interfaceEntry->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
+            EV << "Assigning IP " << newIPv4Address << " to node " << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "]" : "") << endl;
+            ipMACMapping[newIPv4Address] = interfaceEntry->getMacAddress();
         }
     }
 }
@@ -93,5 +128,34 @@ void ARANetworkConfigurator::handleMessage(cMessage *msg) {
     throw cRuntimeError("The ARA::NetworkConfigurator does not use handle messages. Please do not connect anything directly to this module.");
 }
 
-} /* namespace omnetpp */
-} /* namespace ARA */
+MACAddress ARANetworkConfigurator::getMACAddressByIP(IPv4Address address) {
+    return ipMACMapping[address];
+}
+
+IPv4Address ARANetworkConfigurator::getIPAddressFromMAC(MACAddress address) {
+    std::unordered_map<IPv4Address, MACAddress, IPv4AddressHash, IPv4AddressPredicate>::iterator iterator;
+    for (iterator=ipMACMapping.begin(); iterator!=ipMACMapping.end(); iterator++) {
+        if(iterator->second.equals(address)) {
+            return iterator->first;
+        }
+    }
+
+    throw cRuntimeError("Can not find IPv4 address to given MAC address");
+}
+
+void ARANetworkConfigurator::persistStartPositions(cTopology& topology) {
+    mkdir("results", 0777);
+    stringstream fileName;
+    ofstream file;
+    fileName << "results/" << ev.getConfigEx()->getActiveConfigName() << "-StartPositions.txt";
+    file.open(fileName.str());
+
+    int nrOfNodes = topology.getNumNodes();
+    for (int i=0; i < nrOfNodes; i++) {
+        Coord coordinations = nodeInfo[i].mobility->getCurrentPosition();
+        file << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "] " : " ") << coordinations.x << " " << coordinations.y << endl;
+    }
+    file.close();
+}
+
+OMNETARA_NAMESPACE_END

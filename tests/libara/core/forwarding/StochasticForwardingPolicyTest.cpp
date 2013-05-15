@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "CppUTest/TestHarness.h"
 #include "RoutingTable.h"
@@ -33,8 +12,8 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
+#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
+#include "testAPI/mocks/StochasticForwardingPolicyMock.h"
 
 #include <iostream>
 
@@ -42,31 +21,95 @@ using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-TEST_GROUP(StochasticForwardingPolicyTest) {};
+TEST_GROUP(StochasticForwardingPolicyTest) {
+    EvaporationPolicy* evaporationPolicy;
+    RoutingTable* routingTable;
+    NetworkInterfaceMock* interface;
+
+    void setup() {
+        evaporationPolicy = new ExponentialEvaporationPolicyMock();
+        routingTable = new RoutingTable();
+        routingTable->setEvaporationPolicy(evaporationPolicy);
+        interface = new NetworkInterfaceMock();
+    }
+
+    void teardown() {
+        delete routingTable;
+        delete evaporationPolicy;
+        delete interface;
+    }
+};
 
 TEST(StochasticForwardingPolicyTest, testGetNextHop) {
-    EvaporationPolicy* evaporationPolicy = new LinearEvaporationPolicyMock();
-    RoutingTable routingTable = RoutingTable(new TimeFactoryMock());
-    routingTable.setEvaporationPolicy(evaporationPolicy);
-    AddressPtr destination (new AddressMock("Destination"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
-
-    // create multiple next hops
-    AddressPtr nextHopA (new AddressMock("nextHopA"));
-    AddressPtr nextHopB (new AddressMock("nextHopB"));
-    AddressPtr nextHopC (new AddressMock("nextHopC"));
-
     PacketMock packet = PacketMock();
+    AddressPtr route1 (new AddressMock("A"));
+    AddressPtr route2 (new AddressMock("B"));
 
-    // Start the test
-    routingTable.update(destination, nextHopA, &interface, 1.2);
-    routingTable.update(destination, nextHopB, &interface, 2.1);
-    routingTable.update(destination, nextHopC, &interface, 2.3);
+    routingTable->update(packet.getDestination(), route1, interface, 1.2);
+    routingTable->update(packet.getDestination(), route2, interface, 2.1);
 
-    StochasticForwardingPolicy policy = StochasticForwardingPolicy();
-    policy.setRoutingTable(&routingTable);
-    policy.getNextHop(&packet);
-    //FIXME Continue this test
+    unsigned int seed = 42;
+    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock(seed);
 
-    delete evaporationPolicy;
+    NextHop* nextHop = policy.getNextHop(&packet, routingTable);
+    CHECK(nextHop->getAddress()->equals(route1));
+}
+
+TEST(StochasticForwardingPolicyTest, stochasticBehaviour) {
+    PacketMock packet = PacketMock();
+    AddressPtr route1 (new AddressMock("A"));
+    AddressPtr route2 (new AddressMock("B"));
+    AddressPtr route3 (new AddressMock("C"));
+
+    routingTable->update(packet.getDestination(), route1, interface, 3.0);
+    routingTable->update(packet.getDestination(), route2, interface, 6.0);
+    routingTable->update(packet.getDestination(), route3, interface, 1.0);
+
+    int nrOfIterations = 10000;
+    int nrOfTimesRoute1IsChosen = 0;
+    int nrOfTimesRoute2IsChosen = 0;
+    int nrOfTimesRoute3IsChosen = 0;
+
+    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock();
+    for (int i = 0; i < nrOfIterations; i++) {
+        NextHop* nextHop = policy.getNextHop(&packet, routingTable);
+        if(nextHop->getAddress()->equals(route1)) {
+            nrOfTimesRoute1IsChosen++;
+        }
+        else if(nextHop->getAddress()->equals(route2)) {
+            nrOfTimesRoute2IsChosen++;
+        }
+        else if(nextHop->getAddress()->equals(route3)) {
+            nrOfTimesRoute3IsChosen++;
+        }
+    }
+
+    unsigned int allowedDeviation = nrOfIterations/20; // allow a deviation of +- 5%
+    CHECK(nrOfTimesRoute1IsChosen > (nrOfIterations*0.3 - allowedDeviation));
+    CHECK(nrOfTimesRoute1IsChosen < (nrOfIterations*0.3 + allowedDeviation));
+
+    CHECK(nrOfTimesRoute2IsChosen > (nrOfIterations*0.6 - allowedDeviation));
+    CHECK(nrOfTimesRoute2IsChosen < (nrOfIterations*0.6 + allowedDeviation));
+
+    CHECK(nrOfTimesRoute3IsChosen > (nrOfIterations*0.1 - allowedDeviation));
+    CHECK(nrOfTimesRoute3IsChosen < (nrOfIterations*0.1 + allowedDeviation));
+}
+
+TEST(StochasticForwardingPolicyTest, neverChooseTheSenderOfAPacket) {
+    PacketMock packet = PacketMock();
+    AddressPtr route1 (new AddressMock("A"));
+    AddressPtr route2 (new AddressMock("B"));
+    AddressPtr route3 (new AddressMock("C"));
+
+    routingTable->update(packet.getDestination(), route1, interface, 3.0);
+    routingTable->update(packet.getDestination(), route2, interface, 6.0);
+    routingTable->update(packet.getDestination(), packet.getSender(), interface, 5.0);
+
+    int nrOfIterations = 100;
+
+    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock();
+    for (int i = 0; i < nrOfIterations; i++) {
+        NextHop* nextHop = policy.getNextHop(&packet, routingTable);
+        CHECK(nextHop->getAddress()->equals(packet.getSender()) == false);
+    }
 }

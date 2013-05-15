@@ -1,11 +1,11 @@
 include Makefile.inc
 
-all: arasource inetmanet_headers
+all: libARA inetmanet_headers
 	@echo -e "\n~~~ BUILDING OMNeT++ SIMULATIONS ~~~~\n"
 	@cd omnetpp && $(MAKE)
 
-arasource: 
-	@echo -e "\n~~~ BUILDING ARA SOURCE ~~~~~~~~~~~~~\n"
+libARA: 
+	@echo -e "\n~~~ BUILDING libARA ~~~~~~~~~~~~~~~~~\n"
 	@cd src && $(MAKE)
 
 inetmanet_headers: inetmanet/src/libinet.so
@@ -28,19 +28,26 @@ inetmanet/.git:
 	git submodule update inetmanet; \
     fi
 
-test: all
-	@echo -e "\n~~~ BUILDING ALL TESTS ~~~~~~~~~~~~~~\n"
-	@cd tests && $(MAKE) runTests	
-	
-libaratest: arasource
-	@echo -e "\n~~~ BUILDING LIB ARA TESTS ~~~~~~~~~~\n"
+test: libARA
+	@echo -e "\n~~~ BUILDING libARA TESTS ~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runLibAraTests NO_OMNET=TRUE
+	
+omnetTests: all 
+	@echo -e "\n~~~ BUILDING omnetARA TESTS ~~~~~~~~~\n"
+	@cd tests && $(MAKE) runOmnetAraTests 
+
+allTests: all
+	@echo -e "\n~~~ BUILDING all TESTS ~~~~~~~~~~~~~~\n"
+	@cd tests && $(MAKE) all
 
 runSingleTest: all
 	@echo -e "\n~~~ RUNNING SINGLE TEST ~~~~~~~~~~~~~\n"
 	@cd tests && $(MAKE) runSingleTest
 
 clean:
+	@cd src && $(MAKE) clean
+	@cd omnetpp && $(MAKE) clean
+	@cd tests && $(MAKE) clean
 	rm -R -f out/$(CONFIGNAME)
 
 release: clean test	

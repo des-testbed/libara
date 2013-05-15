@@ -1,79 +1,89 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef OMNETARACLIENT_H_
 #define OMNETARACLIENT_H_
 
-#include <omnetpp.h>
-#include <algorithm>
+#include "OMNeTARAMacros.h"
 
-#include "IInterfaceTable.h"
-#include "InterfaceEntry.h"
-
-#include "Packet.h"
-#include "NextHop.h"
-#include "OMNeTGate.h"
-#include "OMNeTPacket.h"
-#include "OMNeTAddress.h"
-#include "ForwardingPolicy.h"
-#include "NetworkInterface.h"
 #include "AbstractARAClient.h"
-#include "OMNeTRoutingTable.h"
-#include "BestPheromoneForwardingPolicy.h"
-#include "OMNeTStochasticForwardingPolicy.h"
-#include "OMNeTTimeFactory.h"
+#include "AbstractOMNeTARAClient.h"
+#include "MessageDispatcher.h"
 
-namespace ARA {
-    namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
+
+class MessageDispatcher;
+
+/**
+ * The class represents the implementation of the ant routing algorithm (ARA)
+ * for the OMNeT++ simulation framework.
+ *
+ * The algorithm was first published in:
+ *
+ *  Mesut Guenes, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
+ *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
+ */
+class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
+    public:
+        ARA();
+        ~ARA();
+
+        // some signals for statistics recording
+        static simsignal_t PACKET_DELIVERED_SIGNAL;
+        static simsignal_t PACKET_NOT_DELIVERED_SIGNAL;
+        static simsignal_t LOOP_DETECTION_SIGNAL;
+        static simsignal_t ROUTE_FAILURE_SIGNAL;
+        static simsignal_t DROP_PACKET_WITH_ZERO_TTL;
+        static simsignal_t NON_SOURCE_ROUTE_DISCOVERY;
+        static simsignal_t NEW_ROUTE_DISCOVERY;
+
+    protected:
+        virtual int numInitStages() const;
+        virtual void initialize(int stage);
+        virtual void handleMessage(cMessage *msg);
+        virtual void finish();
+
         /**
-         * The class represents the implementation of the ant routing algorithm (ARA)
-         * for the OMNeT++ simulation framework.
-         *
-         * The algorithm was first published in:
-         *
-         *  Guenes, Mesut, Udo Sorges, and Imed Bouazizi. "ARA-the ant-colony based routing algorithm for MANETs."
-         *  Parallel Processing Workshops, 2002. Proceedings. International Conference on. IEEE, 2002.
+         * The packet should be directed to this node and must be delivered to the local system.
+         * Please note that this method is responsible for deleting the given packet (or delegating
+         * this responsibility to another method)
          */
-        class ARA: public cSimpleModule, public AbstractARAClient {
-            public:
-                ARA() : AbstractARAClient(new OMNeTTimeFactory()) {}
+        virtual void deliverToSystem(const Packet* packet);
 
-            protected:
-                int numInitStages() const;
-                virtual void initialize(int stage);
-                virtual void handleMessage(cMessage *msg);
+        /**
+         * This method is called if the route discovery is unsuccessful and not route to the packets
+         * destination can be established. The task of this method is to notify the upper layers
+         * about this event and delete the packet.
+         */
+        virtual void packetNotDeliverable(const Packet* packet);
 
-                ForwardingPolicy* getForwardingPolicy();
-                void updateRoutingTable(const Packet* packet, NetworkInterface* interface);
-                void deliverToSystem(const Packet* packet);
+        virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
 
-                void setEvaporationPolicy(EvaporationPolicy *policy);
+        virtual void handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress);
 
-            private:
-                /// The member holds the forwarding policy, which defines how data packets are forwarded to the destination host
-                ForwardingPolicy* forwardingPolicy;
+        virtual void handleCompleteRouteFailure(Packet* packet);
 
-                /// The member represents the evaporation policy, which denotes how the pheromone trail (route) evaporates over time
-                EvaporationPolicy* evaporationPolicy;
+        virtual void handlePacketWithZeroTTL(Packet* packet);
 
-                IInterfaceTable* interfaceTable;
+        virtual void handleNonSourceRouteDiscovery(Packet* packet);
 
-                void initializeNetworkInterfaces();
-                cModule* getHostModule();
-                IInterfaceTable* getInterfaceTable();
-                InterfaceEntry* getSourceInterfaceFrom(cMessage* msg);
-                cModule* getSubModule(const char* moduleIdentifier, const char* errorMessage);
+        virtual void startNewRouteDiscovery(const Packet* packet);
 
-                void initializeRoutingTable();
-                void initializeForwardingPolicy();
-                void initializeEvaporationPolicy();
-                void initializePathReinforcementPolicy();
+        /**
+         * This method is called when the route discovery timer expires.
+         */
+        virtual void timerHasExpired(Timer* responsibleTimer);
 
-                bool isFromUpperLayer(cMessage* msg);
-                bool isARPMessage(cMessage* msg);
-                void handleUpperLayerMessage(cMessage* msg);
-                void handleARP(cMessage* msg);
-                void handleARA(cMessage* msg);
-        };
+    private:
+        int nrOfDeliverablePackets = 0;
+        int nrOfNotDeliverablePackets = 0;
+        int nrOfDetectedLoops = 0;
+        MessageDispatcher* messageDispatcher;
 
-    } /* namespace ARA */
-} /* namespace omnetpp */
+    friend class OMNeTGate;
+};
+
+OMNETARA_NAMESPACE_END
 
 #endif /* OMNETARACLIENT_H_ */

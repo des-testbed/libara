@@ -23,3 +23,9 @@ editable
 subnet
 param
 refactor
+undeliverable
+omnetpp
+dest
+src
+penultimate
+pheromones

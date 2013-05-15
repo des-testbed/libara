@@ -5,55 +5,99 @@
 #ifndef ROUTINGTABLE_H_
 #define ROUTINGTABLE_H_
 
+#include "ARAMacros.h"
 #include "Packet.h"
 #include "Address.h"
 #include "NetworkInterface.h"
 #include "EvaporationPolicy.h"
 #include "RoutingTableEntry.h"
-#include "LinearEvaporationPolicy.h"
-#include "TimeFactory.h"
+#include "ExponentialEvaporationPolicy.h"
+#include "Clock.h"
 
 #include <deque>
 #include <unordered_map>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
+
+struct RoutingTableEntryTupel {
+    AddressPtr destination;
+    RoutingTableEntry* entry;
+};
+
+#define RoutingTableEntryList std::deque<RoutingTableEntry*>
 
 class RoutingTable {
 
 public:
-    RoutingTable(TimeFactory* timeFactory);
-    ~RoutingTable();
+    RoutingTable();
+    virtual ~RoutingTable();
 
-    float getPheromoneValue(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
-    void update(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface, float pheromoneValue);
-    void removeEntry(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
-    std::deque<RoutingTableEntry*>* getPossibleNextHops(std::shared_ptr<Address> destination);
-    std::deque<RoutingTableEntry*>* getPossibleNextHops(const Packet* packet);
-    bool isDeliverable(std::shared_ptr<Address> destination);
+    /**
+     * Get the pheromone value for a specific route in this routing table.
+     */
+    float getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+   
+    void update(AddressPtr destination, RoutingTableEntry* entry);
+    void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
+
+    void removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+    RoutingTableEntryList getPossibleNextHops(const Packet* packet);
+
+    /**
+     * Checks if a route to the packet destination exists, that does *not* lead
+     * over the packets sender.
+     */
     bool isDeliverable(const Packet* packet);
 
-    bool exists(std::shared_ptr<Address> destination, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    /**
+     * Returns true if there is at least one stored route for the given destination in this routing table.
+     */
+    bool isDeliverable(AddressPtr destination);
 
-    void setEvaporationPolicy(EvaporationPolicy *policy);
-    EvaporationPolicy *getEvaporationPolicy() const;
-    std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> getRoutingTable() const;
-    void setRoutingTable(std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table);
+    /**
+     * The method checks if an destination/nextHop/interface entry already exists.
+     */
+    bool exists(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
+    /**
+     * A convenience method which returns the negated result of RoutingTable::exists(...)
+     * @see RoutingTable::exists
+     */
+    bool isNewRoute(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
+    void setEvaporationPolicy(EvaporationPolicy* policy);
+    EvaporationPolicy* getEvaporationPolicy() const;
+
+    /**
+     * Returns the total number of all entries in this table.
+     * This is the sum of all routes to all destinations.
+     */
+    unsigned int getTotalNumberOfEntries() const;
+
+    /**
+     * Returns the n'th ~RoutingTableEntry.
+     * This method is only used to display the routing table entries to the user.
+     */
+    RoutingTableEntryTupel getEntryAt(int wantedPosition) const;
+
+    /**
+     * Triggers the evaporation process if enough time since the last evaporation has passed.
+     */
+    void triggerEvaporation();
 
 protected:
     bool hasTableBeenAccessedEarlier();
-    void triggerEvaporation();
+    virtual void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
+    Time* lastAccessTime;
 
-    TimeFactory* timeFactory;
-    Time *lastAccessTime;
+    std::unordered_map<std::shared_ptr<Address>, RoutingTableEntryList*, AddressHash, AddressPredicate> table;
 
-private:
-    std::unordered_map<std::shared_ptr<Address>, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate> table;
     /**
      * The memory management of the evaporationPolicy member is handled in class
      * ARA. Thus, there is no delete call to the evaporationPolicy member.
      */
-    EvaporationPolicy *evaporationPolicy;
+    EvaporationPolicy* evaporationPolicy;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
 #endif /* ROUTINGTABLE_H_ */

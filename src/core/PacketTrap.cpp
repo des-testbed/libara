@@ -4,12 +4,11 @@
 
 #include "PacketTrap.h"
 
+ARA_NAMESPACE_BEGIN
+
 using namespace std;
-
-namespace ARA {
-
-typedef std::shared_ptr<Address> AddressPtr;
 typedef unordered_set<Packet*, PacketHash, PacketPredicate> PacketSet;
+typedef std::deque<Packet*> PacketList;
 
 PacketTrap::PacketTrap(RoutingTable* routingTable) {
     this->routingTable = routingTable;
@@ -17,7 +16,7 @@ PacketTrap::PacketTrap(RoutingTable* routingTable) {
 
 PacketTrap::~PacketTrap() {
     // delete all packets that might still be trapped
-    unordered_map<AddressPtr, PacketSet*>::iterator iterator;
+    TrappedPacketsMap::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
         pair<AddressPtr, PacketSet*> entryPair = *iterator;
         PacketSet* packetSet = entryPair.second;
@@ -46,7 +45,7 @@ void PacketTrap::trapPacket(Packet* packet) {
 
 void PacketTrap::untrapPacket(Packet* packet) {
     AddressPtr packetDestination = packet->getDestination();
-    unordered_map<AddressPtr, PacketSet*>::const_iterator found = trappedPackets.find(packetDestination);
+    TrappedPacketsMap::const_iterator found = trappedPackets.find(packetDestination);
     if(found != trappedPackets.end()) {
         PacketSet* packetSet = found->second;
         PacketSet::const_iterator storedPacketIterator = packetSet->find(packet);
@@ -71,7 +70,7 @@ void PacketTrap::untrapPacket(Packet* packet) {
 
 bool PacketTrap::contains(Packet* packet) {
     AddressPtr packetDestination = packet->getDestination();
-    unordered_map<AddressPtr, PacketSet*>::const_iterator found = trappedPackets.find(packetDestination);
+    TrappedPacketsMap::const_iterator found = trappedPackets.find(packetDestination);
     if(found != trappedPackets.end()) {
         PacketSet* packetSet = found->second;
         return packetSet->find(packet) != packetSet->end();
@@ -85,17 +84,14 @@ bool PacketTrap::isEmpty() {
     return trappedPackets.size() == 0;
 }
 
-deque<Packet*>* PacketTrap::getDeliverablePackets() {
+deque<Packet*>* PacketTrap::getDeliverablePackets(AddressPtr destination) {
     deque<Packet*>* deliverablePackets = new deque<Packet*>();
 
-    unordered_map<AddressPtr, PacketSet*>::iterator iterator;
-    for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
-        pair<AddressPtr, PacketSet*> entryPair = *iterator;
-        AddressPtr address = entryPair.first;
-
-        if(routingTable->isDeliverable(address)) {
+    TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
+    if(packetsForDestination != trappedPackets.end()) {
+        if(routingTable->isDeliverable(destination)) {
             // Add all packets for this destination
-            PacketSet* packets = entryPair.second;
+            PacketSet* packets = packetsForDestination->second;
             for(auto& trappedPacket: *packets) {
                 deliverablePackets->push_back(trappedPacket);
             }
@@ -105,9 +101,39 @@ deque<Packet*>* PacketTrap::getDeliverablePackets() {
     return deliverablePackets;
 }
 
-// TODO: checks if this is a problem
 void PacketTrap::setRoutingTable(RoutingTable *routingTable){
     this->routingTable = routingTable;
 }
 
-} /* namespace ARA */
+PacketList PacketTrap::removePacketsForDestination(AddressPtr destination) {
+    PacketList removedPackets = PacketList();
+    TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
+
+    if(packetsForDestination != trappedPackets.end()) {
+        PacketSet* packetSet = packetsForDestination->second;
+
+        for(auto& packet: *packetSet) {
+            removedPackets.push_back(packet);
+        }
+
+        trappedPackets.erase(packetsForDestination);
+        delete packetSet;
+    }
+
+    return removedPackets;
+}
+
+unsigned int PacketTrap::getNumberOfTrappedPackets(AddressPtr destination) {
+    unsigned int result = 0;
+
+    for (TrappedPacketsMap::iterator entryPair=trappedPackets.begin(); entryPair!=trappedPackets.end(); entryPair++) {
+        if(destination == nullptr || destination->equals(entryPair->first)) {
+            PacketSet* packetSet = entryPair->second;
+            result += packetSet->size();
+        }
+    }
+
+    return result;
+}
+
+ARA_NAMESPACE_END

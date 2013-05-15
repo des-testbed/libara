@@ -4,6 +4,7 @@
 
 #include "NetworkInterfaceMock.h"
 #include "AddressMock.h"
+#include "Environment.h"
 
 using namespace std;
 
@@ -11,59 +12,59 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-NetworkInterfaceMock::NetworkInterfaceMock() {
-    localAddress = shared_ptr<Address>(new AddressMock("DEFAULT"));
+NetworkInterfaceMock::NetworkInterfaceMock(AbstractARAClient* client) : ReliableNetworkInterface(client, new PacketFactory(15), 5000, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST"))) {
     this->name = "NetworkInterfaceMock";
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName) {
-    localAddress = shared_ptr<Address>(new AddressMock("DEFAULT"));
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, AbstractARAClient* client) : ReliableNetworkInterface(client, new PacketFactory(15), 5000, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST")))  {
     this->name = interfaceName;
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName) {
-    localAddress = shared_ptr<Address>(new AddressMock(localAddressName));
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, const string localAddressName, AbstractARAClient* client) : ReliableNetworkInterface(client, new PacketFactory(15), 5000, AddressPtr(new AddressMock(localAddressName)), AddressPtr(new AddressMock("BROADCAST"))) {
     this->name = interfaceName;
 }
 
 NetworkInterfaceMock::~NetworkInterfaceMock() {
     while(sentPackets.empty() == false) {
-        Pair<Packet*, AddressPtr>* removedPair = sentPackets.back();
+        Pair<const Packet*, AddressPtr>* removedPair = sentPackets.back();
         sentPackets.pop_back();
-        delete removedPair->getLeft();  // this packet has been cloned in the send method
+        delete removedPair->getLeft(); // delete the clone of the sent packet
         delete removedPair;
     }
+
+    for(auto& packet: broadcastedPackets) {
+        delete packet;
+    }
+
+    delete packetFactory;
 }
 
 std::string NetworkInterfaceMock::getName() {
     return this->name;
 }
 
-std::deque<Pair<Packet*, AddressPtr>*>* NetworkInterfaceMock::getSentPackets() {
+std::deque<Pair<const Packet*, AddressPtr>*>* NetworkInterfaceMock::getSentPackets() {
     return &sentPackets;
 }
 
-void NetworkInterfaceMock::send(const Packet* packet, std::shared_ptr<Address> recipient) {
-    Packet* copyOfPacket = packet->clone();
-    std::shared_ptr<Address> copyOfAddress = std::shared_ptr<Address>(recipient);
-    Pair<Packet*, AddressPtr>* pair = new Pair<Packet*, AddressPtr>(copyOfPacket, copyOfAddress);
-    sentPackets.push_back(pair);
+void NetworkInterfaceMock::doSend(const Packet* packet, AddressPtr recipient) {
+    Packet* clone = packetFactory->makeClone(packet);
+    sentPackets.push_back(new Pair<const Packet*, AddressPtr>(clone, recipient));
 }
 
+/**
+ * This is implemented here again to prevent the ReliableNetworkInterface from deleting the packet yet.
+ * We want to store the packet until the destructor is called just for our convenience in the unit tests.
+ */
 void NetworkInterfaceMock::broadcast(const Packet* packet) {
-    std::shared_ptr<Address> broadCastAddress (new AddressMock("BROADCAST"));
-    send(packet, broadCastAddress);
+    doSend(packet, broadcastAddress);
+    broadcastedPackets.push_back(packet);
 }
 
 bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
-    for (auto& pair: sentPackets) {
-        Packet* currentPacket = pair->getLeft();
-        AddressPtr recipient = pair->getRight();
-
+    for (auto& currentPacket: broadcastedPackets) {
         if(currentPacket->equals(packet)) {
-            if(isBroadcastAddress(recipient)) {
-                return true;
-            }
+            return true;
         }
     }
 
@@ -72,7 +73,7 @@ bool NetworkInterfaceMock::hasPacketBeenBroadCasted(Packet* packet) {
 
 bool NetworkInterfaceMock::hasPacketBeenSent(Packet* packet) {
     for (auto& pair: sentPackets) {
-        Packet* currentPacket = pair->getLeft();
+        const Packet* currentPacket = pair->getLeft();
 
         if(currentPacket->equals(packet)) {
             return true;
@@ -96,13 +97,12 @@ unsigned int NetworkInterfaceMock::getNumberOfSentPackets() {
     return sentPackets.size();
 }
 
-shared_ptr<Address> NetworkInterfaceMock::getLocalAddress() {
-    return shared_ptr<Address>(localAddress);
+int NetworkInterfaceMock::getNrOfUnacknowledgedPackets() const {
+    return unacknowledgedPackets.size();
 }
 
-bool NetworkInterfaceMock::isBroadcastAddress(std::shared_ptr<Address> someAddress) const {
-    AddressMock broadcastAddress = AddressMock("BROADCAST");
-    return someAddress->equals(&broadcastAddress);
+int NetworkInterfaceMock::getNrOfRunningTimers() const {
+    return runningTimers.size();
 }
 
 } /* namespace ARA */

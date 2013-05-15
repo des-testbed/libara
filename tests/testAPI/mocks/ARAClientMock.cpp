@@ -1,80 +1,55 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "ARAClientMock.h"
+#include "BasicConfiguration.h"
 #include "RoutingTableEntry.h"
+#include "PacketFactory.h"
 #include "BestPheromoneForwardingPolicy.h"
-#include "testAPI/mocks/LinearEvaporationPolicyMock.h"
-#include "testAPI/mocks/TimeFactoryMock.h"
+#include "LinearPathReinforcementPolicy.h"
+#include "testAPI/mocks/RoutingTableMock.h"
+#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
+#include "testAPI/mocks/time/ClockMock.h"
 
 #include <sstream>
 
 namespace ARA {
 
-ARAClientMock::ARAClientMock() : AbstractARAClient(new TimeFactoryMock()) {
-    forwardingPolicy = new BestPheromoneForwardingPolicy();
-    forwardingPolicy->setRoutingTable(routingTable);
-    setEvaporationPolicy(new LinearEvaporationPolicyMock());
+typedef std::shared_ptr<Address> AddressPtr;
+
+ARAClientMock::ARAClientMock() {
+    float initialPhi = 5.0;
+    float deltaPhi = 5.0;
+    BasicConfiguration configuration = BasicConfiguration(
+            new ExponentialEvaporationPolicyMock(),
+            new LinearPathReinforcementPolicy(deltaPhi),
+            new BestPheromoneForwardingPolicy(),
+            initialPhi
+    );
+    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
 }
 
-void ARAClientMock::setEvaporationPolicy(EvaporationPolicy *policy){
-    evaporationPolicy = policy;
-    routingTable->setEvaporationPolicy(evaporationPolicy);
-};
-
-ARAClientMock::~ARAClientMock() {
-    delete forwardingPolicy;
-
-    // delete the NetworkInterfaceMocks that have been created via createNewNetworkInterfaceMock
-    while(interfaceMocks.empty() == false) {
-        NetworkInterfaceMock* mock = interfaceMocks.back();
-        interfaceMocks.pop_back();
-        delete mock;
-    }
-
-    routingTable->setEvaporationPolicy(NULL);
-    delete evaporationPolicy;
+void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
+    storeReceivedPacket(packet, interface);
+    AbstractARAClient::receivePacket(packet, interface);
 }
 
-ForwardingPolicy* ARAClientMock::getForwardingPolicy() {
-    return forwardingPolicy;
-}
-
-void ARAClientMock::updateRoutingTable(const Packet* packet, NetworkInterface* interface) {
-    routingTable->update(packet->getSource(), packet->getSender(), interface, 10);
+void ARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+    storeRouteFailurePacket(packetFactory->makeClone(packet), nextHop, interface);
+    AbstractARAClient::handleBrokenLink(packet, nextHop, interface);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
-    deliveredPackets.push_back(packet);
+    storeDeliveredPacket(packet);
+}
+
+void ARAClientMock::packetNotDeliverable(const Packet* packet) {
+    storeUndeliverablePacket(packet);
 }
 
 NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
-    std::stringstream mockName;
-    mockName << "InterfaceMock" << (interfaceMocks.size()+1);
-    NetworkInterfaceMock* mock = new NetworkInterfaceMock(mockName.str().c_str(), localAddressName);
-    interfaceMocks.push_back(mock);
+    NetworkInterfaceMock* mock = AbstractClientMockBase::createNewNetworkInterfaceMock(localAddressName);
     addNetworkInterface(mock);
     return mock;
 }
@@ -87,8 +62,16 @@ RoutingTable* ARAClientMock::getRoutingTable() {
     return routingTable;
 }
 
-std::deque<const Packet*>* ARAClientMock::getDeliveredPackets() {
-    return &deliveredPackets;
+void ARAClientMock::setMaxHopCount(int n) {
+    packetFactory->setMaxHopCount(n);
+}
+
+double ARAClientMock::getInitialPhi() const {
+    return initialPheromoneValue;
+}
+
+unsigned int ARAClientMock::getPacketDeliveryDelay() const {
+    return packetDeliveryDelayInMilliSeconds;
 }
 
 } /* namespace ARA */

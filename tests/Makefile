@@ -1,4 +1,4 @@
-include ../Makefile.inc
+SHELL := /bin/bash
 
 ifneq ("$(NO_OMNET)", "TRUE")
 # Pull in OMNeT++ configuration (Makefile.inc or configuser.vc) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,10 +19,17 @@ endif
 include $(CONFIGFILE)
 endif
 
+# our makefile needs to be included after the omnet stuff (otherwise $(CXX) is overridden
+include ../Makefile.inc
+CONFIGNAME = $(CXX)-$(MODE)
+
 # Include path and compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11
 INCLUDE_PATH = -I./ -I../include -I$(CPPUTEST_BASE_DIR)/include
-LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -llog4cxx
+ifneq ("$(NO_OMNET)", "TRUE")
+ADDITIONAL_INCLUDES = $(OMNETPP_INCLUDE_PATH)
+endif 
+LINKFLAGS = -L$(ARA_LIB_DIR) -l$(ARA_TARGET_NAME) -L$(CPPUTEST_LIB_DIR) -lCppUTest -lm -lstdc++
 LINKFLAGS += -Wl,-rpath,$(ARA_LIB_DIR)
 
 # libARA stuff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,6 +50,7 @@ OMNETPP_INCLUDE_PATH = $(INCLUDE_PATH) -I../include/omnetpp -I../include/inetman
 OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet
 OMNETPP_LINKFLAGS += -Wl,-rpath,$(INETMANET_LIB_DIR)
 OMNETPP_LIB_PATH = $(OMNETPP_LIB_DIR)
+OMNETPP_LD_LIB_PATH = LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH) #:$$LD_LIBRARY_PATH
 
 # Output directory and files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
@@ -68,25 +76,34 @@ TESTAPI_TESTS_SRC = $(shell find ./testAPI/tests -type f -name '*Test.cpp')
 TESTAPI_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(TESTS_OUTPUT_DIR)/, $(TESTAPI_TESTS_SRC)))
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-runTests: all
-	@echo -e "\n~~~ RUNNING COMPLETE TEST SUIT ~~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH):$$LD_LIBRARY_PATH ./$(TEST_EXECUTABLE); then \
-		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi
-
-runLibAraTests: $(LIBARA_TEST_EXECUTABLE)
-	@echo -e "\n~~~ RUNNING libARA TEST SUIT ~~~~~~~~\n"	
-	@if ./$(LIBARA_TEST_EXECUTABLE); then \
-		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi
-
-runOmnetAraTests: $(OMNETPP_ARA_TEST_EXECUTABLE)
-	@echo -e "\n~~~ RUNNING OMNET ARA TEST SUIT ~~~~~\n"	
-	@if LD_LIBRARY_PATH=$(OMNETPP_LIB_PATH):$$LD_LIBRARY_PATH ./$(OMNETPP_ARA_TEST_EXECUTABLE); then \
-		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
-    fi
 
 all: $(TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING complete TEST SUIT ~~~~~~"
+	@if $(OMNETPP_LD_LIB_PATH) ./$(TEST_EXECUTABLE); then \
+ 		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+	else \
+		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
+		exit 1; \
+	fi
+
+
+runLibAraTests: $(LIBARA_TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING libARA TEST SUIT ~~~~~~~~"	
+	@if ./$(LIBARA_TEST_EXECUTABLE); then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+	else \
+		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
+		exit 1; \
+	fi
+
+runOmnetAraTests: $(OMNETPP_ARA_TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING OMNET ARA TEST SUIT ~~~~~"	
+	@if $(OMNETPP_LD_LIB_PATH) ./$(OMNETPP_ARA_TEST_EXECUTABLE); then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+	else \
+		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
+		exit 1; \
+	fi
 
 #
 # Builds all available tests (libara and omnet ARA)
@@ -108,7 +125,7 @@ $(LIBARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(TESTAPI_T
 # Tests only the omnetpp ARA sources
 #
 $(OMNETPP_ARA_TEST_EXECUTABLE): $(ARA_LIB) $(CPPUTEST_LIB) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN)
-	@echo "Building the libara test suit (./$(OMNETPP_ARA_TEST_EXECUTABLE))"
+	@echo "Building the omnetara test suit (./$(OMNETPP_ARA_TEST_EXECUTABLE))"
 	@$(CXX) $(CFLAGS) $(OMNETPP_INCLUDE_PATH) $(OMNETPP_ARA_BIN) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN) $(OMNETPP_LINKFLAGS) -o $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 	@ln -s -f $(TESTS_OUTPUT_DIR)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
 
@@ -123,7 +140,7 @@ $(TESTS_OUTPUT_DIR)/%.o: %.cpp
 	else  \
 		echo "Compiling $*.cpp"; \
 	fi
-	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $(OMNETPP_INCLUDE_PATH) $*.cpp -o $@
+	@$(CXX) $(CFLAGS) -c $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $*.cpp -o $@
 
 #
 # Builds the CppUTest Framework

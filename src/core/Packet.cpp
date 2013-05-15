@@ -1,8 +1,5 @@
 /*
- * Packet.cpp
- *
- *  Created on: Dec 2, 2012
- *      Author: Friedrich Große
+ * $FU-Copyright$
  */
 
 #include "Packet.h"
@@ -13,48 +10,35 @@ typedef std::shared_ptr<ARA::Address> AddressPtr;
 
 namespace ARA {
 
-Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) {
+Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) {
     this->source = source;
     this->destination = destination;
     this->sender = sender;
+    this->previousHop = sender;
     this->type = type;
     this->seqNr = seqNr;
 
-    if(payload != NULL && payloadSize == 0) {
-        payloadSize = std::strlen(payload);
+    if(payload != nullptr) {
+        if(payloadSize == 0) {
+            // assume this is a string and calculate the size
+            payloadSize = std::strlen(payload)+1;
+        }
+        char* tmpPayload = new char[payloadSize];
+        memcpy(tmpPayload, payload, payloadSize);
+        this->payload = tmpPayload;
+    }
+    else {
+        this->payload = nullptr;
     }
 
-    this->payload = payload;
     this->payloadSize = payloadSize;
-    this->hopCount = hopCount;
-}
-
-Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, unsigned int hopCount) {
-    this->source = source;
-    this->destination = destination;
-    this->sender = sender;
-    this->type = type;
-    this->seqNr = seqNr;
-    this->hopCount = hopCount;
-
-    this->payload = NULL;
-    this->payloadSize = 0;
-}
-
-Packet::Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr) {
-    this->source = source;
-    this->destination = destination;
-    this->sender = source;
-    this->type = type;
-    this->seqNr = seqNr;
-
-    this->hopCount = 1;
-    this->payload = NULL;
-    this->payloadSize = 0;
+    this->ttl = ttl;
 }
 
 Packet::~Packet() {
-    // Address cleanup is done by the shared_ptrs
+   if(payload != nullptr) {
+        delete[] payload;
+   }
 }
 
 AddressPtr Packet::getSource() const {
@@ -69,6 +53,10 @@ AddressPtr Packet::getSender() const {
     return sender;
 }
 
+AddressPtr Packet::getPreviousHop() const {
+    return previousHop;
+}
+
 char Packet::getType() const {
     return type;
 }
@@ -77,8 +65,8 @@ unsigned int Packet::getSequenceNumber() const {
     return seqNr;
 }
 
-unsigned int Packet::getHopCount() const {
-    return hopCount;
+unsigned int Packet::getTTL() const {
+    return ttl;
 }
 
 const char* Packet::getPayload() const {
@@ -89,36 +77,24 @@ unsigned int Packet::getPayloadLength() const {
     return payloadSize;
 }
 
-void Packet::setHopCount(unsigned int newValue) {
-    hopCount = newValue;
-}
-
-void Packet::increaseHopCount() {
-    hopCount++;
-}
-
 void Packet::setSender(AddressPtr newSender) {
     sender = newSender;
 }
 
+void Packet::setPreviousHop(AddressPtr newPreviousHop) {
+    previousHop = newPreviousHop;
+}
+
+void Packet::increaseTTL() {
+    ttl++;
+}
+
+void Packet::decreaseTTL() {
+    ttl--;
+}
+
 bool Packet::equals(const Packet* otherPacket) const {
     return this->seqNr == otherPacket->getSequenceNumber() && this->source->equals(otherPacket->getSource());
-}
-
-Packet* Packet::clone() const {
-    return new Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
-}
-
-Packet* Packet::createFANT(unsigned int sequenceNumber) const {
-    return new Packet(source, destination, sender, PacketType::FANT, sequenceNumber);
-}
-
-Packet* Packet::createBANT(unsigned int sequenceNumber) const {
-    return new Packet(destination, source, sender, PacketType::BANT, sequenceNumber);
-}
-
-Packet* Packet::createDuplicateWarning() const {
-    return new Packet(source, destination, sender, PacketType::DUPLICATE_ERROR, seqNr, 1);
 }
 
 size_t Packet::getHashValue() const {

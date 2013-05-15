@@ -1,33 +1,15 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef ADDRESS_H_
 #define ADDRESS_H_
 
-#include <stddef.h>
 #include <memory>
+#include <sstream>
+#include <stddef.h>
+#include <iostream>
+#include <string>
 
 namespace ARA {
 
@@ -42,7 +24,7 @@ public:
      * Returns a null-terminated textual representation of this address.
      * This is only used for logging purpose.
      */
-    virtual const char* toString() const = 0;
+    virtual std::string toString() const = 0;
 
     virtual bool equals(const Address* otherAddress) const = 0;
     virtual bool equals(const std::shared_ptr<Address> otherAddress) const = 0; // FIXME 2 abstract equals definitions is not necessary
@@ -55,6 +37,11 @@ public:
 
     bool operator==(const std::shared_ptr<Address> otherAddress) const {
         return this->equals(otherAddress);
+    }
+    
+    friend std::ostream& operator<<(std::ostream& out, Address& address){
+        out << address.toString(); 
+        return out;
     }
 
 };

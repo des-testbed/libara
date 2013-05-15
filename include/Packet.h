@@ -1,37 +1,19 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef PACKET_H_
 #define PACKET_H_
 
+#include "ARAMacros.h"
 #include "Address.h"
 #include "PacketType.h"
+
 #include <stddef.h>
 #include <memory>
+#include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 /**
  * Packets encapsulate a payload that has to be transmitted from
@@ -39,9 +21,8 @@ namespace ARA {
  */
 class Packet {
 public:
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, const char* payload=NULL, unsigned int payloadSize=0, unsigned int hopCount = 0);
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, unsigned int hopCount);
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, char type, unsigned int seqNr);
+    Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
+    Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr, int ttl);
     virtual ~Packet();
 
     /**
@@ -52,8 +33,9 @@ public:
      *
      * @see Packet::getDestination()
      * @see Packet::getSender()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getSource() const;
+    AddressPtr getSource() const;
 
     /**
      * Returns the address of the node to whom the payload of this packet is directed.
@@ -62,8 +44,9 @@ public:
      *
      * @see Packet::getSource()
      * @see Packet::getSender()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getDestination() const;
+    AddressPtr getDestination() const;
 
     /**
      * Returns the address of the node from which this packet has been received (layer 2).
@@ -72,8 +55,19 @@ public:
      *
      * @see Packet::getSource()
      * @see Packet::getDestination()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getSender() const;
+    AddressPtr getSender() const;
+
+    /**
+     * Returns the address of the node from which the sender has received this packet.
+     * This may be nullptr if the sender equals the source.
+     *
+     * @see Packet::getSource()
+     * @see Packet::getDestination()
+     * @see Packet::getSender()
+     */
+    AddressPtr getPreviousHop() const;
 
     /**
      * Returns the null-terminated string representation of the address of the source.
@@ -82,7 +76,7 @@ public:
      *
      * @see Packet::getSource()
      */
-    const char* getSourceString() const {
+    std::string getSourceString() const {
         return getSource()->toString();
     }
 
@@ -93,7 +87,7 @@ public:
      *
      * @see Packet::getSender()
      */
-    const char* getSenderString() const {
+    std::string getSenderString() const {
         return getSender()->toString();
     }
 
@@ -104,14 +98,19 @@ public:
      *
      * @see Packet::getDestination()
      */
-    const char* getDestinationString() const {
+    std::string getDestinationString() const {
         return getDestination()->toString();
     }
 
     /**
      * Assigns a new sender to this packet.
      */
-    void setSender(std::shared_ptr<Address> newSender);
+    void setSender(AddressPtr newSender);
+
+    /**
+     * Assigns a new penultimate hop to this packet.
+     */
+    void setPreviousHop(AddressPtr newPreviousHop);
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
@@ -134,11 +133,25 @@ public:
     size_t getHashValue() const;
 
     /**
-     * Returns the number of links this packet has been send over or respectively
-     * the number of nodes this packet has been send by to arrive at the current node.
-     * Note: After a packet has been received from another node this will be at least 1.
+     * Returns the time to live (TTL) of this packet.
+     * This represents the maximum number of times that this packet can be relayed.
+     * Note: The number of hops this packet has traveled so far can be calculated by
+     * subtracting the TTL from the globally configured maximum number of hops.
      */
-    unsigned int getHopCount() const;
+    unsigned int getTTL() const;
+
+    /**
+     * Increases the TTL value by 1.
+     * This may be necessary in route failure handling when we must make sure, the TTL
+     * value is not decreased multiple times.
+     */
+    void increaseTTL();
+
+    /**
+     * Decreases the TTL value by 1.
+     * This is only used for testing.
+     */
+    void decreaseTTL();
 
     const char* getPayload() const;
 
@@ -162,61 +175,16 @@ public:
         return PacketType::isAntPacket((this->type));
     }
 
-    /**
-     * Sets the hop count of this packet to a specific value.
-     *
-     * @see Packet::increaseHopCount()
-     */
-    void setHopCount(unsigned int newValue);
-
-    /**
-     * Increases the hop count of this packet by one.
-     *
-     * @see Packet::setHopCount()
-     */
-    void increaseHopCount();
-
-    virtual Packet* clone() const;
-
-    /**
-     * Creates a new FANT based on this packet. The FANT inherits all the
-     * addresses of this packet. The hop count is also replicated.
-     *
-     * Note: The result of this method is a newly created object which must be
-     * deleted later by the calling class.
-     */
-	virtual Packet* createFANT(unsigned int sequenceNumber) const;
-
-	/**
-	 * Creates a new BANT based on this packet. This BANT has the destination of
-	 * this packet as its source and the destination of this as its source.
-	 * The hop count will be set to 0. The sequence number of the BANT is
-	 * given as argument of this method.
-	 *
-	 * Note: The result of this method is a newly created object which must be
-	 * deleted later by the calling class.
-	 */
-	virtual Packet* createBANT(unsigned int sequenceNumber) const;
-
-	/**
-     * Creates a new DUPLICATE_WARNING packet based on the information in this
-     * packet. The DUPLICATE_WARNING inherits all the addresses of this packet.
-     * The hop count is incremented.
-     *
-     * Note: The result of this method is a newly created object which must be
-     * deleted later by the calling class.
-     */
-    virtual Packet* createDuplicateWarning() const;
-
 protected:
-    std::shared_ptr<Address> source;
-    std::shared_ptr<Address> destination;
-    std::shared_ptr<Address> sender;
+    AddressPtr source;
+    AddressPtr destination;
+    AddressPtr sender;
+    AddressPtr previousHop;
     char type;
     unsigned int seqNr;
     const char* payload;
     unsigned int payloadSize;
-    unsigned int hopCount;
+    int ttl;
 
 friend struct PacketPredicate;
 };
@@ -240,5 +208,6 @@ struct PacketPredicate {
     }
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif // PACKET_H_

@@ -1,27 +1,6 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
-
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
+/*
+ * $FU-Copyright$
+ */
 
 #include "PacketMock.h"
 #include "PacketType.h"
@@ -33,16 +12,27 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-PacketMock::PacketMock(const char* sourceName, const char* destinationName, unsigned int sequenceNumber, unsigned int hopCount, char packetType)
- : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(sourceName)), packetType, sequenceNumber, "Hello World", 11, hopCount){
+PacketMock::PacketMock(const char* sourceName, const char* destinationName, unsigned int sequenceNumber, int ttl, char packetType)
+ : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(sourceName)), packetType, sequenceNumber, ttl, nullptr, 0){
+    const char* payloadString = "Hello World";
+    payloadSize = std::strlen(payloadString);
+    char* tmpPayload = new char[payloadSize+1];
+    strncpy(tmpPayload, payloadString, payloadSize);
+    tmpPayload[payloadSize] = '\0';
+    payloadSize++;
+    payload = tmpPayload;
 }
 
-PacketMock::PacketMock(const char* sourceName, const char* destinationName, const char* senderName, unsigned int sequenceNumber, unsigned int hopCount, char packetType, const char* payload)
- : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(senderName)), packetType, sequenceNumber, payload, std::strlen(payload), hopCount){
+PacketMock::PacketMock(const char* sourceName, const char* destinationName, const char* senderName, unsigned int sequenceNumber, int ttl, char packetType, const char* payloadString)
+ : Packet(AddressPtr(new AddressMock(sourceName)), AddressPtr(new AddressMock(destinationName)), AddressPtr(new AddressMock(senderName)), packetType, sequenceNumber, ttl, payloadString, std::strlen(payloadString)+1){
 }
 
 void PacketMock::setSender(std::shared_ptr<Address> newSenderAddress) {
     sender = newSenderAddress;
+}
+
+void PacketMock::setSource(std::shared_ptr<Address> newSourceAddress) {
+    source = newSourceAddress;
 }
 
 } /* namespace ARA */

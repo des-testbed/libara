@@ -1,38 +1,20 @@
-/******************************************************************************
- Copyright 2012, The DES-SERT Team, Freie Universität Berlin (FUB).
- All rights reserved.
+/*
+ * $FU-Copyright$
+ */
 
- These sources were originally developed by Friedrich Große
- at Freie Universität Berlin (http://www.fu-berlin.de/),
- Computer Systems and Telematics / Distributed, Embedded Systems (DES) group
- (http://cst.mi.fu-berlin.de/, http://www.des-testbed.net/)
- ------------------------------------------------------------------------------
- This program is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later
- version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with
- this program. If not, see http://www.gnu.org/licenses/ .
- ------------------------------------------------------------------------------
- For further information and questions please use the web site
- http://www.des-testbed.net/
- *******************************************************************************/
-
-#include "OMNeTAddress.h"
+#include "omnetpp/OMNeTAddress.h"
 #include <hash_fun.h>
 
 using namespace std;
 
-namespace ARA {
-namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
-const char* OMNeTAddress::toString() const {
-    return this->str().c_str();
+std::string OMNeTAddress::toString() const {
+    char buffer[6];
+    char* string = buffer;
+    sprintf(string, "[%u]", getDByte(3));
+    *(string-1) = '\0';
+    return std::string(buffer);
 }
 
 bool OMNeTAddress::equals(const Address* otherAddress) const {
@@ -41,12 +23,12 @@ bool OMNeTAddress::equals(const Address* otherAddress) const {
         return false;
     }
     else {
-        // use the native implementation of IPAddress
-        return IPAddress::equals(*otherOMNeTAddress);
+        // use the native implementation of IPv4Address
+        return IPv4Address::equals(*otherOMNeTAddress);
     }
 }
 
-bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
+bool OMNeTAddress::equals(const AddressPtr otherAddress) const {
     return this->equals(otherAddress.get());
 }
 
@@ -61,5 +43,4 @@ Address* OMNeTAddress::clone() {
     return clone;
 }
 
-} /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END

@@ -1,0 +1,32 @@
+/*
+ * $FU-Copyright$
+ */
+
+#ifndef CONFIGURATION_H_
+#define CONFIGURATION_H_
+
+#include "ARAMacros.h"
+#include "EvaporationPolicy.h"
+#include "PathReinforcementPolicy.h"
+#include "ForwardingPolicy.h"
+
+ARA_NAMESPACE_BEGIN
+
+/**
+ * This interface is used to retrieve the ARA configuration parameters.
+ * A default implementation is available in ~BasicConfiguration
+ */
+class Configuration {
+public:
+    virtual ~Configuration() {};
+    virtual EvaporationPolicy* getEvaporationPolicy() = 0;
+    virtual PathReinforcementPolicy* getReinforcementPolicy() = 0;
+    virtual ForwardingPolicy* getForwardingPolicy() = 0;
+    virtual float getInitialPheromoneValue() = 0;
+    virtual int getMaxNrOfRouteDiscoveryRetries() = 0;
+    virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds() = 0;
+    virtual unsigned int getPacketDeliveryDelayInMilliSeconds() = 0;
+};
+
+ARA_NAMESPACE_END
+#endif

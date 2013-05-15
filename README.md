@@ -1,4 +1,4 @@
-Ara-Sim
+Ara-Sim [![Build Status](https://travis-ci.org/des-testbed/Ara-Sim.png?branch=develop)](https://travis-ci.org/des-testbed/Ara-Sim)
 =======
 An enhanceable framework for developing and testing the Ant Routing Algorithm (ARA) as proposed by M. Güneş, U. Sorges and I. Bouazizi in 2002.
 
