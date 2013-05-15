@@ -5,6 +5,7 @@ PROJECT_OUTPUT_DIR = ../out/$(CONFIGNAME)
 LIBARA_OUTPUT_DIR = $(PROJECT_OUTPUT_DIR)/libara
 LIBARA_SRC = $(shell find ./ -type f -name '*.cpp')
 LIBARA_O = $(subst .cpp,.o, $(addprefix $(LIBARA_OUTPUT_DIR)/, $(LIBARA_SRC)))
+LIBARA_DEPENDENCIES = $(LIBARA_O:.o=.d)
 
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11 -fPIC
@@ -13,6 +14,9 @@ COPTS = $(CFLAGS) $(INCLUDE_PATH)
 
 # Build targets~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 all: $(ARA_LIB_NAME)
+
+# pull in dependeny file (if existing)
+-include $(LIBARA_DEPENDENCIES)
 
 #
 # Build the ARA library
@@ -30,6 +34,7 @@ $(LIBARA_OUTPUT_DIR)/%.o: %.cpp
 	@$(MKPATH) $(dir $@)
 	@echo "Compiling $*.cpp";
 	@$(CXX) $(COPTS) -c $*.cpp -o $@
+	@$(CXX) $(COPTS) -MM -MT $(LIBARA_OUTPUT_DIR)/$*.o $*.cpp > $(LIBARA_OUTPUT_DIR)/$*.d;
 	
 #
 # Delets all compiled objects
@@ -37,3 +42,5 @@ $(LIBARA_OUTPUT_DIR)/%.o: %.cpp
 clean:
 	rm -f $(ARA_LIB_NAME) $(LIBARA_OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
 	rm -f $(LIBARA_O)
+	rm -f $(LIBARA_DEPENDENCIES)
+
