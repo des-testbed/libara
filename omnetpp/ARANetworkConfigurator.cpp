@@ -6,6 +6,7 @@
 #include "IPvXAddressResolver.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4Address.h"
+#include "FWMath.h"
 
 #include <vector>
 #include <regex>
@@ -22,6 +23,7 @@ Define_Module(ARANetworkConfigurator);
 
 void ARANetworkConfigurator::initialize(int stage) {
     if (stage==2) {
+        channelControl = check_and_cast<cModule*>(simulation.getSystemModule()->getModuleByRelativePath("channelControl"));
         cTopology topology ("topology");
         extractTopology(topology);
         assignAddresses(topology);
@@ -57,6 +59,7 @@ void ARANetworkConfigurator::extractTopology(cTopology& topology) {
         }
 
         nodeInfo[i].mobility = ModuleAccess<IMobility>("mobility").get(module);
+        nodeInfo[i].radio = ModuleAccess<Radio>("radio").get(module);
     }
 }
 
@@ -153,9 +156,24 @@ void ARANetworkConfigurator::persistStartPositions(cTopology& topology) {
     int nrOfNodes = topology.getNumNodes();
     for (int i=0; i < nrOfNodes; i++) {
         Coord coordinations = nodeInfo[i].mobility->getCurrentPosition();
-        file << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "] " : " ") << coordinations.x << " " << coordinations.y << endl;
+        double receptionRadius = calculateMaximumRadioReceptionRadius(nodeInfo[i].radio);
+        file << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "] " : " ");
+        file << coordinations.x << " " << coordinations.y << " " << receptionRadius << endl;
     }
     file.close();
+}
+
+/**
+ * Mostly copied from inetmanet/src/linklayer/radio/Radio.cc Lines 991ff
+ */
+double ARANetworkConfigurator::calculateMaximumRadioReceptionRadius(Radio* radio) {
+    double carrierFrequency = channelControl->par("carrierFrequency");
+    double alpha = channelControl->par("alpha");
+    double waveLength = (SPEED_OF_LIGHT / carrierFrequency);
+    double transmitterPower = radio->par("transmitterPower");
+    double receiverPower = FWMath::dBm2mW(radio->par("sensitivity"));
+
+    return pow(waveLength * waveLength * transmitterPower / (16.0 * M_PI * M_PI * receiverPower), 1.0 / alpha);
 }
 
 OMNETARA_NAMESPACE_END
