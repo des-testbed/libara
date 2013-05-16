@@ -74,23 +74,22 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
     if(table.find(destination) != table.end()) {
         std::deque<RoutingTableEntry*>* entryList = table[destination];
         std::deque<RoutingTableEntry*>::iterator iterator = entryList->begin();
-        if(entryList->size() == 1) {
-            // delete the last routing table entry for that destination
-            table.erase(destination);
-            RoutingTableEntry* entry =  *iterator;
-            delete entry;
-            delete entryList;
-        }
-        else {
-            // delete one of many routing table entries for that destination
+
+        if(iterator != entryList->end()) {
             while(iterator != entryList->end()) {
                 RoutingTableEntry* entry = *iterator;
                 if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
                     entryList->erase(iterator);
                     delete entry;
-                    return;
+                    break;
                 }
                 iterator++;
+            }
+
+            if(entryList->empty()) {
+                // this was the last entry so we can delete the whole list
+                table.erase(destination);
+                delete entryList;
             }
         }
     }

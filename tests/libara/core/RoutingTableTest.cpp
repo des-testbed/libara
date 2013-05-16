@@ -300,6 +300,7 @@ TEST(RoutingTableTest, removeAllEntries) {
     CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
     CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
 
+    BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
     CHECK(routingTable->isDeliverable(destination) == false);
 }
 
@@ -367,7 +368,7 @@ TEST(RoutingTableTest, getTotalNumberOfEntries) {
     BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
 }
 
-TEST(RoutingTableTest, TableEntriesAreDeletedIfEvaporationReachesZero) {
+TEST(RoutingTableTest, tableEntriesAreDeletedIfEvaporationReachesZero) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
@@ -387,4 +388,17 @@ TEST(RoutingTableTest, TableEntriesAreDeletedIfEvaporationReachesZero) {
     TimeMock::letTimePass(100000);
     routingTable->triggerEvaporation();
     BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
+}
+
+TEST(RoutingTableTest, falselyDeleteLastEntryBug) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr destination (new AddressMock("dest"));
+    AddressPtr nextHop (new AddressMock("A"));
+    AddressPtr anotherAddress (new AddressMock("B"));
+
+    routingTable->update(destination, nextHop, &interface, 2);
+
+    CHECK(routingTable->exists(destination, nextHop, &interface));
+    routingTable->removeEntry(destination, anotherAddress, &interface);
+    CHECK(routingTable->exists(destination, nextHop, &interface));
 }
