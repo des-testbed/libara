@@ -627,9 +627,10 @@ void AbstractARAClient::handleCompleteRouteFailure(Packet* packet) {
 }
 
 void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterface* interface) {
+    logInfo("Received ROUTE_FAILURE from %s. Deleting route to %s via %s", packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSenderString().c_str());
     AddressPtr destination = packet->getDestination();
-    AddressPtr sender = packet->getSender();
-    routingTable->removeEntry(destination, sender, interface);
+    AddressPtr nextHop = packet->getSender();
+    routingTable->removeEntry(destination, nextHop, interface);
     delete packet;
 }
 
