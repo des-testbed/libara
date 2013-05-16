@@ -142,6 +142,8 @@ $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 
 # pull in dependeny file (if existing)
 -include $(LIBARA_DEPENDENCIES)
+-include $(OMNETARA_DEPENDENCIES)
+-include $(TESTS_DEPENDENCIES)
 
 #
 # Builds all cpp files
