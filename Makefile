@@ -104,7 +104,7 @@ CFLAGS += -std=c++11 -fPIC
 ifeq ("$(NO_OMNET)", "TRUE")
     INCLUDE_PATH = -Iinclude
 else
-    INCLUDE_PATH += -Iinclude -Iinclude/omnetpp -Iinclude/inetmanet -I$(OMNETPP_INCL_DIR)
+    INCLUDE_PATH += -Iinclude -Iinclude/omnetpp -Iinclude/inetmanet -I$(OMNETPP_INCL_DIR) -I $(INETMANET_LIB_DIR)
 endif
 INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include
 LINK_TO_LIB_ARA = -L$(LIBARA_SRC_FOLDER) -l$(ARA_TARGET_NAME)
