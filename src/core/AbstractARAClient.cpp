@@ -191,7 +191,7 @@ float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, Address
     return newPheromoneValue;
 }
 
-void AbstractARAClient::startNewRouteDiscovery(const Packet* packet) {
+void AbstractARAClient::startNewRouteDiscovery(Packet* packet) {
     AddressPtr destination = packet->getDestination();
     logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
 
@@ -623,15 +623,20 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
 }
 
 void AbstractARAClient::handleCompleteRouteFailure(Packet* packet) {
-    AddressPtr destination = packet->getDestination();
-    for(auto& interface: interfaces) {
-        AddressPtr source = interface->getLocalAddress();
-        unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
-        interface->broadcast(routeFailurePacket);
+    if(isLocalAddress(packet->getSource())) {
+        startNewRouteDiscovery(packet);
     }
+    else {
+        AddressPtr destination = packet->getDestination();
+        for(auto& interface: interfaces) {
+            AddressPtr source = interface->getLocalAddress();
+            unsigned int sequenceNr = getNextSequenceNumber();
+            Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+            interface->broadcast(routeFailurePacket);
+        }
 
-    delete packet;
+        delete packet;
+    }
 }
 
 void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterface* interface) {

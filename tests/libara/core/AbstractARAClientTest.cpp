@@ -1321,3 +1321,38 @@ TEST(AbstractARAClientTest, routeDiscoveryIsStartedTwice) {
     CHECK(packet1->equals(sentPackets->at(1)->getLeft()) || packet1->equals(sentPackets->at(2)->getLeft()));
     CHECK(packet2->equals(sentPackets->at(1)->getLeft()) || packet2->equals(sentPackets->at(2)->getLeft()));
 }
+
+/**
+ * In this test we check that a client which is the source of a transmission does not drop a packet if all
+ * his known routes do no longer work. Instead it is required to trap the packet and start a new route discovery.
+ */
+TEST(AbstractARAClientTest, restartRouteDiscoveryIfSourceHasCompleteRouteFailure) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr nextHopA (new AddressMock("nextHopA"));
+    AddressPtr nextHopB (new AddressMock("nextHopB"));
+
+    routingTable->update(destination, nextHopA, interface, 10);
+    routingTable->update(destination, nextHopB, interface, 10);
+
+    // start the test by faking that the packet has been send via nextHopA and this link is broken
+    Packet* packet = new Packet(source, destination, source, PacketType::DATA, 1, 10);
+    client->handleBrokenLink(packet, nextHopA, interface);
+
+    // the client should try to deliver the packet over the remaining known route
+    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    AddressPtr receiverAddress = sentPackets->back()->getRight();
+    CHECK(lastSentPacket->equals(packet));
+    CHECK(receiverAddress->equals(nextHopB));
+
+    // unfortunately nextHopB is also not reachable
+    client->handleBrokenLink(packet, nextHopB, interface);
+
+    // now we require the client to start a new route discovery
+    BYTES_EQUAL(2, interface->getNumberOfSentPackets());
+    lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::FANT);
+}

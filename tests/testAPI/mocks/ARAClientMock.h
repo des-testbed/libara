@@ -27,7 +27,7 @@ public:
     ARAClientMock();
 
     void receivePacket(Packet* packet, NetworkInterface* interface);
-    virtual void handleBrokenLink(Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    virtual void handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
     void deliverToSystem(const Packet* packet);
     void packetNotDeliverable(const Packet* packet);
