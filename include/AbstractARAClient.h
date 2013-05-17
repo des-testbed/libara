@@ -269,7 +269,7 @@ protected:
     void handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination);
 
 protected:
-    std::unordered_map<AddressPtr, Timer*> runningRouteDiscoveries;
+    std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> runningRouteDiscoveries;
     std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
     std::unordered_map<Timer*, AddressPtr> runningDeliveryTimers;
 

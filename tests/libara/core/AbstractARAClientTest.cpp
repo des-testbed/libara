@@ -1264,12 +1264,52 @@ TEST(AbstractARAClientTest, routeFailurePacketIsCorrectlyProcessed) {
 }
 
 /**
+ * In this test we check that packets are trapped if there is already an ongoing
+ * route discovery for this destination
+ */
+TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwice) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    SendPacketsList* sentPackets = interface->getSentPackets();
+
+    // start the test
+    Packet* packet1 = new Packet(source, destination, source, PacketType::DATA, 1, 10);
+    client->sendPacket(packet1);
+
+    ClockMock* clock = (ClockMock*) Environment::getClock();
+    TimerMock* routeDiscoveryTimer = clock->getLastTimer();
+
+    // a route discovery should have been started for packet1
+    CHECK(routeDiscoveryTimer->isRunning());
+
+    // the packet is trapped until delivery
+    CHECK(packetTrap->contains(packet1));
+
+    // check if the FANT has been sent just to be sure
+    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
+    const Packet* sentPacket1 = sentPackets->back()->getLeft();
+    CHECK(sentPacket1->getType() == PacketType::FANT);
+    CHECK(sentPacket1->getDestination()->equals(destination));
+
+    // now send another packet to that destination and see if it is also trapped
+    Packet* packet2 = new Packet(source, destination, source, PacketType::DATA, 2, 10);
+    client->sendPacket(packet2);
+
+    // this packet needs to be stored until the delivery timer expires
+    CHECK(packetTrap->contains(packet2));
+
+    // the client should *not* have started a new route discovery so still only one FANT has been sent
+    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
+}
+
+/**
  * In this test two packets shall be delivered to one destination.
  * For the first one a route discovery has just finished but the delivery timer is still
  * running. The second packet shall not start a new discovery now because it will be
  * delivered as well as soon as the delivery timer times out.
  */
-TEST(AbstractARAClientTest, routeDiscoveryIsStartedTwice) {
+TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceSpecialCase) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     AddressPtr source = interface->getLocalAddress();
     AddressPtr destination (new AddressMock("destination"));

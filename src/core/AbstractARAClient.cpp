@@ -34,7 +34,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     routingTable->setEvaporationPolicy(evaporationPolicy);
 
     packetTrap = new PacketTrap(routingTable);
-    runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
+    runningRouteDiscoveries = unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
     runningDeliveryTimers = unordered_map<Timer*, AddressPtr>();
 }
@@ -225,7 +225,8 @@ void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
     discoveryInfo.timer = timer;
     discoveryInfo.originalPacket = packet;
 
-    runningRouteDiscoveries[packet->getDestination()] = timer;
+    AddressPtr destination = packet->getDestination();
+    runningRouteDiscoveries[destination] = timer;
     runningRouteDiscoveryTimers[timer] = discoveryInfo;
 }
 
