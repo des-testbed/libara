@@ -1,7 +1,0 @@
-#/bin/bash
-
-RELATIVE_PATH_TO_ROOT="../.."
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$RELATIVE_PATH_TO_ROOT/src:$RELATIVE_PATH_TO_ROOT/inetmanet/src"
-cd $DIR && nemiver $RELATIVE_PATH_TO_ROOT/omnetpp/ara-sim -r 0 -u Cmdenv -c Scenario05 -n $RELATIVE_PATH_TO_ROOT/inetmanet/src:$RELATIVE_PATH_TO_ROOT/omnetpp:. omnetpp.ini
-
