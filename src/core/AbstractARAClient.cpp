@@ -192,16 +192,19 @@ float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, Address
 }
 
 void AbstractARAClient::startNewRouteDiscovery(const Packet* packet) {
-    logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
-
     AddressPtr destination = packet->getDestination();
+    logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
+
+    forgetKnownIntermediateHopsFor(destination);
+    startRouteDiscoveryTimer(packet);
+    sendFANT(destination);
+}
+
+void AbstractARAClient::forgetKnownIntermediateHopsFor(AddressPtr destination) {
     if(knownIntermediateHops.find(destination) != knownIntermediateHops.end()) {
         std::unordered_set<AddressPtr>* seenNodesForThisDestination = knownIntermediateHops[destination];
         seenNodesForThisDestination->clear();
     }
-
-    startRouteDiscoveryTimer(packet);
-    sendFANT(destination);
 }
 
 void AbstractARAClient::sendFANT(AddressPtr destination) {
@@ -559,22 +562,27 @@ void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
 }
 
 void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo) {
-    const char* destinationString = discoveryInfo.originalPacket->getDestinationString().c_str();
+    AddressPtr destination = discoveryInfo.originalPacket->getDestination();
+    const char* destinationString = destination->toString().c_str();
     logInfo("Route discovery for destination %s timed out", destinationString);
+
     if(discoveryInfo.nrOfRetries < maxNrOfRouteDiscoveryRetries) {
+        // restart the route discovery
         discoveryInfo.nrOfRetries++;
         logInfo("Restarting discovery for destination %s (%u/%u)", destinationString, discoveryInfo.nrOfRetries, maxNrOfRouteDiscoveryRetries);
         runningRouteDiscoveryTimers[routeDiscoveryTimer] = discoveryInfo;
-        sendFANT(discoveryInfo.originalPacket->getDestination());
+
+        forgetKnownIntermediateHopsFor(destination);
+        sendFANT(destination);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
     else {
-        // remove the route discovery timer
-        AddressPtr destination = discoveryInfo.originalPacket->getDestination();
+        // delete the route discovery timer
         runningRouteDiscoveries.erase(destination);
         runningRouteDiscoveryTimers.erase(routeDiscoveryTimer);
         delete routeDiscoveryTimer;
 
+        forgetKnownIntermediateHopsFor(destination);
         deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);
         logWarn("Route discovery for destination %s unsuccessful. Dropping %u packet(s)", destinationString, undeliverablePackets.size());
         for(auto& packet: undeliverablePackets) {

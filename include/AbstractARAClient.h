@@ -253,6 +253,7 @@ protected:
     bool hasBeenSentByThisNode(const Packet* packet) const;
     virtual void startNewRouteDiscovery(const Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
+    void forgetKnownIntermediateHopsFor(AddressPtr destination);
     void sendFANT(AddressPtr destination);
     bool isRouteDiscoveryRunning(AddressPtr destination);
     virtual void handleNonSourceRouteDiscovery(Packet* packet);
