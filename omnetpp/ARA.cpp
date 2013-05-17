@@ -116,7 +116,7 @@ void ARA::handleNonSourceRouteDiscovery(Packet* packet) {
     AbstractARAClient::handleNonSourceRouteDiscovery(packet);
 }
 
-void ARA::startNewRouteDiscovery(const Packet* packet) {
+void ARA::startNewRouteDiscovery(Packet* packet) {
     emit(NEW_ROUTE_DISCOVERY, 1);
     AbstractARAClient::startNewRouteDiscovery(packet);
 }

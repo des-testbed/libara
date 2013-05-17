@@ -68,7 +68,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
 
         virtual void handleNonSourceRouteDiscovery(Packet* packet);
 
-        virtual void startNewRouteDiscovery(const Packet* packet);
+        virtual void startNewRouteDiscovery(Packet* packet);
 
         /**
          * This method is called when the route discovery timer expires.

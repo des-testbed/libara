@@ -171,6 +171,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         } else {
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
+                logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
                 packetTrap->trapPacket(packet);
                 startNewRouteDiscovery(packet);
             }
@@ -193,8 +194,6 @@ float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, Address
 
 void AbstractARAClient::startNewRouteDiscovery(Packet* packet) {
     AddressPtr destination = packet->getDestination();
-    logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
-
     forgetKnownIntermediateHopsFor(destination);
     startRouteDiscoveryTimer(packet);
     sendFANT(destination);
@@ -617,16 +616,17 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
         sendPacket(packet);
     }
     else {
-        logInfo("Link over %s is broken and can not be repaired. Dropping packet %u from %s.", nextHop->toString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
         handleCompleteRouteFailure(packet);
     }
 }
 
 void AbstractARAClient::handleCompleteRouteFailure(Packet* packet) {
     if(isLocalAddress(packet->getSource())) {
+        logInfo("Link over %s is broken and can not be repaired. Starting new route discovery for packet %u from %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
         startNewRouteDiscovery(packet);
     }
     else {
+        logInfo("Link over %s is broken and can not be repaired. Dropping packet %u from %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
         AddressPtr destination = packet->getDestination();
         for(auto& interface: interfaces) {
             AddressPtr source = interface->getLocalAddress();
