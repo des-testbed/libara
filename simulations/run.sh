@@ -1,5 +1,6 @@
 #/bin/bash
 
+#TODO RELATIVE_PATH_TO_ROOT needs to be computed automagically or it will not work on all path depths
 RELATIVE_PATH_TO_ROOT="../.."
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$RELATIVE_PATH_TO_ROOT/src:$RELATIVE_PATH_TO_ROOT/inetmanet/src"
@@ -25,10 +26,13 @@ if [ $# -eq 0 ]; then
 	# just run the simulation with the GUI
 	$RELATIVE_PATH_TO_ROOT/omnetpp/ara-sim -r 0 -n "$nedPath" omnetpp.ini
 else
-	if [ $1 == "--help" ]; then
+	if [ $1 == "--debug" ]; then
+		# run the simulation with the GUI but use nemiver as debugger
+		nemiver $RELATIVE_PATH_TO_ROOT/omnetpp/ara-sim -r 0 -n "$nedPath" omnetpp.ini
+	elif [ $1 == "--help" ]; then
 		scriptName=`basename $0`
 		echo "libARA simulation run script by Friedrich Große"
-		echo "Usage: $scriptName [<experiment_name> [<optional_number_of_runs> | --debug] | --help]"
+		echo "Usage: $scriptName [<experiment_name> [<number_of_runs>] ] [--debug] | --help]"
 		echo "Description:"
 		echo "    - You can run the GUI if no parameters are supplied."
 		echo "    - If you anter an experiment name as first parameter the simulation is run on the command line"
