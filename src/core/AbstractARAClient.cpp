@@ -389,7 +389,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
 void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
     AddressPtr routeDiscoveryDestination = bant->getSource();
     if(packetTrap->getNumberOfTrappedPackets(routeDiscoveryDestination) == 0) {
-        logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.");
+        logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str());
     }
     else {
         logDebug("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
