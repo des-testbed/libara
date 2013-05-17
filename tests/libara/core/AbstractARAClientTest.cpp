@@ -1398,3 +1398,39 @@ TEST(AbstractARAClientTest, restartRouteDiscoveryIfSourceHasCompleteRouteFailure
     lastSentPacket = sentPackets->back()->getLeft();
     CHECK(lastSentPacket->getType() == PacketType::FANT);
 }
+
+/**
+ * In this test we consider the scenario that a node wants to send a packet but notices that
+ * all known routes are no longer reachable (broken link) and tries to restart the
+ * route discovery (like in the test above).
+ * This time the clients gets the handleBorken link message twice for different packets.
+ * It is required that only one route discovery is started for the first packet
+ * The seconds packet must be trapped and shall not cause another route discovery
+ */
+TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceIfSourceHasCompleteRouteFailure) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr nextHop (new AddressMock("nextHopA"));
+
+    routingTable->update(destination, nextHop, interface, 10);
+
+    // start the test by faking that the packet has been send via nextHop and this link is broken
+    Packet* packet1 = new Packet(source, destination, source, PacketType::DATA, 1, 10);
+    client->handleBrokenLink(packet1, nextHop, interface);
+
+    // there are no other routes left so the client should start a route discovery
+    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::FANT);
+    CHECK(packetTrap->contains(packet1));
+
+    // meanwhile the delivery of another packet failed
+    Packet* packet2 = new Packet(source, destination, source, PacketType::DATA, 2, 10);
+    client->handleBrokenLink(packet2, nextHop, interface);
+
+    // this should never cause another route discovery as there is already a running discovery for that destination
+    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
+    CHECK(packetTrap->contains(packet2));
+}
