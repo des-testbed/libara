@@ -1389,9 +1389,11 @@ TEST(AbstractARAClientTest, restartRouteDiscoveryIfSourceHasCompleteRouteFailure
     CHECK(receiverAddress->equals(nextHopB));
 
     // unfortunately nextHopB is also not reachable
-    client->handleBrokenLink(packet, nextHopB, interface);
+    Packet* samePacket = packetFactory->makeClone(packet);
+    client->handleBrokenLink(samePacket, nextHopB, interface);
 
     // now we require the client to start a new route discovery
+    CHECK(packetTrap->contains(samePacket));
     BYTES_EQUAL(2, interface->getNumberOfSentPackets());
     lastSentPacket = sentPackets->back()->getLeft();
     CHECK(lastSentPacket->getType() == PacketType::FANT);

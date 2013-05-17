@@ -624,6 +624,7 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
 void AbstractARAClient::handleCompleteRouteFailure(Packet* packet) {
     if(isLocalAddress(packet->getSource())) {
         logInfo("Link over %s is broken and can not be repaired. Starting new route discovery for packet %u from %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
+        packetTrap->trapPacket(packet);
         startNewRouteDiscovery(packet);
     }
     else {
