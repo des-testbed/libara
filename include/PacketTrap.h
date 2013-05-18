@@ -6,19 +6,21 @@
 #define PACKETTRAP_H_
 
 #include "ARAMacros.h"
-#include "RoutingTable.h"
 #include "Packet.h"
-#include "Address.h"
+#include "RoutingTable.h"
 
-#include <memory>
 #include <unordered_map>
-#include <unordered_set>
 #include <deque>
 
 ARA_NAMESPACE_BEGIN
 
-typedef std::unordered_map<AddressPtr, std::deque<Packet*>, AddressHash, AddressPredicate> TrappedPacketsMap;
+typedef std::deque<Packet*> PacketQueue;
+typedef std::unordered_map<AddressPtr, PacketQueue, AddressHash, AddressPredicate> TrappedPacketsMap;
 
+/**
+ * The PacketTrap is responsible for storing packets while the route discovery
+ * is running for their respective destinations.
+ */
 class PacketTrap {
 public:
     PacketTrap(RoutingTable* routingTable);
@@ -51,13 +53,13 @@ public:
      *
      * Note: The LinkedList must be deleted by the caller of this method
      */
-    std::deque<Packet*>* untrapDeliverablePackets(AddressPtr destination);
+    PacketQueue* untrapDeliverablePackets(AddressPtr destination);
 
     /**
      * This will remove all packets for the given destination address from this packet trap
      * and return them in a list object.
      */
-    std::deque<Packet*> removePacketsForDestination(AddressPtr destination);
+    PacketQueue removePacketsForDestination(AddressPtr destination);
 
     /**
      * Returns the number of trapped packets for a given destination or the
@@ -66,8 +68,14 @@ public:
      */
     unsigned int getNumberOfTrappedPackets(AddressPtr destination=nullptr);
 
-    //TODO maybe remove this? do we really need to set the table dynamically?
-    void setRoutingTable(RoutingTable *routingTable);
+    /**
+     * Set the assigned routing table.
+     * It is necessary to implement this function because some ARA implementations
+     * might need to change their routing tables at runtime (e.g. OMNeT++)
+     */
+    void setRoutingTable(RoutingTable* routingTable) {
+        this->routingTable = routingTable;
+    }
 
 private:
 

@@ -6,9 +6,6 @@
 
 ARA_NAMESPACE_BEGIN
 
-using namespace std;
-typedef std::deque<Packet*> PacketQueue;
-
 PacketTrap::PacketTrap(RoutingTable* routingTable) {
     this->routingTable = routingTable;
 }
@@ -17,7 +14,7 @@ PacketTrap::~PacketTrap() {
     // delete all packets that might still be trapped
     TrappedPacketsMap::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
-        pair<AddressPtr, PacketQueue> entryPair = *iterator;
+        std::pair<AddressPtr, PacketQueue> entryPair = *iterator;
         PacketQueue packetQueue = entryPair.second;
 
         for(auto& packet: packetQueue) {
@@ -30,7 +27,7 @@ PacketTrap::~PacketTrap() {
 void PacketTrap::trapPacket(Packet* packet) {
     AddressPtr destination = packet->getDestination();
     if(trappedPackets.find(destination) == trappedPackets.end()) {
-        PacketQueue newList = PacketList();
+        PacketQueue newList = PacketQueue();
         trappedPackets[destination] = newList;
     }
 
@@ -57,7 +54,7 @@ bool PacketTrap::isEmpty() {
 }
 
 PacketQueue* PacketTrap::untrapDeliverablePackets(AddressPtr destination) {
-    PacketQueue* deliverablePackets = new PacketList();
+    PacketQueue* deliverablePackets = new PacketQueue();
 
     TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
     if(packetsForDestination != trappedPackets.end()) {
@@ -74,12 +71,8 @@ PacketQueue* PacketTrap::untrapDeliverablePackets(AddressPtr destination) {
     return deliverablePackets;
 }
 
-void PacketTrap::setRoutingTable(RoutingTable *routingTable){
-    this->routingTable = routingTable;
-}
-
 PacketQueue PacketTrap::removePacketsForDestination(AddressPtr destination) {
-    PacketQueue removedPackets = PacketList();
+    PacketQueue removedPackets = PacketQueue();
     TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
 
     if(packetsForDestination != trappedPackets.end()) {
