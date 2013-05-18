@@ -203,8 +203,7 @@ struct PacketHash {
  */
 struct PacketPredicate {
     size_t operator()(const Packet* packet1, const Packet* packet2) const {
-        return packet1->seqNr == packet2->seqNr &&
-               packet1->source->equals(packet2->source);
+        return packet1->equals(packet2);
     }
 };
 

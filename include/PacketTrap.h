@@ -17,7 +17,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-typedef std::unordered_map<AddressPtr, std::unordered_set<Packet*, PacketHash, PacketPredicate>*, AddressHash, AddressPredicate> TrappedPacketsMap;
+typedef std::unordered_map<AddressPtr, std::deque<Packet*>, AddressHash, AddressPredicate> TrappedPacketsMap;
 
 class PacketTrap {
 public:
@@ -71,18 +71,15 @@ public:
 
 private:
 
-    bool thereIsAHashSetFor(AddressPtr destination);
-
     /**
      * This hashmap stores all trapped packets.
-     * In Java we would write: HashMap<Address, HashSet<Packet>>
+     * In Java we would write: HashMap<Address, Queue<Packet>>
      * The keys are the packet destinations and the values are a
-     * set of packets.
+     * queue of packets.
      *
      * This is a Hashmap because everytime PacketTrap::getDeliverablePackets()
      * is called we want to find all packets for a specific destination fast.
-     * The Values are hashsets themselves because we also have to find individual
-     * packets everytime we want to untrap a packet (i.e. after acknowledgment).
+     * The Values are stored as queue to keep the order of sent packets.
      */
     TrappedPacketsMap trappedPackets;
 
