@@ -23,12 +23,22 @@ typedef std::unordered_map<AddressPtr, PacketQueue, AddressHash, AddressPredicat
  */
 class PacketTrap {
 public:
+
+    /**
+     * Creates a new PacketTrap which uses the given routingTable to check if
+     * packets are deliverable or not.
+     */
     PacketTrap(RoutingTable* routingTable);
+
+    /**
+     * Deletes the PacketTrap and especially all packets that are still trapped.
+     */
     ~PacketTrap();
 
     /**
      * Stores the given packet in the packet trap until it is removed via
-     * PacketTrap::untrapDeliverablePackets(..).
+     * PacketTrap::untrapDeliverablePackets(..). The order of trapped packets
+     * is preserved in a FIFO style.
      *
      * All packets that are still trapped when the PacketTrap destructor is called are deleted.
      */
@@ -49,7 +59,8 @@ public:
     /**
      * Returns a new list of packets that are deliverable to a given destination
      * according to the routing table associated with this packet trap.
-     * All returned packets are automatically untrapped.
+     * The packets are in the same order as PacketTrap::trapPacket(..) has been
+     * called on them. All returned packets are automatically untrapped.
      */
     PacketQueue untrapDeliverablePackets(AddressPtr destination);
 

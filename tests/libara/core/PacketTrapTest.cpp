@@ -191,3 +191,36 @@ TEST(PacketTrapTest, removePacketsForDestination) {
     delete packet1;
     delete packet2;
 }
+
+TEST(PacketTrapTest, packetOrderIsPreserved) {
+    AddressPtr destination = AddressPtr(new AddressMock("dst"));
+    Packet* packet1 = new PacketMock("src", "dst", 1);
+    Packet* packet2 = new PacketMock("src", "foo", 2);
+    Packet* packet3 = new PacketMock("src", "dst", 1);
+    Packet* packet4 = new PacketMock("src", "foo", 3);
+    Packet* packet5 = new PacketMock("src", "dst", 1);
+    Packet* packet6 = new PacketMock("src", "dst", 1);
+    Packet* packet7 = new PacketMock("src", "foo", 1);
+
+    packetTrap->trapPacket(packet1);
+    packetTrap->trapPacket(packet2);
+    packetTrap->trapPacket(packet3);
+    packetTrap->trapPacket(packet4);
+    packetTrap->trapPacket(packet5);
+    packetTrap->trapPacket(packet6);
+    packetTrap->trapPacket(packet7);
+
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    routingTable->update(destination, destination, &interface, 10);
+    PacketQueue trappedPackets = packetTrap->untrapDeliverablePackets(destination);
+    BYTES_EQUAL(4, trappedPackets.size());
+    CHECK(trappedPackets.at(0) == packet1);
+    CHECK(trappedPackets.at(1) == packet3);
+    CHECK(trappedPackets.at(2) == packet5);
+    CHECK(trappedPackets.at(3) == packet6);
+
+    delete packet1;
+    delete packet3;
+    delete packet5;
+    delete packet6;
+}
