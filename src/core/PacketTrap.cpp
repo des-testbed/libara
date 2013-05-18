@@ -53,22 +53,18 @@ bool PacketTrap::isEmpty() {
     return trappedPackets.size() == 0;
 }
 
-PacketQueue* PacketTrap::untrapDeliverablePackets(AddressPtr destination) {
-    PacketQueue* deliverablePackets = new PacketQueue();
-
+PacketQueue PacketTrap::untrapDeliverablePackets(AddressPtr destination) {
     TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
     if(packetsForDestination != trappedPackets.end()) {
         if(routingTable->isDeliverable(destination)) {
-            // Add all packets for this destination
-            PacketQueue packets = packetsForDestination->second;
-            for(auto& trappedPacket: packets) {
-                deliverablePackets->push_back(trappedPacket);
-            }
+            PacketQueue deliverablePackets = packetsForDestination->second;
             trappedPackets.erase(destination);
+            return deliverablePackets;
         }
     }
 
-    return deliverablePackets;
+    // if there are no deliverable packets we just return an empty queue
+    return PacketQueue();
 }
 
 PacketQueue PacketTrap::removePacketsForDestination(AddressPtr destination) {

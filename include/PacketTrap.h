@@ -50,10 +50,8 @@ public:
      * Returns a new list of packets that are deliverable to a given destination
      * according to the routing table associated with this packet trap.
      * All returned packets are automatically untrapped.
-     *
-     * Note: The LinkedList must be deleted by the caller of this method
      */
-    PacketQueue* untrapDeliverablePackets(AddressPtr destination);
+    PacketQueue untrapDeliverablePackets(AddressPtr destination);
 
     /**
      * This will remove all packets for the given destination address from this packet trap

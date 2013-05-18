@@ -423,13 +423,12 @@ void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
 }
 
 void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
-    deque<Packet*>* deliverablePackets = packetTrap->untrapDeliverablePackets(destination);
-    logDebug("Sending %u trapped packet(s) for destination %s", deliverablePackets->size(), destination->toString().c_str());
+    PacketQueue deliverablePackets = packetTrap->untrapDeliverablePackets(destination);
+    logDebug("Sending %u trapped packet(s) for destination %s", deliverablePackets.size(), destination->toString().c_str());
 
-    for(auto& deliverablePacket : *deliverablePackets) {
+    for(auto& deliverablePacket : deliverablePackets) {
         sendPacket(deliverablePacket);
     }
-    delete deliverablePackets;
 }
 
 void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket, NetworkInterface* interface) {
