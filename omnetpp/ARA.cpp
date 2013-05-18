@@ -94,11 +94,11 @@ void ARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress)
 }
 
 void ARA::handleCompleteRouteFailure(Packet* packet) {
-    AbstractARAClient::handleCompleteRouteFailure(packet);
     if(isLocalAddress(packet->getSource()) == false) {
         // The packet is only dropped if it has not originated from this node
         emit(ROUTE_FAILURE_SIGNAL, 1);
     }
+    AbstractARAClient::handleCompleteRouteFailure(packet);
 }
 
 void ARA::timerHasExpired(Timer* responsibleTimer) {
