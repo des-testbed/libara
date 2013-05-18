@@ -26,16 +26,11 @@ public:
 
     /**
      * Stores the given packet in the packet trap until it is removed via
-     * PacketTrap::untrapPacket(Packet*).
+     * PacketTrap::untrapDeliverablePackets(..).
      *
-     * All packets that are still trapped when the PacketTrap destructor is called are destroyed.
+     * All packets that are still trapped when the PacketTrap destructor is called are deleted.
      */
     void trapPacket(Packet* packet);
-
-    /**
-     * Removes the given packet from this packet trap.
-     */
-    void untrapPacket(Packet* packet);
 
     /**
      * Returns true if this packet trap contains a given packet.
@@ -50,13 +45,13 @@ public:
     bool isEmpty();
 
     /**
-     * TODO maybe this should untrap the packets by default!
      * Returns a new list of packets that are deliverable to a given destination
      * according to the routing table associated with this packet trap.
+     * All returned packets are automatically untrapped.
      *
      * Note: The LinkedList must be deleted by the caller of this method
      */
-    std::deque<Packet*>* getDeliverablePackets(AddressPtr destination);
+    std::deque<Packet*>* untrapDeliverablePackets(AddressPtr destination);
 
     /**
      * This will remove all packets for the given destination address from this packet trap

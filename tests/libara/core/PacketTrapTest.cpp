@@ -83,47 +83,59 @@ TEST(PacketTrapTest, trapMultiplePackets) {
     CHECK(packetTrap->contains(packet4) == true);
 }
 
-TEST(PacketTrapTest, getDeliverablePackets) {
-    Packet* trappedPacket = new PacketMock();
-    AddressPtr destination = trappedPacket->getDestination();
-    AddressPtr someAddress (new AddressMock());
+TEST(PacketTrapTest, untrapDeliverablePackets) {
+    Packet* trappedPacket1 = new PacketMock("src", "dest");
+    Packet* trappedPacket2 = new PacketMock("src", "foo");
+    AddressPtr destination1 = trappedPacket1->getDestination();
+    AddressPtr destination2 = trappedPacket2->getDestination();
+    AddressPtr someAddress (new AddressMock("bar"));
     NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     // Start the test
-    std::deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets(destination);
+    std::deque<Packet*>* deliverablePackets = packetTrap->untrapDeliverablePackets(destination1);
     CHECK(deliverablePackets->empty());   // there is no trapped packet so none can be deliverable
     delete deliverablePackets;
 
-    packetTrap->trapPacket(trappedPacket);
-    deliverablePackets = packetTrap->getDeliverablePackets(destination);
+    packetTrap->trapPacket(trappedPacket1);
+    deliverablePackets = packetTrap->untrapDeliverablePackets(destination1);
     CHECK(deliverablePackets->empty());   // packet is still not deliverable
+    BYTES_EQUAL(1, packetTrap->getNumberOfTrappedPackets());
     delete deliverablePackets;
 
     // update the route to some other destination which should not make this destination deliverable
     routingTable->update(someAddress, someAddress, &interface, 8);
-    deliverablePackets = packetTrap->getDeliverablePackets(destination);
+    deliverablePackets = packetTrap->untrapDeliverablePackets(destination1);
     CHECK(deliverablePackets->empty());
+    BYTES_EQUAL(1, packetTrap->getNumberOfTrappedPackets());
     delete deliverablePackets;
+
+    // trap another packet for a different destination
+    packetTrap->trapPacket(trappedPacket2);
+    BYTES_EQUAL(2, packetTrap->getNumberOfTrappedPackets());
 
     // now update the route to our wanted destination which should make it deliverable
-    routingTable->update(trappedPacket->getDestination(), someAddress, &interface, 10);
-    deliverablePackets = packetTrap->getDeliverablePackets(destination);
+    routingTable->update(trappedPacket1->getDestination(), someAddress, &interface, 10);
+    deliverablePackets = packetTrap->untrapDeliverablePackets(destination1);
     CHECK(deliverablePackets->size() == 1);
 
+    // the packet should have been removed from the packet trap
+    BYTES_EQUAL(1, packetTrap->getNumberOfTrappedPackets());
     Packet* deliverablePacket = deliverablePackets->front();
+    CHECK(deliverablePacket == trappedPacket1);
     delete deliverablePackets;
+    delete deliverablePacket;
 
-    CHECK(deliverablePacket == trappedPacket);
-}
+    // also get the other trapped packet
+    routingTable->update(trappedPacket2->getDestination(), someAddress, &interface, 10);
+    deliverablePackets = packetTrap->untrapDeliverablePackets(destination2);
+    CHECK(deliverablePackets->size() == 1);
 
-TEST(PacketTrapTest, testUntrap) {
-    PacketMock packet = PacketMock();
-
-    CHECK(packetTrap->contains(&packet) == false);
-    packetTrap->trapPacket(&packet);
-    CHECK(packetTrap->contains(&packet) == true);
-    packetTrap->untrapPacket(&packet);
-    CHECK(packetTrap->contains(&packet) == false);
+    // the packet should have been removed from the packet trap
+    BYTES_EQUAL(0, packetTrap->getNumberOfTrappedPackets());
+    deliverablePacket = deliverablePackets->front();
+    CHECK(deliverablePacket == trappedPacket2);
+    delete deliverablePackets;
+    delete deliverablePacket;
 }
 
 TEST(PacketTrapTest, testIsEmpty) {
@@ -134,8 +146,14 @@ TEST(PacketTrapTest, testIsEmpty) {
     packetTrap->trapPacket(&packet);
     CHECK(packetTrap->isEmpty() == false);
 
-    packetTrap->untrapPacket(&packet);
+    // make the trapped packet deliverable
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr destination = packet.getDestination();
+    routingTable->update(destination, destination, &interface, 10);
+
+    std::deque<Packet*>* deliverablePackets = packetTrap->untrapDeliverablePackets(destination);
     CHECK(packetTrap->isEmpty());
+    delete deliverablePackets;
 }
 
 TEST(PacketTrapTest, deleteTrappedPacketsInDestructor) {

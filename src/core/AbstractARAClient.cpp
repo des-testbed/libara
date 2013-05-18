@@ -423,11 +423,10 @@ void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
 }
 
 void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
-    deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets(destination);
+    deque<Packet*>* deliverablePackets = packetTrap->untrapDeliverablePackets(destination);
     logDebug("Sending %u trapped packet(s) for destination %s", deliverablePackets->size(), destination->toString().c_str());
 
     for(auto& deliverablePacket : *deliverablePackets) {
-        packetTrap->untrapPacket(deliverablePacket); // TODO packets could already be removed from the trap in packetTrap->getDeliverablePackets(..)
         sendPacket(deliverablePacket);
     }
     delete deliverablePackets;
