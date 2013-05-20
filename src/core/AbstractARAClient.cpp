@@ -399,7 +399,7 @@ void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
 }
 
 void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
-    unordered_map<AddressPtr, Timer*>::const_iterator discovery;
+    unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate>::const_iterator discovery;
     discovery = runningRouteDiscoveries.find(destination);
 
     if(discovery != runningRouteDiscoveries.end()) {
@@ -590,7 +590,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
 }
 
 void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination) {
-    unordered_map<AddressPtr, Timer*>::const_iterator discovery;
+    unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate>::const_iterator discovery;
     discovery = runningRouteDiscoveries.find(destination);
 
     if(discovery != runningRouteDiscoveries.end()) {
