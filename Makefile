@@ -105,7 +105,7 @@ CFLAGS += -std=c++11 -fPIC
 ifeq ("$(NO_OMNET)", "TRUE")
     INCLUDE_PATH = -I$(INCLUDE_DIR)
 else
-    INCLUDE_PATH += -I. -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/omnetpp -I$(INCLUDE_DIR)/inetmanet -I$(OMNETPP_INCL_DIR) -I$(INETMANET_SRC_FOLDER) $(INETMANET_FOLDERS_INCLUDE)
+    INCLUDE_PATH += -I. -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/omnetpp -I$(INCLUDE_DIR)/inetmanet -I$(OMNETPP_INCL_DIR) -I$(INETMANET_SRC_FOLDER)
 endif
 INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include
 LINK_TO_LIB_ARA = -L$(LIBARA_SRC_FOLDER) -l$(ARA_TARGET_NAME)
@@ -147,7 +147,7 @@ $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 -include $(TESTS_DEPENDENCIES)
 
 #
-# Builds all cpp files
+# Builds most of the cpp files (omnetARA cpps are handled below)
 #
 $(OUTPUT_DIR)/%.o: %.cpp
 	@$(MKPATH) $(dir $@)
@@ -168,6 +168,16 @@ $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(
 	@$(CXX) $(LINK_TO_LIB_ARA) $(OMNETPP_LINKFLAGS) -loppmain$D $(OMNETARA_O) -o $(OMNETARA_EXECUTABLE)
 	@cd $(OMNETARA_SRC_FOLDER) && ln -s -f ../$(OMNETARA_EXECUTABLE) $(OMNETARA_EXECUTABLE_NAME)
 	@echo "You can start the simulation now with the individual run scripts in the simulations folder"
+
+#
+# Builds omnetpp *.cpp files. This is separate from the default %.o target because it uses other includes
+#
+$(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/%.o: $(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_FOLDER)/.git
+	@$(MKPATH) $(dir $@)
+	@echo "Compiling $*.cpp";
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $(OMNETARA_SRC_FOLDER)/$*.cpp -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.o $(OMNETARA_SRC_FOLDER)/$*.cpp > $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.d;
+
 
 #
 # Build the inetmanet simulation library
@@ -291,8 +301,8 @@ clean:
 	@rm -f $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE)
 	@rm -f $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 
-.PHONY: cleanall
-cleanall: clean
+.PHONY: clobber
+clobber: clean
 	@echo "Deleting submodule $(CPPUTEST_BASE_DIR)"
 	@rm -R -f $(CPPUTEST_BASE_DIR)
 	@echo "Deleting submodule $(INETMANET_FOLDER)"
