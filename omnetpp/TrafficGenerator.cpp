@@ -4,7 +4,7 @@
 
 #include "omnetpp/TrafficGenerator.h"
 #include "IInterfaceTable.h"
-#include "IPvXAddressResolver.h"
+#include "ModuleAccess.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4Address.h"
 
@@ -52,7 +52,7 @@ void TrafficGenerator::sendTraffic(cPacket* message, const char* destination) {
 
 IPv4Address TrafficGenerator::getLocalAddress() {
     //TODO this does currently only support one interface
-    IInterfaceTable* interfaceTable = IPvXAddressResolver().interfaceTableOf(this);
+    IInterfaceTable* interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get(this);
     InterfaceEntry* interface = nullptr;
     int nrOfInterfaces = interfaceTable->getNumInterfaces();
     for (int k=0; k < nrOfInterfaces; k++) {
