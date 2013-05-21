@@ -191,7 +191,7 @@ $(INETMANET_LIB): $(INETMANET_FOLDER)/.git
 # Checkout the inetmanet git submodule
 #
 $(INETMANET_FOLDER)/.git:
-	echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n"
+	@echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n"
 	git submodule init $(INETMANET_FOLDER)
 	git submodule update $(INETMANET_FOLDER)
 
