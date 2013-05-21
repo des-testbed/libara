@@ -150,7 +150,8 @@ void ARANetworkConfigurator::persistStartPositions(cTopology& topology) {
     mkdir("results", 0777);
     stringstream fileName;
     ofstream file;
-    fileName << "results/" << ev.getConfigEx()->getActiveConfigName() << "-StartPositions.txt";
+    cConfigurationEx* config = ev.getConfigEx();
+    fileName << "results/" << config->getActiveConfigName() << "-" << config->getActiveRunNumber() << "-StartPositions.net";
     file.open(fileName.str());
 
     int nrOfNodes = topology.getNumNodes();
