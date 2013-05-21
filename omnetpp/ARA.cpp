@@ -102,7 +102,6 @@ void ARA::handleCompleteRouteFailure(Packet* packet) {
 }
 
 void ARA::timerHasExpired(Timer* responsibleTimer) {
-    bubble("Route Discovery expired");
     AbstractARAClient::timerHasExpired(responsibleTimer);
 }
 
