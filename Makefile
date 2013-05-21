@@ -172,9 +172,9 @@ $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(
 #
 # Builds omnetpp *.cpp files. This is separate from the default %.o target because it uses other includes
 #
-$(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/%.o: $(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_FOLDER)/.git
+$(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/%.o: $(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_LIB)
 	@$(MKPATH) $(dir $@)
-	@echo "Compiling $*.cpp";
+	@echo "Compiling $*.cppi (belongs to omnetARA)";
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $(OMNETARA_SRC_FOLDER)/$*.cpp -o $@
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.o $(OMNETARA_SRC_FOLDER)/$*.cpp > $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.d;
 
