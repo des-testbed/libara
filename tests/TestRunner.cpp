@@ -17,5 +17,8 @@ int main(int ac, char** av) {
     } catch(ARA::Exception& exception) {
         std::cout << "\nERROR: Tests failed with ARA::Exception: " << exception.getMessage() << "\n\n";
         return 1;
+    } catch(const char* exceptionMessage) {
+        std::cout << "\nERROR: Tests failed with const char* exception: " << exceptionMessage << "\n\n";
+        return 1;
     }
 }

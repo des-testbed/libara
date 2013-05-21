@@ -12,7 +12,7 @@ using namespace ARA;
 TEST_GROUP(PacketMockTest) {};
 
 TEST(PacketMockTest, testConstructor) {
-    PacketMock mock = PacketMock("Source", "Destination", 123, 0);
+    PacketMock mock = PacketMock("Source", "Destination", 123, 15);
 
     AddressMock wantedSource = AddressMock("Source");
     AddressMock wantedDestination = AddressMock("Destination");
@@ -22,7 +22,7 @@ TEST(PacketMockTest, testConstructor) {
     CHECK(mock.getDestination()->equals(&wantedDestination));
     CHECK(mock.getSender()->equals(&wantedSender));
     CHECK_EQUAL(123, mock.getSequenceNumber());
-    CHECK_EQUAL(0, mock.getHopCount());
+    CHECK_EQUAL(15, mock.getTTL());
     STRCMP_EQUAL("Hello World", mock.getPayload());
     LONGS_EQUAL(strlen("Hello World")+1, mock.getPayloadLength());
 }

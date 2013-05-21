@@ -67,6 +67,7 @@ void OMNeTClock::cancelTimerEvents(unsigned int timerID) {
     std::unordered_map<unsigned int, cMessage*>::iterator pendingSelfMessage = pendingSelfMessages.find(timerID);
     if (pendingSelfMessage != pendingSelfMessages.end()) {
         cancelEvent(pendingSelfMessage->second);
+        delete pendingSelfMessage->second;
         pendingSelfMessages.erase(timerID);
     }
 }
@@ -84,4 +85,10 @@ void OMNeTClock::handleMessage(cMessage* msg) {
     expiredTimer->notifyTimeExpired();
 
     delete msg;
+}
+
+void OMNeTClock::finish() {
+    /* We need to let the environment know that it must not delete this module
+     * because this will be done by the simulation itself */
+    ARA::Environment::notifyClockHasBeenDeleted();
 }

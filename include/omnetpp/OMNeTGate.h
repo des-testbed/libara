@@ -6,6 +6,7 @@
 #define OMNETGATE_H_
 
 #include "omnetpp/OMNeTARAMacros.h"
+#include "omnetpp/ARANetworkConfigurator.h"
 
 #include "AbstractNetworkInterface.h"
 #include "omnetpp/AbstractOMNeTARAClient.h"
@@ -21,7 +22,7 @@ class ARA;
 //TODO write some more documentation for this class
 class OMNeTGate: public AbstractNetworkInterface {
     public:
-        OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClient, cGate* gate, InterfaceEntry* interfaceEntry, double broadCastDelay, double uniCastDelay);
+        OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClient, cGate* gate, InterfaceEntry* interfaceEntry);
 
         void send(const Packet* packet, std::shared_ptr<Address> recipient);
         void send(const Packet* packet, std::shared_ptr<Address> recipient, double sendDelay);
@@ -35,21 +36,9 @@ class OMNeTGate: public AbstractNetworkInterface {
     private:
         AbstractOMNeTARAClient* omnetARAModule;
         ::ARA::PacketFactory* packetFactory;
-        cGate* gateToARP;
+        ARANetworkConfigurator* networkConfig;
+        cGate* outGate;
         int interfaceID;
-
-        /**
-         * The delay in seconds that is added to broadcast operations to
-         * prevent packet collision by perfect synchronization in the simulation
-         */
-        double broadCastDelay;
-
-        /**
-         * The delay in seconds that is added to unicast messaged.
-         * It is used to model processing time and prevents perfect
-         * event synchronization which would lead to packet collisions
-         */
-        double uniCastDelay;
 };
 
 OMNETARA_NAMESPACE_END

@@ -5,18 +5,16 @@
 #include "Environment.h"
 #include "UnixClock.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 Environment* Environment::instance = nullptr;
 
 Environment::Environment() {
     clock = new UnixClock();
-    packetFactory = new PacketFactory();
 }
 
 Environment::~Environment() {
-    delete clock;
-    delete packetFactory;
+    DELETE_IF_NOT_NULL(clock);
 }
 
 void Environment::setTheClock(Clock* newClock) {
@@ -24,9 +22,8 @@ void Environment::setTheClock(Clock* newClock) {
     clock = newClock;
 }
 
-void Environment::setThePacketFactory(PacketFactory* newFactory) {
-    delete packetFactory;
-    packetFactory = newFactory;
+void Environment::notifyClockHasBeenDeleted() {
+    getInstance().clock = nullptr;
 }
 
 Environment& Environment::getInstance() {
@@ -44,12 +41,4 @@ void Environment::setClock(Clock* newClock) {
     getInstance().setTheClock(newClock);
 }
 
-void Environment::setPacketFactory(PacketFactory* newFactory) {
-    getInstance().setThePacketFactory(newFactory);
-}
-
-PacketFactory* Environment::getPacketFactory() {
-    return getInstance().packetFactory;
-}
-
-} /* namespace ARA */
+ARA_NAMESPACE_END

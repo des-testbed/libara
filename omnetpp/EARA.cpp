@@ -4,6 +4,7 @@
 
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
+#include "omnetpp/PacketFactory.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -27,8 +28,10 @@ void EARA::initialize(int stage) {
         AbstractOMNeTARAClient::initialize();
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
+        PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
 
-        AbstractEARAClient::initializeEARA(config, config.getRoutingTable());
+        messageDispatcher->setPacketFactory(packetFactory);
+        AbstractEARAClient::initializeEARA(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
 
         notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
@@ -61,10 +64,10 @@ void EARA::receiveChangeNotification(int category, const cObject* details) {
     }
 }
 
-void EARA::handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
+void EARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
     // TODO this does only work if we have only one network interface card
     NetworkInterface* interface = getNetworkInterface(0);
-    handleRouteFailure(packet, receiverAddress, interface);
+    AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
 }
 
 void EARA::handleBatteryStatusChange(Energy* energyInformation) {

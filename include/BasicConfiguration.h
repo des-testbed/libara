@@ -18,7 +18,13 @@ namespace ARA {
  */
 class BasicConfiguration : public Configuration {
 public:
-    BasicConfiguration(EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries=2, unsigned int routeDiscoveryTimeoutInMilliSeconds=1000);
+    BasicConfiguration(EvaporationPolicy* evaporationPolicy,
+                       PathReinforcementPolicy* reinforcementPolicy,
+                       ForwardingPolicy* forwardingPolicy,
+                       float initialPheromoneValue,
+                       int maxNrOfRouteDiscoveryRetries=2,
+                       unsigned int routeDiscoveryTimeoutInMilliSeconds=1000,
+                       unsigned int packetDeliveryDelayInMilliSeconds=5);
 
     virtual EvaporationPolicy* getEvaporationPolicy();
     virtual PathReinforcementPolicy* getReinforcementPolicy();
@@ -26,6 +32,7 @@ public:
     virtual float getInitialPheromoneValue();
     virtual int getMaxNrOfRouteDiscoveryRetries();
     virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
+    virtual unsigned int getPacketDeliveryDelayInMilliSeconds();
 
 protected:
     EvaporationPolicy* evaporationPolicy;
@@ -34,6 +41,7 @@ protected:
     float initialPheromoneValue;
     int maxNrOfRouteDiscoveryRetries;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
+    unsigned int packetDeliveryDelayInMilliSeconds;
 };
 
 } /* namespace ARA */

@@ -17,18 +17,17 @@ package ara;
 
 import ara.EARA;
 
-import ara.EnergyAwareRoutingTable; 
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 import ara.evaporation.OMNeTExponentialEvaporationPolicy;
 import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
 import inet.networklayer.arp.ARP;
 
-module EARANetworkLayer 
+module EARANetworkLayer
 {
     parameters:
         int nrOfNetworkInterfaces = default(1);
 
-        @display("i=ara.png;bgb=301,297");
+        @display("i=ara.png;bgb=301,245");
 
     gates:
         inout upperLayerGate;
@@ -39,33 +38,28 @@ module EARANetworkLayer
         eara: EARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=204,94");
-        }
-
-        araRoutingTable: EnergyAwareRoutingTable {
-            parameters:
-                @display("p=72,40;i=block/table");
+                @display("i=ara;p=204,72");
         }
 
         forwardingPolicy: OMNeTEnergyAwareStochasticForwardingPolicy {
             parameters:
-                @display("p=72,111");
+                @display("p=72,40");
         }
 
         reinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
             parameters:
-                @display("p=72,185");
+                @display("p=72,114");
         }
 
         evaporationPolicy: OMNeTExponentialEvaporationPolicy {
             parameters:
-                @display("p=72,254");
+                @display("p=72,183");
         }
 
         arp: ARP {
             parameters:
                 proxyARP = false;
-                @display("p=204,215;q=pendingQueue");
+                @display("p=204,163;q=pendingQueue");
             gates:
                 nicOut[nrOfNetworkInterfaces];
         }

@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "CppUTest/TestHarness.h"
 #include "UnixClock.h"
 #include "UnixTime.h"

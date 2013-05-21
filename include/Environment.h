@@ -5,10 +5,10 @@
 #ifndef ENVIRONMENT_H_
 #define ENVIRONMENT_H_
 
+#include "ARAMacros.h"
 #include "Clock.h"
-#include "PacketFactory.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 /**
  * The Environment class represents a static point of access to environment related
@@ -30,18 +30,20 @@ public:
      */
     static Clock* getClock();
 
-    /**
-     * TODO write some description
-     */
-    static PacketFactory* getPacketFactory();
-
     static void setClock(Clock* newClock);
-    static void setPacketFactory(PacketFactory* newFactory);
+
+    /**
+     * This notifies the environment that the clock has been (or will shortly be) deleted
+     * by another class which will make the Environment completely forget about the clock.
+     * This mechanism has become necessary to support external memory management constraints
+     * like OMNeT++ which needs to delete its object by itself. If someone has any suggestions
+     * on how to tackle this problem please let me now -FG
+     */
+    static void notifyClockHasBeenDeleted();
 
 private:
     static Environment* instance;
     Clock* clock;
-    PacketFactory* packetFactory;
 
     /**
      * Private singleton constructor.
@@ -55,16 +57,12 @@ private:
     void setTheClock(Clock* newClock);
 
     /**
-     * The non static variant of Environment::setPacketFactory()
-     */
-    void setThePacketFactory(PacketFactory* newFactory);
-
-    /**
      * Access from the outside should always be directly through the static methods
      * like Environment::getClock() so there is no use in making getInstance public.
      */
     static Environment& getInstance();
 };
 
-} /* namespace ARA */
-#endif // ENVIRONMENT_H_
+ARA_NAMESPACE_END
+
+#endif

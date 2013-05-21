@@ -6,7 +6,7 @@
 
 using namespace ARA;
 
-ExponentialEvaporationPolicyMock::ExponentialEvaporationPolicyMock(float evaporationFactor, float threshold, int intervalInMilliSeconds) : ExponentialEvaporationPolicy(evaporationFactor, threshold, intervalInMilliSeconds) {
+ExponentialEvaporationPolicyMock::ExponentialEvaporationPolicyMock(float evaporationFactor, int intervalInMilliSeconds, float threshold) : ExponentialEvaporationPolicy(evaporationFactor, intervalInMilliSeconds, threshold) {
     // nothing to do here
 }
 

@@ -7,12 +7,14 @@
 
 #include "omnetpp/OMNeTARAMacros.h"
 #include "omnetpp/OMNeTConfiguration.h"
+#include "omnetpp/ARANetworkConfigurator.h"
 #include "omnetpp/OMNeTPacket.h"
 
 #include "Packet.h"
 #include "INotifiable.h"
 #include "NotificationBoard.h"
 #include "IInterfaceTable.h"
+#include "MobilityBase.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -23,7 +25,6 @@ class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
 
     protected:
         virtual void initialize();
-        virtual void initializeEnvironment();
         void initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& configuration);
 
         /**
@@ -48,13 +49,24 @@ class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
          */
         virtual void receiveChangeNotification(int category, const cObject* details);
 
-        virtual void handleBrokenLink(OMNeTPacket* packet, AddressPtr receiverAddress) = 0;
+        virtual void handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) = 0;
+
+        /**
+         * Determines the host module which acts as a container to this simple module.
+         * A host module is defined as the next compound module up the model hierarchy
+         * that has a @node property set
+         */
+        cModule* findHost() const;
+
+    private:
+        void setPositionFromParameters();
+        int getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition);
 
     protected:
-        static bool isEnvironmentInitialized;
-
         NotificationBoard* notificationBoard;
         IInterfaceTable* interfaceTable;
+        MobilityBase* mobility;
+        ARANetworkConfigurator* networkConfig;
 
     friend class OMNeTGate;
 };

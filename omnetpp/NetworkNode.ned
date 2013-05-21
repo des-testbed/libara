@@ -37,6 +37,8 @@ module NetworkNode {
         @node;
         @display("i=device/wifilaptop;bgb=366,335");
 
+		string posX = default("auto"); // the position parameter can be used to assign a position to a node even if it is part of a node vector. Allowed values are "auto", "center", "left", "right", "top", "bottom" or any postive integer
+		string posY = default("auto"); // see posX
         int nrOfNetworkInterfaces = default(1);
 
         string mobilityType = default("RandomWPMobility");
@@ -44,6 +46,7 @@ module NetworkNode {
 
         string forwardingPolicyModel = default("OMNeTStochasticForwardingPolicy");
         string evaporationModel = default("OMNeTExponentialEvaporationPolicy");
+        string reinforcementModel = default("OMNeTLinearPathReinforcementPolicy");
 
     gates:
         input radioIn @directIn;
@@ -75,6 +78,7 @@ module NetworkNode {
             parameters:
                 evaporationModel = evaporationModel;
                 forwardingPolicyModel = forwardingPolicyModel;
+                reinforcementModel = reinforcementModel;
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,124");
         }

@@ -1,8 +1,12 @@
-#include "CubicEvaporationPolicy.h"
+/*
+ * $FU-Copyright$
+ */
 
 #include <cmath>
 #include <cstdlib>
 #include <stdint.h>
+
+#include "CubicEvaporationPolicy.h"
 
 using namespace ARA;
 

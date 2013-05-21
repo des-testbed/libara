@@ -7,7 +7,6 @@
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
-#include "SimpleLogger.h"
 #include "IPvXAddressResolver.h"
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
@@ -22,12 +21,16 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     forwardingPolicy = ModuleAccess<ForwardingPolicy>("forwardingPolicy").get();
     initialPheromoneValue = module->par("initialPhi").doubleValue();
     maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
+    maxTTL = module->par("maxTTL").longValue();
     routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
+    packetDeliveryDelayInMilliSeconds = module->par("packetDeliveryDelay").longValue();
 
-    logger = new SimpleLogger(getHostModule()->getName());
+    logger = new OMNeTLogger(getHostModule()->getFullName());
 
-    broadCastDelay = module->par("broadCastDelay").doubleValue();
-    uniCastDelay = module->par("uniCastDelay").doubleValue();
+    //FIXME make this more generic via a module parameter
+    if(strcmp(getHostModule()->getFullName(), "node[1]") == 0) {
+        logger->setLogLevel(Logger::LEVEL_TRACE);
+    }
 }
 
 EvaporationPolicy* OMNeTConfiguration::getEvaporationPolicy() {
@@ -50,24 +53,24 @@ int OMNeTConfiguration::getMaxNrOfRouteDiscoveryRetries() {
     return maxNrOfRouteDiscoveryRetries;
 }
 
+int OMNeTConfiguration::getMaxTTL() {
+    return maxTTL;
+}
+
 unsigned int OMNeTConfiguration::getRouteDiscoveryTimeoutInMilliSeconds() {
     return routeDiscoveryTimeoutInMilliSeconds;
+}
+
+unsigned int OMNeTConfiguration::getPacketDeliveryDelayInMilliSeconds() {
+    return packetDeliveryDelayInMilliSeconds;
 }
 
 Logger* OMNeTConfiguration::getLogger() {
     return logger;
 }
 
-double OMNeTConfiguration::getBroadCastDelay() {
-    return broadCastDelay;
-}
-
-double OMNeTConfiguration::getUniCastDelay() {
-    return uniCastDelay;
-}
-
 RoutingTable* OMNeTConfiguration::getRoutingTable() {
-    RoutingTable* routingTable = ModuleAccess<RoutingTable>("araRoutingTable").get();
+    RoutingTable* routingTable = new RoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
     return routingTable;
 }

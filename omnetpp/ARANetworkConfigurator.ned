@@ -19,6 +19,7 @@ simple ARANetworkConfigurator {
 	parameters:
         string networkAddress = default("192.168.0.0"); // network part of the address (see netmask parameter)
         string netmask = default("255.255.0.0"); // host part of addresses are autoconfigured
+        bool persistStartPositions = default(false); // wether to save the starting position of nodes to a file in the results folder called <EXPERIMENT_NAME>-StartPositions.txt
         @display("i=block/cogwheel_s");
         @labels(node);
 }

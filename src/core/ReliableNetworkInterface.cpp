@@ -12,11 +12,11 @@ namespace ARA {
 
 typedef std::shared_ptr<Address> AddressPtr;
 
-ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, int ackTimeoutInMicroSeconds, AddressPtr localAddress, AddressPtr broadcastAddress) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
+ReliableNetworkInterface::ReliableNetworkInterface(AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds, AddressPtr localAddress, AddressPtr broadcastAddress) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
     unacknowledgedPackets = deque<const Packet*>();
     runningTimers = unordered_map<Timer*, AckTimerData>();
     this->ackTimeoutInMicroSeconds = ackTimeoutInMicroSeconds;
-    packetFactory = Environment::getPacketFactory();
+    this->packetFactory = packetFactory;
 }
 
 ReliableNetworkInterface::~ReliableNetworkInterface() {
@@ -80,7 +80,7 @@ void ReliableNetworkInterface::handleUndeliverablePacket(Timer* ackTimer, AckTim
         }
     }
 
-    client->handleRouteFailure(const_cast<Packet*>(timerData.packet), timerData.recipient, this);
+    client->handleBrokenLink(const_cast<Packet*>(timerData.packet), timerData.recipient, this);
 }
 
 void ReliableNetworkInterface::broadcast(const Packet* packet) {
@@ -101,7 +101,7 @@ void ReliableNetworkInterface::handleNonAckPacket(Packet* packet) {
     AddressPtr destination = packet->getDestination();
 
     if(packet->isAntPacket() == false) { // TODO actually we want to test if the packet has been sent via a broadcast but this is currently not possible with the API
-        Packet* ackPacket = packetFactory->makeAcknowledgmentPacket(packet);
+        Packet* ackPacket = packetFactory->makeAcknowledgmentPacket(packet, getLocalAddress());
         doSend(ackPacket, packet->getSender());
         delete ackPacket;
     }

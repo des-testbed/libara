@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "TimeMock.h"
 
 #include <iostream>

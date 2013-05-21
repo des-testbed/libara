@@ -7,11 +7,14 @@
 
 using namespace std;
 
-namespace ARA {
-namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
-const char* OMNeTAddress::toString() const {
-    return this->str().c_str();
+std::string OMNeTAddress::toString() const {
+    char buffer[6];
+    char* string = buffer;
+    sprintf(string, "[%u]", getDByte(3));
+    *(string-1) = '\0';
+    return std::string(buffer);
 }
 
 bool OMNeTAddress::equals(const Address* otherAddress) const {
@@ -25,7 +28,7 @@ bool OMNeTAddress::equals(const Address* otherAddress) const {
     }
 }
 
-bool OMNeTAddress::equals(const std::shared_ptr<Address> otherAddress) const {
+bool OMNeTAddress::equals(const AddressPtr otherAddress) const {
     return this->equals(otherAddress.get());
 }
 
@@ -40,5 +43,4 @@ Address* OMNeTAddress::clone() {
     return clone;
 }
 
-} /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END

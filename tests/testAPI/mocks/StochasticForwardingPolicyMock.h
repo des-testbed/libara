@@ -14,6 +14,7 @@ namespace ARA {
      */
     class StochasticForwardingPolicyMock : public StochasticForwardingPolicy {
         public:
+            StochasticForwardingPolicyMock();
             StochasticForwardingPolicyMock(unsigned int seed);
     };
 }

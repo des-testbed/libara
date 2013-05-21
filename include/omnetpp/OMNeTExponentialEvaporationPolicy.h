@@ -5,29 +5,30 @@
 #ifndef OMNET_EXPONENTIAL_EVAPORATION_POLICY_H_
 #define OMNET_EXPONENTIAL_EVAPORATION_POLICY_H_
 
+#include "OMNeTARAMacros.h"
 #include "ExponentialEvaporationPolicy.h"
 #include <omnetpp.h>
 
-namespace ARA { 
-   namespace omnetpp { 
+OMNETARA_NAMESPACE_BEGIN
+
+/**
+ * This class provides the exponential evaporation function of the ant routing algorithm (ARA)
+ * for the OMNeT++ simulation framework.
+ */
+class OMNeTExponentialEvaporationPolicy : public ExponentialEvaporationPolicy, public cSimpleModule {
+    public:
+
         /**
-         * This class provides the exponential evaporation function of the ant routing algorithm (ARA) 
-         * for the OMNeT++ simulation framework.
+         * Creates a new instance of OMNeTExponentialEvaporationPolicy.
+         * Please note that the parameters are initialized in the
+         * initialize method due to OMNeT++s need for a standard constructor
          */
-        class OMNeTExponentialEvaporationPolicy : public ExponentialEvaporationPolicy, public cSimpleModule {
-            public:
+        OMNeTExponentialEvaporationPolicy();
 
-                /**
-                 * Creates a new instance of OMNeTExponentialEvaporationPolicy.
-                 * Please note that the parameters need to be initialized in the
-                 * initialize method due to OMNeT++s need for a standard constructor
-                 */
-                OMNeTExponentialEvaporationPolicy();
+        virtual void initialize();
+        virtual void handleMessage(cMessage *msg);
+};
 
-                virtual void initialize();
-                virtual void handleMessage(cMessage *msg);
-        };
-    }
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END
 
 #endif 

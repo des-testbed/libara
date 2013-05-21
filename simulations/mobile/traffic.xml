@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+ <configurations>
+ <config id="0"
+    packetSize="20"
+    interDepartureTime="0.1"
+    firstPacketTime="0"
+    trafDest="192.168.0.8"
+    onLength="10"
+    offLength="2"
+    onIdenticalTrafDest="true" />
+<config id="1"
+    packetSize="20"
+    interDepartureTime="0.01"
+    firstPacketTime="0"
+    trafDest="192.168.0.8"
+    onLength="10"
+    offLength="0"
+    onIdenticalTrafDest="true" />
+ </configurations>
+

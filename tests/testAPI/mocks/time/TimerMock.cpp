@@ -12,6 +12,7 @@ void TimerMock::run(unsigned long timeoutInMicroSeconds) {
 
 void TimerMock::interrupt() {
     hasTimerBeenInterrupted = true;
+    isTimerRunning = false;
 }
 
 void TimerMock::expire() {

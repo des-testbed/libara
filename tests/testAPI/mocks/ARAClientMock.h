@@ -16,6 +16,8 @@
 
 namespace ARA {
 
+class NetworkInterfaceMock;
+
 /**
  * A ARAClientMock implements the abstract ARA Client and holds references to
  * other mocks for testing the routing table, packet trap and network interfaces.
@@ -25,14 +27,17 @@ public:
     ARAClientMock();
 
     void receivePacket(Packet* packet, NetworkInterface* interface);
-    virtual void handleRouteFailure(Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    virtual void handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
     void deliverToSystem(const Packet* packet);
     void packetNotDeliverable(const Packet* packet);
 
+    void setMaxHopCount(int n);
+    double getInitialPhi() const;
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
+    unsigned int getPacketDeliveryDelay() const;
 };
 
 } /* namespace ARA */

@@ -13,24 +13,29 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara.simulations;
+package ara.simulations.mobile;
 
 import ara.NetworkNode;
 import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
 import inet.world.radio.ChannelControl;
 
-network BasicEvaluation
+network MobileScenario
 {
     parameters:
-        double playgroundSizeX;
-        double playgroundSizeY;
-        double playgroundSizeZ;
         @display("b=297,203;bgb=758,337");
+        int numberOfNodes;
+        volatile double nodeSpeed @unit(mps);
+        volatile double nodePauseTime @unit(s);
+        double playgroundSizeX @unit(m);
+        double playgroundSizeY @unit(m);
+        double playgroundSizeZ @unit(m) = default(0);
+        string mobilityType = default("RandomWPMobility");
+        volatile double mobilityUpdateIntervall @unit(ms) = default(100ms);
 
     submodules:
         clock: OMNeTClock {
-            @display("p=78,161");
+            @display("p=153,41;is=s");
         }
 
         channelControl: ChannelControl {
@@ -45,16 +50,18 @@ network BasicEvaluation
                 @display("p=78,97");
         }
 
-        node0: NetworkNode {
-            @display("p=330,161");
-        }
-
-        node1: NetworkNode {
-            @display("p=475,161");
-        }
-
-        node2: NetworkNode {
-            @display("p=600,161");
+        node[numberOfNodes]: NetworkNode {
+            parameters:
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = mobilityUpdateIntervall;
+                mobility.constraintAreaMinX = 0m;
+                mobility.constraintAreaMinY = 0m;
+                mobility.constraintAreaMinZ = 0m;
+                mobility.constraintAreaMaxX = playgroundSizeX;
+                mobility.constraintAreaMaxY = playgroundSizeY;
+                mobility.constraintAreaMaxZ = playgroundSizeZ;
         }
 }
 

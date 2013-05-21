@@ -20,15 +20,16 @@ TEST(PacketTest, create) {
     AddressPtr sender (new AddressMock("sender"));    // This is the node from which the packet has actually been received
     char type = PacketType::FANT;
     unsigned int seqNr = 1;
+    int ttl = 15;
 
-    Packet packet = Packet(source, destination, sender, type, seqNr);
+    Packet packet = Packet(source, destination, sender, type, seqNr, ttl);
 
     CHECK(packet.getSource()->equals(source));
     CHECK(packet.getDestination()->equals(destination));
     CHECK(packet.getSender()->equals(sender));
     CHECK_EQUAL(type, packet.getType());
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    LONGS_EQUAL(0, packet.getHopCount());
+    LONGS_EQUAL(ttl, packet.getTTL());
 
     CHECK_EQUAL(0, packet.getPayloadLength());
     CHECK(packet.getPayload() == false);
@@ -40,96 +41,38 @@ TEST(PacketTest, createWithPayload) {
     AddressPtr sender (new AddressMock("sender"));
     char type = PacketType::DATA;
     unsigned int seqNr = 2;
+    int ttl = 15;
     const char* payload = "Hello World!";
     int payloadSize = strlen(payload)+1;
 
-    Packet packet = Packet(source, destination, sender, type, seqNr, payload, payloadSize);
+    Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
 
     CHECK(packet.getSource()->equals(source));
     CHECK(packet.getDestination()->equals(destination));
     CHECK(packet.getSender()->equals(sender));
     CHECK_EQUAL(type, packet.getType());
     CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    LONGS_EQUAL(0, packet.getHopCount());
+    LONGS_EQUAL(ttl, packet.getTTL());
 
     LONGS_EQUAL(payloadSize, packet.getPayloadLength());
     STRCMP_EQUAL(payload, packet.getPayload());
-}
-
-TEST(PacketTest, createWithPayloadAndHopCount) {
-    AddressPtr source (new AddressMock("source"));
-    AddressPtr destination (new AddressMock("destination"));
-    AddressPtr sender (new AddressMock("sender"));
-    char type = PacketType::DATA;
-    unsigned int seqNr = 3;
-    const char* payload = "Hello World";
-    int payloadSize = strlen(payload)+1;
-    unsigned int hopCount = 123;
-
-    Packet packet = Packet(source, destination, sender, type, seqNr, payload, payloadSize, hopCount);
-
-    CHECK(packet.getSource()->equals(source));
-    CHECK(packet.getDestination()->equals(destination));
-    CHECK(packet.getSender()->equals(sender));
-    CHECK_EQUAL(type, packet.getType());
-    CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    LONGS_EQUAL(payloadSize, packet.getPayloadLength());
-    STRCMP_EQUAL(payload, packet.getPayload());
-    CHECK_EQUAL(hopCount, packet.getHopCount());
-}
-
-TEST(PacketTest, createWithoutPayloadButWithHopCount) {
-    AddressPtr source (new AddressMock("source"));
-    AddressPtr destination (new AddressMock("destination"));
-    AddressPtr sender (new AddressMock("sender"));
-    char type = PacketType::FANT;
-    unsigned int seqNr = 1;
-    unsigned int hopCount = 7;
-
-    Packet packet = Packet(source, destination, sender, type, seqNr, hopCount);
-
-    CHECK(packet.getSource()->equals(source));
-    CHECK(packet.getDestination()->equals(destination));
-    CHECK(packet.getSender()->equals(sender));
-    CHECK_EQUAL(type, packet.getType());
-    CHECK_EQUAL(seqNr, packet.getSequenceNumber());
-    CHECK_EQUAL(hopCount, packet.getHopCount());
-
-    CHECK_EQUAL(0, packet.getPayloadLength());
-    CHECK(packet.getPayload() == false);
-}
-
-TEST(PacketTest, setHopCount) {
-   AddressPtr source (new AddressMock("source"));
-   AddressPtr destination (new AddressMock("destination"));
-   AddressPtr sender (new AddressMock("sender"));
-   unsigned int type = PacketType::DATA;
-   int seqNr = 3;
-   const char* payload = "Hello World";
-   unsigned int hopCount = 123;
-
-   Packet packet = Packet(source, destination, sender, type, seqNr, payload, strlen(payload), hopCount);
-   CHECK_EQUAL(hopCount, packet.getHopCount());
-
-   unsigned int newHopCount = 124;
-   packet.setHopCount(newHopCount);
-   CHECK_EQUAL(newHopCount, packet.getHopCount());
 }
 
 TEST(PacketTest, equals) {
    unsigned int dataPacket = PacketType::DATA;
    const char* payload = "Hello World";
+   int ttl = 15;
 
    AddressPtr source1 (new AddressMock("Source1"));
    AddressPtr source2 (new AddressMock("Source2"));
    AddressPtr destination (new AddressMock("Destination"));
    AddressPtr sender (new AddressMock("Sender"));
 
-   Packet packet            = Packet(source1, destination, sender, dataPacket, 1, payload, strlen(payload));
-   Packet samePacket        = Packet(source1, destination, sender, dataPacket, 1, payload, strlen(payload));
-   Packet nextSeqPacket     = Packet(source2, destination, sender, dataPacket, 2, payload, strlen(payload));
-   Packet otherSourcePacket = Packet(source2, destination, sender, dataPacket, 1, payload, strlen(payload));
-   Packet otherPacket       = Packet(source2, destination, sender, dataPacket, 3, payload, strlen(payload));
+   Packet packet            = Packet(source1, destination, sender, dataPacket, 1, ttl, payload, strlen(payload));
+   Packet samePacket        = Packet(source1, destination, sender, dataPacket, 1, ttl, payload, strlen(payload));
+   Packet nextSeqPacket     = Packet(source2, destination, sender, dataPacket, 2, ttl, payload, strlen(payload));
+   Packet otherSourcePacket = Packet(source2, destination, sender, dataPacket, 1, ttl, payload, strlen(payload));
+   Packet otherPacket       = Packet(source2, destination, sender, dataPacket, 3, ttl, payload, strlen(payload));
 
    CHECK(packet.equals(&packet));
    CHECK(packet.equals(&samePacket));
@@ -144,22 +87,24 @@ TEST(PacketTest, calculatePayloadLength) {
     AddressPtr sender (new AddressMock("sender"));
     char type = PacketType::DATA;
     unsigned int seqNr = 1;
+    int ttl = 15;
     const char* payload = "Hello World";
 
-    Packet packet = Packet(source, destination, sender, type, seqNr, payload);
+    Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload);
     LONGS_EQUAL(strlen(payload)+1, packet.getPayloadLength())
 }
 
 TEST(PacketTest, setSender) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
-    AddressPtr sender1 (new AddressMock("originalSender"));
-    AddressPtr sender2 (new AddressMock("originalSender"));
+    AddressPtr sender1 (new AddressMock("A"));
+    AddressPtr sender2 (new AddressMock("B"));
     char type = PacketType::DATA;
     unsigned int seqNr = 1;
+    int ttl = 15;
     const char* payload = "Hello World";
 
-    Packet packet = Packet(source, destination, sender1, type, seqNr, payload);
+    Packet packet = Packet(source, destination, sender1, type, seqNr, ttl, payload);
     CHECK(packet.getSender()->equals(sender1));
 
     packet.setSender(source);   // will delete sender1
@@ -171,33 +116,15 @@ TEST(PacketTest, setSender) {
     CHECK(packet.getSource()->equals(source));
 }
 
-TEST(PacketTest, increaseHopCount) {
-    AddressPtr source (new AddressMock("source"));
-    AddressPtr destination (new AddressMock("destination"));
-    AddressPtr sender (new AddressMock("originalSender"));
-    char type = PacketType::DATA;
-    unsigned int seqNr = 1;
-    const char* payload = "Hello World";
-    unsigned int hopCount = 5;
-
-    Packet packet = Packet(source, destination, sender, type, seqNr, payload, 11, hopCount);
-    LONGS_EQUAL(hopCount, packet.getHopCount());
-
-    packet.increaseHopCount();
-    LONGS_EQUAL(hopCount+1, packet.getHopCount());
-
-    packet.increaseHopCount();
-    LONGS_EQUAL(hopCount+2, packet.getHopCount());
-}
-
 TEST(PacketTest, getHashValue) {
     AddressPtr address1 (new AddressMock("A"));
     AddressPtr address2 (new AddressMock("B"));
-    Packet packet1 = Packet(address1, address2, PacketType::DATA, 1);
-    Packet packet2 = Packet(address1, address2, PacketType::DATA, 2);
-    Packet packet3 = Packet(address1, address2, PacketType::DATA, 3);
-    Packet packet4 = Packet(address2, address1, PacketType::DATA, 1);
-    Packet packet5 = Packet(address2, address1, PacketType::DATA, 1);
+    AddressPtr sender (new AddressMock("B"));
+    Packet packet1 = Packet(address1, address2, sender, PacketType::DATA, 1, 15);
+    Packet packet2 = Packet(address1, address2, sender, PacketType::DATA, 2, 8);
+    Packet packet3 = Packet(address1, address2, sender, PacketType::DATA, 3, 10);
+    Packet packet4 = Packet(address2, address1, sender, PacketType::DATA, 1, 7);
+    Packet packet5 = Packet(address2, address1, sender, PacketType::DATA, 1, 2);
 
     CHECK(packet1.getHashValue() != packet2.getHashValue()); // same source - different seqNr
     CHECK(packet2.getHashValue() != packet3.getHashValue()); // same source - different seqNr
@@ -210,30 +137,32 @@ TEST(PacketTest, getAddressString) {
     AddressPtr originalDestination (new AddressMock("destination"));
     AddressPtr originalSender (new AddressMock("sender"));
     unsigned int type = PacketType::DATA;
-    unsigned int originalseqenceNumber = 3;
-    unsigned int originalHopCount = 123;
+    unsigned int seqenceNumber = 3;
+    int ttl = 20;
 
-    Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalHopCount);
-    STRCMP_EQUAL("source", packet.getSourceString());
-    STRCMP_EQUAL("sender", packet.getSenderString());
-    STRCMP_EQUAL("destination", packet.getDestinationString());
+    Packet packet = Packet(originalSource, originalDestination, originalSender, type, seqenceNumber, ttl);
+    STRCMP_EQUAL("source", packet.getSourceString().c_str());
+    STRCMP_EQUAL("sender", packet.getSenderString().c_str());
+    STRCMP_EQUAL("destination", packet.getDestinationString().c_str());
 }
 
-TEST(PacketTest, decreaseHopCount) {
+TEST(PacketTest, setPreviousHop) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
-    AddressPtr sender (new AddressMock("originalSender"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr prevHop1 (new AddressMock("A"));
+    AddressPtr prevHop2 (new AddressMock("B"));
     char type = PacketType::DATA;
     unsigned int seqNr = 1;
+    int ttl = 15;
     const char* payload = "Hello World";
-    unsigned int hopCount = 5;
 
-    Packet packet = Packet(source, destination, sender, type, seqNr, payload, 11, hopCount);
-    LONGS_EQUAL(hopCount, packet.getHopCount());
+    Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload);
+    CHECK(packet.getPreviousHop()->equals(sender));
 
-    packet.decreaseHopCount();
-    LONGS_EQUAL(hopCount-1, packet.getHopCount());
+    packet.setPreviousHop(prevHop1);
+    CHECK(packet.getPreviousHop()->equals(prevHop1));
 
-    packet.decreaseHopCount();
-    LONGS_EQUAL(hopCount-2, packet.getHopCount());
+    packet.setPreviousHop(prevHop2);
+    CHECK(packet.getPreviousHop()->equals(prevHop2));
 }

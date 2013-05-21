@@ -42,13 +42,16 @@ long OMNeTTime::convertSimulationTime(SimTime time, int wantedScaleExponent) con
        /**
         * Example:
         *    Transform from Seconds to
-        *      millisec: 1 * 10^(0 + 3) = 1000
-        *      microsec: 1 * 10^(0 + 6) = 1000000
+        *      millisec: 1 * 10^(0 -(-3)) = 1000
+        *      microsec: 1 * 10^(0 -(-6)) = 1000000
         *    Transform from Milliseconds to
-        *      millisec: 1 * 10^(-3 + 3) = 1
-        *      microsec: 1 * 10^(-3 + 6) = 1000
+        *      millisec: 1 * 10^(-3 -(-3)) = 1
+        *      microsec: 1 * 10^(-3 -(-6)) = 1000
+        *    Transform from Microseconds to
+        *      millisec: 1000 * 10^(-6 -(-3)) = 1
+        *      seconds:  1000 * 10^(-6 -(0)) = 0.001
         */
-        return time.raw() * pow(10, time.getScaleExp() + wantedScaleExponent);
+        return time.raw() * pow(10, time.getScaleExp() - wantedScaleExponent);
     }
 
 }

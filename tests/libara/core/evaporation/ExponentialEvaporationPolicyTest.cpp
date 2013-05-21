@@ -2,11 +2,10 @@
  * $FU-Copyright$
  */
 
-#include <iostream>
-#include <unistd.h>
 #include "CppUTest/TestHarness.h"
+#include "ExponentialEvaporationPolicy.h"
 
-#include "ExponentialEvaporationPolicy.h" 
+#include <cmath>
 
 using namespace ARA;
 
@@ -16,7 +15,7 @@ TEST(ExponentialEvaporationPolicyTest, evaporate) {
     float evaporationFactor = 0.9;
     float threshold = 0.75;
     unsigned int timeIntervalInMillis = 2000;
-    ExponentialEvaporationPolicy policy = ExponentialEvaporationPolicy(evaporationFactor, threshold, timeIntervalInMillis);
+    ExponentialEvaporationPolicy policy = ExponentialEvaporationPolicy(evaporationFactor, timeIntervalInMillis, threshold);
 
     float pheromone = 1;
 
@@ -41,10 +40,21 @@ TEST(ExponentialEvaporationPolicyTest, evaporateWithZeroTimeInterval) {
     float evaporationFactor = 0.9;
     float threshold = 0.75;
     unsigned int timeIntervalInMillis = 2000;
-    ExponentialEvaporationPolicy policy = ExponentialEvaporationPolicy(evaporationFactor, threshold, timeIntervalInMillis);
+    ExponentialEvaporationPolicy policy = ExponentialEvaporationPolicy(evaporationFactor, timeIntervalInMillis, threshold);
 
     float pheromone = 10;
 
     pheromone = policy.evaporate(pheromone, 0);
     DOUBLES_EQUAL(10, pheromone, 0.00001);
+}
+
+TEST(ExponentialEvaporationPolicyTest, partialEvaporation) {
+    float evaporationFactor = 0.9;
+    float threshold = 0.75;
+    unsigned int timeIntervalInMillis = 1000;
+    ExponentialEvaporationPolicy policy = ExponentialEvaporationPolicy(evaporationFactor, timeIntervalInMillis, threshold);
+
+    float pheromone = 10;
+    pheromone = policy.evaporate(pheromone, 500);
+    DOUBLES_EQUAL(10 * pow(evaporationFactor, 0.5), pheromone, 0.00001);
 }

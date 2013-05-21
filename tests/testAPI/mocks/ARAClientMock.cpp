@@ -5,8 +5,10 @@
 #include "ARAClientMock.h"
 #include "BasicConfiguration.h"
 #include "RoutingTableEntry.h"
+#include "PacketFactory.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
+#include "testAPI/mocks/RoutingTableMock.h"
 #include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
@@ -17,7 +19,7 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 ARAClientMock::ARAClientMock() {
-    float initialPhi = 10.0;
+    float initialPhi = 5.0;
     float deltaPhi = 5.0;
     BasicConfiguration configuration = BasicConfiguration(
             new ExponentialEvaporationPolicyMock(),
@@ -25,7 +27,7 @@ ARAClientMock::ARAClientMock() {
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initialize(configuration, new RoutingTable());
+    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
 }
 
 void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
@@ -33,9 +35,9 @@ void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
     AbstractARAClient::receivePacket(packet, interface);
 }
 
-void ARAClientMock::handleRouteFailure(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
-    storeRouteFailurePacket(packet, nextHop, interface);
-    AbstractARAClient::handleRouteFailure(packet, nextHop, interface);
+void ARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+    storeRouteFailurePacket(packetFactory->makeClone(packet), nextHop, interface);
+    AbstractARAClient::handleBrokenLink(packet, nextHop, interface);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
@@ -58,6 +60,18 @@ PacketTrap* ARAClientMock::getPacketTrap() {
 
 RoutingTable* ARAClientMock::getRoutingTable() {
     return routingTable;
+}
+
+void ARAClientMock::setMaxHopCount(int n) {
+    packetFactory->setMaxHopCount(n);
+}
+
+double ARAClientMock::getInitialPhi() const {
+    return initialPheromoneValue;
+}
+
+unsigned int ARAClientMock::getPacketDeliveryDelay() const {
+    return packetDeliveryDelayInMilliSeconds;
 }
 
 } /* namespace ARA */

@@ -1,8 +1,10 @@
 @namespace(ARA::omnetpp);
 package ara.reinforcement;
 
-simple OMNeTLinearPathReinforcementPolicy
+import ara.reinforcement.ReinforcementPolicy;
+
+simple OMNeTLinearPathReinforcementPolicy like ReinforcementPolicy
 {
     parameters:
-        double deltaPhi = default(1.0);
+        double deltaPhi;
 }

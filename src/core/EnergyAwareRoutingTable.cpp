@@ -20,7 +20,7 @@ namespace ARA {
     }
 
     unsigned char EnergyAwareRoutingTable::getEnergyValueOf(AddressPtr nodeAddress) {
-        triggerEvaporation();
+        triggerEvaporation(); //FIXME this should be done only in the ARAClient
 
         if (hasEnergyInformationFor(nodeAddress)) {
             return neighborEnergyValues[nodeAddress];

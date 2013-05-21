@@ -19,6 +19,7 @@ public:
                            float initialPheromoneValue,
                            int maxNrOfRouteDiscoveryRetries=2,
                            unsigned int routeDiscoveryTimeoutInMilliSeconds=1000,
+                           unsigned int packetDeliveryDelayInMilliSeconds=5,
                            unsigned int energyDisseminationTimeoutInMilliSeconds=1000);
 
     virtual unsigned int getEnergyDisseminationTimeout() const;
@@ -41,6 +42,9 @@ public:
     }
     virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds() {
         return BasicConfiguration::getRouteDiscoveryTimeoutInMilliSeconds();
+    }
+    virtual unsigned int getPacketDeliveryDelayInMilliSeconds() {
+        return BasicConfiguration::getPacketDeliveryDelayInMilliSeconds();
     }
 
 private:

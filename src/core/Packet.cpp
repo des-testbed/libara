@@ -10,10 +10,11 @@ typedef std::shared_ptr<ARA::Address> AddressPtr;
 
 namespace ARA {
 
-Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, const char* payload, unsigned int payloadSize, unsigned int hopCount) {
+Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) {
     this->source = source;
     this->destination = destination;
     this->sender = sender;
+    this->previousHop = sender;
     this->type = type;
     this->seqNr = seqNr;
 
@@ -31,31 +32,7 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
     }
 
     this->payloadSize = payloadSize;
-    this->hopCount = hopCount;
-}
-
-Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, unsigned int hopCount) {
-    this->source = source;
-    this->destination = destination;
-    this->sender = sender;
-    this->type = type;
-    this->seqNr = seqNr;
-    this->hopCount = hopCount;
-
-    this->payload = nullptr;
-    this->payloadSize = 0;
-}
-
-Packet::Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr) {
-    this->source = source;
-    this->destination = destination;
-    this->sender = source;
-    this->type = type;
-    this->seqNr = seqNr;
-
-    this->hopCount = 1;
-    this->payload = nullptr;
-    this->payloadSize = 0;
+    this->ttl = ttl;
 }
 
 Packet::~Packet() {
@@ -76,6 +53,10 @@ AddressPtr Packet::getSender() const {
     return sender;
 }
 
+AddressPtr Packet::getPreviousHop() const {
+    return previousHop;
+}
+
 char Packet::getType() const {
     return type;
 }
@@ -84,8 +65,8 @@ unsigned int Packet::getSequenceNumber() const {
     return seqNr;
 }
 
-unsigned int Packet::getHopCount() const {
-    return hopCount;
+unsigned int Packet::getTTL() const {
+    return ttl;
 }
 
 const char* Packet::getPayload() const {
@@ -96,20 +77,20 @@ unsigned int Packet::getPayloadLength() const {
     return payloadSize;
 }
 
-void Packet::setHopCount(unsigned int newValue) {
-    hopCount = newValue;
-}
-
-void Packet::increaseHopCount() {
-    hopCount++;
-}
-
-void Packet::decreaseHopCount() {
-    hopCount--;
-}
-
 void Packet::setSender(AddressPtr newSender) {
     sender = newSender;
+}
+
+void Packet::setPreviousHop(AddressPtr newPreviousHop) {
+    previousHop = newPreviousHop;
+}
+
+void Packet::increaseTTL() {
+    ttl++;
+}
+
+void Packet::decreaseTTL() {
+    ttl--;
 }
 
 bool Packet::equals(const Packet* otherPacket) const {

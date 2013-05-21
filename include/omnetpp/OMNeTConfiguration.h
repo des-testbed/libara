@@ -10,26 +10,25 @@
 #include "AbstractARAClient.h"
 #include "RoutingTable.h"
 #include "IInterfaceTable.h"
-#include "Logger.h"
+#include "OMNeTLogger.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
 class OMNeTConfiguration : public Configuration {
     public:
         OMNeTConfiguration(cModule* module);
-        void initializeNetworkInterfacesOf(AbstractARAClient* client);
 
         virtual EvaporationPolicy* getEvaporationPolicy();
         virtual PathReinforcementPolicy* getReinforcementPolicy();
         virtual ForwardingPolicy* getForwardingPolicy();
         virtual float getInitialPheromoneValue();
         virtual int getMaxNrOfRouteDiscoveryRetries();
+        virtual int getMaxTTL();
         virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
+        virtual unsigned int getPacketDeliveryDelayInMilliSeconds();
 
         virtual RoutingTable* getRoutingTable();
         Logger* getLogger();
-        double getUniCastDelay();
-        double getBroadCastDelay();
 
     protected:
         cModule* getHostModule();
@@ -40,13 +39,12 @@ class OMNeTConfiguration : public Configuration {
         ForwardingPolicy* forwardingPolicy;
         float initialPheromoneValue;
         int maxNrOfRouteDiscoveryRetries;
+        int maxTTL;
         unsigned int routeDiscoveryTimeoutInMilliSeconds;
+        unsigned int packetDeliveryDelayInMilliSeconds;
 
         cModule* simpleModule;
-        Logger* logger;
-
-        double broadCastDelay;
-        double uniCastDelay;
+        OMNeTLogger* logger;
 };
 
 OMNETARA_NAMESPACE_END

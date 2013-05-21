@@ -17,6 +17,8 @@
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/LoggerMock.h"
 
+#include <iostream>
+
 using namespace ARA;
 using namespace std;
 
@@ -44,20 +46,39 @@ TEST_GROUP(AbstractARAClientLoggerTest) {
     /**
      * Checks if one of the logged messages equals the given text and log level
      */
-    bool hasLoggedMessage(string message, Logger::Level level) {
+    void checkHasLoggedMessage(string message, Logger::Level level) {
         deque<LogMessage>* loggedMessages = logger->getLoggedMessages();
         for(auto& loggedMessage: *loggedMessages) {
-            if(loggedMessage.level == level && loggedMessage.text == message) {
-                return true;
+            if(loggedMessage.text == message) {
+                if(loggedMessage.level == level) {
+                    return;
+                }
+                else {
+                    FAIL("Message has been logged but with wrong log level");
+                    return;
+                }
             }
         }
 
-        return false;
+        cout << endl << endl << "ERROR: Did not log expected message: " << endl << message << endl << endl;
+        cout << "Instead the following was logged:" << endl;
+        printLoggedMessages();
+        FAIL("Did not log expected message");
+    }
+
+    void printLoggedMessages() {
+        deque<LogMessage>* loggedMessages = logger->getLoggedMessages();
+        for(auto& loggedMessage: *loggedMessages) {
+            cout << loggedMessage.text << endl;
+        }
     }
 };
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAPacketIsTrappedAndFANTIsBroadcasted) {
-    Packet* packet = new PacketMock("abc", "xyz", 123);
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("abc");
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("xyz"));
+    Packet* packet = new Packet(source, destination, source, PacketType::DATA, 123, 10);
 
     // assume that the packet is not deliverable
     CHECK(routingTable->isDeliverable(packet) == false);
@@ -65,7 +86,7 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAPacketIsTrappedAndFANTIsBroa
 
     // check that the log message is generated
     LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    CHECK(hasLoggedMessage("Packet 123 from abc to xyz is not deliverable. Starting route discovery phase", Logger::LEVEL_DEBUG));
+    checkHasLoggedMessage("Packet 123 from abc to xyz is not deliverable. Starting route discovery phase", Logger::LEVEL_DEBUG);
 }
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfFANTReachedItsDestination) {
@@ -75,8 +96,7 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfFANTReachedItsDestination) {
     client->receivePacket(packet, interface);
 
     // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    CHECK(hasLoggedMessage("FANT 123 from source reached its destination. Broadcasting BANT", Logger::LEVEL_DEBUG));
+    checkHasLoggedMessage("FANT 123 from source reached its destination. Broadcasting BANT", Logger::LEVEL_DEBUG);
 }
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
@@ -88,7 +108,8 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
     client->receivePacket(bantPacket, interface);
 
     // check that the log message is generated
-    CHECK(hasLoggedMessage("BANT 123 came back from destination. 1 trapped packet can now be delivered", Logger::LEVEL_DEBUG));
+    BYTES_EQUAL(5, client->getPacketDeliveryDelay());
+    checkHasLoggedMessage("First BANT 123 came back from destination via destination. Waiting 5ms until delivering the trapped packets", Logger::LEVEL_DEBUG);
 }
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
@@ -97,8 +118,7 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
     client->receivePacket(antPacket, interface);
 
     // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    CHECK(hasLoggedMessage("Broadcasting FANT 123 from source", Logger::LEVEL_TRACE));
+    checkHasLoggedMessage("Broadcasting FANT 123 from source (via source)", Logger::LEVEL_TRACE);
 }
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfDataPacketIsRelayed) {
@@ -112,7 +132,9 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfDataPacketIsRelayed) {
     CHECK(routingTable->isDeliverable(dataPacket));
     client->receivePacket(dataPacket, interface);
 
-    // check that the log message is generated
-    LONGS_EQUAL(1, logger->getNrOfLoggedMessages());
-    CHECK(hasLoggedMessage("Forwarding DATA packet 123 from 192.168.0.1 to 192.168.0.10 via 192.168.0.3", Logger::LEVEL_TRACE));
+    // first check that the pheromone value has been updated to 15 (need this in the logged message)
+    CHECK_EQUAL(15.0, routingTable->getPheromoneValue(dataPacket->getDestination(), nextHop, interface));
+
+    // then actually check that the log message is generated
+    checkHasLoggedMessage("Forwarding DATA packet 123 from 192.168.0.1 to 192.168.0.10 via 192.168.0.3 (phi=15.00)", Logger::LEVEL_TRACE);
 }

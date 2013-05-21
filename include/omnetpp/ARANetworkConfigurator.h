@@ -1,28 +1,42 @@
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef __ARA_SIMULATION_NETWORKCONFIGURATOR_H_
 #define __ARA_SIMULATION_NETWORKCONFIGURATOR_H_
 
+#include "OMNeTARAMacros.h"
 #include "IPv4Address.h"
+#include "MACAddress.h"
 #include "IInterfaceTable.h"
+#include "IMobility.h"
+#include "Radio.h"
 
 #include <omnetpp.h>
+#include <string>
+#include <unordered_map>
 
-namespace ARA {
-namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
+
+/**
+ * This Functor is needed for std::unordered_map (hashmap implementation)
+ */
+struct IPv4AddressHash {
+    size_t operator()(IPv4Address address) const {
+        int firstByte = address.getDByte(0);
+        int secondByte = address.getDByte(1);
+        return firstByte * 256 + secondByte;  // integer value between 0 and 65535
+    }
+};
+
+/**
+ * This Functor is needed for std::unordered_map (hashmap implementation)
+ */
+struct IPv4AddressPredicate {
+    size_t operator()(IPv4Address address1, IPv4Address address2) const {
+        return address1.equals(address2);
+    }
+};
 
 /**
  * The NetworkConfigurator assigns IPv4 addresses to all nodes in the network.
@@ -31,12 +45,20 @@ namespace omnetpp {
  * any routes or update any routing tables.
  */
 class ARANetworkConfigurator : public cSimpleModule {
+public:
+    MACAddress getMACAddressByIP(IPv4Address address);
+    IPv4Address getIPAddressFromMAC(MACAddress address);
+
 protected:
     struct NodeInfo {
         NodeInfo() {hasInterfaceTable=false; interfaceTable=NULL;}
         bool hasInterfaceTable;
+        std::string name;
         IInterfaceTable* interfaceTable;
         IPv4Address address;
+        bool isVectorNode = false;
+        IMobility* mobility;
+        Radio* radio;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 
@@ -46,12 +68,17 @@ protected:
 
     void extractTopology(cTopology& topo);
     void assignAddresses(cTopology& topology);
-
+    void assignAddressToNode(unsigned int i, unsigned int n, uint32 networkAddress);
+    int extractNodeNumber(int i);
+    void persistStartPositions(cTopology& topology);
+    double calculateMaximumRadioReceptionRadius(Radio* radio);
 private:
+    cModule* channelControl;
     NodeInfoVector nodeInfo;
+    std::unordered_map<IPv4Address, MACAddress, IPv4AddressHash, IPv4AddressPredicate> ipMACMapping;
+
 };
 
-} /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END
 
 #endif

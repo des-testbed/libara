@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "CppUTest/TestHarness.h"
 #include "testAPI/mocks/time/TimerMock.h"
 #include "testAPI/mocks/time/TimeoutEventListenerMock.h"

@@ -5,12 +5,15 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
+#include "ARAMacros.h"
 #include "Address.h"
 #include "PacketType.h"
+
 #include <stddef.h>
 #include <memory>
+#include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 /**
  * Packets encapsulate a payload that has to be transmitted from
@@ -18,9 +21,8 @@ namespace ARA {
  */
 class Packet {
 public:
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, const char* payload=nullptr, unsigned int payloadSize=0, unsigned int hopCount = 0);
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, std::shared_ptr<Address> sender, char type, unsigned int seqNr, unsigned int hopCount);
-    Packet(std::shared_ptr<Address> source, std::shared_ptr<Address> destination, char type, unsigned int seqNr);
+    Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
+    Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr, int ttl);
     virtual ~Packet();
 
     /**
@@ -31,8 +33,9 @@ public:
      *
      * @see Packet::getDestination()
      * @see Packet::getSender()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getSource() const;
+    AddressPtr getSource() const;
 
     /**
      * Returns the address of the node to whom the payload of this packet is directed.
@@ -41,8 +44,9 @@ public:
      *
      * @see Packet::getSource()
      * @see Packet::getSender()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getDestination() const;
+    AddressPtr getDestination() const;
 
     /**
      * Returns the address of the node from which this packet has been received (layer 2).
@@ -51,8 +55,19 @@ public:
      *
      * @see Packet::getSource()
      * @see Packet::getDestination()
+     * @see Packet::getPenultimateHop()
      */
-    std::shared_ptr<Address> getSender() const;
+    AddressPtr getSender() const;
+
+    /**
+     * Returns the address of the node from which the sender has received this packet.
+     * This may be nullptr if the sender equals the source.
+     *
+     * @see Packet::getSource()
+     * @see Packet::getDestination()
+     * @see Packet::getSender()
+     */
+    AddressPtr getPreviousHop() const;
 
     /**
      * Returns the null-terminated string representation of the address of the source.
@@ -61,7 +76,7 @@ public:
      *
      * @see Packet::getSource()
      */
-    const char* getSourceString() const {
+    std::string getSourceString() const {
         return getSource()->toString();
     }
 
@@ -72,7 +87,7 @@ public:
      *
      * @see Packet::getSender()
      */
-    const char* getSenderString() const {
+    std::string getSenderString() const {
         return getSender()->toString();
     }
 
@@ -83,14 +98,19 @@ public:
      *
      * @see Packet::getDestination()
      */
-    const char* getDestinationString() const {
+    std::string getDestinationString() const {
         return getDestination()->toString();
     }
 
     /**
      * Assigns a new sender to this packet.
      */
-    void setSender(std::shared_ptr<Address> newSender);
+    void setSender(AddressPtr newSender);
+
+    /**
+     * Assigns a new penultimate hop to this packet.
+     */
+    void setPreviousHop(AddressPtr newPreviousHop);
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
@@ -113,11 +133,25 @@ public:
     size_t getHashValue() const;
 
     /**
-     * Returns the number of links this packet has been send over or respectively
-     * the number of nodes this packet has been send by to arrive at the current node.
-     * Note: After a packet has been received from another node this will be at least 1.
+     * Returns the time to live (TTL) of this packet.
+     * This represents the maximum number of times that this packet can be relayed.
+     * Note: The number of hops this packet has traveled so far can be calculated by
+     * subtracting the TTL from the globally configured maximum number of hops.
      */
-    unsigned int getHopCount() const;
+    unsigned int getTTL() const;
+
+    /**
+     * Increases the TTL value by 1.
+     * This may be necessary in route failure handling when we must make sure, the TTL
+     * value is not decreased multiple times.
+     */
+    void increaseTTL();
+
+    /**
+     * Decreases the TTL value by 1.
+     * This is only used for testing.
+     */
+    void decreaseTTL();
 
     const char* getPayload() const;
 
@@ -141,36 +175,16 @@ public:
         return PacketType::isAntPacket((this->type));
     }
 
-    /**
-     * Sets the hop count of this packet to a specific value.
-     *
-     * @see Packet::increaseHopCount()
-     */
-    void setHopCount(unsigned int newValue);
-
-    /**
-     * Increases the hop count of this packet by one.
-     *
-     * @see Packet::setHopCount()
-     */
-    void increaseHopCount();
-
-    /**
-     * Decreases the hop count of this packet by one.
-     *
-     * @see Packet::setHopCount()
-     */
-    void decreaseHopCount();
-
 protected:
-    std::shared_ptr<Address> source;
-    std::shared_ptr<Address> destination;
-    std::shared_ptr<Address> sender;
+    AddressPtr source;
+    AddressPtr destination;
+    AddressPtr sender;
+    AddressPtr previousHop;
     char type;
     unsigned int seqNr;
     const char* payload;
     unsigned int payloadSize;
-    unsigned int hopCount;
+    int ttl;
 
 friend struct PacketPredicate;
 };
@@ -189,10 +203,10 @@ struct PacketHash {
  */
 struct PacketPredicate {
     size_t operator()(const Packet* packet1, const Packet* packet2) const {
-        return packet1->seqNr == packet2->seqNr &&
-               packet1->source->equals(packet2->source);
+        return packet1->equals(packet2);
     }
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif // PACKET_H_

@@ -4,12 +4,7 @@
 
 #include "PacketTrap.h"
 
-using namespace std;
-
-namespace ARA {
-
-typedef std::shared_ptr<Address> AddressPtr;
-typedef unordered_set<Packet*, PacketHash, PacketPredicate> PacketSet;
+ARA_NAMESPACE_BEGIN
 
 PacketTrap::PacketTrap(RoutingTable* routingTable) {
     this->routingTable = routingTable;
@@ -17,115 +12,84 @@ PacketTrap::PacketTrap(RoutingTable* routingTable) {
 
 PacketTrap::~PacketTrap() {
     // delete all packets that might still be trapped
-    unordered_map<AddressPtr, PacketSet*>::iterator iterator;
+    TrappedPacketsMap::iterator iterator;
     for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
-        pair<AddressPtr, PacketSet*> entryPair = *iterator;
-        PacketSet* packetSet = entryPair.second;
+        std::pair<AddressPtr, PacketQueue> entryPair = *iterator;
+        PacketQueue packetQueue = entryPair.second;
 
-        for(auto& packet: *packetSet) {
+        for(auto& packet: packetQueue) {
             delete packet;
         }
-        delete packetSet;
     }
     trappedPackets.clear();
 }
 
-bool PacketTrap::thereIsAHashSetFor(AddressPtr destination) {
-    return trappedPackets.find(destination) != trappedPackets.end();
-}
-
 void PacketTrap::trapPacket(Packet* packet) {
     AddressPtr destination = packet->getDestination();
-    if(thereIsAHashSetFor(destination) == false) {
-        PacketSet* newHashSet = new PacketSet();
-        trappedPackets[destination] = newHashSet;
+    if(trappedPackets.find(destination) == trappedPackets.end()) {
+        PacketQueue newList = PacketQueue();
+        trappedPackets[destination] = newList;
     }
 
-    trappedPackets[destination]->insert(packet);
-}
-
-void PacketTrap::untrapPacket(Packet* packet) {
-    AddressPtr packetDestination = packet->getDestination();
-    unordered_map<AddressPtr, PacketSet*>::const_iterator found = trappedPackets.find(packetDestination);
-    if(found != trappedPackets.end()) {
-        PacketSet* packetSet = found->second;
-        PacketSet::const_iterator storedPacketIterator = packetSet->find(packet);
-        if(storedPacketIterator != packetSet->end()) {
-            Packet* storedPacket = *storedPacketIterator;
-            packetSet->erase(storedPacket);
-
-            // if this was the last packet for this destination we need to delete the set
-            if(packetSet->size() == 0) {
-                trappedPackets.erase(packetDestination);
-                delete packetSet;
-            }
-        }
-        else {
-            //TODO throw Exception if there is no such trapped packet
-        }
-    }
-    else {
-        //TODO throw Exception if there are no packets for this destination
-    }
+    trappedPackets[destination].push_back(packet);
 }
 
 bool PacketTrap::contains(Packet* packet) {
     AddressPtr packetDestination = packet->getDestination();
-    unordered_map<AddressPtr, PacketSet*>::const_iterator found = trappedPackets.find(packetDestination);
+    TrappedPacketsMap::const_iterator found = trappedPackets.find(packetDestination);
     if(found != trappedPackets.end()) {
-        PacketSet* packetSet = found->second;
-        return packetSet->find(packet) != packetSet->end();
+        PacketQueue packetQueue = found->second;
+        for(auto& trappedPacket: packetQueue) {
+            if(trappedPacket->equals(packet)) {
+                return true;
+            }
+        }
     }
-    else {
-        return false;
-    }
+
+    return false;
 }
 
 bool PacketTrap::isEmpty() {
     return trappedPackets.size() == 0;
 }
 
-deque<Packet*>* PacketTrap::getDeliverablePackets() {
-    deque<Packet*>* deliverablePackets = new deque<Packet*>();
-
-    unordered_map<AddressPtr, PacketSet*>::iterator iterator;
-    for (iterator=trappedPackets.begin(); iterator!=trappedPackets.end(); iterator++) {
-        pair<AddressPtr, PacketSet*> entryPair = *iterator;
-        AddressPtr address = entryPair.first;
-
-        if(routingTable->isDeliverable(address)) {
-            // Add all packets for this destination
-            PacketSet* packets = entryPair.second;
-            for(auto& trappedPacket: *packets) {
-                deliverablePackets->push_back(trappedPacket);
-            }
+PacketQueue PacketTrap::untrapDeliverablePackets(AddressPtr destination) {
+    TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
+    if(packetsForDestination != trappedPackets.end()) {
+        if(routingTable->isDeliverable(destination)) {
+            PacketQueue deliverablePackets = packetsForDestination->second;
+            trappedPackets.erase(destination);
+            return deliverablePackets;
         }
     }
 
-    return deliverablePackets;
+    // if there are no deliverable packets we just return an empty queue
+    return PacketQueue();
 }
 
-// TODO: checks if this is a problem
-void PacketTrap::setRoutingTable(RoutingTable *routingTable){
-    this->routingTable = routingTable;
-}
-
-std::deque<Packet*> PacketTrap::removePacketsForDestination(std::shared_ptr<Address> destination) {
-    std::deque<Packet*> removedPackets = std::deque<Packet*>();
-    unordered_map<AddressPtr, PacketSet*>::const_iterator packetsForDestination = trappedPackets.find(destination);
+PacketQueue PacketTrap::removePacketsForDestination(AddressPtr destination) {
+    PacketQueue removedPackets = PacketQueue();
+    TrappedPacketsMap::const_iterator packetsForDestination = trappedPackets.find(destination);
 
     if(packetsForDestination != trappedPackets.end()) {
-        PacketSet* packetSet = packetsForDestination->second;
-
-        for(auto& packet: *packetSet) {
-            removedPackets.push_back(packet);
-        }
-
+        removedPackets = packetsForDestination->second;
         trappedPackets.erase(packetsForDestination);
-        delete packetSet;
     }
 
     return removedPackets;
 }
 
-} /* namespace ARA */
+unsigned int PacketTrap::getNumberOfTrappedPackets(AddressPtr destination) {
+    unsigned int result = 0;
+
+    for (TrappedPacketsMap::iterator entryPair=trappedPackets.begin(); entryPair!=trappedPackets.end(); entryPair++) {
+        if(destination == nullptr || destination->equals(entryPair->first)) {
+            PacketQueue packetQueue = entryPair->second;
+            result += packetQueue.size();
+        }
+    }
+
+    return result;
+}
+
+ARA_NAMESPACE_END

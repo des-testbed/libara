@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "TimeoutEventListenerMock.h"
 
 using namespace ARA;

@@ -38,7 +38,7 @@ void AbstractClientMockBase::storeReceivedPacket(Packet* packet, NetworkInterfac
 
 void AbstractClientMockBase::storeRouteFailurePacket(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     PacketInfo packetInfo;
-    packetInfo.packet = Environment::getPacketFactory()->makeClone(packet);
+    packetInfo.packet = packet;
     packetInfo.nextHop = nextHop;
     packetInfo.interface = interface;
     routeFailurePackets.push_back(packetInfo);

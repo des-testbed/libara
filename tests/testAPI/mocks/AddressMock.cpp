@@ -17,8 +17,8 @@ AddressMock::AddressMock(const std::string name) {
     this->address = name;
 }
 
-const char* AddressMock::toString() const {
-    return address.c_str();
+std::string AddressMock::toString() const {
+    return address;
 }
 
 bool AddressMock::equals(const Address* otherAddress) const {

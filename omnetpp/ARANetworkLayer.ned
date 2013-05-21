@@ -16,20 +16,11 @@
 package ara;
 
 import ara.ARA;
-import ara.OMNeTRoutingTable;
 import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 
 import ara.evaporation.EvaporationPolicy;
-import ara.evaporation.OMNeTCubicEvaporationPolicy;
-import ara.evaporation.OMNeTLinearEvaporationPolicy;
-import ara.evaporation.OMNeTExponentialEvaporationPolicy;
-
 import ara.forwarding.ForwardingPolicy;
-import ara.forwarding.OMNeTStochasticForwardingPolicy;
-import ara.forwarding.OMNeTBestPheromoneForwardingPolicy;
-import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
-
-import inet.networklayer.arp.ARP;
+import ara.reinforcement.ReinforcementPolicy;
 
 module ARANetworkLayer
 {
@@ -37,8 +28,9 @@ module ARANetworkLayer
         int nrOfNetworkInterfaces = default(1);
         string forwardingPolicyModel @enum("OMNeTStochasticForwardingPolicy","OMNeTEnergyAwareStochasticForwardingPolicy","OMNeTBestPheromoneForwardingPolicy") = default("OMNeTStochasticForwardingPolicy");
         string evaporationModel @enum("OMNeTExponentialEvaporationPolicy","OMNeTCubicEvaporationPolicy","OMNeTLinearEvaporationPolicy") = default("OMNeTExponentialEvaporationPolicy");
+        string reinforcementModel @enum("OMNeTLinearPathReinforcementPolicy") = default("OMNeTLinearPathReinforcementPolicy");
 
-        @display("i=ara.png;bgb=301,297");
+        @display("i=ara.png;bgb=301,241");
 
     gates:
         inout upperLayerGate;
@@ -49,46 +41,29 @@ module ARANetworkLayer
         ara: ARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=204,94");
+                @display("i=ara;p=204,72");
         }
 
-        araRoutingTable: OMNeTRoutingTable {
+        forwardingPolicy: <forwardingPolicyModel> like ForwardingPolicy if forwardingPolicyModel != "" {
             parameters:
-                @display("p=72,40;i=block/table");
+                @display("p=71,33");
         }
 
-// FIXME
-        forwardingPolicy: OMNeTStochasticForwardingPolicy {
-        //forwardingPolicy: <forwardingPolicyModel> like ForwardingPolicy if forwardingPolicyModel != "" {
+        reinforcementPolicy: <reinforcementModel> like ReinforcementPolicy if reinforcementModel != "" {
             parameters:
-                @display("p=72,111");
-        }
-
-        reinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
-            parameters:
-                @display("p=72,185");
+                @display("p=71,107");
         }
 
         evaporationPolicy: <evaporationModel> like EvaporationPolicy if evaporationModel != "" {
             parameters:
-                @display("p=72,254");
+                @display("p=71,176");
         }
-
-        arp: ARP {
-            parameters:
-                proxyARP = false;
-                @display("p=204,215;q=pendingQueue");
-            gates:
-                nicOut[nrOfNetworkInterfaces];
-        }
-
 
     connections allowunconnected:
         upperLayerGate <--> ara.upperLayerGate;
-        arp.ipIn <-- ara.arpOut;
 
         for i=0..nrOfNetworkInterfaces-1 {
             ifIn[i] --> ara.ifIn[i];
-            arp.nicOut[i] --> ifOut[i];
+            ara.ifOut[i] --> ifOut[i];
         }
 }
