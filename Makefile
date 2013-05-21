@@ -56,15 +56,16 @@ MKPATH = mkdir -p
 ifeq ("$(NO_OMNET)", "TRUE")
     LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER)
 else
-    LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER):$(OMNETPP_LIB_DIR):./$(INETMANET_LIB_DIR)
+    LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER):$(OMNETPP_LIB_DIR):./$(INETMANET_SRC_FOLDER)
 endif
 
-# Source folder ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Folders ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_SRC_FOLDER = src
 TESTS_FOLDER = tests
 OMNETARA_SRC_FOLDER = omnetpp
-INET_MANET_SRC_FOLDER = inetmanet
+INETMANET_FOLDER = inetmanet
 OUTPUT_DIR = out/$(CONFIGNAME)
+INCLUDE_DIR = include
 
 # libARA files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_SRC = $(shell find $(LIBARA_SRC_FOLDER)/ -type f -name '*.cpp')
@@ -102,9 +103,9 @@ OMNETPP_ARA_TEST_EXECUTABLE = runOmnetAraTests
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11 -fPIC
 ifeq ("$(NO_OMNET)", "TRUE")
-    INCLUDE_PATH = -Iinclude
+    INCLUDE_PATH = -I$(INCLUDE_DIR)
 else
-    INCLUDE_PATH += -Iinclude -Iinclude/omnetpp -Iinclude/inetmanet -I$(OMNETPP_INCL_DIR) -I $(INETMANET_LIB_DIR)
+    INCLUDE_PATH += -I. -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/omnetpp -I$(INCLUDE_DIR)/inetmanet -I$(OMNETPP_INCL_DIR) -I$(INETMANET_SRC_FOLDER) $(INETMANET_FOLDERS_INCLUDE)
 endif
 INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include
 LINK_TO_LIB_ARA = -L$(LIBARA_SRC_FOLDER) -l$(ARA_TARGET_NAME)
@@ -117,11 +118,11 @@ TESTS_CFLAGS = $(CFLAGS) -include $(CPPUTEST_BASE_DIR)/include/CppUTest/MemoryLe
 TESTS_LINKFLAGS = $(LINK_TO_LIB_ARA) -L$(CPPUTEST_LIB_DIR) -lCppUTest -lm -lstdc++
 
 # Simulation kernel and user interface libraries ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
-OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
-INETMANET_LIB_DIR = $(INET_MANET_SRC_FOLDER)/src
-INETMANET_LIB = $(INETMANET_LIB_DIR)/libinet.so
-OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_LIB_DIR) -linet -lm
+INETMANET_SRC_FOLDER = $(INETMANET_FOLDER)/src
+INETMANET_LIB = $(INETMANET_SRC_FOLDER)/libinet.so
+INETMANET_FOLDERS_INCLUDE = $(addprefix -I, $(shell find $(INETMANET_SRC_FOLDER) -type f -name "*.h" | sed 's%\(.*\)/.*%\1%' | sort -u))
+OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_SRC_FOLDER) -linet -lm
+OMNETPP_LIBS = -L"$(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 USERIF_LIBS = $(AS_NEEDED_OFF) -loppcmdenv$D -loppenvir$D $(AS_NEEDED_OFF) -lopptkenv$D -loppenvir$D -lopplayout$D
 
 # Build targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -171,24 +172,18 @@ $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(
 #
 # Build the inetmanet simulation library
 #
-$(INETMANET_LIB): $(INET_MANET_SRC_FOLDER)/.git
+$(INETMANET_LIB): $(INETMANET_FOLDER)/.git
 	@echo -e "\n~~~ BUILDING INET/MANET FRAMEWORK ~~~\n"
-	@cd $(INET_MANET_SRC_FOLDER) && $(MAKE) makefiles
-	@cd $(INET_MANET_SRC_FOLDER) && $(MAKE)
-	@if [ ! -d include/inetmanet ]; then \
-		echo -e "\n~~~ UPDATING INETMANET HEADERS ~~~"; \
-		mkdir include/inetmanet; \
-		for i in `find inetmanet/src/ -type f -name "*.h"`; do ln -s ../../$$i include/inetmanet/$${i##*/}; done; \
-		echo "updating include/inetmanet/........done"; \
-	fi
+	@cd $(INETMANET_FOLDER) && $(MAKE) makefiles
+	@cd $(INETMANET_FOLDER) && $(MAKE)
 
 #
 # Checkout the inetmanet git submodule
 #
-$(INET_MANET_SRC_FOLDER)/.git:
-	echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n" \
-	git submodule init $(INET_MANET_SRC_FOLDER) \
-	git submodule update $(INET_MANET_SRC_FOLDER) \
+$(INETMANET_FOLDER)/.git:
+	echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n"
+	git submodule init $(INETMANET_FOLDER)
+	git submodule update $(INETMANET_FOLDER)
 
 # Test targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: test
@@ -300,8 +295,8 @@ clean:
 cleanall: clean
 	@echo "Deleting submodule $(CPPUTEST_BASE_DIR)"
 	@rm -R -f $(CPPUTEST_BASE_DIR)
-	@echo "Deleting submodule $(INET_MANET_SRC_FOLDER)"
-	@rm -R -f $(INET_MANET_SRC_FOLDER)
+	@echo "Deleting submodule $(INETMANET_FOLDER)"
+	@rm -R -f $(INETMANET_FOLDER)
 	@echo "Deleting out/$(CONFIGNAME)"
 	@rm -R -f out/$(CONFIGNAME)
 
