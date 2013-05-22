@@ -151,9 +151,9 @@ $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 #
 $(OUTPUT_DIR)/%.o: %.cpp
 	@$(MKPATH) $(dir $@)
-	@echo "Compiling $*.cpp";
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $*.cpp -o $@
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $(OUTPUT_DIR)/$*.o $*.cpp > $(OUTPUT_DIR)/$*.d;
+	@echo "Compiling $<";
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $< -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $@ $< > $(OUTPUT_DIR)/$*.d;
 
 # OMNeTARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -174,10 +174,18 @@ $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(
 #
 $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/%.o: $(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_LIB)
 	@$(MKPATH) $(dir $@)
-	@echo "Compiling $*.cppi (belongs to omnetARA)";
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $(OMNETARA_SRC_FOLDER)/$*.cpp -o $@
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.o $(OMNETARA_SRC_FOLDER)/$*.cpp > $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.d;
+	@echo "Compiling $< (belongs to omnetARA)";
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $< -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $@ $< > $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.d
 
+#
+# Builds omnetpp *Test.cpp files. This is separate from the default %.o target because it uses other includes
+#
+$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETARA_SRC_FOLDER)/%.o: $(TESTS_FOLDER)/$(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_LIB)
+	@$(MKPATH) $(dir $@)
+	@echo "Compiling $< (belongs to omnetARA)";
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $< -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $@ $< > $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETARA_SRC_FOLDER)/$*.d
 
 #
 # Build the inetmanet simulation library
