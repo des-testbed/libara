@@ -55,3 +55,7 @@ long OMNeTTime::convertSimulationTime(SimTime time, int wantedScaleExponent) con
     }
 
 }
+
+uint64 OMNeTTime::getRawTime() const {
+    return timestamp.raw();
+}
