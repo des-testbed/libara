@@ -146,15 +146,6 @@ $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 -include $(OMNETARA_DEPENDENCIES)
 -include $(TESTS_DEPENDENCIES)
 
-#
-# Builds most of the cpp files (omnetARA cpps are handled below)
-#
-$(OUTPUT_DIR)/%.o: %.cpp
-	@$(MKPATH) $(dir $@)
-	@echo "Compiling $<";
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $< -o $@
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $@ $< > $(OUTPUT_DIR)/$*.d;
-
 # OMNeTARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .PHONY: omnetARA
@@ -275,8 +266,6 @@ $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_N
                 -o $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
 
-# Other targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 #
 # Builds the CppUTest Framework
 #
@@ -288,6 +277,18 @@ $(CPPUTEST_BASE_DIR)/.git:
 	@echo -e "\n~~~ INITIALIZING CPPUTEST SUBMODULE ~\n"
 	@git submodule init $(CPPUTEST_BASE_DIR)
 	@git submodule update $(CPPUTEST_BASE_DIR)
+
+# Other targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#
+# Builds most of the cpp files (omnetARA & omnetARATest cpps are handled above)
+#
+$(OUTPUT_DIR)/%.o: %.cpp
+	@$(MKPATH) $(dir $@)
+	@echo "Compiling $<";
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $< -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $@ $< > $(OUTPUT_DIR)/$*.d;
+
 
 #
 # Clean up (delete) all generated files
