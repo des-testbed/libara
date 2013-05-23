@@ -67,7 +67,7 @@ void RoutingTableDataPersistor::write(RoutingTable* routingTable) {
         file.write((char*)&nrOfEntries, 1);
 
         for (int i = 0; i < nrOfEntries; i++) {
-            RoutingTableEntryTupel entryTupel = routingTable->getEntryAt(i);
+            RoutingTableEntryTupel entryTupel = routingTable->getEntryAt(i); // FIXME getEntryAt is very inefficient. This function is called very often so it better use something with better performance
             OMNeTAddress* destination = dynamic_cast<OMNeTAddress*>(entryTupel.destination.get());
             uint32 destinationInt = htobe32(destination->getInt());
 
