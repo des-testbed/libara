@@ -12,7 +12,7 @@ Installation from git
 2. Please install the required dependencies
 
 		clang >= 3.2
-		OMNeT++ >= 4.2
+		OMNeT++ >= 4.3
 		log4cxx-devel >= 0.10.0
 
 3. After the checkout you can build the sources and simulation via 

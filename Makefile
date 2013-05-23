@@ -54,9 +54,9 @@ CFLAGS_RELEASE = -O2 -DNDEBUG=1
 MKPATH = mkdir -p
 
 ifeq ("$(NO_OMNET)", "TRUE")
-    LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER)
+    LD_LIBRARY_PATH=LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./$(LIBARA_SRC_FOLDER)
 else
-    LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER):$(OMNETPP_LIB_DIR):./$(INETMANET_SRC_FOLDER)
+    LD_LIBRARY_PATH=LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./$(LIBARA_SRC_FOLDER):$(OMNETPP_LIB_DIR):./$(INETMANET_SRC_FOLDER)
 endif
 
 # Folders ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -146,15 +146,6 @@ $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 -include $(OMNETARA_DEPENDENCIES)
 -include $(TESTS_DEPENDENCIES)
 
-#
-# Builds most of the cpp files (omnetARA cpps are handled below)
-#
-$(OUTPUT_DIR)/%.o: %.cpp
-	@$(MKPATH) $(dir $@)
-	@echo "Compiling $*.cpp";
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $*.cpp -o $@
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $(OUTPUT_DIR)/$*.o $*.cpp > $(OUTPUT_DIR)/$*.d;
-
 # OMNeTARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .PHONY: omnetARA
@@ -165,7 +156,7 @@ omnetARA: $(OMNETARA_EXECUTABLE)
 #
 $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(OMNETARA_O)
 	@echo "Linking $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME)"
-	@$(CXX) $(LINK_TO_LIB_ARA) $(OMNETPP_LINKFLAGS) -loppmain$D $(OMNETARA_O) -o $(OMNETARA_EXECUTABLE)
+	@$(CXX) $(OMNETARA_O) -o $(OMNETARA_EXECUTABLE) $(LINK_TO_LIB_ARA) $(OMNETPP_LINKFLAGS) -loppmain$D 
 	@cd $(OMNETARA_SRC_FOLDER) && ln -s -f ../$(OMNETARA_EXECUTABLE) $(OMNETARA_EXECUTABLE_NAME)
 	@echo "You can start the simulation now with the individual run scripts in the simulations folder"
 
@@ -174,10 +165,18 @@ $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(
 #
 $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/%.o: $(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_LIB)
 	@$(MKPATH) $(dir $@)
-	@echo "Compiling $*.cppi (belongs to omnetARA)";
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $(OMNETARA_SRC_FOLDER)/$*.cpp -o $@
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.o $(OMNETARA_SRC_FOLDER)/$*.cpp > $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.d;
+	@echo "Compiling $< (belongs to omnetARA)";
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $< -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $@ $< > $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$*.d
 
+#
+# Builds omnetpp *Test.cpp files. This is separate from the default %.o target because it uses other includes
+#
+$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETARA_SRC_FOLDER)/%.o: $(TESTS_FOLDER)/$(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_LIB)
+	@$(MKPATH) $(dir $@)
+	@echo "Compiling $< (belongs to omnetARA)";
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $< -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $@ $< > $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETARA_SRC_FOLDER)/$*.d
 
 #
 # Build the inetmanet simulation library
@@ -267,8 +266,6 @@ $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_N
                 -o $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
 
-# Other targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 #
 # Builds the CppUTest Framework
 #
@@ -280,6 +277,18 @@ $(CPPUTEST_BASE_DIR)/.git:
 	@echo -e "\n~~~ INITIALIZING CPPUTEST SUBMODULE ~\n"
 	@git submodule init $(CPPUTEST_BASE_DIR)
 	@git submodule update $(CPPUTEST_BASE_DIR)
+
+# Other targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#
+# Builds most of the cpp files (omnetARA & omnetARATest cpps are handled above)
+#
+$(OUTPUT_DIR)/%.o: %.cpp
+	@$(MKPATH) $(dir $@)
+	@echo "Compiling $<";
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $< -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $@ $< > $(OUTPUT_DIR)/$*.d;
+
 
 #
 # Clean up (delete) all generated files

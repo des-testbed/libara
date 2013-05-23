@@ -3,6 +3,10 @@
  */
 
 #include "omnetpp/TrafficGenerator.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
+#include "IPv4InterfaceData.h"
+#include "IPv4Address.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -34,7 +38,7 @@ void TrafficGenerator::SendTraf(cPacket* message, const char* destination) {
 
 void TrafficGenerator::sendTraffic(cPacket* message, const char* destination) {
     IPv4ControlInfo* controlInfo = new  IPv4ControlInfo();
-    IPv4Address sourceAddress("192.168.0.1"); //TODO get this from the interface table or via a configuration parameter
+    IPv4Address sourceAddress = getLocalAddress();
     IPv4Address destinationAddress(destination);
     controlInfo->setSrcAddr(sourceAddress);
     controlInfo->setDestAddr(destinationAddress);
@@ -44,6 +48,30 @@ void TrafficGenerator::sendTraffic(cPacket* message, const char* destination) {
     datagram->setControlInfo(controlInfo);
     send(datagram, "lowergate$o");
     nrOfSentMessages++;
+}
+
+IPv4Address TrafficGenerator::getLocalAddress() {
+    //TODO this does currently only support one interface
+    IInterfaceTable* interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get(this);
+    InterfaceEntry* interface = nullptr;
+    int nrOfInterfaces = interfaceTable->getNumInterfaces();
+    for (int k=0; k < nrOfInterfaces; k++) {
+        InterfaceEntry* currentInterfaceEntry = interfaceTable->getInterface(k);
+        if(currentInterfaceEntry->isLoopback() == false) {
+            if(interface != nullptr) {
+                throw cRuntimeError("The TrafficGenerator does currently only support one single interface per node");
+            }
+            else {
+                interface = currentInterfaceEntry;
+            }
+        }
+    }
+
+    if(interface == nullptr) {
+        throw cRuntimeError("The TrafficGenerator could not determine the nodes interface");
+    }
+
+    return interface->ipv4Data()->getIPAddress();
 }
 
 void TrafficGenerator::handleLowerMsg(cPacket *message) {

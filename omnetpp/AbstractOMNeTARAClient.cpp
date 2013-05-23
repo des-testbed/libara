@@ -91,7 +91,10 @@ void AbstractOMNeTARAClient::sendToUpperLayer(const Packet* packet) {
     ASSERT(omnetPacket);
 
     cPacket* encapsulatedData = omnetPacket->decapsulate();
+    ASSERT(encapsulatedData);
+
     send(encapsulatedData, "upperLayerGate$o");
+    delete omnetPacket;
 }
 
 void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObject* details) {
