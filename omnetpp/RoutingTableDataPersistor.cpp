@@ -15,10 +15,12 @@ using namespace std;
 
 RoutingTableDataPersistor::RoutingTableDataPersistor(cModule* hostModule, int updateIntervallInMillis) {
     updateIntervall = updateIntervallInMillis;
-    const char* fileName = getFileName(hostModule);
-    file.open(fileName, ios::out | ios::binary);
-    if(!file.good()) {
-        throw cRuntimeError("could not open file %s, to write routing table data", fileName);
+    string fileName = getFileName(hostModule);
+    cout << "Writing file '" << fileName << "'" << endl;
+    file.open(fileName.c_str(), ios::out | ios::binary | ios::trunc);
+
+    if (file.is_open() == false) {
+        throw cRuntimeError("could not open file '%s', to write routing table data statistics", fileName.c_str());
     }
 }
 
@@ -27,15 +29,14 @@ RoutingTableDataPersistor::~RoutingTableDataPersistor() {
         delete lastWriteTime;
     }
 
-    file.flush();
     file.close();
 }
 
-const char* RoutingTableDataPersistor::getFileName(cModule* hostModule) const {
+string RoutingTableDataPersistor::getFileName(cModule* hostModule) const {
     stringstream fileName;
     cConfigurationEx* config = ev.getConfigEx();
-    fileName << "results/" << config->getActiveConfigName() << "-" << config->getActiveRunNumber() << "-" << hostModule->getName() << hostModule->getIndex() << "-RoutingTable.bin";
-    return fileName.str().c_str();
+    fileName << "results/" << config->getActiveConfigName() << "-" << config->getActiveRunNumber() << "-" << hostModule->getName() << hostModule->getIndex() << ".rtd";
+    return fileName.str();
 }
 
 /**

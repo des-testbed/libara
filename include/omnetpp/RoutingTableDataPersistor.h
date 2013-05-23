@@ -10,6 +10,7 @@
 #include "RoutingTable.h"
 
 #include <fstream>
+#include <string>
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -21,11 +22,11 @@ class RoutingTableDataPersistor {
         void write(RoutingTable* routingTable);
 
     private:
-        const char* getFileName(cModule* hostModule) const;
+        std::string getFileName(cModule* hostModule) const;
 
         long updateIntervall;
         OMNeTTime* lastWriteTime = nullptr;
-        std::fstream file;
+        std::ofstream file;
 
 };
 
