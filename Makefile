@@ -156,7 +156,7 @@ omnetARA: $(OMNETARA_EXECUTABLE)
 #
 $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(OMNETARA_O)
 	@echo "Linking $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME)"
-	@$(CXX) $(LINK_TO_LIB_ARA) $(OMNETPP_LINKFLAGS) -loppmain$D $(OMNETARA_O) -o $(OMNETARA_EXECUTABLE)
+	@$(CXX) $(OMNETARA_O) -o $(OMNETARA_EXECUTABLE) $(LINK_TO_LIB_ARA) $(OMNETPP_LINKFLAGS) -loppmain$D 
 	@cd $(OMNETARA_SRC_FOLDER) && ln -s -f ../$(OMNETARA_EXECUTABLE) $(OMNETARA_EXECUTABLE_NAME)
 	@echo "You can start the simulation now with the individual run scripts in the simulations folder"
 
