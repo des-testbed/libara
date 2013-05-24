@@ -51,8 +51,6 @@ string RoutingTableDataPersistor::getFileName(cModule* hostModule) const {
  * | 4 Byte destination | 4 Byte nextHop | 4 Byte pheromone value |
  *
  * The format stores all <entry_data> triples directly one after another.
- *
- * Note that all binary data is stored in big endian format
  */
 void RoutingTableDataPersistor::write(RoutingTable* routingTable) {
     OMNeTTime* currentTime = dynamic_cast<OMNeTTime*>(Environment::getClock()->makeTime());
@@ -61,20 +59,21 @@ void RoutingTableDataPersistor::write(RoutingTable* routingTable) {
     if(lastWriteTime == nullptr
     || currentTime->getDifferenceInMilliSeconds(lastWriteTime) >= updateIntervall) {
 
-        int64 rawTime = htobe64(currentTime->getRawTime());
+        int64 rawTime = currentTime->getRawTime();
         file.write((char*)&rawTime, sizeof(rawTime));
 
-        int nrOfEntries = htole32(routingTable->getTotalNumberOfEntries());
+        // convert nrOfentries to big endian so the first byte we write is the one we care for
+        int nrOfEntries = routingTable->getTotalNumberOfEntries();
         file.write((char*)&nrOfEntries, 1);
 
         for (int i = 0; i < nrOfEntries; i++) {
             RoutingTableEntryTupel entryTupel = routingTable->getEntryAt(i); // FIXME getEntryAt is very inefficient. This function is called very often so it better use something with better performance
             OMNeTAddress* destination = dynamic_cast<OMNeTAddress*>(entryTupel.destination.get());
-            uint32 destinationInt = htobe32(destination->getInt());
+            uint32 destinationInt = destination->getInt();
 
             RoutingTableEntry* entry = entryTupel.entry;
             OMNeTAddress* nextHop = dynamic_cast<OMNeTAddress*>(entry->getAddress().get());
-            uint32 nextHopInt = htobe32(nextHop->getInt());
+            uint32 nextHopInt = nextHop->getInt();
 
             float pheromoneValue = entry->getPheromoneValue();
 
