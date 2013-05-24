@@ -10,6 +10,7 @@
 #include "AbstractARAClient.h"
 #include "AbstractOMNeTARAClient.h"
 #include "MessageDispatcher.h"
+#include "RoutingTableDataPersistor.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -37,6 +38,8 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         static simsignal_t DROP_PACKET_WITH_ZERO_TTL;
         static simsignal_t NON_SOURCE_ROUTE_DISCOVERY;
         static simsignal_t NEW_ROUTE_DISCOVERY;
+
+        virtual void receivePacket(Packet* packet, NetworkInterface* interface);
 
     protected:
         virtual int numInitStages() const;
@@ -80,6 +83,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         int nrOfNotDeliverablePackets = 0;
         int nrOfDetectedLoops = 0;
         MessageDispatcher* messageDispatcher;
+        RoutingTableDataPersistor* routingTablePersistor;
 
     friend class OMNeTGate;
 };

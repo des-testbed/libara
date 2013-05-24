@@ -26,6 +26,7 @@ ARA::ARA() {
 
 ARA::~ARA() {
     delete messageDispatcher;
+    delete routingTablePersistor;
 
     /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
      * This is necessary because the surround omnetpp simulation will attempt to delete those modules
@@ -51,6 +52,7 @@ void ARA::initialize(int stage) {
         AbstractARAClient::initialize(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
 
+        routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
         new RoutingTableWatcher(routingTable);
         WATCH(nrOfDeliverablePackets);
         WATCH(nrOfNotDeliverablePackets);
@@ -67,6 +69,11 @@ void ARA::initialize(int stage) {
 
 void ARA::handleMessage(cMessage* message) {
     messageDispatcher->dispatch(message);
+}
+
+void ARA::receivePacket(Packet* packet, NetworkInterface* interface) {
+    AbstractARAClient::receivePacket(packet, interface);
+    routingTablePersistor->write(routingTable);
 }
 
 void ARA::deliverToSystem(const Packet* packet) {
