@@ -199,7 +199,7 @@ $(INETMANET_FOLDER)/.git:
 test: libAraTests
 
 .PHONY: allTests
-allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE)
+allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OMNETARA_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING complete TEST SUIT ~~~~~~"
 	@if $(LD_LIBRARY_PATH) $(TESTS_FOLDER)/$(TEST_EXECUTABLE); then \
  		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
