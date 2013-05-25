@@ -13,9 +13,11 @@ class TrafficControlInfo : public cObject {
 public:
     TrafficControlInfo(const char* destinationIPv4Address);
     AddressPtr getDestination() const;
+    SimTime getCreationTime() const;
 
 private:
     AddressPtr destination;
+    SimTime creationTime;
 };
 
 OMNETARA_NAMESPACE_END
