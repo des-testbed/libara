@@ -46,9 +46,13 @@ void MessageDispatcher::handleUpperLayerMessage(cMessage* message) {
 
     IPv4Address sourceIP = controlInfo->getSrcAddr();
     AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));;
-    AddressPtr sender = source;
+    unsigned int sequenceNumber = araClient->getNextSequenceNumber();
 
-    OMNeTPacket* omnetPacket = packetFactory->createOMNetPacket(source, destination, sender, PacketType::DATA, araClient->getNextSequenceNumber());
+    // note that we implement the payload via encapsulation in OMNeT++
+    const char* payload = nullptr;
+    unsigned int payloadSize = 0;
+
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packetFactory->makeDataPacket(source, destination, sequenceNumber, payload, payloadSize);
     omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
 
     araClient->sendPacket(omnetPacket);
