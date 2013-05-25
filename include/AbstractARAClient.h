@@ -40,7 +40,7 @@ typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressH
 /**
  * TODO write class description
  */
-class AbstractARAClient : public AbstractNetworkClient, public TimeoutEventListener {
+class AbstractARAClient : public virtual AbstractNetworkClient, public TimeoutEventListener {
 
 public:
     /**

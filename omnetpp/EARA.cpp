@@ -11,14 +11,6 @@ OMNETARA_NAMESPACE_BEGIN
 // Register the class with the OMNeT++ simulation
 Define_Module(EARA);
 
-EARA::EARA() {
-    messageDispatcher = new MessageDispatcher(this, this);
-}
-
-EARA::~EARA() {
-    delete messageDispatcher;
-}
-
 int EARA::numInitStages() const {
     return 5;
 }
@@ -30,7 +22,6 @@ void EARA::initialize(int stage) {
         setLogger(config.getLogger());
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
 
-        messageDispatcher->setPacketFactory(packetFactory);
         AbstractEARAClient::initializeEARA(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
 
@@ -43,7 +34,7 @@ void EARA::initialize(int stage) {
 
 void EARA::handleMessage(cMessage* message) {
     if (hasEnoughBattery) {
-        messageDispatcher->dispatch(message);
+        AbstractOMNeTARAClient::handleMessage(message);
     }
 }
 

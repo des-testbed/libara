@@ -10,7 +10,6 @@
 #include "AbstractEARAClient.h"
 #include "AbstractOMNeTARAClient.h"
 #include "Energy.h"
-#include "MessageDispatcher.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -18,9 +17,6 @@ OMNETARA_NAMESPACE_BEGIN
  * TODO write class description
  */
 class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
-    public:
-        EARA();
-        ~EARA();
 
     protected:
         virtual int numInitStages() const;
@@ -35,7 +31,6 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         void handleBatteryStatusChange(Energy* energyInformation);
 
     private:
-        MessageDispatcher* messageDispatcher;
         bool hasEnoughBattery = true;
         double maximumBatteryLevel;
         int currentEnergyLevel;

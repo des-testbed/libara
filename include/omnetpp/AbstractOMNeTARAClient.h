@@ -5,12 +5,13 @@
 #ifndef ABSTRACT_OMNET_ARA_CLIENT_H_
 #define ABSTRACT_OMNET_ARA_CLIENT_H_
 
+#include "AbstractNetworkClient.h"
+
 #include "omnetpp/OMNeTARAMacros.h"
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/ARANetworkConfigurator.h"
 #include "omnetpp/OMNeTPacket.h"
 
-#include "Packet.h"
 #include "INotifiable.h"
 #include "NotificationBoard.h"
 #include "IInterfaceTable.h"
@@ -18,7 +19,7 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
+class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimpleModule, public INotifiable {
     public:
         virtual ~AbstractOMNeTARAClient() {};
         IInterfaceTable* getInterfaceTable();
@@ -26,6 +27,28 @@ class AbstractOMNeTARAClient: public cSimpleModule, public INotifiable {
     protected:
         virtual void initialize();
         void initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& configuration);
+
+        /**
+         * Handles a message from the OMNeT++ simulation.
+         */
+        virtual void handleMessage(cMessage *msg);
+
+        /**
+         * Checks whether the given cMessage cam from the upper layer.
+         */
+        bool isFromUpperLayer(cMessage* message);
+
+        /**
+         * Extracts the IPv4ControlInfo object from the given message
+         * and creates a new data packet from the extracted destination and source.
+         * The Packet is then send via AbstractARAClient::sendPacket(..)
+         */
+        void handleUpperLayerMessage(cMessage* message);
+
+        /**
+         * This casts the given message to OMNeTPacket and dispatches it to the correct arrival gate
+         */
+        void handleARAMessage(cMessage* message);
 
         /**
          * Method for friend class OMNeTGate.

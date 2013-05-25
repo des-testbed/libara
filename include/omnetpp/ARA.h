@@ -9,7 +9,6 @@
 
 #include "AbstractARAClient.h"
 #include "AbstractOMNeTARAClient.h"
-#include "MessageDispatcher.h"
 #include "RoutingTableDataPersistor.h"
 
 OMNETARA_NAMESPACE_BEGIN
@@ -27,7 +26,6 @@ class MessageDispatcher;
  */
 class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
     public:
-        ARA();
         ~ARA();
 
         // some signals for statistics recording
@@ -44,7 +42,6 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
     protected:
         virtual int numInitStages() const;
         virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg);
         virtual void finish();
 
         /**
@@ -82,7 +79,6 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         int nrOfDeliverablePackets = 0;
         int nrOfNotDeliverablePackets = 0;
         int nrOfDetectedLoops = 0;
-        MessageDispatcher* messageDispatcher;
         RoutingTableDataPersistor* routingTablePersistor;
 
     friend class OMNeTGate;

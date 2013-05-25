@@ -36,14 +36,6 @@ public:
     virtual ~AbstractNetworkClient();
 
     /**
-     * This method will initialize this client with the given configuration, ~RoutingTable and ~PacketFactory.
-     * It must be called before any call to AbstractNetworkClient::sendPacket or
-     * AbstractNetworkClient::receivePacket. If this object has been created by the
-     * standard constructor this method must be called manually.
-     */
-    virtual void initialize(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) = 0;
-
-    /**
      * Somehow sends the packet to the packets destination.
      */
     virtual void sendPacket(Packet* packet) = 0;

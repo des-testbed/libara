@@ -5,11 +5,11 @@
 #include "omnetpp/AbstractOMNeTARAClient.h"
 #include "omnetpp/OMNeTGate.h"
 #include "Environment.h"
+
 #include "Ieee80211Frame_m.h"
 #include "ModuleAccess.h"
-#include "ARP.h"
-#include "MACAddress.h"
 #include "IPv4Address.h"
+#include "IPv4ControlInfo.h"
 
 #include <cstring>
 
@@ -77,6 +77,48 @@ void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* cl
             nrOfAssignedInterfaces++;
         }
     }
+}
+
+void AbstractOMNeTARAClient::handleMessage(cMessage* message) {
+    if(isFromUpperLayer(message)) {
+        handleUpperLayerMessage(message);
+    }
+    else {
+        handleARAMessage(message);
+    }
+}
+
+bool AbstractOMNeTARAClient::isFromUpperLayer(cMessage* message) {
+    std::string nameOfUpperLayergate = "upperLayerGate$i";
+    std::string gateName = std::string(message->getArrivalGate()->getName());
+    return gateName.length() <= nameOfUpperLayergate.length()
+        && std::equal(gateName.begin(), gateName.end(), nameOfUpperLayergate.begin());
+}
+
+void AbstractOMNeTARAClient::handleUpperLayerMessage(cMessage* message) {
+      IPv4ControlInfo* controlInfo = (IPv4ControlInfo*)message->getControlInfo();
+      IPv4Address destinationIP = controlInfo->getDestAddr();
+      AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
+
+      IPv4Address sourceIP = controlInfo->getSrcAddr();
+      AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));;
+      unsigned int sequenceNumber = getNextSequenceNumber();
+
+      // note that we implement the payload via encapsulation in OMNeT++
+      const char* payload = nullptr;
+      unsigned int payloadSize = 0;
+
+      OMNeTPacket* omnetPacket = (OMNeTPacket*) packetFactory->makeDataPacket(source, destination, sequenceNumber, payload, payloadSize);
+      omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
+
+      sendPacket(omnetPacket);
+}
+
+void AbstractOMNeTARAClient::handleARAMessage(cMessage* message) {
+      OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(message);
+      ASSERT(omnetPacket->getTTL() > 0);
+      OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(message->getArrivalGate()->getIndex());
+      arrivalGate->receive(omnetPacket);
 }
 
 void AbstractOMNeTARAClient::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
