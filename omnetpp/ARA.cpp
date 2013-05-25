@@ -97,10 +97,6 @@ void ARA::handleCompleteRouteFailure(Packet* packet) {
     AbstractARAClient::handleCompleteRouteFailure(packet);
 }
 
-void ARA::timerHasExpired(Timer* responsibleTimer) {
-    AbstractARAClient::timerHasExpired(responsibleTimer);
-}
-
 void ARA::handlePacketWithZeroTTL(Packet* packet) {
     AbstractARAClient::handlePacketWithZeroTTL(packet);
 

@@ -70,11 +70,6 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
 
         virtual void startNewRouteDiscovery(Packet* packet);
 
-        /**
-         * This method is called when the route discovery timer expires.
-         */
-        virtual void timerHasExpired(Timer* responsibleTimer);
-
     private:
         int nrOfDeliverablePackets = 0;
         int nrOfNotDeliverablePackets = 0;
