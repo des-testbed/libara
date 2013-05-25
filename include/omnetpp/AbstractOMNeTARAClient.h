@@ -81,6 +81,14 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
          */
         cModule* findHost() const;
 
+        /**
+         * Returns the address of the clients interface.
+         * Note that this does *not* work with multiple interfaces and will
+         * throw an exception if more than one (non loop-back) interface is found
+         * to warn the user.
+         */
+        AddressPtr getLocalAddress();
+
     private:
         void setPositionFromParameters();
         int getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition);

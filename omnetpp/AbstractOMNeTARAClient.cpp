@@ -3,13 +3,14 @@
  */
 
 #include "omnetpp/AbstractOMNeTARAClient.h"
+#include "omnetpp/TrafficControllInfo.h"
 #include "omnetpp/OMNeTGate.h"
 #include "Environment.h"
 
 #include "Ieee80211Frame_m.h"
 #include "ModuleAccess.h"
 #include "IPv4Address.h"
-#include "IPv4ControlInfo.h"
+#include "IPv4InterfaceData.h"
 
 #include <cstring>
 
@@ -96,22 +97,19 @@ bool AbstractOMNeTARAClient::isFromUpperLayer(cMessage* message) {
 }
 
 void AbstractOMNeTARAClient::handleUpperLayerMessage(cMessage* message) {
-      IPv4ControlInfo* controlInfo = (IPv4ControlInfo*)message->getControlInfo();
-      IPv4Address destinationIP = controlInfo->getDestAddr();
-      AddressPtr destination = AddressPtr(new OMNeTAddress(destinationIP));
+    TrafficControlInfo* controlInfo = (TrafficControlInfo*)message->getControlInfo();
+    AddressPtr destination = controlInfo->getDestination();
+    AddressPtr source = getLocalAddress();
+    unsigned int sequenceNumber = getNextSequenceNumber();
 
-      IPv4Address sourceIP = controlInfo->getSrcAddr();
-      AddressPtr source = AddressPtr(new OMNeTAddress(sourceIP));;
-      unsigned int sequenceNumber = getNextSequenceNumber();
+    // note that we implement the payload via encapsulation in OMNeT++
+    const char* payload = nullptr;
+    unsigned int payloadSize = 0;
 
-      // note that we implement the payload via encapsulation in OMNeT++
-      const char* payload = nullptr;
-      unsigned int payloadSize = 0;
+    OMNeTPacket* omnetPacket = (OMNeTPacket*) packetFactory->makeDataPacket(source, destination, sequenceNumber, payload, payloadSize);
+    omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
 
-      OMNeTPacket* omnetPacket = (OMNeTPacket*) packetFactory->makeDataPacket(source, destination, sequenceNumber, payload, payloadSize);
-      omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
-
-      sendPacket(omnetPacket);
+    sendPacket(omnetPacket);
 }
 
 void AbstractOMNeTARAClient::handleARAMessage(cMessage* message) {
@@ -170,6 +168,30 @@ cModule* AbstractOMNeTARAClient::findHost() const {
     }
 
     throw cRuntimeError("Could not determine the host module (should have a property named @node)");
+}
+
+AddressPtr AbstractOMNeTARAClient::getLocalAddress() {
+    //TODO this does currently only support one interface
+    InterfaceEntry* interface = nullptr;
+    int nrOfInterfaces = interfaceTable->getNumInterfaces();
+    for (int k=0; k < nrOfInterfaces; k++) {
+        InterfaceEntry* currentInterfaceEntry = interfaceTable->getInterface(k);
+        if(currentInterfaceEntry->isLoopback() == false) {
+            if(interface != nullptr) {
+                throw cRuntimeError("The AbstractOMNeTARAClient does currently only support one single interface per node");
+            }
+            else {
+                interface = currentInterfaceEntry;
+            }
+        }
+    }
+
+    if(interface == nullptr) {
+        throw cRuntimeError("The TrafficGenerator could not determine the nodes interface");
+    }
+
+    IPv4Address ipv4 = interface->ipv4Data()->getIPAddress();
+    return AddressPtr(new OMNeTAddress(ipv4));
 }
 
 OMNETARA_NAMESPACE_END
