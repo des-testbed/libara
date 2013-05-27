@@ -289,23 +289,27 @@ $(OUTPUT_DIR)/%.o: %.cpp
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $< -o $@
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $@ $< > $(OUTPUT_DIR)/$*.d;
 
+#
+# Clean up only the dependencies
+#
+.PHONY: cleandep
+	@rm -f $(LIBARA_DEPENDENCIES)
+	@rm -f $(OMNETARA_DEPENDENCIES)
+	@rm -f $(TESTS_DEPENDENCIES)
 
 #
 # Clean up (delete) all generated files
 #
 .PHONY: clean
-clean:
+clean: cleandep
 	@echo "Cleaning libARA.."
 	@rm -f $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
 	@rm -f $(LIBARA_O)
-	@rm -f $(LIBARA_DEPENDENCIES)
 	@echo "Cleaning omnetARA.."
 	@rm -f $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME) $(OMNETARA_EXECUTABLE)
 	@rm -f $(OMNETARA_O)
-	@rm -f $(OMNETARA_DEPENDENCIES)
 	@echo "Cleaning tests.."
 	@rm -f $(ALL_TEST_BINARIES)
-	@rm -f $(TESTS_DEPENDENCIES)
 	@rm -f $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TEST_EXECUTABLE)
 	@rm -f $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE)
 	@rm -f $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
