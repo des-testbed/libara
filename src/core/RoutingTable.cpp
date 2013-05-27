@@ -95,9 +95,19 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
     }
 }
 
-std::deque<RoutingTableEntry*> RoutingTable::getPossibleNextHops(const Packet* packet) {
+RoutingTableEntryList  RoutingTable::getPossibleNextHops(const Packet* packet) {
     if(isDeliverable(packet)) {
         return *(table[packet->getDestination()]);
+    }
+    else {
+        // return empty list
+        return std::deque<RoutingTableEntry*>();
+    }
+}
+
+RoutingTableEntryList  RoutingTable::getPossibleNextHops(AddressPtr destination) {
+    if(isDeliverable(destination)) {
+        return *(table[destination]);
     }
     else {
         // return empty list

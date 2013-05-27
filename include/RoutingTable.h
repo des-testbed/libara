@@ -42,6 +42,7 @@ public:
 
     void removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
     RoutingTableEntryList getPossibleNextHops(const Packet* packet);
+    RoutingTableEntryList getPossibleNextHops(AddressPtr destination);
 
     /**
      * Checks if a route to the packet destination exists, that does *not* lead

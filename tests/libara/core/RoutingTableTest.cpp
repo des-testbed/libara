@@ -402,3 +402,71 @@ TEST(RoutingTableTest, falselyDeleteLastEntryBug) {
     routingTable->removeEntry(destination, anotherAddress, &interface);
     CHECK(routingTable->exists(destination, nextHop, &interface));
 }
+
+TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
+    AddressPtr sourceAddress (new AddressMock("Source"));
+    AddressPtr destination1 (new AddressMock("Destination1"));
+    AddressPtr destination2 (new AddressMock("Destination2"));
+
+    AddressPtr nextHop1a (new AddressMock("nextHop1a"));
+    AddressPtr nextHop1b (new AddressMock("nextHop1b"));
+    AddressPtr nextHop2 (new AddressMock("nextHop2"));
+    AddressPtr nextHop3 (new AddressMock("nextHop3"));
+    AddressPtr nextHop4 (new AddressMock("nextHop4"));
+    NetworkInterfaceMock interface1 = NetworkInterfaceMock();
+    NetworkInterfaceMock interface2 = NetworkInterfaceMock();
+    NetworkInterfaceMock interface3 = NetworkInterfaceMock();
+
+    float pheromoneValue1a = 1;
+    float pheromoneValue1b = 5;
+    float pheromoneValue2 = 2.3;
+    float pheromoneValue3 = 4;
+    float pheromoneValue4 = 2;
+
+    routingTable->update(destination1, nextHop1a, &interface1, pheromoneValue1a);
+    routingTable->update(destination1, nextHop1b, &interface1, pheromoneValue1b);
+    routingTable->update(destination1, nextHop2, &interface2, pheromoneValue2);
+
+    routingTable->update(destination2, nextHop3, &interface3, pheromoneValue3);
+    routingTable->update(destination2, nextHop4, &interface1, pheromoneValue4);
+
+    std::deque<RoutingTableEntry*> nextHopsForDestination1 = routingTable->getPossibleNextHops(destination1);
+    BYTES_EQUAL(3, nextHopsForDestination1.size());
+    for (unsigned int i = 0; i < nextHopsForDestination1.size(); i++) {
+        RoutingTableEntry* possibleHop = nextHopsForDestination1.at(i);
+        AddressPtr hopAddress = possibleHop->getAddress();
+        if(hopAddress->equals(nextHop1a)) {
+            CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue1a, possibleHop->getPheromoneValue());
+        }
+        else if(hopAddress->equals(nextHop1b)) {
+            CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue1b, possibleHop->getPheromoneValue());
+        }
+        else if(hopAddress->equals(nextHop2)) {
+            CHECK_EQUAL(&interface2, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue2, possibleHop->getPheromoneValue());
+        }
+        else {
+            CHECK(false); // hops for this destination must either be nextHop1a, nextHop1b or nextHop2
+        }
+    }
+
+    std::deque<RoutingTableEntry*> nextHopsForDestination2 = routingTable->getPossibleNextHops(destination2);
+    BYTES_EQUAL(2, nextHopsForDestination2.size());
+    for (unsigned int i = 0; i < nextHopsForDestination2.size(); i++) {
+        RoutingTableEntry* possibleHop = nextHopsForDestination2.at(i);
+        AddressPtr hopAddress = possibleHop->getAddress();
+        if(hopAddress->equals(nextHop3)) {
+            CHECK_EQUAL(&interface3, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue3, possibleHop->getPheromoneValue());
+        }
+        else if(hopAddress->equals(nextHop4)) {
+            CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue4, possibleHop->getPheromoneValue());
+        }
+        else {
+            CHECK(false); // hops for this destination must either be nextHop3 or nextHop4
+        }
+    }
+}
