@@ -653,7 +653,15 @@ void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterfac
         logInfo("Received ROUTE_FAILURE from %s. Deleting route to %s via %s", packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSenderString().c_str());
         routingTable->removeEntry(destination, nextHop, interface);
 
-        if (routingTable->isDeliverable(destination) == false) {
+        deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
+        if (possibleNextHops.size() == 1) {
+            AddressPtr source = interface->getLocalAddress();
+            unsigned int sequenceNr = getNextSequenceNumber();
+            Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+            RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
+            lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, lastRemainingRoute->getAddress());
+        }
+        else if (possibleNextHops.empty()) {
             logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
             for(auto& interface: interfaces) {
                 AddressPtr source = interface->getLocalAddress();

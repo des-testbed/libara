@@ -1470,3 +1470,42 @@ TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDele
     CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
     CHECK(lastSentPacket->getDestination()->equals(destination));
 }
+
+/**
+ * This test checks if a client sends the ROUTE_FAILURE to a neighbor
+ * if it has only one single next hop available for a specific destination.
+ *
+ * Test setup:                     | Description:
+ *                                 |   * We are testing from the perspective of (A)
+ * (...)---(A)-->(B)-(...)--(dest) |   * A receives a ROUTE_FAILURE packet from (B)
+ *          └--->(C)---------/     |   * first (A) deletes the route do (dest) via (B)
+ *                                 |   * then is recognizes that the only remaining route leads via (C)
+ *                                 |   * (A) send a ROUTE_FAILURE to (C) to prevent it from sending any traffic to (dest) via (A)
+ */
+TEST(AbstractARAClientTest, sendRouteFailureIfOnlyOneRouteIsLeft) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(destination, nodeB, interface, 10);
+    routingTable->update(destination, nodeC, interface, 10);
+
+    // start the test by receiving the ROUTE_FAILURE packet from (B)
+    Packet* routeFailure = packetFactory->makeRouteFailurePacket(nodeB, destination, 1);
+    client->receivePacket(routeFailure, interface);
+
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_TRUE( routingTable->exists(destination, nodeC, interface));
+    BYTES_EQUAL(1, sentPackets->size());
+
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(receiver->equals(nodeC));
+
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(lastSentPacket->getDestination()->equals(destination));
+}
