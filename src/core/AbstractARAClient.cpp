@@ -649,9 +649,19 @@ void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterfac
     AddressPtr destination = packet->getDestination();
     AddressPtr nextHop = packet->getSender();
 
-    if(routingTable->exists(destination, nextHop, interface)) {
+    if (routingTable->exists(destination, nextHop, interface)) {
         logInfo("Received ROUTE_FAILURE from %s. Deleting route to %s via %s", packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSenderString().c_str());
         routingTable->removeEntry(destination, nextHop, interface);
+
+        if (routingTable->isDeliverable(destination) == false) {
+            logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
+            for(auto& interface: interfaces) {
+                AddressPtr source = interface->getLocalAddress();
+                unsigned int sequenceNr = getNextSequenceNumber();
+                Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+                interface->broadcast(routeFailurePacket);
+            }
+        }
     }
 
     delete packet;

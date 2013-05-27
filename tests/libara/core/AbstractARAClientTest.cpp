@@ -1434,3 +1434,39 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceIfSourceHasCompleteRo
     BYTES_EQUAL(1, interface->getNumberOfSentPackets());
     CHECK(packetTrap->contains(packet2));
 }
+
+/**
+ * In this test we check that a client broadcasts another ROUTE_FAILURE to all of its neighbors
+ * if it just deleted the last known route to a destination due to a previously received ROUTE_FAILURE
+ * from one of its neighbors
+ *
+ * Test setup:                   | Description:
+ *                               |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)   (dest)    |   * A receives a ROUTE_FAILURE packet from (B)
+ *                               |   * first (A) deletes its only route do (dest) via (B)
+ *                               |   * (A) has no other route so it also broadcasts a ROUTE_FAILURE
+ */
+TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDeleted) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(destination, nodeB, interface, 10);
+
+    // start the test by receiving the ROUTE_FAILURE packet from (B)
+    Packet* routeFailure = packetFactory->makeRouteFailurePacket(nodeB, destination, 1);
+    client->receivePacket(routeFailure, interface);
+
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    BYTES_EQUAL(1, sentPackets->size());
+
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(interface->isBroadcastAddress(receiver));
+
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(lastSentPacket->getDestination()->equals(destination));
+}
