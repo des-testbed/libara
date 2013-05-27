@@ -433,7 +433,7 @@ void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
 
 void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket, NetworkInterface* interface) {
     logInfo("Received DUPLICATE_ERROR from %s. Deleting route to %s via %s", duplicateErrorPacket->getSourceString().c_str(), duplicateErrorPacket->getDestinationString().c_str(), duplicateErrorPacket->getSenderString().c_str());
-    routingTable->removeEntry(duplicateErrorPacket->getDestination(), duplicateErrorPacket->getSender(), interface);
+    deleteRoutingTableEntry(duplicateErrorPacket->getDestination(), duplicateErrorPacket->getSender(), interface);
     delete duplicateErrorPacket;
 }
 
@@ -651,28 +651,32 @@ void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterfac
 
     if (routingTable->exists(destination, nextHop, interface)) {
         logInfo("Received ROUTE_FAILURE from %s. Deleting route to %s via %s", packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSenderString().c_str());
-        routingTable->removeEntry(destination, nextHop, interface);
-
-        deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
-        if (possibleNextHops.size() == 1) {
-            AddressPtr source = interface->getLocalAddress();
-            unsigned int sequenceNr = getNextSequenceNumber();
-            Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
-            RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
-            lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, lastRemainingRoute->getAddress());
-        }
-        else if (possibleNextHops.empty()) {
-            logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
-            for(auto& interface: interfaces) {
-                AddressPtr source = interface->getLocalAddress();
-                unsigned int sequenceNr = getNextSequenceNumber();
-                Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
-                interface->broadcast(routeFailurePacket);
-            }
-        }
+        deleteRoutingTableEntry(destination, nextHop, interface);
     }
 
     delete packet;
+}
+
+void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    routingTable->removeEntry(destination, nextHop, interface);
+
+    deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
+    if (possibleNextHops.size() == 1) {
+        AddressPtr source = interface->getLocalAddress();
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+        RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
+        lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, lastRemainingRoute->getAddress());
+    }
+    else if (possibleNextHops.empty()) {
+        logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
+        for(auto& interface: interfaces) {
+            AddressPtr source = interface->getLocalAddress();
+            unsigned int sequenceNr = getNextSequenceNumber();
+            Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+            interface->broadcast(routeFailurePacket);
+        }
+    }
 }
 
 ARA_NAMESPACE_END

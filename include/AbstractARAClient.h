@@ -264,6 +264,7 @@ protected:
     void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
     bool hasPreviousNodeBeenSeenBefore(const Packet* packet);
     virtual void handleCompleteRouteFailure(Packet* packet);
+    void deleteRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
 
     void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo);
     void handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination);

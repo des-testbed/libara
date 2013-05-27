@@ -1446,7 +1446,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceIfSourceHasCompleteRo
  *                               |   * first (A) deletes its only route do (dest) via (B)
  *                               |   * (A) has no other route so it also broadcasts a ROUTE_FAILURE
  */
-TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDeleted) {
+TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDeletedDueToRoutingFailure) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr nodeB (new AddressMock("B"));
@@ -1508,4 +1508,45 @@ TEST(AbstractARAClientTest, sendRouteFailureIfOnlyOneRouteIsLeft) {
     CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
     CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
     CHECK(lastSentPacket->getDestination()->equals(destination));
+}
+
+/**
+ * In this test we check that a client broadcasts another ROUTE_FAILURE to all of its neighbors
+ * if it just deleted the last known route to a destination due to a previously received ROUTE_FAILURE
+ * from one of its neighbors
+ *
+ * Test setup:                   | Description:
+ *                               |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)   (dest)    |   * A receives a DUPLICATE_WARNING packet from (B)
+ *                               |   * first (A) deletes its only route do (dest) via (B)
+ *                               |   * (A) has no other route so it also broadcasts a ROUTE_FAILURE
+ */
+TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDeletedDueToDuplicateWarning) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr destination (new AddressMock("dest"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(destination, nodeB, interface, 10);
+
+    // start the test by receiving the ROUTE_FAILURE packet from (B)
+    Packet* packetThatCausedTheDuplicate = new Packet(source, destination, nodeA, PacketType::DATA, 123, 10);
+    Packet* duplicateWarning = packetFactory->makeDulicateWarningPacket(packetThatCausedTheDuplicate, nodeB, 1);
+    client->receivePacket(duplicateWarning, interface);
+
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    BYTES_EQUAL(1, sentPackets->size());
+
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(interface->isBroadcastAddress(receiver));
+
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(lastSentPacket->getDestination()->equals(destination));
+
+    delete packetThatCausedTheDuplicate;
 }
