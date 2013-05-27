@@ -123,7 +123,10 @@ INETMANET_LIB = $(INETMANET_SRC_FOLDER)/libinet.so
 INETMANET_FOLDERS_INCLUDE = $(addprefix -I, $(shell find $(INETMANET_SRC_FOLDER) -type f -name "*.h" | sed 's%\(.*\)/.*%\1%' | sort -u))
 OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_SRC_FOLDER) -linet -lm
 OMNETPP_LIBS = -L"$(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
-USERIF_LIBS = $(AS_NEEDED_OFF) -loppcmdenv$D -loppenvir$D $(AS_NEEDED_OFF) -lopptkenv$D -loppenvir$D -lopplayout$D
+USERIF_LIBS = $(AS_NEEDED_OFF) -loppcmdenv$D -loppenvir$D $(AS_NEEDED_OFF) -loppenvir$D -lopplayout$D
+ifneq ("$(HEADLESS)", "TRUE")
+    USERIF_LIBS += -lopptkenv$D
+endif
 
 # Build targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: all
