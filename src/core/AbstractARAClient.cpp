@@ -626,10 +626,10 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
         packetTrap->trapPacket(packet);
 
         if (isRouteDiscoveryRunning(packet->getDestination())) {
-            logDebug("No alternative route is available. Trapping packet %u from %s because route discovery is already running for destination %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
+            logDebug("No alternative route is available. Trapping packet %u from %s because route discovery is already running for destination %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
         }
         else {
-            logDebug("No alternative route is available. Starting new route discovery for packet %u from %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
+            logDebug("No alternative route is available. Starting new route discovery for packet %u from %s.", packet->getSequenceNumber(), packet->getSourceString().c_str());
             startNewRouteDiscovery(packet);
         }
     }
