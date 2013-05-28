@@ -236,7 +236,8 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 
 void AbstractARAClient::handleNonSourceRouteDiscovery(Packet* packet) {
     logWarn("Dropping packet %u from %s because no route is known (non-source RD disabled)", packet->getSequenceNumber(), packet->getSourceString().c_str());
-    handleCompleteRouteFailure(packet);
+    broadcastRouteFailure(packet->getDestination());
+    delete packet;
 }
 
 void AbstractARAClient::handlePacketWithZeroTTL(Packet* packet) {
@@ -608,39 +609,26 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, Address
 }
 
 void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
-    routingTable->removeEntry(packet->getDestination(), nextHop, interface);
+    logInfo("Link over %s is broken", nextHop->toString().c_str());
+    deleteRoutingTableEntry(packet->getDestination(), nextHop, interface);
+    //FIXME now we can delete ALL routes via the nextHop!
 
     if (routingTable->isDeliverable(packet)) {
-        logInfo("Link over %s is broken. Sending over alternative route", nextHop->toString().c_str());
+        logDebug("Sending %u from %s over alternative route", packet->getSequenceNumber(), packet->getSourceString().c_str());
         sendPacket(packet);
     }
-    else {
-        handleCompleteRouteFailure(packet);
-    }
-}
+    else if(isLocalAddress(packet->getSource())) {
+        packetTrap->trapPacket(packet);
 
-void AbstractARAClient::handleCompleteRouteFailure(Packet* packet) {
-    if(isLocalAddress(packet->getSource())) {
         if (isRouteDiscoveryRunning(packet->getDestination())) {
-            logInfo("Link over %s is broken and can not be repaired. Trapping packet  %u from %s because route discovery is already running for destination %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
-            packetTrap->trapPacket(packet);
+            logDebug("No alternative route is available. Trapping packet %u from %s because route discovery is already running for destination %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
         }
         else {
-            logInfo("Link over %s is broken and can not be repaired. Starting new route discovery for packet %u from %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
-            packetTrap->trapPacket(packet);
+            logDebug("No alternative route is available. Starting new route discovery for packet %u from %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
             startNewRouteDiscovery(packet);
         }
     }
     else {
-        logInfo("Link over %s is broken and can not be repaired. Dropping packet %u from %s.", packet->getSenderString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
-        AddressPtr destination = packet->getDestination();
-        for(auto& interface: interfaces) {
-            AddressPtr source = interface->getLocalAddress();
-            unsigned int sequenceNr = getNextSequenceNumber();
-            Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
-            interface->broadcast(routeFailurePacket);
-        }
-
         delete packet;
     }
 }
@@ -658,24 +646,31 @@ void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterfac
 }
 
 void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-    routingTable->removeEntry(destination, nextHop, interface);
+    if(routingTable->exists(destination, nextHop, interface)) {
+        routingTable->removeEntry(destination, nextHop, interface);
 
-    deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
-    if (possibleNextHops.size() == 1) {
-        AddressPtr source = interface->getLocalAddress();
-        unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
-        RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
-        lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, lastRemainingRoute->getAddress());
-    }
-    else if (possibleNextHops.empty()) {
-        logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
-        for(auto& interface: interfaces) {
+        deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
+        if (possibleNextHops.size() == 1) {
+            logDebug("Only one last route is known to %s. Notifying last remaining neighbor with ROUTE_FAILURE packet", destination->toString().c_str());
             AddressPtr source = interface->getLocalAddress();
             unsigned int sequenceNr = getNextSequenceNumber();
             Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
-            interface->broadcast(routeFailurePacket);
+            RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
+            lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, lastRemainingRoute->getAddress());
         }
+        else if (possibleNextHops.empty()) {
+            logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
+            broadcastRouteFailure(destination);
+        }
+    }
+}
+
+void AbstractARAClient::broadcastRouteFailure(AddressPtr destination) {
+    for(auto& interface: interfaces) {
+        AddressPtr source = interface->getLocalAddress();
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+        interface->broadcast(routeFailurePacket);
     }
 }
 
