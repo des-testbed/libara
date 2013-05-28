@@ -470,3 +470,42 @@ TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
         }
     }
 }
+
+/**
+ * In this test we check if the routing table correctly returns a list of routing table entries
+ * which lead over a specified hop.
+ *
+ * Test setup:                   | Description:
+ *                ┌--->(dest1)   |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)-->(dest2)   |
+ *          |     └--->(dest3)   |
+ *          |             ↑      |
+ *          └--->(C)--->--┘      |
+ */
+TEST(RoutingTableTest, getAllRoutesThatLeadOverSpecificNextHop) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr someUnknownNode (new AddressMock("X"));
+    AddressPtr dest1 (new AddressMock("dest1"));
+    AddressPtr dest2 (new AddressMock("dest2"));
+    AddressPtr dest3 (new AddressMock("dest3"));
+
+    routingTable->update(dest1, nodeB, &interface, 10);
+    routingTable->update(dest2, nodeB, &interface, 10);
+    routingTable->update(dest3, nodeB, &interface, 10);
+    routingTable->update(dest3, nodeC, &interface, 10);
+
+    std::deque<RoutingTableEntryTupel> entriesOverB = routingTable->getAllRoutesThatLeadOver(nodeB);
+    BYTES_EQUAL(3, entriesOverB.size());
+    for (auto& entry: entriesOverB) {
+        CHECK(entry.destination->equals(dest1) || entry.destination->equals(dest2) || entry.destination->equals(dest3));
+    }
+
+    std::deque<RoutingTableEntryTupel> entriesOverC = routingTable->getAllRoutesThatLeadOver(nodeC);
+    BYTES_EQUAL(1, entriesOverC.size());
+    CHECK(entriesOverC.front().destination->equals(dest3));
+
+    std::deque<RoutingTableEntryTupel> entriesOverUnkown = routingTable->getAllRoutesThatLeadOver(someUnknownNode);
+    CHECK(entriesOverUnkown.empty());
+}

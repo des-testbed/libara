@@ -258,4 +258,25 @@ RoutingTableEntryTupel RoutingTable::getEntryAt(int wantedPosition) const {
     throw Exception("RoutingTable::getEntryAt: Index out of bounds");
 }
 
+std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(AddressPtr nextHop) const {
+    std::deque<RoutingTableEntryTupel> result = std::deque<RoutingTableEntryTupel>();
+
+    // TODO this could be made faster with an additional hashmap (but would require more memory)
+    std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::const_iterator iterator;
+    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+        AddressPtr destination = iterator->first;
+        RoutingTableEntryList* entryList = iterator->second;
+        for (auto& entry: *entryList) {
+            if(entry->getAddress()->equals(nextHop)) {
+                RoutingTableEntryTupel tupel;
+                tupel.destination = destination;
+                tupel.entry = entry;
+                result.push_back(tupel);
+            }
+        }
+    }
+
+    return result;
+}
+
 ARA_NAMESPACE_END

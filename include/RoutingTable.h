@@ -86,6 +86,11 @@ public:
      */
     void triggerEvaporation();
 
+    /**
+     * Returns all known routes that lead over the given next hop.
+     */
+    std::deque<RoutingTableEntryTupel> getAllRoutesThatLeadOver(AddressPtr nextHop) const;
+
 protected:
     bool hasTableBeenAccessedEarlier();
     virtual void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
