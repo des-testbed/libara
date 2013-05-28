@@ -610,9 +610,14 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, Address
 
 void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     logInfo("Link over %s is broken", nextHop->toString().c_str());
-    deleteRoutingTableEntry(packet->getDestination(), nextHop, interface);
-    //FIXME now we can delete ALL routes via the nextHop!
 
+    // delete all known routes via this next hop
+    std::deque<RoutingTableEntryTupel> allRoutesOverNextHop = routingTable->getAllRoutesThatLeadOver(nextHop);
+    for (auto& route: allRoutesOverNextHop) {
+        deleteRoutingTableEntry(route.destination, nextHop, route.entry->getNetworkInterface());
+    }
+
+    // Try to deliver the packet on an alternative route
     if (routingTable->isDeliverable(packet)) {
         logDebug("Sending %u from %s over alternative route", packet->getSequenceNumber(), packet->getSourceString().c_str());
         sendPacket(packet);

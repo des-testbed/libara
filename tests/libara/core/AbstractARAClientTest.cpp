@@ -21,6 +21,8 @@
 #include "testAPI/mocks/LoggerMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
+#include <iostream>
+
 using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
@@ -48,6 +50,22 @@ TEST_GROUP(AbstractARAClientTest) {
      */
     bool routeIsKnown(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
         return routingTable->exists(destination, nextHop, interface);
+    }
+
+    /**
+     * This is just for debugging failing tests
+     */
+    void printAllSentPackets(SendPacketsList* sentPackets) {
+        std::cout << std::endl << "DEBUG: Client has sent " << sentPackets->size() << " packets" << std::endl;
+        int packetCounter = 0;
+        for (auto& sendPacketPair: *sentPackets) {
+            packetCounter++;
+            const Packet* packet = sendPacketPair->getLeft();
+            AddressPtr receiver = sendPacketPair->getRight();
+
+            std::cout << packetCounter << ": " << PacketType::getAsString(packet->getType());
+            std::cout << " to " << packet->getDestinationString() << " via " << receiver->toString() << std::endl;
+        }
     }
 };
 
@@ -1654,4 +1672,56 @@ TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDele
     CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
     CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
     CHECK(lastSentPacket->getDestination()->equals(destination));
+}
+
+/**
+ * In this test we check if a client deletes all known routes via one of its neighbors
+ * if it recognized a link failure to it.
+ *
+ * Test setup:                   | Description:
+ *                ┌--->(dest1)   |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)-->(dest2)   |   * (A) knows that it can reach (dest1), (dest2) & (dest3) via (B)
+ *          |     └--->(dest3)   |   * (A) recognizes a link failure to (B)
+ *          |             ↑      |   * (A) should now remove a routing table entries which lead over (B)
+ *          └--->(C)--->--┘      |   *     but it should not delete the remaining route via (C) since it is still valid
+ */
+TEST(AbstractARAClientTest, deleteAllKnownRoutesViaNextHopwhenLinkIsBroken) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr source (new AddressMock("source"));;
+    AddressPtr dest1 (new AddressMock("dest1"));
+    AddressPtr dest2 (new AddressMock("dest2"));
+    AddressPtr dest3 (new AddressMock("dest3"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(dest1, nodeB, interface, 10);
+    routingTable->update(dest2, nodeB, interface, 10);
+    routingTable->update(dest3, nodeB, interface, 10);
+    routingTable->update(dest3, nodeC, interface, 10);
+
+    // start the test by recognizing the broken link to (B)
+    Packet* somePacket = new Packet(source, dest1, nodeA, PacketType::DATA, 123, 10);
+    client->handleBrokenLink(somePacket, nodeB, interface);
+
+    // all routes over (B) should have been deleted
+    CHECK_FALSE(routingTable->exists(dest1, nodeB, interface));
+    CHECK_FALSE(routingTable->exists(dest2, nodeB, interface));
+    CHECK_FALSE(routingTable->exists(dest3, nodeB, interface));
+
+    // the route over (C) does still exist
+    CHECK_TRUE(routingTable->exists(dest3, nodeC, interface));
+
+    // the client should have broadcasted 2 ROUTE_FAILURE packets for (dest1) and (dest2)
+    // additionally it should have sent 1 ROUTE_FAILURE unicast to (C) as this is the only remaining route to (dest3)
+    BYTES_EQUAL(3, sentPackets->size());
+    for (int i = 0; i < 3; ++i) {
+        const Packet* sentPacket = sentPackets->at(i)->getLeft();
+        AddressPtr receiver = sentPackets->at(i)->getRight();
+
+        CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
+        CHECK(interface->isBroadcastAddress(receiver) || receiver->equals(nodeC));
+    }
 }
