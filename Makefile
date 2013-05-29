@@ -54,9 +54,9 @@ CFLAGS_RELEASE = -O2 -DNDEBUG=1
 MKPATH = mkdir -p
 
 ifeq ("$(NO_OMNET)", "TRUE")
-    LD_LIBRARY_PATH=LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./$(LIBARA_SRC_FOLDER)
+    LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER):$(shell echo $$LD_LIBRARY_PATH)
 else
-    LD_LIBRARY_PATH=LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./$(LIBARA_SRC_FOLDER):$(OMNETPP_LIB_DIR):./$(INETMANET_SRC_FOLDER)
+    LD_LIBRARY_PATH=LD_LIBRARY_PATH=./$(LIBARA_SRC_FOLDER):$(OMNETPP_LIB_DIR):./$(INETMANET_SRC_FOLDER):$(shell echo $$LD_LIBRARY_PATH)
 endif
 
 # Folders ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -123,7 +123,10 @@ INETMANET_LIB = $(INETMANET_SRC_FOLDER)/libinet.so
 INETMANET_FOLDERS_INCLUDE = $(addprefix -I, $(shell find $(INETMANET_SRC_FOLDER) -type f -name "*.h" | sed 's%\(.*\)/.*%\1%' | sort -u))
 OMNETPP_LINKFLAGS = $(LINKFLAGS) $(OMNETPP_LIBS) -L$(INETMANET_SRC_FOLDER) -linet -lm
 OMNETPP_LIBS = -L"$(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
-USERIF_LIBS = $(AS_NEEDED_OFF) -loppcmdenv$D -loppenvir$D $(AS_NEEDED_OFF) -lopptkenv$D -loppenvir$D -lopplayout$D
+USERIF_LIBS = $(AS_NEEDED_OFF) -loppcmdenv$D -loppenvir$D $(AS_NEEDED_OFF) -loppenvir$D -lopplayout$D
+ifneq ("$(HEADLESS)", "TRUE")
+    USERIF_LIBS += -lopptkenv$D
+endif
 
 # Build targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: all
@@ -199,7 +202,7 @@ $(INETMANET_FOLDER)/.git:
 test: libAraTests
 
 .PHONY: allTests
-allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE)
+allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OMNETARA_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING complete TEST SUIT ~~~~~~"
 	@if $(LD_LIBRARY_PATH) $(TESTS_FOLDER)/$(TEST_EXECUTABLE); then \
  		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
