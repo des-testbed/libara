@@ -26,6 +26,7 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     packetDeliveryDelayInMilliSeconds = module->par("packetDeliveryDelay").longValue();
     neighborActivityCheckIntervalInMilliSeconds = module->par("neighborActivityCheckInterval").longValue();
     maxNeighborInactivityTimeInMilliSeconds = module->par("maxNeighborInactivityTime").longValue();
+    pantIntervalInMilliSeconds = module->par("pantInterval").longValue();
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
 
@@ -73,6 +74,10 @@ unsigned int OMNeTConfiguration::getNeighborActivityCheckIntervalInMilliSeconds(
 
 unsigned int OMNeTConfiguration::getMaxNeighborInactivityTimeInMilliSeconds() {
     return maxNeighborInactivityTimeInMilliSeconds;
+}
+
+unsigned int OMNeTConfiguration::getPANTIntervalInMilliSeconds() {
+    return pantIntervalInMilliSeconds;
 }
 
 Logger* OMNeTConfiguration::getLogger() {

@@ -35,9 +35,11 @@ public:
     virtual unsigned int getPacketDeliveryDelayInMilliSeconds();
     virtual unsigned int getNeighborActivityCheckIntervalInMilliSeconds();
     virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds();
+    virtual unsigned int getPANTIntervalInMilliSeconds();
 
-    void setNeighborActivityCheckInterval(unsigned int newTimeoutInMilliSeconds);
+    void setNeighborActivityCheckInterval(unsigned int newIntervalInMilliSeconds);
     void setMaxNeighborInactivityTime(unsigned int newTimeInMilliSeconds);
+    void setPANTInterval(unsigned int newIntervalInMilliSeconds);
 
 protected:
     EvaporationPolicy* evaporationPolicy;
@@ -49,6 +51,7 @@ protected:
     unsigned int packetDeliveryDelayInMilliSeconds;
     unsigned int neighborActivityCheckIntervalInMilliSeconds;
     unsigned int maxNeighborInactivityTimeInMilliSeconds;
+    unsigned int pantIntervalInMilliSeconds;
 };
 
 } /* namespace ARA */
