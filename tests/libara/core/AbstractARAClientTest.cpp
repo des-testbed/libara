@@ -2007,3 +2007,31 @@ TEST(AbstractARAClientTest, PANTSAreOnlySentByTheSource) {
     TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(destination);
     CHECK(pantTimer == nullptr);
 }
+
+/**
+ * In this test we check if a client who receives a PANT broadcasts over all of its interfaces
+ */
+TEST(AbstractARAClientTest, receivedPANTSPacketsAreBroadcasted) {
+    // initial test setup
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    SendPacketsList* sentPackets = interface->getSentPackets();
+
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    Packet* pant = packetFactory->makePANT(source, destination, 123);
+    unsigned int originalTTL = pant->getTTL();
+    // start the test
+    client->receivePacket(pant, interface);
+
+    BYTES_EQUAL(1, sentPackets->size());
+    const Packet* sentPacket = sentPackets->back()->getLeft();
+    AddressPtr receiver = sentPackets->back()->getRight();
+
+    // check the sent packet
+    CHECK(interface->isBroadcastAddress(receiver));
+    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getDestination()->equals(destination));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    CHECK_EQUAL(PacketType::PANT, sentPacket->getType());
+    LONGS_EQUAL(originalTTL-1, sentPacket->getTTL());
+}
