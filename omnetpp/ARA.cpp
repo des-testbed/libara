@@ -79,20 +79,23 @@ void ARA::packetNotDeliverable(const Packet* packet) {
     emit(PACKET_NOT_DELIVERED_SIGNAL, 1);
 }
 
-void ARA::handleDuplicatePacket(Packet* packet, NetworkInterface* interface) {
-    AbstractARAClient::handleDuplicatePacket(packet, interface);
+void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
+    AbstractARAClient::handleDuplicateErrorPacket(packet, interface);
     nrOfDetectedLoops++;
     emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
 void ARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
-    if(isLocalAddress(packet->getSource()) == false && routingTable->isDeliverable(packet) == false) {
-        emit(ROUTE_FAILURE_SIGNAL, 1);
-    }
-
     // TODO this does only work if we have only one network interface card
     NetworkInterface* interface = getNetworkInterface(0);
+    AddressPtr packetSource = packet->getSource();
     AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
+
+    if(routingTable->isDeliverable(packet) == false) {
+        if(isLocalAddress(packetSource) == false) {
+            emit(ROUTE_FAILURE_SIGNAL, 1);
+        }
+    }
 }
 
 void ARA::timerHasExpired(Timer* responsibleTimer) {

@@ -58,7 +58,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
          */
         virtual void packetNotDeliverable(const Packet* packet);
 
-        virtual void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
+        virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
 
         virtual void handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress);
 
