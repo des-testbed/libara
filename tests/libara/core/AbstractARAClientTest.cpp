@@ -1847,3 +1847,15 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     // we check that this has not happened an only 9 packets (6 + 3 data packets) have been send by the client
     BYTES_EQUAL(9, sentPackets->size());
 }
+
+/**
+ * This simple test just checks that there is no exception when processing a HELLO packet.
+ * The client does not need to take any actions because this packet has already been acknowledged on layer 2
+ */
+TEST(AbstractARAClientTest, clientCanHandleHelloPacket) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr neighbor (new AddressMock("neighbor"));;
+
+    Packet* helloPacket = packetFactory->makeHelloPacket(neighbor, interface->getLocalAddress(), 123);
+    client->receivePacket(helloPacket, interface);
+}

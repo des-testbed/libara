@@ -361,6 +361,10 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     else if (packet->getType() == PacketType::ROUTE_FAILURE) {
         handleRouteFailurePacket(packet, interface);
     }
+    else if (packet->getType() == PacketType::HELLO) {
+        // this has already been acknowledged on the layer 2 so we can ignore this one
+        delete packet;
+    }
     else {
         throw Exception("Can not handle packet");
     }
