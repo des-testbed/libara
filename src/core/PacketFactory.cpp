@@ -41,6 +41,10 @@ Packet* PacketFactory::makeEnergyDisseminationPacket(AddressPtr source, unsigned
     return makePacket(source, source, source, PacketType::ENERGY_INFO, seqNr, maxHopCount, payload, 1);
 }
 
+Packet* PacketFactory::makeHelloPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
+    return makePacket(source, destination, source, PacketType::HELLO, sequenceNumber, maxHopCount);
+}
+
 Packet* PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {
     Packet* packet = new Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
     if(previousHop != nullptr) {

@@ -42,6 +42,7 @@ public:
 
     void removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
     RoutingTableEntryList getPossibleNextHops(const Packet* packet);
+    RoutingTableEntryList getPossibleNextHops(AddressPtr destination);
 
     /**
      * Checks if a route to the packet destination exists, that does *not* lead
@@ -84,6 +85,11 @@ public:
      * Triggers the evaporation process if enough time since the last evaporation has passed.
      */
     void triggerEvaporation();
+
+    /**
+     * Returns all known routes that lead over the given next hop.
+     */
+    std::deque<RoutingTableEntryTupel> getAllRoutesThatLeadOver(AddressPtr nextHop) const;
 
 protected:
     bool hasTableBeenAccessedEarlier();

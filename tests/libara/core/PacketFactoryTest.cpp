@@ -198,3 +198,22 @@ TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
 TEST(PacketFactoryTest, getMaximumNrOfHops){
     BYTES_EQUAL(maximumHopCount, factory->getMaximumNrOfHops());
 }
+
+TEST(PacketFactoryTest, makeHelloPacket) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    unsigned int seqenceNumber = 123;
+
+    Packet* helloPacket = factory->makeHelloPacket(source, destination, seqenceNumber);
+
+    CHECK(helloPacket->getSource()->equals(source));
+    CHECK(helloPacket->getDestination()->equals(destination));
+    CHECK(helloPacket->getSender()->equals(source));
+    CHECK(helloPacket->getPreviousHop()->equals(source));
+    CHECK_EQUAL(PacketType::HELLO, helloPacket->getType());
+    CHECK_EQUAL(seqenceNumber, helloPacket->getSequenceNumber());
+    CHECK_EQUAL(maximumHopCount, helloPacket->getTTL());
+    CHECK_EQUAL(0, helloPacket->getPayloadLength());
+
+    delete helloPacket;
+}

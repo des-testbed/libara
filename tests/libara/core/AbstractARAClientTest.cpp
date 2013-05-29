@@ -21,6 +21,8 @@
 #include "testAPI/mocks/LoggerMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
+#include <iostream>
+
 using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
@@ -48,6 +50,22 @@ TEST_GROUP(AbstractARAClientTest) {
      */
     bool routeIsKnown(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
         return routingTable->exists(destination, nextHop, interface);
+    }
+
+    /**
+     * This is just for debugging failing tests
+     */
+    void printAllSentPackets(SendPacketsList* sentPackets) {
+        std::cout << std::endl << "DEBUG: Client has sent " << sentPackets->size() << " packets" << std::endl;
+        int packetCounter = 0;
+        for (auto& sendPacketPair: *sentPackets) {
+            packetCounter++;
+            const Packet* packet = sendPacketPair->getLeft();
+            AddressPtr receiver = sendPacketPair->getRight();
+
+            std::cout << packetCounter << ": " << PacketType::getAsString(packet->getType());
+            std::cout << " from " << packet->getSourceString() << " to " << packet->getDestinationString() << " via " << receiver->toString() << std::endl;
+        }
     }
 };
 
@@ -843,10 +861,12 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     Packet* packet = new Packet(source, destination, sender, PacketType::DATA, originalSeqNr, originalTTL, "Foo", 4);
     AddressPtr route1 (new AddressMock("route1"));
     AddressPtr route2 (new AddressMock("route2"));
+    AddressPtr route3 (new AddressMock("route3"));
 
-    // create two known routes to the destination
+    // create three known routes to the destination
     routingTable->update(destination, route1, interface, 20);
     routingTable->update(destination, route2, interface, 10);
+    routingTable->update(destination, route3, interface, 10);
 
     // sanity check
     CHECK(routingTable->isDeliverable(destination));
@@ -858,10 +878,11 @@ TEST(AbstractARAClientTest, takeAlternativeRouteInRouteFailure) {
     // the client is expected to delete the route from the routing table
     CHECK(routingTable->exists(destination, route1, interface) == false);
 
-    // the packet should have been sent via the other route
+    // the packet should have been sent via one of the other routes
     BYTES_EQUAL(1, sentPackets->size());
     Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
-    CHECK(sentPacketInfo->getRight()->equals(route2));
+    AddressPtr receiver = sentPacketInfo->getRight();
+    CHECK(receiver->equals(route2) || receiver->equals(route3));
 
     CHECK_PACKET(sentPacketInfo->getLeft(), PacketType::DATA, originalSeqNr, originalTTL, source, sender, destination, "Foo");
 }
@@ -1381,22 +1402,35 @@ TEST(AbstractARAClientTest, restartRouteDiscoveryIfSourceHasCompleteRouteFailure
     Packet* packet = new Packet(source, destination, source, PacketType::DATA, 1, 10);
     client->handleBrokenLink(packet, nextHopA, interface);
 
-    // the client should try to deliver the packet over the remaining known route
-    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
-    const Packet* lastSentPacket = sentPackets->back()->getLeft();
-    AddressPtr receiverAddress = sentPackets->back()->getRight();
-    CHECK(lastSentPacket->equals(packet));
+    // At first the client notifies the last remaining neighbor that it can no longer send over this client as this would lead to a loop
+    BYTES_EQUAL(2, interface->getNumberOfSentPackets());
+    const Packet* sentPacket = sentPackets->at(0)->getLeft();
+    AddressPtr receiverAddress = sentPackets->at(0)->getRight();
+    CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(receiverAddress->equals(nextHopB));
+
+    // Then it should try to deliver the packet over the remaining known route
+    sentPacket = sentPackets->at(1)->getLeft();
+    receiverAddress = sentPackets->at(1)->getRight();
+    CHECK(sentPacket->equals(packet));
     CHECK(receiverAddress->equals(nextHopB));
 
     // unfortunately nextHopB is also not reachable
     Packet* samePacket = packetFactory->makeClone(packet);
     client->handleBrokenLink(samePacket, nextHopB, interface);
 
-    // now we require the client to start a new route discovery
+    // now we require the client to recognize the complete route failure and start a new route discovery
     CHECK(packetTrap->contains(samePacket));
-    BYTES_EQUAL(2, interface->getNumberOfSentPackets());
-    lastSentPacket = sentPackets->back()->getLeft();
-    CHECK(lastSentPacket->getType() == PacketType::FANT);
+    BYTES_EQUAL(4, interface->getNumberOfSentPackets());
+    sentPacket = sentPackets->at(2)->getLeft();
+    receiverAddress = sentPackets->at(2)->getRight();
+    CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(interface->isBroadcastAddress(receiverAddress));
+
+    sentPacket = sentPackets->at(3)->getLeft();
+    receiverAddress = sentPackets->at(3)->getRight();
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(interface->isBroadcastAddress(receiverAddress));
 }
 
 /**
@@ -1420,10 +1454,18 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceIfSourceHasCompleteRo
     Packet* packet1 = new Packet(source, destination, source, PacketType::DATA, 1, 10);
     client->handleBrokenLink(packet1, nextHop, interface);
 
-    // there are no other routes left so the client should start a route discovery
-    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
-    const Packet* lastSentPacket = sentPackets->back()->getLeft();
-    CHECK(lastSentPacket->getType() == PacketType::FANT);
+    // there are no other routes left so the client should broadcast a ROUTE_FAILURE
+    BYTES_EQUAL(2, interface->getNumberOfSentPackets());
+    const Packet* sentPacket = sentPackets->at(0)->getLeft();
+    AddressPtr receiverAddress = sentPackets->at(0)->getRight();
+    CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(interface->isBroadcastAddress(receiverAddress));
+
+    // now since this is the source of the packet the client should start a route discovery
+    sentPacket = sentPackets->at(1)->getLeft();
+    receiverAddress = sentPackets->at(1)->getRight();
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(interface->isBroadcastAddress(receiverAddress));
     CHECK(packetTrap->contains(packet1));
 
     // meanwhile the delivery of another packet failed
@@ -1431,6 +1473,389 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceIfSourceHasCompleteRo
     client->handleBrokenLink(packet2, nextHop, interface);
 
     // this should never cause another route discovery as there is already a running discovery for that destination
-    BYTES_EQUAL(1, interface->getNumberOfSentPackets());
+    BYTES_EQUAL(2, interface->getNumberOfSentPackets()); // still only 2 packets have been sent
     CHECK(packetTrap->contains(packet2));
+}
+
+/**
+ * In this test we check that a client broadcasts another ROUTE_FAILURE to all of its neighbors
+ * if it just deleted the last known route to a destination due to a previously received ROUTE_FAILURE
+ * from one of its neighbors
+ *
+ * Test setup:                   | Description:
+ *                               |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)   (dest)    |   * A receives a ROUTE_FAILURE packet from (B)
+ *                               |   * first (A) deletes its only route do (dest) via (B)
+ *                               |   * (A) has no other route so it also broadcasts a ROUTE_FAILURE
+ */
+TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDeletedDueToRoutingFailure) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(destination, nodeB, interface, 10);
+
+    // start the test by receiving the ROUTE_FAILURE packet from (B)
+    Packet* routeFailure = packetFactory->makeRouteFailurePacket(nodeB, destination, 1);
+    client->receivePacket(routeFailure, interface);
+
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    BYTES_EQUAL(1, sentPackets->size());
+
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(interface->isBroadcastAddress(receiver));
+
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(lastSentPacket->getDestination()->equals(destination));
+}
+
+/**
+ * This test checks if a client sends the ROUTE_FAILURE to a neighbor
+ * if it has only one single next hop available for a specific destination.
+ *
+ * Test setup:                     | Description:
+ *                                 |   * We are testing from the perspective of (A)
+ * (...)---(A)-->(B)-(...)--(dest) |   * A receives a ROUTE_FAILURE packet from (B)
+ *          └--->(C)---------/     |   * first (A) deletes the route do (dest) via (B)
+ *                                 |   * then is recognizes that the only remaining route leads via (C)
+ *                                 |   * (A) send a ROUTE_FAILURE to (C) to prevent it from sending any traffic to (dest) via (A)
+ */
+TEST(AbstractARAClientTest, sendRouteFailureIfOnlyOneRouteIsLeftDueToRoutingFailure) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(destination, nodeB, interface, 10);
+    routingTable->update(destination, nodeC, interface, 10);
+
+    // start the test by receiving the ROUTE_FAILURE packet from (B)
+    Packet* routeFailure = packetFactory->makeRouteFailurePacket(nodeB, destination, 1);
+    client->receivePacket(routeFailure, interface);
+
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_TRUE( routingTable->exists(destination, nodeC, interface));
+    BYTES_EQUAL(1, sentPackets->size());
+
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(receiver->equals(nodeC));
+
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(lastSentPacket->getDestination()->equals(destination));
+}
+
+/**
+ * In this test we check that a client broadcasts a ROUTE_FAILURE to all of its neighbors
+ * if it just deleted the last known route to a destination due to a previously received DUPLICATE_WARNING
+ * from one of its neighbors
+ *
+ * Test setup:                   | Description:
+ *                               |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)   (dest)    |   * A receives a DUPLICATE_WARNING packet from (B)
+ *                               |   * first (A) deletes its only route do (dest) via (B)
+ *                               |   * (A) has no other route so it broadcasts a ROUTE_FAILURE
+ */
+TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDeletedDueToDuplicateWarning) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr destination (new AddressMock("dest"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(destination, nodeB, interface, 10);
+
+    // start the test by receiving the DUPLICATE_WARNING packet from (B)
+    Packet* packetThatCausedTheDuplicate = new Packet(source, destination, nodeA, PacketType::DATA, 123, 10);
+    Packet* duplicateWarning = packetFactory->makeDulicateWarningPacket(packetThatCausedTheDuplicate, nodeB, 1);
+    client->receivePacket(duplicateWarning, interface);
+
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    BYTES_EQUAL(1, sentPackets->size());
+
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(interface->isBroadcastAddress(receiver));
+
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(lastSentPacket->getDestination()->equals(destination));
+
+    delete packetThatCausedTheDuplicate;
+}
+
+/**
+ * This test checks if a client sends the ROUTE_FAILURE to a neighbor
+ * if it has only one single next hop available for a specific destination.
+ *
+ * Test setup:                     | Description:
+ *                                 |   * We are testing from the perspective of (A)
+ * (...)---(A)-->(B)-(...)--(dest) |   * A receives a DUPLICATE_WARNING packet from (B)
+ *          └--->(C)---------/     |   * first (A) deletes the route do (dest) via (B)
+ *                                 |   * then is recognizes that the only remaining route leads via (C)
+ *                                 |   * (A) send a ROUTE_FAILURE to (C) to prevent it from sending any traffic to (dest) via (A)
+ */
+TEST(AbstractARAClientTest, sendRouteFailureIfOnlyOneRouteIsLeftDueToDuplicateWarning) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(destination, nodeB, interface, 10);
+    routingTable->update(destination, nodeC, interface, 10);
+
+    // start the test by receiving the DUPLICATE_WARNING packet from (B)
+    Packet* packetThatCausedTheDuplicate = new Packet(source, destination, nodeA, PacketType::DATA, 123, 10);
+    Packet* duplicateWarning = packetFactory->makeDulicateWarningPacket(packetThatCausedTheDuplicate, nodeB, 1);
+    client->receivePacket(duplicateWarning, interface);
+
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_TRUE( routingTable->exists(destination, nodeC, interface));
+    BYTES_EQUAL(1, sentPackets->size());
+
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(receiver->equals(nodeC));
+
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(lastSentPacket->getDestination()->equals(destination));
+
+    delete packetThatCausedTheDuplicate;
+}
+
+/**
+ * In this test we check that a client broadcasts a ROUTE_FAILURE to all of its neighbors
+ * if it just deleted the last known route to a destination due to a recognized link failure
+ *
+ * Test setup:                   | Description:
+ *                               |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)   (dest)    |   * A recognizes that its link to (B) is broken
+ *                               |   * first (A) deletes its only route do (dest) via (B)
+ *                               |   * (A) has no other route so it broadcasts a ROUTE_FAILURE
+ */
+TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDeletedDueToBrokenLink) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr destination (new AddressMock("dest"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(destination, nodeB, interface, 10);
+
+    // start the test by recognizing the broken link to (B)
+    Packet* somePacket = new Packet(source, destination, nodeA, PacketType::DATA, 123, 10);
+    client->handleBrokenLink(somePacket, nodeB, interface);
+
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    BYTES_EQUAL(1, sentPackets->size());
+
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(interface->isBroadcastAddress(receiver));
+
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::ROUTE_FAILURE);
+    CHECK(lastSentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(lastSentPacket->getDestination()->equals(destination));
+}
+
+/**
+ * In this test we check if a client deletes all known routes via one of its neighbors
+ * if it recognized a link failure to it.
+ *
+ * Test setup:                   | Description:
+ *                ┌--->(dest1)   |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)-->(dest2)   |   * (A) knows that it can reach (dest1), (dest2) & (dest3) via (B)
+ *          │     └--->(dest3)   |   * (A) recognizes a link failure to (B)
+ *          │             │      |   * (A) should now remove a routing table entries which lead over (B)
+ *          └--->(C)--->--┘      |   *     but it should not delete the remaining route via (C) since it is still valid
+ */
+TEST(AbstractARAClientTest, deleteAllKnownRoutesViaNextHopwhenLinkIsBroken) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr source (new AddressMock("source"));;
+    AddressPtr dest1 (new AddressMock("dest1"));
+    AddressPtr dest2 (new AddressMock("dest2"));
+    AddressPtr dest3 (new AddressMock("dest3"));
+
+    // we are testing from the perspective of (A)
+    routingTable->update(dest1, nodeB, interface, 10);
+    routingTable->update(dest2, nodeB, interface, 10);
+    routingTable->update(dest3, nodeB, interface, 10);
+    routingTable->update(dest3, nodeC, interface, 10);
+
+    // start the test by recognizing the broken link to (B)
+    Packet* somePacket = new Packet(source, dest1, nodeA, PacketType::DATA, 123, 10);
+    client->handleBrokenLink(somePacket, nodeB, interface);
+
+    // all routes over (B) should have been deleted
+    CHECK_FALSE(routingTable->exists(dest1, nodeB, interface));
+    CHECK_FALSE(routingTable->exists(dest2, nodeB, interface));
+    CHECK_FALSE(routingTable->exists(dest3, nodeB, interface));
+
+    // the route over (C) does still exist
+    CHECK_TRUE(routingTable->exists(dest3, nodeC, interface));
+
+    // the client should have broadcasted 2 ROUTE_FAILURE packets for (dest1) and (dest2)
+    // additionally it should have sent 1 ROUTE_FAILURE unicast to (C) as this is the only remaining route to (dest3)
+    BYTES_EQUAL(3, sentPackets->size());
+    for (int i = 0; i < 3; ++i) {
+        const Packet* sentPacket = sentPackets->at(i)->getLeft();
+        AddressPtr receiver = sentPackets->at(i)->getRight();
+
+        CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
+        CHECK(interface->isBroadcastAddress(receiver) || receiver->equals(nodeC));
+    }
+}
+
+/**
+ * This test checks if a node sends a HELLO packet to all of its neighbors
+ * which have not send or successfully received any packets lately.
+ *
+ * Test setup:                      | Description (Test from perspective of (A)):
+ *          ┌--->(B)──(..)───┐      |   * After some time has passed the following happens:
+ * (src)───(A)-->(C)──(..)──(dest1) |   * (A) has received a packet from (D)
+ *          │└<─>(D)──(..)───┘│     |   * (A) has successfully send a packet via (E)
+ *          └───>(E)──(..)────┘     |   * but (A) has not heard from (B) and (C) lately
+ *                └─────────(dest2) |   * (A) should send a HELLO unicast to (B) and (C)
+ *                                  |   * only (C) responds but for (B) a broken link is detected
+ *                                  |   * the link to (C) should be deleted
+ */
+TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
+    // at first we need our own configuration to enable this feature
+    BasicConfiguration configuration = client->getStandardConfiguration();
+    configuration.setNeighborActivityCheckInterval(500); // doesn't matter what we ste here because we expire the timer manually
+    configuration.setMaxNeighborInactivityTime(500);
+
+    ARAClientMock client = ARAClientMock(configuration);
+    packetTrap = client.getPacketTrap();
+    routingTable = (RoutingTableMock*) client.getRoutingTable();
+    packetFactory = client.getPacketFactory();
+
+    TimerMock* neighborActivityTimer = (TimerMock*) client.getNeighborActivityTimer();
+
+    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr nodeD (new AddressMock("D"));
+    AddressPtr nodeE (new AddressMock("E"));
+    AddressPtr source (new AddressMock("src"));;
+    AddressPtr dest1 (new AddressMock("dest1"));
+    AddressPtr dest2 (new AddressMock("dest2"));
+
+    // at first we create all routes via the reception of a BANT from (dest)
+    // create a route to delay the BANT
+    routingTable->update(source, source, interface, 10);
+
+    Packet* bant1 = new Packet(dest1, source, nodeB, PacketType::BANT, 1, 10);
+    client.receivePacket(bant1, interface);
+    Packet* bant2 = new Packet(dest1, source, nodeC, PacketType::BANT, 1, 10);
+    client.receivePacket(bant2, interface);
+    Packet* bant3 = new Packet(dest1, source, nodeD, PacketType::BANT, 1, 10);
+    client.receivePacket(bant3, interface);
+    Packet* bant4 = new Packet(dest1, source, nodeE, PacketType::BANT, 1, 10);
+    client.receivePacket(bant4, interface);
+    // we also have a route to dest2 via (E)
+    Packet* bant5 = new Packet(dest2, source, nodeE, PacketType::BANT, 1, 10);
+    client.receivePacket(bant5, interface);
+
+    // sanity check
+    CHECK(routeIsKnown(dest1, nodeB, interface));
+    CHECK(routeIsKnown(dest1, nodeC, interface));
+    CHECK(routeIsKnown(dest1, nodeD, interface));
+    CHECK(routeIsKnown(dest1, nodeE, interface));
+    CHECK(routeIsKnown(dest2, nodeE, interface));
+
+    // start the test by receiving a packet  from (D). This shows that (D) is still active and reachable
+    TimeMock::letTimePass(300); // time is now at 300
+    Packet* packetFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 2, 10);
+    client.receivePacket(packetFromD, interface);
+
+    // after some more time we successfully route a packet via (E). We know there is no error because layer 2 reports no problems.
+    TimeMock::letTimePass(100); // time is now at 400
+    Packet* packetviaE = new Packet(source, dest2, source, PacketType::DATA, 3, 10);
+    client.sendPacket(packetviaE);
+
+    // the client should have relayed this packet via (E)
+    // This is the fourth packet: 1. BANT from dest1, 2. BANT from dest2, 3. DATA from dest1, 4. DATA from src
+    BYTES_EQUAL(4, sentPackets->size());
+    const Packet* sentPacket = sentPackets->back()->getLeft();
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(sentPacket->getSource()->equals(source) && sentPacket->getSequenceNumber() == 3);
+    CHECK(receiver->equals(nodeE));
+
+    // now even more time passes and the neighborActivityDelayInMs should be reached for (B) and (C)
+    TimeMock::letTimePass(100); // time is now at 500
+    neighborActivityTimer->expire();
+
+    // the client should now try to reach (B) and (C) to see if they are still active
+    BYTES_EQUAL(6, sentPackets->size());
+    for (int i = 4; i <= 5; i++) {
+        sentPacket = sentPackets->at(i)->getLeft();
+        receiver = sentPackets->at(i)->getRight();
+
+        CHECK(sentPacket->getType() == PacketType::HELLO);
+        CHECK(sentPacket->getSource()->equals(nodeA));
+        CHECK(sentPacket->getSender()->equals(nodeA));
+        CHECK(sentPacket->getDestination()->equals(nodeB) || sentPacket->getDestination()->equals(nodeC));
+    }
+
+    // now simulate that (B) does not respond and there is a link brake detected at layer 2
+    Packet* packetThatDetectedLinkBreak = new Packet(source, nodeB, nodeA, PacketType::HELLO, 5, 10);
+    client.handleBrokenLink(packetThatDetectedLinkBreak, nodeB, interface);
+
+    CHECK_FALSE(routeIsKnown(dest1, nodeB, interface));
+    CHECK_TRUE(routeIsKnown(dest1, nodeC, interface));
+    CHECK_TRUE(routeIsKnown(dest1, nodeD, interface));
+    CHECK_TRUE(routeIsKnown(dest1, nodeE, interface));
+    CHECK_TRUE(routeIsKnown(dest2, nodeE, interface));
+
+    // we do now keep the other routes active and check that the client does not try to send
+    // another HELLO to (B) since this route has already failed
+    TimeMock::letTimePass(200); // time is now at 700
+    Packet* keepAliveFromC = new Packet(dest1, source, nodeC, PacketType::DATA, 3, 10);
+    Packet* keepAliveFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 4, 10);
+    Packet* keepAliveFromE = new Packet(dest1, source, nodeE, PacketType::DATA, 5, 10);
+    client.receivePacket(keepAliveFromC, interface);
+    client.receivePacket(keepAliveFromD, interface);
+    client.receivePacket(keepAliveFromE, interface);
+
+    TimeMock::letTimePass(300); // time is now at 1000
+    neighborActivityTimer->expire();
+
+    // now it would have been time for a HELLO packet to (B) (last activity for that was the HELLO packet at 500)
+    // we check that this has not happened an only 9 packets (6 + 3 data packets) have been send by the client
+    BYTES_EQUAL(9, sentPackets->size());
+}
+
+/**
+ * This simple test just checks that there is no exception when processing a HELLO packet.
+ * The client does not need to take any actions because this packet has already been acknowledged on layer 2
+ */
+TEST(AbstractARAClientTest, clientCanHandleHelloPacket) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr neighbor (new AddressMock("neighbor"));;
+
+    Packet* helloPacket = packetFactory->makeHelloPacket(neighbor, interface->getLocalAddress(), 123);
+    client->receivePacket(helloPacket, interface);
 }
