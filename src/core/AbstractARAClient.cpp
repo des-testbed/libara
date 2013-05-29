@@ -709,6 +709,7 @@ void AbstractARAClient::checkInactiveNeighbors() {
             NetworkInterface* interface = entryPair.second.second;
             unsigned int sequenceNumber = getNextSequenceNumber();
             Packet* helloPacket = packetFactory->makeHelloPacket(interface->getLocalAddress(), addressofNeighbor, sequenceNumber);
+            logDebug("Sending HELLO packet to inactive neighbor %s", addressofNeighbor->toString().c_str());
             sendUnicast(helloPacket, interface, addressofNeighbor);
         }
     }
