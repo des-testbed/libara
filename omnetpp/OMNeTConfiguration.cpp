@@ -24,6 +24,8 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     maxTTL = module->par("maxTTL").longValue();
     routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
     packetDeliveryDelayInMilliSeconds = module->par("packetDeliveryDelay").longValue();
+    neighborActivityCheckIntervalInMilliSeconds = module->par("neighborActivityCheckInterval").longValue();
+    maxNeighborInactivityTimeInMilliSeconds = module->par("maxNeighborInactivityTime").longValue();
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
 
@@ -65,8 +67,12 @@ unsigned int OMNeTConfiguration::getPacketDeliveryDelayInMilliSeconds() {
     return packetDeliveryDelayInMilliSeconds;
 }
 
-unsigned int OMNeTConfiguration::getNeighborActivityTimeoutInMilliSeconds() {
-    return neighborActivityTimeoutInMilliSeconds;
+unsigned int OMNeTConfiguration::getNeighborActivityCheckIntervalInMilliSeconds() {
+    return neighborActivityCheckIntervalInMilliSeconds;
+}
+
+unsigned int OMNeTConfiguration::getMaxNeighborInactivityTimeInMilliSeconds() {
+    return maxNeighborInactivityTimeInMilliSeconds;
 }
 
 Logger* OMNeTConfiguration::getLogger() {

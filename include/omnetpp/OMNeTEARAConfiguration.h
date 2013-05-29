@@ -19,6 +19,7 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
         virtual unsigned int getEnergyDisseminationTimeout() const;
         virtual EnergyAwareRoutingTable* getRoutingTable();
         double getMaximumBatteryLevel();
+
     private:
         unsigned int energyDisseminationTimeout;
         double maximumBatteryLevel;

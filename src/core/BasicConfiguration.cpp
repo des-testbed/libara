@@ -3,7 +3,7 @@
  */
 
 #include "BasicConfiguration.h"
-
+#include <limits.h>
 ARA_NAMESPACE_BEGIN
 
 BasicConfiguration::BasicConfiguration(EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, unsigned int routeDiscoveryTimeoutInMilliSeconds, unsigned int packetDeliveryDelayInMilliSeconds) {
@@ -14,7 +14,8 @@ BasicConfiguration::BasicConfiguration(EvaporationPolicy* evaporationPolicy, Pat
     this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
     this->routeDiscoveryTimeoutInMilliSeconds = routeDiscoveryTimeoutInMilliSeconds;
     this->packetDeliveryDelayInMilliSeconds = packetDeliveryDelayInMilliSeconds;
-    this->neighborActivityTimeoutInMilliSeconds = 0; // disabled by default
+    this->neighborActivityCheckIntervalInMilliSeconds = 0; // disabled by default
+    this->maxNeighborInactivityTimeInMilliSeconds = UINT_MAX; // disabled by default
 }
 
 EvaporationPolicy* BasicConfiguration::getEvaporationPolicy() {
@@ -45,12 +46,20 @@ unsigned int BasicConfiguration::getPacketDeliveryDelayInMilliSeconds() {
     return packetDeliveryDelayInMilliSeconds;
 }
 
-unsigned int BasicConfiguration::getNeighborActivityTimeoutInMilliSeconds() {
-    return neighborActivityTimeoutInMilliSeconds;
+unsigned int BasicConfiguration::getNeighborActivityCheckIntervalInMilliSeconds() {
+    return neighborActivityCheckIntervalInMilliSeconds;
 }
 
-void BasicConfiguration::setNeighborActivityTimeoutInMs(unsigned int newTimeout) {
-    neighborActivityTimeoutInMilliSeconds = newTimeout;
+unsigned int BasicConfiguration::getMaxNeighborInactivityTimeInMilliSeconds() {
+    return maxNeighborInactivityTimeInMilliSeconds;
+}
+
+void BasicConfiguration::setNeighborActivityCheckInterval(unsigned int newTimeoutInMilliSeconds) {
+    neighborActivityCheckIntervalInMilliSeconds = newTimeoutInMilliSeconds;
+}
+
+void BasicConfiguration::setMaxNeighborInactivityTime(unsigned int newTimeInMilliSeconds) {
+    maxNeighborInactivityTimeInMilliSeconds = newTimeInMilliSeconds;
 }
 
 ARA_NAMESPACE_END

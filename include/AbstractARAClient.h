@@ -20,6 +20,7 @@
 #include "PathReinforcementPolicy.h"
 #include "RouteDiscoveryInfo.h"
 #include "Timer.h"
+#include "Time.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -32,6 +33,7 @@ namespace ARA {
 
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
+typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>> NeighborActivityMap;
 
 //TODO fix the visibility: most of the methods should be protected instead of public
 //TODO fix the indent
@@ -127,6 +129,8 @@ public:
     unsigned int getNumberOfNetworkInterfaces();
 
     PacketFactory* getPacketFactory() const;
+
+    void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
 
     //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     void broadCast(Packet* packet);
@@ -269,10 +273,15 @@ protected:
     void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo);
     void handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination);
 
+    void startNeighborActivityTimer();
+    void registerActivity(AddressPtr neighbor, NetworkInterface* interface);
+    void checkInactiveNeighbors();
+
 protected:
     std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> runningRouteDiscoveries;
     std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
     std::unordered_map<Timer*, AddressPtr> runningDeliveryTimers;
+    Timer* neighborActivityTimer = nullptr;
 
     ForwardingPolicy* forwardingPolicy;
     PathReinforcementPolicy* pathReinforcementPolicy;
@@ -286,7 +295,8 @@ protected:
     double initialPheromoneValue;
     unsigned int packetDeliveryDelayInMilliSeconds;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
-    unsigned int neighborActivityTimeoutInMilliSeconds;
+    unsigned int neighborActivityCheckIntervalInMilliSeconds;
+    unsigned int maxNeighborInactivityTimeInMilliSeconds;
     int maxNrOfRouteDiscoveryRetries;
 
 private:
@@ -301,6 +311,12 @@ private:
      * nodes this client has learned from the penultimate packet field.
      */
     KnownIntermediateHopsMap knownIntermediateHops;
+
+    /**
+     * This hashmap holds information of the last time a neighbor has shown some activity.
+     * This could either be that this client has successfully received or send a packet to/from this client
+     */
+    NeighborActivityMap neighborActivityTimes;
 };
 
 } /* namespace ARA */

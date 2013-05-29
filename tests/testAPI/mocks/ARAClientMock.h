@@ -5,8 +5,10 @@
 #ifndef ARACLIENTMOCK_H_
 #define ARACLIENTMOCK_H_
 
+#include "TestMacros.h"
 #include "AbstractARAClient.h"
 #include "AbstractClientMockBase.h"
+#include "Configuration.h"
 #include "Packet.h"
 #include "NetworkInterfaceMock.h"
 #include "PacketTrap.h"
@@ -15,7 +17,7 @@
 
 #include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 class NetworkInterfaceMock;
 
@@ -26,6 +28,8 @@ class NetworkInterfaceMock;
 class ARAClientMock: public AbstractARAClient, public AbstractClientMockBase {
 public:
     ARAClientMock();
+    ARAClientMock(Configuration& configuration);
+
     BasicConfiguration getStandardConfiguration() const;
 
     void receivePacket(Packet* packet, NetworkInterface* interface);
@@ -40,7 +44,9 @@ public:
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
     unsigned int getPacketDeliveryDelay() const;
+    Timer* getNeighborActivityTimer() const;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif /* ARACLIENTMOCK_H_ */

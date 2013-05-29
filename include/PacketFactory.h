@@ -88,8 +88,9 @@ public:
        * Note: The result of this method is a newly created object which must be
        * deleted later by the calling class.
        */
-     Packet* makeEnergyDisseminationPacket(AddressPtr source, unsigned int seqNr, unsigned char energyLevel);
+     Packet* makeEnergyDisseminationPacket(AddressPtr source, unsigned int sequenceNumber, unsigned char energyLevel);
 
+     Packet* makeHelloPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber);
 
      void setMaxHopCount(int n);
      int getMaximumNrOfHops();

@@ -33,9 +33,11 @@ public:
     virtual int getMaxNrOfRouteDiscoveryRetries();
     virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
     virtual unsigned int getPacketDeliveryDelayInMilliSeconds();
-    virtual unsigned int getNeighborActivityTimeoutInMilliSeconds();
+    virtual unsigned int getNeighborActivityCheckIntervalInMilliSeconds();
+    virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds();
 
-    void setNeighborActivityTimeoutInMs(unsigned int newTimeout);
+    void setNeighborActivityCheckInterval(unsigned int newTimeoutInMilliSeconds);
+    void setMaxNeighborInactivityTime(unsigned int newTimeInMilliSeconds);
 
 protected:
     EvaporationPolicy* evaporationPolicy;
@@ -45,7 +47,8 @@ protected:
     int maxNrOfRouteDiscoveryRetries;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
     unsigned int packetDeliveryDelayInMilliSeconds;
-    unsigned int neighborActivityTimeoutInMilliSeconds;
+    unsigned int neighborActivityCheckIntervalInMilliSeconds;
+    unsigned int maxNeighborInactivityTimeInMilliSeconds;
 };
 
 } /* namespace ARA */
