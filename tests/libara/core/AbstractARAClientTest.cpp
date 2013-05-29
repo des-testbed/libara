@@ -1742,8 +1742,8 @@ TEST(AbstractARAClientTest, deleteAllKnownRoutesViaNextHopwhenLinkIsBroken) {
 TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     // at first we need our own configuration to enable this feature
     BasicConfiguration configuration = client->getStandardConfiguration();
-    configuration.setNeighborActivityCheckInterval(2000);
-    configuration.setMaxNeighborInactivityTime(1000);
+    configuration.setNeighborActivityCheckInterval(500); // doesn't matter what we ste here because we expire the timer manually
+    configuration.setMaxNeighborInactivityTime(500);
 
     ARAClientMock client = ARAClientMock(configuration);
     packetTrap = client.getPacketTrap();
@@ -1787,14 +1787,14 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     CHECK(routeIsKnown(dest2, nodeE, interface));
 
     // start the test by receiving a packet  from (D). This shows that (D) is still active and reachable
-    TimeMock::letTimePass(400);
+    TimeMock::letTimePass(300); // time is now at 300
     Packet* packetFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 2, 10);
     client.receivePacket(packetFromD, interface);
 
     // after some more time we successfully route a packet via (E). We know there is no error because layer 2 reports no problems.
-    TimeMock::letTimePass(400);
+    TimeMock::letTimePass(100); // time is now at 400
     Packet* packetviaE = new Packet(source, dest2, source, PacketType::DATA, 3, 10);
-    client.receivePacket(packetviaE, interface);
+    client.sendPacket(packetviaE);
 
     // the client should have relayed this packet via (E)
     // This is the fourth packet: 1. BANT from dest1, 2. BANT from dest2, 3. DATA from dest1, 4. DATA from src
@@ -1805,7 +1805,7 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     CHECK(receiver->equals(nodeE));
 
     // now even more time passes and the neighborActivityDelayInMs should be reached for (B) and (C)
-    TimeMock::letTimePass(300);
+    TimeMock::letTimePass(100); // time is now at 500
     neighborActivityTimer->expire();
 
     // the client should now try to reach (B) and (C) to see if they are still active
@@ -1821,7 +1821,7 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     }
 
     // now simulate that (B) does not respond and there is a link brake detected at layer 2
-    Packet* packetThatDetectedLinkBreak = new Packet(nodeA, nodeB, nodeA, PacketType::HELLO, 5, 10);
+    Packet* packetThatDetectedLinkBreak = new Packet(source, nodeB, nodeA, PacketType::HELLO, 5, 10);
     client.handleBrokenLink(packetThatDetectedLinkBreak, nodeB, interface);
 
     CHECK_FALSE(routeIsKnown(dest1, nodeB, interface));
@@ -1829,4 +1829,21 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     CHECK_TRUE(routeIsKnown(dest1, nodeD, interface));
     CHECK_TRUE(routeIsKnown(dest1, nodeE, interface));
     CHECK_TRUE(routeIsKnown(dest2, nodeE, interface));
+
+    // we do now keep the other routes active and check that the client does not try to send
+    // another HELLO to (B) since this route has already failed
+    TimeMock::letTimePass(200); // time is now at 700
+    Packet* keepAliveFromC = new Packet(dest1, source, nodeC, PacketType::DATA, 3, 10);
+    Packet* keepAliveFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 4, 10);
+    Packet* keepAliveFromE = new Packet(dest1, source, nodeE, PacketType::DATA, 5, 10);
+    client.receivePacket(keepAliveFromC, interface);
+    client.receivePacket(keepAliveFromD, interface);
+    client.receivePacket(keepAliveFromE, interface);
+
+    TimeMock::letTimePass(300); // time is now at 1000
+    neighborActivityTimer->expire();
+
+    // now it would have been time for a HELLO packet to (B) (last activity for that was the HELLO packet at 500)
+    // we check that this has not happened an only 9 packets (6 + 3 data packets) have been send by the client
+    BYTES_EQUAL(9, sentPackets->size());
 }

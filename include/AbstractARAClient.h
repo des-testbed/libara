@@ -33,10 +33,9 @@ namespace ARA {
 
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
-typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>> NeighborActivityMap;
+typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>, AddressHash, AddressPredicate> NeighborActivityMap;
 
 //TODO fix the visibility: most of the methods should be protected instead of public
-//TODO fix the indent
 
 /**
  * TODO write class description

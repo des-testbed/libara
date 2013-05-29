@@ -647,6 +647,13 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
         deleteRoutingTableEntry(route.destination, nextHop, route.entry->getNetworkInterface());
     }
 
+    NeighborActivityMap::const_iterator foundNeighbor = neighborActivityTimes.find(nextHop);
+    if(foundNeighbor != neighborActivityTimes.end()) {
+        // delete the associated Time object first
+        delete foundNeighbor->second.first;
+        neighborActivityTimes.erase(nextHop);
+    }
+
     // Try to deliver the packet on an alternative route
     if (routingTable->isDeliverable(packet)) {
         logDebug("Sending %u from %s over alternative route", packet->getSequenceNumber(), packet->getSourceString().c_str());
@@ -693,7 +700,7 @@ void AbstractARAClient::checkInactiveNeighbors() {
         std::pair<AddressPtr, std::pair<Time*, NetworkInterface*>> entryPair = *iterator;
         Time* lastActiveTime = entryPair.second.first;
         long timeDifference = currentTime->getDifferenceInMilliSeconds(lastActiveTime);
-        if (timeDifference > maxNeighborInactivityTimeInMilliSeconds) {
+        if (timeDifference >= maxNeighborInactivityTimeInMilliSeconds) {
             AddressPtr addressofNeighbor = entryPair.first;
             NetworkInterface* interface = entryPair.second.second;
             unsigned int sequenceNumber = getNextSequenceNumber();
