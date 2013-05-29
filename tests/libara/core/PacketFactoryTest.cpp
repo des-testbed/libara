@@ -217,3 +217,23 @@ TEST(PacketFactoryTest, makeHelloPacket) {
 
     delete helloPacket;
 }
+
+TEST(PacketFactoryTest, makeDataPacket) {
+    AddressPtr originalSource (new AddressMock("source"));
+    AddressPtr originalDestination(new AddressMock("destination"));
+    unsigned int seqNr = 123;
+    const char* payload = "I am the payload";
+    unsigned int payloadSize = strlen(payload) + 1; // dont foprget the null byte for the string
+    Packet* dataPacket = factory->makeDataPacket(originalSource, originalDestination, seqNr, payload, payloadSize);
+
+    CHECK_EQUAL(PacketType::DATA, dataPacket->getType());
+    CHECK(dataPacket->getSource()->equals(originalSource));
+    CHECK(dataPacket->getSender()->equals(originalSource));
+    CHECK(dataPacket->getDestination()->equals(originalDestination));
+    BYTES_EQUAL(seqNr, dataPacket->getSequenceNumber());
+    BYTES_EQUAL(maximumHopCount, dataPacket->getTTL());
+    BYTES_EQUAL(payloadSize, dataPacket->getPayloadLength());
+    STRCMP_EQUAL(payload, dataPacket->getPayload());
+
+    delete dataPacket;
+}

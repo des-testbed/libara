@@ -6,6 +6,7 @@
 #define ABSTRACTARACLIENT_H_
 
 #include "ARAMacros.h"
+#include "AbstractNetworkClient.h"
 #include "TimeoutEventListener.h"
 #include "Configuration.h"
 #include "Logger.h"
@@ -29,7 +30,7 @@
 #include <memory>
 #include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
@@ -40,7 +41,7 @@ typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>, Addr
 /**
  * TODO write class description
  */
-class AbstractARAClient : public TimeoutEventListener {
+class AbstractARAClient : public virtual AbstractNetworkClient, public TimeoutEventListener {
 
 public:
     /**
@@ -78,7 +79,7 @@ public:
      * @param packet the Packet to be send. Please note that the packet will be
      *        deleted by the AbstractARAClient when it is no longer needed.
      */
-    void sendPacket(Packet* packet);
+    virtual void sendPacket(Packet* packet);
 
     /**
      * Receive a Packet over the given NetworkInterface. The packet will be
@@ -104,47 +105,16 @@ public:
      */
     void initialize(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory);
 
-    /**
-     * Sets a logger for this ARA client.
-     *
-     * This logger will be used to log messages during the routing algorithm.
-     * It will be deleted in the destructor of this client.
-     */
-    void setLogger(Logger* logger);
-
-    /**
-     * Registers a new NetworkInterface at this client.
-     */
-    void addNetworkInterface(NetworkInterface* newInterface);
-
-    /**
-     * Returns a specific NetworkInterface by index.
-     */
-    NetworkInterface* getNetworkInterface(unsigned int index);
-
-    /**
-     * Returns the amount of registered network interfaces of this client.
-     */
-    unsigned int getNumberOfNetworkInterfaces();
-
-    PacketFactory* getPacketFactory() const;
-
-    void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
-
-    //TODO AbstractARAClient::broadCast(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
-    void broadCast(Packet* packet);
-    //TODO AbstractARAClient::getNextSequenceNumber(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
-    unsigned int getNextSequenceNumber();
     //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     bool hasBeenReceivedEarlier(const Packet* packet);
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
-    void setRoutingTable(RoutingTable *routingTable);
-
     virtual void timerHasExpired(Timer* responsibleTimer);
 
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
+
+    void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
 
 protected:
     /**
@@ -185,64 +155,6 @@ protected:
      */
     virtual void handlePacket(Packet* packet, NetworkInterface* interface);
 
-    /**
-     * Checks if a logger has been assigned to this ARA client and if so
-     * delegates the call to it with Logger::LEVEL_TRACE.
-     *
-     * The optional varargs are handled as parameters to the logMessage string.
-     * If no logger has been set via setLogger() nothing happens.
-     *
-     * @see AbstractARAClient::logTrace
-     * @see AbstractARAClient::logDebug
-     * @see AbstractARAClient::logInfo
-     * @see AbstractARAClient::logWarn
-     * @see AbstractARAClient::logError
-     * @see AbstractARAClient::logFatal
-     */
-    void logMessage(const std::string &logMessage, Logger::Level level, ...) const;
-
-    /**
-     * Logs with trace level.
-     *
-     * @see AbstractARAClient::logMessage
-     */
-    void logTrace(const std::string &logMessage, ...) const;
-
-    /**
-     * Logs with debug level.
-     *
-     * @see AbstractARAClient::logMessage
-     */
-    void logDebug(const std::string &logMessage, ...) const;
-
-    /**
-     * Logs with info level.
-     *
-     * @see AbstractARAClient::logMessage
-     */
-    void logInfo(const std::string &logMessage, ...) const;
-
-    /**
-     * Logs with warn level.
-     *
-     * @see AbstractARAClient::logMessage
-     */
-    void logWarn(const std::string &logMessage, ...) const;
-
-    /**
-     * Logs with error level.
-     *
-     * @see AbstractARAClient::logMessage
-     */
-    void logError(const std::string &logMessage, ...) const;
-
-    /**
-     * Logs with fatal level.
-     *
-     * @see AbstractARAClient::logMessage
-     */
-    void logFatal(const std::string &logMessage, ...) const;
-
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
     void handleDataPacket(Packet* packet);
@@ -251,9 +163,6 @@ protected:
     void handleBANTForThisNode(Packet* bant);
     virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
-    bool isDirectedToThisNode(const Packet* packet) const;
-    bool isLocalAddress(AddressPtr address) const;
-    bool hasBeenSentByThisNode(const Packet* packet) const;
     virtual void startNewRouteDiscovery(Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
     void forgetKnownIntermediateHopsFor(AddressPtr destination);
@@ -286,11 +195,6 @@ protected:
     PathReinforcementPolicy* pathReinforcementPolicy;
     EvaporationPolicy* evaporationPolicy;
 
-    std::deque<NetworkInterface*> interfaces;
-    RoutingTable* routingTable;
-    PacketTrap* packetTrap;
-    PacketFactory* packetFactory;
-
     double initialPheromoneValue;
     unsigned int packetDeliveryDelayInMilliSeconds;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
@@ -299,9 +203,6 @@ protected:
     int maxNrOfRouteDiscoveryRetries;
 
 private:
-    Logger* logger = nullptr;
-    unsigned int nextSequenceNumber = 1;
-
     //TODO the knownIntermediateHops and lastReceivedPackets may be merged into a single hashmap
     LastReceivedPacketsMap lastReceivedPackets;
 
@@ -318,5 +219,6 @@ private:
     NeighborActivityMap neighborActivityTimes;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif /* ABSTRACTARACLIENT_H_ */

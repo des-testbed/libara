@@ -28,9 +28,6 @@ class TrafficGenerator : public TrafGen {
         void sendTraffic(cPacket* message, const char* destination);
 
     private:
-        IPv4Address getLocalAddress();
-
-    private:
         int nrOfPacketsToSend;
         int nrOfSentMessages = 0;
         int nrOfReceivedMessages = 0;

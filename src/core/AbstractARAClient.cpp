@@ -48,11 +48,6 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
 }
 
 AbstractARAClient::~AbstractARAClient() {
-    // delete logger if it has been set
-    if(logger != nullptr) {
-        delete logger;
-    }
-
     // delete the sequence number lists of the last received packets
     for (LastReceivedPacketsMap::iterator iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
         // the addresses are disposed of automatically by shared_ptr
@@ -85,9 +80,6 @@ AbstractARAClient::~AbstractARAClient() {
     neighborActivityTimes.clear();
 
     /* The following members may have be deleted earlier, depending on the destructor of the implementing class */
-    DELETE_IF_NOT_NULL(packetFactory);
-    DELETE_IF_NOT_NULL(packetTrap);
-    DELETE_IF_NOT_NULL(routingTable);
     DELETE_IF_NOT_NULL(pathReinforcementPolicy);
     DELETE_IF_NOT_NULL(evaporationPolicy);
     DELETE_IF_NOT_NULL(forwardingPolicy);
@@ -96,74 +88,6 @@ AbstractARAClient::~AbstractARAClient() {
 
 void AbstractARAClient::startNeighborActivityTimer() {
     neighborActivityTimer->run(neighborActivityCheckIntervalInMilliSeconds * 1000);
-}
-
-void AbstractARAClient::setLogger(Logger* logger) {
-    this->logger = logger;
-}
-
-void AbstractARAClient::logTrace(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_TRACE, args);
-    }
-}
-
-void AbstractARAClient::logDebug(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_DEBUG, args);
-    }
-}
-
-void AbstractARAClient::logInfo(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_INFO, args);
-    }
-}
-
-void AbstractARAClient::logWarn(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_WARN, args);
-    }
-}
-
-void AbstractARAClient::logError(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_ERROR, args);
-    }
-}
-
-void AbstractARAClient::logFatal(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_FATAL, args);
-    }
-}
-
-void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
-    interfaces.push_back(newInterface);
-}
-
-NetworkInterface* AbstractARAClient::getNetworkInterface(unsigned int index) {
-    return interfaces.at(index);
-}
-
-unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
-    return interfaces.size();
-}
-
-PacketFactory* AbstractARAClient::getPacketFactory() const{
-    return packetFactory;
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
@@ -468,37 +392,6 @@ void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket,
     delete duplicateErrorPacket;
 }
 
-bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) const {
-    return isLocalAddress(packet->getDestination());
-}
-
-bool AbstractARAClient::isLocalAddress(AddressPtr address) const {
-    for(auto& interface: interfaces) {
-        if(interface->getLocalAddress()->equals(address)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
-    return isLocalAddress(packet->getSource());
-}
-
-void AbstractARAClient::broadCast(Packet* packet) {
-    for(auto& interface: interfaces) {
-        Packet* packetClone = packetFactory->makeClone(packet);
-        packetClone->setPreviousHop(packet->getSender());
-        packetClone->setSender(interface->getLocalAddress());
-        interface->broadcast(packetClone);
-    }
-    delete packet;
-}
-
-unsigned int AbstractARAClient::getNextSequenceNumber() {
-    return nextSequenceNumber++;
-}
-
 bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
     AddressPtr source = packet->getSource();
     unsigned int sequenceNumber = packet->getSequenceNumber();
@@ -557,16 +450,6 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
 float AbstractARAClient::calculateInitialPheromoneValue(unsigned int ttl) {
     int alpha = 1; // may change in the future implementations
     return alpha * ttl + initialPheromoneValue;
-}
-
-void AbstractARAClient::setRoutingTable(RoutingTable* newRoutingTable){
-    packetTrap->setRoutingTable(newRoutingTable);
-
-    // delete old routing table
-    delete routingTable;
-
-    // set new routing table
-    routingTable = newRoutingTable;
 }
 
 void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries) {

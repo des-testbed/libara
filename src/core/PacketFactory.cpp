@@ -14,6 +14,10 @@ Packet* PacketFactory::makeClone(const Packet* originalPacket) {
     return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), originalPacket->getType(), originalPacket->getSequenceNumber(), originalPacket->getTTL(), originalPacket->getPayload(), originalPacket->getPayloadLength(), originalPacket->getPreviousHop());
 }
 
+Packet* PacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber, const char* payload, unsigned int payloadSize) {
+    return makePacket(source, destination, source, PacketType::DATA, newSequenceNumber, maxHopCount, payload, payloadSize);
+}
+
 Packet* PacketFactory::makeFANT(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber) {
     return makePacket(source, destination, source, PacketType::FANT, newSequenceNumber, maxHopCount);
 }

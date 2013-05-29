@@ -20,12 +20,7 @@ simsignal_t ARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
 simsignal_t ARA::NON_SOURCE_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
 simsignal_t ARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
 
-ARA::ARA() {
-    messageDispatcher = new MessageDispatcher(this, this);
-}
-
 ARA::~ARA() {
-    delete messageDispatcher;
     delete routingTablePersistor;
 
     /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
@@ -49,8 +44,6 @@ void ARA::initialize(int stage) {
         OMNeTConfiguration config = OMNeTConfiguration(this);
         setLogger(config.getLogger());
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
-
-        messageDispatcher->setPacketFactory(packetFactory);
         AbstractARAClient::initialize(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
 
@@ -67,10 +60,6 @@ void ARA::initialize(int stage) {
         NON_SOURCE_ROUTE_DISCOVERY = registerSignal("nonSourceRouteDiscovery");
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
     }
-}
-
-void ARA::handleMessage(cMessage* message) {
-    messageDispatcher->dispatch(message);
 }
 
 void ARA::receivePacket(Packet* packet, NetworkInterface* interface) {

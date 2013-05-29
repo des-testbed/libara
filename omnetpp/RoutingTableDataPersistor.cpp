@@ -16,11 +16,10 @@ using namespace std;
 RoutingTableDataPersistor::RoutingTableDataPersistor(cModule* hostModule, int updateIntervallInMillis) {
     updateIntervall = updateIntervallInMillis;
     string fileName = getFileName(hostModule);
-    cout << "Writing file '" << fileName << "'" << endl;
     file.open(fileName.c_str(), ios::out | ios::binary | ios::trunc);
 
     if (file.is_open() == false) {
-        throw cRuntimeError("could not open file '%s', to write routing table data statistics", fileName.c_str());
+        throw cRuntimeError("Could not open file '%s', to write routing table data statistics", fileName.c_str());
     }
 }
 
@@ -62,7 +61,6 @@ void RoutingTableDataPersistor::write(RoutingTable* routingTable) {
         int64 rawTime = currentTime->getRawTime();
         file.write((char*)&rawTime, sizeof(rawTime));
 
-        // convert nrOfentries to big endian so the first byte we write is the one we care for
         int nrOfEntries = routingTable->getTotalNumberOfEntries();
         file.write((char*)&nrOfEntries, 1);
 
@@ -81,9 +79,6 @@ void RoutingTableDataPersistor::write(RoutingTable* routingTable) {
             file.write((char*)&nextHopInt, 4);
             file.write((char*)&pheromoneValue, sizeof(pheromoneValue));
         }
-
-        // flush to file in case the simulation crashes or anything happens
-        file.flush();
 
         delete lastWriteTime;
         lastWriteTime = currentTime;
