@@ -68,6 +68,13 @@ TEST_GROUP(AbstractARAClientTest) {
         }
     }
 
+    /**
+     * This is just for debugging failing tests
+     */
+    void printAllSentPackets(NetworkInterfaceMock* interface) {
+        return printAllSentPackets(interface->getSentPackets());
+    }
+
     void createNewClient(Configuration& configuration) {
         // first delete the old client
         delete client;
@@ -1913,10 +1920,10 @@ TEST(AbstractARAClientTest, schedulePANT) {
 
 
     // check if PANT1 is sent
-    TimerMock* pantsTimer1 = (TimerMock*) client->getPANTsTimer(dest1);
-    CHECK(pantsTimer1 != nullptr);
-    CHECK(pantsTimer1->isRunning());
-    pantsTimer1->expire();
+    TimerMock* pantTimer1 = (TimerMock*) client->getPANTsTimer(dest1);
+    CHECK(pantTimer1 != nullptr);
+    CHECK(pantTimer1->isRunning());
+    pantTimer1->expire();
 
     BYTES_EQUAL(3, sentPackets->size());
     sentPacket = sentPackets->back()->getLeft();
@@ -1930,10 +1937,10 @@ TEST(AbstractARAClientTest, schedulePANT) {
     CHECK(client->getPANTsTimer(dest1) == nullptr);
 
     // check if PANT2 is sent
-    TimerMock* pantsTimer2 = (TimerMock*) client->getPANTsTimer(dest2);
-    CHECK(pantsTimer2 != nullptr);
-    CHECK(pantsTimer2->isRunning());
-    pantsTimer2->expire();
+    TimerMock* pantTimer2 = (TimerMock*) client->getPANTsTimer(dest2);
+    CHECK(pantTimer2 != nullptr);
+    CHECK(pantTimer2->isRunning());
+    pantTimer2->expire();
 
     BYTES_EQUAL(4, sentPackets->size());
     sentPacket = sentPackets->back()->getLeft();
@@ -1970,7 +1977,33 @@ TEST(AbstractARAClientTest, scheduledPANTTimersAreDeletedInDestructor) {
     client->sendPacket(somePacket);
 
     // check if the PANT timer is running
-    TimerMock* pantsTimer = (TimerMock*) client->getPANTsTimer(destination);
-    CHECK(pantsTimer != nullptr);
-    CHECK(pantsTimer->isRunning());
+    TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(destination);
+    CHECK(pantTimer != nullptr);
+    CHECK(pantTimer->isRunning());
+}
+
+/**
+ * In this test we check that a client does only send a PANT if he is the original source of a transmission.
+ */
+TEST(AbstractARAClientTest, PANTSAreOnlySentByTheSource) {
+    // at first we need our own configuration to enable this feature
+    BasicConfiguration configuration = client->getStandardConfiguration();
+    configuration.setPANTInterval(1000); // it doesn't really matter what value we set as long as this is > 0
+    createNewClient(configuration);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("Foo");
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr someNode (new AddressMock("A"));
+
+    // we are testing from the perspective of (src)
+    routingTable->update(destination, someNode, interface, 10);
+
+    // start the test by giving sending a packet to (destination)
+    Packet* somePacket = new Packet(source, destination, source, PacketType::DATA, 1, 10, "Foo", 4);
+    client->sendPacket(somePacket);
+
+    // check that a PANT timer has *not* been started
+    TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(destination);
+    CHECK(pantTimer == nullptr);
 }

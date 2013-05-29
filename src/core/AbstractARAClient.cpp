@@ -139,12 +139,13 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 void AbstractARAClient::sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver) {
     interface->send(packet, receiver);
     registerActivity(receiver, interface);
-    checkPantTimer(packet->getDestination());
+    checkPantTimer(packet);
 }
 
-void AbstractARAClient::checkPantTimer(AddressPtr destination) {
+void AbstractARAClient::checkPantTimer(const Packet* packet) {
     if (pantIntervalInMilliSeconds > 0) {
-        if (scheduledPANTs.find(destination) == scheduledPANTs.end()) {
+        AddressPtr destination = packet->getDestination();
+        if (isLocalAddress(packet->getSource()) && scheduledPANTs.find(destination) == scheduledPANTs.end()) {
             Clock* clock = Environment::getClock();
             Timer* pantTimer = clock->getNewTimer();
             pantTimer->addTimeoutListener(this);

@@ -118,7 +118,7 @@ public:
 
     void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
 
-    void checkPantTimer(AddressPtr destination);
+    void checkPantTimer(const Packet* packet);
 
 protected:
     /**
