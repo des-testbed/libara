@@ -47,7 +47,7 @@ public:
      * Note: The result of this method is a newly created object which must be
      * deleted later by the calling class.
      */
-    Packet* makeFANT(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber);
+    Packet* makeFANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber);
 
     /**
      * Creates a new BANT based on the given packet. This BANT has the destination of
@@ -58,6 +58,15 @@ public:
      * deleted later by the calling class.
      */
      Packet* makeBANT(const Packet* originalPacket, unsigned int sequenceNumber);
+
+     /**
+       * Creates a new HELLO packet with the given addresses.
+       * The sender and previous hop will be set to the source.
+       *
+       * Note: The result of this method is a newly created object which must be
+       * deleted later by the calling class.
+       */
+     Packet* makePANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber);
 
      /**
       * Creates a new DUPLICATE_WARNING packet based on the information of the
@@ -100,6 +109,13 @@ public:
        */
      Packet* makeEnergyDisseminationPacket(AddressPtr source, unsigned int sequenceNumber, unsigned char energyLevel);
 
+     /**
+      * Creates a new HELLO packet with the given addresses.
+      * The sender and previous hop will be set to the source.
+      *
+      * Note: The result of this method is a newly created object which must be
+      * deleted later by the calling class.
+      */
      Packet* makeHelloPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber);
 
      void setMaxHopCount(int n);

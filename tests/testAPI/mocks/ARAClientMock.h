@@ -44,7 +44,9 @@ public:
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
     unsigned int getPacketDeliveryDelay() const;
+
     Timer* getNeighborActivityTimer() const;
+    Timer* getPANTsTimer(AddressPtr destination) const;
 };
 
 ARA_NAMESPACE_END

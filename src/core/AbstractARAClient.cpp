@@ -30,6 +30,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
     neighborActivityCheckIntervalInMilliSeconds = configuration.getNeighborActivityCheckIntervalInMilliSeconds();
     maxNeighborInactivityTimeInMilliSeconds = configuration.getMaxNeighborInactivityTimeInMilliSeconds();
+    pantIntervalInMilliSeconds = configuration.getPANTIntervalInMilliSeconds();
 
     this->packetFactory = packetFactory;
     this->routingTable = routingTable;
@@ -73,11 +74,17 @@ AbstractARAClient::~AbstractARAClient() {
     }
     runningDeliveryTimers.clear();
 
-    // delete last activity times of all currently known neighbors
+    // delete the last activity timers of all currently known neighbors
     for (NeighborActivityMap::iterator iterator=neighborActivityTimes.begin(); iterator!=neighborActivityTimes.end(); iterator++) {
         delete iterator->second.first;
     }
     neighborActivityTimes.clear();
+
+    // delete all running pant timers
+    for (RunningPANTsMap::iterator iterator=runningPANTTimers.begin(); iterator!=runningPANTTimers.end(); iterator++) {
+        delete iterator->first;
+    }
+    runningPANTTimers.clear();
 
     /* The following members may have be deleted earlier, depending on the destructor of the implementing class */
     DELETE_IF_NOT_NULL(pathReinforcementPolicy);
@@ -132,6 +139,20 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 void AbstractARAClient::sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver) {
     interface->send(packet, receiver);
     registerActivity(receiver, interface);
+    checkPantTimer(packet->getDestination());
+}
+
+void AbstractARAClient::checkPantTimer(AddressPtr destination) {
+    if (pantIntervalInMilliSeconds > 0) {
+        if (scheduledPANTs.find(destination) == scheduledPANTs.end()) {
+            Clock* clock = Environment::getClock();
+            Timer* pantTimer = clock->getNewTimer();
+            pantTimer->addTimeoutListener(this);
+            pantTimer->run(pantIntervalInMilliSeconds * 1000);
+            scheduledPANTs.insert(destination);
+            runningPANTTimers[pantTimer] = destination;
+        }
+    }
 }
 
 float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
@@ -457,24 +478,37 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
 }
 
 void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
+    // check if this is the neighbor activity timer
+    if (responsibleTimer == neighborActivityTimer) {
+        checkInactiveNeighbors();
+        startNeighborActivityTimer();
+        return;
+    }
+
+    // check if this is a route discovery timer
     DiscoveryTimerInfo::iterator discoveryTimerInfo = runningRouteDiscoveryTimers.find(responsibleTimer);
     if (discoveryTimerInfo != runningRouteDiscoveryTimers.end()) {
         handleExpiredRouteDiscoveryTimer(responsibleTimer, discoveryTimerInfo->second);
+        return;
     }
-    else if (responsibleTimer == neighborActivityTimer) {
-        checkInactiveNeighbors();
-        startNeighborActivityTimer();
+
+    // check if this is a PANT timer
+    RunningPANTsMap::iterator runningPANTTimerInfo = runningPANTTimers.find(responsibleTimer);
+    if (runningPANTTimers.find(responsibleTimer) != runningPANTTimers.end()) {
+        handleExpiredPANTTimer(responsibleTimer, runningPANTTimerInfo->second);
+        return;
     }
-    else {
-        DeliveryTimerInfo::iterator deliveryTimerInfo = runningDeliveryTimers.find(responsibleTimer);
-        if (deliveryTimerInfo != runningDeliveryTimers.end()) {
-            handleExpiredDeliveryTimer(responsibleTimer, deliveryTimerInfo->second);
-        }
-        else {
-            // if this happens its a bug in our code
-            logError("Could not identify expired timer");
-        }
+
+    // check if this is a delivery timer
+    DeliveryTimerInfo::iterator deliveryTimerInfo = runningDeliveryTimers.find(responsibleTimer);
+    if (deliveryTimerInfo != runningDeliveryTimers.end()) {
+        handleExpiredDeliveryTimer(responsibleTimer, deliveryTimerInfo->second);
+        return;
     }
+
+    // if this happens its a bug in our code
+    logError("Could not identify expired timer");
+    delete responsibleTimer;
 }
 
 void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo) {
@@ -522,7 +556,13 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, Address
     else {
         logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
     }
+}
 
+void AbstractARAClient::handleExpiredPANTTimer(Timer* pantTimer, AddressPtr destination) {
+    scheduledPANTs.erase(destination);
+    runningPANTTimers.erase(pantTimer);
+    broadcastPANT(destination);
+    delete pantTimer;
 }
 
 void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
@@ -637,6 +677,15 @@ void AbstractARAClient::broadcastRouteFailure(AddressPtr destination) {
         AddressPtr source = interface->getLocalAddress();
         unsigned int sequenceNr = getNextSequenceNumber();
         Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+        interface->broadcast(routeFailurePacket);
+    }
+}
+
+void AbstractARAClient::broadcastPANT(AddressPtr destination) {
+    for(auto& interface: interfaces) {
+        AddressPtr source = interface->getLocalAddress();
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* routeFailurePacket = packetFactory->makePANT(source, destination, sequenceNr);
         interface->broadcast(routeFailurePacket);
     }
 }

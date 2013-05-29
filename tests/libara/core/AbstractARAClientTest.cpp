@@ -67,6 +67,17 @@ TEST_GROUP(AbstractARAClientTest) {
             std::cout << " from " << packet->getSourceString() << " to " << packet->getDestinationString() << " via " << receiver->toString() << std::endl;
         }
     }
+
+    void createNewClient(Configuration& configuration) {
+        // first delete the old client
+        delete client;
+
+        // then create a new one
+        client = new ARAClientMock(configuration);
+        packetTrap = client->getPacketTrap();
+        routingTable = (RoutingTableMock*) client->getRoutingTable();
+        packetFactory = client->getPacketFactory();
+    }
 };
 
 TEST(AbstractARAClientTest, packetGetsTrappedIfNotDeliverable) {
@@ -1744,15 +1755,11 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     BasicConfiguration configuration = client->getStandardConfiguration();
     configuration.setNeighborActivityCheckInterval(500); // doesn't matter what we ste here because we expire the timer manually
     configuration.setMaxNeighborInactivityTime(500);
+    createNewClient(configuration);
 
-    ARAClientMock client = ARAClientMock(configuration);
-    packetTrap = client.getPacketTrap();
-    routingTable = (RoutingTableMock*) client.getRoutingTable();
-    packetFactory = client.getPacketFactory();
+    TimerMock* neighborActivityTimer = (TimerMock*) client->getNeighborActivityTimer();
 
-    TimerMock* neighborActivityTimer = (TimerMock*) client.getNeighborActivityTimer();
-
-    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr nodeA = interface->getLocalAddress();
     AddressPtr nodeB (new AddressMock("B"));
@@ -1768,16 +1775,16 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     routingTable->update(source, source, interface, 10);
 
     Packet* bant1 = new Packet(dest1, source, nodeB, PacketType::BANT, 1, 10);
-    client.receivePacket(bant1, interface);
+    client->receivePacket(bant1, interface);
     Packet* bant2 = new Packet(dest1, source, nodeC, PacketType::BANT, 1, 10);
-    client.receivePacket(bant2, interface);
+    client->receivePacket(bant2, interface);
     Packet* bant3 = new Packet(dest1, source, nodeD, PacketType::BANT, 1, 10);
-    client.receivePacket(bant3, interface);
+    client->receivePacket(bant3, interface);
     Packet* bant4 = new Packet(dest1, source, nodeE, PacketType::BANT, 1, 10);
-    client.receivePacket(bant4, interface);
+    client->receivePacket(bant4, interface);
     // we also have a route to dest2 via (E)
     Packet* bant5 = new Packet(dest2, source, nodeE, PacketType::BANT, 1, 10);
-    client.receivePacket(bant5, interface);
+    client->receivePacket(bant5, interface);
 
     // sanity check
     CHECK(routeIsKnown(dest1, nodeB, interface));
@@ -1789,12 +1796,12 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     // start the test by receiving a packet  from (D). This shows that (D) is still active and reachable
     TimeMock::letTimePass(300); // time is now at 300
     Packet* packetFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 2, 10);
-    client.receivePacket(packetFromD, interface);
+    client->receivePacket(packetFromD, interface);
 
     // after some more time we successfully route a packet via (E). We know there is no error because layer 2 reports no problems.
     TimeMock::letTimePass(100); // time is now at 400
     Packet* packetviaE = new Packet(source, dest2, source, PacketType::DATA, 3, 10);
-    client.sendPacket(packetviaE);
+    client->sendPacket(packetviaE);
 
     // the client should have relayed this packet via (E)
     // This is the fourth packet: 1. BANT from dest1, 2. BANT from dest2, 3. DATA from dest1, 4. DATA from src
@@ -1822,7 +1829,7 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
 
     // now simulate that (B) does not respond and there is a link brake detected at layer 2
     Packet* packetThatDetectedLinkBreak = new Packet(source, nodeB, nodeA, PacketType::HELLO, 5, 10);
-    client.handleBrokenLink(packetThatDetectedLinkBreak, nodeB, interface);
+    client->handleBrokenLink(packetThatDetectedLinkBreak, nodeB, interface);
 
     CHECK_FALSE(routeIsKnown(dest1, nodeB, interface));
     CHECK_TRUE(routeIsKnown(dest1, nodeC, interface));
@@ -1836,9 +1843,9 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     Packet* keepAliveFromC = new Packet(dest1, source, nodeC, PacketType::DATA, 3, 10);
     Packet* keepAliveFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 4, 10);
     Packet* keepAliveFromE = new Packet(dest1, source, nodeE, PacketType::DATA, 5, 10);
-    client.receivePacket(keepAliveFromC, interface);
-    client.receivePacket(keepAliveFromD, interface);
-    client.receivePacket(keepAliveFromE, interface);
+    client->receivePacket(keepAliveFromC, interface);
+    client->receivePacket(keepAliveFromD, interface);
+    client->receivePacket(keepAliveFromE, interface);
 
     TimeMock::letTimePass(300); // time is now at 1000
     neighborActivityTimer->expire();
@@ -1858,4 +1865,112 @@ TEST(AbstractARAClientTest, clientCanHandleHelloPacket) {
 
     Packet* helloPacket = packetFactory->makeHelloPacket(neighbor, interface->getLocalAddress(), 123);
     client->receivePacket(helloPacket, interface);
+}
+
+/**
+ * In this test we check if the PANT feature works.
+ *
+ * Test setup:                | Description
+ *                            |   * we test from perspective the of (src)
+ * (src)──>(A)──(..)──(dest1) |   * at first we let (src) send a packet to (dest1) via (A)
+ *   └────>(B)──(..)──(dest2) |   * this should make (src) schedule PANT1 to (dest1) for the future
+ *                            |   * then we let (src) send a packet to (dest2) via (B)
+ *                            |   * this should also make (src) schedule PANT2 for (dest2)
+ *                            |   * then we advance to that future and see if PANT1 and PANT2 have been sent independently
+ */
+TEST(AbstractARAClientTest, schedulePANT) {
+    // at first we need our own configuration to enable this feature
+    BasicConfiguration configuration = client->getStandardConfiguration();
+    configuration.setPANTInterval(1000); // it doesn't really matter what value we set as long as this is > 0 (timer is expired manually in the test)
+    createNewClient(configuration);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("src");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr dest1 (new AddressMock("dest1"));
+    AddressPtr dest2 (new AddressMock("dest2"));
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+
+    // we are testing from the perspective of (src)
+    routingTable->update(dest1, nodeA, interface, 10);
+    routingTable->update(dest2, nodeB, interface, 10);
+
+    // start the test by giving (src) a packet to route to (dest1)
+    Packet* packet1 = new Packet(source, dest1, source, PacketType::DATA, 1, 10, "Foo", 4);
+    client->sendPacket(packet1);
+
+    // and another packet to a different destination
+    Packet* packet2 = new Packet(source, dest2, source, PacketType::DATA, 2, 10, "Bar", 4);
+    client->sendPacket(packet2);
+
+    // just check if both packet have been relayed to be sure
+    BYTES_EQUAL(2, sentPackets->size());
+    const Packet* sentPacket = sentPackets->at(0)->getLeft();
+    CHECK(sentPacket->equals(packet1));
+    sentPacket = sentPackets->at(1)->getLeft();
+    CHECK(sentPacket->equals(packet2));
+
+
+    // check if PANT1 is sent
+    TimerMock* pantsTimer1 = (TimerMock*) client->getPANTsTimer(dest1);
+    CHECK(pantsTimer1 != nullptr);
+    CHECK(pantsTimer1->isRunning());
+    pantsTimer1->expire();
+
+    BYTES_EQUAL(3, sentPackets->size());
+    sentPacket = sentPackets->back()->getLeft();
+    CHECK(sentPacket->getType() == PacketType::PANT);
+    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getDestination()->equals(dest1));
+    CHECK(sentPacket->getSender()->equals(source));
+    BYTES_EQUAL(0, sentPacket->getPayloadLength());
+
+    // the timer should have been deleted and reset to nullptr
+    CHECK(client->getPANTsTimer(dest1) == nullptr);
+
+    // check if PANT2 is sent
+    TimerMock* pantsTimer2 = (TimerMock*) client->getPANTsTimer(dest2);
+    CHECK(pantsTimer2 != nullptr);
+    CHECK(pantsTimer2->isRunning());
+    pantsTimer2->expire();
+
+    BYTES_EQUAL(4, sentPackets->size());
+    sentPacket = sentPackets->back()->getLeft();
+    CHECK(sentPacket->getType() == PacketType::PANT);
+    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getDestination()->equals(dest2));
+    CHECK(sentPacket->getSender()->equals(source));
+    BYTES_EQUAL(0, sentPacket->getPayloadLength());
+
+    // the timer should have been deleted and reset to nullptr as well
+    CHECK(client->getPANTsTimer(dest2) == nullptr);
+}
+
+/**
+ * This test checks if the destructor does clean up the running pant timers.
+ * The test succeeds if there is no memory leak at the end
+ */
+TEST(AbstractARAClientTest, scheduledPANTTimersAreDeletedInDestructor) {
+    // at first we need our own configuration to enable this feature
+    BasicConfiguration configuration = client->getStandardConfiguration();
+    configuration.setPANTInterval(1000); // it doesn't really matter what value we set as long as this is > 0
+    createNewClient(configuration);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("src");
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr someNode (new AddressMock("A"));
+
+    // we are testing from the perspective of (src)
+    routingTable->update(destination, someNode, interface, 10);
+
+    // start the test by giving (src) a packet to route to (destination)
+    Packet* somePacket = new Packet(source, destination, source, PacketType::DATA, 1, 10, "Foo", 4);
+    client->sendPacket(somePacket);
+
+    // check if the PANT timer is running
+    TimerMock* pantsTimer = (TimerMock*) client->getPANTsTimer(destination);
+    CHECK(pantsTimer != nullptr);
+    CHECK(pantsTimer->isRunning());
 }
