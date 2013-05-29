@@ -65,6 +65,10 @@ unsigned int OMNeTConfiguration::getPacketDeliveryDelayInMilliSeconds() {
     return packetDeliveryDelayInMilliSeconds;
 }
 
+unsigned int OMNeTConfiguration::getNeighborActivityTimeoutInMilliSeconds() {
+    return neighborActivityTimeoutInMilliSeconds;
+}
+
 Logger* OMNeTConfiguration::getLogger() {
     return logger;
 }

@@ -18,6 +18,7 @@ TEST(PacketTypeTest, testIsAntPacket) {
     CHECK(PacketType::isAntPacket(PacketType::ACK) == false);
     CHECK(PacketType::isAntPacket(PacketType::ROUTE_FAILURE) == false);
     CHECK(PacketType::isAntPacket(PacketType::ENERGY_INFO) == false);
+    CHECK(PacketType::isAntPacket(PacketType::HELLO) == false);
 }
 
 TEST(PacketTypeTest, testIsDataPacket) {
@@ -29,6 +30,7 @@ TEST(PacketTypeTest, testIsDataPacket) {
     CHECK(PacketType::isDataPacket(PacketType::ACK) == false);
     CHECK(PacketType::isDataPacket(PacketType::ROUTE_FAILURE) == false);
     CHECK(PacketType::isDataPacket(PacketType::ENERGY_INFO) == false);
+    CHECK(PacketType::isDataPacket(PacketType::HELLO) == false);
 }
 
 TEST(PacketTypeTest, testGetAsString) {
@@ -40,5 +42,6 @@ TEST(PacketTypeTest, testGetAsString) {
     CHECK_EQUAL("ACK", PacketType::getAsString(PacketType::ACK));
     CHECK_EQUAL("ROUTE_FAILURE", PacketType::getAsString(PacketType::ROUTE_FAILURE));
     CHECK_EQUAL("ENERGY_INFO", PacketType::getAsString(PacketType::ENERGY_INFO));
+    CHECK_EQUAL("HELLO", PacketType::getAsString(PacketType::HELLO));
     CHECK_EQUAL("UNKOWN", PacketType::getAsString(123));
 }

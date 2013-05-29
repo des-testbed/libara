@@ -26,8 +26,9 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     evaporationPolicy = configuration.getEvaporationPolicy();
     initialPheromoneValue = configuration.getInitialPheromoneValue();
     maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
-    routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
     packetDeliveryDelayInMilliSeconds = configuration.getPacketDeliveryDelayInMilliSeconds();
+    routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
+    neighborActivityTimeoutInMilliSeconds = configuration.getNeighborActivityTimeoutInMilliSeconds();
 
     this->packetFactory = packetFactory;
     this->routingTable = routingTable;

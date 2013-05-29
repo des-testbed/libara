@@ -284,8 +284,9 @@ protected:
     PacketFactory* packetFactory;
 
     double initialPheromoneValue;
-    unsigned int routeDiscoveryTimeoutInMilliSeconds;
     unsigned int packetDeliveryDelayInMilliSeconds;
+    unsigned int routeDiscoveryTimeoutInMilliSeconds;
+    unsigned int neighborActivityTimeoutInMilliSeconds;
     int maxNrOfRouteDiscoveryRetries;
 
 private:

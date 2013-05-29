@@ -11,7 +11,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-class BasicEARAConfiguration : public BasicConfiguration, public EARAConfiguration {
+class BasicEARAConfiguration : public virtual BasicConfiguration, public EARAConfiguration {
 public:
     BasicEARAConfiguration(EvaporationPolicy* evaporationPolicy,
                            PathReinforcementPolicy* reinforcementPolicy,
@@ -23,29 +23,6 @@ public:
                            unsigned int energyDisseminationTimeoutInMilliSeconds=1000);
 
     virtual unsigned int getEnergyDisseminationTimeout() const;
-
-    /* It seems like C++ does not allow implementing interface methods via inheritance :( */
-    virtual EvaporationPolicy* getEvaporationPolicy() {
-        return BasicConfiguration::getEvaporationPolicy();
-    }
-    virtual PathReinforcementPolicy* getReinforcementPolicy() {
-        return BasicConfiguration::getReinforcementPolicy();
-    }
-    virtual ForwardingPolicy* getForwardingPolicy() {
-        return BasicConfiguration::getForwardingPolicy();
-    }
-    virtual float getInitialPheromoneValue() {
-        return BasicConfiguration::getInitialPheromoneValue();
-    }
-    virtual int getMaxNrOfRouteDiscoveryRetries() {
-        return BasicConfiguration::getMaxNrOfRouteDiscoveryRetries();
-    }
-    virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds() {
-        return BasicConfiguration::getRouteDiscoveryTimeoutInMilliSeconds();
-    }
-    virtual unsigned int getPacketDeliveryDelayInMilliSeconds() {
-        return BasicConfiguration::getPacketDeliveryDelayInMilliSeconds();
-    }
 
 private:
     unsigned int energyDisseminationTimeout;

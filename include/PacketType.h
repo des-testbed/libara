@@ -30,7 +30,8 @@ public:
         DUPLICATE_ERROR,
         ACK,
         ROUTE_FAILURE,
-        ENERGY_INFO
+        ENERGY_INFO,
+        HELLO
     };
 
     static bool isAntPacket(char type);
@@ -46,6 +47,7 @@ public:
             case PacketType::DUPLICATE_ERROR: return "DUPLICATE_ERROR";
             case PacketType::ROUTE_FAILURE: return "ROUTE_FAILURE";
             case PacketType::ENERGY_INFO: return "ENERGY_INFO";
+            case PacketType::HELLO: return "HELLO";
             default: return "UNKOWN";
         }
     }

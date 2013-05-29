@@ -11,6 +11,7 @@
 #include "NetworkInterfaceMock.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
+#include "BasicConfiguration.h"
 
 #include <string>
 
@@ -25,6 +26,7 @@ class NetworkInterfaceMock;
 class ARAClientMock: public AbstractARAClient, public AbstractClientMockBase {
 public:
     ARAClientMock();
+    BasicConfiguration getStandardConfiguration() const;
 
     void receivePacket(Packet* packet, NetworkInterface* interface);
     virtual void handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);

@@ -14,6 +14,7 @@ BasicConfiguration::BasicConfiguration(EvaporationPolicy* evaporationPolicy, Pat
     this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
     this->routeDiscoveryTimeoutInMilliSeconds = routeDiscoveryTimeoutInMilliSeconds;
     this->packetDeliveryDelayInMilliSeconds = packetDeliveryDelayInMilliSeconds;
+    this->neighborActivityTimeoutInMilliSeconds = 0; // disabled by default
 }
 
 EvaporationPolicy* BasicConfiguration::getEvaporationPolicy() {
@@ -42,6 +43,14 @@ unsigned int BasicConfiguration::getRouteDiscoveryTimeoutInMilliSeconds() {
 
 unsigned int BasicConfiguration::getPacketDeliveryDelayInMilliSeconds() {
     return packetDeliveryDelayInMilliSeconds;
+}
+
+unsigned int BasicConfiguration::getNeighborActivityTimeoutInMilliSeconds() {
+    return neighborActivityTimeoutInMilliSeconds;
+}
+
+void BasicConfiguration::setNeighborActivityTimeoutInMs(unsigned int newTimeout) {
+    neighborActivityTimeoutInMilliSeconds = newTimeout;
 }
 
 ARA_NAMESPACE_END

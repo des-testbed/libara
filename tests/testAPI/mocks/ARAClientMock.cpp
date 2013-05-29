@@ -19,15 +19,19 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 ARAClientMock::ARAClientMock() {
+    BasicConfiguration configuration = getStandardConfiguration();
+    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
+}
+
+BasicConfiguration ARAClientMock::getStandardConfiguration() const {
     float initialPhi = 5.0;
     float deltaPhi = 5.0;
-    BasicConfiguration configuration = BasicConfiguration(
-            new ExponentialEvaporationPolicyMock(),
-            new LinearPathReinforcementPolicy(deltaPhi),
-            new BestPheromoneForwardingPolicy(),
-            initialPhi
+    return BasicConfiguration(
+        new ExponentialEvaporationPolicyMock(),
+        new LinearPathReinforcementPolicy(deltaPhi),
+        new BestPheromoneForwardingPolicy(),
+        initialPhi
     );
-    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
 }
 
 void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {

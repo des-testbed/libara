@@ -64,7 +64,7 @@ TEST_GROUP(AbstractARAClientTest) {
             AddressPtr receiver = sendPacketPair->getRight();
 
             std::cout << packetCounter << ": " << PacketType::getAsString(packet->getType());
-            std::cout << " to " << packet->getDestinationString() << " via " << receiver->toString() << std::endl;
+            std::cout << " from " << packet->getSourceString() << " to " << packet->getDestinationString() << " via " << receiver->toString() << std::endl;
         }
     }
 };
@@ -1681,8 +1681,8 @@ TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDele
  * Test setup:                   | Description:
  *                ┌--->(dest1)   |   * We are testing from the perspective of (A)
  * (...)---(A)---(B)-->(dest2)   |   * (A) knows that it can reach (dest1), (dest2) & (dest3) via (B)
- *          |     └--->(dest3)   |   * (A) recognizes a link failure to (B)
- *          |             ↑      |   * (A) should now remove a routing table entries which lead over (B)
+ *          │     └--->(dest3)   |   * (A) recognizes a link failure to (B)
+ *          │             │      |   * (A) should now remove a routing table entries which lead over (B)
  *          └--->(C)--->--┘      |   *     but it should not delete the remaining route via (C) since it is still valid
  */
 TEST(AbstractARAClientTest, deleteAllKnownRoutesViaNextHopwhenLinkIsBroken) {
@@ -1724,4 +1724,100 @@ TEST(AbstractARAClientTest, deleteAllKnownRoutesViaNextHopwhenLinkIsBroken) {
         CHECK(sentPacket->getType() == PacketType::ROUTE_FAILURE);
         CHECK(interface->isBroadcastAddress(receiver) || receiver->equals(nodeC));
     }
+}
+
+/**
+ * This test checks if a node sends a HELLO packet to all of its neighbors
+ * which have not send or successfully received any packets lately.
+ *
+ * Test setup:                      | Description (Test from perspective of (A)):
+ *          ┌--->(B)──(..)───┐      |   * After some time has passed the following happens:
+ * (src)───(A)-->(C)──(..)──(dest1) |   * (A) has received a packet from (D)
+ *          │└<─>(D)──(..)───┘│     |   * (A) has successfully send a packet via (E)
+ *          └───>(E)──(..)────┘     |   * but (A) has not heard from (B) and (C) lately
+ *                └─────────(dest2) |   * (A) should send a HELLO unicast to (B) and (C)
+ *                                  |   * only (C) responds but for (B) a broken link is detected
+ *                                  |   * the link to (C) should be deleted
+ */
+TEST(AbstractARAClientTest, sendHELLOPacketToInactiveNeighbors) {
+    BasicConfiguration configuration = client->getStandardConfiguration();
+    configuration.setNeighborActivityTimeoutInMs(1000);
+    client->initialize(configuration, routingTable, packetFactory);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr nodeD (new AddressMock("D"));
+    AddressPtr nodeE (new AddressMock("E"));
+    AddressPtr source (new AddressMock("src"));;
+    AddressPtr dest1 (new AddressMock("dest1"));
+    AddressPtr dest2 (new AddressMock("dest2"));
+
+    // at first we create all routes via the reception of a BANT from (dest)
+    // create a route to delay the BANT
+    routingTable->update(source, source, interface, 10);
+
+    Packet* bant1 = new Packet(dest1, source, nodeB, PacketType::BANT, 1, 10);
+    client->receivePacket(bant1, interface);
+    Packet* bant2 = new Packet(dest1, source, nodeC, PacketType::BANT, 1, 10);
+    client->receivePacket(bant2, interface);
+    Packet* bant3 = new Packet(dest1, source, nodeD, PacketType::BANT, 1, 10);
+    client->receivePacket(bant3, interface);
+    Packet* bant4 = new Packet(dest1, source, nodeE, PacketType::BANT, 1, 10);
+    client->receivePacket(bant4, interface);
+    // we also have a route to dest2 via (E)
+    Packet* bant5 = new Packet(dest2, source, nodeE, PacketType::BANT, 1, 10);
+    client->receivePacket(bant5, interface);
+
+    // sanity check
+    CHECK(routeIsKnown(dest1, nodeB, interface));
+    CHECK(routeIsKnown(dest1, nodeC, interface));
+    CHECK(routeIsKnown(dest1, nodeD, interface));
+    CHECK(routeIsKnown(dest1, nodeE, interface));
+    CHECK(routeIsKnown(dest2, nodeE, interface));
+
+    // start the test by receiving a packet  from (D). This shows that (D) is still active and reachable
+    TimeMock::letTimePass(400);
+    Packet* packetFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 2, 10);
+    client->receivePacket(packetFromD, interface);
+
+    // after some more time we successfully route a packet via (E). We know there is no error because layer 2 reports no problems.
+    TimeMock::letTimePass(400);
+    Packet* packetviaE = new Packet(source, dest2, source, PacketType::DATA, 3, 10);
+    client->receivePacket(packetviaE, interface);
+
+    // the client should have relayed this packet via (E)
+    // This is the fourth packet: 1. BANT from dest1, 2. BANT from dest2, 3. DATA from dest1, 4. DATA from src
+    BYTES_EQUAL(4, sentPackets->size());
+    const Packet* sentPacket = sentPackets->back()->getLeft();
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(sentPacket->getSource()->equals(source) && sentPacket->getSequenceNumber() == 3);
+    CHECK(receiver->equals(nodeE));
+
+    // now even more time passes and the neighborActivityDelayInMs is reached (400+400+200)
+    TimeMock::letTimePass(200);
+
+    // the client should now try to reach (B) and (C) to see if they are still active
+    BYTES_EQUAL(6, sentPackets->size());
+    for (int i = 4; i <= 5; i++) {
+        sentPacket = sentPackets->at(i)->getLeft();
+        receiver = sentPackets->at(i)->getRight();
+
+        CHECK(sentPacket->getType() == PacketType::HELLO);
+        CHECK(sentPacket->getSource()->equals(nodeA));
+        CHECK(sentPacket->getSender()->equals(nodeA));
+        CHECK(sentPacket->getDestination()->equals(nodeB) || sentPacket->getDestination()->equals(nodeC));
+    }
+
+    // now simulate that (B) does not respond and there is a link brake detected at layer 2
+    Packet* packetThatDetectedLinkBreak = new Packet(nodeA, nodeB, nodeA, PacketType::HELLO, 5, 10);
+    client->handleBrokenLink(packetThatDetectedLinkBreak, nodeB, interface);
+
+    CHECK_FALSE(routeIsKnown(dest1, nodeB, interface));
+    CHECK_TRUE(routeIsKnown(dest1, nodeC, interface));
+    CHECK_TRUE(routeIsKnown(dest1, nodeD, interface));
+    CHECK_TRUE(routeIsKnown(dest1, nodeE, interface));
+    CHECK_TRUE(routeIsKnown(dest2, nodeE, interface));
 }
