@@ -18,14 +18,18 @@ Installation from git
 3. After the checkout you can build the sources and simulation via 
 
 		make all
+		
+   We also support a headless build via
 
-4. Ara-Sim is developed with a test driven approach using the [CppUTest][1] framework. 
+		 make HEADLESS=TRUE
+
+5. Ara-Sim is developed with a test driven approach using the [CppUTest][1] framework. 
 You should can run the whole Ara-Sim regression test suit via the following command.
 This will automatically initialize and update the git submodule [tests/cpputest][2].
 
 		make test
 
-5. A doxygen based documentation can be build using the 'doc' target
+6. A doxygen based documentation can be build using the 'doc' target
 
 		make doc
 
