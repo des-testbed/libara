@@ -546,7 +546,7 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
         logDebug("Sending %u from %s over alternative route", packet->getSequenceNumber(), packet->getSourceString().c_str());
         sendPacket(packet);
     }
-    else if(isLocalAddress(packet->getSource())) {
+    else if(packet->isDataPacket() && isLocalAddress(packet->getSource())) {
         packetTrap->trapPacket(packet);
 
         if (isRouteDiscoveryRunning(packet->getDestination())) {
