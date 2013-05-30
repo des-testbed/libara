@@ -144,14 +144,19 @@ void AbstractARAClient::sendUnicast(Packet* packet, NetworkInterface* interface,
 
 void AbstractARAClient::checkPantTimer(const Packet* packet) {
     if (pantIntervalInMilliSeconds > 0) {
-        AddressPtr destination = packet->getDestination();
-        if (isLocalAddress(packet->getSource()) && scheduledPANTs.find(destination) == scheduledPANTs.end()) {
-            Clock* clock = Environment::getClock();
-            Timer* pantTimer = clock->getNewTimer();
-            pantTimer->addTimeoutListener(this);
-            pantTimer->run(pantIntervalInMilliSeconds * 1000);
-            scheduledPANTs.insert(destination);
-            runningPANTTimers[pantTimer] = destination;
+        // only send PANTs if this feature is enabled
+        if (packet->isDataPacket() && isLocalAddress(packet->getSource())) {
+            // only trigger the sending of a PANT by DATA packets which originate from this ndoe
+            AddressPtr destination = packet->getDestination();
+            if (scheduledPANTs.find(destination) == scheduledPANTs.end()) {
+                // only start PANT if no timer is already running
+                Clock* clock = Environment::getClock();
+                Timer* pantTimer = clock->getNewTimer();
+                pantTimer->addTimeoutListener(this);
+                pantTimer->run(pantIntervalInMilliSeconds * 1000);
+                scheduledPANTs.insert(destination);
+                runningPANTTimers[pantTimer] = destination;
+            }
         }
     }
 }
