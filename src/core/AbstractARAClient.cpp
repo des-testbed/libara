@@ -149,6 +149,7 @@ void AbstractARAClient::checkPantTimer(const Packet* packet) {
             // only trigger the sending of a PANT by DATA packets which originate from this ndoe
             AddressPtr destination = packet->getDestination();
             if (scheduledPANTs.find(destination) == scheduledPANTs.end()) {
+                logDebug("Scheduled PANT to be sent in %u ms", pantIntervalInMilliSeconds);
                 // only start PANT if no timer is already running
                 Clock* clock = Environment::getClock();
                 Timer* pantTimer = clock->getNewTimer();
@@ -323,6 +324,7 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 
 void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
+        logDebug("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
         deliverToSystem(packet);
     }
     else {
@@ -688,6 +690,7 @@ void AbstractARAClient::broadcastRouteFailure(AddressPtr destination) {
 }
 
 void AbstractARAClient::broadcastPANT(AddressPtr destination) {
+    logDebug("Sending new PANT over all interfaces");
     for(auto& interface: interfaces) {
         AddressPtr source = interface->getLocalAddress();
         unsigned int sequenceNr = getNextSequenceNumber();
