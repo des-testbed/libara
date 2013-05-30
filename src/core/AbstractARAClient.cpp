@@ -606,10 +606,10 @@ void AbstractARAClient::checkInactiveNeighbors() {
 
 void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterface* interface) {
     AddressPtr destination = packet->getDestination();
-    AddressPtr nextHop = packet->getSender();
+    AddressPtr nextHop = packet->getSource();
 
     if (routingTable->exists(destination, nextHop, interface)) {
-        logInfo("Received ROUTE_FAILURE from %s. Deleting route to %s via %s", packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSenderString().c_str());
+        logInfo("Received ROUTE_FAILURE from %s. Deleting route to %s via %s", packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSourceString().c_str());
         deleteRoutingTableEntry(destination, nextHop, interface);
     }
 
@@ -623,9 +623,9 @@ void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressP
         deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
         if (possibleNextHops.size() == 1) {
             logDebug("Only one last route is known to %s. Notifying last remaining neighbor with ROUTE_FAILURE packet", destination->toString().c_str());
-            AddressPtr source = interface->getLocalAddress();
+            AddressPtr localAddress = interface->getLocalAddress();
             unsigned int sequenceNr = getNextSequenceNumber();
-            Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+            Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(localAddress, destination, sequenceNr);
             RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
             lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, lastRemainingRoute->getAddress());
         }
@@ -638,9 +638,9 @@ void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressP
 
 void AbstractARAClient::broadcastRouteFailure(AddressPtr destination) {
     for(auto& interface: interfaces) {
-        AddressPtr source = interface->getLocalAddress();
+        AddressPtr localAddress = interface->getLocalAddress();
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(localAddress, destination, sequenceNr);
         interface->broadcast(routeFailurePacket);
     }
 }
