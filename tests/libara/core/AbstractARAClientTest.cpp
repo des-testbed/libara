@@ -1859,3 +1859,65 @@ TEST(AbstractARAClientTest, clientCanHandleHelloPacket) {
     Packet* helloPacket = packetFactory->makeHelloPacket(neighbor, interface->getLocalAddress(), 123);
     client->receivePacket(helloPacket, interface);
 }
+
+/**
+ * In this test we check the following scenario:
+ *
+  * Test setup:                      | Description
+ *                                   |   * The link (C,dest) is broken
+ * (src)──(A)──(B)──(C)--(dest)      |   * (C) sends a ROUTE_FAILURE because it has no more routes to (dest)
+ *                                   |   * (B) receives this ROUTE_FAILURE, deletes the route via (C)
+ *                                   |   * now (B) has no more routes and it needs to send a ROUTE_FAILURE itself
+ *                                   |   * (A) does the same
+ */
+TEST(AbstractARAClientTest, chainRouteFailuresIfCriticalLinkBroke) {
+    NetworkInterfaceMock* interfaceOfSrc = client->createNewNetworkInterfaceMock("src");
+
+    ARAClientMock clientA = ARAClientMock();
+    NetworkInterfaceMock* interfaceOfA = clientA.createNewNetworkInterfaceMock("A");
+    SendPacketsList* sentPacketsOfA = interfaceOfA->getSentPackets();
+
+    ARAClientMock clientB = ARAClientMock();
+    NetworkInterfaceMock* interfaceOfB = clientB.createNewNetworkInterfaceMock("B");
+    SendPacketsList* sentPacketsOfB = interfaceOfB->getSentPackets();
+
+    ARAClientMock clientC = ARAClientMock();
+    NetworkInterfaceMock* interfaceOfC = clientC.createNewNetworkInterfaceMock("C");
+    SendPacketsList* sentPacketsOfC = interfaceOfC->getSentPackets();
+
+    AddressPtr source = interfaceOfSrc->getLocalAddress();
+    AddressPtr nodeA = interfaceOfA->getLocalAddress();
+    AddressPtr nodeB = interfaceOfB->getLocalAddress();
+    AddressPtr nodeC = interfaceOfC->getLocalAddress();
+    AddressPtr destination (new AddressMock("destination"));
+
+    routingTable->update(destination, nodeA, interfaceOfSrc, 10);
+    clientA.getRoutingTable()->update(destination, nodeB, interfaceOfA, 10);
+    clientB.getRoutingTable()->update(destination, nodeC, interfaceOfB, 10);
+    clientC.getRoutingTable()->update(destination, destination, interfaceOfC, 10);
+
+    // start the test by noticing the broken link
+    Packet* somePacket = new Packet(source, destination, nodeC, PacketType::DATA, 123, 10);
+    clientC.handleBrokenLink(somePacket, destination, interfaceOfC);
+
+    // (C) should have broadcasted a ROUTE FAILURE
+    BYTES_EQUAL(1, sentPacketsOfC->size());
+    const Packet* routeFailurePacket = sentPacketsOfC->back()->getLeft();
+    CHECK(routeFailurePacket->getType() == PacketType::ROUTE_FAILURE);
+
+    // now let (B) receive this ROUTE_FAILURE
+    clientB.handleBrokenLink(packetFactory->makeClone(routeFailurePacket), nodeC, interfaceOfB);
+
+    // (B) should have broadcasted a ROUTE FAILURE
+    BYTES_EQUAL(1, sentPacketsOfB->size());
+    routeFailurePacket = sentPacketsOfB->back()->getLeft();
+    CHECK(routeFailurePacket->getType() == PacketType::ROUTE_FAILURE);
+
+    // now let (A) receive this ROUTE_FAILURE
+    clientA.handleBrokenLink(packetFactory->makeClone(routeFailurePacket), nodeB, interfaceOfA);
+
+    // (A) should have broadcasted a ROUTE FAILURE
+    BYTES_EQUAL(1, sentPacketsOfA->size());
+    routeFailurePacket = sentPacketsOfA->back()->getLeft();
+    CHECK(routeFailurePacket->getType() == PacketType::ROUTE_FAILURE);
+}
