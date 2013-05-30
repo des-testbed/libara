@@ -104,7 +104,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     if (packet->getTTL() > 0) {
         AddressPtr destination = packet->getDestination();
         if (isRouteDiscoveryRunning(destination)) {
-            logTrace("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
+            logDebug("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
             packetTrap->trapPacket(packet);
         }
         else if (routingTable->isDeliverable(packet)) {
@@ -115,7 +115,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             packet->setSender(interface->getLocalAddress());
 
             float newPheromoneValue = reinforcePheromoneValue(destination, nextHopAddress, interface);
-            logTrace("Forwarding DATA packet %u from %s to %s via %s (phi=%.2f)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str(), newPheromoneValue);
+            logDebug("Forwarding DATA packet %u from %s to %s via %s (phi=%.2f)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str(), newPheromoneValue);
 
             sendUnicast(packet, interface, nextHopAddress);
         }
@@ -336,7 +336,7 @@ void AbstractARAClient::handleAntPacket(Packet* packet) {
         handleAntPacketForThisNode(packet);
     }
     else if (packet->getTTL() > 0) {
-        logDebug("Broadcasting %s %u from %s (via %s)", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
+        logDebug("Broadcasting %s %u from %s to %s (came from %s)", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSenderString().c_str());
         broadCast(packet);
     }
     else {
