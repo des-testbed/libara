@@ -34,8 +34,9 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         static simsignal_t LOOP_DETECTION_SIGNAL;
         static simsignal_t ROUTE_FAILURE_SIGNAL;
         static simsignal_t DROP_PACKET_WITH_ZERO_TTL;
-        static simsignal_t NON_SOURCE_ROUTE_DISCOVERY;
+        static simsignal_t ROUTE_FAILURE_NO_HOP;
         static simsignal_t NEW_ROUTE_DISCOVERY;
+        static simsignal_t ROUTE_FAILURE_NEXT_HOP_IS_SENDER;
 
         virtual void receivePacket(Packet* packet, NetworkInterface* interface);
 

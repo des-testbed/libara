@@ -43,7 +43,8 @@ simple ARA {
         @statistic[routingLoopDetected](title="Routing loops";record=count,vector);
         @statistic[routeFailure](title="Route Failures";record=count,vector);
         @statistic[dropZeroTTLPacket](title="Zero TTL drops";record=count,vector);
-        @statistic[nonSourceRouteDiscovery](title="Non-source Route Discovery";record=count);
+        @statistic[routeFailureNoHopAvailable](title="Route Failure (no hop available)";record=count);
+        @statistic[routeFailureNextHopIsSender](title="Route Failure (next hop = sender)";record=count);
         @statistic[newRouteDiscovery](title="Nr of Route Discoveries";record=count);
 
     gates:

@@ -17,8 +17,9 @@ simsignal_t ARA::PACKET_NOT_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::LOOP_DETECTION_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::ROUTE_FAILURE_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
-simsignal_t ARA::NON_SOURCE_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
+simsignal_t ARA::ROUTE_FAILURE_NO_HOP = SIMSIGNAL_NULL;
 simsignal_t ARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
+simsignal_t ARA::ROUTE_FAILURE_NEXT_HOP_IS_SENDER = SIMSIGNAL_NULL;
 
 ARA::~ARA() {
     delete routingTablePersistor;
@@ -57,8 +58,9 @@ void ARA::initialize(int stage) {
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
         ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
         DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
-        NON_SOURCE_ROUTE_DISCOVERY = registerSignal("nonSourceRouteDiscovery");
+        ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
+        ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
     }
 }
 
@@ -106,7 +108,14 @@ void ARA::handlePacketWithZeroTTL(Packet* packet) {
 }
 
 void ARA::handleNonSourceRouteDiscovery(Packet* packet) {
-    emit(NON_SOURCE_ROUTE_DISCOVERY, 1);
+    if(routingTable->isDeliverable(packet->getDestination())) {
+        // can not be sent because the only known next hop is the sender of this packet
+        emit(ROUTE_FAILURE_NEXT_HOP_IS_SENDER, 1);
+    }
+    else {
+        // can not be sent because there really is no known next hop
+        emit(ROUTE_FAILURE_NO_HOP, 1);
+    }
     AbstractARAClient::handleNonSourceRouteDiscovery(packet);
 }
 
