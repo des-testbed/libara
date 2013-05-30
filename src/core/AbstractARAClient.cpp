@@ -336,7 +336,7 @@ void AbstractARAClient::handleAntPacket(Packet* packet) {
         handleAntPacketForThisNode(packet);
     }
     else if (packet->getTTL() > 0) {
-        logTrace("Broadcasting %s %u from %s (via %s)", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
+        logDebug("Broadcasting %s %u from %s (via %s)", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
         broadCast(packet);
     }
     else {
