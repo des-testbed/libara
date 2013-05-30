@@ -195,7 +195,6 @@ void AbstractARAClient::handlePacketWithZeroTTL(Packet* packet) {
 }
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
-    registerActivity(packet->getSender(), interface);
     updateRoutingTable(packet, interface);
     packet->decreaseTTL();
 
@@ -274,9 +273,11 @@ bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
 
 void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
     if (packet->isDataPacket()) {
+        registerActivity(packet->getSender(), interface);
         handleDataPacket(packet);
     }
     else if(packet->isAntPacket()) {
+        registerActivity(packet->getSender(), interface);
         handleAntPacket(packet);
     }
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {

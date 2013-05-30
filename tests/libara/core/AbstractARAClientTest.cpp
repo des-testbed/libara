@@ -67,6 +67,18 @@ TEST_GROUP(AbstractARAClientTest) {
             std::cout << " from " << packet->getSourceString() << " to " << packet->getDestinationString() << " via " << receiver->toString() << std::endl;
         }
     }
+
+    void activateNeighborActivityCheck(unsigned int maxNeighborInavtivityTimeInMs, unsigned int neighborCheckIntervalInMs = 500) {
+        BasicConfiguration configuration = client->getStandardConfiguration();
+        configuration.setNeighborActivityCheckInterval(neighborCheckIntervalInMs); // this doesn't really matter in the tests as the timer is usually expired manually by the test
+        configuration.setMaxNeighborInactivityTime(maxNeighborInavtivityTimeInMs);
+
+        delete client;
+        client = new ARAClientMock(configuration);
+        packetTrap = client->getPacketTrap();
+        routingTable = (RoutingTableMock*) client->getRoutingTable();
+        packetFactory = client->getPacketFactory();
+    }
 };
 
 TEST(AbstractARAClientTest, packetGetsTrappedIfNotDeliverable) {
@@ -1740,19 +1752,10 @@ TEST(AbstractARAClientTest, deleteAllKnownRoutesViaNextHopwhenLinkIsBroken) {
  *                                  |   * the link to (C) should be deleted
  */
 TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
-    // at first we need our own configuration to enable this feature
-    BasicConfiguration configuration = client->getStandardConfiguration();
-    configuration.setNeighborActivityCheckInterval(500); // doesn't matter what we ste here because we expire the timer manually
-    configuration.setMaxNeighborInactivityTime(500);
+    activateNeighborActivityCheck(500);
+    TimerMock* neighborActivityTimer = (TimerMock*) client->getNeighborActivityTimer();
 
-    ARAClientMock client = ARAClientMock(configuration);
-    packetTrap = client.getPacketTrap();
-    routingTable = (RoutingTableMock*) client.getRoutingTable();
-    packetFactory = client.getPacketFactory();
-
-    TimerMock* neighborActivityTimer = (TimerMock*) client.getNeighborActivityTimer();
-
-    NetworkInterfaceMock* interface = client.createNewNetworkInterfaceMock("A");
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr nodeA = interface->getLocalAddress();
     AddressPtr nodeB (new AddressMock("B"));
@@ -1763,21 +1766,23 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     AddressPtr dest1 (new AddressMock("dest1"));
     AddressPtr dest2 (new AddressMock("dest2"));
 
-    // at first we create all routes via the reception of a BANT from (dest)
-    // create a route to delay the BANT
+    unsigned int seqNr = 1;
+
+    // at first we create all routes via the reception some data from (dest)
+    // create a route to relay the data
     routingTable->update(source, source, interface, 10);
 
-    Packet* bant1 = new Packet(dest1, source, nodeB, PacketType::BANT, 1, 10);
-    client.receivePacket(bant1, interface);
-    Packet* bant2 = new Packet(dest1, source, nodeC, PacketType::BANT, 1, 10);
-    client.receivePacket(bant2, interface);
-    Packet* bant3 = new Packet(dest1, source, nodeD, PacketType::BANT, 1, 10);
-    client.receivePacket(bant3, interface);
-    Packet* bant4 = new Packet(dest1, source, nodeE, PacketType::BANT, 1, 10);
-    client.receivePacket(bant4, interface);
+    Packet* data1 = new Packet(dest1, source, nodeB, PacketType::DATA, seqNr++, 10);
+    client->receivePacket(data1, interface);
+    Packet* data2 = new Packet(dest1, source, nodeC, PacketType::DATA, seqNr++, 10);
+    client->receivePacket(data2, interface);
+    Packet* data3 = new Packet(dest1, source, nodeD, PacketType::DATA, seqNr++, 10);
+    client->receivePacket(data3, interface);
+    Packet* data4 = new Packet(dest1, source, nodeE, PacketType::DATA, seqNr++, 10);
+    client->receivePacket(data4, interface);
     // we also have a route to dest2 via (E)
-    Packet* bant5 = new Packet(dest2, source, nodeE, PacketType::BANT, 1, 10);
-    client.receivePacket(bant5, interface);
+    Packet* data5 = new Packet(dest2, source, nodeE, PacketType::DATA, seqNr++, 10);
+    client->receivePacket(data5, interface);
 
     // sanity check
     CHECK(routeIsKnown(dest1, nodeB, interface));
@@ -1788,20 +1793,20 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
 
     // start the test by receiving a packet  from (D). This shows that (D) is still active and reachable
     TimeMock::letTimePass(300); // time is now at 300
-    Packet* packetFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 2, 10);
-    client.receivePacket(packetFromD, interface);
+    Packet* packetFromD = new Packet(dest1, source, nodeD, PacketType::DATA, seqNr++, 10);
+    client->receivePacket(packetFromD, interface);
 
     // after some more time we successfully route a packet via (E). We know there is no error because layer 2 reports no problems.
     TimeMock::letTimePass(100); // time is now at 400
-    Packet* packetviaE = new Packet(source, dest2, source, PacketType::DATA, 3, 10);
-    client.sendPacket(packetviaE);
+    Packet* packetviaE = new Packet(source, dest2, source, PacketType::DATA, seqNr++, 10);
+    client->sendPacket(packetviaE);
 
     // the client should have relayed this packet via (E)
-    // This is the fourth packet: 1. BANT from dest1, 2. BANT from dest2, 3. DATA from dest1, 4. DATA from src
-    BYTES_EQUAL(4, sentPackets->size());
+    // This is the seventh packet: 1-4. DATA from dest1, 5. DATA from dest2, 6. DATA from dest1, 7. DATA from src
+    BYTES_EQUAL(7, sentPackets->size());
     const Packet* sentPacket = sentPackets->back()->getLeft();
     AddressPtr receiver = sentPackets->back()->getRight();
-    CHECK(sentPacket->getSource()->equals(source) && sentPacket->getSequenceNumber() == 3);
+    CHECK(sentPacket->getSource()->equals(source) && sentPacket->getSequenceNumber() == seqNr-1);
     CHECK(receiver->equals(nodeE));
 
     // now even more time passes and the neighborActivityDelayInMs should be reached for (B) and (C)
@@ -1809,8 +1814,8 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     neighborActivityTimer->expire();
 
     // the client should now try to reach (B) and (C) to see if they are still active
-    BYTES_EQUAL(6, sentPackets->size());
-    for (int i = 4; i <= 5; i++) {
+    BYTES_EQUAL(9, sentPackets->size());
+    for (int i = 7; i <= 8; i++) {
         sentPacket = sentPackets->at(i)->getLeft();
         receiver = sentPackets->at(i)->getRight();
 
@@ -1822,7 +1827,7 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
 
     // now simulate that (B) does not respond and there is a link brake detected at layer 2
     Packet* packetThatDetectedLinkBreak = new Packet(source, nodeB, nodeA, PacketType::HELLO, 5, 10);
-    client.handleBrokenLink(packetThatDetectedLinkBreak, nodeB, interface);
+    client->handleBrokenLink(packetThatDetectedLinkBreak, nodeB, interface);
 
     CHECK_FALSE(routeIsKnown(dest1, nodeB, interface));
     CHECK_TRUE(routeIsKnown(dest1, nodeC, interface));
@@ -1833,19 +1838,19 @@ TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     // we do now keep the other routes active and check that the client does not try to send
     // another HELLO to (B) since this route has already failed
     TimeMock::letTimePass(200); // time is now at 700
-    Packet* keepAliveFromC = new Packet(dest1, source, nodeC, PacketType::DATA, 3, 10);
-    Packet* keepAliveFromD = new Packet(dest1, source, nodeD, PacketType::DATA, 4, 10);
-    Packet* keepAliveFromE = new Packet(dest1, source, nodeE, PacketType::DATA, 5, 10);
-    client.receivePacket(keepAliveFromC, interface);
-    client.receivePacket(keepAliveFromD, interface);
-    client.receivePacket(keepAliveFromE, interface);
+    Packet* keepAliveFromC = new Packet(dest1, source, nodeC, PacketType::DATA, seqNr++, 10);
+    Packet* keepAliveFromD = new Packet(dest1, source, nodeD, PacketType::DATA, seqNr++, 10);
+    Packet* keepAliveFromE = new Packet(dest1, source, nodeE, PacketType::DATA, seqNr++, 10);
+    client->receivePacket(keepAliveFromC, interface);
+    client->receivePacket(keepAliveFromD, interface);
+    client->receivePacket(keepAliveFromE, interface);
 
     TimeMock::letTimePass(300); // time is now at 1000
     neighborActivityTimer->expire();
 
     // now it would have been time for a HELLO packet to (B) (last activity for that was the HELLO packet at 500)
     // we check that this has not happened an only 9 packets (6 + 3 data packets) have been send by the client
-    BYTES_EQUAL(9, sentPackets->size());
+    BYTES_EQUAL(12, sentPackets->size());
 }
 
 /**
@@ -1920,4 +1925,86 @@ TEST(AbstractARAClientTest, chainRouteFailuresIfCriticalLinkBroke) {
     BYTES_EQUAL(1, sentPacketsOfA->size());
     routeFailurePacket = sentPacketsOfA->back()->getLeft();
     CHECK(routeFailurePacket->getType() == PacketType::ROUTE_FAILURE);
+}
+
+/**
+ * In this test we check that the HELLO packet timers (neighbor activity timers) are only started for
+ * arriving ANT or DATA packets.
+ * Note: This concerns only the processing of received packets.
+ */
+TEST(AbstractARAClientTest, helloPacketTimersAreOnlystartedForDataAndAntPackets) {
+    activateNeighborActivityCheck(500);
+    TimerMock* neighborActivityTimer = (TimerMock*) client->getNeighborActivityTimer();
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr localAddress = interface->getLocalAddress();
+    AddressPtr neighbor1 (new AddressMock("1"));
+    AddressPtr neighbor2 (new AddressMock("2"));
+    AddressPtr neighbor3 (new AddressMock("3"));
+    AddressPtr neighbor4 (new AddressMock("4"));
+    AddressPtr neighbor5 (new AddressMock("5"));
+    AddressPtr neighbor6 (new AddressMock("6"));
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("dest"));
+
+    unsigned int seqNr = 1;
+
+    // start the test by receiving the packets
+
+    // receiving a FANT should trigger a HELLO later
+    Packet* fant = packetFactory->makeFANT(source, destination, seqNr++)->setSender(neighbor1);
+    client->receivePacket(fant, interface);
+    TimeMock::letTimePass(500);
+    neighborActivityTimer->expire();
+    BYTES_EQUAL(2, sentPackets->size());
+    const Packet* lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::HELLO);
+    client->forget(neighbor1);
+
+    // receiving a BANT should trigger a HELLO later
+    Packet* fantThatTriggeredBANT = packetFactory->makeFANT(source, destination, seqNr++);
+    Packet* bant = packetFactory->makeBANT(fantThatTriggeredBANT, seqNr++)->setSender(neighbor2);
+    client->receivePacket(bant, interface);
+    TimeMock::letTimePass(500);
+    neighborActivityTimer->expire();
+    BYTES_EQUAL(4, sentPackets->size());
+    lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::HELLO);
+    client->forget(neighbor2);
+    delete fantThatTriggeredBANT;
+
+    // receiving a data packet should trigger a HELLO later
+    Packet* dataPacket = packetFactory->makeDataPacket(source, destination, seqNr++, "Foo", 4)->setSender(neighbor3);
+    client->receivePacket(dataPacket, interface);
+    TimeMock::letTimePass(500);
+    neighborActivityTimer->expire();
+    BYTES_EQUAL(6, sentPackets->size());
+    lastSentPacket = sentPackets->back()->getLeft();
+    CHECK(lastSentPacket->getType() == PacketType::HELLO);
+    client->forget(neighbor3);
+
+    // receiving a DUPLICATE_WARNING should *not* trigger a HELLO later
+    Packet packetThatCausedLoop = Packet(source, destination, localAddress, PacketType::DATA, seqNr++, 10);
+    Packet* duplicateWarning = packetFactory->makeDulicateWarningPacket(&packetThatCausedLoop, neighbor4, seqNr++);
+    client->receivePacket(duplicateWarning, interface);
+    TimeMock::letTimePass(500);
+    neighborActivityTimer->expire();
+    BYTES_EQUAL(6, sentPackets->size()); // still 6
+    client->forget(neighbor4);
+
+    // receiving a HELLO should *not* trigger another HELLO later
+    Packet* helloPacket = packetFactory->makeHelloPacket(neighbor5, localAddress, seqNr++);
+    client->receivePacket(helloPacket, interface);
+    TimeMock::letTimePass(500);
+    neighborActivityTimer->expire();
+    BYTES_EQUAL(6, sentPackets->size()); // still 6
+    client->forget(neighbor5);
+
+    // receiving a ROUTE_FAILURE should *not* trigger a HELLO later
+    Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(neighbor6, localAddress, seqNr++);
+    client->receivePacket(routeFailurePacket, interface);
+    TimeMock::letTimePass(500);
+    neighborActivityTimer->expire();
+    BYTES_EQUAL(6, sentPackets->size()); // still 6
+    client->forget(neighbor5);
 }

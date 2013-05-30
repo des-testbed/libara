@@ -44,7 +44,7 @@ TEST(ARAClientMockTest, getNetworkInterfaceMock) {
     CHECK_EQUAL(0, client->getNumberOfNetworkInterfaces());
 
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
-    AddressMock defaultLocalAddress = AddressMock("DEFAULT");
+    AddressMock defaultLocalAddress = AddressMock("localhost");
     CHECK_EQUAL(1, client->getNumberOfNetworkInterfaces());
     CHECK_EQUAL("InterfaceMock1", interface->getName());
     CHECK(interface->getLocalAddress()->equals(&defaultLocalAddress));

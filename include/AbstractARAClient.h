@@ -202,7 +202,6 @@ protected:
     unsigned int maxNeighborInactivityTimeInMilliSeconds;
     int maxNrOfRouteDiscoveryRetries;
 
-private:
     //TODO the knownIntermediateHops and lastReceivedPackets may be merged into a single hashmap
     LastReceivedPacketsMap lastReceivedPackets;
 

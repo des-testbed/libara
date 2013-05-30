@@ -42,9 +42,15 @@ public:
     double getInitialPhi() const;
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
-    NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
+    NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "localhost");
     unsigned int getPacketDeliveryDelay() const;
     Timer* getNeighborActivityTimer() const;
+
+    /**
+     * Makes this client forget this neighbor (if he ever knew it)
+     * This means all routing table entries are deleted and possibly existent activityTimes are discarded.
+     */
+    void forget(AddressPtr neighbor);
 };
 
 ARA_NAMESPACE_END

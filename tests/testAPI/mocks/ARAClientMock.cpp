@@ -84,4 +84,19 @@ Timer* ARAClientMock::getNeighborActivityTimer() const {
     return neighborActivityTimer;
 }
 
+void ARAClientMock::forget(AddressPtr neighbor) {
+    // delete all known routes via this next hop
+    std::deque<RoutingTableEntryTupel> allRoutesOverNeighbor = routingTable->getAllRoutesThatLeadOver(neighbor);
+    for (auto& route: allRoutesOverNeighbor) {
+        routingTable->removeEntry(route.destination, neighbor, route.entry->getNetworkInterface());
+    }
+
+    NeighborActivityMap::const_iterator foundNeighbor = neighborActivityTimes.find(neighbor);
+    if(foundNeighbor != neighborActivityTimes.end()) {
+        // delete the associated Time object first
+        delete foundNeighbor->second.first;
+        neighborActivityTimes.erase(neighbor);
+    }
+}
+
 ARA_NAMESPACE_END
