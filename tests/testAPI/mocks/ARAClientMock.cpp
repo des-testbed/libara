@@ -41,9 +41,9 @@ void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
     AbstractARAClient::receivePacket(packet, interface);
 }
 
-void ARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+bool ARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     storeRouteFailurePacket(packetFactory->makeClone(packet), nextHop, interface);
-    AbstractARAClient::handleBrokenLink(packet, nextHop, interface);
+    return AbstractARAClient::handleBrokenLink(packet, nextHop, interface);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {

@@ -525,7 +525,7 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, Address
 
 }
 
-void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+bool AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     logInfo("Link over %s is broken", nextHop->toString().c_str());
 
     // delete all known routes via this next hop
@@ -545,6 +545,7 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
     if (routingTable->isDeliverable(packet)) {
         logDebug("Sending %u from %s over alternative route", packet->getSequenceNumber(), packet->getSourceString().c_str());
         sendPacket(packet);
+        return true;
     }
     else if(packet->isDataPacket() && isLocalAddress(packet->getSource())) {
         packetTrap->trapPacket(packet);
@@ -556,9 +557,11 @@ void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
             logDebug("No alternative route is available. Starting new route discovery for packet %u from %s.", packet->getSequenceNumber(), packet->getSourceString().c_str());
             startNewRouteDiscovery(packet);
         }
+        return true;
     }
     else {
         delete packet;
+        return false;
     }
 }
 

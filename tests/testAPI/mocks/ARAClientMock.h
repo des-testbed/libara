@@ -33,7 +33,7 @@ public:
     BasicConfiguration getStandardConfiguration() const;
 
     void receivePacket(Packet* packet, NetworkInterface* interface);
-    virtual void handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
+    virtual bool handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
     void deliverToSystem(const Packet* packet);
     void packetNotDeliverable(const Packet* packet);

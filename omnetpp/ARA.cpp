@@ -88,13 +88,8 @@ void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface
 void ARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
     // TODO this does only work if we have only one network interface card
     NetworkInterface* interface = getNetworkInterface(0);
-    AddressPtr packetSource = packet->getSource();
-    AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
-
-    if(routingTable->isDeliverable(packet) == false) {
-        if(isLocalAddress(packetSource) == false) {
-            emit(ROUTE_FAILURE_SIGNAL, 1);
-        }
+    if(AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface) == false) {
+        emit(ROUTE_FAILURE_SIGNAL, 1);
     }
 }
 
