@@ -934,11 +934,11 @@ TEST(AbstractARAClientTest, broadcastRouteFailureIfNoAlternativeRoutesAreKownOnR
 }
 
 TEST(AbstractARAClientTest, clientsDeleteRoutingTableEntryWhenTheyReceiveRoutingFailurePacket) {
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("sender");
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     AddressPtr source (new AddressMock("source"));
     AddressPtr sender (new AddressMock("sender"));
     AddressPtr destination (new AddressMock("destination"));
-    Packet* routeFailurePacket = new Packet(source, destination, sender, PacketType::ROUTE_FAILURE, 123, 10);
+    Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(sender, destination, 123);
 
     routingTable->update(destination, sender, interface, 10);
 
