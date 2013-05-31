@@ -30,10 +30,6 @@ AbstractClientMockBase::~AbstractClientMockBase() {
     for(auto& packet: undeliverablePackets) {
         delete packet;
     }
-
-    for(auto& packet: deliveredPackets) {
-        delete packet;
-    }
 }
 
 void AbstractClientMockBase::storeReceivedPacket(Packet* packet, NetworkInterface* interface) {

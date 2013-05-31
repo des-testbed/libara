@@ -1875,86 +1875,6 @@ TEST(AbstractARAClientTest, clientCanHandleHelloPacket) {
 }
 
 /**
- * In this test we check if the PANT feature works.
- *
- * Test setup:                | Description
- *                            |   * we test from perspective the of (src)
- * (src)──>(A)──(..)──(dest1) |   * at first we let (src) send a packet to (dest1) via (A)
- *   └────>(B)──(..)──(dest2) |   * this should make (src) schedule PANT1 to (dest1) for the future
- *                            |   * then we let (src) send a packet to (dest2) via (B)
- *                            |   * this should also make (src) schedule PANT2 for (dest2)
- *                            |   * then we advance to that future and see if PANT1 and PANT2 have been sent independently
- */
-TEST(AbstractARAClientTest, schedulePANT) {
-    // at first we need our own configuration to enable this feature
-    BasicConfiguration configuration = client->getStandardConfiguration();
-    configuration.setPANTInterval(1000); // it doesn't really matter what value we set as long as this is > 0 (timer is expired manually in the test)
-    createNewClient(configuration);
-
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("src");
-    SendPacketsList* sentPackets = interface->getSentPackets();
-    AddressPtr source = interface->getLocalAddress();
-    AddressPtr dest1 (new AddressMock("dest1"));
-    AddressPtr dest2 (new AddressMock("dest2"));
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-
-    // we are testing from the perspective of (src)
-    routingTable->update(dest1, nodeA, interface, 10);
-    routingTable->update(dest2, nodeB, interface, 10);
-
-    // start the test by giving (src) a packet to route to (dest1)
-    Packet* packet1 = new Packet(source, dest1, source, PacketType::DATA, 1, 10, "Foo", 4);
-    client->sendPacket(packet1);
-
-    // and another packet to a different destination
-    Packet* packet2 = new Packet(source, dest2, source, PacketType::DATA, 2, 10, "Bar", 4);
-    client->sendPacket(packet2);
-
-    // just check if both packet have been relayed to be sure
-    BYTES_EQUAL(2, sentPackets->size());
-    const Packet* sentPacket = sentPackets->at(0)->getLeft();
-    CHECK(sentPacket->equals(packet1));
-    sentPacket = sentPackets->at(1)->getLeft();
-    CHECK(sentPacket->equals(packet2));
-
-
-    // check if PANT1 is sent
-    TimerMock* pantTimer1 = (TimerMock*) client->getPANTsTimer(dest1);
-    CHECK(pantTimer1 != nullptr);
-    CHECK(pantTimer1->isRunning());
-    pantTimer1->expire();
-
-    BYTES_EQUAL(3, sentPackets->size());
-    sentPacket = sentPackets->back()->getLeft();
-    CHECK(sentPacket->getType() == PacketType::PANT);
-    CHECK(sentPacket->getSource()->equals(source));
-    CHECK(sentPacket->getDestination()->equals(dest1));
-    CHECK(sentPacket->getSender()->equals(source));
-    BYTES_EQUAL(0, sentPacket->getPayloadLength());
-
-    // the timer should have been deleted and reset to nullptr
-    CHECK(client->getPANTsTimer(dest1) == nullptr);
-
-    // check if PANT2 is sent
-    TimerMock* pantTimer2 = (TimerMock*) client->getPANTsTimer(dest2);
-    CHECK(pantTimer2 != nullptr);
-    CHECK(pantTimer2->isRunning());
-    pantTimer2->expire();
-
-    BYTES_EQUAL(4, sentPackets->size());
-    sentPacket = sentPackets->back()->getLeft();
-    CHECK(sentPacket->getType() == PacketType::PANT);
-    CHECK(sentPacket->getSource()->equals(source));
-    CHECK(sentPacket->getDestination()->equals(dest2));
-    CHECK(sentPacket->getSender()->equals(source));
-    BYTES_EQUAL(0, sentPacket->getPayloadLength());
-
-    // the timer should have been deleted and reset to nullptr as well
-    CHECK(client->getPANTsTimer(dest2) == nullptr);
-}
-
-/**
  * This test checks if the destructor does clean up the running pant timers.
  * The test succeeds if there is no memory leak at the end
  */
@@ -1985,9 +1905,9 @@ TEST(AbstractARAClientTest, scheduledPANTTimersAreDeletedInDestructor) {
 }
 
 /**
- * In this test we check that a client does only send a PANT if he is the original source of a transmission.
+ * In this test we check that a client does only send a PANT if he is the destination of a transmission.
  */
-TEST(AbstractARAClientTest, PANTSAreOnlySentByTheSource) {
+TEST(AbstractARAClientTest, PANTSAreNotSendByIntermediateNodes) {
     // at first we need our own configuration to enable this feature
     BasicConfiguration configuration = client->getStandardConfiguration();
     configuration.setPANTInterval(1000); // it doesn't really matter what value we set as long as this is > 0

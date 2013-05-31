@@ -364,7 +364,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
         handleBANTForThisNode(packet);
     }
     else if(packetType == PacketType::PANT) {
-        //TODO PANT zurückschicken!!!!
+        // don't do anything other than deleting the packet
     }
     else {
         logError("Can not handle ANT packet %u from %s (unknown type %u)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packetType);
