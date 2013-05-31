@@ -324,7 +324,7 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 
 void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
-        logDebug("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
+        logInfo("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
         deliverToSystem(packet);
     }
     else {
@@ -362,6 +362,9 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     }
     else if(packetType == PacketType::BANT) {
         handleBANTForThisNode(packet);
+    }
+    else if(packetType == PacketType::PANT) {
+        //TODO PANT zurückschicken!!!!
     }
     else {
         logError("Can not handle ANT packet %u from %s (unknown type %u)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packetType);
@@ -408,7 +411,7 @@ void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
 
 void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
     PacketQueue deliverablePackets = packetTrap->untrapDeliverablePackets(destination);
-    logDebug("Sending %u trapped packet(s) for destination %s", deliverablePackets.size(), destination->toString().c_str());
+    logInfo("Sending %u trapped packet(s) for destination %s", deliverablePackets.size(), destination->toString().c_str());
 
     for(auto& deliverablePacket : deliverablePackets) {
         sendPacket(deliverablePacket);
@@ -666,12 +669,13 @@ void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressP
 
         deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
         if (possibleNextHops.size() == 1) {
-            logDebug("Only one last route is known to %s. Notifying last remaining neighbor with ROUTE_FAILURE packet", destination->toString().c_str());
+            RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
+            AddressPtr remainingNextHop = lastRemainingRoute->getAddress();
+            logDebug("Only one last route is known to %s. Notifying %s with ROUTE_FAILURE packet", destination->toString().c_str(), remainingNextHop->toString().c_str());
             AddressPtr source = interface->getLocalAddress();
             unsigned int sequenceNr = getNextSequenceNumber();
             Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
-            RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
-            lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, lastRemainingRoute->getAddress());
+            lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, remainingNextHop);
         }
         else if (possibleNextHops.empty()) {
             logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
