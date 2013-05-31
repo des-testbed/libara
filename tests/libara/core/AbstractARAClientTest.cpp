@@ -1964,22 +1964,24 @@ TEST(AbstractARAClientTest, scheduledPANTTimersAreDeletedInDestructor) {
     configuration.setPANTInterval(1000); // it doesn't really matter what value we set as long as this is > 0
     createNewClient(configuration);
 
-    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("src");
-    AddressPtr source = interface->getLocalAddress();
-    AddressPtr destination (new AddressMock("destination"));
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("dest");
+    AddressPtr source (new AddressMock("src"));
     AddressPtr someNode (new AddressMock("A"));
 
-    // we are testing from the perspective of (src)
-    routingTable->update(destination, someNode, interface, 10);
+    // we are testing from the perspective of (dest)
+    routingTable->update(source, someNode, interface, 10);
 
-    // start the test by giving (src) a packet to route to (destination)
-    Packet* somePacket = new Packet(source, destination, source, PacketType::DATA, 1, 10, "Foo", 4);
-    client->sendPacket(somePacket);
+    // start the test by letting (dest) receive a DATA packet
+    Packet* somePacket = new Packet(source, interface->getLocalAddress(), someNode, PacketType::DATA, 1, 10, "Foo", 4);
+    client->receivePacket(somePacket, interface);
 
     // check if the PANT timer is running
-    TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(destination);
+    TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(source);
     CHECK(pantTimer != nullptr);
     CHECK(pantTimer->isRunning());
+
+    //TODO why do I need to clean this up (ARAClientMock should do this)
+    delete somePacket;
 }
 
 /**
@@ -2034,4 +2036,85 @@ TEST(AbstractARAClientTest, receivedPANTSPacketsAreBroadcasted) {
     CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
     CHECK_EQUAL(PacketType::PANT, sentPacket->getType());
     LONGS_EQUAL(originalTTL-1, sentPacket->getTTL());
+}
+
+/**
+ * In this test we check that a client does only start to send out PANTS
+ * to the directions he *received* data from
+ */
+TEST(AbstractARAClientTest, startToSendPacketsOnlyIfclientReceivesData) {
+    // at first we need our own configuration to enable this feature
+    BasicConfiguration configuration = client->getStandardConfiguration();
+    configuration.setPANTInterval(1000); // it doesn't really matter what value we set as long as this is > 0 (timer is expired manually in the test)
+    createNewClient(configuration);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("destination");
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr destination = interface->getLocalAddress();
+    AddressPtr source1 (new AddressMock("src1"));
+    AddressPtr source2 (new AddressMock("src2"));
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+
+    // we are testing from the perspective of (destination)
+
+    // start the test by receiving the first BANTs from (src1) and (src2)
+    Packet* fant1 = new Packet(source1, destination, nodeA, PacketType::FANT, 1, 10);
+    Packet* fant2 = new Packet(source2, destination, nodeB, PacketType::FANT, 1, 10);
+    client->receivePacket(fant1, interface);
+    client->receivePacket(fant2, interface);
+
+    // the client should now have sent two BANTs back
+    BYTES_EQUAL(2, sentPackets->size());
+    CHECK(sentPackets->at(0)->getLeft()->getType() == PacketType::BANT);
+    CHECK(sentPackets->at(1)->getLeft()->getType() == PacketType::BANT);
+
+    // no PANTs should have been scheduled because those where only ANT packets (no DATA)
+    CHECK(client->getPANTsTimer(source1) == nullptr);
+
+    // now we receive some DATA which should make us schedule PANT1
+    Packet* dataPacket1 = new Packet(source1, destination, nodeA, PacketType::DATA, 2, 10, "Foo", 4);
+    client->receivePacket(dataPacket1, interface);
+
+    CHECK(client->getPANTsTimer(source1) != nullptr);
+    CHECK(client->getPANTsTimer(source2) == nullptr);
+
+    // check if PANT1 is sent
+    TimerMock* pantTimer1 = (TimerMock*) client->getPANTsTimer(source1);
+    CHECK(pantTimer1->isRunning());
+    TimeMock::letTimePass(1000);
+    pantTimer1->expire();
+
+    BYTES_EQUAL(3, sentPackets->size());
+    const Packet* sentPacket = sentPackets->back()->getLeft();
+    CHECK(sentPacket->getType() == PacketType::PANT);
+    CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getDestination()->equals(source1));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    BYTES_EQUAL(0, sentPacket->getPayloadLength());
+
+    // now we receive traffic from (src2) which should make us send PANT2 (nut not PANT1 anymore since this has already been sent)
+    Packet* dataPacket2 = new Packet(source2, destination, nodeB, PacketType::DATA, 2, 10, "Foo", 4);
+    client->receivePacket(dataPacket2, interface);
+
+    CHECK(client->getPANTsTimer(source1) == nullptr);
+    CHECK(client->getPANTsTimer(source2) != nullptr);
+
+    // check if PANT1 is sent
+    TimerMock* pantTimer2 = (TimerMock*) client->getPANTsTimer(source2);
+    CHECK(pantTimer2->isRunning());
+    TimeMock::letTimePass(1000);
+    pantTimer2->expire();
+
+    BYTES_EQUAL(4, sentPackets->size());
+    sentPacket = sentPackets->back()->getLeft();
+    CHECK(sentPacket->getType() == PacketType::PANT);
+    CHECK(sentPacket->getSource()->equals(interface->getLocalAddress()));
+    CHECK(sentPacket->getDestination()->equals(source2));
+    CHECK(sentPacket->getSender()->equals(interface->getLocalAddress()));
+    BYTES_EQUAL(0, sentPacket->getPayloadLength());
+
+    //TODO why do I need to clean this up (ARAClientMock should do this)
+    delete dataPacket1;
+    delete dataPacket2;
 }

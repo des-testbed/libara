@@ -139,27 +139,6 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 void AbstractARAClient::sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver) {
     interface->send(packet, receiver);
     registerActivity(receiver, interface);
-    checkPantTimer(packet);
-}
-
-void AbstractARAClient::checkPantTimer(const Packet* packet) {
-    if (pantIntervalInMilliSeconds > 0) {
-        // only send PANTs if this feature is enabled
-        if (packet->isDataPacket() && isLocalAddress(packet->getSource())) {
-            // only trigger the sending of a PANT by DATA packets which originate from this ndoe
-            AddressPtr destination = packet->getDestination();
-            if (scheduledPANTs.find(destination) == scheduledPANTs.end()) {
-                logDebug("Scheduled PANT to be sent in %u ms", pantIntervalInMilliSeconds);
-                // only start PANT if no timer is already running
-                Clock* clock = Environment::getClock();
-                Timer* pantTimer = clock->getNewTimer();
-                pantTimer->addTimeoutListener(this);
-                pantTimer->run(pantIntervalInMilliSeconds * 1000);
-                scheduledPANTs.insert(destination);
-                runningPANTTimers[pantTimer] = destination;
-            }
-        }
-    }
 }
 
 float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
@@ -326,9 +305,30 @@ void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
         logInfo("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
         deliverToSystem(packet);
+        checkPantTimer(packet);
     }
     else {
         sendPacket(packet);
+    }
+}
+
+void AbstractARAClient::checkPantTimer(const Packet* packet) {
+    // this should only be called for arrived DATA packets for this node
+    if (pantIntervalInMilliSeconds > 0) {
+        // only send PANTs if this feature is enabled
+        AddressPtr pantDestination = packet->getSource();
+        if (scheduledPANTs.find(pantDestination) == scheduledPANTs.end()) {
+            // only start PANT if no timer is already running
+            logDebug("Scheduled PANT to be sent in %u ms", pantIntervalInMilliSeconds);
+
+            Clock* clock = Environment::getClock();
+            Timer* pantTimer = clock->getNewTimer();
+            pantTimer->addTimeoutListener(this);
+            pantTimer->run(pantIntervalInMilliSeconds * 1000);
+
+            scheduledPANTs.insert(pantDestination);
+            runningPANTTimers[pantTimer] = pantDestination;
+        }
     }
 }
 
