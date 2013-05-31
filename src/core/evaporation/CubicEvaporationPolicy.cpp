@@ -33,32 +33,14 @@ void CubicEvaporationPolicy::setThreshold(float pThreshold){
     this->threshold = pThreshold;
 }
 
-/**
- * FIXME: There is something wrong 
- * 
- */
 float CubicEvaporationPolicy::evaporate(float oldPheromoneValue, int milliSecondsSinceLastEvaporation) {
     if(milliSecondsSinceLastEvaporation == 0) {
         return oldPheromoneValue;
     }
     else {
-        int factor = milliSecondsSinceLastEvaporation / timeInterval;
-        float newPheromone;
+	    float newPheromone = oldPheromoneValue;
+            newPheromone = slow*(1.0+threshold-pow(((milliSecondsSinceLastEvaporation-2000)/reduction),3)/plateau);
 
-        /// we iterate 'factor' times since it is not (yet) possible just to use the pow function
-        for(int i = 0; i < factor; i++){
-            float t, m;
-            float a = 1 - (2 * oldPheromoneValue);
-
-            if(a > 0){
-                t = 0.5 * (pow(abs(a), (1/this->plateau)) + 1);
-            }else{
-                t = 0.5 * (1 - pow(abs(a), (1/this->plateau)));
-            }
-
-            m = t + (this->reduction * this->slow);
-
-            newPheromone = 0.5 * (pow(((2 * m) - 1), this->plateau) + 1);
 
             /// check if the result is below a threshold
             if(newPheromone < 0){
@@ -70,7 +52,6 @@ float CubicEvaporationPolicy::evaporate(float oldPheromoneValue, int milliSecond
                 // TODO: check!
                 newPheromone = 1;
             }
-        }
 
         return newPheromone;
     }
