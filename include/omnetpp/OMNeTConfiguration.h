@@ -34,6 +34,7 @@ class OMNeTConfiguration : public virtual Configuration {
 
     protected:
         cModule* getHostModule();
+        void setLogLevel(const char* logLevelParameter);
 
     protected:
         EvaporationPolicy* evaporationPolicy;

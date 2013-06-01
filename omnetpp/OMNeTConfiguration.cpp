@@ -11,6 +11,8 @@
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
 
+#include <cstring>
+
 using namespace ARA;
 using namespace ARA::omnetpp;
 
@@ -28,10 +30,30 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     maxNeighborInactivityTimeInMilliSeconds = module->par("maxNeighborInactivityTime").longValue();
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
+    setLogLevel(module->par("logLevel").stringValue());
+}
 
-    //FIXME make this more generic via a module parameter
-    if(strcmp(getHostModule()->getFullName(), "node[1]") == 0) {
+void OMNeTConfiguration::setLogLevel(const char* logLevelParameter) {
+    if (strcmp(logLevelParameter, "TRACE") == 0) {
         logger->setLogLevel(Logger::LEVEL_TRACE);
+    }
+    else if (strcmp(logLevelParameter, "DEBUG") == 0) {
+        logger->setLogLevel(Logger::LEVEL_DEBUG);
+    }
+    else if (strcmp(logLevelParameter, "INFO") == 0) {
+        logger->setLogLevel(Logger::LEVEL_INFO);
+    }
+    else if (strcmp(logLevelParameter, "WARN") == 0) {
+        logger->setLogLevel(Logger::LEVEL_WARN);
+    }
+    else if (strcmp(logLevelParameter, "ERROR") == 0) {
+        logger->setLogLevel(Logger::LEVEL_ERROR);
+    }
+    else if (strcmp(logLevelParameter, "FATAL") == 0) {
+        logger->setLogLevel(Logger::LEVEL_FATAL);
+    }
+    else {
+        throw cRuntimeError("Invalid log level '%s'", logLevelParameter);
     }
 }
 

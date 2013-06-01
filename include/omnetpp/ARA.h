@@ -75,7 +75,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         int nrOfDeliverablePackets = 0;
         int nrOfNotDeliverablePackets = 0;
         int nrOfDetectedLoops = 0;
-        RoutingTableDataPersistor* routingTablePersistor;
+        RoutingTableDataPersistor* routingTablePersistor = nullptr;
 
     friend class OMNeTGate;
 };
