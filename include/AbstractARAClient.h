@@ -34,6 +34,7 @@ ARA_NAMESPACE_BEGIN
 
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
+typedef std::unordered_map<AddressPtr, unsigned int, AddressHash, AddressPredicate> LastRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>, AddressHash, AddressPredicate> NeighborActivityMap;
 
 //TODO fix the visibility: most of the methods should be protected instead of public
@@ -184,6 +185,7 @@ protected:
     void startNeighborActivityTimer();
     void registerActivity(AddressPtr neighbor, NetworkInterface* interface);
     void checkInactiveNeighbors();
+    bool isNewRouteDiscovery(const Packet* packet);
 
 protected:
     std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> runningRouteDiscoveries;
@@ -216,6 +218,14 @@ protected:
      * This could either be that this client has successfully received or send a packet to/from this client
      */
     NeighborActivityMap neighborActivityTimes;
+
+    /**
+     * We identify each route discovery by its origin (source address) and sequence number.
+     * When we receive a new ant packet we check its sequence number with this. If they differ,
+     * this is a new route discovery and we need to forget about all knownIntermediateHops for
+     * the packets source we know so far.
+     */
+    LastRouteDiscoveriesMap lastRouteDiscoverySeqNumbers;
 };
 
 ARA_NAMESPACE_END

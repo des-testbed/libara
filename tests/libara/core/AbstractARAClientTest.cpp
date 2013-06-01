@@ -1868,7 +1868,7 @@ TEST(AbstractARAClientTest, clientCanHandleHelloPacket) {
 /**
  * In this test we check the following scenario:
  *
-  * Test setup:                      | Description
+ * Test setup:                       | Description
  *                                   |   * The link (C,dest) is broken
  * (src)──(A)──(B)──(C)--(dest)      |   * (C) sends a ROUTE_FAILURE because it has no more routes to (dest)
  *                                   |   * (B) receives this ROUTE_FAILURE, deletes the route via (C)
@@ -2007,4 +2007,49 @@ TEST(AbstractARAClientTest, helloPacketTimersAreOnlystartedForDataAndAntPackets)
     neighborActivityTimer->expire();
     BYTES_EQUAL(6, sentPackets->size()); // still 6
     client->forget(neighbor5);
+}
+
+/**
+ * In this test we check if a client is able to learn a new route if a previously collapsed route has died
+ * and a new route discovery is run.
+ *
+ * Test setup:                       | Description
+ *                                   |   * We test from the perspective of (A)
+ * (src)──(A)──(B)──(...)--(dest)    |   * (A) receives FANT1 from src and broadcasts it further into the network
+ *                                   |   * (A) receives BANT1 from (B) and creates a route to (dest) via (B)
+ *                                   |   * (A) wants to send DATA1 and notices that the link to (B) is broken and broadcasts a ROUTE_FAILURE
+ *                                   |   * (src) starts another route discovery
+ *                                   |   * (A) receives FANT2 and broadcasts it into the network
+ *                                   |   * (A) receives a BANT2 from (B) an creates a new route to (dest) via (B)
+ */
+TEST(AbstractARAClientTest, clientIsAbleToLearnNewRoutes) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr nodeA = interface->getLocalAddress();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr destination (new AddressMock("dest"));
+
+    Packet* fant1 = packetFactory->makeFANT(source, destination, 1);
+    Packet* cloneOfFant1 = packetFactory->makeClone(fant1);
+    Packet* bant1 = packetFactory->makeBANT(cloneOfFant1, 1)->setSender(nodeB);
+    client->receivePacket(fant1, interface);
+    client->receivePacket(bant1, interface);
+
+    CHECK(routeIsKnown(destination, nodeB, interface));
+
+    Packet* data1 = packetFactory->makeDataPacket(source, destination, 2, "Foo", 4)->setSender(nodeA);
+    client->handleBrokenLink(data1, nodeB, interface);
+
+    CHECK(routeIsKnown(destination, nodeB, interface) == false);
+
+    Packet* fant2 = packetFactory->makeFANT(source, destination, 3);
+    Packet* cloneOfFant2 = packetFactory->makeClone(fant2);
+    Packet* bant2 = packetFactory->makeBANT(cloneOfFant2, 2)->setSender(nodeB);
+    client->receivePacket(fant2, interface);
+    client->receivePacket(bant2, interface);
+
+    CHECK(routeIsKnown(destination, nodeB, interface));
+
+    delete cloneOfFant1;
+    delete cloneOfFant2;
 }

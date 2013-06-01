@@ -256,19 +256,59 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
 }
 
 bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
-    KnownIntermediateHopsMap::const_iterator found = knownIntermediateHops.find(packet->getSource());
-    if(found == knownIntermediateHops.end()) {
-        // we have never seen any packet for this source address so we can not have seen this previous node before
+    AddressPtr source = packet->getSource();
+
+    if (isNewRouteDiscovery(packet)) {
+        delete knownIntermediateHops[source];
+        knownIntermediateHops.erase(source);
         return false;
     }
+    else {
+        KnownIntermediateHopsMap::const_iterator found = knownIntermediateHops.find(source);
+        if (found == knownIntermediateHops.end()) {
+            // we have never seen any packet for this source address so we can not have seen this previous node before
+            return false;
+        }
 
-    unordered_set<AddressPtr>* listOfKnownNodes = found->second;
+        unordered_set<AddressPtr>* listOfKnownNodes = found->second;
 
-    // have we seen this sender, or the previous hop before?
-    bool senderHasBeenSeen = listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end();
-    bool prevHopHasBeenSeen = listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
+        // have we seen this sender, or the previous hop before?
+        bool senderHasBeenSeen = listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end();
+        bool prevHopHasBeenSeen = listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
 
-    return senderHasBeenSeen || prevHopHasBeenSeen;
+        return senderHasBeenSeen || prevHopHasBeenSeen;
+    }
+}
+
+bool AbstractARAClient::isNewRouteDiscovery(const Packet* packet) {
+    if (packet->isAntPacket()) {
+        AddressPtr source = packet->getSource();
+        unsigned int sequenceNumber = packet->getSequenceNumber();
+
+        LastRouteDiscoveriesMap::const_iterator foundLastRouteDiscovery = lastRouteDiscoverySeqNumbers.find(source);
+        if (foundLastRouteDiscovery == lastRouteDiscoverySeqNumbers.end()) {
+            // we have never seen any route discovery from this source so far
+            lastRouteDiscoverySeqNumbers[source] = sequenceNumber;
+            return true;
+        }
+        else {
+            unsigned int seqNrOfLastRouteDiscovery = foundLastRouteDiscovery->second;
+
+            if (sequenceNumber == seqNrOfLastRouteDiscovery) {
+                // this is the same route discovery we already saw
+                return false;
+            }
+            else {
+                // this seems to be a new route discovery
+                lastRouteDiscoverySeqNumbers[source] = sequenceNumber;
+                return true;
+            }
+        }
+    }
+    else {
+        // this is not even an ant packet so it can't be part of a route discovery
+        return false;
+    }
 }
 
 void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
