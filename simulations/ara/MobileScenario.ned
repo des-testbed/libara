@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara.simulations.mobile;
+package ara.simulations.ara;
 
 import ara.NetworkNode;
 import ara.ARANetworkConfigurator;
