@@ -23,7 +23,7 @@ Define_Module(ARANetworkConfigurator);
 
 void ARANetworkConfigurator::initialize(int stage) {
     if (stage==2) {
-        channelControl = check_and_cast<cModule*>(simulation.getSystemModule()->getModuleByRelativePath("channelControl"));
+        channelControl = check_and_cast<cModule*>(simulation.getSystemModule()->getModuleByPath("channelControl"));
         cTopology topology ("topology");
         extractTopology(topology);
         assignAddresses(topology);
