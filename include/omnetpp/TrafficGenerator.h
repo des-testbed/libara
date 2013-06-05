@@ -31,6 +31,8 @@ class TrafficGenerator : public TrafGen {
         int nrOfPacketsToSend;
         int nrOfSentMessages = 0;
         int nrOfReceivedMessages = 0;
+
+        cOutVector delayVector;
 };
 
 OMNETARA_NAMESPACE_END
