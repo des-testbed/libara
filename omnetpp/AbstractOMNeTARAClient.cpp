@@ -24,8 +24,12 @@ void AbstractOMNeTARAClient::initialize() {
     networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
     setPositionFromParameters();
 
-    this->mobilityDataPersistor = new MobilityDataPersistor(this, "mobilityStateChanged");
-    this->subscribe("mobilityStateChanged", this->mobilityDataPersistor);
+    this->mobilityDataPersistor = new MobilityDataPersistor(mobility, this->findHost());
+}
+
+AbstractOMNeTARAClient::~AbstractOMNeTARAClient(){
+    this->mobilityDataPersistor->unsubscribe(ModuleAccess<MobilityBase>("mobility").get());
+    delete this->mobilityDataPersistor;
 }
 
 void AbstractOMNeTARAClient::setPositionFromParameters() {

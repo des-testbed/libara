@@ -22,7 +22,7 @@ OMNETARA_NAMESPACE_BEGIN
 
 class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimpleModule, public INotifiable {
     public:
-        virtual ~AbstractOMNeTARAClient() {};
+        virtual ~AbstractOMNeTARAClient();
         IInterfaceTable* getInterfaceTable();
 
     protected:

@@ -15,7 +15,7 @@ using namespace std;
 
 //mobilityStateChanged
 
-MobilityDataPersistor::MobilityDataPersistor(cModule* hostModule, std::string signalName) {
+MobilityDataPersistor::MobilityDataPersistor(MobilityBase* mobility, cModule* hostModule) {
     string fileName = getFileName(hostModule);
     file.open(fileName.c_str(), ios::out | ios::binary | ios::trunc);
 
@@ -23,7 +23,8 @@ MobilityDataPersistor::MobilityDataPersistor(cModule* hostModule, std::string si
         throw cRuntimeError("Could not open file '%s', to write routing table data statistics", fileName.c_str());
     }
 
-    this->signalName = signalName;
+    this->signalName = std::string("mobilityStateChanged");
+    mobility->subscribe("mobilityStateChanged", this);
 }
 
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, long l){
@@ -41,7 +42,6 @@ void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, simti
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, const char *s){
 
 }
-
 
 void MobilityDataPersistor::receiveSignal(cComponent *source, simsignal_t signalID, const SimTime& t){
 
@@ -63,14 +63,32 @@ bool MobilityDataPersistor::signalMatches(std::string pSignalName){
     return (this->signalName == pSignalName);
 }
 
+/**
+ * The method unsubscribes the class from the 'mobilityStateChanged'
+ * signal and is called via class 'AbstractOMNeTARAClient'.
+ *
+ * @param mobility The mobility module of a node 
+ */
+void MobilityDataPersistor::unsubscribe(MobilityBase *mobility) {
+    mobility->unsubscribe("mobilityStateChanged", this);
+}
+
 MobilityDataPersistor::~MobilityDataPersistor() {
     file.close();
 }
 
+/**
+ * The method determines the file name for the mobile trace. The file
+ * name has the following schema:
+ *
+ *    <scenario>-<run>-<node_id>.mtr
+ *
+ * @param hostModule The host module which reprents the node in the current simulation context.
+ */
 string MobilityDataPersistor::getFileName(cModule* hostModule) const {
     stringstream fileName;
     cConfigurationEx* config = ev.getConfigEx();
-    fileName << "results/" << config->getActiveConfigName() << "-" << config->getActiveRunNumber() << "-" << hostModule->getName() << hostModule->getIndex() << ".md";
+    fileName << "results/" << config->getActiveConfigName() << "-" << config->getActiveRunNumber() << "-" << hostModule->getName() << hostModule->getIndex() << ".mtr";
     return fileName.str();
 }
 
@@ -83,44 +101,12 @@ string MobilityDataPersistor::getFileName(cModule* hostModule) const {
  * | 8 Byte timestamp | 1 Byte nrOfEntries | <entry_data> | ... | [<entry_data>]
  *
  * <entry_data> is defined as a triple in the following format:
- * | 4 Byte destination | 4 Byte nextHop | 4 Byte pheromone value |
+ * | 4 Byte x position | 4 Byte y position | 4 Byte z position |
  *
  * The format stores all <entry_data> triples directly one after another.
  */
-/*
-void MobilityDataPersistor::write(Mobility* routingTable) {
-    OMNeTTime* currentTime = dynamic_cast<OMNeTTime*>(Environment::getClock()->makeTime());
-    currentTime->setToCurrentTime();
+void MobilityDataPersistor::write(Coord position) {
 
-    if(lastWriteTime == nullptr
-    || currentTime->getDifferenceInMilliSeconds(lastWriteTime) >= updateIntervall) {
-
-        int64 rawTime = currentTime->getRawTime();
-        file.write((char*)&rawTime, sizeof(rawTime));
-
-        int nrOfEntries = routingTable->getTotalNumberOfEntries();
-        file.write((char*)&nrOfEntries, 1);
-
-        for (int i = 0; i < nrOfEntries; i++) {
-            MobilityEntryTupel entryTupel = routingTable->getEntryAt(i); // FIXME getEntryAt is very inefficient. This function is called very often so it better use something with better performance
-            OMNeTAddress* destination = dynamic_cast<OMNeTAddress*>(entryTupel.destination.get());
-            uint32 destinationInt = destination->getInt();
-
-            MobilityEntry* entry = entryTupel.entry;
-            OMNeTAddress* nextHop = dynamic_cast<OMNeTAddress*>(entry->getAddress().get());
-            uint32 nextHopInt = nextHop->getInt();
-
-            float pheromoneValue = entry->getPheromoneValue();
-
-            file.write((char*)&destinationInt, 4);
-            file.write((char*)&nextHopInt, 4);
-            file.write((char*)&pheromoneValue, sizeof(pheromoneValue));
-        }
-
-        delete lastWriteTime;
-        lastWriteTime = currentTime;
-    }
 }
-*/
 
 OMNETARA_NAMESPACE_END
