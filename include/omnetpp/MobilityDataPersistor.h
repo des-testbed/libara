@@ -38,7 +38,6 @@ class MobilityDataPersistor : public cIListener {
         
         void unsubscribe(MobilityBase* mobility);
 
-//        void write(Mobility* routingTable);
         void write(Coord position);
 
     private:

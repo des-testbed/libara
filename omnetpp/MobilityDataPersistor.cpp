@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <endian.h>
 
+#include "MovingMobilityBase.h"
+
+
 OMNETARA_NAMESPACE_BEGIN
 
 using namespace std;
@@ -54,8 +57,9 @@ void MobilityDataPersistor::receiveSignal(cComponent *source, simsignal_t signal
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, cObject *obj){
     std::string signal(src->getSignalName(id));
     
-    if(signalMatches(signal)){
-      std::cout << "received mobility signal" << std::endl;
+    if (signalMatches(signal)) {
+       MovingMobilityBase* mobility = check_and_cast<MovingMobilityBase*>(obj);
+       this->write(mobility->getCurrentPosition());
     }
 }
 
@@ -106,6 +110,7 @@ string MobilityDataPersistor::getFileName(cModule* hostModule) const {
  * The format stores all <entry_data> triples directly one after another.
  */
 void MobilityDataPersistor::write(Coord position) {
+    std::cout << position.x << ", " << position.y << "," << position.z << " : " << sizeof(position.x) << std::endl;
 
 }
 
