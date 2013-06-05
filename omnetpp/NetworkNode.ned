@@ -16,7 +16,9 @@
 package ara;
 
 import ara.ARANetworkLayer;
-import ara.TrafficGenerator;
+import ara.traffic.TrafficGenerator;
+import ara.traffic.TrafficSink;
+import ara.traffic.TrafficMultiplexer;
 import inet.applications.pingapp.PingApp;
 import inet.base.NotificationBoard;
 
@@ -32,14 +34,16 @@ import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.IMobility;
 import inet.battery.IBattery;
 
-module NetworkNode {
+module NetworkNode
+{
     parameters:
         @node;
         @display("i=device/wifilaptop;bgb=366,335");
 
-		string posX = default("auto"); // the position parameter can be used to assign a position to a node even if it is part of a node vector. Allowed values are "auto", "center", "left", "right", "top", "bottom" or any postive integer
-		string posY = default("auto"); // see posX
+        string posX = default("auto"); // the position parameter can be used to assign a position to a node even if it is part of a node vector. Allowed values are "auto", "center", "left", "right", "top", "bottom" or any postive integer
+        string posY = default("auto"); // see posX
         int nrOfNetworkInterfaces = default(1);
+        int nrOfTrafficGenerators = default(1);
 
         string mobilityType = default("RandomWPMobility");
         string batteryModel = default("OMNeTBattery");
@@ -56,12 +60,12 @@ module NetworkNode {
             parameters:
                 @display("p=49,37");
         }
-        
+
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=49,106");
         }
-        
+
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
@@ -69,24 +73,35 @@ module NetworkNode {
                 @display("p=49,171;i=block/table");
         }
 
-        app: TrafficGenerator {
+        app[nrOfTrafficGenerators]: TrafficGenerator {
             parameters:
-                @display("b=40,24;p=239,29,col");
+                @display("b=40,24;p=205,29,col");
         }
-        
+
+        sink: TrafficSink {
+            parameters:
+                @display("b=40,24;p=324,29,col");
+        }
+
+        mux: TrafficMultiplexer {
+			parameters:
+			    nrOfUpperGates = nrOfTrafficGenerators;
+            	@display("p=205,100");
+        }
+
         networkLayer: ARANetworkLayer {
             parameters:
                 evaporationModel = evaporationModel;
                 forwardingPolicyModel = forwardingPolicyModel;
                 reinforcementModel = reinforcementModel;
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=239,124");
+                @display("i=ara;p=239,185");
         }
-        
+
         wlan[nrOfNetworkInterfaces]: Ieee80211Nic {
             parameters:
                 mgmtType = "Ieee80211MgmtAdhoc";
-                @display("p=239,222;q=queue");
+                @display("p=239,268;q=queue");
         }
 
         mobility: <mobilityType> like IMobility if mobilityType != "" {
@@ -95,7 +110,11 @@ module NetworkNode {
         }
 
     connections allowunconnected:
-        app.lowergate <--> networkLayer.upperLayerGate;
+        for i=0..nrOfTrafficGenerators-1 {
+            app[i].toLowerGate --> mux.fromUpperGate[i];
+        }
+        mux.toLowerGate --> networkLayer.upperLayerGate$i;
+        sink.fromLowerGate <-- networkLayer.upperLayerGate$o;
 
         for i=0..nrOfNetworkInterfaces-1 {
             networkLayer.ifOut[i] --> wlan[i].upperLayerIn;
