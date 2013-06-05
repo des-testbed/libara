@@ -12,6 +12,8 @@ src/libARA.so
 omnetpp/ara-sim
 doc/doxygen/html
 include/inetmanet/*
+*_m.cpp
+*_m.h
 
 # Test output files #
 tests/TestResults.xml
