@@ -11,6 +11,7 @@
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/ARANetworkConfigurator.h"
 #include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/MobilityDataPersistor.h"
 
 #include "INotifiable.h"
 #include "NotificationBoard.h"
@@ -92,6 +93,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
     private:
         void setPositionFromParameters();
         int getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition);
+        MobilityDataPersistor* mobilityDataPersistor;
 
     protected:
         NotificationBoard* notificationBoard;
