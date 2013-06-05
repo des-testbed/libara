@@ -2,9 +2,9 @@
  * $FU-Copyright$
  */
 
-#include "omnetpp/TrafficGenerator.h"
-#include "omnetpp/TrafficControllInfo.h"
-#include "omnetpp/TrafficPacket_m.h"
+#include "TrafficGenerator.h"
+#include "TrafficControllInfo.h"
+#include "TrafficPacket_m.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
