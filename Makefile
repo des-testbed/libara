@@ -76,7 +76,7 @@ LIBARA_DEPENDENCIES = $(LIBARA_O:.o=.d)
 OMNETARA_MESSAGE_FILES = $(shell find $(OMNETARA_SRC_FOLDER)/ -type f -name '*.msg')
 OMNETARA_MESSAGE_SRC = $(OMNETARA_MESSAGE_FILES:.msg=_m.cpp)
 OMNETARA_MESSAGE_HEADERS = $(OMNETARA_MESSAGE_FILES:.msg=_m.h)
-OMNETARA_SRC = $(shell find $(OMNETARA_SRC_FOLDER)/ -type f -name '*.cpp')
+OMNETARA_SRC = $(shell find $(OMNETARA_SRC_FOLDER)/ -type f -name '*.cpp' -and -not -name '*_m.cpp')
 OMNETARA_SRC += $(OMNETARA_MESSAGE_SRC)
 OMNETARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(OMNETARA_SRC)))
 OMNETARA_DEPENDENCIES = $(OMNETARA_O:.o=.d)
@@ -169,6 +169,7 @@ $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(
 #
 # Creates the *.cpp files for all *.msg files
 #
+.SECONDARY: $(OMNETARA_MESSAGE_SRC) $(OMNETARA_MESSAGE_HEADERS)
 %_m.cpp: %.msg
 	@echo "Creating $@ from msg class"
 	@opp_msgc -s "_m.cpp" $<
@@ -306,9 +307,8 @@ $(OUTPUT_DIR)/%.o: %.cpp
 # Clean up only the dependencies
 #
 .PHONY: cleandep
-	@rm -f $(LIBARA_DEPENDENCIES)
-	@rm -f $(OMNETARA_DEPENDENCIES)
-	@rm -f $(TESTS_DEPENDENCIES)
+cleandep:
+	@rm -f $(shell find $(OUTPUT_DIR) -type f -name '*.d')
 
 #
 # Clean up (delete) all generated files
