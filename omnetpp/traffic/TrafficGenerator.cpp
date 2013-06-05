@@ -14,7 +14,6 @@ void TrafficGenerator::initialize(int level) {
     TrafGen::initialize(level);
     if(level == 0) {
         nrOfPacketsToSend = par("nrOfPackets").longValue();
-        WATCH(nrOfSentMessages);
     }
 }
 
@@ -45,10 +44,6 @@ void TrafficGenerator::sendTraffic(cPacket* message, const char* destination) {
 
     send(packet, "toLowerGate");
     nrOfSentMessages++;
-}
-
-void TrafficGenerator::finish() {
-    recordScalar("trafficSent", nrOfSentMessages);
 }
 
 OMNETARA_NAMESPACE_END
