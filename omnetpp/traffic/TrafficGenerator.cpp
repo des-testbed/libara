@@ -2,8 +2,9 @@
  * $FU-Copyright$
  */
 
-#include "omnetpp/TrafficGenerator.h"
-#include "omnetpp/TrafficControllInfo.h"
+#include "TrafficGenerator.h"
+#include "TrafficControllInfo.h"
+#include "TrafficPacket_m.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -13,6 +14,7 @@ void TrafficGenerator::initialize(int level) {
     TrafGen::initialize(level);
     if(level == 0) {
         nrOfPacketsToSend = par("nrOfPackets").longValue();
+        delayVector.setName("delay");
         WATCH(nrOfSentMessages);
         WATCH(nrOfReceivedMessages);
     }
@@ -33,13 +35,28 @@ void TrafficGenerator::SendTraf(cPacket* message, const char* destination) {
 }
 
 void TrafficGenerator::sendTraffic(cPacket* message, const char* destination) {
+    // TODO we may no longer need the inheritance from the stupid TrafGen if we don#t even use its message objects anymore
+    delete message;
+
+    TrafficPacket* packet = new TrafficPacket("Traffic");
+    SimTime now = simTime();
+    packet->setCreationTime(now);
+
     TrafficControlInfo* controlInfo = new TrafficControlInfo(destination);
-    message->setControlInfo(controlInfo);
-    send(message, "lowergate$o");
+    packet->setControlInfo(controlInfo);
+
+    send(packet, "lowergate$o");
     nrOfSentMessages++;
 }
 
-void TrafficGenerator::handleLowerMsg(cPacket *message) {
+void TrafficGenerator::handleLowerMsg(cPacket* message) {
+    TrafficPacket* packet = check_and_cast<TrafficPacket*>(message);
+
+    SimTime currentTime = simTime();
+    SimTime delay = currentTime - packet->getCreationTime();
+
+    delayVector.record(delay);
+
     nrOfReceivedMessages++;
     delete message;
 }

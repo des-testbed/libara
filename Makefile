@@ -73,12 +73,15 @@ LIBARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(LIBARA_SRC)))
 LIBARA_DEPENDENCIES = $(LIBARA_O:.o=.d)
 
 # omnetARA files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-OMNETARA_SRC = $(shell find $(OMNETARA_SRC_FOLDER)/ -type f -name '*.cpp')
+OMNETARA_MESSAGE_FILES = $(shell find $(OMNETARA_SRC_FOLDER)/ -type f -name '*.msg')
+OMNETARA_MESSAGE_SRC = $(OMNETARA_MESSAGE_FILES:.msg=_m.cpp)
+OMNETARA_MESSAGE_HEADERS = $(OMNETARA_MESSAGE_FILES:.msg=_m.h)
+OMNETARA_SRC = $(shell find $(OMNETARA_SRC_FOLDER)/ -type f -name '*.cpp' -and -not -name '*_m.cpp')
+OMNETARA_SRC += $(OMNETARA_MESSAGE_SRC)
 OMNETARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(OMNETARA_SRC)))
 OMNETARA_DEPENDENCIES = $(OMNETARA_O:.o=.d)
 OMNETARA_EXECUTABLE_NAME = ara-sim
 OMNETARA_EXECUTABLE = $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME)
-
 # Tests files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_TESTS_SRC = $(shell find $(TESTS_FOLDER)/libara -type f -name '*Test.cpp')
 LIBARA_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(LIBARA_TESTS_SRC)))
@@ -162,6 +165,14 @@ $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(
 	@$(CXX) $(OMNETARA_O) -o $(OMNETARA_EXECUTABLE) $(LINK_TO_LIB_ARA) $(OMNETPP_LINKFLAGS) -loppmain$D 
 	@cd $(OMNETARA_SRC_FOLDER) && ln -s -f ../$(OMNETARA_EXECUTABLE) $(OMNETARA_EXECUTABLE_NAME)
 	@echo "You can start the simulation now with the individual run scripts in the simulations folder"
+
+#
+# Creates the *.cpp files for all *.msg files
+#
+.SECONDARY: $(OMNETARA_MESSAGE_SRC) $(OMNETARA_MESSAGE_HEADERS)
+%_m.cpp: %.msg
+	@echo "Creating $@ from msg class"
+	@opp_msgc -s "_m.cpp" $<
 
 #
 # Builds omnetpp *.cpp files. This is separate from the default %.o target because it uses other includes
@@ -296,9 +307,8 @@ $(OUTPUT_DIR)/%.o: %.cpp
 # Clean up only the dependencies
 #
 .PHONY: cleandep
-	@rm -f $(LIBARA_DEPENDENCIES)
-	@rm -f $(OMNETARA_DEPENDENCIES)
-	@rm -f $(TESTS_DEPENDENCIES)
+cleandep:
+	@rm -f $(shell find $(OUTPUT_DIR) -type f -name '*.d')
 
 #
 # Clean up (delete) all generated files
@@ -311,6 +321,7 @@ clean: cleandep
 	@echo "Cleaning omnetARA.."
 	@rm -f $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME) $(OMNETARA_EXECUTABLE)
 	@rm -f $(OMNETARA_O)
+	@rm -f $(OMNETARA_MESSAGE_HEADERS) $(OMNETARA_MESSAGE_SRC)
 	@echo "Cleaning tests.."
 	@rm -f $(ALL_TEST_BINARIES)
 	@rm -f $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TEST_EXECUTABLE)

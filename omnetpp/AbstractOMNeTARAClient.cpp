@@ -97,7 +97,7 @@ bool AbstractOMNeTARAClient::isFromUpperLayer(cMessage* message) {
 }
 
 void AbstractOMNeTARAClient::handleUpperLayerMessage(cMessage* message) {
-    TrafficControlInfo* controlInfo = (TrafficControlInfo*)message->getControlInfo();
+    TrafficControlInfo* controlInfo = check_and_cast<TrafficControlInfo*>(message->getControlInfo());
     AddressPtr destination = controlInfo->getDestination();
     AddressPtr source = getLocalAddress();
     unsigned int sequenceNumber = getNextSequenceNumber();
