@@ -25,6 +25,12 @@ class MobilityDataPersistor : public cIListener {
         ~MobilityDataPersistor();
 
         void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
+        void receiveSignal(cComponent *src, simsignal_t id, long l);
+        void receiveSignal(cComponent *src, simsignal_t id, double d);
+        void receiveSignal(cComponent *src, simsignal_t id, simtime_t t);
+        void receiveSignal(cComponent *src, simsignal_t id, const char *s);
+        void receiveSignal(cComponent *source, simsignal_t signalID, const SimTime& t);
+        void receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l);
 
 //        void write(Mobility* routingTable);
 //        void write(float x, float y, float z);

@@ -26,6 +26,31 @@ MobilityDataPersistor::MobilityDataPersistor(cModule* hostModule, std::string si
     this->signalName = signalName;
 }
 
+void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, long l){
+
+}
+
+void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, double d){
+
+}
+
+void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, simtime_t t){
+
+}
+
+void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, const char *s){
+
+}
+
+
+void MobilityDataPersistor::receiveSignal(cComponent *source, simsignal_t signalID, const SimTime& t){
+
+}
+
+void MobilityDataPersistor::receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l){
+
+}
+
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, cObject *obj){
     std::string signal(src->getSignalName(id));
     
