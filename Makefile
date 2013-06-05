@@ -169,15 +169,19 @@ $(OMNETARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(INETMANET_LIB) $(
 #
 # Creates the *.cpp files for all *.msg files
 #
-.SECONDARY: $(OMNETARA_MESSAGE_SRC) $(OMNETARA_MESSAGE_HEADERS)
+.SECONDARY: $(OMNETARA_MESSAGE_SRC)
 %_m.cpp: %.msg
-	@echo "Creating $@ from msg class"
+	@echo "Compiling $<"
 	@opp_msgc -s "_m.cpp" $<
+
+.SECONDARY: $(OMNETARA_MESSAGE_HEADERS)
+%_m.h: %_m.cpp
+	
 
 #
 # Builds omnetpp *.cpp files. This is separate from the default %.o target because it uses other includes
 #
-$(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/%.o: $(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_LIB)
+$(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/%.o: $(OMNETARA_SRC_FOLDER)/%.cpp $(INETMANET_LIB) $(OMNETARA_MESSAGE_HEADERS)
 	@$(MKPATH) $(dir $@)
 	@echo "Compiling $< (belongs to omnetARA)";
 	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $< -o $@
