@@ -2,34 +2,20 @@
  * $FU-Copyright$
  */
 
-#ifndef LINEAR_EVAPORATION_POLICY_H_
-#define LINEAR_EVAPORATION_POLICY_H_
-
-#include "EvaporationPolicy.h"
-#include "Clock.h"
-
 namespace ARA { 
    /**
     * This class provides the cubic evaporation function for an ant 
 	* routing algorithm.
     */
-    class CubicEvaporationPolicy : public EvaporationPolicy {
+    class CubicEvaporationPolicy {
         public:
-            CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold, unsigned int timeIntervalInMilliSeconds = 1000);
-
-            float evaporate(float oldPheromoneValue, int milliSecondsSinceLastEvaporation);
-
-            void setPlateau(float plateau);
-            void setSlow(float slow);
-            void setReduction(float reduction);
-            void setThreshold(float threshold);
+            CubicEvaporationPolicy(float plateau, float center, int degree);
+            float evaporate(float oldPheromoneValue, float milliSecondsSinceLastTraffic);
 
         private:
             float plateau;
-            float slow;
-            float reduction;
-            float threshold;
+            float center;
+            int degree;
     };
 } 
 
-#endif 

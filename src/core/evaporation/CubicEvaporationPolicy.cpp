@@ -10,49 +10,20 @@
 
 using namespace ARA;
 
-CubicEvaporationPolicy::CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold, unsigned int timeIntervalInMilliSeconds) : EvaporationPolicy(timeIntervalInMilliSeconds) {
-    this->plateau = pPlateau;
-    this->slow = pSlow;
-    this->reduction = pReduction;
-    this->threshold = pThreshold;
+CubicEvaporationPolicy::CubicEvaporationPolicy(float plateau, float center, int degree){
+    this->plateau = plateau;
+    this->center = center;
+    this->degree = degree;
 }
 
-void CubicEvaporationPolicy::setPlateau(float pPlateau){
-    this->plateau = pPlateau;
-}
+float CubicEvaporationPolicy::evaporate(float oldPheromoneValue, float milliSecondsSinceLastTraffic) {
+        float alpha = pow(center,degree);
+        float evaporation = (plateau/alpha)*(alpha+pow((milliSecondsSinceLastTraffic-center),degree));
+        float newPheromoneValue = oldPheromoneValue-evaporation;
 
-void CubicEvaporationPolicy::setSlow(float pSlow){
-    this->slow = pSlow;
-}
-
-void CubicEvaporationPolicy::setReduction(float pReduction){
-    this->reduction = pReduction;
-}
-
-void CubicEvaporationPolicy::setThreshold(float pThreshold){
-    this->threshold = pThreshold;
-}
-
-float CubicEvaporationPolicy::evaporate(float oldPheromoneValue, int milliSecondsSinceLastEvaporation) {
-    if(milliSecondsSinceLastEvaporation == 0) {
-        return oldPheromoneValue;
-    }
-    else {
-	    float newPheromone = oldPheromoneValue;
-            newPheromone = slow*(1.0+threshold-pow(((milliSecondsSinceLastEvaporation-2000)/reduction),3)/plateau);
-
-
-            /// check if the result is below a threshold
-            if(newPheromone < 0){
-                /// set pheromone to 0
-                return 0;
-            }
-
-            if(newPheromone > 1){
-                // TODO: check!
-                newPheromone = 1;
-            }
-
-        return newPheromone;
-    }
+        if(newPheromoneValue>=0.0) {
+            return(newPheromoneValue);
+        } else {
+            return 0;
+        }
 }
