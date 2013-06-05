@@ -14,9 +14,7 @@ void TrafficGenerator::initialize(int level) {
     TrafGen::initialize(level);
     if(level == 0) {
         nrOfPacketsToSend = par("nrOfPackets").longValue();
-        delayVector.setName("delay");
         WATCH(nrOfSentMessages);
-        WATCH(nrOfReceivedMessages);
     }
 }
 
@@ -45,25 +43,12 @@ void TrafficGenerator::sendTraffic(cPacket* message, const char* destination) {
     TrafficControlInfo* controlInfo = new TrafficControlInfo(destination);
     packet->setControlInfo(controlInfo);
 
-    send(packet, "lowergate$o");
+    send(packet, "toLowerGate");
     nrOfSentMessages++;
-}
-
-void TrafficGenerator::handleLowerMsg(cPacket* message) {
-    TrafficPacket* packet = check_and_cast<TrafficPacket*>(message);
-
-    SimTime currentTime = simTime();
-    SimTime delay = currentTime - packet->getCreationTime();
-
-    delayVector.record(delay);
-
-    nrOfReceivedMessages++;
-    delete message;
 }
 
 void TrafficGenerator::finish() {
     recordScalar("trafficSent", nrOfSentMessages);
-    recordScalar("trafficReceived", nrOfReceivedMessages);
 }
 
 OMNETARA_NAMESPACE_END
