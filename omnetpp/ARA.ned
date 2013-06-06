@@ -4,6 +4,9 @@ package ara;
 simple ARA {
     
     parameters:
+        // The flag controls if mobile traces are created or not
+        bool activateMobileTrace = default(false);
+
         // The value which is added to the initial pheromone value which is based on the TTL.
         // This can be used to hold the TTL as low as possible without making the initial pheromone value always too small
         double initialPhi = default(0);

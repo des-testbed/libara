@@ -11,6 +11,7 @@
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/ARANetworkConfigurator.h"
 #include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/MobilityDataPersistor.h"
 
 #include "INotifiable.h"
 #include "NotificationBoard.h"
@@ -21,7 +22,7 @@ OMNETARA_NAMESPACE_BEGIN
 
 class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimpleModule, public INotifiable {
     public:
-        virtual ~AbstractOMNeTARAClient() {};
+        virtual ~AbstractOMNeTARAClient();
         IInterfaceTable* getInterfaceTable();
 
     protected:
@@ -92,6 +93,8 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
     private:
         void setPositionFromParameters();
         int getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition);
+        bool mobilityTraceEnabled;
+        MobilityDataPersistor* mobilityDataPersistor;
 
     protected:
         NotificationBoard* notificationBoard;

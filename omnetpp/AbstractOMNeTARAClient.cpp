@@ -23,6 +23,18 @@ void AbstractOMNeTARAClient::initialize() {
     interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
     networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
     setPositionFromParameters();
+
+    mobilityTraceEnabled = par("activateMobileTrace").boolValue();
+
+    if(mobilityTraceEnabled){
+        this->mobilityDataPersistor = new MobilityDataPersistor(mobility, this->findHost());
+    }
+}
+
+AbstractOMNeTARAClient::~AbstractOMNeTARAClient(){
+    if(mobilityTraceEnabled){
+        delete this->mobilityDataPersistor;
+    }
 }
 
 void AbstractOMNeTARAClient::setPositionFromParameters() {
