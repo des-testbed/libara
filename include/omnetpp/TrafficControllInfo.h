@@ -11,11 +11,17 @@ OMNETARA_NAMESPACE_BEGIN
 
 class TrafficControlInfo : public cObject {
 public:
-    TrafficControlInfo(const char* destinationIPv4Address);
+    TrafficControlInfo();
+
+    void setDestination(const char* destinationIPv4Address);
+    void setHopCount(int hopCount);
+
     AddressPtr getDestination() const;
+    int getHopCount() const;
 
 private:
     AddressPtr destination;
+    int hopCount;
 };
 
 OMNETARA_NAMESPACE_END

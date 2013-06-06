@@ -145,6 +145,11 @@ void AbstractOMNeTARAClient::sendToUpperLayer(const Packet* packet) {
     cPacket* encapsulatedData = omnetPacket->decapsulate();
     ASSERT(encapsulatedData);
 
+    TrafficControlInfo* controlInfo = new TrafficControlInfo();
+    int maxTTL = packetFactory->getMaximumNrOfHops();
+    controlInfo->setHopCount(maxTTL - omnetPacket->getTTL());
+    encapsulatedData->setControlInfo(controlInfo);
+
     send(encapsulatedData, "upperLayerGate$o");
     delete omnetPacket;
 }

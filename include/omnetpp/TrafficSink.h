@@ -22,6 +22,7 @@ class TrafficSink : public cSimpleModule {
     private:
         int nrOfReceivedMessages = 0;
         cOutVector delayVector;
+        cOutVector hopCountVector;
 };
 
 OMNETARA_NAMESPACE_END

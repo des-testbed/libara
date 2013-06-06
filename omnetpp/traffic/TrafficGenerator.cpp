@@ -38,7 +38,8 @@ void TrafficGenerator::sendTraffic(cPacket* originalTrafGenMessage, const char* 
     long packetSizeInBytes = PacketSize();
     packet->setByteLength(packetSizeInBytes);
 
-    TrafficControlInfo* controlInfo = new TrafficControlInfo(destination);
+    TrafficControlInfo* controlInfo = new TrafficControlInfo();
+    controlInfo->setDestination(destination);
     packet->setControlInfo(controlInfo);
 
     send(packet, "toLowerGate");

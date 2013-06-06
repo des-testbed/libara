@@ -4,6 +4,7 @@
 
 #include "TrafficSink.h"
 #include "TrafficPacket_m.h"
+#include "TrafficControllInfo.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -12,6 +13,7 @@ Define_Module(TrafficSink);
 void TrafficSink::initialize(int level) {
     if(level == 0) {
         delayVector.setName("delay");
+        hopCountVector.setName("hopCount");
         WATCH(nrOfReceivedMessages);
     }
 }
@@ -24,6 +26,9 @@ void TrafficSink::handleMessage(cMessage* message) {
 
     delayVector.record(delay);
     nrOfReceivedMessages++;
+
+    TrafficControlInfo* controlInfo = check_and_cast<TrafficControlInfo*>(packet->getControlInfo());
+    hopCountVector.record(controlInfo->getHopCount());
 
     delete message;
 }
