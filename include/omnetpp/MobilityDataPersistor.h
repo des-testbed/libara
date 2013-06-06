@@ -8,14 +8,18 @@
 #include "OMNeTARAMacros.h"
 #include "OMNeTTime.h"
 
-#include <iostream>
-#include <fstream>
 #include <string>
+#include <stdio.h>
+#include <fstream>
+#include <unistd.h>
+#include <endian.h>
 
 #include <clistener.h>
 
 #include "Coord.h"
+#include "Environment.h"
 #include "MobilityBase.h"
+#include "MovingMobilityBase.h"
 
 OMNETARA_NAMESPACE_BEGIN
 

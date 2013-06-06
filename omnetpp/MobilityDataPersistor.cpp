@@ -2,21 +2,12 @@
  * $FU-Copyright$
  */
 
+#include <iostream>
 #include "MobilityDataPersistor.h"
-#include "Environment.h"
-
-#include <unistd.h>
-#include <stdio.h>
-#include <endian.h>
-
-#include "MovingMobilityBase.h"
-
 
 OMNETARA_NAMESPACE_BEGIN
 
 using namespace std;
-
-//mobilityStateChanged
 
 MobilityDataPersistor::MobilityDataPersistor(MobilityBase* mobility, cModule* hostModule) {
     string fileName = getFileName(hostModule);
@@ -31,27 +22,27 @@ MobilityDataPersistor::MobilityDataPersistor(MobilityBase* mobility, cModule* ho
 }
 
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, long l){
-
+    throw("this method is not implemented since the mobility module does not create such a signal");
 }
 
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, double d){
-
+    throw("this method is not implemented since the mobility module does not create such a signal");
 }
 
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, simtime_t t){
-
+    throw("this method is not implemented since the mobility module does not create such a signal");
 }
 
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, const char *s){
-
+    throw("this method is not implemented since the mobility module does not create such a signal");
 }
 
 void MobilityDataPersistor::receiveSignal(cComponent *source, simsignal_t signalID, const SimTime& t){
-
+    throw("this method is not implemented since the mobility module does not create such a signal");
 }
 
 void MobilityDataPersistor::receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l){
-
+    throw("this method is not implemented since the mobility module does not create such a signal");
 }
 
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, cObject *obj){
@@ -65,16 +56,6 @@ void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, cObje
 
 bool MobilityDataPersistor::signalMatches(std::string pSignalName){
     return (this->signalName == pSignalName);
-}
-
-/**
- * The method unsubscribes the class from the 'mobilityStateChanged'
- * signal and is called via class 'AbstractOMNeTARAClient'.
- *
- * @param mobility The mobility module of a node 
- */
-void MobilityDataPersistor::unsubscribe(MobilityBase *mobility) {
-    mobility->unsubscribe("mobilityStateChanged", this);
 }
 
 MobilityDataPersistor::~MobilityDataPersistor() {
@@ -97,21 +78,28 @@ string MobilityDataPersistor::getFileName(cModule* hostModule) const {
 }
 
 /**
- * Writes the current entries of the given Mobility to file if at least
- * n milliseconds have passed since the last write (where n is the updateIntervall
- * given the class constructor).
+ * Writes the current position of the node to a file
  *
  * The binary format of the written data is defined as follows:
- * | 8 Byte timestamp | 1 Byte nrOfEntries | <entry_data> | ... | [<entry_data>]
+ * | 8 byte timestamp | <entry_data> | ... | [<entry_data>]
  *
  * <entry_data> is defined as a triple in the following format:
- * | 4 Byte x position | 4 Byte y position | 4 Byte z position |
+ * | 8 byte x position | 8 byte y position | 8 byte z position |
  *
  * The format stores all <entry_data> triples directly one after another.
+ *
+ * @param position The position of the node
  */
 void MobilityDataPersistor::write(Coord position) {
-    std::cout << position.x << ", " << position.y << "," << position.z << " : " << sizeof(position.x) << std::endl;
+    OMNeTTime* currentTime = dynamic_cast<OMNeTTime*>(Environment::getClock()->makeTime());
+    currentTime->setToCurrentTime();
+  
+    int64 rawTime = currentTime->getRawTime();
 
+    file.write((char*)&rawTime, sizeof(rawTime));
+    file.write((char*)&position.x, 8);
+    file.write((char*)&position.y, 8);
+    file.write((char*)&position.z, 8);
 }
 
 OMNETARA_NAMESPACE_END

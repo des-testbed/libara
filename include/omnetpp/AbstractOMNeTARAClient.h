@@ -93,6 +93,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
     private:
         void setPositionFromParameters();
         int getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition);
+        bool mobilityTraceEnabled;
         MobilityDataPersistor* mobilityDataPersistor;
 
     protected:
