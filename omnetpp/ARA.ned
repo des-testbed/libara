@@ -23,6 +23,10 @@ simple ARA {
          // This does influences the initial pheromone value.
         int maxTTL;
         
+        // Determines if the previousHop feature is activated or not.
+        // If it is, a node does also use the previous hop of a packet for decide if a route has been seen before.  
+        bool previousHopFeature = default(true);
+        
         // If this value is greater 0 the client will check each neighborActivityCheckInterval milliseconds
         // if there are neighbors which have been inactive for to long. If so they are contacted which could
         // lead to a deletion from the routing table if they are no longer reachable. This is mostly important in

@@ -1880,7 +1880,6 @@ TEST(AbstractARAClientTest, clientCanHandleHelloPacket) {
 }
 
 /**
-<<<<<<< HEAD
  * In this test we check the following scenario:
  *
  * Test setup:                       | Description
@@ -2232,4 +2231,45 @@ TEST(AbstractARAClientTest, startToSendPacketsOnlyIfclientReceivesData) {
     //TODO why do I need to clean this up (ARAClientMock should do this)
     delete dataPacket1;
     delete dataPacket2;
+}
+
+/**
+ * In this test we disable the previous hop feature and check if the right routes are created.
+ *
+ * Test setup:                      | Description (Test from perspective of (C)):
+ *          ┌───>(B)                |   * at first (C) gets a FANT from (A) so it learns this route
+ *          │     │                 |   * then it gets the same FANT from (B) and also creates the route
+ * (src)───(A)──>(C)──(..)──(dest)  |     no matter if it already knows the previous hop
+ */
+TEST(AbstractARAClientTest, previousHopFeatureCanBeDisabled) {
+    // at first we need our own configuration to enable this feature
+    BasicConfiguration configuration = client->getStandardConfiguration();
+    configuration.deactivatePreviousHopFeature();
+    createNewClient(configuration);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("C");
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC = interface->getLocalAddress();
+    AddressPtr source (new AddressMock("src"));
+    AddressPtr destination (new AddressMock("dest"));
+
+    // we test from the perspective of node C
+    CHECK_FALSE(routingTable->isDeliverable(source));
+
+    // at first we receive the broadcast from A
+    Packet* fantFromA = new Packet(source, destination, nodeA, PacketType::FANT, 1, 10);
+    client->receivePacket(fantFromA, interface);
+
+    // this should have created a route to (src) via (A)
+    CHECK_TRUE(routeIsKnown(source, nodeA, interface));
+
+    // now we receive the broadcast from (B)
+    Packet* fantFromB = new Packet(source, destination, nodeB, PacketType::FANT, 1, 9);
+    // even if we would set the previousHop to (A) the client would ignore this and still create the route
+    fantFromB->setPreviousHop(nodeA);
+    client->receivePacket(fantFromB, interface);
+
+    // this should also create the route to (src) via (B)
+    CHECK_TRUE(routeIsKnown(source, nodeB, interface));
 }

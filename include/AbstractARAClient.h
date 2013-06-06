@@ -212,6 +212,7 @@ protected:
     unsigned int neighborActivityCheckIntervalInMilliSeconds;
     unsigned int maxNeighborInactivityTimeInMilliSeconds;
     unsigned int pantIntervalInMilliSeconds;
+    bool isPreviousHopFeatureActivated;
     int maxNrOfRouteDiscoveryRetries;
 
     //TODO the knownIntermediateHops and lastReceivedPackets may be merged into a single hashmap

@@ -29,6 +29,7 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     neighborActivityCheckIntervalInMilliSeconds = module->par("neighborActivityCheckInterval").longValue();
     maxNeighborInactivityTimeInMilliSeconds = module->par("maxNeighborInactivityTime").longValue();
     pantIntervalInMilliSeconds = module->par("pantInterval").longValue();
+    previousHopFeatureIsActivated  = module->par("previousHopFeature").boolValue();
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
     setLogLevel(module->par("logLevel").stringValue());
@@ -116,4 +117,8 @@ cModule* OMNeTConfiguration::getHostModule() {
     cModule* parent = simpleModule->getParentModule();
     cModule* grandParent = parent->getParentModule();
     return grandParent;
+}
+
+bool OMNeTConfiguration::isPreviousHopFeatureActivated() {
+    return previousHopFeatureIsActivated;
 }

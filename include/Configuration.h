@@ -29,6 +29,7 @@ public:
     virtual unsigned int getNeighborActivityCheckIntervalInMilliSeconds() = 0;
     virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds() = 0;
     virtual unsigned int getPANTIntervalInMilliSeconds() = 0;
+    virtual bool isPreviousHopFeatureActivated() = 0;
 };
 
 ARA_NAMESPACE_END

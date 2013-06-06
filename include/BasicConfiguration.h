@@ -36,10 +36,13 @@ public:
     virtual unsigned int getNeighborActivityCheckIntervalInMilliSeconds();
     virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds();
     virtual unsigned int getPANTIntervalInMilliSeconds();
+    virtual bool isPreviousHopFeatureActivated();
 
     void setNeighborActivityCheckInterval(unsigned int newIntervalInMilliSeconds);
     void setMaxNeighborInactivityTime(unsigned int newTimeInMilliSeconds);
     void setPANTInterval(unsigned int newIntervalInMilliSeconds);
+    void activatePreviousHopFeature();
+    void deactivatePreviousHopFeature();
 
 protected:
     EvaporationPolicy* evaporationPolicy;
@@ -52,6 +55,7 @@ protected:
     unsigned int neighborActivityCheckIntervalInMilliSeconds;
     unsigned int maxNeighborInactivityTimeInMilliSeconds;
     unsigned int pantIntervalInMilliSeconds;
+    bool previousHopFeatureIsActivated;
 };
 
 } /* namespace ARA */

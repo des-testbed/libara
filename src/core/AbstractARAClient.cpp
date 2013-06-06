@@ -31,6 +31,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     neighborActivityCheckIntervalInMilliSeconds = configuration.getNeighborActivityCheckIntervalInMilliSeconds();
     maxNeighborInactivityTimeInMilliSeconds = configuration.getMaxNeighborInactivityTimeInMilliSeconds();
     pantIntervalInMilliSeconds = configuration.getPANTIntervalInMilliSeconds();
+    isPreviousHopFeatureActivated = configuration.isPreviousHopFeatureActivated();
 
     this->packetFactory = packetFactory;
     this->routingTable = routingTable;
@@ -234,6 +235,7 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
 
 void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
     // we do not want to send/reinforce routes that would send the packet back over ourselves
+    // Please note that we deliberately decided to enable this check even if isPreviousHopFeatureActivated is false!
     if (isLocalAddress(packet->getPreviousHop()) == false) {
         // trigger the evaporation first so this does not effect the new route or update
         routingTable->triggerEvaporation();
@@ -281,9 +283,14 @@ bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
 
         // have we seen this sender, or the previous hop before?
         bool senderHasBeenSeen = listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end();
-        bool prevHopHasBeenSeen = listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
 
-        return senderHasBeenSeen || prevHopHasBeenSeen;
+        if (isPreviousHopFeatureActivated) {
+            bool prevHopHasBeenSeen = listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
+            return senderHasBeenSeen || prevHopHasBeenSeen;
+        }
+        else {
+            return senderHasBeenSeen;
+        }
     }
 }
 
@@ -483,7 +490,6 @@ bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     AddressPtr source = packet->getSource();
     AddressPtr sender = packet->getSender();
-    AddressPtr previousHop = packet->getPreviousHop();
 
     // first check the lastReceived sequence numbers for this source
     LastReceivedPacketsMap::const_iterator foundPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
@@ -506,15 +512,16 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
         // There is no record of any known intermediate node for this source address ~> create new
         listOfKnownIntermediateNodes = new unordered_set<AddressPtr>();
         listOfKnownIntermediateNodes->insert(packet->getSender());
-        if(previousHop->equals(sender) == false) {
-            listOfKnownIntermediateNodes->insert(previousHop);
-        }
         knownIntermediateHops[source] = listOfKnownIntermediateNodes;
     }
     else {
         listOfKnownIntermediateNodes = foundIntermediateHopsForSource->second;
         listOfKnownIntermediateNodes->insert(sender);
-        if(previousHop->equals(sender) == false) {
+    }
+
+    if(isPreviousHopFeatureActivated) {
+        AddressPtr previousHop = packet->getPreviousHop();
+        if(packet->getPreviousHop()->equals(sender) == false) {
             listOfKnownIntermediateNodes->insert(previousHop);
         }
     }
