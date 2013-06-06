@@ -20,6 +20,9 @@ public:
 
 protected:
     virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
+
+private:
+    int calculatePacketSize(Packet* packet);
 };
 
 OMNETARA_NAMESPACE_END

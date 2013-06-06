@@ -6,6 +6,7 @@
 #include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/PacketFactory.h"
 #include "omnetpp/RoutingTableWatcher.h"
+#include "omnetpp/OMNeTGate.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -126,6 +127,17 @@ void ARA::startNewRouteDiscovery(Packet* packet) {
 
 void ARA::finish() {
     recordScalar("nrOfTrappedPacketsAfterFinish", packetTrap->getNumberOfTrappedPackets());
+
+    int64 nrOfSentDataBits = 0;
+    int64 nrOfSentControlBits = 0;
+    for(auto& interface: interfaces) {
+        OMNeTGate* gate = (OMNeTGate*) interface;
+        nrOfSentDataBits += gate->getNrOfSentDataBits();
+        nrOfSentControlBits += gate->getNrOfSentControlBits();
+    }
+
+    recordScalar("nrOfSentDataBits", nrOfSentDataBits);
+    recordScalar("nrOfSentControlBits", nrOfSentDataBits);
 }
 
 OMNETARA_NAMESPACE_END

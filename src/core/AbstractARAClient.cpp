@@ -34,6 +34,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     isPreviousHopFeatureActivated = configuration.isPreviousHopFeatureActivated();
 
     this->packetFactory = packetFactory;
+    this->packetFactory->setPreviousHopFeature(isPreviousHopFeatureActivated);
     this->routingTable = routingTable;
     routingTable->setEvaporationPolicy(evaporationPolicy);
 
