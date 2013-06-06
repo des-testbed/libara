@@ -20,18 +20,24 @@ import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
 import inet.world.radio.ChannelControl;
 
-network EARAScenario01
+network EARAScenario
 {
     parameters:
-        double playgroundSizeX;
-        double playgroundSizeY;
         @display("b=297,203;bgb=758,337");
+        int numberOfNodes;
+        volatile double nodeSpeed @unit(mps);
+        volatile double nodePauseTime @unit(s);
+        double playgroundSizeX @unit(m);
+        double playgroundSizeY @unit(m);
+        double playgroundSizeZ @unit(m) = default(0);
+        string mobilityType = default("RandomWPMobility");
+        volatile double mobilityUpdateIntervall @unit(ms) = default(100ms);
 
     submodules:
         clock: OMNeTClock {
-            @display("p=78,161");
+            @display("p=153,41;is=s");
         }
-        
+
         channelControl: ChannelControl {
             parameters:
                 @display("p=78,36");
@@ -43,30 +49,19 @@ network EARAScenario01
                 netmask = "255.255.0.0";
                 @display("p=78,97");
         }
-        node1: EnergyAwareNetworkNode {
-            mobility.constraintAreaX = playgroundSizeX;
-            mobility.constraintAreaY = playgroundSizeY;
-            @display("p=515,69");
-        }
-        node2: EnergyAwareNetworkNode {
-            mobility.constraintAreaX = playgroundSizeX;
-            mobility.constraintAreaY = playgroundSizeY;
-            @display("p=195,215");
-        }
-        node3: EnergyAwareNetworkNode {
-            mobility.constraintAreaX = playgroundSizeX;
-            mobility.constraintAreaY = playgroundSizeY;
-            @display("p=697,182");
-        }
-        node4: EnergyAwareNetworkNode {
-            mobility.constraintAreaX = playgroundSizeX;
-            mobility.constraintAreaY = playgroundSizeY;
-            @display("p=305,125");
-        }
-        node5: EnergyAwareNetworkNode {
-            mobility.constraintAreaX = playgroundSizeX;
-            mobility.constraintAreaY = playgroundSizeY;
-            @display("p=496,267");
+
+        node[numberOfNodes]: EnergyAwareNetworkNode {
+            parameters:
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = mobilityUpdateIntervall;
+                mobility.constraintAreaMinX = 0m;
+                mobility.constraintAreaMinY = 0m;
+                mobility.constraintAreaMinZ = 0m;
+                mobility.constraintAreaMaxX = playgroundSizeX;
+                mobility.constraintAreaMaxY = playgroundSizeY;
+                mobility.constraintAreaMaxZ = playgroundSizeZ;
         }
 }
 
