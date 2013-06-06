@@ -40,8 +40,6 @@ class MobilityDataPersistor : public cIListener {
         void receiveSignal(cComponent *source, simsignal_t signalID, const SimTime& t);
         void receiveSignal(cComponent *source, simsignal_t signalID, unsigned long l);
         
-        void unsubscribe(MobilityBase* mobility);
-
         void write(Coord position);
 
     private:
