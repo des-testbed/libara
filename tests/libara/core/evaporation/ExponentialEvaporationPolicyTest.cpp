@@ -58,3 +58,20 @@ TEST(ExponentialEvaporationPolicyTest, partialEvaporation) {
     pheromone = policy.evaporate(pheromone, 500);
     DOUBLES_EQUAL(10 * pow(evaporationFactor, 0.5), pheromone, 0.00001);
 }
+
+TEST(ExponentialEvaporationPolicyTest, sequentialVsContinuousEvaporation) {
+    float evaporationFactor = 0.7;
+    float threshold = 1;
+    unsigned int timeIntervalInMillis = 1000;
+    ExponentialEvaporationPolicy policy = ExponentialEvaporationPolicy(evaporationFactor, timeIntervalInMillis, threshold);
+
+    float originalPheromone = 123;
+    float evaporationInOneStep = policy.evaporate(originalPheromone, 10 * timeIntervalInMillis);
+
+    float evaporationInMultipleSteps = originalPheromone;
+    for (int i = 0; i < 10; ++i) {
+        evaporationInMultipleSteps = policy.evaporate(evaporationInMultipleSteps, timeIntervalInMillis);
+    }
+
+    DOUBLES_EQUAL(evaporationInOneStep, evaporationInMultipleSteps, 0.00001);
+}
