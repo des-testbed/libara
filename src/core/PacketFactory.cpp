@@ -14,20 +14,20 @@ Packet* PacketFactory::makeClone(const Packet* originalPacket) {
     return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), originalPacket->getType(), originalPacket->getSequenceNumber(), originalPacket->getTTL(), originalPacket->getPayload(), originalPacket->getPayloadLength(), originalPacket->getPreviousHop());
 }
 
-Packet* PacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber, const char* payload, unsigned int payloadSize) {
-    return makePacket(source, destination, source, PacketType::DATA, newSequenceNumber, maxHopCount, payload, payloadSize);
+Packet* PacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, const char* payload, unsigned int payloadSize) {
+    return makePacket(source, destination, source, PacketType::DATA, sequenceNumber, maxHopCount, payload, payloadSize);
 }
 
-Packet* PacketFactory::makeFANT(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber) {
-    return makePacket(source, destination, source, PacketType::FANT, newSequenceNumber, maxHopCount);
+Packet* PacketFactory::makeFANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
+    return makePacket(source, destination, source, PacketType::FANT, sequenceNumber, maxHopCount);
 }
 
-Packet* PacketFactory::makeBANT(const Packet* originalPacket, unsigned int newSequenceNumber) {
-    return makePacket(originalPacket->getDestination(), originalPacket->getSource(), originalPacket->getDestination(), PacketType::BANT, newSequenceNumber, maxHopCount);
+Packet* PacketFactory::makeBANT(const Packet* originalPacket, unsigned int sequenceNumber) {
+    return makePacket(originalPacket->getDestination(), originalPacket->getSource(), originalPacket->getDestination(), PacketType::BANT, sequenceNumber, maxHopCount);
 }
 
-Packet* PacketFactory::makeDulicateWarningPacket(const Packet* originalPacket, AddressPtr senderOfDuplicateWarning, unsigned int newSequenceNumber) {
-    return makePacket(senderOfDuplicateWarning, originalPacket->getDestination(), senderOfDuplicateWarning, PacketType::DUPLICATE_ERROR, newSequenceNumber, maxHopCount);
+Packet* PacketFactory::makeDulicateWarningPacket(const Packet* originalPacket, AddressPtr senderOfDuplicateWarning, unsigned int sequenceNumber) {
+    return makePacket(senderOfDuplicateWarning, originalPacket->getDestination(), senderOfDuplicateWarning, PacketType::DUPLICATE_ERROR, sequenceNumber, maxHopCount);
 }
 
 Packet* PacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender) {
@@ -47,6 +47,10 @@ Packet* PacketFactory::makeEnergyDisseminationPacket(AddressPtr source, unsigned
 
 Packet* PacketFactory::makeHelloPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
     return makePacket(source, destination, source, PacketType::HELLO, sequenceNumber, maxHopCount);
+}
+
+Packet* PacketFactory::makePANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
+    return makePacket(source, destination, source, PacketType::PANT, sequenceNumber, maxHopCount);
 }
 
 Packet* PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {

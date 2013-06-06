@@ -16,6 +16,7 @@ BasicConfiguration::BasicConfiguration(EvaporationPolicy* evaporationPolicy, Pat
     this->packetDeliveryDelayInMilliSeconds = packetDeliveryDelayInMilliSeconds;
     this->neighborActivityCheckIntervalInMilliSeconds = 0; // disabled by default
     this->maxNeighborInactivityTimeInMilliSeconds = UINT_MAX; // disabled by default
+    this->pantIntervalInMilliSeconds = 0; // disabled by default
 }
 
 EvaporationPolicy* BasicConfiguration::getEvaporationPolicy() {
@@ -54,12 +55,20 @@ unsigned int BasicConfiguration::getMaxNeighborInactivityTimeInMilliSeconds() {
     return maxNeighborInactivityTimeInMilliSeconds;
 }
 
-void BasicConfiguration::setNeighborActivityCheckInterval(unsigned int newTimeoutInMilliSeconds) {
-    neighborActivityCheckIntervalInMilliSeconds = newTimeoutInMilliSeconds;
+unsigned int BasicConfiguration::getPANTIntervalInMilliSeconds() {
+    return pantIntervalInMilliSeconds;
+}
+
+void BasicConfiguration::setNeighborActivityCheckInterval(unsigned int newIntervalInMilliSeconds) {
+    neighborActivityCheckIntervalInMilliSeconds = newIntervalInMilliSeconds;
 }
 
 void BasicConfiguration::setMaxNeighborInactivityTime(unsigned int newTimeInMilliSeconds) {
     maxNeighborInactivityTimeInMilliSeconds = newTimeInMilliSeconds;
+}
+
+void BasicConfiguration::setPANTInterval(unsigned int newIntervalInMilliSeconds) {
+    pantIntervalInMilliSeconds = newIntervalInMilliSeconds;
 }
 
 ARA_NAMESPACE_END

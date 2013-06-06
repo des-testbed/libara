@@ -99,4 +99,17 @@ void ARAClientMock::forget(AddressPtr neighbor) {
     }
 }
 
+Timer* ARAClientMock::getPANTsTimer(AddressPtr destination) const {
+    RunningPANTsMap::iterator iterator;
+    for (RunningPANTsMap::const_iterator iterator=runningPANTTimers.begin(); iterator!=runningPANTTimers.end(); iterator++) {
+        std::pair<Timer*, AddressPtr> entryPair = *iterator;
+        if (entryPair.second->equals(destination)) {
+            return entryPair.first;
+        }
+    }
+
+    // could not find any timer for that destination
+    return nullptr;
+}
+
 ARA_NAMESPACE_END

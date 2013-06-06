@@ -44,6 +44,7 @@ public:
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "localhost");
     unsigned int getPacketDeliveryDelay() const;
+
     Timer* getNeighborActivityTimer() const;
 
     /**
@@ -51,6 +52,8 @@ public:
      * This means all routing table entries are deleted and possibly existent activityTimes are discarded.
      */
     void forget(AddressPtr neighbor);
+
+    Timer* getPANTsTimer(AddressPtr destination) const;
 };
 
 ARA_NAMESPACE_END

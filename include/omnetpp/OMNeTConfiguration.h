@@ -28,6 +28,7 @@ class OMNeTConfiguration : public virtual Configuration {
         virtual unsigned int getPacketDeliveryDelayInMilliSeconds();
         virtual unsigned int getNeighborActivityCheckIntervalInMilliSeconds();
         virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds();
+        virtual unsigned int getPANTIntervalInMilliSeconds();
 
         virtual RoutingTable* getRoutingTable();
         Logger* getLogger();
@@ -47,6 +48,7 @@ class OMNeTConfiguration : public virtual Configuration {
         unsigned int packetDeliveryDelayInMilliSeconds;
         unsigned int neighborActivityCheckIntervalInMilliSeconds;
         unsigned int maxNeighborInactivityTimeInMilliSeconds;
+        unsigned int pantIntervalInMilliSeconds;
 
         cModule* simpleModule;
         OMNeTLogger* logger;

@@ -27,11 +27,15 @@ simple ARA {
         // if there are neighbors which have been inactive for to long. If so they are contacted which could
         // lead to a deletion from the routing table if they are no longer reachable. This is mostly important in
         // mobile scenarios where the connection graph may change heavily. 
-        int neighborActivityCheckInterval @unit("ms") = default(0s);
+        int neighborActivityCheckInterval @unit("ms") = default(0ms);
         
         // If the clients check for the last time a neighbor has been seen active
         // it will try to contact each client which has not been active for more than this value in milliseconds.
-        int maxNeighborInactivityTime @unit("ms") = default(1s);
+        int maxNeighborInactivityTime @unit("ms") = default(1000ms);
+        
+        // The PANTInterval controls if and when PANTs are sent into the network to explore new routes
+        // The default value of 0 means that this feature is disabled
+        int pantInterval @unit("ms") = default(0ms);
         
         string logLevel @enum("TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL") = default("INFO");
         
