@@ -35,7 +35,8 @@ void TrafficGenerator::sendTraffic(cPacket* originalTrafGenMessage, const char* 
     TrafficPacket* packet = new TrafficPacket("Traffic");
     SimTime now = simTime();
     packet->setCreationTime(now);
-    packet->setBitLength(originalTrafGenMessage->getBitLength());
+    long packetSizeInBytes = PacketSize();
+    packet->setByteLength(packetSizeInBytes);
 
     TrafficControlInfo* controlInfo = new TrafficControlInfo(destination);
     packet->setControlInfo(controlInfo);
