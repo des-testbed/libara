@@ -24,6 +24,12 @@ public:
     virtual ~PacketFactory() {};
 
     /**
+     * If the previous hop feature is deactivated it should be announced to the factory.
+     * This can be used in calculation of the packet size.
+     */
+    void setPreviousHopFeature(bool isActivated);
+
+    /**
      * Creates a copy of the original packet.
      *
      * Note: The result of this method is a newly created object which must be
@@ -128,6 +134,7 @@ protected:
      virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
 
      int maxHopCount;
+     bool isPreviousHopFeatureEnabled;
 };
 
 } /* namespace ARA */

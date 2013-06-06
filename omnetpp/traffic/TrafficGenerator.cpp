@@ -31,19 +31,19 @@ void TrafficGenerator::SendTraf(cPacket* message, const char* destination) {
     }
 }
 
-void TrafficGenerator::sendTraffic(cPacket* message, const char* destination) {
-    // TODO we may no longer need the inheritance from the stupid TrafGen if we don#t even use its message objects anymore
-    delete message;
-
+void TrafficGenerator::sendTraffic(cPacket* originalTrafGenMessage, const char* destination) {
     TrafficPacket* packet = new TrafficPacket("Traffic");
     SimTime now = simTime();
     packet->setCreationTime(now);
+    packet->setBitLength(originalTrafGenMessage->getBitLength());
 
     TrafficControlInfo* controlInfo = new TrafficControlInfo(destination);
     packet->setControlInfo(controlInfo);
 
     send(packet, "toLowerGate");
     nrOfSentMessages++;
+
+    delete originalTrafGenMessage;
 }
 
 OMNETARA_NAMESPACE_END

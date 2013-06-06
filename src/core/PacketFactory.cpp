@@ -8,6 +8,11 @@ namespace ARA {
 
 PacketFactory::PacketFactory(int maxHopCount) {
     this->maxHopCount = maxHopCount;
+    this->isPreviousHopFeatureEnabled = true;
+}
+
+void PacketFactory::setPreviousHopFeature(bool isActivated) {
+    this->isPreviousHopFeatureEnabled = isActivated;
 }
 
 Packet* PacketFactory::makeClone(const Packet* originalPacket) {
