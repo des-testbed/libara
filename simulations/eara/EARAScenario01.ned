@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara.simulations.EARAScenarios;
+package ara.simulations.eara;
 
 import ara.EnergyAwareNetworkNode;
 import ara.ARANetworkConfigurator;
