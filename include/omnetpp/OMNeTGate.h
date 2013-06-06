@@ -32,6 +32,8 @@ class OMNeTGate: public AbstractNetworkInterface {
 
         int64 getNrOfSentDataBits();
         int64 getNrOfSentControlBits();
+        unsigned int getNrOfControlPackets();
+        unsigned int getNrOfDataPackets();
 
     private:
         std::shared_ptr<OMNeTAddress> getNextHopAddress(std::shared_ptr<Address> recipient);
@@ -47,6 +49,8 @@ class OMNeTGate: public AbstractNetworkInterface {
         // this is only for statistics
         int64 nrOfSentControlBits;
         int64 nrOfSentDataBits;
+        unsigned int nrOfSentControlPackets;
+        unsigned int nrOfSentDataPackets;
 };
 
 OMNETARA_NAMESPACE_END

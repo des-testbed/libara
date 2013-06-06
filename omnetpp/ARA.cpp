@@ -130,14 +130,20 @@ void ARA::finish() {
 
     int64 nrOfSentDataBits = 0;
     int64 nrOfSentControlBits = 0;
+    unsigned int nrOfControlPackets = 0;
+    unsigned int nrOfDataPackets = 0;
     for(auto& interface: interfaces) {
         OMNeTGate* gate = (OMNeTGate*) interface;
         nrOfSentDataBits += gate->getNrOfSentDataBits();
         nrOfSentControlBits += gate->getNrOfSentControlBits();
+        nrOfControlPackets += gate->getNrOfControlPackets();
+        nrOfDataPackets += gate->getNrOfDataPackets();
     }
 
     recordScalar("nrOfSentDataBits", nrOfSentDataBits);
-    recordScalar("nrOfSentControlBits", nrOfSentDataBits);
+    recordScalar("nrOfSentControlBits", nrOfSentControlBits);
+    recordScalar("nrOfControlPackets", nrOfControlPackets);
+    recordScalar("nrOfDataPackets", nrOfDataPackets);
 }
 
 OMNETARA_NAMESPACE_END
