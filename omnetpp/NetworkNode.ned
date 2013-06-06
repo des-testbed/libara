@@ -15,10 +15,11 @@
 
 package ara;
 
+import ara.NetworkNodeBase;
 import ara.ARANetworkLayer;
 
 module NetworkNode extends NetworkNodeBase {
-    
+
     parameters:
         @node;
         @display("i=device/wifilaptop;bgb=366,335");
