@@ -16,6 +16,7 @@ simsignal_t EARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
 simsignal_t EARA::ROUTE_FAILURE_NO_HOP = SIMSIGNAL_NULL;
 simsignal_t EARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
 simsignal_t EARA::ROUTE_FAILURE_NEXT_HOP_IS_SENDER = SIMSIGNAL_NULL;
+simsignal_t EARA::DROP_PACKET_BECAUSE_ENERGY_DEPLETED = SIMSIGNAL_NULL;
 
 EARA::~EARA() {
     /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
@@ -53,6 +54,7 @@ void EARA::initialize(int stage) {
         ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
         ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
+        DROP_PACKET_BECAUSE_ENERGY_DEPLETED =  registerSignal("dropPacketBecauseEnergyDepleted");
     }
 }
 
@@ -61,7 +63,7 @@ void EARA::handleMessage(cMessage* message) {
         AbstractOMNeTARAClient::handleMessage(message);
     }
     else {
-        //FIXME record this statistic as well!!
+        emit(DROP_PACKET_BECAUSE_ENERGY_DEPLETED, 1);
         delete message;
     }
 }

@@ -26,6 +26,7 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         static simsignal_t ROUTE_FAILURE_NO_HOP;
         static simsignal_t NEW_ROUTE_DISCOVERY;
         static simsignal_t ROUTE_FAILURE_NEXT_HOP_IS_SENDER;
+        static simsignal_t DROP_PACKET_BECAUSE_ENERGY_DEPLETED;
 
     protected:
         virtual int numInitStages() const;
