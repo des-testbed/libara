@@ -17,17 +17,19 @@ package ara;
 
 import ara.EARA;
 
-import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
-import ara.evaporation.OMNeTExponentialEvaporationPolicy;
-import ara.forwarding.OMNeTEnergyAwareStochasticForwardingPolicy;
-import inet.networklayer.arp.ARP;
+import ara.evaporation.EvaporationPolicy;
+import ara.forwarding.ForwardingPolicy;
+import ara.reinforcement.ReinforcementPolicy;
 
 module EARANetworkLayer
 {
     parameters:
         int nrOfNetworkInterfaces = default(1);
-
-        @display("i=ara.png;bgb=301,245");
+		string forwardingPolicyModel @enum("OMNeTEnergyAwareStochasticForwardingPolicy") = default("OMNeTEnergyAwareStochasticForwardingPolicy");
+        string evaporationModel @enum("OMNeTExponentialEvaporationPolicy","OMNeTCubicEvaporationPolicy","OMNeTLinearEvaporationPolicy") = default("OMNeTExponentialEvaporationPolicy");
+        string reinforcementModel @enum("OMNeTLinearPathReinforcementPolicy") = default("OMNeTLinearPathReinforcementPolicy");
+        
+        @display("i=ara.png;bgb=301,241");
 
     gates:
         inout upperLayerGate;
@@ -35,41 +37,32 @@ module EARANetworkLayer
         output ifOut[nrOfNetworkInterfaces];	// output to  NIC interface (INET/MANET needs this to be named this way)
 
     submodules:
-        eara: EARA {
+        ara: EARA {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=204,72");
         }
 
-        forwardingPolicy: OMNeTEnergyAwareStochasticForwardingPolicy {
+        forwardingPolicy: <forwardingPolicyModel> like ForwardingPolicy if forwardingPolicyModel != "" {
             parameters:
-                @display("p=72,40");
+                @display("p=71,33");
         }
 
-        reinforcementPolicy: OMNeTLinearPathReinforcementPolicy {
+        reinforcementPolicy: <reinforcementModel> like ReinforcementPolicy if reinforcementModel != "" {
             parameters:
-                @display("p=72,114");
+                @display("p=71,107");
         }
 
-        evaporationPolicy: OMNeTExponentialEvaporationPolicy {
+        evaporationPolicy: <evaporationModel> like EvaporationPolicy if evaporationModel != "" {
             parameters:
-                @display("p=72,183");
-        }
-
-        arp: ARP {
-            parameters:
-                proxyARP = false;
-                @display("p=204,163;q=pendingQueue");
-            gates:
-                nicOut[nrOfNetworkInterfaces];
+                @display("p=71,176");
         }
 
     connections allowunconnected:
-        upperLayerGate <--> eara.upperLayerGate;
-        arp.ipIn <-- eara.arpOut;
+        upperLayerGate <--> ara.upperLayerGate;
 
         for i=0..nrOfNetworkInterfaces-1 {
-            ifIn[i] --> eara.ifIn[i];
-            arp.nicOut[i] --> ifOut[i];
+            ifIn[i] --> ara.ifIn[i];
+            ara.ifOut[i] --> ifOut[i];
         }
 }

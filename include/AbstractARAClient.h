@@ -122,19 +122,6 @@ public:
     void checkPantTimer(const Packet* packet);
 
 protected:
-    /**
-     * The packet should be directed to this node and must be delivered to the local system.
-     * Please note that this method is responsible for deleting the given packet (or delegating
-     * this responsibility to another method)
-     */
-    virtual void deliverToSystem(const Packet* packet) = 0;
-
-    /**
-     * This method is called if the route discovery is unsuccessful and not route to the packets
-     * destination can be established. The task of this method is to notify the upper layers
-     * about this event and delete the packet.
-     */
-    virtual void packetNotDeliverable(const Packet* packet) = 0;
 
     /**
      * This method either initializes or reinforces a route in the routing table.
