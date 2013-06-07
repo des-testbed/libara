@@ -30,7 +30,6 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         static simsignal_t PACKET_NOT_DELIVERED_SIGNAL;
         static simsignal_t ROUTE_FAILURE_SIGNAL;
 
-        virtual void receivePacket(Packet* packet, NetworkInterface* interface);
         IInterfaceTable* getInterfaceTable();
 
     protected:
@@ -114,6 +113,8 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
          * to warn the user.
          */
         AddressPtr getLocalAddress();
+
+        void persistRoutingTableData();
 
         /**
          * This will record a detected routing loop for statistical purposes.

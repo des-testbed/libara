@@ -31,6 +31,8 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         virtual int numInitStages() const;
         virtual void initialize(int stage);
 
+        virtual void receivePacket(Packet* packet, NetworkInterface* interface);
+
         virtual void handleMessage(cMessage* message);
 
         virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);

@@ -38,6 +38,8 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
         virtual int numInitStages() const;
         virtual void initialize(int stage);
 
+        virtual void receivePacket(Packet* packet, NetworkInterface* interface);
+
         virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
 
         virtual bool handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface);

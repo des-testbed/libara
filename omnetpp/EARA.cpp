@@ -66,6 +66,11 @@ void EARA::handleMessage(cMessage* message) {
     }
 }
 
+void EARA::receivePacket(Packet* packet, NetworkInterface* interface) {
+    AbstractEARAClient::receivePacket(packet, interface);
+    persistRoutingTableData();
+}
+
 void EARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
     AbstractARAClient::handleDuplicateErrorPacket(packet, interface);
     nrOfDetectedLoops++;

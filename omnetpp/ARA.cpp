@@ -52,6 +52,11 @@ void ARA::initialize(int stage) {
     }
 }
 
+void ARA::receivePacket(Packet* packet, NetworkInterface* interface) {
+    AbstractARAClient::receivePacket(packet, interface);
+    persistRoutingTableData();
+}
+
 void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
     AbstractARAClient::handleDuplicateErrorPacket(packet, interface);
     nrOfDetectedLoops++;

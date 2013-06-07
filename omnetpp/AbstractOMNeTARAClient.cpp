@@ -143,8 +143,7 @@ void AbstractOMNeTARAClient::handleARAMessage(cMessage* message) {
       arrivalGate->receive(omnetPacket);
 }
 
-void AbstractOMNeTARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
-    AbstractNetworkClient::receivePacket(packet, interface);
+void AbstractOMNeTARAClient::persistRoutingTableData() {
     routingTablePersistor->write(routingTable);
 }
 
