@@ -65,6 +65,7 @@ endif
 LIBARA_SRC_FOLDER = src
 TESTS_FOLDER = tests
 OMNETARA_SRC_FOLDER = omnetpp
+TESTBEDARA_SRC_FOLDER = testbed
 INETMANET_FOLDER = inetmanet
 OUTPUT_DIR = out/$(CONFIGNAME)
 INCLUDE_DIR = include
@@ -84,6 +85,15 @@ OMNETARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(OMNETARA_SRC)))
 OMNETARA_DEPENDENCIES = $(OMNETARA_O:.o=.d)
 OMNETARA_EXECUTABLE_NAME = ara-sim
 OMNETARA_EXECUTABLE = $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME)
+
+# testbedARA files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TESTBEDARA_SRC = $(shell find $(TESTBEDARA_SRC_FOLDER)/ -type f -name '*.cpp')
+TESTBEDARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(TESTBEDARA_SRC)))
+TESTBEDARA_DEPENDENCIES = $(TESTBEDARA_O:.o=.d)
+TESTBEDARA_EXECUTABLE_NAME = ara
+TESTBEDARA_EXECUTABLE = $(OUTPUT_DIR)/$(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME)
+TESTBEDARA_LINKFLAGS = $(LINKFLAGS) -ldessert -lcli
+
 # Tests files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_TESTS_SRC = $(shell find $(TESTS_FOLDER)/libara -type f -name '*Test.cpp')
 LIBARA_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(LIBARA_TESTS_SRC)))
@@ -213,6 +223,18 @@ $(INETMANET_FOLDER)/.git:
 	@echo -e "\n~~~ INITIALIZING INET/MANET SUBMODULE ~~~\n"
 	git submodule init $(INETMANET_FOLDER)
 	git submodule update $(INETMANET_FOLDER)
+
+# testbedARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.PHONY: testbedARA
+testbedARA: $(TESTBEDARA_EXECUTABLE)
+
+#
+# Build the DES-Testbed version of libARA
+#
+$(TESTBEDARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(TESTBEDARA_O)
+	@echo "Linking $(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME)"
+	@$(CXX) $(TESTBEDARA_O) -o $(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_LINKFLAGS)
+	@cd $(TESTBEDARA_SRC_FOLDER) && ln -s -f ../$(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_EXECUTABLE_NAME)
 
 # Test targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: test
