@@ -36,6 +36,9 @@ void EARA::handleMessage(cMessage* message) {
     if (hasEnoughBattery) {
         AbstractOMNeTARAClient::handleMessage(message);
     }
+    else {
+        delete message;
+    }
 }
 
 void EARA::deliverToSystem(const Packet* packet) {
