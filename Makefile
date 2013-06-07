@@ -162,6 +162,7 @@ $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 -include $(OMNETARA_DEPENDENCIES)
 -include $(TESTS_DEPENDENCIES)
 
+
 # OMNeTARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .PHONY: omnetARA
@@ -222,6 +223,7 @@ $(INETMANET_FOLDER)/.git:
 	git submodule init $(INETMANET_FOLDER)
 	git submodule update $(INETMANET_FOLDER)
 
+
 # testbedARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: testbedARA
 testbedARA: $(TESTBEDARA_EXECUTABLE)
@@ -233,6 +235,7 @@ $(TESTBEDARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(TESTBEDARA_O)
 	@echo "Linking $(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME)"
 	@$(CXX) $(TESTBEDARA_O) -o $(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_LINKFLAGS)
 	@cd $(TESTBEDARA_SRC_FOLDER) && ln -s -f ../$(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_EXECUTABLE_NAME)
+
 
 # Test targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: test
@@ -348,6 +351,9 @@ clean: cleandep
 	@rm -f $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME) $(OMNETARA_EXECUTABLE)
 	@rm -f $(OMNETARA_O)
 	@rm -f $(OMNETARA_MESSAGE_HEADERS) $(OMNETARA_MESSAGE_SRC)
+	@echo "Cleaning testbedARA.."
+	@rm -f $(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME) $(TESTBEDARA_EXECUTABLE)
+	@rm -f $(TESTBEDARA_O)
 	@echo "Cleaning tests.."
 	@rm -f $(ALL_TEST_BINARIES)
 	@rm -f $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TEST_EXECUTABLE)
