@@ -93,7 +93,7 @@ TESTBEDARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(TESTBEDARA_SRC)))
 TESTBEDARA_DEPENDENCIES = $(TESTBEDARA_O:.o=.d)
 TESTBEDARA_EXECUTABLE_NAME = ara
 TESTBEDARA_EXECUTABLE = $(OUTPUT_DIR)/$(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME)
-TESTBEDARA_LINKFLAGS = $(LINKFLAGS) -ldessert -lcli -lstdc++
+TESTBEDARA_LINKFLAGS = $(LINKFLAGS) -ldessert -lcli -lstdc++ -lm
 
 # Tests files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_TESTS_SRC = $(shell find $(TESTS_FOLDER)/libara -type f -name '*Test.cpp')
