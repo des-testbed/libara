@@ -24,7 +24,7 @@ void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, Energy
 }
 
 AbstractEARAClient::~AbstractEARAClient() {
-    delete energyDisseminationTimer;
+    DELETE_IF_NOT_NULL(energyDisseminationTimer);
 }
 
 void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
