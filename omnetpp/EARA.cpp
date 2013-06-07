@@ -11,13 +11,31 @@ OMNETARA_NAMESPACE_BEGIN
 // Register the class with the OMNeT++ simulation
 Define_Module(EARA);
 
+simsignal_t EARA::LOOP_DETECTION_SIGNAL = SIMSIGNAL_NULL;
+simsignal_t EARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
+simsignal_t EARA::ROUTE_FAILURE_NO_HOP = SIMSIGNAL_NULL;
+simsignal_t EARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
+simsignal_t EARA::ROUTE_FAILURE_NEXT_HOP_IS_SENDER = SIMSIGNAL_NULL;
+
+EARA::~EARA() {
+    /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
+     * This is necessary because the surround omnetpp simulation will attempt to delete those modules
+     * because they are SimpleModules which are owned by other compound modules*/
+
+    forwardingPolicy = nullptr;
+    evaporationPolicy = nullptr;
+    pathReinforcementPolicy = nullptr;
+}
+
 int EARA::numInitStages() const {
     return 5;
 }
 
 void EARA::initialize(int stage) {
-    if(stage == 4) {
+    if(stage == 0) {
         AbstractOMNeTARAClient::initialize();
+    }
+    else if(stage == 4) {
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
@@ -29,6 +47,12 @@ void EARA::initialize(int stage) {
         maximumBatteryLevel = config.getMaximumBatteryLevel();
         currentEnergyLevel =  255;
         WATCH(currentEnergyLevel);
+        WATCH(nrOfDetectedLoops);
+        LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
+        DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
+        ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
+        NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
+        ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
     }
 }
 
@@ -37,16 +61,44 @@ void EARA::handleMessage(cMessage* message) {
         AbstractOMNeTARAClient::handleMessage(message);
     }
     else {
+        //FIXME record this statistic as well!!
         delete message;
     }
 }
 
-void EARA::deliverToSystem(const Packet* packet) {
-    sendToUpperLayer(packet);
+void EARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
+    AbstractARAClient::handleDuplicateErrorPacket(packet, interface);
+    nrOfDetectedLoops++;
+    emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
-void EARA::packetNotDeliverable(const Packet* packet) {
-    //TODO report to upper layer
+bool EARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
+    return AbstractEARAClient::handleBrokenLink(packet, receiverAddress, interface);
+}
+
+void EARA::handlePacketWithZeroTTL(Packet* packet) {
+    AbstractEARAClient::handlePacketWithZeroTTL(packet);
+
+    if(packet->isDataPacket()) {
+        emit(DROP_PACKET_WITH_ZERO_TTL, 1);
+    }
+}
+
+void EARA::handleNonSourceRouteDiscovery(Packet* packet) {
+    if(routingTable->isDeliverable(packet->getDestination())) {
+        // can not be sent because the only known next hop is the sender of this packet
+        emit(ROUTE_FAILURE_NEXT_HOP_IS_SENDER, 1);
+    }
+    else {
+        // can not be sent because there really is no known next hop
+        emit(ROUTE_FAILURE_NO_HOP, 1);
+    }
+    AbstractEARAClient::handleNonSourceRouteDiscovery(packet);
+}
+
+void EARA::startNewRouteDiscovery(Packet* packet) {
+    emit(NEW_ROUTE_DISCOVERY, 1);
+    AbstractEARAClient::startNewRouteDiscovery(packet);
 }
 
 void EARA::receiveChangeNotification(int category, const cObject* details) {
@@ -56,12 +108,6 @@ void EARA::receiveChangeNotification(int category, const cObject* details) {
     else {
         AbstractOMNeTARAClient::receiveChangeNotification(category, details);
     }
-}
-
-void EARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
-    // TODO this does only work if we have only one network interface card
-    NetworkInterface* interface = getNetworkInterface(0);
-    AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
 }
 
 void EARA::handleBatteryStatusChange(Energy* energyInformation) {
