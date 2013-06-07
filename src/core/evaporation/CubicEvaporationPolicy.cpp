@@ -2,76 +2,49 @@
  * $FU-Copyright$
  */
 
-#include <cmath>
-#include <cstdlib>
-#include <stdint.h>
-
 #include "CubicEvaporationPolicy.h"
+#include "Exception.h"
+
+#include <cmath>
 
 using namespace ARA;
 
-CubicEvaporationPolicy::CubicEvaporationPolicy(int pPlateau, float pSlow, float pReduction, float pThreshold, unsigned int timeIntervalInMilliSeconds) : EvaporationPolicy(timeIntervalInMilliSeconds) {
-    this->plateau = pPlateau;
-    this->slow = pSlow;
-    this->reduction = pReduction;
-    this->threshold = pThreshold;
+CubicEvaporationPolicy::CubicEvaporationPolicy(unsigned int millisecondsUntilPlateauCenterIsReached, float plateauCenterDepth, unsigned int oddExponent) {
+    checkExponent(oddExponent);
+
+    this->alpha = millisecondsUntilPlateauCenterIsReached;
+    this->plateauCenterDepth = plateauCenterDepth;
+    this->exponent = oddExponent;
 }
 
-void CubicEvaporationPolicy::setPlateau(float pPlateau){
-    this->plateau = pPlateau;
-}
-
-void CubicEvaporationPolicy::setSlow(float pSlow){
-    this->slow = pSlow;
-}
-
-void CubicEvaporationPolicy::setReduction(float pReduction){
-    this->reduction = pReduction;
-}
-
-void CubicEvaporationPolicy::setThreshold(float pThreshold){
-    this->threshold = pThreshold;
-}
-
-/**
- * FIXME: There is something wrong 
- * 
- */
-float CubicEvaporationPolicy::evaporate(float oldPheromoneValue, int milliSecondsSinceLastEvaporation) {
-    if(milliSecondsSinceLastEvaporation == 0) {
-        return oldPheromoneValue;
+void CubicEvaporationPolicy::checkExponent(unsigned int exponent) {
+    if(exponent % 2 == 0) {
+        throw Exception("The exponent of the cubic evaporation function can not be even");
     }
-    else {
-        int factor = milliSecondsSinceLastEvaporation / timeInterval;
-        float newPheromone;
+}
 
-        /// we iterate 'factor' times since it is not (yet) possible just to use the pow function
-        for(int i = 0; i < factor; i++){
-            float t, m;
-            float a = 1 - (2 * oldPheromoneValue);
+float CubicEvaporationPolicy::evaporate(float oldPheromoneValue, float milliSecondsSinceLastTraffic) {
+    float potentiatedAlpha = pow(alpha, exponent);
+    float factor = plateauCenterDepth / potentiatedAlpha;
+    float amountOfEvaporation = factor * (potentiatedAlpha + pow(milliSecondsSinceLastTraffic - alpha, exponent));
+    float newPheromoneValue = oldPheromoneValue - amountOfEvaporation;
 
-            if(a > 0){
-                t = 0.5 * (pow(abs(a), (1/this->plateau)) + 1);
-            }else{
-                t = 0.5 * (1 - pow(abs(a), (1/this->plateau)));
-            }
-
-            m = t + (this->reduction * this->slow);
-
-            newPheromone = 0.5 * (pow(((2 * m) - 1), this->plateau) + 1);
-
-            /// check if the result is below a threshold
-            if(newPheromone < 0){
-                /// set pheromone to 0
-                return 0;
-            }
-
-            if(newPheromone > 1){
-                // TODO: check!
-                newPheromone = 1;
-            }
-        }
-
-        return newPheromone;
+    if(newPheromoneValue < 0) {
+        newPheromoneValue = 0;
     }
+
+    return newPheromoneValue;
+}
+
+void CubicEvaporationPolicy::setTimeUntilPlateauCenterIsReached(unsigned int millisecondsUntilPlateauCenterIsReached) {
+    alpha = millisecondsUntilPlateauCenterIsReached;
+}
+
+void CubicEvaporationPolicy::setPlateauCenterDepth(float newPlateauCenterDepth) {
+    plateauCenterDepth = newPlateauCenterDepth;
+}
+
+void CubicEvaporationPolicy::setExponent(unsigned int newOddExponent) {
+    checkExponent(newOddExponent);
+    exponent = newOddExponent;
 }
