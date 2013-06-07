@@ -1,11 +1,5 @@
-extern "C" {
-#include <dessert.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <netinet/in.h>
-#include <uthash.h>
-}
-//#include <libcli.h>
+#include "testbed/CLibs.h"
+//#include "AbstractARAClient.h"
 
 int main(int argc, char** argv) {
      /** read the configuration file */
