@@ -246,7 +246,7 @@ $(TESTBEDARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(TESTBEDARA_O) $
 
 # Test targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: test
-test: libAraTests
+test: testbedTests
 
 .PHONY: allTests
 allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OMNETARA_EXECUTABLE)
