@@ -46,6 +46,20 @@ public:
     virtual void receivePacket(Packet* packet, NetworkInterface* interface) = 0;
 
     /**
+     * The packet should be directed to this node and must be delivered to the local system.
+     * Please note that this method is responsible for deleting the given packet (or delegating
+     * this responsibility to another method)
+     */
+    virtual void deliverToSystem(const Packet* packet) = 0;
+
+    /**
+     * This method is called if the route discovery is unsuccessful and not route to the packets
+     * destination can be established. The task of this method is to notify the upper layers
+     * about this event and delete the packet.
+     */
+    virtual void packetNotDeliverable(const Packet* packet) = 0;
+
+    /**
      * Sets a logger for this network client.
      *
      * This logger will be used to log messages during the routing algorithm.

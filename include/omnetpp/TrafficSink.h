@@ -20,9 +20,11 @@ class TrafficSink : public cSimpleModule {
         virtual void finish();
 
     private:
+        SimTime timeOfLastReceivedPacket;
         int nrOfReceivedMessages = 0;
         cOutVector delayVector;
         cOutVector hopCountVector;
+        cOutVector routeEnergyOutVector;
 };
 
 OMNETARA_NAMESPACE_END

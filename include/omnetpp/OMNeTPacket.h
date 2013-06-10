@@ -22,7 +22,7 @@ class OMNeTPacket : public cPacket, public Packet {
     bool operator==(const OMNeTPacket&);
 
   public:
-    OMNeTPacket(AddressPtr source=nullptr, AddressPtr destination=nullptr, AddressPtr sender=nullptr, char type=0, unsigned int seqNr=0, int ttl=50);
+    OMNeTPacket(AddressPtr source=nullptr, AddressPtr destination=nullptr, AddressPtr sender=nullptr, char type=0, unsigned int seqNr=0, int ttl=50, const char* payload=nullptr, unsigned int payloadSize=0);
     OMNeTPacket(const OMNeTPacket& other);
     OMNeTPacket& operator=(const OMNeTPacket& other);
     virtual OMNeTPacket *dup() const {return new OMNeTPacket(*this);}

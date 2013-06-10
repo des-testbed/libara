@@ -16,7 +16,6 @@
 package ara;
 
 import ara.ARA;
-import ara.reinforcement.OMNeTLinearPathReinforcementPolicy;
 
 import ara.evaporation.EvaporationPolicy;
 import ara.forwarding.ForwardingPolicy;

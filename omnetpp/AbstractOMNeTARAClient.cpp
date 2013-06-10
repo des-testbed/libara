@@ -4,7 +4,9 @@
 
 #include "omnetpp/AbstractOMNeTARAClient.h"
 #include "omnetpp/TrafficControllInfo.h"
+#include "omnetpp/RoutingTableWatcher.h"
 #include "omnetpp/OMNeTGate.h"
+#include "omnetpp/traffic/TrafficPacket_m.h"
 #include "Environment.h"
 
 #include "Ieee80211Frame_m.h"
@@ -16,24 +18,37 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-void AbstractOMNeTARAClient::initialize() {
-    notificationBoard = NotificationBoardAccess().get();
-    notificationBoard->subscribe(this, NF_LINK_BREAK);
-    mobility = ModuleAccess<MobilityBase>("mobility").get();
-    interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
-    networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
-    setPositionFromParameters();
+simsignal_t AbstractOMNeTARAClient::PACKET_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
+simsignal_t AbstractOMNeTARAClient::PACKET_NOT_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
+simsignal_t AbstractOMNeTARAClient::ROUTE_FAILURE_SIGNAL = SIMSIGNAL_NULL;
 
-    mobilityTraceEnabled = par("activateMobileTrace").boolValue();
-
-    if(mobilityTraceEnabled){
-        this->mobilityDataPersistor = new MobilityDataPersistor(mobility, this->findHost());
-    }
+AbstractOMNeTARAClient::~AbstractOMNeTARAClient() {
+    DELETE_IF_NOT_NULL(routingTablePersistor);
+    DELETE_IF_NOT_NULL(mobilityDataPersistor);
 }
 
-AbstractOMNeTARAClient::~AbstractOMNeTARAClient(){
-    if(mobilityTraceEnabled){
-        delete this->mobilityDataPersistor;
+void AbstractOMNeTARAClient::initialize(int stage) {
+    if(stage == 0) {
+        notificationBoard = NotificationBoardAccess().get();
+        notificationBoard->subscribe(this, NF_LINK_BREAK);
+        mobility = ModuleAccess<MobilityBase>("mobility").get();
+        interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
+        networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
+        setPositionFromParameters();
+
+        PACKET_DELIVERED_SIGNAL = registerSignal("packetDelivered");
+        PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
+        ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
+
+        WATCH(nrOfDeliverablePackets);
+        WATCH(nrOfNotDeliverablePackets);
+
+        if(par("activateMobileTrace").boolValue()){
+            mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
+        }
+
+        routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
+        new RoutingTableWatcher(routingTable);
     }
 }
 
@@ -131,13 +146,26 @@ void AbstractOMNeTARAClient::handleARAMessage(cMessage* message) {
       arrivalGate->receive(omnetPacket);
 }
 
+void AbstractOMNeTARAClient::persistRoutingTableData() {
+    routingTablePersistor->write(routingTable);
+}
+
 void AbstractOMNeTARAClient::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
     Enter_Method_Silent("takeAndSend(msg)");
     take(msg);
+
+    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(msg);
+    if (packet->isDataPacket()) {
+        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
+        //TODO inject our own address and energy level
+        Route route = encapsulatedPacket->getRoute();
+        route.push_back(getLocalAddress());
+    }
+
     sendDelayed(msg, sendDelay, gate);
 }
 
-void AbstractOMNeTARAClient::sendToUpperLayer(const Packet* packet) {
+void AbstractOMNeTARAClient::deliverToSystem(const Packet* packet) {
     Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
     OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
     ASSERT(omnetPacket);
@@ -151,7 +179,17 @@ void AbstractOMNeTARAClient::sendToUpperLayer(const Packet* packet) {
     encapsulatedData->setControlInfo(controlInfo);
 
     send(encapsulatedData, "upperLayerGate$o");
+
+    nrOfDeliverablePackets++;
+    emit(PACKET_DELIVERED_SIGNAL, 1);
+
     delete omnetPacket;
+}
+
+void AbstractOMNeTARAClient::packetNotDeliverable(const Packet* packet) {
+    delete packet;
+    nrOfNotDeliverablePackets++;
+    emit(PACKET_NOT_DELIVERED_SIGNAL, 1);
 }
 
 void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObject* details) {
@@ -166,7 +204,12 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
             AddressPtr omnetAddress (new OMNeTAddress(receiverIPv4Address));
 
             OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
-            handleBrokenOMNeTLink(omnetPacket, omnetAddress);
+
+            // TODO this does only work if we have only one network interface card
+            NetworkInterface* interface = getNetworkInterface(0);
+            if (handleBrokenOMNeTLink(omnetPacket, omnetAddress, interface)) {
+                emit(ROUTE_FAILURE_SIGNAL, 1);
+            }
         }
     }
 }
@@ -204,11 +247,32 @@ AddressPtr AbstractOMNeTARAClient::getLocalAddress() {
     }
 
     if(interface == nullptr) {
-        throw cRuntimeError("The TrafficGenerator could not determine the nodes interface");
+        throw cRuntimeError("Could not determine the nodes interface");
     }
 
     IPv4Address ipv4 = interface->ipv4Data()->getIPAddress();
     return AddressPtr(new OMNeTAddress(ipv4));
+}
+
+void AbstractOMNeTARAClient::finish() {
+    recordScalar("nrOfTrappedPacketsAfterFinish", packetTrap->getNumberOfTrappedPackets());
+
+    int64 nrOfSentDataBits = 0;
+    int64 nrOfSentControlBits = 0;
+    unsigned int nrOfControlPackets = 0;
+    unsigned int nrOfDataPackets = 0;
+    for(auto& interface: interfaces) {
+        OMNeTGate* gate = (OMNeTGate*) interface;
+        nrOfSentDataBits += gate->getNrOfSentDataBits();
+        nrOfSentControlBits += gate->getNrOfSentControlBits();
+        nrOfControlPackets += gate->getNrOfControlPackets();
+        nrOfDataPackets += gate->getNrOfDataPackets();
+    }
+
+    recordScalar("nrOfSentDataBits", nrOfSentDataBits);
+    recordScalar("nrOfSentControlBits", nrOfSentControlBits);
+    recordScalar("nrOfControlPackets", nrOfControlPackets);
+    recordScalar("nrOfDataPackets", nrOfDataPackets);
 }
 
 OMNETARA_NAMESPACE_END
