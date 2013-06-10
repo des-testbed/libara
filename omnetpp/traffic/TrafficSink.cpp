@@ -23,6 +23,7 @@ void TrafficSink::handleMessage(cMessage* message) {
 
     SimTime currentTime = simTime();
     SimTime delay = currentTime - packet->getCreationTime();
+    timeOfLastReceivedPacket = currentTime;
 
     delayVector.record(delay);
     nrOfReceivedMessages++;
@@ -35,6 +36,7 @@ void TrafficSink::handleMessage(cMessage* message) {
 
 void TrafficSink::finish() {
     recordScalar("trafficReceived", nrOfReceivedMessages);
+    recordScalar("timeOfLastReceivedPacket", timeOfLastReceivedPacket);
 }
 
 OMNETARA_NAMESPACE_END
