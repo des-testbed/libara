@@ -19,22 +19,22 @@ import ara.NetworkNodeBase;
 import ara.EARANetworkLayer;
 import ara.OMNeTBattery;
 
-module EnergyAwareNetworkNode extends NetworkNodeBase {
-
+module EnergyAwareNetworkNode extends NetworkNodeBase
+{
     parameters:
         @node;
-        @display("i=device/wifilaptop;bgb=366,335");
+        @display("i=device/wifilaptop;bgb=366,354");
 
     submodules:
         networkLayer: EARANetworkLayer {
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
-                @display("i=ara;p=239,124");
+                @display("i=ara;p=239,185");
         }
-                
+
         battery: OMNeTBattery {
             parameters:
-                @display("p=49,293;i=block/plug");
+                @display("p=49,307;i=block/plug");
         }
 
     connections allowunconnected:
