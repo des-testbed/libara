@@ -57,6 +57,8 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         bool hasEnoughBattery = true;
         double maximumBatteryLevel;
         int currentEnergyLevel;
+
+        cOutVector energyLevelOutVector;
 };
 
 OMNETARA_NAMESPACE_END

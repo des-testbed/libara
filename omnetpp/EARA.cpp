@@ -55,10 +55,13 @@ void EARA::initialize(int stage) {
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
         ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
         DROP_PACKET_BECAUSE_ENERGY_DEPLETED =  registerSignal("dropPacketBecauseEnergyDepleted");
+        energyLevelOutVector.setName("energyLevel");
     }
 }
 
 void EARA::handleMessage(cMessage* message) {
+    energyLevelOutVector.record(getCurrentEnergyLevel());
+
     if (hasEnoughBattery) {
         AbstractOMNeTARAClient::handleMessage(message);
     }
