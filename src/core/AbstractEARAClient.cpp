@@ -17,9 +17,10 @@ AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration, EnergyA
 
 void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, PacketFactory* packetFactory) {
     AbstractARAClient::initialize(configuration, routingTable, packetFactory);
+    energyDisseminationTimeoutInMillis = configuration.getEnergyDisseminationTimeout();
     energyDisseminationTimer = Environment::getClock()->getNewTimer();
     energyDisseminationTimer->addTimeoutListener(this);
-    energyDisseminationTimer->run(configuration.getEnergyDisseminationTimeout());
+    energyDisseminationTimer->run(energyDisseminationTimeoutInMillis);
     this->routingTable = routingTable;
 }
 
@@ -30,6 +31,7 @@ AbstractEARAClient::~AbstractEARAClient() {
 void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
     if(responsibleTimer == energyDisseminationTimer) {
         sendEnergyDisseminationPacket();
+        responsibleTimer->run(energyDisseminationTimeoutInMillis);
     }
     else {
         AbstractARAClient::timerHasExpired(responsibleTimer);
