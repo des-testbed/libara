@@ -168,7 +168,7 @@ $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 -include $(LIBARA_DEPENDENCIES)
 -include $(OMNETARA_DEPENDENCIES)
 -include $(TESTS_DEPENDENCIES)
-
+-include $(TESTBEDARA_DEPENDENCIES)
 
 # OMNeTARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
