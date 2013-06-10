@@ -5,16 +5,19 @@
 #ifndef ARACLIENTMOCK_H_
 #define ARACLIENTMOCK_H_
 
+#include "TestMacros.h"
 #include "AbstractARAClient.h"
 #include "AbstractClientMockBase.h"
+#include "Configuration.h"
 #include "Packet.h"
 #include "NetworkInterfaceMock.h"
 #include "PacketTrap.h"
 #include "RoutingTable.h"
+#include "BasicConfiguration.h"
 
 #include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 class NetworkInterfaceMock;
 
@@ -25,9 +28,12 @@ class NetworkInterfaceMock;
 class ARAClientMock: public AbstractARAClient, public AbstractClientMockBase {
 public:
     ARAClientMock();
+    ARAClientMock(Configuration& configuration);
+
+    BasicConfiguration getStandardConfiguration() const;
 
     void receivePacket(Packet* packet, NetworkInterface* interface);
-    virtual void handleBrokenLink(Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    virtual bool handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
     void deliverToSystem(const Packet* packet);
     void packetNotDeliverable(const Packet* packet);
@@ -36,9 +42,20 @@ public:
     double getInitialPhi() const;
     PacketTrap* getPacketTrap();
     RoutingTable* getRoutingTable();
-    NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
+    NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "localhost");
     unsigned int getPacketDeliveryDelay() const;
+
+    Timer* getNeighborActivityTimer() const;
+
+    /**
+     * Makes this client forget this neighbor (if he ever knew it)
+     * This means all routing table entries are deleted and possibly existent activityTimes are discarded.
+     */
+    void forget(AddressPtr neighbor);
+
+    Timer* getPANTsTimer(AddressPtr destination) const;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif /* ARACLIENTMOCK_H_ */

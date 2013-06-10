@@ -104,13 +104,17 @@ public:
 
     /**
      * Assigns a new sender to this packet.
+     * This returns a copy to self which makes chaining methods pretty ease.
+     * Example: Packet* packet = packetFactory->makeFANT(source, destination, seqNr)->setSender(foo);
      */
-    void setSender(AddressPtr newSender);
+    Packet* setSender(AddressPtr newSender);
 
     /**
      * Assigns a new penultimate hop to this packet.
+     * This returns a copy to self which makes chaining methods pretty ease.
+     * Example: Packet* packet = packetFactory->makeFANT(source, destination, seqNr)->setSender(foo);
      */
-    void setPreviousHop(AddressPtr newPreviousHop);
+    Packet* setPreviousHop(AddressPtr newPreviousHop);
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
@@ -203,8 +207,7 @@ struct PacketHash {
  */
 struct PacketPredicate {
     size_t operator()(const Packet* packet1, const Packet* packet2) const {
-        return packet1->seqNr == packet2->seqNr &&
-               packet1->source->equals(packet2->source);
+        return packet1->equals(packet2);
     }
 };
 

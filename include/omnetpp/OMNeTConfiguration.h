@@ -14,7 +14,7 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-class OMNeTConfiguration : public Configuration {
+class OMNeTConfiguration : public virtual Configuration {
     public:
         OMNeTConfiguration(cModule* module);
 
@@ -26,12 +26,17 @@ class OMNeTConfiguration : public Configuration {
         virtual int getMaxTTL();
         virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
         virtual unsigned int getPacketDeliveryDelayInMilliSeconds();
+        virtual unsigned int getNeighborActivityCheckIntervalInMilliSeconds();
+        virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds();
+        virtual unsigned int getPANTIntervalInMilliSeconds();
+        virtual bool isPreviousHopFeatureActivated();
 
         virtual RoutingTable* getRoutingTable();
         Logger* getLogger();
 
     protected:
         cModule* getHostModule();
+        void setLogLevel(const char* logLevelParameter);
 
     protected:
         EvaporationPolicy* evaporationPolicy;
@@ -42,6 +47,10 @@ class OMNeTConfiguration : public Configuration {
         int maxTTL;
         unsigned int routeDiscoveryTimeoutInMilliSeconds;
         unsigned int packetDeliveryDelayInMilliSeconds;
+        unsigned int neighborActivityCheckIntervalInMilliSeconds;
+        unsigned int maxNeighborInactivityTimeInMilliSeconds;
+        unsigned int pantIntervalInMilliSeconds;
+        bool previousHopFeatureIsActivated;
 
         cModule* simpleModule;
         OMNeTLogger* logger;

@@ -30,7 +30,7 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTPacket);
 
-OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, ttl, nullptr, 0) {
+OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize) {
 
 }
 

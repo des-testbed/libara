@@ -16,7 +16,7 @@ namespace ARA {
 /**
  * This is the default implementation of the ~Configuration interface.
  */
-class BasicConfiguration : public Configuration {
+class BasicConfiguration : public virtual Configuration {
 public:
     BasicConfiguration(EvaporationPolicy* evaporationPolicy,
                        PathReinforcementPolicy* reinforcementPolicy,
@@ -33,6 +33,16 @@ public:
     virtual int getMaxNrOfRouteDiscoveryRetries();
     virtual unsigned int getRouteDiscoveryTimeoutInMilliSeconds();
     virtual unsigned int getPacketDeliveryDelayInMilliSeconds();
+    virtual unsigned int getNeighborActivityCheckIntervalInMilliSeconds();
+    virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds();
+    virtual unsigned int getPANTIntervalInMilliSeconds();
+    virtual bool isPreviousHopFeatureActivated();
+
+    void setNeighborActivityCheckInterval(unsigned int newIntervalInMilliSeconds);
+    void setMaxNeighborInactivityTime(unsigned int newTimeInMilliSeconds);
+    void setPANTInterval(unsigned int newIntervalInMilliSeconds);
+    void activatePreviousHopFeature();
+    void deactivatePreviousHopFeature();
 
 protected:
     EvaporationPolicy* evaporationPolicy;
@@ -42,6 +52,10 @@ protected:
     int maxNrOfRouteDiscoveryRetries;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
     unsigned int packetDeliveryDelayInMilliSeconds;
+    unsigned int neighborActivityCheckIntervalInMilliSeconds;
+    unsigned int maxNeighborInactivityTimeInMilliSeconds;
+    unsigned int pantIntervalInMilliSeconds;
+    bool previousHopFeatureIsActivated;
 };
 
 } /* namespace ARA */

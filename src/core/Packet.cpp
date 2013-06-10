@@ -77,12 +77,14 @@ unsigned int Packet::getPayloadLength() const {
     return payloadSize;
 }
 
-void Packet::setSender(AddressPtr newSender) {
+Packet* Packet::setSender(AddressPtr newSender) {
     sender = newSender;
+    return this;
 }
 
-void Packet::setPreviousHop(AddressPtr newPreviousHop) {
+Packet* Packet::setPreviousHop(AddressPtr newPreviousHop) {
     previousHop = newPreviousHop;
+    return this;
 }
 
 void Packet::increaseTTL() {

@@ -10,6 +10,7 @@
 #include "MACAddress.h"
 #include "IInterfaceTable.h"
 #include "IMobility.h"
+#include "Radio.h"
 
 #include <omnetpp.h>
 #include <string>
@@ -57,6 +58,7 @@ protected:
         IPv4Address address;
         bool isVectorNode = false;
         IMobility* mobility;
+        Radio* radio;
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 
@@ -69,7 +71,9 @@ protected:
     void assignAddressToNode(unsigned int i, unsigned int n, uint32 networkAddress);
     int extractNodeNumber(int i);
     void persistStartPositions(cTopology& topology);
+    double calculateMaximumRadioReceptionRadius(Radio* radio);
 private:
+    cModule* channelControl;
     NodeInfoVector nodeInfo;
     std::unordered_map<IPv4Address, MACAddress, IPv4AddressHash, IPv4AddressPredicate> ipMACMapping;
 

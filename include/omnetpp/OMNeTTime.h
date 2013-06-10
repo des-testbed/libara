@@ -8,6 +8,7 @@
 #include <omnetpp.h>
 
 #include "Time.h"
+#include "platdep/intxtypes.h"
 
 namespace ARA {
 namespace omnetpp {
@@ -20,6 +21,8 @@ namespace omnetpp {
         public:
             virtual void setToCurrentTime();
             virtual long getDifferenceInMilliSeconds(const Time* otherTime) const;
+
+            uint64 getRawTime() const;
 
         private:
             long convertSimulationTime(SimTime time, int wantedScaleExponent) const;

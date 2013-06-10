@@ -74,6 +74,7 @@ private:
     void handleEnergyInfoPacket(Packet* packet);
 
 protected:
+    unsigned int energyDisseminationTimeoutInMillis;
     Timer* energyDisseminationTimer;
     EnergyAwareRoutingTable* routingTable;
 };

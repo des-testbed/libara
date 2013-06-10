@@ -74,31 +74,40 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
     if(table.find(destination) != table.end()) {
         std::deque<RoutingTableEntry*>* entryList = table[destination];
         std::deque<RoutingTableEntry*>::iterator iterator = entryList->begin();
-        if(entryList->size() == 1) {
-            // delete the last routing table entry for that destination
-            table.erase(destination);
-            RoutingTableEntry* entry =  *iterator;
-            delete entry;
-            delete entryList;
-        }
-        else {
-            // delete one of many routing table entries for that destination
+
+        if(iterator != entryList->end()) {
             while(iterator != entryList->end()) {
                 RoutingTableEntry* entry = *iterator;
                 if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
                     entryList->erase(iterator);
                     delete entry;
-                    return;
+                    break;
                 }
                 iterator++;
+            }
+
+            if(entryList->empty()) {
+                // this was the last entry so we can delete the whole list
+                table.erase(destination);
+                delete entryList;
             }
         }
     }
 }
 
-std::deque<RoutingTableEntry*> RoutingTable::getPossibleNextHops(const Packet* packet) {
+RoutingTableEntryList  RoutingTable::getPossibleNextHops(const Packet* packet) {
     if(isDeliverable(packet)) {
         return *(table[packet->getDestination()]);
+    }
+    else {
+        // return empty list
+        return std::deque<RoutingTableEntry*>();
+    }
+}
+
+RoutingTableEntryList  RoutingTable::getPossibleNextHops(AddressPtr destination) {
+    if(isDeliverable(destination)) {
+        return *(table[destination]);
     }
     else {
         // return empty list
@@ -247,6 +256,27 @@ RoutingTableEntryTupel RoutingTable::getEntryAt(int wantedPosition) const {
     }
 
     throw Exception("RoutingTable::getEntryAt: Index out of bounds");
+}
+
+std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(AddressPtr nextHop) const {
+    std::deque<RoutingTableEntryTupel> result = std::deque<RoutingTableEntryTupel>();
+
+    // TODO this could be made faster with an additional hashmap (but would require more memory)
+    std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::const_iterator iterator;
+    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+        AddressPtr destination = iterator->first;
+        RoutingTableEntryList* entryList = iterator->second;
+        for (auto& entry: *entryList) {
+            if(entry->getAddress()->equals(nextHop)) {
+                RoutingTableEntryTupel tupel;
+                tupel.destination = destination;
+                tupel.entry = entry;
+                result.push_back(tupel);
+            }
+        }
+    }
+
+    return result;
 }
 
 ARA_NAMESPACE_END

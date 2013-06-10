@@ -5,28 +5,20 @@
 #include "omnetpp/ARA.h"
 #include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/PacketFactory.h"
-#include "omnetpp/RoutingTableWatcher.h"
+#include "omnetpp/OMNeTGate.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
 // Register the class with the OMNeT++ simulation
 Define_Module(ARA);
 
-simsignal_t ARA::PACKET_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
-simsignal_t ARA::PACKET_NOT_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::LOOP_DETECTION_SIGNAL = SIMSIGNAL_NULL;
-simsignal_t ARA::ROUTE_FAILURE_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t ARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
-simsignal_t ARA::NON_SOURCE_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
+simsignal_t ARA::ROUTE_FAILURE_NO_HOP = SIMSIGNAL_NULL;
 simsignal_t ARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
-
-ARA::ARA() {
-    messageDispatcher = new MessageDispatcher(this, this);
-}
+simsignal_t ARA::ROUTE_FAILURE_NEXT_HOP_IS_SENDER = SIMSIGNAL_NULL;
 
 ARA::~ARA() {
-    delete messageDispatcher;
-
     /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
      * This is necessary because the surround omnetpp simulation will attempt to delete those modules
      * because they are SimpleModules which are owned by other compound modules*/
@@ -41,44 +33,26 @@ int ARA::numInitStages() const {
 }
 
 void ARA::initialize(int stage) {
+    AbstractOMNeTARAClient::initialize(stage);
     if(stage == 4) {
-        AbstractOMNeTARAClient::initialize();
         OMNeTConfiguration config = OMNeTConfiguration(this);
         setLogger(config.getLogger());
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
-
-        messageDispatcher->setPacketFactory(packetFactory);
         AbstractARAClient::initialize(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
 
-        new RoutingTableWatcher(routingTable);
-        WATCH(nrOfDeliverablePackets);
-        WATCH(nrOfNotDeliverablePackets);
         WATCH(nrOfDetectedLoops);
-        PACKET_DELIVERED_SIGNAL = registerSignal("packetDelivered");
-        PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
-        ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
         DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
-        NON_SOURCE_ROUTE_DISCOVERY = registerSignal("nonSourceRouteDiscovery");
+        ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
+        ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
     }
 }
 
-void ARA::handleMessage(cMessage* message) {
-    messageDispatcher->dispatch(message);
-}
-
-void ARA::deliverToSystem(const Packet* packet) {
-    sendToUpperLayer(packet);
-    nrOfDeliverablePackets++;
-    emit(PACKET_DELIVERED_SIGNAL, 1);
-}
-
-void ARA::packetNotDeliverable(const Packet* packet) {
-    delete packet;
-    nrOfNotDeliverablePackets++;
-    emit(PACKET_NOT_DELIVERED_SIGNAL, 1);
+void ARA::receivePacket(Packet* packet, NetworkInterface* interface) {
+    AbstractARAClient::receivePacket(packet, interface);
+    persistRoutingTableData();
 }
 
 void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
@@ -87,20 +61,8 @@ void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface
     emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
-void ARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
-    // TODO this does only work if we have only one network interface card
-    NetworkInterface* interface = getNetworkInterface(0);
-    AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
-}
-
-void ARA::handleCompleteRouteFailure(Packet* packet) {
-    AbstractARAClient::handleCompleteRouteFailure(packet);
-    emit(ROUTE_FAILURE_SIGNAL, 1);
-}
-
-void ARA::timerHasExpired(Timer* responsibleTimer) {
-    bubble("Route Discovery expired");
-    AbstractARAClient::timerHasExpired(responsibleTimer);
+bool ARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
+    return AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
 }
 
 void ARA::handlePacketWithZeroTTL(Packet* packet) {
@@ -112,17 +74,20 @@ void ARA::handlePacketWithZeroTTL(Packet* packet) {
 }
 
 void ARA::handleNonSourceRouteDiscovery(Packet* packet) {
-    emit(NON_SOURCE_ROUTE_DISCOVERY, 1);
+    if(routingTable->isDeliverable(packet->getDestination())) {
+        // can not be sent because the only known next hop is the sender of this packet
+        emit(ROUTE_FAILURE_NEXT_HOP_IS_SENDER, 1);
+    }
+    else {
+        // can not be sent because there really is no known next hop
+        emit(ROUTE_FAILURE_NO_HOP, 1);
+    }
     AbstractARAClient::handleNonSourceRouteDiscovery(packet);
 }
 
-void ARA::startNewRouteDiscovery(const Packet* packet) {
+void ARA::startNewRouteDiscovery(Packet* packet) {
     emit(NEW_ROUTE_DISCOVERY, 1);
     AbstractARAClient::startNewRouteDiscovery(packet);
-}
-
-void ARA::finish() {
-    recordScalar("nrOfTrappedPacketsAfterFinish", packetTrap->getNumberOfTrappedPackets());
 }
 
 OMNETARA_NAMESPACE_END

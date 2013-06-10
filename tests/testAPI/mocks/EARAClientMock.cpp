@@ -34,9 +34,9 @@ void EARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) 
     AbstractEARAClient::receivePacket(packet, interface);
 }
 
-void EARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+bool EARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     storeRouteFailurePacket(packetFactory->makeClone(packet), nextHop, interface);
-    AbstractEARAClient::handleBrokenLink(packet, nextHop, interface);
+    return AbstractEARAClient::handleBrokenLink(packet, nextHop, interface);
 }
 
 void EARAClientMock::deliverToSystem(const Packet* packet) {

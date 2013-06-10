@@ -44,7 +44,7 @@ TEST(PacketFactoryTest, makeFANT) {
    CHECK(fant->getDestination()->equals(destination));
    CHECK(fant->getSender()->equals(source));
    CHECK(fant->getPreviousHop()->equals(source));
-   CHECK_EQUAL(PacketType::FANT, fant->getType());
+   CHECK(fant->getType() == PacketType::FANT);
    LONGS_EQUAL(newSequenceNumber, fant->getSequenceNumber());
    LONGS_EQUAL(maximumHopCount, fant->getTTL());
    LONGS_EQUAL(0, fant->getPayloadLength());
@@ -72,11 +72,11 @@ TEST(PacketFactoryTest, makeClone) {
    CHECK(clone->getSender()->equals(sender));
    CHECK(clone->getPreviousHop() != nullptr);
    CHECK(clone->getPreviousHop()->equals(prevHop));
-   CHECK_EQUAL(type, clone->getType());
-   CHECK_EQUAL(seqNr, clone->getSequenceNumber());
+   CHECK(clone->getType() == type);
+   LONGS_EQUAL(seqNr, clone->getSequenceNumber());
    LONGS_EQUAL(payloadSize, clone->getPayloadLength());
    STRCMP_EQUAL(payload, clone->getPayload());
-   CHECK_EQUAL(ttl, clone->getTTL());
+   LONGS_EQUAL(ttl, clone->getTTL());
    CHECK(packet.equals(clone));
 
    delete clone;
@@ -98,7 +98,7 @@ TEST(PacketFactoryTest, makeBANT) {
     CHECK(bant->getDestination()->equals(originalSource));
     CHECK(bant->getSender()->equals(originalDestination));
     CHECK(bant->getPreviousHop()->equals(originalDestination));
-    CHECK_EQUAL(PacketType::BANT, bant->getType());
+    CHECK(bant->getType() == PacketType::BANT);
     LONGS_EQUAL(newSequenceNumber, bant->getSequenceNumber());
     LONGS_EQUAL(maximumHopCount, bant->getTTL());
     LONGS_EQUAL(0, bant->getPayloadLength());
@@ -123,10 +123,10 @@ TEST(PacketFactoryTest, makeDulicateErrorPacket) {
     CHECK(duplicateWarning->getDestination()->equals(originalDestination));
     CHECK(duplicateWarning->getSender()->equals(senderOfDuplicateWarning));
     CHECK(duplicateWarning->getPreviousHop()->equals(senderOfDuplicateWarning));
-    CHECK_EQUAL(PacketType::DUPLICATE_ERROR, duplicateWarning->getType());
-    CHECK_EQUAL(newSequenceNumber, duplicateWarning->getSequenceNumber());
-    CHECK_EQUAL(maximumHopCount, duplicateWarning->getTTL());
-    CHECK_EQUAL(0, duplicateWarning->getPayloadLength());
+    CHECK(duplicateWarning->getType() == PacketType::DUPLICATE_ERROR);
+    LONGS_EQUAL(newSequenceNumber, duplicateWarning->getSequenceNumber());
+    LONGS_EQUAL(maximumHopCount, duplicateWarning->getTTL());
+    LONGS_EQUAL(0, duplicateWarning->getPayloadLength());
 
     delete duplicateWarning;
 }
@@ -146,10 +146,10 @@ TEST(PacketFactoryTest, makeAcknowledgmentPacket) {
     CHECK(ackPacket->getDestination()->equals(originalDestination));
     CHECK(ackPacket->getSender()->equals(originalSender));
     CHECK(ackPacket->getPreviousHop()->equals(originalSender));
-    CHECK_EQUAL(PacketType::ACK, ackPacket->getType());
-    CHECK_EQUAL(originalseqenceNumber, ackPacket->getSequenceNumber());
-    CHECK_EQUAL(maximumHopCount, ackPacket->getTTL());
-    CHECK_EQUAL(0, ackPacket->getPayloadLength());
+    CHECK(ackPacket->getType() == PacketType::ACK);
+    LONGS_EQUAL(originalseqenceNumber, ackPacket->getSequenceNumber());
+    LONGS_EQUAL(maximumHopCount, ackPacket->getTTL());
+    LONGS_EQUAL(0, ackPacket->getPayloadLength());
 
     delete ackPacket;
 }
@@ -165,10 +165,10 @@ TEST(PacketFactoryTest, makeRouteFailurePacket) {
     CHECK(routeFailurePacket->getDestination()->equals(destination));
     CHECK(routeFailurePacket->getSender()->equals(source));
     CHECK(routeFailurePacket->getPreviousHop()->equals(source));
-    CHECK_EQUAL(PacketType::ROUTE_FAILURE, routeFailurePacket->getType());
-    CHECK_EQUAL(seqenceNumber, routeFailurePacket->getSequenceNumber());
-    CHECK_EQUAL(maximumHopCount, routeFailurePacket->getTTL());
-    CHECK_EQUAL(0, routeFailurePacket->getPayloadLength());
+    CHECK(routeFailurePacket->getType() == PacketType::ROUTE_FAILURE);
+    LONGS_EQUAL(seqenceNumber, routeFailurePacket->getSequenceNumber());
+    LONGS_EQUAL(maximumHopCount, routeFailurePacket->getTTL());
+    LONGS_EQUAL(0, routeFailurePacket->getPayloadLength());
 
     delete routeFailurePacket;
 }
@@ -184,10 +184,10 @@ TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
     // we do not need to check the destination field because it will be set to the broadcast address by the NIC
     CHECK(energyPacket->getPreviousHop()->equals(originalSource));
 
-    CHECK_EQUAL(PacketType::ENERGY_INFO, energyPacket->getType());
-    CHECK_EQUAL(seqNr, energyPacket->getSequenceNumber());
-    BYTES_EQUAL(maximumHopCount, energyPacket->getTTL());
-    BYTES_EQUAL(1, energyPacket->getPayloadLength());
+    CHECK(energyPacket->getType() == PacketType::ENERGY_INFO);
+    LONGS_EQUAL(seqNr, energyPacket->getSequenceNumber());
+    LONGS_EQUAL(maximumHopCount, energyPacket->getTTL());
+    LONGS_EQUAL(1, energyPacket->getPayloadLength());
 
     const char* payload = energyPacket->getPayload();
     BYTES_EQUAL(energyLevel, payload[0]);
@@ -197,4 +197,60 @@ TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
 
 TEST(PacketFactoryTest, getMaximumNrOfHops){
     BYTES_EQUAL(maximumHopCount, factory->getMaximumNrOfHops());
+}
+
+TEST(PacketFactoryTest, makeHelloPacket) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    unsigned int seqenceNumber = 123;
+
+    Packet* helloPacket = factory->makeHelloPacket(source, destination, seqenceNumber);
+
+    CHECK(helloPacket->getSource()->equals(source));
+    CHECK(helloPacket->getDestination()->equals(destination));
+    CHECK(helloPacket->getSender()->equals(source));
+    CHECK(helloPacket->getPreviousHop()->equals(source));
+    CHECK(helloPacket->getType() == PacketType::HELLO);
+    LONGS_EQUAL(seqenceNumber, helloPacket->getSequenceNumber());
+    LONGS_EQUAL(maximumHopCount, helloPacket->getTTL());
+    LONGS_EQUAL(0, helloPacket->getPayloadLength());
+
+    delete helloPacket;
+}
+
+TEST(PacketFactoryTest, makeDataPacket) {
+    AddressPtr originalSource (new AddressMock("source"));
+    AddressPtr originalDestination(new AddressMock("destination"));
+    unsigned int seqNr = 123;
+    const char* payload = "I am the payload";
+    unsigned int payloadSize = strlen(payload) + 1; // dont foprget the null byte for the string
+    Packet* dataPacket = factory->makeDataPacket(originalSource, originalDestination, seqNr, payload, payloadSize);
+
+    CHECK(dataPacket->getType() == PacketType::DATA);
+    CHECK(dataPacket->getSource()->equals(originalSource));
+    CHECK(dataPacket->getSender()->equals(originalSource));
+    CHECK(dataPacket->getDestination()->equals(originalDestination));
+    LONGS_EQUAL(seqNr, dataPacket->getSequenceNumber());
+    LONGS_EQUAL(maximumHopCount, dataPacket->getTTL());
+    LONGS_EQUAL(payloadSize, dataPacket->getPayloadLength());
+    STRCMP_EQUAL(payload, dataPacket->getPayload());
+
+    delete dataPacket;
+}
+
+TEST(PacketFactoryTest, makePANT) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination(new AddressMock("destination"));
+    unsigned int sequenceNumber = 123;
+    Packet* pant = factory->makePANT(source, destination, sequenceNumber);
+
+    CHECK(pant->getType() == PacketType::PANT);
+    CHECK(pant->getSource()->equals(source));
+    CHECK(pant->getSender()->equals(source));
+    CHECK(pant->getDestination()->equals(destination));
+    LONGS_EQUAL(sequenceNumber, pant->getSequenceNumber());
+    LONGS_EQUAL(maximumHopCount, pant->getTTL());
+    LONGS_EQUAL(0, pant->getPayloadLength());
+
+    delete pant;
 }

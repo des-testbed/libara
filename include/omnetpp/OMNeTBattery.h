@@ -5,39 +5,39 @@
 #ifndef OMNET_BATTERY_H_
 #define OMNET_BATTERY_H_
 
-#include <algorithm>
-#include <omnetpp.h>
-
+#include "OMNeTARAMacros.h"
 #include "Energy.h"
 #include "InetSimpleBattery.h"
 
-namespace ARA {
-    namespace omnetpp {
-        /**
-         * The class represents a simple implementation of a battery. It is
-         * based on the battery interface as provided in the INETMANET package. 
-         */
-        class OMNeTBattery : public InetSimpleBattery {
-            public:
-                OMNeTBattery(){};
-                virtual ~OMNeTBattery(){};
+#include <algorithm>
 
-                void initialize(int stage);
-                double getNominalValue();
+OMNETARA_NAMESPACE_BEGIN
 
-            protected:
-                void deductAndCheck();
+/**
+ * The class represents a simple implementation of a battery. It is
+ * based on the battery interface as provided in the INETMANET package.
+ */
+class OMNeTBattery : public InetSimpleBattery {
+    public:
+        OMNeTBattery(){};
+        virtual ~OMNeTBattery(){};
 
-            private:
-                void calculateConsumedEnergy();
-                void evaluateCurrentEnergyLevel();
-                void updateBatteryIcon();
-                void publishEnergyInformation(double publishedEnergyLevel);
-                bool hasBatteryCapacityChangedEnough();
-                void recordStatistics();
-        };
-    }
-}
+        void initialize(int stage);
+        double getNominalValue();
+
+    protected:
+        void deductAndCheck();
+
+    private:
+        void calculateConsumedEnergy();
+        void evaluateCurrentEnergyLevel();
+        void updateBatteryIcon();
+        void publishEnergyInformation(double publishedEnergyLevel);
+        bool hasBatteryCapacityChangedEnough();
+        void recordStatistics();
+};
+
+OMNETARA_NAMESPACE_END
 
 #endif
 

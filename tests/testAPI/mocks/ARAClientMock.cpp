@@ -14,20 +14,26 @@
 
 #include <sstream>
 
-namespace ARA {
-
-typedef std::shared_ptr<Address> AddressPtr;
+ARA_NAMESPACE_BEGIN
 
 ARAClientMock::ARAClientMock() {
+    BasicConfiguration configuration = getStandardConfiguration();
+    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
+}
+
+ARAClientMock::ARAClientMock(Configuration& configuration) {
+    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
+}
+
+BasicConfiguration ARAClientMock::getStandardConfiguration() const {
     float initialPhi = 5.0;
     float deltaPhi = 5.0;
-    BasicConfiguration configuration = BasicConfiguration(
-            new ExponentialEvaporationPolicyMock(),
-            new LinearPathReinforcementPolicy(deltaPhi),
-            new BestPheromoneForwardingPolicy(),
-            initialPhi
+    return BasicConfiguration(
+        new ExponentialEvaporationPolicyMock(),
+        new LinearPathReinforcementPolicy(deltaPhi),
+        new BestPheromoneForwardingPolicy(),
+        initialPhi
     );
-    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
 }
 
 void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
@@ -35,9 +41,9 @@ void ARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
     AbstractARAClient::receivePacket(packet, interface);
 }
 
-void ARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+bool ARAClientMock::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
     storeRouteFailurePacket(packetFactory->makeClone(packet), nextHop, interface);
-    AbstractARAClient::handleBrokenLink(packet, nextHop, interface);
+    return AbstractARAClient::handleBrokenLink(packet, nextHop, interface);
 }
 
 void ARAClientMock::deliverToSystem(const Packet* packet) {
@@ -74,4 +80,36 @@ unsigned int ARAClientMock::getPacketDeliveryDelay() const {
     return packetDeliveryDelayInMilliSeconds;
 }
 
-} /* namespace ARA */
+Timer* ARAClientMock::getNeighborActivityTimer() const {
+    return neighborActivityTimer;
+}
+
+void ARAClientMock::forget(AddressPtr neighbor) {
+    // delete all known routes via this next hop
+    std::deque<RoutingTableEntryTupel> allRoutesOverNeighbor = routingTable->getAllRoutesThatLeadOver(neighbor);
+    for (auto& route: allRoutesOverNeighbor) {
+        routingTable->removeEntry(route.destination, neighbor, route.entry->getNetworkInterface());
+    }
+
+    NeighborActivityMap::const_iterator foundNeighbor = neighborActivityTimes.find(neighbor);
+    if(foundNeighbor != neighborActivityTimes.end()) {
+        // delete the associated Time object first
+        delete foundNeighbor->second.first;
+        neighborActivityTimes.erase(neighbor);
+    }
+}
+
+Timer* ARAClientMock::getPANTsTimer(AddressPtr destination) const {
+    RunningPANTsMap::iterator iterator;
+    for (RunningPANTsMap::const_iterator iterator=runningPANTTimers.begin(); iterator!=runningPANTTimers.end(); iterator++) {
+        std::pair<Timer*, AddressPtr> entryPair = *iterator;
+        if (entryPair.second->equals(destination)) {
+            return entryPair.first;
+        }
+    }
+
+    // could not find any timer for that destination
+    return nullptr;
+}
+
+ARA_NAMESPACE_END

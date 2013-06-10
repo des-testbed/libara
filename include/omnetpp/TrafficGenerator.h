@@ -20,17 +20,14 @@ OMNETARA_NAMESPACE_BEGIN
 class TrafficGenerator : public TrafGen {
     public:
         virtual void initialize(int level);
-        virtual void finish();
 
     protected:
-        virtual void handleLowerMsg(cPacket* packet);
         virtual void SendTraf(cPacket* msg, const char* destination);
         void sendTraffic(cPacket* message, const char* destination);
 
     private:
         int nrOfPacketsToSend;
         int nrOfSentMessages = 0;
-        int nrOfReceivedMessages = 0;
 };
 
 OMNETARA_NAMESPACE_END

@@ -300,6 +300,7 @@ TEST(RoutingTableTest, removeAllEntries) {
     CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
     CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
 
+    BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
     CHECK(routingTable->isDeliverable(destination) == false);
 }
 
@@ -367,7 +368,7 @@ TEST(RoutingTableTest, getTotalNumberOfEntries) {
     BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
 }
 
-TEST(RoutingTableTest, TableEntriesAreDeletedIfEvaporationReachesZero) {
+TEST(RoutingTableTest, tableEntriesAreDeletedIfEvaporationReachesZero) {
     NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
@@ -387,4 +388,124 @@ TEST(RoutingTableTest, TableEntriesAreDeletedIfEvaporationReachesZero) {
     TimeMock::letTimePass(100000);
     routingTable->triggerEvaporation();
     BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
+}
+
+TEST(RoutingTableTest, falselyDeleteLastEntryBug) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr destination (new AddressMock("dest"));
+    AddressPtr nextHop (new AddressMock("A"));
+    AddressPtr anotherAddress (new AddressMock("B"));
+
+    routingTable->update(destination, nextHop, &interface, 2);
+
+    CHECK(routingTable->exists(destination, nextHop, &interface));
+    routingTable->removeEntry(destination, anotherAddress, &interface);
+    CHECK(routingTable->exists(destination, nextHop, &interface));
+}
+
+TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
+    AddressPtr sourceAddress (new AddressMock("Source"));
+    AddressPtr destination1 (new AddressMock("Destination1"));
+    AddressPtr destination2 (new AddressMock("Destination2"));
+
+    AddressPtr nextHop1a (new AddressMock("nextHop1a"));
+    AddressPtr nextHop1b (new AddressMock("nextHop1b"));
+    AddressPtr nextHop2 (new AddressMock("nextHop2"));
+    AddressPtr nextHop3 (new AddressMock("nextHop3"));
+    AddressPtr nextHop4 (new AddressMock("nextHop4"));
+    NetworkInterfaceMock interface1 = NetworkInterfaceMock();
+    NetworkInterfaceMock interface2 = NetworkInterfaceMock();
+    NetworkInterfaceMock interface3 = NetworkInterfaceMock();
+
+    float pheromoneValue1a = 1;
+    float pheromoneValue1b = 5;
+    float pheromoneValue2 = 2.3;
+    float pheromoneValue3 = 4;
+    float pheromoneValue4 = 2;
+
+    routingTable->update(destination1, nextHop1a, &interface1, pheromoneValue1a);
+    routingTable->update(destination1, nextHop1b, &interface1, pheromoneValue1b);
+    routingTable->update(destination1, nextHop2, &interface2, pheromoneValue2);
+
+    routingTable->update(destination2, nextHop3, &interface3, pheromoneValue3);
+    routingTable->update(destination2, nextHop4, &interface1, pheromoneValue4);
+
+    std::deque<RoutingTableEntry*> nextHopsForDestination1 = routingTable->getPossibleNextHops(destination1);
+    BYTES_EQUAL(3, nextHopsForDestination1.size());
+    for (unsigned int i = 0; i < nextHopsForDestination1.size(); i++) {
+        RoutingTableEntry* possibleHop = nextHopsForDestination1.at(i);
+        AddressPtr hopAddress = possibleHop->getAddress();
+        if(hopAddress->equals(nextHop1a)) {
+            CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue1a, possibleHop->getPheromoneValue());
+        }
+        else if(hopAddress->equals(nextHop1b)) {
+            CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue1b, possibleHop->getPheromoneValue());
+        }
+        else if(hopAddress->equals(nextHop2)) {
+            CHECK_EQUAL(&interface2, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue2, possibleHop->getPheromoneValue());
+        }
+        else {
+            CHECK(false); // hops for this destination must either be nextHop1a, nextHop1b or nextHop2
+        }
+    }
+
+    std::deque<RoutingTableEntry*> nextHopsForDestination2 = routingTable->getPossibleNextHops(destination2);
+    BYTES_EQUAL(2, nextHopsForDestination2.size());
+    for (unsigned int i = 0; i < nextHopsForDestination2.size(); i++) {
+        RoutingTableEntry* possibleHop = nextHopsForDestination2.at(i);
+        AddressPtr hopAddress = possibleHop->getAddress();
+        if(hopAddress->equals(nextHop3)) {
+            CHECK_EQUAL(&interface3, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue3, possibleHop->getPheromoneValue());
+        }
+        else if(hopAddress->equals(nextHop4)) {
+            CHECK_EQUAL(&interface1, possibleHop->getNetworkInterface());
+            CHECK_EQUAL(pheromoneValue4, possibleHop->getPheromoneValue());
+        }
+        else {
+            CHECK(false); // hops for this destination must either be nextHop3 or nextHop4
+        }
+    }
+}
+
+/**
+ * In this test we check if the routing table correctly returns a list of routing table entries
+ * which lead over a specified hop.
+ *
+ * Test setup:                   | Description:
+ *                ┌--->(dest1)   |   * We are testing from the perspective of (A)
+ * (...)---(A)---(B)-->(dest2)   |
+ *          |     └--->(dest3)   |
+ *          |             ↑      |
+ *          └--->(C)--->--┘      |
+ */
+TEST(RoutingTableTest, getAllRoutesThatLeadOverSpecificNextHop) {
+    NetworkInterfaceMock interface = NetworkInterfaceMock();
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr someUnknownNode (new AddressMock("X"));
+    AddressPtr dest1 (new AddressMock("dest1"));
+    AddressPtr dest2 (new AddressMock("dest2"));
+    AddressPtr dest3 (new AddressMock("dest3"));
+
+    routingTable->update(dest1, nodeB, &interface, 10);
+    routingTable->update(dest2, nodeB, &interface, 10);
+    routingTable->update(dest3, nodeB, &interface, 10);
+    routingTable->update(dest3, nodeC, &interface, 10);
+
+    std::deque<RoutingTableEntryTupel> entriesOverB = routingTable->getAllRoutesThatLeadOver(nodeB);
+    BYTES_EQUAL(3, entriesOverB.size());
+    for (auto& entry: entriesOverB) {
+        CHECK(entry.destination->equals(dest1) || entry.destination->equals(dest2) || entry.destination->equals(dest3));
+    }
+
+    std::deque<RoutingTableEntryTupel> entriesOverC = routingTable->getAllRoutesThatLeadOver(nodeC);
+    BYTES_EQUAL(1, entriesOverC.size());
+    CHECK(entriesOverC.front().destination->equals(dest3));
+
+    std::deque<RoutingTableEntryTupel> entriesOverUnkown = routingTable->getAllRoutesThatLeadOver(someUnknownNode);
+    CHECK(entriesOverUnkown.empty());
 }

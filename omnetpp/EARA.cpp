@@ -5,18 +5,29 @@
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
 #include "omnetpp/PacketFactory.h"
+#include "omnetpp/traffic/TrafficPacket_m.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
 // Register the class with the OMNeT++ simulation
 Define_Module(EARA);
 
-EARA::EARA() {
-    messageDispatcher = new MessageDispatcher(this, this);
-}
+simsignal_t EARA::LOOP_DETECTION_SIGNAL = SIMSIGNAL_NULL;
+simsignal_t EARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
+simsignal_t EARA::ROUTE_FAILURE_NO_HOP = SIMSIGNAL_NULL;
+simsignal_t EARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
+simsignal_t EARA::ROUTE_FAILURE_NEXT_HOP_IS_SENDER = SIMSIGNAL_NULL;
+simsignal_t EARA::DROP_PACKET_BECAUSE_ENERGY_DEPLETED = SIMSIGNAL_NULL;
 
 EARA::~EARA() {
-    delete messageDispatcher;
+    /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
+     * This is necessary because the surround omnetpp simulation will attempt to delete those modules
+     * because they are SimpleModules which are owned by other compound modules*/
+
+    forwardingPolicy = nullptr;
+    evaporationPolicy = nullptr;
+    pathReinforcementPolicy = nullptr;
+    energyDisseminationTimer = nullptr;
 }
 
 int EARA::numInitStages() const {
@@ -24,13 +35,12 @@ int EARA::numInitStages() const {
 }
 
 void EARA::initialize(int stage) {
+    AbstractOMNeTARAClient::initialize(stage);
     if(stage == 4) {
-        AbstractOMNeTARAClient::initialize();
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
 
-        messageDispatcher->setPacketFactory(packetFactory);
         AbstractEARAClient::initializeEARA(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
 
@@ -38,21 +48,67 @@ void EARA::initialize(int stage) {
         maximumBatteryLevel = config.getMaximumBatteryLevel();
         currentEnergyLevel =  255;
         WATCH(currentEnergyLevel);
+        WATCH(nrOfDetectedLoops);
+        LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
+        DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
+        ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
+        NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
+        ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
+        DROP_PACKET_BECAUSE_ENERGY_DEPLETED =  registerSignal("dropPacketBecauseEnergyDepleted");
+        energyLevelOutVector.setName("energyLevel");
     }
 }
 
 void EARA::handleMessage(cMessage* message) {
+    energyLevelOutVector.record(getCurrentEnergyLevel());
+
     if (hasEnoughBattery) {
-        messageDispatcher->dispatch(message);
+        AbstractOMNeTARAClient::handleMessage(message);
+    }
+    else {
+        emit(DROP_PACKET_BECAUSE_ENERGY_DEPLETED, 1);
+        delete message;
     }
 }
 
-void EARA::deliverToSystem(const Packet* packet) {
-    sendToUpperLayer(packet);
+void EARA::receivePacket(Packet* packet, NetworkInterface* interface) {
+    AbstractEARAClient::receivePacket(packet, interface);
+    persistRoutingTableData();
 }
 
-void EARA::packetNotDeliverable(const Packet* packet) {
-    //TODO report to upper layer
+void EARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface) {
+    AbstractARAClient::handleDuplicateErrorPacket(packet, interface);
+    nrOfDetectedLoops++;
+    emit(LOOP_DETECTION_SIGNAL, 1);
+}
+
+bool EARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
+    return AbstractEARAClient::handleBrokenLink(packet, receiverAddress, interface);
+}
+
+void EARA::handlePacketWithZeroTTL(Packet* packet) {
+    AbstractEARAClient::handlePacketWithZeroTTL(packet);
+
+    if(packet->isDataPacket()) {
+        emit(DROP_PACKET_WITH_ZERO_TTL, 1);
+    }
+}
+
+void EARA::handleNonSourceRouteDiscovery(Packet* packet) {
+    if(routingTable->isDeliverable(packet->getDestination())) {
+        // can not be sent because the only known next hop is the sender of this packet
+        emit(ROUTE_FAILURE_NEXT_HOP_IS_SENDER, 1);
+    }
+    else {
+        // can not be sent because there really is no known next hop
+        emit(ROUTE_FAILURE_NO_HOP, 1);
+    }
+    AbstractEARAClient::handleNonSourceRouteDiscovery(packet);
+}
+
+void EARA::startNewRouteDiscovery(Packet* packet) {
+    emit(NEW_ROUTE_DISCOVERY, 1);
+    AbstractEARAClient::startNewRouteDiscovery(packet);
 }
 
 void EARA::receiveChangeNotification(int category, const cObject* details) {
@@ -64,17 +120,12 @@ void EARA::receiveChangeNotification(int category, const cObject* details) {
     }
 }
 
-void EARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress) {
-    // TODO this does only work if we have only one network interface card
-    NetworkInterface* interface = getNetworkInterface(0);
-    AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
-}
-
 void EARA::handleBatteryStatusChange(Energy* energyInformation) {
     currentEnergyLevel = (energyInformation->GetEnergy() / maximumBatteryLevel) * 255;
 
     if (currentEnergyLevel <= 0) {
        hasEnoughBattery = false;
+       nodeEnergyDepletionTimestamp = simTime();
 
        // change the node color
        cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
@@ -84,6 +135,26 @@ void EARA::handleBatteryStatusChange(Energy* energyInformation) {
 
 unsigned char EARA::getCurrentEnergyLevel() {
     return currentEnergyLevel;
+}
+
+void EARA::finish() {
+    if (nodeEnergyDepletionTimestamp > 0) {
+        recordScalar("nodeEnergyDepletionTimestamp", nodeEnergyDepletionTimestamp);
+    }
+
+    AbstractOMNeTARAClient::finish();
+}
+
+void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
+    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(message);
+    if (packet->isDataPacket()) {
+        // record our energy level for the whole path energy of this packet
+        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
+        int oldRouteEnergy = encapsulatedPacket->getRouteEnergy();
+        encapsulatedPacket->setRouteEnergy(oldRouteEnergy + getCurrentEnergyLevel());
+    }
+
+    AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);
 }
 
 OMNETARA_NAMESPACE_END

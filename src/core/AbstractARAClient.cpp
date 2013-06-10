@@ -26,25 +26,31 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     evaporationPolicy = configuration.getEvaporationPolicy();
     initialPheromoneValue = configuration.getInitialPheromoneValue();
     maxNrOfRouteDiscoveryRetries = configuration.getMaxNrOfRouteDiscoveryRetries();
-    routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
     packetDeliveryDelayInMilliSeconds = configuration.getPacketDeliveryDelayInMilliSeconds();
+    routeDiscoveryTimeoutInMilliSeconds = configuration.getRouteDiscoveryTimeoutInMilliSeconds();
+    neighborActivityCheckIntervalInMilliSeconds = configuration.getNeighborActivityCheckIntervalInMilliSeconds();
+    maxNeighborInactivityTimeInMilliSeconds = configuration.getMaxNeighborInactivityTimeInMilliSeconds();
+    pantIntervalInMilliSeconds = configuration.getPANTIntervalInMilliSeconds();
+    isPreviousHopFeatureActivated = configuration.isPreviousHopFeatureActivated();
 
     this->packetFactory = packetFactory;
+    this->packetFactory->setPreviousHopFeature(isPreviousHopFeatureActivated);
     this->routingTable = routingTable;
     routingTable->setEvaporationPolicy(evaporationPolicy);
 
     packetTrap = new PacketTrap(routingTable);
-    runningRouteDiscoveries = unordered_map<AddressPtr, Timer*>();
+    runningRouteDiscoveries = unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate>();
     runningRouteDiscoveryTimers = unordered_map<Timer*, RouteDiscoveryInfo>();
     runningDeliveryTimers = unordered_map<Timer*, AddressPtr>();
+
+    if (neighborActivityCheckIntervalInMilliSeconds > 0) {
+       neighborActivityTimer = Environment::getClock()->getNewTimer();
+       neighborActivityTimer->addTimeoutListener(this);
+       startNeighborActivityTimer();
+    }
 }
 
 AbstractARAClient::~AbstractARAClient() {
-    // delete logger if it has been set
-    if(logger != nullptr) {
-        delete logger;
-    }
-
     // delete the sequence number lists of the last received packets
     for (LastReceivedPacketsMap::iterator iterator=lastReceivedPackets.begin(); iterator!=lastReceivedPackets.end(); iterator++) {
         // the addresses are disposed of automatically by shared_ptr
@@ -70,81 +76,27 @@ AbstractARAClient::~AbstractARAClient() {
     }
     runningDeliveryTimers.clear();
 
+    // delete the last activity timers of all currently known neighbors
+    for (NeighborActivityMap::iterator iterator=neighborActivityTimes.begin(); iterator!=neighborActivityTimes.end(); iterator++) {
+        delete iterator->second.first;
+    }
+    neighborActivityTimes.clear();
+
+    // delete all running pant timers
+    for (RunningPANTsMap::iterator iterator=runningPANTTimers.begin(); iterator!=runningPANTTimers.end(); iterator++) {
+        delete iterator->first;
+    }
+    runningPANTTimers.clear();
+
     /* The following members may have be deleted earlier, depending on the destructor of the implementing class */
-    DELETE_IF_NOT_NULL(packetFactory);
-    DELETE_IF_NOT_NULL(packetTrap);
-    DELETE_IF_NOT_NULL(routingTable);
     DELETE_IF_NOT_NULL(pathReinforcementPolicy);
     DELETE_IF_NOT_NULL(evaporationPolicy);
     DELETE_IF_NOT_NULL(forwardingPolicy);
+    DELETE_IF_NOT_NULL(neighborActivityTimer);
 }
 
-void AbstractARAClient::setLogger(Logger* logger) {
-    this->logger = logger;
-}
-
-void AbstractARAClient::logTrace(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_TRACE, args);
-    }
-}
-
-void AbstractARAClient::logDebug(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_DEBUG, args);
-    }
-}
-
-void AbstractARAClient::logInfo(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_INFO, args);
-    }
-}
-
-void AbstractARAClient::logWarn(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_WARN, args);
-    }
-}
-
-void AbstractARAClient::logError(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_ERROR, args);
-    }
-}
-
-void AbstractARAClient::logFatal(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_FATAL, args);
-    }
-}
-
-void AbstractARAClient::addNetworkInterface(NetworkInterface* newInterface) {
-    interfaces.push_back(newInterface);
-}
-
-NetworkInterface* AbstractARAClient::getNetworkInterface(unsigned int index) {
-    return interfaces.at(index);
-}
-
-unsigned int AbstractARAClient::getNumberOfNetworkInterfaces() {
-    return interfaces.size();
-}
-
-PacketFactory* AbstractARAClient::getPacketFactory() const{
-    return packetFactory;
+void AbstractARAClient::startNeighborActivityTimer() {
+    neighborActivityTimer->run(neighborActivityCheckIntervalInMilliSeconds * 1000);
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
@@ -154,7 +106,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     if (packet->getTTL() > 0) {
         AddressPtr destination = packet->getDestination();
         if (isRouteDiscoveryRunning(destination)) {
-            logTrace("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
+            logDebug("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
             packetTrap->trapPacket(packet);
         }
         else if (routingTable->isDeliverable(packet)) {
@@ -165,12 +117,14 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             packet->setSender(interface->getLocalAddress());
 
             float newPheromoneValue = reinforcePheromoneValue(destination, nextHopAddress, interface);
-            logTrace("Forwarding DATA packet %u from %s to %s via %s (phi=%.2f)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str(), newPheromoneValue);
+            logDebug("Forwarding DATA packet %u from %s to %s via %s (phi=%.2f)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str(), newPheromoneValue);
 
-            interface->send(packet, nextHopAddress);
-        } else {
+            sendUnicast(packet, interface, nextHopAddress);
+        }
+        else {
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
+                logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
                 packetTrap->trapPacket(packet);
                 startNewRouteDiscovery(packet);
             }
@@ -184,6 +138,11 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     }
 }
 
+void AbstractARAClient::sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver) {
+    interface->send(packet, receiver);
+    registerActivity(receiver, interface);
+}
+
 float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
     float currentPheromoneValue = routingTable->getPheromoneValue(destination, nextHop, interface);
     float newPheromoneValue = pathReinforcementPolicy->calculateReinforcedValue(currentPheromoneValue);
@@ -191,17 +150,18 @@ float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, Address
     return newPheromoneValue;
 }
 
-void AbstractARAClient::startNewRouteDiscovery(const Packet* packet) {
-    logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
-
+void AbstractARAClient::startNewRouteDiscovery(Packet* packet) {
     AddressPtr destination = packet->getDestination();
+    forgetKnownIntermediateHopsFor(destination);
+    startRouteDiscoveryTimer(packet);
+    sendFANT(destination);
+}
+
+void AbstractARAClient::forgetKnownIntermediateHopsFor(AddressPtr destination) {
     if(knownIntermediateHops.find(destination) != knownIntermediateHops.end()) {
         std::unordered_set<AddressPtr>* seenNodesForThisDestination = knownIntermediateHops[destination];
         seenNodesForThisDestination->clear();
     }
-
-    startRouteDiscoveryTimer(packet);
-    sendFANT(destination);
 }
 
 void AbstractARAClient::sendFANT(AddressPtr destination) {
@@ -223,7 +183,8 @@ void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
     discoveryInfo.timer = timer;
     discoveryInfo.originalPacket = packet;
 
-    runningRouteDiscoveries[packet->getDestination()] = timer;
+    AddressPtr destination = packet->getDestination();
+    runningRouteDiscoveries[destination] = timer;
     runningRouteDiscoveryTimers[timer] = discoveryInfo;
 }
 
@@ -233,7 +194,8 @@ bool AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
 
 void AbstractARAClient::handleNonSourceRouteDiscovery(Packet* packet) {
     logWarn("Dropping packet %u from %s because no route is known (non-source RD disabled)", packet->getSequenceNumber(), packet->getSourceString().c_str());
-    handleCompleteRouteFailure(packet);
+    broadcastRouteFailure(packet->getDestination());
+    delete packet;
 }
 
 void AbstractARAClient::handlePacketWithZeroTTL(Packet* packet) {
@@ -269,11 +231,12 @@ void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* i
     AddressPtr sender = interface->getLocalAddress();
     logWarn("Routing loop for packet %u from %s detected. Sending duplicate warning back to %s", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
     Packet* duplicateWarningPacket = packetFactory->makeDulicateWarningPacket(packet, sender, getNextSequenceNumber());
-    interface->send(duplicateWarningPacket, packet->getSender());
+    sendUnicast(duplicateWarningPacket, interface, packet->getSender());
 }
 
 void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
     // we do not want to send/reinforce routes that would send the packet back over ourselves
+    // Please note that we deliberately decided to enable this check even if isPreviousHopFeatureActivated is false!
     if (isLocalAddress(packet->getPreviousHop()) == false) {
         // trigger the evaporation first so this does not effect the new route or update
         routingTable->triggerEvaporation();
@@ -303,26 +266,73 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
 }
 
 bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
-    KnownIntermediateHopsMap::const_iterator found = knownIntermediateHops.find(packet->getSource());
-    if(found == knownIntermediateHops.end()) {
-        // we have never seen any packet for this source address so we can not have seen this previous node before
+    AddressPtr source = packet->getSource();
+
+    if (isNewRouteDiscovery(packet)) {
+        delete knownIntermediateHops[source];
+        knownIntermediateHops.erase(source);
         return false;
     }
+    else {
+        KnownIntermediateHopsMap::const_iterator found = knownIntermediateHops.find(source);
+        if (found == knownIntermediateHops.end()) {
+            // we have never seen any packet for this source address so we can not have seen this previous node before
+            return false;
+        }
 
-    unordered_set<AddressPtr>* listOfKnownNodes = found->second;
+        unordered_set<AddressPtr>* listOfKnownNodes = found->second;
 
-    // have we seen this sender, or the previous hop before?
-    bool senderHasBeenSeen = listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end();
-    bool prevHopHasBeenSeen = listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
+        // have we seen this sender, or the previous hop before?
+        bool senderHasBeenSeen = listOfKnownNodes->find(packet->getSender()) != listOfKnownNodes->end();
 
-    return senderHasBeenSeen || prevHopHasBeenSeen;
+        if (isPreviousHopFeatureActivated) {
+            bool prevHopHasBeenSeen = listOfKnownNodes->find(packet->getPreviousHop()) != listOfKnownNodes->end();
+            return senderHasBeenSeen || prevHopHasBeenSeen;
+        }
+        else {
+            return senderHasBeenSeen;
+        }
+    }
+}
+
+bool AbstractARAClient::isNewRouteDiscovery(const Packet* packet) {
+    if (packet->isAntPacket()) {
+        AddressPtr source = packet->getSource();
+        unsigned int sequenceNumber = packet->getSequenceNumber();
+
+        LastRouteDiscoveriesMap::const_iterator foundLastRouteDiscovery = lastRouteDiscoverySeqNumbers.find(source);
+        if (foundLastRouteDiscovery == lastRouteDiscoverySeqNumbers.end()) {
+            // we have never seen any route discovery from this source so far
+            lastRouteDiscoverySeqNumbers[source] = sequenceNumber;
+            return true;
+        }
+        else {
+            unsigned int seqNrOfLastRouteDiscovery = foundLastRouteDiscovery->second;
+
+            if (sequenceNumber == seqNrOfLastRouteDiscovery) {
+                // this is the same route discovery we already saw
+                return false;
+            }
+            else {
+                // this seems to be a new route discovery
+                lastRouteDiscoverySeqNumbers[source] = sequenceNumber;
+                return true;
+            }
+        }
+    }
+    else {
+        // this is not even an ant packet so it can't be part of a route discovery
+        return false;
+    }
 }
 
 void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface) {
     if (packet->isDataPacket()) {
+        registerActivity(packet->getSender(), interface);
         handleDataPacket(packet);
     }
     else if(packet->isAntPacket()) {
+        registerActivity(packet->getSender(), interface);
         handleAntPacket(packet);
     }
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
@@ -331,6 +341,10 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     else if (packet->getType() == PacketType::ROUTE_FAILURE) {
         handleRouteFailurePacket(packet, interface);
     }
+    else if (packet->getType() == PacketType::HELLO) {
+        // this has already been acknowledged on the layer 2 so we can ignore this one
+        delete packet;
+    }
     else {
         throw Exception("Can not handle packet");
     }
@@ -338,10 +352,32 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 
 void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
+        logInfo("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
         deliverToSystem(packet);
+        checkPantTimer(packet);
     }
     else {
         sendPacket(packet);
+    }
+}
+
+void AbstractARAClient::checkPantTimer(const Packet* packet) {
+    // this should only be called for arrived DATA packets for this node
+    if (pantIntervalInMilliSeconds > 0) {
+        // only send PANTs if this feature is enabled
+        AddressPtr pantDestination = packet->getSource();
+        if (scheduledPANTs.find(pantDestination) == scheduledPANTs.end()) {
+            // only start PANT if no timer is already running
+            logDebug("Scheduled PANT to be sent in %u ms", pantIntervalInMilliSeconds);
+
+            Clock* clock = Environment::getClock();
+            Timer* pantTimer = clock->getNewTimer();
+            pantTimer->addTimeoutListener(this);
+            pantTimer->run(pantIntervalInMilliSeconds * 1000);
+
+            scheduledPANTs.insert(pantDestination);
+            runningPANTTimers[pantTimer] = pantDestination;
+        }
     }
 }
 
@@ -356,7 +392,7 @@ void AbstractARAClient::handleAntPacket(Packet* packet) {
         handleAntPacketForThisNode(packet);
     }
     else if (packet->getTTL() > 0) {
-        logTrace("Broadcasting %s %u from %s (via %s)", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
+        logDebug("Broadcasting %s %u from %s to %s (came from %s)", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSenderString().c_str());
         broadCast(packet);
     }
     else {
@@ -376,6 +412,9 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     else if(packetType == PacketType::BANT) {
         handleBANTForThisNode(packet);
     }
+    else if(packetType == PacketType::PANT) {
+        // don't do anything other than deleting the packet
+    }
     else {
         logError("Can not handle ANT packet %u from %s (unknown type %u)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packetType);
     }
@@ -386,7 +425,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
 void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
     AddressPtr routeDiscoveryDestination = bant->getSource();
     if(packetTrap->getNumberOfTrappedPackets(routeDiscoveryDestination) == 0) {
-        logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.");
+        logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str());
     }
     else {
         logDebug("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
@@ -396,7 +435,7 @@ void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
 }
 
 void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
-    unordered_map<AddressPtr, Timer*>::const_iterator discovery;
+    unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate>::const_iterator discovery;
     discovery = runningRouteDiscoveries.find(destination);
 
     if(discovery != runningRouteDiscoveries.end()) {
@@ -420,51 +459,18 @@ void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
 }
 
 void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
-    deque<Packet*>* deliverablePackets = packetTrap->getDeliverablePackets(destination);
-    logDebug("Sending %u trapped packet(s) for destination %s", deliverablePackets->size(), destination->toString().c_str());
+    PacketQueue deliverablePackets = packetTrap->untrapDeliverablePackets(destination);
+    logInfo("Sending %u trapped packet(s) for destination %s", deliverablePackets.size(), destination->toString().c_str());
 
-    for(auto& deliverablePacket : *deliverablePackets) {
-        packetTrap->untrapPacket(deliverablePacket); // TODO packets could already be removed from the trap in packetTrap->getDeliverablePackets(..)
+    for(auto& deliverablePacket : deliverablePackets) {
         sendPacket(deliverablePacket);
     }
-    delete deliverablePackets;
 }
 
 void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket, NetworkInterface* interface) {
     logInfo("Received DUPLICATE_ERROR from %s. Deleting route to %s via %s", duplicateErrorPacket->getSourceString().c_str(), duplicateErrorPacket->getDestinationString().c_str(), duplicateErrorPacket->getSenderString().c_str());
-    routingTable->removeEntry(duplicateErrorPacket->getDestination(), duplicateErrorPacket->getSender(), interface);
+    deleteRoutingTableEntry(duplicateErrorPacket->getDestination(), duplicateErrorPacket->getSender(), interface);
     delete duplicateErrorPacket;
-}
-
-bool AbstractARAClient::isDirectedToThisNode(const Packet* packet) const {
-    return isLocalAddress(packet->getDestination());
-}
-
-bool AbstractARAClient::isLocalAddress(AddressPtr address) const {
-    for(auto& interface: interfaces) {
-        if(interface->getLocalAddress()->equals(address)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool AbstractARAClient::hasBeenSentByThisNode(const Packet* packet) const {
-    return isLocalAddress(packet->getSource());
-}
-
-void AbstractARAClient::broadCast(Packet* packet) {
-    for(auto& interface: interfaces) {
-        Packet* packetClone = packetFactory->makeClone(packet);
-        packetClone->setPreviousHop(packet->getSender());
-        packetClone->setSender(interface->getLocalAddress());
-        interface->broadcast(packetClone);
-    }
-    delete packet;
-}
-
-unsigned int AbstractARAClient::getNextSequenceNumber() {
-    return nextSequenceNumber++;
 }
 
 bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
@@ -485,7 +491,6 @@ bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
     AddressPtr source = packet->getSource();
     AddressPtr sender = packet->getSender();
-    AddressPtr previousHop = packet->getPreviousHop();
 
     // first check the lastReceived sequence numbers for this source
     LastReceivedPacketsMap::const_iterator foundPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
@@ -508,15 +513,16 @@ void AbstractARAClient::registerReceivedPacket(const Packet* packet) {
         // There is no record of any known intermediate node for this source address ~> create new
         listOfKnownIntermediateNodes = new unordered_set<AddressPtr>();
         listOfKnownIntermediateNodes->insert(packet->getSender());
-        if(previousHop->equals(sender) == false) {
-            listOfKnownIntermediateNodes->insert(previousHop);
-        }
         knownIntermediateHops[source] = listOfKnownIntermediateNodes;
     }
     else {
         listOfKnownIntermediateNodes = foundIntermediateHopsForSource->second;
         listOfKnownIntermediateNodes->insert(sender);
-        if(previousHop->equals(sender) == false) {
+    }
+
+    if(isPreviousHopFeatureActivated) {
+        AddressPtr previousHop = packet->getPreviousHop();
+        if(packet->getPreviousHop()->equals(sender) == false) {
             listOfKnownIntermediateNodes->insert(previousHop);
         }
     }
@@ -527,54 +533,66 @@ float AbstractARAClient::calculateInitialPheromoneValue(unsigned int ttl) {
     return alpha * ttl + initialPheromoneValue;
 }
 
-void AbstractARAClient::setRoutingTable(RoutingTable* newRoutingTable){
-    packetTrap->setRoutingTable(newRoutingTable);
-
-    // delete old routing table
-    delete routingTable;
-
-    // set new routing table
-    routingTable = newRoutingTable;
-}
-
 void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries) {
     this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
 }
 
 void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
+    // check if this is the neighbor activity timer
+    if (responsibleTimer == neighborActivityTimer) {
+        checkInactiveNeighbors();
+        startNeighborActivityTimer();
+        return;
+    }
+
+    // check if this is a route discovery timer
     DiscoveryTimerInfo::iterator discoveryTimerInfo = runningRouteDiscoveryTimers.find(responsibleTimer);
-    if(discoveryTimerInfo != runningRouteDiscoveryTimers.end()) {
+    if (discoveryTimerInfo != runningRouteDiscoveryTimers.end()) {
         handleExpiredRouteDiscoveryTimer(responsibleTimer, discoveryTimerInfo->second);
+        return;
     }
-    else {
-        DeliveryTimerInfo::iterator deliveryTimerInfo = runningDeliveryTimers.find(responsibleTimer);
-        if(deliveryTimerInfo != runningDeliveryTimers.end()) {
-            handleExpiredDeliveryTimer(responsibleTimer, deliveryTimerInfo->second);
-        }
-        else {
-            // if this happens its a bug in our code
-            logError("Could not identify expired timer");
-        }
+
+    // check if this is a PANT timer
+    RunningPANTsMap::iterator runningPANTTimerInfo = runningPANTTimers.find(responsibleTimer);
+    if (runningPANTTimers.find(responsibleTimer) != runningPANTTimers.end()) {
+        handleExpiredPANTTimer(responsibleTimer, runningPANTTimerInfo->second);
+        return;
     }
+
+    // check if this is a delivery timer
+    DeliveryTimerInfo::iterator deliveryTimerInfo = runningDeliveryTimers.find(responsibleTimer);
+    if (deliveryTimerInfo != runningDeliveryTimers.end()) {
+        handleExpiredDeliveryTimer(responsibleTimer, deliveryTimerInfo->second);
+        return;
+    }
+
+    // if this happens its a bug in our code
+    logError("Could not identify expired timer");
+    delete responsibleTimer;
 }
 
 void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo) {
-    const char* destinationString = discoveryInfo.originalPacket->getDestinationString().c_str();
+    AddressPtr destination = discoveryInfo.originalPacket->getDestination();
+    const char* destinationString = destination->toString().c_str();
     logInfo("Route discovery for destination %s timed out", destinationString);
+
     if(discoveryInfo.nrOfRetries < maxNrOfRouteDiscoveryRetries) {
+        // restart the route discovery
         discoveryInfo.nrOfRetries++;
         logInfo("Restarting discovery for destination %s (%u/%u)", destinationString, discoveryInfo.nrOfRetries, maxNrOfRouteDiscoveryRetries);
         runningRouteDiscoveryTimers[routeDiscoveryTimer] = discoveryInfo;
-        sendFANT(discoveryInfo.originalPacket->getDestination());
+
+        forgetKnownIntermediateHopsFor(destination);
+        sendFANT(destination);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
     else {
-        // remove the route discovery timer
-        AddressPtr destination = discoveryInfo.originalPacket->getDestination();
+        // delete the route discovery timer
         runningRouteDiscoveries.erase(destination);
         runningRouteDiscoveryTimers.erase(routeDiscoveryTimer);
         delete routeDiscoveryTimer;
 
+        forgetKnownIntermediateHopsFor(destination);
         deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);
         logWarn("Route discovery for destination %s unsuccessful. Dropping %u packet(s)", destinationString, undeliverablePackets.size());
         for(auto& packet: undeliverablePackets) {
@@ -584,7 +602,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
 }
 
 void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination) {
-    unordered_map<AddressPtr, Timer*>::const_iterator discovery;
+    unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate>::const_iterator discovery;
     discovery = runningRouteDiscoveries.find(destination);
 
     if(discovery != runningRouteDiscoveries.end()) {
@@ -598,39 +616,143 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, Address
     else {
         logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
     }
-
 }
 
-void AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
-    routingTable->removeEntry(packet->getDestination(), nextHop, interface);
+void AbstractARAClient::handleExpiredPANTTimer(Timer* pantTimer, AddressPtr destination) {
+    scheduledPANTs.erase(destination);
+    runningPANTTimers.erase(pantTimer);
+    broadcastPANT(destination);
+    delete pantTimer;
+}
 
+bool AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
+    logInfo("Link over %s is broken", nextHop->toString().c_str());
+
+    // delete all known routes via this next hop
+    std::deque<RoutingTableEntryTupel> allRoutesOverNextHop = routingTable->getAllRoutesThatLeadOver(nextHop);
+    for (auto& route: allRoutesOverNextHop) {
+        deleteRoutingTableEntry(route.destination, nextHop, route.entry->getNetworkInterface());
+    }
+
+    NeighborActivityMap::const_iterator foundNeighbor = neighborActivityTimes.find(nextHop);
+    if(foundNeighbor != neighborActivityTimes.end()) {
+        // delete the associated Time object first
+        delete foundNeighbor->second.first;
+        neighborActivityTimes.erase(nextHop);
+    }
+
+    // Try to deliver the packet on an alternative route
     if (routingTable->isDeliverable(packet)) {
-        logInfo("Link over %s is broken. Sending over alternative route", nextHop->toString().c_str());
+        logDebug("Sending %u from %s over alternative route", packet->getSequenceNumber(), packet->getSourceString().c_str());
         sendPacket(packet);
+        return true;
+    }
+    else if(packet->isDataPacket() && isLocalAddress(packet->getSource())) {
+        packetTrap->trapPacket(packet);
+
+        if (isRouteDiscoveryRunning(packet->getDestination())) {
+            logDebug("No alternative route is available. Trapping packet %u from %s because route discovery is already running for destination %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
+        }
+        else {
+            logDebug("No alternative route is available. Starting new route discovery for packet %u from %s.", packet->getSequenceNumber(), packet->getSourceString().c_str());
+            startNewRouteDiscovery(packet);
+        }
+        return true;
     }
     else {
-        logInfo("Link over %s is broken and can not be repaired. Dropping packet %u from %s.", nextHop->toString().c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str());
-        handleCompleteRouteFailure(packet);
+        delete packet;
+        return false;
     }
 }
 
-void AbstractARAClient::handleCompleteRouteFailure(Packet* packet) {
-    AddressPtr destination = packet->getDestination();
-    for(auto& interface: interfaces) {
-        AddressPtr source = interface->getLocalAddress();
-        unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
-        interface->broadcast(routeFailurePacket);
+void AbstractARAClient::registerActivity(AddressPtr neighbor, NetworkInterface* interface) {
+    NeighborActivityMap::const_iterator foundNeighbor = neighborActivityTimes.find(neighbor);
+    if(foundNeighbor == neighborActivityTimes.end()) {
+        // we have never heard from this neighbor before
+        Clock* clock = Environment::getClock();
+        Time* currentTime = clock->makeTime();
+        currentTime->setToCurrentTime();
+        neighborActivityTimes[neighbor] = std::pair<Time*, NetworkInterface*>(currentTime, interface);
+    }
+    else {
+        // just update the activity time for one of the currently known neighbors
+        foundNeighbor->second.first->setToCurrentTime();
+    }
+}
+
+void AbstractARAClient::checkInactiveNeighbors() {
+    Clock* clock = Environment::getClock();
+    Time* currentTime = clock->makeTime();
+    currentTime->setToCurrentTime();
+
+    NeighborActivityMap::iterator iterator;
+    for (iterator=neighborActivityTimes.begin(); iterator!=neighborActivityTimes.end(); iterator++) {
+        std::pair<AddressPtr, std::pair<Time*, NetworkInterface*>> entryPair = *iterator;
+        Time* lastActiveTime = entryPair.second.first;
+        long timeDifference = currentTime->getDifferenceInMilliSeconds(lastActiveTime);
+        if (timeDifference >= maxNeighborInactivityTimeInMilliSeconds) {
+            AddressPtr addressofNeighbor = entryPair.first;
+            NetworkInterface* interface = entryPair.second.second;
+            unsigned int sequenceNumber = getNextSequenceNumber();
+            Packet* helloPacket = packetFactory->makeHelloPacket(interface->getLocalAddress(), addressofNeighbor, sequenceNumber);
+            logDebug("Sending HELLO packet to inactive neighbor %s", addressofNeighbor->toString().c_str());
+            sendUnicast(helloPacket, interface, addressofNeighbor);
+        }
     }
 
-    delete packet;
+    delete currentTime;
 }
 
 void AbstractARAClient::handleRouteFailurePacket(Packet* packet, NetworkInterface* interface) {
     AddressPtr destination = packet->getDestination();
-    AddressPtr sender = packet->getSender();
-    routingTable->removeEntry(destination, sender, interface);
+    AddressPtr nextHop = packet->getSource();
+
+    if (routingTable->exists(destination, nextHop, interface)) {
+        logInfo("Received ROUTE_FAILURE from %s. Deleting route to %s via %s", packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSourceString().c_str());
+        deleteRoutingTableEntry(destination, nextHop, interface);
+    }
+
     delete packet;
+}
+
+void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    if(routingTable->exists(destination, nextHop, interface)) {
+        routingTable->removeEntry(destination, nextHop, interface);
+
+        deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
+        if (possibleNextHops.size() == 1) {
+            RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
+            AddressPtr remainingNextHop = lastRemainingRoute->getAddress();
+            logDebug("Only one last route is known to %s. Notifying %s with ROUTE_FAILURE packet", destination->toString().c_str(), remainingNextHop->toString().c_str());
+            AddressPtr source = interface->getLocalAddress();
+            unsigned int sequenceNr = getNextSequenceNumber();
+            Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
+            lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, remainingNextHop);
+        }
+        else if (possibleNextHops.empty()) {
+            logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
+            broadcastRouteFailure(destination);
+        }
+    }
+}
+
+void AbstractARAClient::broadcastRouteFailure(AddressPtr destination) {
+    for(auto& interface: interfaces) {
+        AddressPtr localAddress = interface->getLocalAddress();
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(localAddress, destination, sequenceNr);
+        interface->broadcast(routeFailurePacket);
+    }
+}
+
+void AbstractARAClient::broadcastPANT(AddressPtr destination) {
+    logDebug("Sending new PANT over all interfaces");
+    for(auto& interface: interfaces) {
+        AddressPtr source = interface->getLocalAddress();
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* routeFailurePacket = packetFactory->makePANT(source, destination, sequenceNr);
+        interface->broadcast(routeFailurePacket);
+    }
 }
 
 ARA_NAMESPACE_END

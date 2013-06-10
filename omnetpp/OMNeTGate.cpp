@@ -30,6 +30,10 @@ OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClien
     this->interfaceID = interfaceEntry->getInterfaceId();
     this->packetFactory = araClient->getPacketFactory();
     this->networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
+    this->nrOfSentControlBits = 0;
+    this->nrOfSentDataBits = 0;
+    this->nrOfSentControlPackets = 0;
+    this->nrOfSentDataPackets = 0;
 }
 
 void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
@@ -56,8 +60,37 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double
     controlInfo->setDest(macOfNextHop);
     omnetPacket->setControlInfo(controlInfo);
 
+    recordNumberOfSentBits(omnetPacket);
+
     // we might have switched the context from the OMNeTTimer
     omnetARAModule->takeAndSend(omnetPacket, outGate, sendDelay);
+}
+
+void OMNeTGate::recordNumberOfSentBits(OMNeTPacket* packet) {
+    if (packet->isDataPacket()) {
+        nrOfSentDataBits += packet->getBitLength();
+        nrOfSentDataPackets++;
+    }
+    else {
+        nrOfSentControlBits += packet->getBitLength();
+        nrOfSentControlPackets++;
+    }
+}
+
+int64 OMNeTGate::getNrOfSentDataBits() {
+    return nrOfSentDataBits;
+}
+
+int64 OMNeTGate::getNrOfSentControlBits() {
+    return nrOfSentControlBits;
+}
+
+unsigned int OMNeTGate::getNrOfControlPackets() {
+    return nrOfSentControlPackets;
+}
+
+unsigned int OMNeTGate::getNrOfDataPackets() {
+    return nrOfSentDataPackets;
 }
 
 OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {

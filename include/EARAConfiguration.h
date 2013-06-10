@@ -14,7 +14,7 @@ ARA_NAMESPACE_BEGIN
  * This interface extends the ~Configuration interface and is used to retrieve the EARA specific configuration parameters.
  * A default implementation is available in ~BasicEARAConfiguration
  */
-class EARAConfiguration : public Configuration {
+class EARAConfiguration : public virtual Configuration {
 public:
     virtual ~EARAConfiguration() {};
 

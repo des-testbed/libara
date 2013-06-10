@@ -13,30 +13,31 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package ara.simulations;
+package ara.simulations.ara;
 
 import ara.NetworkNode;
 import ara.ARANetworkConfigurator;
 import ara.time.OMNeTClock;
 import inet.world.radio.ChannelControl;
 
-network ARAPaperEvaluation
+network MobileScenario
 {
     parameters:
         @display("b=297,203;bgb=758,337");
-        double playgroundSizeX @unit(m) = default(1500m);
-        double playgroundSizeY @unit(m) = default(300m);
-        double playgroundSizeZ = default(0) @unit(m);
-        int numberOfNodes = default(50);
-        volatile double nodeSpeed @unit(mps) = default(10mps);
-        volatile double nodePauseTime @unit(s) = uniform(3s,8s);
-        
+        int numberOfNodes;
+        volatile double nodeSpeed @unit(mps);
+        volatile double nodePauseTime @unit(s);
+        double playgroundSizeX @unit(m);
+        double playgroundSizeY @unit(m);
+        double playgroundSizeZ @unit(m) = default(0);
+        string mobilityType = default("RandomWPMobility");
+        volatile double mobilityUpdateIntervall @unit(ms) = default(100ms);
 
     submodules:
         clock: OMNeTClock {
-            @display("p=78,161");
+            @display("p=153,41;is=s");
         }
-        
+
         channelControl: ChannelControl {
             parameters:
                 @display("p=78,36");
@@ -49,12 +50,12 @@ network ARAPaperEvaluation
                 @display("p=78,97");
         }
 
-        node[numberOfNodes] : NetworkNode {
+        node[numberOfNodes]: NetworkNode {
             parameters:
-                mobilityType = "RandomWPMobility";
-                mobility.speed = nodeSpeed; // I'm not sure if this works
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
                 mobility.waitTime = nodePauseTime;
-                mobility.updateInterval = 100ms;
+                mobility.updateInterval = mobilityUpdateIntervall;
                 mobility.constraintAreaMinX = 0m;
                 mobility.constraintAreaMinY = 0m;
                 mobility.constraintAreaMinZ = 0m;
