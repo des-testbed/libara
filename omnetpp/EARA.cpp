@@ -150,8 +150,8 @@ void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
     if (packet->isDataPacket()) {
         // record our energy level for the whole path energy of this packet
         TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
-        RouteEnergy routeEnergy = encapsulatedPacket->getRouteEnergy();
-        routeEnergy.push_back(getCurrentEnergyLevel());
+        int oldRouteEnergy = encapsulatedPacket->getRouteEnergy();
+        encapsulatedPacket->setRouteEnergy(oldRouteEnergy + getCurrentEnergyLevel());
     }
 
     AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);

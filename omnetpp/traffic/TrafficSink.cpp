@@ -14,6 +14,7 @@ void TrafficSink::initialize(int level) {
     if(level == 0) {
         delayVector.setName("delay");
         hopCountVector.setName("hopCount");
+        routeEnergyOutVector.setName("routeEnergy");
         WATCH(nrOfReceivedMessages);
     }
 }
@@ -30,6 +31,8 @@ void TrafficSink::handleMessage(cMessage* message) {
 
     TrafficControlInfo* controlInfo = check_and_cast<TrafficControlInfo*>(packet->getControlInfo());
     hopCountVector.record(controlInfo->getHopCount());
+
+    routeEnergyOutVector.record(packet->getRouteEnergy());
 
     delete message;
 }
