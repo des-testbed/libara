@@ -5,6 +5,7 @@
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
 #include "omnetpp/PacketFactory.h"
+#include "omnetpp/traffic/TrafficPacket_m.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -26,6 +27,7 @@ EARA::~EARA() {
     forwardingPolicy = nullptr;
     evaporationPolicy = nullptr;
     pathReinforcementPolicy = nullptr;
+    energyDisseminationTimer = nullptr;
 }
 
 int EARA::numInitStages() const {
@@ -33,10 +35,8 @@ int EARA::numInitStages() const {
 }
 
 void EARA::initialize(int stage) {
-    if(stage == 0) {
-        AbstractOMNeTARAClient::initialize();
-    }
-    else if(stage == 4) {
+    AbstractOMNeTARAClient::initialize(stage);
+    if(stage == 4) {
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
@@ -55,10 +55,13 @@ void EARA::initialize(int stage) {
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
         ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
         DROP_PACKET_BECAUSE_ENERGY_DEPLETED =  registerSignal("dropPacketBecauseEnergyDepleted");
+        energyLevelOutVector.setName("energyLevel");
     }
 }
 
 void EARA::handleMessage(cMessage* message) {
+    energyLevelOutVector.record(getCurrentEnergyLevel());
+
     if (hasEnoughBattery) {
         AbstractOMNeTARAClient::handleMessage(message);
     }
@@ -122,6 +125,7 @@ void EARA::handleBatteryStatusChange(Energy* energyInformation) {
 
     if (currentEnergyLevel <= 0) {
        hasEnoughBattery = false;
+       nodeEnergyDepletionTimestamp = simTime();
 
        // change the node color
        cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
@@ -131,6 +135,26 @@ void EARA::handleBatteryStatusChange(Energy* energyInformation) {
 
 unsigned char EARA::getCurrentEnergyLevel() {
     return currentEnergyLevel;
+}
+
+void EARA::finish() {
+    if (nodeEnergyDepletionTimestamp > 0) {
+        recordScalar("nodeEnergyDepletionTimestamp", nodeEnergyDepletionTimestamp);
+    }
+
+    AbstractOMNeTARAClient::finish();
+}
+
+void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
+    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(message);
+    if (packet->isDataPacket()) {
+        // record our energy level for the whole path energy of this packet
+        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
+        int oldRouteEnergy = encapsulatedPacket->getRouteEnergy();
+        encapsulatedPacket->setRouteEnergy(oldRouteEnergy + getCurrentEnergyLevel());
+    }
+
+    AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);
 }
 
 OMNETARA_NAMESPACE_END

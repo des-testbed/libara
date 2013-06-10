@@ -33,7 +33,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         IInterfaceTable* getInterfaceTable();
 
     protected:
-        virtual void initialize();
+        virtual void initialize(int stage);
         void initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& configuration);
 
         /**
@@ -70,7 +70,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
          * with the given delay.
          */
         //TODO rename this to sendToNetwork() and remove the gate parameter
-        void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
+        virtual void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
 
         /**
          * The given packet is sent to the next upper layer.

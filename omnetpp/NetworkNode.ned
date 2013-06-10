@@ -22,7 +22,7 @@ module NetworkNode extends NetworkNodeBase {
 
     parameters:
         @node;
-        @display("i=device/wifilaptop;bgb=366,335");
+        @display("i=device/wifilaptop;bgb=366,354");
 
         string forwardingPolicyModel = default("OMNeTStochasticForwardingPolicy");
         string evaporationModel = default("OMNeTExponentialEvaporationPolicy");

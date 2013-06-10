@@ -82,3 +82,17 @@ TEST(AbstractEARAClientTest, processPeriodicEnergyInformationMessages) {
     client->receivePacket(energyPacket, interface);
     BYTES_EQUAL(energyLevel, routingTable->getEnergyValueOf(someNode));
 }
+
+TEST(AbstractEARAClientTest, energyDisseminationTimerIsstartedAgain) {
+    // prepare the test
+    TimerMock* timer = client->getEnergyDisseminationTimer();
+
+    // start the test
+    CHECK(timer->isRunning());
+
+    // let the timer expire
+    timer->expire();
+
+    // the timer should have been restarted after the timeout has been processed
+    CHECK(timer->isRunning());
+}

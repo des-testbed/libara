@@ -6,6 +6,7 @@
 #include "omnetpp/TrafficControllInfo.h"
 #include "omnetpp/RoutingTableWatcher.h"
 #include "omnetpp/OMNeTGate.h"
+#include "omnetpp/traffic/TrafficPacket_m.h"
 #include "Environment.h"
 
 #include "Ieee80211Frame_m.h"
@@ -26,27 +27,29 @@ AbstractOMNeTARAClient::~AbstractOMNeTARAClient() {
     DELETE_IF_NOT_NULL(mobilityDataPersistor);
 }
 
-void AbstractOMNeTARAClient::initialize() {
-    notificationBoard = NotificationBoardAccess().get();
-    notificationBoard->subscribe(this, NF_LINK_BREAK);
-    mobility = ModuleAccess<MobilityBase>("mobility").get();
-    interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
-    networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
-    setPositionFromParameters();
+void AbstractOMNeTARAClient::initialize(int stage) {
+    if(stage == 0) {
+        notificationBoard = NotificationBoardAccess().get();
+        notificationBoard->subscribe(this, NF_LINK_BREAK);
+        mobility = ModuleAccess<MobilityBase>("mobility").get();
+        interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
+        networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
+        setPositionFromParameters();
 
-    PACKET_DELIVERED_SIGNAL = registerSignal("packetDelivered");
-    PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
-    ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
+        PACKET_DELIVERED_SIGNAL = registerSignal("packetDelivered");
+        PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
+        ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
 
-    WATCH(nrOfDeliverablePackets);
-    WATCH(nrOfNotDeliverablePackets);
+        WATCH(nrOfDeliverablePackets);
+        WATCH(nrOfNotDeliverablePackets);
 
-    if(par("activateMobileTrace").boolValue()){
-        mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
+        if(par("activateMobileTrace").boolValue()){
+            mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
+        }
+
+        routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
+        new RoutingTableWatcher(routingTable);
     }
-
-    routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
-    new RoutingTableWatcher(routingTable);
 }
 
 void AbstractOMNeTARAClient::setPositionFromParameters() {
@@ -150,6 +153,15 @@ void AbstractOMNeTARAClient::persistRoutingTableData() {
 void AbstractOMNeTARAClient::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
     Enter_Method_Silent("takeAndSend(msg)");
     take(msg);
+
+    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(msg);
+    if (packet->isDataPacket()) {
+        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
+        //TODO inject our own address and energy level
+        Route route = encapsulatedPacket->getRoute();
+        route.push_back(getLocalAddress());
+    }
+
     sendDelayed(msg, sendDelay, gate);
 }
 
@@ -235,7 +247,7 @@ AddressPtr AbstractOMNeTARAClient::getLocalAddress() {
     }
 
     if(interface == nullptr) {
-        throw cRuntimeError("The TrafficGenerator could not determine the nodes interface");
+        throw cRuntimeError("Could not determine the nodes interface");
     }
 
     IPv4Address ipv4 = interface->ipv4Data()->getIPAddress();

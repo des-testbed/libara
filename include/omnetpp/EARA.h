@@ -31,6 +31,7 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
     protected:
         virtual int numInitStages() const;
         virtual void initialize(int stage);
+        virtual void finish();
 
         virtual void receivePacket(Packet* packet, NetworkInterface* interface);
 
@@ -49,6 +50,8 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         virtual bool handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface);
 
         virtual unsigned char getCurrentEnergyLevel();
+
+        virtual void takeAndSend(cMessage* message, cGate* gate, double sendDelay);
     private:
         void handleBatteryStatusChange(Energy* energyInformation);
 
@@ -57,6 +60,9 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         bool hasEnoughBattery = true;
         double maximumBatteryLevel;
         int currentEnergyLevel;
+
+        cOutVector energyLevelOutVector;
+        SimTime nodeEnergyDepletionTimestamp = -1;
 };
 
 OMNETARA_NAMESPACE_END
