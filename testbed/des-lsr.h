@@ -35,8 +35,7 @@ extern "C"{
  void init_logic();
  dessert_per_result_t send_hello(void *data, struct timeval *scheduled, struct timeval *interval);
  dessert_per_result_t send_tc(void *data, struct timeval *scheduled, struct timeval *interval);
- dessert_per_result_t refresh_list(void *data, struct timeval *scheduled, struct timeval *interval) {
-     pthread_rwlock_wrlock(&pp_rwlock);};
+ dessert_per_result_t refresh_list(void *data, struct timeval *scheduled, struct timeval *interval);
 
  void init_rt();
  dessert_per_result_t refresh_rt();
