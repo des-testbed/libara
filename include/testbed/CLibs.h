@@ -4,4 +4,5 @@ extern "C" {
  #include <pthread.h>
  #include <netinet/in.h>
  #include <uthash.h>
+ #include <libcli.h>
  }
