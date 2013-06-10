@@ -320,7 +320,7 @@ cleandep:
 .PHONY: clean
 clean: cleandep
 	@echo "Cleaning libARA.."
-	@rm -f $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
+	@rm -f $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(OUTPUT_DIR)/$(ARA_LIB_NAME).*
 	@rm -f $(LIBARA_O)
 	@echo "Cleaning omnetARA.."
 	@rm -f $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME) $(OMNETARA_EXECUTABLE)
