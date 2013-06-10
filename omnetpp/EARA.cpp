@@ -26,6 +26,7 @@ EARA::~EARA() {
     forwardingPolicy = nullptr;
     evaporationPolicy = nullptr;
     pathReinforcementPolicy = nullptr;
+    energyDisseminationTimer = nullptr;
 }
 
 int EARA::numInitStages() const {
