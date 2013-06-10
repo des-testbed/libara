@@ -128,11 +128,11 @@ ifeq ("$(NO_OMNET)", "TRUE")
     INCLUDE_PATH = -I$(INCLUDE_DIR)
 else
     INCLUDE_PATH += -I. \
-                    -I$(INCLUDE_DIR)
-                    -I$(INCLUDE_DIR)/omnetpp
-                    -I$(INCLUDE_DIR)/testbed
-                    -I$(INCLUDE_DIR)/inetmanet
-                    -I$(OMNETPP_INCL_DIR)
+                    -I$(INCLUDE_DIR) \
+                    -I$(INCLUDE_DIR)/omnetpp \
+                    -I$(INCLUDE_DIR)/testbed \
+                    -I$(INCLUDE_DIR)/inetmanet \
+                    -I$(OMNETPP_INCL_DIR) \
                     -I$(INETMANET_SRC_FOLDER)
 endif
 INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include
