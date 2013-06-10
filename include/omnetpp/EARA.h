@@ -31,6 +31,7 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
     protected:
         virtual int numInitStages() const;
         virtual void initialize(int stage);
+        virtual void finish();
 
         virtual void receivePacket(Packet* packet, NetworkInterface* interface);
 
@@ -59,6 +60,7 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         int currentEnergyLevel;
 
         cOutVector energyLevelOutVector;
+        SimTime nodeEnergyDepletionTimestamp = -1;
 };
 
 OMNETARA_NAMESPACE_END

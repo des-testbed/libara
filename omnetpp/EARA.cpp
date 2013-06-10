@@ -34,10 +34,8 @@ int EARA::numInitStages() const {
 }
 
 void EARA::initialize(int stage) {
-    if(stage == 0) {
-        AbstractOMNeTARAClient::initialize();
-    }
-    else if(stage == 4) {
+    AbstractOMNeTARAClient::initialize(stage);
+    if(stage == 4) {
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
@@ -126,6 +124,7 @@ void EARA::handleBatteryStatusChange(Energy* energyInformation) {
 
     if (currentEnergyLevel <= 0) {
        hasEnoughBattery = false;
+       nodeEnergyDepletionTimestamp = simTime();
 
        // change the node color
        cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
@@ -135,6 +134,14 @@ void EARA::handleBatteryStatusChange(Energy* energyInformation) {
 
 unsigned char EARA::getCurrentEnergyLevel() {
     return currentEnergyLevel;
+}
+
+void EARA::finish() {
+    if (nodeEnergyDepletionTimestamp > 0) {
+        recordScalar("nodeEnergyDepletionTimestamp", nodeEnergyDepletionTimestamp);
+    }
+
+    AbstractOMNeTARAClient::finish();
 }
 
 OMNETARA_NAMESPACE_END

@@ -33,10 +33,8 @@ int ARA::numInitStages() const {
 }
 
 void ARA::initialize(int stage) {
-    if(stage == 0) {
-        AbstractOMNeTARAClient::initialize();
-    }
-    else if(stage == 4) {
+    AbstractOMNeTARAClient::initialize(stage);
+    if(stage == 4) {
         OMNeTConfiguration config = OMNeTConfiguration(this);
         setLogger(config.getLogger());
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());

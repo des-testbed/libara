@@ -33,7 +33,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         IInterfaceTable* getInterfaceTable();
 
     protected:
-        virtual void initialize();
+        virtual void initialize(int stage);
         void initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& configuration);
 
         /**

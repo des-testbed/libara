@@ -26,27 +26,29 @@ AbstractOMNeTARAClient::~AbstractOMNeTARAClient() {
     DELETE_IF_NOT_NULL(mobilityDataPersistor);
 }
 
-void AbstractOMNeTARAClient::initialize() {
-    notificationBoard = NotificationBoardAccess().get();
-    notificationBoard->subscribe(this, NF_LINK_BREAK);
-    mobility = ModuleAccess<MobilityBase>("mobility").get();
-    interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
-    networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
-    setPositionFromParameters();
+void AbstractOMNeTARAClient::initialize(int stage) {
+    if(stage == 0) {
+        notificationBoard = NotificationBoardAccess().get();
+        notificationBoard->subscribe(this, NF_LINK_BREAK);
+        mobility = ModuleAccess<MobilityBase>("mobility").get();
+        interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
+        networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
+        setPositionFromParameters();
 
-    PACKET_DELIVERED_SIGNAL = registerSignal("packetDelivered");
-    PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
-    ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
+        PACKET_DELIVERED_SIGNAL = registerSignal("packetDelivered");
+        PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
+        ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
 
-    WATCH(nrOfDeliverablePackets);
-    WATCH(nrOfNotDeliverablePackets);
+        WATCH(nrOfDeliverablePackets);
+        WATCH(nrOfNotDeliverablePackets);
 
-    if(par("activateMobileTrace").boolValue()){
-        mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
+        if(par("activateMobileTrace").boolValue()){
+            mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
+        }
+
+        routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
+        new RoutingTableWatcher(routingTable);
     }
-
-    routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
-    new RoutingTableWatcher(routingTable);
 }
 
 void AbstractOMNeTARAClient::setPositionFromParameters() {
