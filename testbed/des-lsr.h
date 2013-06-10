@@ -1,4 +1,7 @@
- extern "C"{
+#ifndef DESSERT_LSR_H
+#define DESSERT_LSR_H
+
+extern "C"{
  #include <dessert.h>
  #include <libcli.h>
  }
@@ -60,3 +63,5 @@
 
  // FUNCTIONS FROM des-lsr_dijkstra.c
  void shortest_path(uint8_t *addr);
+
+#endif /* DESSERT_LSR_H */
