@@ -5,6 +5,7 @@
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
 #include "omnetpp/PacketFactory.h"
+#include "omnetpp/traffic/TrafficPacket_m.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -142,6 +143,18 @@ void EARA::finish() {
     }
 
     AbstractOMNeTARAClient::finish();
+}
+
+void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
+    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(message);
+    if (packet->isDataPacket()) {
+        // record our energy level for the whole path energy of this packet
+        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
+        RouteEnergy routeEnergy = encapsulatedPacket->getRouteEnergy();
+        routeEnergy.push_back(getCurrentEnergyLevel());
+    }
+
+    AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);
 }
 
 OMNETARA_NAMESPACE_END

@@ -50,6 +50,8 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         virtual bool handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface);
 
         virtual unsigned char getCurrentEnergyLevel();
+
+        virtual void takeAndSend(cMessage* message, cGate* gate, double sendDelay);
     private:
         void handleBatteryStatusChange(Energy* energyInformation);
 

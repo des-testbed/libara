@@ -6,6 +6,7 @@
 #include "omnetpp/TrafficControllInfo.h"
 #include "omnetpp/RoutingTableWatcher.h"
 #include "omnetpp/OMNeTGate.h"
+#include "omnetpp/traffic/TrafficPacket_m.h"
 #include "Environment.h"
 
 #include "Ieee80211Frame_m.h"
@@ -152,6 +153,15 @@ void AbstractOMNeTARAClient::persistRoutingTableData() {
 void AbstractOMNeTARAClient::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
     Enter_Method_Silent("takeAndSend(msg)");
     take(msg);
+
+    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(msg);
+    if (packet->isDataPacket()) {
+        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
+        //TODO inject our own address and energy level
+        Route route = encapsulatedPacket->getRoute();
+        route.push_back(getLocalAddress());
+    }
+
     sendDelayed(msg, sendDelay, gate);
 }
 
@@ -237,7 +247,7 @@ AddressPtr AbstractOMNeTARAClient::getLocalAddress() {
     }
 
     if(interface == nullptr) {
-        throw cRuntimeError("The TrafficGenerator could not determine the nodes interface");
+        throw cRuntimeError("Could not determine the nodes interface");
     }
 
     IPv4Address ipv4 = interface->ipv4Data()->getIPAddress();

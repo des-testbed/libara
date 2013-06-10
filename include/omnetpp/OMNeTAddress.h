@@ -17,6 +17,13 @@ class OMNeTAddress : public Address, public IPv4Address {
 public:
 
     /**
+     * Default constructor, initializes to 0.0.0.0.
+     * I hate that we have this but it seems to be necessary if we want to
+     * use OMNeTAddresses in generated TrafficPackets
+     */
+    OMNeTAddress() : IPv4Address() {}
+
+    /**
       * IP address as int
       */
      OMNeTAddress(uint32 ipAddress) : IPv4Address(ipAddress) {}
