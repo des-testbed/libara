@@ -1,3 +1,6 @@
+#ifndef DESSERT_LSR_ITEMS_H
+#define DESSERT_LSR_ITEMS_H
+
 extern "C"{
 #include <dessert.h>
  #include <uthash.h>
@@ -33,3 +36,5 @@ extern "C"{
  // EXTENSIONS
  typedef struct  hello_ext {
  } __attribute__((__packed__)) hello_ext_t;
+
+ #endif /* DESSERT_LSR_ITEMS_H */
