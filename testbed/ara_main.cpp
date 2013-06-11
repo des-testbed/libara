@@ -22,7 +22,12 @@ int main(int argc, char** argv) {
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
      /** initializes dessert framework and sets up logging */
-     dessert_init("ARAT", 0x00, DESSERT_OPT_DAEMONIZE);
+     if(dessert_init("ARAT", 0x00, DESSERT_OPT_NODAEMONIZE)!= DESSERT_OK) {
+         cout << "dessert_init failed"<<endl;
+     }
+     else {
+         cout << "dessert init succeded" << endl;
+     }
      /** enable logging to STDERR */
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); // enable compression, maybe this helps
      /** initialize the command line interface */
