@@ -70,7 +70,7 @@ int OMNeTBattery::registerDevice(cObject* device, int numberOfActvities) {
     EV<< "Registered new power consuming device"  << deviceEntryVector.size() << " with " << numberOfActvities << " activities" << endl;
     deviceEntryVector.push_back(newDevice);
 
-    int idOfRegisteredDevice = deviceEntryVector.size()-1
+    int idOfRegisteredDevice = deviceEntryVector.size()-1;
     return idOfRegisteredDevice;
 }
 
