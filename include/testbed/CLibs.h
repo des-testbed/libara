@@ -8,6 +8,6 @@ extern "C" {
  #include <netinet/in.h>
  #include <uthash.h>
  #include <libcli.h>
- }
+}
 
 #endif /* CLIBS_H */
