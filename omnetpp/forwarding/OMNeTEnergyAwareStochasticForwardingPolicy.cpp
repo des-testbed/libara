@@ -4,23 +4,21 @@
 
 #include "omnetpp/OMNeTEnergyAwareStochasticForwardingPolicy.h"
 
-namespace ARA {
-    namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
-        Define_Module(OMNeTEnergyAwareStochasticForwardingPolicy);
+Define_Module(OMNeTEnergyAwareStochasticForwardingPolicy);
 
-        float OMNeTEnergyAwareStochasticForwardingPolicy::getRandomNumber(){
-           return dblrand();
-        }
+float OMNeTEnergyAwareStochasticForwardingPolicy::getRandomNumber(){
+    return dblrand();
+}
 
-        void OMNeTEnergyAwareStochasticForwardingPolicy::initialize(){
-            alpha = par("alpha").doubleValue();
-            beta = par("beta").doubleValue();
-        }
+void OMNeTEnergyAwareStochasticForwardingPolicy::initialize(){
+    setPheromoneWeight(par("alpha").doubleValue());
+    setEnergyWeight(par("beta").doubleValue());
+}
 
-        void OMNeTEnergyAwareStochasticForwardingPolicy::handleMessage(cMessage *msg) {
-            throw cRuntimeError("OMNeTEnergyAwareStochasticForwardingPolicy: handleMessage() should never be called!");
-        }
+void OMNeTEnergyAwareStochasticForwardingPolicy::handleMessage(cMessage *msg) {
+    throw cRuntimeError("OMNeTEnergyAwareStochasticForwardingPolicy: handleMessage() should never be called!");
+}
 
-    } /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END

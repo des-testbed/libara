@@ -5,34 +5,27 @@
 #ifndef OMNET_ENERGY_AWARE_STOCHASTIC_FORWARDING_POLICY_H_
 #define OMNET_ENERGY_AWARE_STOCHASTIC_FORWARDING_POLICY_H_
 
-#include <numeric>
-#include <omnetpp.h>
-#include <csimplemodule.h>
-
-#include "RoutingTable.h"
-#include "ForwardingPolicy.h"
+#include "OMNeTARAMacros.h"
 #include "EnergyAwareStochasticForwardingPolicy.h"
 
-namespace ARA {
-    namespace omnetpp {
-           /**
-            * The class provides a energy aware stochastic forwarding policy for class ARA. The
-            * class overwrites the getRandomNumber() method of the base class. It uses a
-            * pseudo-random number generator provided by OMNeT++.
-            */
-           class OMNeTEnergyAwareStochasticForwardingPolicy : public cSimpleModule, public EnergyAwareStochasticForwardingPolicy {
-              public:
-                 OMNeTEnergyAwareStochasticForwardingPolicy(){};
-                 ~OMNeTEnergyAwareStochasticForwardingPolicy(){};
-              protected:
-                 /// The method returns a random number wich uses OMNeT++ pseudo random number generators
-                 float getRandomNumber();
+OMNETARA_NAMESPACE_BEGIN
 
-                 virtual void initialize();
-                 virtual void handleMessage(cMessage *msg);
-           };
+/**
+* The class provides a energy aware stochastic forwarding policy for class ARA. The
+* class overwrites the getRandomNumber() method of the base class. It uses a
+* pseudo-random number generator provided by OMNeT++.
+*/
+class OMNeTEnergyAwareStochasticForwardingPolicy : public cSimpleModule, public EnergyAwareStochasticForwardingPolicy {
+    protected:
+        /**
+        *  The method returns a random number which uses OMNeT++ pseudo random number generators
+        */
+        float getRandomNumber();
 
-    } /* namespace omnetpp */
-} /* namespace ARA */
+        virtual void initialize();
+        virtual void handleMessage(cMessage *msg);
+};
+
+OMNETARA_NAMESPACE_END
 
 #endif
