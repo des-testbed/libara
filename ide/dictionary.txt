@@ -33,3 +33,4 @@ unicast
 timestamp
 nullptr
 deactivated
+residual

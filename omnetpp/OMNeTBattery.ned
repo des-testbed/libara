@@ -3,8 +3,10 @@ package ara;
 
 import inet.battery.models.InetSimpleBattery;
 
-simple OMNeTBattery extends InetSimpleBattery {
+simple OMNeTBattery {
     parameters:
-	    @class(OMNeTBattery);
-        ConsumedVector = true;
+        double voltage @unit("V");
+        double nominal @unit("mAh");
+        double capacity @unit("mAh");
+        double publishTime @unit("s");
 }
