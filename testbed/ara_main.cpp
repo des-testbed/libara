@@ -1,6 +1,8 @@
 #include "testbed/CLibs.h"
 //#include "AbstractARAClient.h"
 
+#include "TestbedProxy.h"
+
 int main(int argc, char** argv) {
      /** read the configuration file */
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
