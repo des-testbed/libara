@@ -11,7 +11,7 @@ OMNETARA_NAMESPACE_BEGIN
 OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module) : OMNeTConfiguration(module) {
     energyDisseminationTimeout = module->par("helloMessageTimeout").longValue();
     OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
-    maximumBatteryLevel = battery->getNominalValue();
+    maximumBatteryLevel = battery->getCapacity();
 }
 
 unsigned int OMNeTEARAConfiguration::getEnergyDisseminationTimeout() const {

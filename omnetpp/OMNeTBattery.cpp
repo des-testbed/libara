@@ -10,38 +10,31 @@ OMNETARA_NAMESPACE_BEGIN
 
 Define_Module(OMNeTBattery);
 
+int OMNeTBattery::NO_ACTIVITY = -1;
+
 void OMNeTBattery::initialize(int stage) {
     if(stage == 0) {
         notificationBoard = NotificationBoardAccess().get();
+        checkCompatibilityToRadioState();
 
         voltageInVolts = par("voltage");
-        double nominalCapacityInMilliAmperePerHour = par("nominal");
-        nominalCapacityInMilliWattPerSecond = nominalCapacityInMilliAmperePerHour * 60 * 60 * voltageInVolts;
+        double capacityInMilliAmpereHours = par("capacity");
+        capacityInMilliWattSeconds = capacityInMilliAmpereHours * 60 * 60 * voltageInVolts;
+        residualCapacityInMilliWattSeconds = capacityInMilliWattSeconds;
 
-        double capacityInMilliAmperePerHour = par("capacity");
-        capacityInMilliWattPerSecond = capacityInMilliAmperePerHour * 60 * 60 * voltageInVolts;
-
-        residualCapacityInMilliWattPerSecond = capacityInMilliWattPerSecond;
-        lastPublishedCapacity = residualCapacityInMilliWattPerSecond;
-
-        publishTime = par("publishTime");
-        if (publishTime > 0) {
+        updateInterval = par("updateInterval");
+        if (updateInterval > 0) {
             lastUpdateTime = simTime();
             publishMessage = new cMessage("Update energy");
             publishMessage->setSchedulingPriority(2000);
-            scheduleAt(publishTime, publishMessage);
+            scheduleAt(updateInterval, publishMessage);
+        }
+        else {
+            EV << "Warning: Battery is disabled (updateInterval is <= 0)" << std::endl;
         }
 
-        /* TODO check if all parameters make sense
-        if (nominalCapmAh <= 0) {
-            error("Invalid nominal capacity value");
-        }*/
-
-        checkCompatibilityToRadioState();
-
         residualEnergyOutVector.setName("Residual Energy");
-        WATCH(residualCapacityInMilliWattPerSecond);
-        WATCH(lastPublishedCapacity);
+        WATCH(residualCapacityInMilliWattSeconds);
         updateBatteryIcon();
     }
 }
@@ -70,22 +63,15 @@ void OMNeTBattery::checkCompatibilityToRadioState() {
 
 int OMNeTBattery::registerDevice(cObject* device, int numberOfActvities) {
     checkIfDeviceHasBeenRegisteredBefore(device);
-    ASSERT(numberOfActvities > 0);
 
-    DeviceEntry* newDevice = new DeviceEntry();
+    DeviceEntry* newDevice = new DeviceEntry(numberOfActvities);
     newDevice->owner = device;
-    newDevice->numAccts = numberOfActvities;
-    newDevice->accts = new double[numberOfActvities];
-    newDevice->times = new simtime_t[numberOfActvities];
-
-    for (int i = 0; i < numberOfActvities; i++) {
-        newDevice->accts[i] = 0;
-        newDevice->times[i] = 0;
-    }
 
     EV<< "Registered new power consuming device"  << deviceEntryVector.size() << " with " << numberOfActvities << " activities" << endl;
     deviceEntryVector.push_back(newDevice);
-    return deviceEntryVector.size()-1;
+
+    int idOfRegisteredDevice = deviceEntryVector.size()-1
+    return idOfRegisteredDevice;
 }
 
 void OMNeTBattery::checkIfDeviceHasBeenRegisteredBefore(cObject* device) {
@@ -97,34 +83,28 @@ void OMNeTBattery::checkIfDeviceHasBeenRegisteredBefore(cObject* device) {
     }
 }
 
-void OMNeTBattery::registerWirelessDevice(int deviceID, double usageWhenIdle, double usageWhenReceiving, double usageWhenSending, double usageWhenSleeping) {
+void OMNeTBattery::registerWirelessDevice(int deviceID, double usageWhenIdleInMilliAmpere, double usageWhenReceivingInMilliAmpere, double usageWhenSendingInMilliAmpere, double usageWhenSleepingInMilliAmpere) {
     Enter_Method_Silent();
     checkIfWirelessDeviceHasBeenRegisteredBefore(deviceID);
 
-    DeviceEntry* newDevice = new DeviceEntry();
-    newDevice->numAccts = 4;
-    newDevice->accts = new double[4];
-    newDevice->times = new simtime_t[4];
-    newDevice->radioUsageCurrent[RadioState::IDLE] = usageWhenIdle;
-    newDevice->radioUsageCurrent[RadioState::RECV] = usageWhenReceiving;
-    newDevice->radioUsageCurrent[RadioState::TRANSMIT] = usageWhenSending;
-    newDevice->radioUsageCurrent[RadioState::SLEEP] = usageWhenSleeping;
-
-    for (int i = 0; i < 4; i++) {
-        newDevice->accts[i] = 0;
-        newDevice->times[i] = 0;
-    }
+    int nrofActivities = 4;
+    DeviceEntry* newDevice = new DeviceEntry(nrofActivities);
+    newDevice->radioUsageCurrent[RadioState::IDLE] = usageWhenIdleInMilliAmpere;
+    newDevice->radioUsageCurrent[RadioState::RECV] = usageWhenReceivingInMilliAmpere;
+    newDevice->radioUsageCurrent[RadioState::TRANSMIT] = usageWhenSendingInMilliAmpere;
+    newDevice->radioUsageCurrent[RadioState::SLEEP] = usageWhenSleepingInMilliAmpere;
 
     deviceEntryMap.insert(std::pair<int,DeviceEntry*>(deviceID, newDevice));
+
     if (hasAlreadySubscribedToRadioStateChanged == false) {
         notificationBoard->subscribe(this, NF_RADIOSTATE_CHANGED);
-        hasAlreadySubscribedToRadioStateChanged = false;
+        hasAlreadySubscribedToRadioStateChanged = true;
     }
 }
 
 void OMNeTBattery::checkIfWirelessDeviceHasBeenRegisteredBefore(int deviceID) {
     if (deviceEntryMap.find(deviceID) != deviceEntryMap.end()) {
-        error("Device with id %u has been already registered!", deviceID);
+        error("Wireless device with id %u has already been registered!", deviceID);
     }
 }
 
@@ -133,70 +113,69 @@ void OMNeTBattery::handleMessage(cMessage* message) {
         error("Can not handle any external messages");
     }
 
-    deductAndCheck();
-    scheduleAt(simTime() + publishTime, publishMessage);
+    updateResidualEnergy();
+    scheduleAt(simTime() + updateInterval, publishMessage);
 }
 
-void OMNeTBattery::deductAndCheck(){
-    if (residualCapacityInMilliWattPerSecond <= 0) {
+void OMNeTBattery::updateResidualEnergy(){
+    if (residualCapacityInMilliWattSeconds <= 0) {
         // The battery is already depleted and devices should have stopped sending drawMsg. However leftover messages in queue are caught
         return;
     }
 
     calculateConsumedEnergy();
-    publishEnergyInformation(residualCapacityInMilliWattPerSecond);
-
+    publishEnergyInformation(residualCapacityInMilliWattSeconds);
     updateBatteryIcon();
-    residualEnergyOutVector.record(residualCapacityInMilliWattPerSecond);
+    residualEnergyOutVector.record(residualCapacityInMilliWattSeconds);
 }
 
 void OMNeTBattery::calculateConsumedEnergy() {
-    SimTime now = simTime();
+    calculateConsumedEnergyOfStandardDevices();
+    calculateConsumedEnergyOfWirelessDevices();
 
-    /**
-     * If device[i] has never drawn current (e.g. because the device
-     * hasn't been used yet or only uses ENERGY) the currentActivity is
-     * still -1.  If the device is not drawing current at the moment,
-     * draw has been reset to 0, so energy is also 0.  (It might perhaps
-     * be wise to guard more carefully against fp issues later.)
-     */
-    for (unsigned int i = 0; i < deviceEntryVector.size(); i++) {
-        int currentActivity = deviceEntryVector[i]->currentActivity;
-        if (currentActivity > -1) {
-            double energy = deviceEntryVector[i]->draw * voltageInVolts * (now - lastUpdateTime).dbl();
-            if (energy > 0) {
-                deviceEntryVector[i]->accts[currentActivity] += energy;
-                deviceEntryVector[i]->times[currentActivity] += (now - lastUpdateTime);
-                residualCapacityInMilliWattPerSecond -= energy;
-            }
-        }
-    }
-
-    for (DeviceEntryMap::iterator it = deviceEntryMap.begin(); it!=deviceEntryMap.end(); it++) {
-        int currentActivity = it->second->currentActivity;
-        if (currentActivity > -1) {
-            double energy = it->second->draw * voltageInVolts * (now - lastUpdateTime).dbl();
-            if (energy > 0) {
-                it->second->accts[currentActivity] += energy;
-                it->second->times[currentActivity] += (now - lastUpdateTime);
-                residualCapacityInMilliWattPerSecond -= energy;
-            }
-        }
-    }
-
-    if (residualCapacityInMilliWattPerSecond <= 0.0 ) {
+    if (residualCapacityInMilliWattSeconds <= 0.0 ) {
         EV << "[BATTERY]: " << getParentModule()->getFullName() <<" 's battery exhausted" << "\n";
-        residualCapacityInMilliWattPerSecond = 0;
+        residualCapacityInMilliWattSeconds = 0;
     }
     else {
-        EV << "[BATTERY]: residual capacity = " << residualCapacityInMilliWattPerSecond << "\n";
+        EV << "[BATTERY]: residual capacity = " << residualCapacityInMilliWattSeconds << "\n";
     }
-    lastUpdateTime = now;
+
+    lastUpdateTime = simTime();
+}
+
+void OMNeTBattery::calculateConsumedEnergyOfStandardDevices() {
+    SimTime now = simTime();
+    for (unsigned int i = 0; i < deviceEntryVector.size(); i++) {
+        int currentActivity = deviceEntryVector[i]->currentActivity;
+        if (currentActivity != NO_ACTIVITY) {
+            double usedEnergy = deviceEntryVector[i]->currentEnergyDraw * voltageInVolts * (now - lastUpdateTime).dbl();
+            if (usedEnergy > 0) {
+                deviceEntryVector[i]->accts[currentActivity] += usedEnergy;
+                residualCapacityInMilliWattSeconds -= usedEnergy;
+            }
+        }
+    }
+}
+
+void OMNeTBattery::calculateConsumedEnergyOfWirelessDevices() {
+    SimTime now = simTime();
+    for (DeviceEntryMap::iterator it = deviceEntryMap.begin(); it!=deviceEntryMap.end(); it++) {
+        DeviceEntry* deviceEntry = it->second;
+        int currentActivity = deviceEntry->currentActivity;
+        if (currentActivity != NO_ACTIVITY) {
+            double usedEnergy = deviceEntry->currentEnergyDraw * voltageInVolts * (now - lastUpdateTime).dbl();
+            if (usedEnergy > 0) {
+                deviceEntry->accts[currentActivity] += usedEnergy;
+                residualCapacityInMilliWattSeconds -= usedEnergy;
+            }
+        }
+    }
 }
 
 void OMNeTBattery::updateBatteryIcon() {
     char buffer[64];
-    std::sprintf(buffer, "c: %.1f", residualCapacityInMilliWattPerSecond);
+    std::sprintf(buffer, "c: %.1f", residualCapacityInMilliWattSeconds);
 
     cDisplayString& displayString = getDisplayString();
     displayString.setTagArg("t", 0, buffer);
@@ -206,12 +185,10 @@ void OMNeTBattery::publishEnergyInformation(double publishedEnergyLevel) {
     Energy* energyInformation = new Energy(publishedEnergyLevel);
     notificationBoard->fireChangeNotification(NF_BATTERY_CHANGED, energyInformation);
     delete energyInformation;
-
-    lastPublishedCapacity = publishedEnergyLevel;
 }
 
-double OMNeTBattery::getNominalValue() {
-    return nominalCapacityInMilliWattPerSecond;
+double OMNeTBattery::getCapacity() {
+    return capacityInMilliWattSeconds;
 }
 
 void OMNeTBattery::receiveChangeNotification(int category, const cObject* notificationDetails) {
@@ -220,11 +197,12 @@ void OMNeTBattery::receiveChangeNotification(int category, const cObject* notifi
         const RadioState* radioState = check_and_cast<const RadioState*>(notificationDetails);
         DeviceEntryMap::iterator foundDeviceEntry = deviceEntryMap.find(radioState->getRadioId());
         if (foundDeviceEntry==deviceEntryMap.end()) {
+            // device has not been registered
             return;
         }
 
         DeviceEntry* deviceEntry = foundDeviceEntry->second;
-        if (radioState->getState() >= deviceEntry->numAccts) {
+        if (radioState->getState() >= deviceEntry->numberOfActivities) {
             error("Can not handle change in radio state (unkown state)");
         }
 
@@ -233,10 +211,10 @@ void OMNeTBattery::receiveChangeNotification(int category, const cObject* notifi
         EV << simTime() << " Wireless device " << radioState->getRadioId() << " drew current " << current << "mA, new state = " << radioState->getState() << std::endl;
 
         // update the residual capacity (finish previous current draw)
-        deductAndCheck();
+        updateResidualEnergy();
 
         // set the new current draw in the device vector
-        deviceEntry->draw = current;
+        deviceEntry->currentEnergyDraw = current;
         deviceEntry->currentActivity = radioState->getState();
     }
 }
@@ -251,15 +229,15 @@ void OMNeTBattery::draw(int deviceID, DrawAmount& amount, int activity) {
         EV << simTime() << " device " << deviceID << " drew current " << current << "mA, activity = " << activity << endl;
 
         // update the residual capacity (finish previous current draw)
-        deductAndCheck();
+        updateResidualEnergy();
 
         // set the new current draw in the device vector
-        deviceEntryVector[deviceID]->draw = current;
+        deviceEntryVector[deviceID]->currentEnergyDraw = current;
         deviceEntryVector[deviceID]->currentActivity = activity;
     }
     else if (amount.getType() == DrawAmount::ENERGY) {
         double energy = amount.getValue();
-        if (!(activity >= 0 && activity < deviceEntryVector[deviceID]->numAccts)) {
+        if (!(activity >= 0 && activity < deviceEntryVector[deviceID]->numberOfActivities)) {
             error("Invalid activity specified");
         }
 
@@ -267,10 +245,10 @@ void OMNeTBattery::draw(int deviceID, DrawAmount& amount, int activity) {
 
         // deduct a fixed energy cost
         deviceEntryVector[deviceID]->accts[activity] += energy;
-        residualCapacityInMilliWattPerSecond -= energy;
+        residualCapacityInMilliWattSeconds -= energy;
 
         // update the residual capacity (ongoing current draw)
-        deductAndCheck();
+        updateResidualEnergy();
     }
     else {
         error("Unknown power type!");
@@ -279,7 +257,7 @@ void OMNeTBattery::draw(int deviceID, DrawAmount& amount, int activity) {
 
 void OMNeTBattery::finish() {
     // do a final update of battery capacity
-    deductAndCheck();
+    updateResidualEnergy();
     deviceEntryMap.clear();
     deviceEntryVector.clear();
 }
