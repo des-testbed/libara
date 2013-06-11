@@ -1,3 +1,6 @@
+#ifndef CLIBS_H
+#define CLIBS_H
+
 extern "C" {
  #include <dessert.h>
  #include <unistd.h>
@@ -6,3 +9,5 @@ extern "C" {
  #include <uthash.h>
  #include <libcli.h>
  }
+
+#endif /* CLIBS_H */
