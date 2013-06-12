@@ -35,9 +35,8 @@ int main(int argc, char** argv) {
 
      _dessert_cb_results (*ToMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &PacketToMeshDispatcher;
      dessert_sysrxcb_add(ToMesh, 50);
-     dessert_msg_t *TestPacket;
+     dessert_msg_t *TestPacket = NULL;
      dessert_msg_new(&TestPacket);
-     dessert_syssend_msg(TestPacket);
 
 
      dessert_debug("applying configuration");
@@ -51,6 +50,10 @@ int main(int argc, char** argv) {
       * is called or the daemon is killed
       */
      dessert_run();
+
+     if (TestPacket != NULL) {
+        dessert_syssend_msg(TestPacket);
+     }
 
      return (0);
  }
