@@ -18,20 +18,15 @@ _dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, ui
 
 
 int main(int argc, char** argv) {
-     /// read the configuration file 
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
-
-     /** initializes dessert framework and sets up logging */
      if(dessert_init("ARAT", 0x00, DESSERT_OPT_NODAEMONIZE)!= DESSERT_OK) {
          cout << "dessert_init failed"<<endl;
      }
      else {
          cout << "dessert init succeded" << endl;
      }
-     /** enable logging to STDERR */
+
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); // enable compression, maybe this helps
-     /** initialize the command line interface */
-     //ara_init_cli();
      cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize tap interface");
      cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
 
@@ -45,7 +40,6 @@ int main(int argc, char** argv) {
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
      dessert_debug("configuration applied");
 
-     /** start up the command line interface. */
      dessert_cli_run();
      /**
       * starts up the dessert main loop and waits until dessert_exit()
@@ -56,6 +50,8 @@ int main(int argc, char** argv) {
      if (TestPacket != NULL) {
         dessert_syssend_msg(TestPacket);
      }
+
+     dessert_exit();
 
      return (0);
  }
