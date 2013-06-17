@@ -13,10 +13,12 @@ _dessert_cb_results PacketToMeshDispatcher (dessert_msg_t* ReceivedMessage, uint
     else return DESSERT_MSG_NEEDNOSPARSE;
 }
 
-_dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t *ProcessingFlags, const dessert_meshif_t *MeshInterface, dessert_frameid_t id);
+_dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t *ProcessingFlags, dessert_meshif_t *MeshInterface, dessert_frameid_t id) {
+    return DESSERT_MSG_KEEP;
+}
 
 int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[], int argc){
-    dessert_msg_t *TestPacket = NULL;
+    dessert_msg_t *TestPacket;
     dessert_msg_new(&TestPacket);
     if(TestPacket != NULL) {
         dessert_syssend_msg(TestPacket);
@@ -44,7 +46,10 @@ int main(int argc, char** argv) {
      cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("testSendMesh"), testbed_cli_cmd_testsendmesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("send a test packet to mesh interface"));
 
      _dessert_cb_results (*ToMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &PacketToMeshDispatcher;
+     dessert_cb_result (*ToSys)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &PacketToSystemDispatcher;
      dessert_sysrxcb_add(ToMesh, 50);
+     dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 15);
+     dessert_meshrxcb_add(ToSys, 50);
 
      dessert_debug("applying configuration");
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
