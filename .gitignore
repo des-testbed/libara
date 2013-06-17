@@ -11,7 +11,7 @@ out/*
 src/ara-sim
 src/libARA.so
 omnetpp/ara-sim
-testbed/ara
+testbed/TestbedDaemon
 doc/doxygen/html
 include/inetmanet/*
 *_m.cpp

@@ -87,13 +87,13 @@ OMNETARA_EXECUTABLE_NAME = ara-sim
 OMNETARA_EXECUTABLE = $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME)
 
 # testbedARA files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-TESTBEDARA_MAIN = ara_main
+TESTBEDARA_MAIN = TestbedMain
 TESTBEDARA_SRC_MAIN = $(shell find $(TESTBEDARA_SRC_FOLDER)/ -type f -name '*$(TESTBEDARA_MAIN).cpp')
 TESTBEDARA_SRC_MAIN_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(TESTBEDARA_SRC_MAIN)))
 TESTBEDARA_SRC = $(shell find $(TESTBEDARA_SRC_FOLDER)/ -type f -name '*.cpp' -a -not -name '$(TESTBEDARA_MAIN).cpp')
 TESTBEDARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(TESTBEDARA_SRC)))
 TESTBEDARA_DEPENDENCIES = $(TESTBEDARA_O:.o=.d)
-TESTBEDARA_EXECUTABLE_NAME = ara
+TESTBEDARA_EXECUTABLE_NAME = TestbedDaemon
 TESTBEDARA_EXECUTABLE = $(OUTPUT_DIR)/$(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME)
 TESTBEDARA_LINKFLAGS = $(LINKFLAGS) -ldessert -lcli -lstdc++ -lm -lpthread
 
