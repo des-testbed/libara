@@ -21,7 +21,7 @@ int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[
     dessert_msg_t *TestPacket;
     dessert_msg_new(&TestPacket);
     if(TestPacket != NULL) {
-        dessert_syssend_msg(TestPacket);
+        dessert_meshsend(TestPacket, NULL);
         return 0;
     }
     else {
