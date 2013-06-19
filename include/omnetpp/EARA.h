@@ -9,7 +9,6 @@
 
 #include "AbstractEARAClient.h"
 #include "AbstractOMNeTARAClient.h"
-#include "Energy.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -26,16 +25,12 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
         static simsignal_t ROUTE_FAILURE_NO_HOP;
         static simsignal_t NEW_ROUTE_DISCOVERY;
         static simsignal_t ROUTE_FAILURE_NEXT_HOP_IS_SENDER;
-        static simsignal_t DROP_PACKET_BECAUSE_ENERGY_DEPLETED;
 
     protected:
         virtual int numInitStages() const;
         virtual void initialize(int stage);
-        virtual void finish();
 
         virtual void receivePacket(Packet* packet, NetworkInterface* interface);
-
-        virtual void handleMessage(cMessage* message);
 
         virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
 
@@ -45,24 +40,14 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
 
         virtual void startNewRouteDiscovery(Packet* packet);
 
-        virtual void receiveChangeNotification(int category, const cObject* details);
-
         virtual bool handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface);
+
+        virtual void takeAndSend(cMessage* message, cGate* gate, double sendDelay);
 
         virtual unsigned char getCurrentEnergyLevel();
 
-        virtual void takeAndSend(cMessage* message, cGate* gate, double sendDelay);
-    private:
-        void handleBatteryStatusChange(Energy* energyInformation);
-
     private:
         int nrOfDetectedLoops = 0;
-        bool hasEnoughBattery = true;
-        double maximumBatteryLevel;
-        int currentEnergyLevel;
-
-        cOutVector energyLevelOutVector;
-        SimTime nodeEnergyDepletionTimestamp = -1;
 };
 
 OMNETARA_NAMESPACE_END

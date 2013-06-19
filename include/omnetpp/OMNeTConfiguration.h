@@ -31,6 +31,8 @@ class OMNeTConfiguration : public virtual Configuration {
         virtual unsigned int getPANTIntervalInMilliSeconds();
         virtual bool isPreviousHopFeatureActivated();
 
+        double getMaximumBatteryLevel();
+
         virtual RoutingTable* getRoutingTable();
         Logger* getLogger();
 
@@ -51,6 +53,7 @@ class OMNeTConfiguration : public virtual Configuration {
         unsigned int maxNeighborInactivityTimeInMilliSeconds;
         unsigned int pantIntervalInMilliSeconds;
         bool previousHopFeatureIsActivated;
+        double maximumBatteryLevel;
 
         cModule* simpleModule;
         OMNeTLogger* logger;

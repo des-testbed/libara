@@ -4,6 +4,7 @@
 
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/OMNeTGate.h"
+#include "omnetpp/OMNeTBattery.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
@@ -30,6 +31,9 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     maxNeighborInactivityTimeInMilliSeconds = module->par("maxNeighborInactivityTime").longValue();
     pantIntervalInMilliSeconds = module->par("pantInterval").longValue();
     previousHopFeatureIsActivated  = module->par("previousHopFeature").boolValue();
+
+    OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
+    maximumBatteryLevel = battery->getCapacity();
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
     setLogLevel(module->par("logLevel").stringValue());
@@ -121,4 +125,8 @@ cModule* OMNeTConfiguration::getHostModule() {
 
 bool OMNeTConfiguration::isPreviousHopFeatureActivated() {
     return previousHopFeatureIsActivated;
+}
+
+double OMNeTConfiguration::getMaximumBatteryLevel() {
+    return maximumBatteryLevel;
 }

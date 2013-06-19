@@ -21,6 +21,7 @@ OMNETARA_NAMESPACE_BEGIN
 simsignal_t AbstractOMNeTARAClient::PACKET_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t AbstractOMNeTARAClient::PACKET_NOT_DELIVERED_SIGNAL = SIMSIGNAL_NULL;
 simsignal_t AbstractOMNeTARAClient::ROUTE_FAILURE_SIGNAL = SIMSIGNAL_NULL;
+simsignal_t AbstractOMNeTARAClient::DROP_PACKET_BECAUSE_ENERGY_DEPLETED = SIMSIGNAL_NULL;
 
 AbstractOMNeTARAClient::~AbstractOMNeTARAClient() {
     DELETE_IF_NOT_NULL(routingTablePersistor);
@@ -39,7 +40,9 @@ void AbstractOMNeTARAClient::initialize(int stage) {
         PACKET_DELIVERED_SIGNAL = registerSignal("packetDelivered");
         PACKET_NOT_DELIVERED_SIGNAL = registerSignal("packetUnDeliverable");
         ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
+        DROP_PACKET_BECAUSE_ENERGY_DEPLETED =  registerSignal("dropPacketBecauseEnergyDepleted");
 
+        WATCH(currentEnergyLevel);
         WATCH(nrOfDeliverablePackets);
         WATCH(nrOfNotDeliverablePackets);
 
@@ -47,6 +50,8 @@ void AbstractOMNeTARAClient::initialize(int stage) {
             mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
         }
 
+        currentEnergyLevel =  255;
+        energyLevelOutVector.setName("energyLevel");
         routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
         new RoutingTableWatcher(routingTable);
     }
@@ -108,11 +113,19 @@ void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* cl
 }
 
 void AbstractOMNeTARAClient::handleMessage(cMessage* message) {
-    if(isFromUpperLayer(message)) {
-        handleUpperLayerMessage(message);
+    energyLevelOutVector.record(currentEnergyLevel);
+
+    if (hasEnoughBattery) {
+        if(isFromUpperLayer(message)) {
+            handleUpperLayerMessage(message);
+        }
+        else {
+            handleARAMessage(message);
+        }
     }
     else {
-        handleARAMessage(message);
+        emit(DROP_PACKET_BECAUSE_ENERGY_DEPLETED, 1);
+        delete message;
     }
 }
 
@@ -212,6 +225,22 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
             }
         }
     }
+    else if(category == NF_BATTERY_CHANGED) {
+        handleBatteryStatusChange(check_and_cast<Energy*>(details));
+    }
+}
+
+void AbstractOMNeTARAClient::handleBatteryStatusChange(Energy* energyInformation) {
+    currentEnergyLevel = (energyInformation->GetEnergy() / maximumBatteryLevel) * 255;
+
+    if (currentEnergyLevel <= 0) {
+       hasEnoughBattery = false;
+       nodeEnergyDepletionTimestamp = simTime();
+
+       // change the node color
+       cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
+       displayString.setTagArg("i", 1, "#FF0000");
+    }
 }
 
 IInterfaceTable* AbstractOMNeTARAClient::getInterfaceTable() {
@@ -273,6 +302,10 @@ void AbstractOMNeTARAClient::finish() {
     recordScalar("nrOfSentControlBits", nrOfSentControlBits);
     recordScalar("nrOfControlPackets", nrOfControlPackets);
     recordScalar("nrOfDataPackets", nrOfDataPackets);
+
+    if (nodeEnergyDepletionTimestamp > 0) {
+        recordScalar("nodeEnergyDepletionTimestamp", nodeEnergyDepletionTimestamp);
+    }
 }
 
 OMNETARA_NAMESPACE_END
