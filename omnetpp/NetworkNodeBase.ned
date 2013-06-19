@@ -18,6 +18,7 @@ package ara;
 import ara.traffic.TrafficGenerator;
 import ara.traffic.TrafficSink;
 import ara.traffic.TrafficMultiplexer;
+import ara.OMNeTBattery;
 
 import inet.base.NotificationBoard;
 import inet.networklayer.common.InterfaceTable;
@@ -83,6 +84,11 @@ module NetworkNodeBase {
         mobility: <mobilityType> like IMobility if mobilityType != "" {
             parameters:
                 @display("p=49,230");
+        }
+
+		battery: OMNeTBattery {
+            parameters:
+                @display("p=49,307;i=block/plug");
         }
 
     connections allowunconnected:
