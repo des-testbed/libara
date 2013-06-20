@@ -14,7 +14,17 @@ _dessert_cb_results PacketToMeshDispatcher (dessert_msg_t* ReceivedMessage, uint
 }
 
 _dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t *ProcessingFlags, dessert_meshif_t *MeshInterface, dessert_frameid_t id) {
-    return DESSERT_MSG_KEEP;
+    struct ether_header *eth;
+    size_t eth_len;
+
+    if (ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_DST ||
+        ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_BROADCAST ||
+        ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_MULTICAST ) {
+            eth_len = dessert_msg_ethdecap(ReceivedMessage, &eth);
+            dessert_syssend(eth, eth_len);
+            free(eth);
+  }
+  return DESSERT_MSG_KEEP;
 }
 
 int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[], int argc){
