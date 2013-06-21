@@ -7,9 +7,9 @@ typedef u_char ara_address_t[ETHER_ADDR_LEN];
 using namespace std;
 
 _dessert_cb_results PacketToMeshDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t* ProcessingFlags, dessert_sysif_t* SystemInterface, dessert_frameid_t id) {
-    cout << "Received packet from sys, broadcasting via mesh" <<endl;
+    cout << "PacketToMeshDispatcher: Received packet from sys, broadcasting via mesh" << endl;
 
-    if(dessert_meshsend(ReceivedMessage,NULL)==DESSERT_OK){
+    if(dessert_meshsend(ReceivedMessage,NULL) == DESSERT_OK){
         return DESSERT_MSG_DROP;
     }
 
@@ -17,6 +17,9 @@ _dessert_cb_results PacketToMeshDispatcher (dessert_msg_t* ReceivedMessage, uint
 }
 
 _dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t *ProcessingFlags, dessert_meshif_t *MeshInterface, dessert_frameid_t id) {
+    /// DEBUG:
+    cout << "PacketToSystemDispatcher: Sending packet " << endl;
+
     struct ether_header *eth;
     size_t eth_len;
 
@@ -33,6 +36,9 @@ _dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, ui
 
 
 int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[], int argc){
+    /// DEBUG:
+    cout << "preparte to send packet " << endl;
+
     /// set the address to 
     ///ara_address_t address = "00:21:9b:79:22:02";
     ara_address_t address;
@@ -72,7 +78,9 @@ int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[
     dessert_msg_dummy_payload(testPacket, 128);
 
     if(testPacket != nullptr) {
+        cout << "send packet " << endl;
         dessert_meshsend(testPacket, NULL);
+        cout << "packet sent" << endl;
         dessert_msg_destroy(testPacket);
         return 0;
     } 
@@ -95,7 +103,9 @@ int main(int argc, char** argv) {
      cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("mesh"), dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize mesh interface"));
      cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("testSendMesh"), testbed_cli_cmd_testsendmesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("send a test packet to mesh interface"));
 
+     /// ara_tun2ara
      _dessert_cb_results (*ToMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &PacketToMeshDispatcher;
+     /// ara_ara2tun
      dessert_cb_result (*ToSys)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &PacketToSystemDispatcher;
 
      dessert_sysrxcb_add(ToMesh, 50);
