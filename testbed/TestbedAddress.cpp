@@ -2,21 +2,12 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-
-
-TestbedAddress::TestbedAddress(){
-
-}
-
 TestbedAddress::TestbedAddress(int byte1, int byte2, int byte3, int byte4, int byte5, int byte6){
    if(snprintf((char*)this->address, ETHER_ADDR_LEN, "%d:%d:%d:%d:%d:%d", byte1, byte2, byte3, byte4, byte5, byte6) < 0){
        // an error occurred
    }
 }
 
-TestbedAddress::~TestbedAddress(){
-
-}
 
 /// check why this should be null-terminated
 std::string TestbedAddress::toString() const{
