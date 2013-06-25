@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "CppUTest/TestHarness.h"
 #include "testbed/CLibs.h"
 

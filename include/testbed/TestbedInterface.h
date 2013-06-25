@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef _TESTBED_INTERFACE_H_
 #define _TESTBED_INTERFACE_H_
 

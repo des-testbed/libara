@@ -1,3 +1,6 @@
+/*
+ * $FU-Copyright$
+ */
 
 #ifndef CLIBS_H
 #include "CLibs.h"

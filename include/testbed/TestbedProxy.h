@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef _TESTBED_PROXY_H_
 #define _TESTBED_PROXY_H_
 

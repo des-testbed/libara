@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef _TESTBED_ADDRESS_H_
 #define _TESTBED_ADDRESS_H_
 
