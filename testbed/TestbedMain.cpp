@@ -37,7 +37,7 @@ _dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, ui
 
 int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[], int argc){
     /// DEBUG:
-    cout << "preparte to send packet " << endl;
+    cout << "prepare to send packet " << endl;
 
     /// set the address to 
     ///ara_address_t address = "00:21:9b:79:22:02";
@@ -46,7 +46,7 @@ int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[
     dessert_msg_t *testPacket = nullptr;
     /// define a new ethernet frame
     struct ether_header* ethernetFrame = nullptr;
-    /// define a new extensionRecordension record
+    /// define a new extension record
     dessert_ext_t* extensionRecord = nullptr;
     /// generate a new packet 
     dessert_msg_new(&testPacket);
