@@ -1,39 +1,10 @@
 #include <iostream>
 #include "CLibs.h"
-#include "TestbedPacketDispatcher.h"
+#include "PacketDispatcher.h"
 
 typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
 using namespace std;
-
-_dessert_cb_results PacketToMeshDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t* ProcessingFlags, dessert_sysif_t* SystemInterface, dessert_frameid_t id) {
-    cout << "PacketToMeshDispatcher: Received packet from sys, broadcasting via mesh" << endl;
-
-    if(dessert_meshsend(ReceivedMessage,NULL) == DESSERT_OK){
-        return DESSERT_MSG_DROP;
-    }
-
-    return DESSERT_MSG_NEEDNOSPARSE;
-}
-
-_dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t *ProcessingFlags, dessert_meshif_t *MeshInterface, dessert_frameid_t id) {
-    /// DEBUG:
-    cout << "PacketToSystemDispatcher: Sending packet " << endl;
-
-    struct ether_header *eth;
-    size_t eth_len;
-
-    if (ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_DST ||
-        ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_BROADCAST ||
-        ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_MULTICAST ) {
-            eth_len = dessert_msg_ethdecap(ReceivedMessage, &eth);
-            dessert_syssend(eth, eth_len);
-            free(eth);
-  }
-
-  return DESSERT_MSG_KEEP;
-}
-
 
 int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[], int argc){
     /// DEBUG:
