@@ -18,14 +18,4 @@ typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
 TESTBED_NAMESPACE_END
 
-/*
-#include "omnetpp/OMNeTAddress.h"
-
-class OMNeTAddress;
-
-OMNETARA_NAMESPACE_BEGIN
-typedef std::shared_ptr<OMNeTAddress> OMNeTAddressPtr;
-OMNETARA_NAMESPACE_END
-*/
-
 #endif 
