@@ -17,12 +17,16 @@ TEST_GROUP(TestbedAddressTest) {};
 
 TEST(TestbedAddressTest, testToString) {
     TestbedAddress address(1,2,3,4,5,6);
-    std::cout << "Address 1:2:3:4:5:6 "<< address.toString() << std::endl;
+    std::string expected = "1:2:3:4:5:6";
+    STRCMP_EQUAL(expected.c_str(),address.toString().c_str());
 }
 
 TEST(TestbedAddressTest, testGetHashValue) {
-    TestbedAddress address(1,2,3,4,5,6);
-    std::cout << "Hash of address "<< address.getHashValue() << std::endl;
+    int leastSignificantBit = 6;
+    int nextLeastSignificantBit = 5;
+    TestbedAddress address(1,2,3,4, nextLeastSignificantBit,leastSignificantBit);
+    int hashValueExpected = leastSignificantBit*256 + nextLeastSignificantBit;
+    LONGS_EQUAL(hashValueExpected, address.getHashValue());
 }
 
 TEST(TestbedAddressTest, testEquals) {
