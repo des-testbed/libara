@@ -3,8 +3,8 @@
 TESTBED_NAMESPACE_BEGIN
 
 TestbedAddress::TestbedAddress(int byte1, int byte2, int byte3, int byte4, int byte5, int byte6){
-   if(snprintf((char*)this->address, ETHER_ADDR_LEN, "%d:%d:%d:%d:%d:%d", byte1, byte2, byte3, byte4, byte5, byte6) < 0){
-       dessert_debug("TestbedAddress initialization failure for address %d:%d:%d:%d:%d:%d", byte1, byte2, byte3, byte4, byte5, byte6);
+   if(snprintf((char*)this->address, ETHER_ADDR_LEN, "%X:%X:%X:%X:%X:%X", byte1, byte2, byte3, byte4, byte5, byte6) < 0){
+       dessert_debug("TestbedAddress initialization failure for address %X:%X:%X:%X:%X:%X", byte1, byte2, byte3, byte4, byte5, byte6);
    }
 }
 

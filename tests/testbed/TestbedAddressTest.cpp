@@ -10,6 +10,7 @@ TESTBED_NAMESPACE_BEGIN
 
 TEST_GROUP(TestbedAddressTest) {};
 
+
 TEST(TestbedAddressTest, testToString) {
     TestbedAddress address(1,2,3,4,5,6);
     std::cout << "Address 1:2:3:4:5:6 "<< address.toString() << std::endl;
