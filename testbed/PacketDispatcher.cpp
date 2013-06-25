@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "PacketDispatcher.h"
 
 _dessert_cb_results PacketToMeshDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t* ProcessingFlags, dessert_sysif_t* SystemInterface, dessert_frameid_t id) {

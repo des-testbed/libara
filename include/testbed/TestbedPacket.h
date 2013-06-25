@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef _TESTBED_PACKET_H_
 #define _TESTBED_PACKET_H_
 

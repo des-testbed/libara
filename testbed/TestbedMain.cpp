@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include <iostream>
 #include "CLibs.h"
 #include "PacketDispatcher.h"

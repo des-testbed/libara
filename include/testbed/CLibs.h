@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef CLIBS_H
 #define CLIBS_H
 

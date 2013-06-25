@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #include "TestbedAddress.h" 
 
 TESTBED_NAMESPACE_BEGIN

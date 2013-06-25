@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef _SYSTEM_HANDLER_H_
 #define _SYSTEM_HANDLER_H_
 

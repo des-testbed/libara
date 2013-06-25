@@ -1,3 +1,7 @@
+/*
+ * $FU-Copyright$
+ */
+
 #ifndef _MESH_HANDLER_H_
 #define _MESH_HANDLER_H_
 
