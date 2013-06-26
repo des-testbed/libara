@@ -12,37 +12,44 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-TEST_GROUP(TestbedAddressTest) {
-    u_char macAddress1[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
-    u_char macAddress2[ETHER_ADDR_LEN] = {15,8,2,42,17,69};
-    u_char macAddress3[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
-};
+TEST_GROUP(TestbedAddressTest) {};
 
-
-TEST(TestbedAddressTest, testToString) {
-    TestbedAddress address(macAddress1);
+TEST(TestbedAddressTest, toString) {
+    u_char macAddress[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
+    TestbedAddress address(macAddress);
     std::string expected = "1:2:3:4:5:6";
+
     STRCMP_EQUAL(expected.c_str(),address.toString().c_str());
 }
 
-TEST(TestbedAddressTest, testGetHashValue) {
-    int leastSignificantBit = macAddress1[5];
-    int nextLeastSignificantBit = macAddress1[4];
-    TestbedAddress address(macAddress1);
+TEST(TestbedAddressTest, getHashValue) {
+    u_char macAddress[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
+    int leastSignificantBit = macAddress[5];
+    int nextLeastSignificantBit = macAddress[4];
+    TestbedAddress address(macAddress);
     int hashValueExpected = leastSignificantBit*256 + nextLeastSignificantBit;
+
     LONGS_EQUAL(hashValueExpected, address.getHashValue());
 }
 
-TEST(TestbedAddressTest, testEquals) {
-    TestbedAddress address1(macAddress1);
-    TestbedAddress address2(macAddress3);
-    CHECK_TRUE(address1==address2);
+TEST(TestbedAddressTest, equals) {
+    u_char macAddress[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
+    u_char sameMacAddress[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
+
+    TestbedAddress address(macAddress);
+    TestbedAddress sameAddress(sameMacAddress);
+
+    CHECK_TRUE(address == sameAddress);
 }
 
-TEST(TestbedAddressTest, testNotEquals) {
-    TestbedAddress address1(macAddress1);
-    TestbedAddress address2(macAddress2);
-    CHECK_FALSE(address1==address2);
+TEST(TestbedAddressTest, notEquals) {
+    u_char macAddress[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
+    u_char otherMacAddress[ETHER_ADDR_LEN] = {15,8,2,42,17,69};
+
+    TestbedAddress address(macAddress);
+    TestbedAddress otherAddress(otherMacAddress);
+
+    CHECK_FALSE(address == otherAddress);
 }
 
 TESTBED_NAMESPACE_END
