@@ -5,40 +5,39 @@
 #ifndef ENERGY_AWARE_STOCHASTIC_FORWARDING_POLICY_H_
 #define ENERGY_AWARE_STOCHASTIC_FORWARDING_POLICY_H_
 
-#include <deque>
-#include <cmath>
-#include <ctime>
-#include <numeric>
-#include <stdlib.h>
-
-#include "Packet.h"
-#include "NextHop.h"
-#include "RoutingTable.h"
-#include "RoutingTableEntry.h"
+#include "ARAMacros.h"
 #include "StochasticForwardingPolicy.h"
+#include "NextHop.h"
+#include "Packet.h"
+#include "RoutingTable.h"
 
-namespace ARA {
-    /**
-	 * The class provides the forwarding policy for the energy aware ant routing 
-	 * (EARA).
-	 *
-	 */
-    class EnergyAwareStochasticForwardingPolicy : public StochasticForwardingPolicy {
-        public:
-            EnergyAwareStochasticForwardingPolicy(float pAlpha = 1.0, float pBeta = 2.0);
-            virtual ~EnergyAwareStochasticForwardingPolicy(){};
-            virtual NextHop* getNextHop(const Packet* packet, RoutingTable* routingTable);
+ARA_NAMESPACE_BEGIN
 
-            void setPheromoneWeight(float alpha);
-            void setEnergyWeight(float beta);
+/**
+ * The class provides the forwarding policy for the energy aware ant routing
+ * (EARA).
+ */
+class EnergyAwareStochasticForwardingPolicy : public StochasticForwardingPolicy {
+    public:
+        EnergyAwareStochasticForwardingPolicy(float pheromoneWeight = 1.0, float energyWeight = 2.0);
+        virtual ~EnergyAwareStochasticForwardingPolicy(){};
 
-        protected:
-            /// the weight of the pheromone variable in the transmission probability
-            float alpha;
-            /// the weight of the energy variable in the transmission probability
-            float beta;
-    };
+        virtual NextHop* getNextHop(const Packet* packet, RoutingTable* routingTable);
 
-} /* namespace ARA */
+        void setPheromoneWeight(float alpha);
+        void setEnergyWeight(float beta);
+
+    private:
+        int getRandomNodeIndex(float cumulativeSum[]);
+
+    protected:
+        /** the weight of the pheromone variable in the transmission probability **/
+        float alpha;
+
+        /** the weight of the energy variable in the transmission probability **/
+        float beta;
+};
+
+ARA_NAMESPACE_END
 
 #endif

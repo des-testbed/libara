@@ -38,9 +38,4 @@ size_t OMNeTAddress::getHashValue() const {
     return firstByte * 256 + secondByte;  // integer value between 0 and 65535
 }
 
-Address* OMNeTAddress::clone() {
-    OMNeTAddress* clone = new OMNeTAddress(getInt());
-    return clone;
-}
-
 OMNETARA_NAMESPACE_END

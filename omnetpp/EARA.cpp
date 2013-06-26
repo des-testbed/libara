@@ -17,7 +17,6 @@ simsignal_t EARA::DROP_PACKET_WITH_ZERO_TTL = SIMSIGNAL_NULL;
 simsignal_t EARA::ROUTE_FAILURE_NO_HOP = SIMSIGNAL_NULL;
 simsignal_t EARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
 simsignal_t EARA::ROUTE_FAILURE_NEXT_HOP_IS_SENDER = SIMSIGNAL_NULL;
-simsignal_t EARA::DROP_PACKET_BECAUSE_ENERGY_DEPLETED = SIMSIGNAL_NULL;
 
 EARA::~EARA() {
     /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
@@ -46,28 +45,12 @@ void EARA::initialize(int stage) {
 
         notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
         maximumBatteryLevel = config.getMaximumBatteryLevel();
-        currentEnergyLevel =  255;
-        WATCH(currentEnergyLevel);
         WATCH(nrOfDetectedLoops);
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
         DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
         ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
         ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
-        DROP_PACKET_BECAUSE_ENERGY_DEPLETED =  registerSignal("dropPacketBecauseEnergyDepleted");
-        energyLevelOutVector.setName("energyLevel");
-    }
-}
-
-void EARA::handleMessage(cMessage* message) {
-    energyLevelOutVector.record(getCurrentEnergyLevel());
-
-    if (hasEnoughBattery) {
-        AbstractOMNeTARAClient::handleMessage(message);
-    }
-    else {
-        emit(DROP_PACKET_BECAUSE_ENERGY_DEPLETED, 1);
-        delete message;
     }
 }
 
@@ -111,40 +94,6 @@ void EARA::startNewRouteDiscovery(Packet* packet) {
     AbstractEARAClient::startNewRouteDiscovery(packet);
 }
 
-void EARA::receiveChangeNotification(int category, const cObject* details) {
-    if(category == NF_BATTERY_CHANGED) {
-        handleBatteryStatusChange(check_and_cast<Energy*>(details));
-    }
-    else {
-        AbstractOMNeTARAClient::receiveChangeNotification(category, details);
-    }
-}
-
-void EARA::handleBatteryStatusChange(Energy* energyInformation) {
-    currentEnergyLevel = (energyInformation->GetEnergy() / maximumBatteryLevel) * 255;
-
-    if (currentEnergyLevel <= 0) {
-       hasEnoughBattery = false;
-       nodeEnergyDepletionTimestamp = simTime();
-
-       // change the node color
-       cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
-       displayString.setTagArg("i", 1, "#FF0000");
-    }
-}
-
-unsigned char EARA::getCurrentEnergyLevel() {
-    return currentEnergyLevel;
-}
-
-void EARA::finish() {
-    if (nodeEnergyDepletionTimestamp > 0) {
-        recordScalar("nodeEnergyDepletionTimestamp", nodeEnergyDepletionTimestamp);
-    }
-
-    AbstractOMNeTARAClient::finish();
-}
-
 void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
     OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(message);
     if (packet->isDataPacket()) {
@@ -155,6 +104,10 @@ void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
     }
 
     AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);
+}
+
+unsigned char EARA::getCurrentEnergyLevel() {
+    return currentEnergyLevel;
 }
 
 OMNETARA_NAMESPACE_END

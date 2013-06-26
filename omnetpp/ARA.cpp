@@ -40,6 +40,7 @@ void ARA::initialize(int stage) {
         PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
         AbstractARAClient::initialize(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
+        maximumBatteryLevel = config.getMaximumBatteryLevel();
 
         WATCH(nrOfDetectedLoops);
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");

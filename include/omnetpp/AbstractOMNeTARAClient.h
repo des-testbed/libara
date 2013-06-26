@@ -18,6 +18,7 @@
 #include "NotificationBoard.h"
 #include "IInterfaceTable.h"
 #include "MobilityBase.h"
+#include "Energy.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -29,6 +30,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         static simsignal_t PACKET_DELIVERED_SIGNAL;
         static simsignal_t PACKET_NOT_DELIVERED_SIGNAL;
         static simsignal_t ROUTE_FAILURE_SIGNAL;
+        static simsignal_t DROP_PACKET_BECAUSE_ENERGY_DEPLETED;
 
         IInterfaceTable* getInterfaceTable();
 
@@ -126,10 +128,14 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
     private:
         void setPositionFromParameters();
         int getNewNodePosition(const char* positionParameter, int maxPosition, int minPosition);
+        void handleBatteryStatusChange(Energy* energyInformation);
+
 
         // some statistics collection
         int nrOfDeliverablePackets = 0;
         int nrOfNotDeliverablePackets = 0;
+        SimTime nodeEnergyDepletionTimestamp = -1;
+        cOutVector energyLevelOutVector;
 
         MobilityDataPersistor* mobilityDataPersistor = nullptr;
         RoutingTableDataPersistor* routingTablePersistor = nullptr;
@@ -139,6 +145,11 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         IInterfaceTable* interfaceTable;
         MobilityBase* mobility;
         ARANetworkConfigurator* networkConfig;
+
+        // node battery
+        double maximumBatteryLevel;
+        bool hasEnoughBattery = true;
+        int currentEnergyLevel;
 
     friend class OMNeTGate;
 };

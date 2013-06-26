@@ -17,7 +17,6 @@ package ara;
 
 import ara.NetworkNodeBase;
 import ara.EARANetworkLayer;
-import ara.OMNeTBattery;
 
 module EnergyAwareNetworkNode extends NetworkNodeBase
 {
@@ -30,11 +29,6 @@ module EnergyAwareNetworkNode extends NetworkNodeBase
             parameters:
                 nrOfNetworkInterfaces = nrOfNetworkInterfaces;
                 @display("i=ara;p=239,185");
-        }
-
-        battery: OMNeTBattery {
-            parameters:
-                @display("p=49,307;i=block/plug");
         }
 
     connections allowunconnected:

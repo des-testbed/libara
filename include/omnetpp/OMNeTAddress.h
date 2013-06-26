@@ -49,7 +49,6 @@ public:
     bool equals(const IPv4Address& ipAddress) const {return IPv4Address::equals(ipAddress);}
 
     size_t getHashValue() const;
-    Address* clone();
 };
 
 OMNETARA_NAMESPACE_END
