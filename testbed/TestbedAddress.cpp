@@ -6,14 +6,14 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-TestbedAddress::TestbedAddress(int byte1, int byte2, int byte3, int byte4, int byte5, int byte6){
-   if(snprintf((char*)this->address, ETHER_ADDR_LEN, "%X:%X:%X:%X:%X:%X", byte1, byte2, byte3, byte4, byte5, byte6) < 0){
-       dessert_debug("TestbedAddress initialization failure for address %X:%X:%X:%X:%X:%X", byte1, byte2, byte3, byte4, byte5, byte6);
-   }
+TestbedAddress::TestbedAddress(u_char* address){
+   memcpy(this->address, address, 6);
 }
 
 std::string TestbedAddress::toString() const{
-    return std::string((const char*)address);
+    char buffer[12];
+    snprintf(buffer, ETHER_ADDR_LEN+6, "%X:%X:%X:%X:%X:%X", address[0], address[1], address[2], address[3], address[4], address[5]);
+    return buffer;
 }
 
 bool TestbedAddress::equals(const Address* otherAddress) const{
@@ -22,10 +22,8 @@ bool TestbedAddress::equals(const Address* otherAddress) const{
         return false;
     }
 
-    for(int i=0; i<ETHER_ADDR_LEN; i++)
-    {
-        if(this->address[i] != otherTestbedAddress->address[i])
-        {
+    for(int i=0; i<ETHER_ADDR_LEN; i++) {
+        if(this->address[i] != otherTestbedAddress->address[i]) {
             return false;
         }
     }
@@ -43,7 +41,7 @@ size_t TestbedAddress::getHashValue() const {
 }
 
 Address* TestbedAddress::clone() {
-   return new TestbedAddress(address[0],address[1],address[2],address[3],address[4],address[5]);
+   return new TestbedAddress(address);
 }
 
 TESTBED_NAMESPACE_END
