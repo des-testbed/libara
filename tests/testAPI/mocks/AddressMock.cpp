@@ -50,9 +50,4 @@ string AddressMock::getAddress() {
     return address;
 }
 
-Address* AddressMock::clone() {
-    AddressMock* clone = new AddressMock(this->address);
-    return clone;
-}
-
 } /* namespace ARA */
