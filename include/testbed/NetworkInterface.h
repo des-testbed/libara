@@ -2,21 +2,18 @@
  * $FU-Copyright$
  */
 
-#ifndef _TESTBED_INTERFACE_H_
-#define _TESTBED_INTERFACE_H_
+#ifndef _NETWORK_INTERFACE_H_
+#define _NETWORK_INTERFACE_H_
 
 #include "Testbed.h"
 #include "ReliableNetworkInterface.h"
 
 TESTBED_NAMESPACE_BEGIN
 
-class TestbedInterface : public ReliableNetworkInterface {
+class NetworkInterface : public ReliableNetworkInterface {
     public:
         void receive(Packet* packet);
-        bool equals(NetworkInterface* otherInterface);
-        bool operator==(ReliableNetworkInterface &otherInterface) {
-            return this->equals(&otherInterface);
-        }
+        bool equals(ARA::NetworkInterface* otherInterface);
 
     protected:
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
