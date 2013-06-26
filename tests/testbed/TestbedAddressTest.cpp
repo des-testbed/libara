@@ -5,8 +5,6 @@
 #include "CppUTest/TestHarness.h"
 #include "testbed/CLibs.h"
 
-#include <iostream>
-
 #include "Testbed.h" 
 #include "TestbedAddress.h"
 
