@@ -16,6 +16,9 @@ TESTBED_NAMESPACE_BEGIN
 
 typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
+#define DESSERT_LOCAL_ADDRESS dessert_l25_defsrc
+#define DESSERT_BROADCAST_ADDRESS ether_broadcast
+
 TESTBED_NAMESPACE_END
 
 #endif 
