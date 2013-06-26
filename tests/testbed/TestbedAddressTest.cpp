@@ -39,13 +39,6 @@ TEST(TestbedAddressTest, testEquals) {
     CHECK_TRUE(address1==address2);
 }
 
-TEST(TestbedAddressTest, testClone) {
-    TestbedAddress address1(macAddress1);
-    Address* address2 = address1.clone();
-    CHECK_TRUE(address1==*address2);
-    delete address2;
-}
-
 TEST(TestbedAddressTest, testNotEquals) {
     TestbedAddress address1(macAddress1);
     TestbedAddress address2(macAddress2);

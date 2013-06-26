@@ -40,8 +40,4 @@ size_t TestbedAddress::getHashValue() const {
     return leastSignificantByte * 256 + nextLeastSignificantByte;
 }
 
-Address* TestbedAddress::clone() {
-   return new TestbedAddress(address);
-}
-
 TESTBED_NAMESPACE_END
