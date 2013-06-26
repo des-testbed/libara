@@ -12,11 +12,15 @@ TESTBED_NAMESPACE_BEGIN
 
 class NetworkInterface : public ReliableNetworkInterface {
     public:
+        NetworkInterface(AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
         void receive(Packet* packet);
         bool equals(ARA::NetworkInterface* otherInterface);
 
     protected:
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
+
+        static AddressPtr localAddress;
+        static AddressPtr broadcastAddress;
 };
 
 TESTBED_NAMESPACE_END
