@@ -3,6 +3,7 @@
  */
 
 #include "PacketDispatcher.h"
+#include "TestbedAddress.h"
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -34,14 +35,20 @@ _dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, ui
 }
 
 Packet* extractPacket(dessert_msg_t* dessertMessage) {
-    AddressPtr source;
-    AddressPtr destination;
+    dessert_ext_t* extension;
+    dessert_msg_getext(dessertMessage, &extension, DESSERT_EXT_ETH, 0);
+    struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
+
+    AddressPtr source (new TestbedAddress(ethernetFrame->ether_shost));
+    AddressPtr destination (new TestbedAddress(ethernetFrame->ether_dhost));
     AddressPtr sender;
-    char type = 0x01;
     unsigned int sequenceNumber = dessertMessage->u16;
     int ttl = dessertMessage->ttl;
+    char type = dessertMessage->u8;
+    void* payload;
+    unsigned int payloadSize =  dessert_msg_getpayload (dessertMessage, &payload);
 
-    return new Packet(source, destination, sender, type, sequenceNumber, ttl);
+    return new Packet(source, destination, sender, type, sequenceNumber, ttl, (const char *)payload, payloadSize);
 }
 
 TESTBED_NAMESPACE_END
