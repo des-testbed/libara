@@ -17,7 +17,6 @@ class TestbedAddress : public Address {
         virtual bool equals(const Address* otherAddress) const;
         virtual bool equals(const std::shared_ptr<Address> otherAddress) const; 
         virtual size_t getHashValue() const;
-        virtual Address* clone();
 
     private:
         ara_address_t address;
