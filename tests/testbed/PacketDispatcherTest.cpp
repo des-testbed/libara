@@ -96,17 +96,19 @@ TEST(PacketDispatcherTest, extractSourceAndDestination) {
     int ttl = 45;
     unsigned int sequenceNumber = 123;
     char type = PacketType::FANT;
+    u_int8_t* source = DESSERT_LOCAL_ADDRESS;
+    u_int8_t* destination = DESSERT_BROADCAST_ADDRESS;
 
-    dessert_msg_t* dessertMessage  = createDessertMessage(sequenceNumber, ttl, type, DESSERT_LOCAL_ADDRESS, DESSERT_BROADCAST_ADDRESS);
+    dessert_msg_t* dessertMessage  = createDessertMessage(sequenceNumber, ttl, type, source, destination);
     Packet* packet = extractPacket(dessertMessage);
 
-    AddressPtr destination = packet->getDestination();
-    CHECK(destination != nullptr);
-    CHECK(interface->isBroadcastAddress(destination));
+    AddressPtr extractDestination = packet->getDestination();
+    CHECK(extractDestination != nullptr);
+    CHECK(interface->isBroadcastAddress(extractDestination));
 
-    AddressPtr source = packet->getSource();
-    CHECK(source != nullptr);
-    CHECK(interface->getLocalAddress()->equals(source));
+    AddressPtr extractedSource = packet->getSource();
+    CHECK(extractedSource != nullptr);
+    CHECK(interface->isLocalAddress(extractedSource));
 
     delete packet;
     delete interface;
