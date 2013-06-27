@@ -55,13 +55,6 @@ public:
 
     void timerHasExpired(Timer* responsibleTimer);
 
-protected:
-    /**
-     * Method is overriden to implement the handling of the energy information packets.
-     * @see AbstractARAClient::handlePacket
-     */
-    void handlePacket(Packet* packet, NetworkInterface* interface);
-
 private:
     /**
      * This method is private to prevent anyone from using it because we slightly changed
@@ -69,9 +62,6 @@ private:
      * @see AbstractEARAClient::initializeEARA
      */
     void initialize(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) {};
-
-    void sendEnergyDisseminationPacket();
-    void handleEnergyInfoPacket(Packet* packet);
 
 protected:
     unsigned int energyDisseminationTimeoutInMillis;
