@@ -27,7 +27,7 @@ TEST_GROUP(PacketDispatcherTest) {
     /**
      * Create a dessert message to test the packet marshaling process with it.
      */
-    dessert_msg_t* createDessertMessage(int sequenceNumber, int ttl, char type = PacketType::FANT, u_int8_t* source = DESSERT_LOCAL_ADDRESS, u_int8_t* destination = DESSERT_BROADCAST_ADDRESS, const char** payload = nullptr) {
+    dessert_msg_t* createDessertMessage(int sequenceNumber=123, int ttl=10, char type=PacketType::FANT, u_int8_t* source=DESSERT_LOCAL_ADDRESS, u_int8_t* destination = DESSERT_BROADCAST_ADDRESS, const char** payload=nullptr) {
         dessert_msg_t* packet;
         dessert_msg_new(&packet);
 
@@ -120,6 +120,16 @@ TEST(PacketDispatcherTest, extractPayload) {
 
     STRCMP_EQUAL(payload, packet->getPayload());
     BYTES_EQUAL(13, packet->getPayloadLength());
+
+    delete packet;
+}
+
+TEST(PacketDispatcherTest, extractPacketWithoutPayload) {
+    // the default parameters for createDessertMessage do not specify any payload
+    dessert_msg_t* dessertMessage  = createDessertMessage();
+    Packet* packet = extractPacket(dessertMessage);
+
+    BYTES_EQUAL(0, packet->getPayloadLength());
 
     delete packet;
 }
