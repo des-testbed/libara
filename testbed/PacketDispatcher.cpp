@@ -46,9 +46,9 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
     int ttl = dessertMessage->ttl;
     char type = dessertMessage->u8;
     void* payload;
-    unsigned int payloadSize =  dessert_msg_getpayload (dessertMessage, &payload);
+    unsigned int payloadSize =  dessert_msg_getpayload(dessertMessage, &payload);
 
-    return new Packet(source, destination, sender, type, sequenceNumber, ttl, (const char *)payload, payloadSize);
+    return new Packet(source, destination, sender, type, sequenceNumber, ttl, (const char*)payload, payloadSize);
 }
 
 TESTBED_NAMESPACE_END

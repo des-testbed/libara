@@ -27,7 +27,7 @@ TEST_GROUP(PacketDispatcherTest) {
     /**
      * Create a dessert message to test the packet marshaling process with it.
      */
-    dessert_msg_t* createDessertMessage(int sequenceNumber, int ttl, char type = PacketType::FANT, u_int8_t* source = DESSERT_LOCAL_ADDRESS, u_int8_t* destination = DESSERT_BROADCAST_ADDRESS, const char* payload = nullptr) {
+    dessert_msg_t* createDessertMessage(int sequenceNumber, int ttl, char type = PacketType::FANT, u_int8_t* source = DESSERT_LOCAL_ADDRESS, u_int8_t* destination = DESSERT_BROADCAST_ADDRESS, const char** payload = nullptr) {
         dessert_msg_t* packet;
         dessert_msg_new(&packet);
 
@@ -43,11 +43,17 @@ TEST_GROUP(PacketDispatcherTest) {
         memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
 
         if (payload != nullptr) {
-            int payloadSize = strlen(payload)+1;
-            dessert_msg_addpayload (packet, ((void**)&payload), payloadSize);
+            int payloadSize = strlen(*payload)+1;
+            checkDessertResult(dessert_msg_addpayload (packet, ((void**)payload), payloadSize));
         }
 
-        return(packet);
+        return packet;
+    }
+
+    void checkDessertResult(dessert_result returnValueToCheck) {
+        if (returnValueToCheck != DESSERT_OK) {
+            FAIL("DESSERT return value was no DESSERT_OK");
+        }
     }
 
     /**
@@ -109,7 +115,7 @@ TEST(PacketDispatcherTest, extractSourceAndDestination) {
 TEST(PacketDispatcherTest, extractPayload) {
     const char* payload = "Hello World!";
 
-    dessert_msg_t* dessertMessage  = createDessertMessage(123, 10, PacketType::FANT, DESSERT_LOCAL_ADDRESS, DESSERT_BROADCAST_ADDRESS, payload);
+    dessert_msg_t* dessertMessage  = createDessertMessage(123, 10, PacketType::FANT, DESSERT_LOCAL_ADDRESS, DESSERT_BROADCAST_ADDRESS, &payload);
     Packet* packet = extractPacket(dessertMessage);
 
     STRCMP_EQUAL(payload, packet->getPayload());
