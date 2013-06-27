@@ -36,3 +36,5 @@ deactivated
 residual
 unset
 deactivating
+ethernet
+struct

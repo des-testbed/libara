@@ -120,6 +120,8 @@ TEST(PacketDispatcherTest, extractPayload) {
 
     STRCMP_EQUAL(payload, packet->getPayload());
     BYTES_EQUAL(13, packet->getPayloadLength());
+
+    delete packet;
 }
 
 TESTBED_NAMESPACE_END
