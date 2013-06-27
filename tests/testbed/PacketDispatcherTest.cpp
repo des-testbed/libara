@@ -24,6 +24,9 @@ TEST_GROUP(PacketDispatcherTest) {
         delete client;
     }
 
+    /**
+     * Create a dessert message to test the packet marshaling process with it.
+     */
     dessert_msg_t* createDessertMessage(int sequenceNumber, int ttl, char type = PacketType::FANT, u_int8_t* source = DESSERT_LOCAL_ADDRESS, u_int8_t* destination = DESSERT_BROADCAST_ADDRESS, const char* payload = nullptr) {
         dessert_msg_t* packet;
         dessert_msg_new(&packet);
@@ -39,11 +42,17 @@ TEST_GROUP(PacketDispatcherTest) {
         memcpy(ethernetFrame->ether_shost, source, ETHER_ADDR_LEN);
         memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
 
-        void** voidPayload = (void**)&payload;
-        dessert_msg_addpayload (packet, voidPayload, strlen(payload)+1);
+        if (payload != nullptr) {
+            int payloadSize = strlen(payload)+1;
+            dessert_msg_addpayload (packet, ((void**)&payload), payloadSize);
+        }
+
         return(packet);
     }
 
+    /**
+     * Create a network interface for testing if some address is broadcast or the local address
+     */
     NetworkInterface* createNetworkInterface() {
         return new NetworkInterface(client, client->getPacketFactory(), 400);
     }
