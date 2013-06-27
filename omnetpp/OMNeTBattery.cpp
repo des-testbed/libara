@@ -33,7 +33,7 @@ void OMNeTBattery::initialize(int stage) {
             EV << "Warning: Battery is disabled (updateInterval is <= 0)" << std::endl;
         }
 
-        residualEnergyOutVector.setName("Residual Energy");
+        residualEnergyOutVector.setName("energyLevel");
         WATCH(residualCapacityInMilliWattSeconds);
         updateBatteryIcon();
     }
