@@ -34,3 +34,5 @@ timestamp
 nullptr
 deactivated
 residual
+ethernet
+struct

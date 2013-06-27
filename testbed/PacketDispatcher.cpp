@@ -5,6 +5,8 @@
 #include "PacketDispatcher.h"
 #include "TestbedAddress.h"
 
+#include <netinet/in.h>
+
 TESTBED_NAMESPACE_BEGIN
 
 _dessert_cb_results PacketToMeshDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t* ProcessingFlags, dessert_sysif_t* SystemInterface, dessert_frameid_t id) {
@@ -46,7 +48,7 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
     int ttl = dessertMessage->ttl;
 
     void* payload;
-    unsigned int payloadSize =  dessert_msg_getpayload(dessertMessage, &payload);
+    unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
 
     return new Packet(source, destination, sender, packetType, sequenceNumber, ttl, (const char*)payload, payloadSize);
 }
