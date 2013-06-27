@@ -6,8 +6,6 @@
 
 namespace ARA {
 
-typedef std::shared_ptr<Address> AddressPtr;
-
 AbstractNetworkInterface::AbstractNetworkInterface(AbstractARAClient* client, AddressPtr localAddress, AddressPtr broadcastAddress) {
     this->client = client;
     this->localAddress = localAddress;
@@ -18,8 +16,12 @@ AddressPtr AbstractNetworkInterface::getLocalAddress() const {
     return localAddress;
 }
 
-bool AbstractNetworkInterface::isBroadcastAddress(std::shared_ptr<Address> someAddress) const {
+bool AbstractNetworkInterface::isBroadcastAddress(AddressPtr someAddress) const {
     return someAddress->equals(broadcastAddress);
+}
+
+bool AbstractNetworkInterface::isLocalAddress(AddressPtr someAddress) const {
+    return someAddress->equals(localAddress);
 }
 
 void AbstractNetworkInterface::broadcast(const Packet* packet) {
