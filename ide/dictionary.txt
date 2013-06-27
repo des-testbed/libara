@@ -38,3 +38,5 @@ ethernet
 struct
 unset
 deactivating
+ethernet
+struct

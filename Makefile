@@ -27,7 +27,7 @@ endif
 # TODO we might want to make this more generic (i.e. enable compiling with gcc)
 # A simple ifndef does not work because this will always be set by the OMNeT+ makefile.inc to gcc
 #ifndef CXX
-CXX = clang
+CXX = g++
 #endif
 
 # Configname determines where (in which subdirectory of out/)
@@ -95,7 +95,7 @@ TESTBEDARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(TESTBEDARA_SRC)))
 TESTBEDARA_DEPENDENCIES = $(TESTBEDARA_O:.o=.d)
 TESTBEDARA_EXECUTABLE_NAME = TestbedDaemon
 TESTBEDARA_EXECUTABLE = $(OUTPUT_DIR)/$(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME)
-TESTBEDARA_LINKFLAGS = $(LINKFLAGS) -ldessert -lcli -lstdc++ -lm -lpthread
+TESTBEDARA_LINKFLAGS = $(LINKFLAGS) -L/home/mfrey/testbed/software/dessert/lib -ldessert -lcli -lstdc++ -lm -lpthread
 
 # Tests files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_TESTS_SRC = $(shell find $(TESTS_FOLDER)/libara -type f -name '*Test.cpp')
