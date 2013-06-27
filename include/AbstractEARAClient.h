@@ -9,7 +9,6 @@
 #include "EARAConfiguration.h"
 #include "PacketFactory.h"
 #include "EnergyAwareRoutingTable.h"
-#include "Timer.h"
 
 namespace ARA {
 
@@ -40,10 +39,8 @@ public:
     AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable *routingTable, PacketFactory* packetFactory);
 
     /**
-     * The standard virtual destructor of this abstract class.
+     * Initializes the EARE specific part of this class.
      */
-    virtual ~AbstractEARAClient();
-
     void initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, PacketFactory* packetFactory);
 
     /**
@@ -52,8 +49,6 @@ public:
      * and a level of 0 indicates that the energy is as good as depleted.
      */
     virtual unsigned char getCurrentEnergyLevel() = 0;
-
-    void timerHasExpired(Timer* responsibleTimer);
 
 private:
     /**
@@ -64,8 +59,6 @@ private:
     void initialize(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) {};
 
 protected:
-    unsigned int energyDisseminationTimeoutInMillis;
-    Timer* energyDisseminationTimer;
     EnergyAwareRoutingTable* routingTable;
 };
 

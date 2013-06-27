@@ -2,6 +2,7 @@
  * $FU-Copyright$
  */
 
+#include "ARAMacros.h"
 #include "EARAClientMock.h"
 #include "BasicEARAConfiguration.h"
 #include "EnergyAwareRoutingTable.h"
@@ -10,11 +11,7 @@
 #include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
-#include <sstream>
-
-namespace ARA {
-
-typedef std::shared_ptr<Address> AddressPtr;
+ARA_NAMESPACE_BEGIN
 
 EARAClientMock::EARAClientMock() {
     float initialPhi = 10.0;
@@ -69,8 +66,4 @@ EnergyAwareRoutingTable* EARAClientMock::getRoutingTable() {
     return (EnergyAwareRoutingTable*) routingTable;
 }
 
-TimerMock* EARAClientMock::getEnergyDisseminationTimer() {
-    return (TimerMock*) energyDisseminationTimer;
-}
-
-} /* namespace ARA */
+ARA_NAMESPACE_END
