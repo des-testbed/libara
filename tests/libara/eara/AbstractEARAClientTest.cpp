@@ -6,14 +6,9 @@
 #include "TestMacros.h"
 #include "PacketTrap.h"
 #include "EnergyAwareRoutingTable.h"
-#include "Environment.h"
-#include "Pair.h"
-#include "PacketType.h"
+#include "PacketFactory.h"
 
 #include "testAPI/mocks/EARAClientMock.h"
-#include "testAPI/mocks/time/TimerMock.h"
-
-#include <deque>
 
 using namespace ARA;
 
