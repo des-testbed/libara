@@ -12,5 +12,5 @@ simple OMNeTBattery {
         // the fraction the energy has to change (compared to the capacity)
         // before it is written via the out vector
         // must be between 0 and 1 (inclusive)
-        double energyVectorDelta;  
+        double energyVectorDelta = default(0.05);  
 }
