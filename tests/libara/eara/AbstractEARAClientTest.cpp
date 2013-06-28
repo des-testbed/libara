@@ -6,7 +6,7 @@
 #include "TestMacros.h"
 #include "PacketTrap.h"
 #include "EnergyAwareRoutingTable.h"
-#include "PacketFactory.h"
+#include "EARAPacketFactory.h"
 
 #include "testAPI/mocks/EARAClientMock.h"
 

@@ -4,6 +4,7 @@
 
 #include "ARAMacros.h"
 #include "EARAClientMock.h"
+#include "EARAPacketFactory.h"
 #include "BasicEARAConfiguration.h"
 #include "EnergyAwareRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
@@ -22,7 +23,7 @@ EARAClientMock::EARAClientMock() {
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initializeEARA(configuration, new EnergyAwareRoutingTable(), new PacketFactory(15));
+    initializeEARA(configuration, new EnergyAwareRoutingTable(), new EARAPacketFactory(15));
     currentEnergyLevel = 255;
 }
 

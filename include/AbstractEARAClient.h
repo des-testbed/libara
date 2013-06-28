@@ -7,7 +7,7 @@
 
 #include "AbstractARAClient.h"
 #include "EARAConfiguration.h"
-#include "PacketFactory.h"
+#include "EARAPacketFactory.h"
 #include "EnergyAwareRoutingTable.h"
 
 namespace ARA {
@@ -36,16 +36,16 @@ public:
      * if possible. It will initialize the client with the given configuration so no additional
      * call to AbstractARAClient::initialize is required.
      */
-    AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable *routingTable, PacketFactory* packetFactory);
+    AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, EARAPacketFactory* packetFactory);
 
     /**
      * Initializes the EARE specific part of this class.
      */
-    void initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, PacketFactory* packetFactory);
+    void initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, EARAPacketFactory* packetFactory);
 
     /**
      * This method must be implemented by the concrete EARA client. It returns the current energy
-     * level in a range between 0 and 255. An energy level of 255 means full battery capactity
+     * level in a range between 0 and 255. An energy level of 255 means full battery capacity
      * and a level of 0 indicates that the energy is as good as depleted.
      */
     virtual unsigned char getCurrentEnergyLevel() = 0;

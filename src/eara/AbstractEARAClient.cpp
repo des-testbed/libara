@@ -9,11 +9,11 @@
 
 ARA_NAMESPACE_BEGIN
 
-AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, PacketFactory* packetFactory) {
+AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, EARAPacketFactory* packetFactory) {
     initializeEARA(configuration, routingTable, packetFactory);
 }
 
-void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, PacketFactory* packetFactory) {
+void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, EARAPacketFactory* packetFactory) {
     AbstractARAClient::initialize(configuration, routingTable, packetFactory);
     this->routingTable = routingTable;
 }

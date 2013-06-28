@@ -4,7 +4,7 @@
 
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
-#include "omnetpp/PacketFactory.h"
+#include "omnetpp/EARAPacketFactory.h"
 #include "omnetpp/traffic/TrafficPacket_m.h"
 
 OMNETARA_NAMESPACE_BEGIN
@@ -26,7 +26,6 @@ EARA::~EARA() {
     forwardingPolicy = nullptr;
     evaporationPolicy = nullptr;
     pathReinforcementPolicy = nullptr;
-    energyDisseminationTimer = nullptr;
 }
 
 int EARA::numInitStages() const {
@@ -38,7 +37,7 @@ void EARA::initialize(int stage) {
     if(stage == 4) {
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
-        PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
+        EARAPacketFactory* packetFactory = new EARAPacketFactory(config.getMaxTTL());
 
         AbstractEARAClient::initializeEARA(config, config.getRoutingTable(), packetFactory);
         initializeNetworkInterfacesOf(this, config);
