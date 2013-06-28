@@ -4,7 +4,7 @@
 
 #include "PacketFactory.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 PacketFactory::PacketFactory(int maxHopCount) {
     this->maxHopCount = maxHopCount;
@@ -67,4 +67,4 @@ int PacketFactory::getMaximumNrOfHops() {
     return maxHopCount;
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
