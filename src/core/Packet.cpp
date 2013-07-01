@@ -73,9 +73,6 @@ const char* Packet::getPayload() const {
     return payload;
 }
 
-void** Packet::getPayloadPointer() const {
-    return (void**)&payload;
-}
 
 unsigned int Packet::getPayloadLength() const {
     return payloadSize;
