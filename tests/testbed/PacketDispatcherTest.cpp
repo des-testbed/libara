@@ -10,6 +10,7 @@
 #include "testbed/NetworkInterface.h"
 #include "testAPI/mocks/ARAClientMock.h"
 #include <cstring>
+#include "TestbedAddress.h"
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -61,6 +62,15 @@ TEST_GROUP(PacketDispatcherTest) {
      */
     NetworkInterface* createNetworkInterface() {
         return new NetworkInterface(client, client->getPacketFactory(), 400);
+    }
+
+    bool isSameAddress(u_char* address1, u_char* address2) {
+        for (int i = 0; i < 6; ++i) {
+            if(address1[i] != address2[i]){
+                return false;
+            }
+        }
+        return true;
     }
 };
 
@@ -117,7 +127,7 @@ TEST(PacketDispatcherTest, extractSourceAndDestination) {
 TEST(PacketDispatcherTest, extractPayload) {
     const char* payload = "Hello World!";
 
-    dessert_msg_t* dessertMessage  = createDessertMessage(123, 10, PacketType::FANT, DESSERT_LOCAL_ADDRESS, DESSERT_BROADCAST_ADDRESS, &payload);
+    dessert_msg_t* dessertMessage = createDessertMessage(123, 10, PacketType::FANT, DESSERT_LOCAL_ADDRESS, DESSERT_BROADCAST_ADDRESS, &payload);
     Packet* packet = extractPacket(dessertMessage);
 
     STRCMP_EQUAL(payload, packet->getPayload());
@@ -128,12 +138,44 @@ TEST(PacketDispatcherTest, extractPayload) {
 
 TEST(PacketDispatcherTest, extractPacketWithoutPayload) {
     // the default parameters for createDessertMessage do not specify any payload
-    dessert_msg_t* dessertMessage  = createDessertMessage();
+    dessert_msg_t* dessertMessage = createDessertMessage();
     Packet* packet = extractPacket(dessertMessage);
 
     BYTES_EQUAL(0, packet->getPayloadLength());
 
     delete packet;
+}
+
+TEST(PacketDispatcherTest, packetToDessertMessage) {
+    u_char sourceMAC[] = {5,186,24,3,82,1};
+    AddressPtr source = AddressPtr(new TestbedAddress(sourceMAC));
+    u_char destinationMAC[] = {192,168,1,1,69,18};
+    AddressPtr destination = AddressPtr(new TestbedAddress(destinationMAC));
+    char type = PacketType::BANT;
+    unsigned int sequenceNumber = 37;
+    int ttl = 42;
+    const char* payload = "abcd";
+    int payloadLength = 5;
+    Packet packet(source, destination, source, type, sequenceNumber, ttl, payload, payloadLength);
+
+    dessert_msg_t* dessertMessage  = extractDessertMessage(&packet);
+
+    CHECK(dessertMessage != NULL);
+    CHECK(dessertMessage != nullptr);
+    LONGS_EQUAL(sequenceNumber, dessertMessage->u16);
+    LONGS_EQUAL(ttl, dessertMessage->ttl);
+    BYTES_EQUAL(type, dessertMessage->u8);
+
+    ether_header* ethernetHeader = extractEthernetHeader(dessertMessage);
+
+    CHECK(isSameAddress(ethernetHeader->ether_dhost, destinationMAC));
+    CHECK(isSameAddress(ethernetHeader->ether_shost, sourceMAC));
+
+    const char* extractedPayload;
+    dessert_msg_getpayload(dessertMessage, (void**)&extractedPayload);
+    STRCMP_EQUAL(payload, extractedPayload);
+    BYTES_EQUAL(payloadLength, dessertMessage->plen);
+
 }
 
 TESTBED_NAMESPACE_END

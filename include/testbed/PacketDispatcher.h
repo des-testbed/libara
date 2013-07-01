@@ -31,6 +31,8 @@ Packet* extractPacket(dessert_msg_t* dessertMessage);
  */
 ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage);
 
+dessert_msg_t* extractDessertMessage(Packet* packet);
+
 TESTBED_NAMESPACE_END
 
 #endif /*PACKET_DISPATCHER_H*/
