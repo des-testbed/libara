@@ -6,6 +6,7 @@
 #include "TestbedAddress.h"
 
 #include <netinet/in.h>
+#include <iostream>
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -80,12 +81,27 @@ dessert_msg_t* extractDessertMessage(Packet* packet) {
 
     //TODO: Sender
 
-    // TODO implement getPayloadPointer
     void** payloadPointer = packet->getPayloadPointer();
-    if (payload != nullptr) {
+    if (payloadPointer != nullptr) {
+
+        std::cout << "payloadPointer = " << (char*)*payloadPointer << std::endl;
+
         int payloadSize = packet->getPayloadLength();
-        dessert_msg_addpayload(dessertMessage, payloadPointer, payloadSize);
+        int returnVal = dessert_msg_addpayload(dessertMessage, payloadPointer, payloadSize);
+        std::cout << "blargh " << returnVal;
     }
+
+    std::cout << dessertMessage->plen << std::endl;
+    std::cout << dessertMessage->hlen << std::endl;
+    std::cout << sizeof(dessertMessage) << std::endl;
+    std::cout << sizeof(*dessertMessage) << std::endl;
+
+    void** payloadTestPointer = nullptr;
+    *payloadTestPointer = (uint8_t *)dessertMessage ;//+ ntohs(dessertMessage->hlen);
+
+    //int returnType = dessert_msg_getpayload(dessertMessage, payloadTestPointer);
+    //std::cout << "return type is " << returnType << std::endl;
+    //std::cout << (char*)*payloadTestPointer << std::endl;
 
     return dessertMessage;
 }
