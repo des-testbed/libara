@@ -79,9 +79,9 @@ int main(int argc, char** argv) {
      cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("testSendMesh"), testbed_cli_cmd_testsendmesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("send a test packet to mesh interface"));
 
      /// ara_tun2ara
-     _dessert_cb_results (*ToMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &PacketToMeshDispatcher;
+     _dessert_cb_results (*ToMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &ARA::testbed::PacketToMeshDispatcher;
      /// ara_ara2tun
-     dessert_cb_result (*ToSys)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &PacketToSystemDispatcher;
+     dessert_cb_result (*ToSys)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &ARA::testbed::PacketToSystemDispatcher;
 
      dessert_sysrxcb_add(ToMesh, 50);
      dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 15);
