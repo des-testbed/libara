@@ -60,6 +60,13 @@ public:
     virtual void packetNotDeliverable(const Packet* packet) = 0;
 
     /**
+     * This method is called each time packet can not be delivered to a specific next hop address.
+     * This is the case if this client never receives an acknowledgment in the timeout period
+     * and has tried too many times.
+     */
+    virtual bool handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) = 0;
+
+    /**
      * Sets a logger for this network client.
      *
      * This logger will be used to log messages during the routing algorithm.

@@ -117,6 +117,8 @@ public:
 
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
+    void setForwardingPolicy(ForwardingPolicy* newForwardingPolicy);
+
     void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
 
     void checkPantTimer(const Packet* packet);

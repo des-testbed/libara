@@ -7,12 +7,10 @@
 #include "BestPheromoneForwardingPolicy.h"
 #include "RoutingTableEntry.h"
 #include "NextHop.h"
-#include "PacketType.h"
-#include "Exception.h" 
+#include "testAPI/mocks/ARAClientMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 
 #include <iostream>
 #include <memory>
@@ -22,24 +20,21 @@ using namespace ARA;
 typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(BestPheromoneForwardingPolicyTest) {
+    ARAClientMock* client;
     BestPheromoneForwardingPolicy* policy;
-    EvaporationPolicy* evaporationPolicy;
     RoutingTable* routingTable;
     NetworkInterfaceMock* interface;
 
     void setup() {
         policy = new BestPheromoneForwardingPolicy();
-        evaporationPolicy = new ExponentialEvaporationPolicyMock();
-        routingTable = new RoutingTable();
-        routingTable->setEvaporationPolicy(evaporationPolicy);
-        interface = new NetworkInterfaceMock();
+        client = new ARAClientMock();
+        routingTable = client->getRoutingTable();
+        client->setForwardingPolicy(policy);
+        interface = client->createNewNetworkInterfaceMock();
     }
 
     void teardown() {
-        delete routingTable;
-        delete evaporationPolicy;
-        delete policy;
-        delete interface;
+        delete client;
     }
 };
 

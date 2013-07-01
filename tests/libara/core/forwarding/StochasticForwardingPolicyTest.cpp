@@ -4,15 +4,12 @@
 
 #include "CppUTest/TestHarness.h"
 #include "RoutingTable.h"
-#include "StochasticForwardingPolicy.h"
 #include "RoutingTableEntry.h"
 #include "NextHop.h"
-#include "PacketType.h"
-#include "Exception.h" 
+#include "testAPI/mocks/ARAClientMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/StochasticForwardingPolicyMock.h"
 
 #include <iostream>
@@ -22,21 +19,20 @@ using namespace ARA;
 typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(StochasticForwardingPolicyTest) {
+    ARAClientMock* client;
     EvaporationPolicy* evaporationPolicy;
     RoutingTable* routingTable;
     NetworkInterfaceMock* interface;
 
     void setup() {
-        evaporationPolicy = new ExponentialEvaporationPolicyMock();
-        routingTable = new RoutingTable();
-        routingTable->setEvaporationPolicy(evaporationPolicy);
-        interface = new NetworkInterfaceMock();
+        client = new ARAClientMock();
+        routingTable = client->getRoutingTable();
+        evaporationPolicy = routingTable->getEvaporationPolicy();
+        interface = client->createNewNetworkInterfaceMock();
     }
 
     void teardown() {
-        delete routingTable;
-        delete evaporationPolicy;
-        delete interface;
+        delete client;
     }
 };
 

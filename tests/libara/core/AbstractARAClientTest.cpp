@@ -190,9 +190,9 @@ TEST(AbstractARAClientTest, sendPacketToNextHopIfRouteIsKnown) {
 }
 
 TEST(AbstractARAClientTest, getNumberOfNetworkInterfaces) {
-    NetworkInterfaceMock interface1 = NetworkInterfaceMock();
-    NetworkInterfaceMock interface2 = NetworkInterfaceMock();
-    NetworkInterfaceMock interface3 = NetworkInterfaceMock();
+    NetworkInterfaceMock interface1 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface2 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface3 = NetworkInterfaceMock(client);
     CHECK_EQUAL(0, client->getNumberOfNetworkInterfaces());
 
     client->addNetworkInterface(&interface1);
@@ -206,9 +206,9 @@ TEST(AbstractARAClientTest, getNumberOfNetworkInterfaces) {
 }
 
 TEST(AbstractARAClientTest, getNetworkInterface) {
-    NetworkInterfaceMock interface1 = NetworkInterfaceMock();
-    NetworkInterfaceMock interface2 = NetworkInterfaceMock();
-    NetworkInterfaceMock interface3 = NetworkInterfaceMock();
+    NetworkInterfaceMock interface1 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface2 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface3 = NetworkInterfaceMock(client);
     client->addNetworkInterface(&interface1);
     client->addNetworkInterface(&interface2);
     client->addNetworkInterface(&interface3);

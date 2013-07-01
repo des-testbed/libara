@@ -755,4 +755,9 @@ void AbstractARAClient::broadcastPANT(AddressPtr destination) {
     }
 }
 
+void AbstractARAClient::setForwardingPolicy(ForwardingPolicy* newForwardingPolicy) {
+    DELETE_IF_NOT_NULL(forwardingPolicy);
+    forwardingPolicy = newForwardingPolicy;
+}
+
 ARA_NAMESPACE_END

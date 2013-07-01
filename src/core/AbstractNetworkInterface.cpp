@@ -4,9 +4,9 @@
 
 #include "AbstractNetworkInterface.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
-AbstractNetworkInterface::AbstractNetworkInterface(AbstractARAClient* client, AddressPtr localAddress, AddressPtr broadcastAddress) {
+AbstractNetworkInterface::AbstractNetworkInterface(AbstractNetworkClient* client, AddressPtr localAddress, AddressPtr broadcastAddress) {
     this->client = client;
     this->localAddress = localAddress;
     this->broadcastAddress = broadcastAddress;
@@ -37,4 +37,4 @@ void AbstractNetworkInterface::deliverToARAClient(Packet* packet) {
     client->receivePacket(packet, this);
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END

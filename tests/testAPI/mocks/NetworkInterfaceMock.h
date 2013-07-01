@@ -6,7 +6,7 @@
 #define NETWORKINTERFACEMOCK_H_
 
 #include "ReliableNetworkInterface.h"
-#include "AbstractARAClient.h"
+#include "AbstractNetworkClient.h"
 #include "Packet.h"
 #include "Pair.h"
 #include "AddressMock.h"
@@ -18,9 +18,9 @@ namespace ARA {
 
 class NetworkInterfaceMock: public ARA::ReliableNetworkInterface {
 public:
-    NetworkInterfaceMock(AbstractARAClient* client = nullptr);
-    NetworkInterfaceMock(const std::string interfaceName, AbstractARAClient* client = nullptr);
-    NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName, AbstractARAClient* client = nullptr);
+    NetworkInterfaceMock(AbstractNetworkClient* client);
+    NetworkInterfaceMock(const std::string interfaceName, AbstractNetworkClient* client);
+    NetworkInterfaceMock(const std::string interfaceName, const std::string localAddressName, AbstractNetworkClient* client);
     ~NetworkInterfaceMock();
 
     void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
