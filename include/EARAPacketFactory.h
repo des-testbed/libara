@@ -7,6 +7,7 @@
 
 #include "ARAMacros.h"
 #include "PacketFactory.h"
+#include "EARAPacket.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -20,12 +21,14 @@ class EARAPacketFactory : public PacketFactory {
     public:
         EARAPacketFactory(int maxHopCount) : PacketFactory(maxHopCount) {};
 
+        virtual EARAPacket* makeClone(const Packet* originalPacket);
+
     protected:
 
         /**
           * This will always create EARAPacket instances
           */
-         virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
+         virtual EARAPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
 
 };
 

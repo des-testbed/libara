@@ -34,7 +34,7 @@ class PacketFactory {
          * Note: The result of this method is a newly created object which must be
          * deleted later by the calling class.
          */
-        Packet* makeClone(const Packet* originalPacket);
+        virtual Packet* makeClone(const Packet* originalPacket);
 
         /**
          * Creates a new DATA packet based on the given addresses, sequence number
