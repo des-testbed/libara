@@ -159,8 +159,6 @@ public:
 
     const char* getPayload() const;
 
-    void** getPayloadPointer() const;
-
     unsigned int getPayloadLength() const;
 
     /**
