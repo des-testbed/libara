@@ -151,6 +151,7 @@ TEST(PacketDispatcherTest, packetToDessertMessage) {
     AddressPtr source = AddressPtr(new TestbedAddress(sourceMAC));
     u_char destinationMAC[] = {192,168,1,1,69,18};
     AddressPtr destination = AddressPtr(new TestbedAddress(destinationMAC));
+
     char type = PacketType::BANT;
     unsigned int sequenceNumber = 37;
     int ttl = 42;
@@ -173,9 +174,11 @@ TEST(PacketDispatcherTest, packetToDessertMessage) {
 
     const char* extractedPayload;
     //ntohs converts payload length from network byte order to hose byte order
+
     LONGS_EQUAL(payloadLength, ntohs(dessertMessage->plen));
     dessert_msg_getpayload(dessertMessage, (void**)&extractedPayload);
     STRCMP_EQUAL(payload, extractedPayload);
+
 }
 
 TESTBED_NAMESPACE_END
