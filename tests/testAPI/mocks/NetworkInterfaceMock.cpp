@@ -8,19 +8,22 @@
 
 using namespace std;
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
-typedef std::shared_ptr<Address> AddressPtr;
+string NetworkInterfaceMock::DEFAULT_INTERFACE_NAME = "NetworkInterfaceMock";
+AddressPtr NetworkInterfaceMock::DEFAULT_LOCAL_ADDRESS = AddressPtr(new AddressMock("DEFAULT"));
+AddressPtr NetworkInterfaceMock::DEFAULT_BROADCAST_ADDRESS = AddressPtr(new AddressMock("BROADCAST"));
+int NetworkInterfaceMock::DEFAULT_ACK_TIMEOUT = 5000;
 
-NetworkInterfaceMock::NetworkInterfaceMock(AbstractNetworkClient* client) : ReliableNetworkInterface(client, 5000, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST"))) {
-    this->name = "NetworkInterfaceMock";
+NetworkInterfaceMock::NetworkInterfaceMock(AbstractNetworkClient* client) : ReliableNetworkInterface(client, DEFAULT_ACK_TIMEOUT, DEFAULT_LOCAL_ADDRESS, DEFAULT_BROADCAST_ADDRESS) {
+    this->name = DEFAULT_INTERFACE_NAME;
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, AbstractNetworkClient* client) : ReliableNetworkInterface(client, 5000, AddressPtr(new AddressMock("DEFAULT")), AddressPtr(new AddressMock("BROADCAST")))  {
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, AbstractNetworkClient* client) : ReliableNetworkInterface(client, DEFAULT_ACK_TIMEOUT, DEFAULT_LOCAL_ADDRESS, DEFAULT_BROADCAST_ADDRESS)  {
     this->name = interfaceName;
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, const string localAddressName, AbstractNetworkClient* client) : ReliableNetworkInterface(client, 5000, AddressPtr(new AddressMock(localAddressName)), AddressPtr(new AddressMock("BROADCAST"))) {
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, const string localAddressName, AbstractNetworkClient* client) : ReliableNetworkInterface(client, DEFAULT_ACK_TIMEOUT, AddressPtr(new AddressMock(localAddressName)), AddressPtr(new AddressMock("BROADCAST"))) {
     this->name = interfaceName;
 }
 
@@ -103,4 +106,4 @@ int NetworkInterfaceMock::getNrOfRunningTimers() const {
     return runningTimers.size();
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
