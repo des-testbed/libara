@@ -59,4 +59,35 @@ ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage) {
     return (ether_header*) extension->data;
 }
 
+dessert_msg_t* extractDessertMessage(Packet* packet) {
+    dessert_msg_t* dessertMessage;
+    dessert_msg_new(&dessertMessage);
+
+    dessertMessage->u16 = packet->getSequenceNumber();
+    dessertMessage->ttl = packet->getTTL();
+    dessertMessage->u8  = packet->getType();
+
+    dessert_ext_t* extension;
+    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
+
+    struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
+    TestbedAddressPtr sourceTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getSource());
+    u_int8_t* source = sourceTestbedAddress->getDessertValue();
+    TestbedAddressPtr destinationTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getDestination());
+    u_int8_t* destination = destinationTestbedAddress->getDessertValue();
+    memcpy(ethernetFrame->ether_shost, source, ETHER_ADDR_LEN);
+    memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
+
+    //TODO: Sender
+
+    // TODO implement getPayloadPointer
+    void** payloadPointer = packet->getPayloadPointer();
+    if (payload != nullptr) {
+        int payloadSize = packet->getPayloadLength();
+        dessert_msg_addpayload(dessertMessage, payloadPointer, payloadSize);
+    }
+
+    return dessertMessage;
+}
+
 TESTBED_NAMESPACE_END
