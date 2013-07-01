@@ -166,3 +166,18 @@ TEST(PacketTest, setPreviousHop) {
     packet.setPreviousHop(prevHop2);
     CHECK(packet.getPreviousHop()->equals(prevHop2));
 }
+
+TEST(PacketTest, getPayloadPointer) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr prevHop1 (new AddressMock("A"));
+    AddressPtr prevHop2 (new AddressMock("B"));
+    char type = PacketType::DATA;
+    unsigned int seqNr = 1;
+    int ttl = 15;
+    const char* payload = "Hello World";
+
+    Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload);
+    STRCMP_EQUAL(payload, (*packet.getPayloadPointer())
+}
