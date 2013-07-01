@@ -191,7 +191,6 @@ TEST(PacketTest, decreaseTTL) {
     packet.decreaseTTL(20);
     BYTES_EQUAL(0, packet.getTTL())
 }
-*/
 TEST(PacketTest, getPayloadPointer) {
     AddressPtr source (new AddressMock("source"));
     AddressPtr destination (new AddressMock("destination"));
@@ -206,3 +205,4 @@ TEST(PacketTest, getPayloadPointer) {
     Packet packet = Packet(source, destination, sender, type, seqNr, ttl, payload);
     STRCMP_EQUAL(payload, (*packet.getPayloadPointer())
 }
+*/
