@@ -50,4 +50,21 @@ TEST(TestbedAddressTest, notEquals) {
     CHECK_FALSE(address == otherAddress);
 }
 
+
+TEST(TestbedAddressTest, getDessertValue) {
+    u_char macAddress[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
+    TestbedAddress address(macAddress);
+
+    u_int8_t* dessertAddress = address.getDessertValue();
+
+    BYTES_EQUAL(1, dessertAddress[0]);
+    BYTES_EQUAL(2, dessertAddress[1]);
+    BYTES_EQUAL(3, dessertAddress[2]);
+    BYTES_EQUAL(4, dessertAddress[3]);
+    BYTES_EQUAL(5, dessertAddress[4]);
+    BYTES_EQUAL(6, dessertAddress[5]);
+
+    delete[] dessertAddress;
+}
+
 TESTBED_NAMESPACE_END
