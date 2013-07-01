@@ -64,7 +64,6 @@ TEST(TestbedAddressTest, getDessertValue) {
     BYTES_EQUAL(5, dessertAddress[4]);
     BYTES_EQUAL(6, dessertAddress[5]);
 
-    delete[] dessertAddress;
 }
 
 TESTBED_NAMESPACE_END

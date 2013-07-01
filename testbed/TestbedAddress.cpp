@@ -42,9 +42,8 @@ size_t TestbedAddress::getHashValue() const {
 
 
 u_int8_t* TestbedAddress::getDessertValue() const {
-    u_int8_t* dessertValue = new u_int8_t[6];
-    memcpy(dessertValue, address, 6);
-    return dessertValue;
+    //TODO: Find a better way to return acceptable value for cross platform
+    return (u_int8_t*) this->address;
 }
 
 TESTBED_NAMESPACE_END
