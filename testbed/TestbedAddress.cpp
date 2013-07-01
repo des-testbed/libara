@@ -40,4 +40,11 @@ size_t TestbedAddress::getHashValue() const {
     return leastSignificantByte * 256 + nextLeastSignificantByte;
 }
 
+
+u_int8_t* TestbedAddress::getDessertValue() const {
+    u_int8_t* dessertValue = new u_int8_t[6];
+    memcpy(dessertValue, address, 6);
+    return dessertValue;
+}
+
 TESTBED_NAMESPACE_END

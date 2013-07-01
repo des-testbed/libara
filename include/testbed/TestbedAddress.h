@@ -18,6 +18,11 @@ class TestbedAddress : public Address {
         virtual bool equals(const std::shared_ptr<Address> otherAddress) const; 
         virtual size_t getHashValue() const;
 
+        /**
+         * Caller must delete returned array, array[0] = MSB
+         */
+        u_int8_t* getDessertValue() const;
+
     private:
         ara_address_t address;
 };
