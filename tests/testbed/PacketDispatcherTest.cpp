@@ -155,7 +155,7 @@ TEST(PacketDispatcherTest, packetToDessertMessage) {
     unsigned int sequenceNumber = 37;
     int ttl = 42;
     const char* payload = "abcd";
-    int payloadLength = 5;
+    long payloadLength = 5;
     Packet packet(source, destination, source, type, sequenceNumber, ttl, payload, payloadLength);
 
     dessert_msg_t* dessertMessage  = extractDessertMessage(&packet);
@@ -172,10 +172,10 @@ TEST(PacketDispatcherTest, packetToDessertMessage) {
     CHECK(isSameAddress(ethernetHeader->ether_shost, sourceMAC));
 
     const char* extractedPayload;
+    //ntohs converts payload length from network byte order to hose byte order
+    LONGS_EQUAL(payloadLength, ntohs(dessertMessage->plen));
     dessert_msg_getpayload(dessertMessage, (void**)&extractedPayload);
     STRCMP_EQUAL(payload, extractedPayload);
-    BYTES_EQUAL(payloadLength, dessertMessage->plen);
-
 }
 
 TESTBED_NAMESPACE_END
