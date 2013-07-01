@@ -67,4 +67,8 @@ EnergyAwareRoutingTable* EARAClientMock::getRoutingTable() {
     return (EnergyAwareRoutingTable*) routingTable;
 }
 
+EARAPacketFactory* EARAClientMock::getPacketFactory() {
+    return packetFactory;
+}
+
 ARA_NAMESPACE_END

@@ -50,6 +50,12 @@ public:
      */
     virtual unsigned char getCurrentEnergyLevel() = 0;
 
+    /**
+     * This method is overwritten to embed the energy values in the packets before they are
+     * actually broadcasted on the network interface.
+     */
+    virtual void broadCast(Packet* packet);
+
 private:
     /**
      * This method is private to prevent anyone from using it because we slightly changed
@@ -60,6 +66,7 @@ private:
 
 protected:
     EnergyAwareRoutingTable* routingTable;
+    EARAPacketFactory* packetFactory;
 };
 
 } /* namespace ARA */

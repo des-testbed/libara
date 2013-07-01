@@ -16,6 +16,14 @@ AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration, EnergyA
 void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, EARAPacketFactory* packetFactory) {
     AbstractARAClient::initialize(configuration, routingTable, packetFactory);
     this->routingTable = routingTable;
+    this->packetFactory = packetFactory;
+}
+
+void AbstractEARAClient::broadCast(Packet* packet) {
+    EARAPacket* earaPacket = (EARAPacket*) packet;
+    unsigned int energyOfCurrentNode = getCurrentEnergyLevel();
+    earaPacket->addEnergyValue(energyOfCurrentNode);
+    AbstractARAClient::broadCast(earaPacket);
 }
 
 ARA_NAMESPACE_END

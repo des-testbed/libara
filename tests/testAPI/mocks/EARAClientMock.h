@@ -38,6 +38,7 @@ public:
 
     PacketTrap* getPacketTrap();
     EnergyAwareRoutingTable* getRoutingTable();
+    EARAPacketFactory* getPacketFactory();
     TimerMock* getEnergyDisseminationTimer();
 
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");

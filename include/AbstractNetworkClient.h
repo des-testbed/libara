@@ -104,7 +104,7 @@ public:
      * The sender is automatically set to the corresponding interface address.
      * The previous hop will be the original sender of the packet.
      */
-    void broadCast(Packet* packet);
+    virtual void broadCast(Packet* packet);
 
     /**
      * Returns the next sequence number and advances the sequence number counter by one.
