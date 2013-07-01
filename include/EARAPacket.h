@@ -19,7 +19,21 @@ class EARAPacket : public Packet {
         unsigned int getTotalEnergyValue() const;
         unsigned int getMinimumEnergyValue() const;
 
+        /**
+         * Adds the given value to the energy information field of this packet.
+         * If the value is lower than the current minimum it will also replace it.
+         */
         void addEnergyValue(unsigned int energyValue);
+
+        /**
+         * Directly sets the total energy value.
+         */
+        void setTotalEnergyValue(unsigned int energyValue);
+
+        /**
+         * Directly sets the minimum energy value.
+         */
+        void setMinimumEnergyValue(unsigned int energyValue);
 
     protected:
         unsigned int totalEnergyValue;

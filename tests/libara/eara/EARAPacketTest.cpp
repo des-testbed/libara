@@ -114,3 +114,27 @@ TEST(EARAPacketTest, overflow) {
     packet.addEnergyValue(100);
     LONGS_EQUAL(UINT_MAX, packet.getTotalEnergyValue());
 }
+
+TEST(EARAPacketTest, setTotalEnergyValue) {
+    AddressPtr source (new AddressMock("Source1"));
+    AddressPtr destination (new AddressMock("Destination"));
+    AddressPtr sender (new AddressMock("Sender"));
+    EARAPacket packet = EARAPacket(source, destination, sender, PacketType::DATA, 123, 10);
+
+    LONGS_EQUAL(0, packet.getTotalEnergyValue());
+
+    packet.setTotalEnergyValue(100);
+    LONGS_EQUAL(100, packet.getTotalEnergyValue());
+}
+
+TEST(EARAPacketTest, setMinimumEnergyValue) {
+    AddressPtr source (new AddressMock("Source1"));
+    AddressPtr destination (new AddressMock("Destination"));
+    AddressPtr sender (new AddressMock("Sender"));
+    EARAPacket packet = EARAPacket(source, destination, sender, PacketType::DATA, 123, 10);
+
+    LONGS_EQUAL(UINT_MAX, packet.getMinimumEnergyValue());
+
+    packet.setMinimumEnergyValue(20);
+    LONGS_EQUAL(20, packet.getMinimumEnergyValue());
+}

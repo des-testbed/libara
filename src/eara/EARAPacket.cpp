@@ -33,4 +33,12 @@ void EARAPacket::addEnergyValue(unsigned int newEnergyValue) {
     }
 }
 
+void EARAPacket::setTotalEnergyValue(unsigned int energyValue) {
+    totalEnergyValue = energyValue;
+}
+
+void EARAPacket::setMinimumEnergyValue(unsigned int energyValue) {
+    minEnergyValue = energyValue;
+}
+
 ARA_NAMESPACE_END
