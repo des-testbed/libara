@@ -535,7 +535,7 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
     this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
 }
 
-void AbstractARAClient::timerHasExpired(Timer* responsibleTimer, void* contextObject) {
+void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
     char timerType = responsibleTimer->getType();
     switch (timerType) {
         case TimerType::NEIGHBOR_ACTIVITY_TIMER:

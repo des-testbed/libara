@@ -6,7 +6,7 @@
 
 using namespace ARA;
 
-void TimeoutEventListenerMock::timerHasExpired(Timer* responsibleTimer, void* contextObject) {
+void TimeoutEventListenerMock::timerHasExpired(Timer* responsibleTimer) {
     hasListenerBeenNotified = true;
 }
 

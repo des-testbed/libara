@@ -26,13 +26,13 @@ AbstractEARAClient::~AbstractEARAClient() {
     DELETE_IF_NOT_NULL(energyDisseminationTimer);
 }
 
-void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer, void* contextObject) {
+void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
     if(responsibleTimer == energyDisseminationTimer) {
         sendEnergyDisseminationPacket();
         responsibleTimer->run(energyDisseminationTimeoutInMillis * 1000);
     }
     else {
-        AbstractARAClient::timerHasExpired(responsibleTimer, contextObject);
+        AbstractARAClient::timerHasExpired(responsibleTimer);
     }
 }
 

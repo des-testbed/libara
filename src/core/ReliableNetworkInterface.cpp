@@ -52,7 +52,7 @@ void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, Ad
     runningTimers[ackTimer] = timerData;
 }
 
-void ReliableNetworkInterface::timerHasExpired(Timer* ackTimer, void* contextObject) {
+void ReliableNetworkInterface::timerHasExpired(Timer* ackTimer) {
     // some acknowledgment timed out so we need to send the packet again or tell the client
     AckTimerData timerData = runningTimers[ackTimer];
     if(timerData.nrOfRetries < maxNrOfRetransmissions) {

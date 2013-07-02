@@ -114,7 +114,7 @@ public:
     //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
     void registerReceivedPacket(const Packet* packet);
 
-    virtual void timerHasExpired(Timer* responsibleTimer, void* contextObject=nullptr);
+    virtual void timerHasExpired(Timer* responsibleTimer);
 
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
