@@ -167,7 +167,7 @@ protected:
     void stopRouteDiscoveryTimer(AddressPtr destination);
     void startDeliveryTimer(AddressPtr destination);
     void sendDeliverablePackets(AddressPtr destination);
-    void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
+    virtual void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
     bool hasPreviousNodeBeenSeenBefore(const Packet* packet);
     void deleteRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
     void broadcastRouteFailure(AddressPtr destination);

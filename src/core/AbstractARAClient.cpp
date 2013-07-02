@@ -16,7 +16,7 @@ ARA_NAMESPACE_BEGIN
 typedef std::unordered_map<Timer*, RouteDiscoveryInfo> DiscoveryTimerInfo;
 typedef std::unordered_map<Timer*, AddressPtr> DeliveryTimerInfo;
 
-AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) {
+AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable* routingTable, PacketFactory* packetFactory) {
     initialize(configuration, routingTable, packetFactory);
 }
 
@@ -244,7 +244,13 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
         AddressPtr source = packet->getSource();
         AddressPtr sender = packet->getSender();
         if (routingTable->isNewRoute(source, sender, interface)) {
-            createNewRouteFrom(packet, interface);
+
+            if(hasPreviousNodeBeenSeenBefore(packet) == false) {
+                createNewRouteFrom(packet, interface);
+            }
+            else {
+                logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
+            }
         }
         else {
             reinforcePheromoneValue(source, sender, interface);
@@ -255,14 +261,9 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
 }
 
 void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {
-    if(hasPreviousNodeBeenSeenBefore(packet) == false) {
-        float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
-        routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
-        logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
-    }
-    else {
-        logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
-    }
+    float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
+    routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
+    logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
 }
 
 bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {

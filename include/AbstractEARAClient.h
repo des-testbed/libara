@@ -8,6 +8,7 @@
 #include "AbstractARAClient.h"
 #include "EARAConfiguration.h"
 #include "EARAPacketFactory.h"
+#include "EARAPacket.h"
 #include "EnergyAwareRoutingTable.h"
 
 namespace ARA {
@@ -56,6 +57,15 @@ public:
      */
     virtual void broadCast(Packet* packet);
 
+protected:
+
+    /**
+     * Starts the calculation of the initial pheromone and energy values and creates a new route in the routing table.
+     */
+    virtual void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
+
+    float calculateInitialEnergyValue(EARAPacket* packet);
+
 private:
     /**
      * This method is private to prevent anyone from using it because we slightly changed
@@ -67,6 +77,11 @@ private:
 protected:
     EnergyAwareRoutingTable* routingTable;
     EARAPacketFactory* packetFactory;
+
+    unsigned int maximumEnergyValue;
+
+    // `b` parameter for energy fitness initialization
+    float influenceOfMinimumEnergyValue;
 };
 
 } /* namespace ARA */
