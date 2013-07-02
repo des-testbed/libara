@@ -26,7 +26,7 @@ endif
 
 # TODO we might want to make this more generic (i.e. enable compiling with gcc)
 # A simple ifndef does not work because this will always be set by the OMNeT+ makefile.inc to gcc
-CXX = clang
+CXX = g++
 
 # Configname determines where (in which subdirectory of out/)
 # makemake-generated makefiles create object files and other
