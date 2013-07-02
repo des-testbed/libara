@@ -21,7 +21,7 @@ class NetworkInterface : public ReliableNetworkInterface {
 
         static AddressPtr localAddress;
         static AddressPtr broadcastAddress;
-        static std::string name;
+        std::string name;
 };
 
 TESTBED_NAMESPACE_END
