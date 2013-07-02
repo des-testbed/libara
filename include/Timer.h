@@ -5,14 +5,16 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
+#include "ARAMacros.h"
 #include "TimeoutEventListener.h"
 
 #include <deque>
 
-namespace ARA {
-    class Timer {
+ARA_NAMESPACE_BEGIN
+
+class Timer {
     public:
-        Timer();
+        Timer(char type=0);
         virtual ~Timer() {}
         void addTimeoutListener(TimeoutEventListener* listener);
 
@@ -29,12 +31,22 @@ namespace ARA {
          */
         virtual void interrupt() = 0;
 
+        /**
+         * Returns the type of this timer. This is useful for objects to distinguish
+         * several conceptually different timers.
+         */
+        char getType() const;
+
     protected:
         void notifyAllListeners();
 
+    protected:
+        char type;
+
     private:
         std::deque<TimeoutEventListener*> listeners;
-    };
-}
+};
+
+ARA_NAMESPACE_END
 
 #endif 

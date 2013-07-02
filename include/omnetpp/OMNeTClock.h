@@ -20,7 +20,7 @@ namespace omnetpp {
     class OMNeTClock : public Clock, public cSimpleModule {
         public:
             Time* makeTime();
-            Timer* getNewTimer();
+            Timer* getNewTimer(char timerType=0);
 
             void startTimer(unsigned int timerID, unsigned long timeoutInMicroSeconds);
             void stopTimer(unsigned int timerID);

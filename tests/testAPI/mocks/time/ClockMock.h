@@ -13,7 +13,7 @@ namespace ARA {
     class ClockMock : public Clock {
         public:
             Time* makeTime();
-            Timer* getNewTimer();
+            Timer* getNewTimer(char timerType=0);
 
             TimerMock* getLastTimer();
 

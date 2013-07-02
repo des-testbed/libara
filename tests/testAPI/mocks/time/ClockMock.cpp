@@ -13,8 +13,8 @@ Time* ClockMock::makeTime() {
     return new TimeMock();
 }
 
-Timer* ClockMock::getNewTimer() {
-    lastTimer = new TimerMock();
+Timer* ClockMock::getNewTimer(char timerType) {
+    lastTimer = new TimerMock(timerType);
     return lastTimer;
 }
 

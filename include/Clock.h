@@ -29,8 +29,11 @@ namespace ARA {
             /**
              * Creates a new Timer instance. The pointer must be deleted by the
              * invoking object.
+             *
+             * @param timerType : an optional parameter with which the timer can be assigned to some type.
+             *                    This is helpful to distinguish conceptually different timers.
              */
-            virtual Timer* getNewTimer() = 0;
+            virtual Timer* getNewTimer(char timerType=0) = 0;
     };
 }
 

@@ -5,11 +5,14 @@
 #ifndef TIMER_MOCK_H_
 #define TIMER_MOCK_H_
 
+#include "ARAMacros.h"
 #include "Timer.h"
 
-namespace ARA {
-    class TimerMock : public Timer {
+ARA_NAMESPACE_BEGIN
+
+class TimerMock : public Timer {
     public:
+        TimerMock(char type=0) : Timer(type) {};
         void run(unsigned long timeoutInMicroSeconds);
         void interrupt();
 
@@ -22,7 +25,8 @@ namespace ARA {
         bool isTimerRunning = false;
         bool hasTimerExpired = false;
         bool hasTimerBeenInterrupted = false;
-    };
-}
+};
+
+ARA_NAMESPACE_END
 
 #endif

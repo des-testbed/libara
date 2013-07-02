@@ -30,3 +30,12 @@ TEST(UnixClockTest, getNewTimer) {
 
     delete newTimer;
 }
+
+TEST(UnixClockTest, getNewTimerWithType) {
+    UnixClock clock = UnixClock();
+    Timer* newTimer = clock.getNewTimer(123);
+
+    BYTES_EQUAL(123, newTimer->getType());
+
+    delete newTimer;
+}

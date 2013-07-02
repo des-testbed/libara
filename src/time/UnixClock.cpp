@@ -12,6 +12,6 @@ Time* UnixClock::makeTime() {
    return new UnixTime();
 }
 
-Timer* UnixClock::getNewTimer() {
-    return new UnixTimer();
+Timer* UnixClock::getNewTimer(char timerType) {
+    return new UnixTimer(timerType);
 }

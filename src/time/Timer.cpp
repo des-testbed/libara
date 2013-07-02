@@ -6,8 +6,13 @@
 
 using namespace ARA;
 
-Timer::Timer() {
+Timer::Timer(char type) {
+    this->type = type;
     listeners = std::deque<TimeoutEventListener*>();
+}
+
+char Timer::getType() const {
+    return type;
 }
 
 void Timer::addTimeoutListener(TimeoutEventListener* listener) {
