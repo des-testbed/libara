@@ -37,8 +37,7 @@ typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, Addres
 typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
 typedef std::unordered_map<AddressPtr, unsigned int, AddressHash, AddressPredicate> LastRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>, AddressHash, AddressPredicate> NeighborActivityMap;
-typedef std::unordered_set<AddressPtr, AddressHash, AddressPredicate> ScheduledPANTsSet;
-typedef std::unordered_map<Timer*, AddressPtr> RunningPANTsMap;
+typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> ScheduledPANTsMap;
 
 //TODO fix the visibility: most of the methods should be protected instead of public
 
@@ -174,7 +173,7 @@ protected:
 
     void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer);
     void handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination);
-    void handleExpiredPANTTimer(Timer* pantTimer, AddressPtr destination);
+    void handleExpiredPANTTimer(Timer* pantTimer);
 
     void startNeighborActivityTimer();
     void registerActivity(AddressPtr neighbor, NetworkInterface* interface);
@@ -186,8 +185,7 @@ protected:
     std::unordered_map<Timer*, AddressPtr> runningDeliveryTimers;
     Timer* neighborActivityTimer = nullptr;
 
-    ScheduledPANTsSet scheduledPANTs;
-    RunningPANTsMap runningPANTTimers;
+    ScheduledPANTsMap scheduledPANTs;
 
     ForwardingPolicy* forwardingPolicy;
     PathReinforcementPolicy* pathReinforcementPolicy;

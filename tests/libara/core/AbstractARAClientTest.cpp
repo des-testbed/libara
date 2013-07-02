@@ -2097,6 +2097,7 @@ TEST(AbstractARAClientTest, scheduledPANTTimersAreDeletedInDestructor) {
     // check if the PANT timer is running
     TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(source);
     CHECK(pantTimer != nullptr);
+    CHECK(pantTimer->getType() == TimerType::PANTS_TIMER);
     CHECK(pantTimer->isRunning());
 
     //TODO why do I need to clean this up (ARAClientMock should do this)

@@ -6,7 +6,7 @@
 #define ROUTE_DISCOVERY_INFO_H_
 
 #include "ARAMacros.h"
-#include "Timer.h"
+#include "Packet.h"
 
 ARA_NAMESPACE_BEGIN
 

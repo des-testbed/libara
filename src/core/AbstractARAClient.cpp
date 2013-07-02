@@ -8,6 +8,7 @@
 #include "Environment.h"
 #include "Exception.h"
 #include "TimerType.h"
+#include "PANTTimerInfo.h"
 
 #include "sstream"
 using namespace std;
@@ -64,6 +65,7 @@ AbstractARAClient::~AbstractARAClient() {
         delete (RouteDiscoveryInfo*) timer->getContextObject();
         delete timer;
     }
+    runningRouteDiscoveries.clear();
 
     // delete the known intermediate hop addresses for all sources
     for (KnownIntermediateHopsMap::iterator iterator=knownIntermediateHops.begin(); iterator!=knownIntermediateHops.end(); iterator++) {
@@ -84,10 +86,12 @@ AbstractARAClient::~AbstractARAClient() {
     neighborActivityTimes.clear();
 
     // delete all running pant timers
-    for (RunningPANTsMap::iterator iterator=runningPANTTimers.begin(); iterator!=runningPANTTimers.end(); iterator++) {
-        delete iterator->first;
+    for (ScheduledPANTsMap::iterator iterator=scheduledPANTs.begin(); iterator!=scheduledPANTs.end(); iterator++) {
+        Timer* timer = iterator->second;
+        delete (PantTimerInfo*) timer->getContextObject();
+        delete timer;
     }
-    runningPANTTimers.clear();
+    scheduledPANTs.clear();
 
     /* The following members may have be deleted earlier, depending on the destructor of the implementing class */
     DELETE_IF_NOT_NULL(pathReinforcementPolicy);
@@ -367,12 +371,11 @@ void AbstractARAClient::checkPantTimer(const Packet* packet) {
             logDebug("Scheduled PANT to be sent in %u ms", pantIntervalInMilliSeconds);
 
             Clock* clock = Environment::getClock();
-            Timer* pantTimer = clock->getNewTimer();
+            Timer* pantTimer = clock->getNewTimer(TimerType::PANTS_TIMER, new PantTimerInfo(pantDestination));
             pantTimer->addTimeoutListener(this);
             pantTimer->run(pantIntervalInMilliSeconds * 1000);
 
-            scheduledPANTs.insert(pantDestination);
-            runningPANTTimers[pantTimer] = pantDestination;
+            scheduledPANTs[pantDestination] = pantTimer;
         }
     }
 }
@@ -543,13 +546,9 @@ void AbstractARAClient::timerHasExpired(Timer* responsibleTimer, void* contextOb
         case TimerType::ROUTE_DISCOVERY_TIMER:
             handleExpiredRouteDiscoveryTimer(responsibleTimer);
             return;
-    }
-
-    // check if this is a PANT timer
-    RunningPANTsMap::iterator runningPANTTimerInfo = runningPANTTimers.find(responsibleTimer);
-    if (runningPANTTimers.find(responsibleTimer) != runningPANTTimers.end()) {
-        handleExpiredPANTTimer(responsibleTimer, runningPANTTimerInfo->second);
-        return;
+        case TimerType::PANTS_TIMER:
+            handleExpiredPANTTimer(responsibleTimer);
+            return;
     }
 
     // check if this is a delivery timer
@@ -610,11 +609,12 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, Address
     }
 }
 
-void AbstractARAClient::handleExpiredPANTTimer(Timer* pantTimer, AddressPtr destination) {
-    scheduledPANTs.erase(destination);
-    runningPANTTimers.erase(pantTimer);
-    broadcastPANT(destination);
+void AbstractARAClient::handleExpiredPANTTimer(Timer* pantTimer) {
+    PantTimerInfo* timerInfo = (PantTimerInfo*)pantTimer->getContextObject();
+    scheduledPANTs.erase(timerInfo->destination);
+    broadcastPANT(timerInfo->destination);
     delete pantTimer;
+    delete timerInfo;
 }
 
 bool AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) {
