@@ -10,7 +10,7 @@
 namespace ARA {
     class TimeoutEventListenerMock : public TimeoutEventListener {
     public:
-        void timerHasExpired(Timer* responsibleTimer);
+        void timerHasExpired(Timer* responsibleTimer, void* contextObject=nullptr);
         bool hasBeenNotified();
 
     private:

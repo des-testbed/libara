@@ -65,7 +65,7 @@ namespace ARA {
 
             void setMaxNrOfRetransmissions(int n);
 
-            void timerHasExpired(Timer* responsibleTimer);
+            void timerHasExpired(Timer* responsibleTimer, void* contextObject=nullptr);
 
         protected:
 

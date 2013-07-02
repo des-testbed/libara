@@ -53,7 +53,7 @@ public:
      */
     virtual unsigned char getCurrentEnergyLevel() = 0;
 
-    void timerHasExpired(Timer* responsibleTimer);
+    void timerHasExpired(Timer* responsibleTimer, void* contextObject=nullptr);
 
 protected:
     /**
