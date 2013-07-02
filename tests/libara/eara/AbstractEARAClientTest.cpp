@@ -16,6 +16,7 @@ using namespace ARA;
 using namespace std;
 
 typedef std::shared_ptr<Address> AddressPtr;
+typedef std::deque<Pair<const Packet*, AddressPtr>*> SendPacketsList;
 
 TEST_GROUP(AbstractEARAClientTest) {
     EARAClientMock* client;
@@ -173,4 +174,85 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant4->decreaseTTL(4); // traveled 4 hops
     client->receivePacket(fant4, interface);
     DOUBLES_EQUAL(0.4, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+}
+
+/**
+ * This test checks whether a client waits for a configurable amount of time before it
+ * rebroadcasts received FANTs/BANTs. This needs to be implemented so longer routes
+ * have also a chance of being broadcasted if they have a higher energy fitness.
+ *
+ * Test setup:                | Description (Test from perspective of (X)):
+ *                            |
+ *   ┌────(A1)───(A)────>─┐   |   * at first (X) receives a FANT from (B) which low energy fitness
+ * (..)──────(B)────────>(X)  |   * before broadcasting it any further, it waits for a very short time interval
+ *   └─(C1)──(C2)──(C)──>─┘   |   * after some time another FANT from (A) and then from (C) arrives
+ *                            |   * (X) is now required to broadcast only the FANT with the best energy fitness
+ */
+/* FIXME continue this test when the timer framework has been refactored
+TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
+    NetworkInterfaceMock* interface;
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr destination (new AddressMock("destination"));
+    unsigned int seqNumber = 123;
+    int maxTTL = client->getMaxTTL();
+
+    EARAPacket* fant1 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
+    fant1->decreaseTTL(2);
+    fant1->setSender(nodeB);
+    fant1->setMinimumEnergyValue(20);
+    fant1->setTotalEnergyValue(20);
+
+    EARAPacket* fant2 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
+    fant2->decreaseTTL(3);
+    fant2->setSender(nodeA);
+    fant2->setMinimumEnergyValue(60);
+    fant2->setTotalEnergyValue(80 + 60);
+
+    EARAPacket* fant3 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
+    fant3->decreaseTTL(4);
+    fant3->setSender(nodeC);
+    fant3->setMinimumEnergyValue(70);
+    fant3->setTotalEnergyValue(90 + 90 + 70);
+
+    // start test by receiving first the first FANT from (B)
+    client->receivePacket(fant1, interface);
+    // no packet should have been broadcasted just yet
+    BYTES_EQUAL(0, sentPackets->size());
+    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source, seqNumber);
+    CHECK(routeDiscoveryDelayTimer->isRunning());
+
+    // now after some short time the next FANT arrives
+    client->receivePacket(fant2, interface);
+    //  still no packet is broadcasted (timer has not expired)
+    CHECK(routeDiscoveryDelayTimer->isRunning());
+    BYTES_EQUAL(0, sentPackets->size());
+
+    // now we receive the third FANT
+    client->receivePacket(fant2, interface);
+    // still no packet is broadcasted
+    BYTES_EQUAL(0, sentPackets->size());
+    CHECK(routeDiscoveryDelayTimer->isRunning());
+
+    // now finally the wait time is over and the client sends the best FANT (from B)
+    routeDiscoveryDelayTimer->expire();
+
+    BYTES_EQUAL(1, sentPackets->size());
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(interface->isBroadcastAddress(receiver));
+
+    EARAPacket* sentPacket = castToEARAPacket(sentPackets->back()->getLeft());
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getDestination()->equals(destination));
+    LONGS_EQUAL(140, sentPacket->getTotalEnergyValue());
+    LONGS_EQUAL( 60, sentPacket->getMinimumEnergyValue());
+    LONGS_EQUAL(maxTTL-3, sentPacket->getTTL());
+}
+*/
+TEST(AbstractEARAClientTest, overlappingRouteDiscoveryDelays) {
+    //FIXME implement this!
 }

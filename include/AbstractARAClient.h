@@ -124,6 +124,8 @@ public:
 
     void checkPantTimer(const Packet* packet);
 
+    int getMaxTTL() const;
+
 protected:
 
     /**

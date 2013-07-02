@@ -752,4 +752,8 @@ void AbstractARAClient::setForwardingPolicy(ForwardingPolicy* newForwardingPolic
     forwardingPolicy = newForwardingPolicy;
 }
 
+int AbstractARAClient::getMaxTTL() const {
+    return packetFactory->getMaximumNrOfHops();
+}
+
 ARA_NAMESPACE_END
