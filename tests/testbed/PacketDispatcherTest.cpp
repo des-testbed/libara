@@ -61,7 +61,7 @@ TEST_GROUP(PacketDispatcherTest) {
      * Create a network interface for testing if some address is broadcast or the local address
      */
     NetworkInterface* createNetworkInterface() {
-        return new NetworkInterface(client, client->getPacketFactory(), 400);
+        return new NetworkInterface("eth0",client, client->getPacketFactory(), 400);
     }
 
     bool isSameAddress(u_char* address1, u_char* address2) {
