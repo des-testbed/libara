@@ -32,6 +32,7 @@
 
 ARA_NAMESPACE_BEGIN
 
+typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RunningRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
 typedef std::unordered_map<AddressPtr, unsigned int, AddressHash, AddressPredicate> LastRouteDiscoveriesMap;
@@ -171,7 +172,7 @@ protected:
     void broadcastRouteFailure(AddressPtr destination);
     void broadcastPANT(AddressPtr destination);
 
-    void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo);
+    void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer);
     void handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination);
     void handleExpiredPANTTimer(Timer* pantTimer, AddressPtr destination);
 
@@ -181,8 +182,7 @@ protected:
     bool isNewRouteDiscovery(const Packet* packet);
 
 protected:
-    std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> runningRouteDiscoveries;
-    std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
+    RunningRouteDiscoveriesMap runningRouteDiscoveries;
     std::unordered_map<Timer*, AddressPtr> runningDeliveryTimers;
     Timer* neighborActivityTimer = nullptr;
 
