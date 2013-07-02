@@ -6,8 +6,7 @@
 #define CLIBS_H
 
 extern "C" {
-#include "/vol/fob-vol3/nebenf12/newell/Software/build/lib/include/dessert.h"
- //#include <dessert.h>
+ #include <dessert.h>
  #ifdef min
  #undef min
  #endif
