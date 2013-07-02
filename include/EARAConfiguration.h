@@ -19,6 +19,13 @@ public:
     virtual ~EARAConfiguration() {};
 
     /**
+     * Returns the maximum energy capacity which is expected in the network.
+     * This will be used to calculate the percentage values from the received
+     * energy.
+     */
+    virtual unsigned int getMaximumEnergyValue() const = 0;
+
+    /**
      * Returns a value which indicates the impact of the Minimum energy value when the
      * route energy fitness is initialized.  The value needs to be >= 1.
      * Any value 1 <= b < 2 will favor the Minimum value over the Average.

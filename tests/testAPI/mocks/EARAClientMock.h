@@ -5,8 +5,10 @@
 #ifndef EARACLIENT_MOCK_H_
 #define EARACLIENT_MOCK_H_
 
+#include "ARAMacros.h"
 #include "AbstractEARAClient.h"
 #include "AbstractClientMockBase.h"
+#include "BasicEARAConfiguration.h"
 #include "Packet.h"
 #include "NetworkInterfaceMock.h"
 #include "PacketTrap.h"
@@ -15,7 +17,7 @@
 
 #include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 /**
  * A EARAClientMock implements the abstract EARA Client and holds references to
@@ -24,6 +26,8 @@ namespace ARA {
 class EARAClientMock: public AbstractEARAClient, public AbstractClientMockBase {
 public:
     EARAClientMock();
+    EARAClientMock(EARAConfiguration& configuration);
+    BasicEARAConfiguration getStandardConfiguration() const;
 
     void receivePacket(Packet* packet, NetworkInterface* interface);
     virtual bool handleBrokenLink(Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
@@ -47,5 +51,6 @@ private:
     unsigned char currentEnergyLevel;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif /* EARACLIENT_MOCK_H_ */

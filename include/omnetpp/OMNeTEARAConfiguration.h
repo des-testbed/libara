@@ -16,10 +16,12 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
     public:
         OMNeTEARAConfiguration(cModule* module);
 
+        virtual unsigned int getMaximumEnergyValue() const;
         virtual float getInfluenceOfMinimumEnergyValue() const;
         virtual EnergyAwareRoutingTable* getRoutingTable();
 
     private:
+        unsigned int maximumEnergyValue;
         float influenceOfMinimumEnergyValue;
 };
 

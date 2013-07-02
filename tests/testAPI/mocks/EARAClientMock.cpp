@@ -2,10 +2,8 @@
  * $FU-Copyright$
  */
 
-#include "ARAMacros.h"
 #include "EARAClientMock.h"
 #include "EARAPacketFactory.h"
-#include "BasicEARAConfiguration.h"
 #include "EnergyAwareRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
@@ -15,16 +13,37 @@
 ARA_NAMESPACE_BEGIN
 
 EARAClientMock::EARAClientMock() {
-    float initialPhi = 10.0;
-    float deltaPhi = 5.0;
-    BasicEARAConfiguration configuration = BasicEARAConfiguration(
-            new ExponentialEvaporationPolicyMock(),
-            new LinearPathReinforcementPolicy(deltaPhi),
-            new BestPheromoneForwardingPolicy(),
-            initialPhi
-    );
+    BasicEARAConfiguration configuration = getStandardConfiguration();
     initializeEARA(configuration, new EnergyAwareRoutingTable(), new EARAPacketFactory(15));
     currentEnergyLevel = 255;
+}
+
+EARAClientMock::EARAClientMock(EARAConfiguration& configuration) {
+    initializeEARA(configuration, new EnergyAwareRoutingTable(), new EARAPacketFactory(15));
+    currentEnergyLevel = 255;
+}
+
+BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
+    float initialPhi = 10.0;
+    float deltaPhi = 5.0;
+    int maxNrOfRouteDiscoveryRetries = 2;
+    unsigned int routeDiscoveryTimeoutInMilliSeconds = 1000;
+    unsigned int packetDeliveryDelayInMilliSeconds = 5;
+
+    unsigned int maxEnergyValue = 100;
+    float influenceOfMinimumEnergyValue = 3;
+
+    return BasicEARAConfiguration(
+        new ExponentialEvaporationPolicyMock(),
+        new LinearPathReinforcementPolicy(deltaPhi),
+        new BestPheromoneForwardingPolicy(),
+        initialPhi,
+        maxNrOfRouteDiscoveryRetries,
+        routeDiscoveryTimeoutInMilliSeconds,
+        packetDeliveryDelayInMilliSeconds,
+        maxEnergyValue,
+        influenceOfMinimumEnergyValue
+    );
 }
 
 void EARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
