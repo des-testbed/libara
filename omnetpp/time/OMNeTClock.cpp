@@ -23,9 +23,9 @@ Time* OMNeTClock::makeTime(){
     return new OMNeTTime();
 }
 
-Timer* OMNeTClock::getNewTimer() {
+Timer* OMNeTClock::getNewTimer(char timerType, void* contextObject) {
     unsigned int timerID = timerIDCounter++;
-    runningTimers[timerID] = new OMNeTTimer(timerID, this);
+    runningTimers[timerID] = new OMNeTTimer(timerID, this, timerType, contextObject);
     return runningTimers[timerID];
 }
 

@@ -5,15 +5,24 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
+#include "ARAMacros.h"
 #include "TimeoutEventListener.h"
 
 #include <deque>
 
-namespace ARA {
-    class Timer {
+ARA_NAMESPACE_BEGIN
+
+class Timer {
     public:
-        Timer();
+
+        /**
+         * Creates a new Timer instance.
+         * The Timer can have a type and also an optional context object.
+         * Both can be used by the TimeoutEventlisteners when the timer has expired.
+         */
+        Timer(char type, void* contextObject=nullptr);
         virtual ~Timer() {}
+
         void addTimeoutListener(TimeoutEventListener* listener);
 
         /**
@@ -29,12 +38,29 @@ namespace ARA {
          */
         virtual void interrupt() = 0;
 
+        /**
+         * Returns the type of this timer. This is useful for objects to distinguish
+         * several conceptually different timers.
+         */
+        char getType() const;
+
+        /**
+         * Returns the context object.
+         * If there is no context object, this will always return a nullptr.
+         */
+        void* getContextObject();
+
     protected:
         void notifyAllListeners();
 
+    protected:
+        char type;
+        void* contextObject;
+
     private:
         std::deque<TimeoutEventListener*> listeners;
-    };
-}
+};
+
+ARA_NAMESPACE_END
 
 #endif 

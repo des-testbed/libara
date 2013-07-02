@@ -6,12 +6,14 @@
 #include "UnixTime.h"
 #include "UnixTimer.h"
 
-using namespace ARA;
+ARA_NAMESPACE_BEGIN
 
 Time* UnixClock::makeTime() {
    return new UnixTime();
 }
 
-Timer* UnixClock::getNewTimer() {
-    return new UnixTimer();
+Timer* UnixClock::getNewTimer(char timerType, void* contextObject) {
+    return new UnixTimer(timerType, contextObject);
 }
+
+ARA_NAMESPACE_END
