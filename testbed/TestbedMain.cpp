@@ -65,10 +65,7 @@ int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[
 }
 
 int main(int argc, char** argv) {
-     ARA::testbed::TestbedTimer testbedTimer;
-     std::thread thread(&ARA::testbed::TestbedTimer::run, &testbedTimer, 5000000);
-     thread.join();
-/*
+
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
      if(dessert_init("ARAT", 0x00, DESSERT_OPT_NODAEMONIZE) != DESSERT_OK) {
@@ -98,6 +95,6 @@ int main(int argc, char** argv) {
 
      dessert_cli_run();
      dessert_run();
-*/
+
      return (0);
  }
