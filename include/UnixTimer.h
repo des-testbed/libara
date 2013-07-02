@@ -15,7 +15,7 @@ ARA_NAMESPACE_BEGIN
  */
 class UnixTimer : public Timer {
     public:
-        UnixTimer(char type) : Timer(type) {};
+        UnixTimer(char type, void* contextObject=nullptr) : Timer(type, contextObject) {};
         void run(unsigned long timeoutInMicroSeconds);
         void interrupt();
 };

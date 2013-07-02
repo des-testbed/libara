@@ -33,8 +33,9 @@ class Clock {
          *
          * @param timerType : parameter with which the timer can be assigned to some type.
          *                    This is helpful to distinguish conceptually different timers.
+         * @param contextObject: an optional parameter which can provide some context when the timer is expired
          */
-        virtual Timer* getNewTimer(char timerType=-1) = 0;
+        virtual Timer* getNewTimer(char timerType=-1, void* contextObject=nullptr) = 0;
         //TODO use the TimerType enum and remove the default parameter
 };
 

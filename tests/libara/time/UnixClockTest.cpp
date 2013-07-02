@@ -39,3 +39,13 @@ TEST(UnixClockTest, getNewTimerWithType) {
 
     delete newTimer;
 }
+
+TEST(UnixClockTest, getNewTimerWithTypeAndContextObject) {
+    UnixClock clock = UnixClock();
+    const char* contextObject = "Hello World";
+    Timer* newTimer = clock.getNewTimer(123, (void*) contextObject);
+
+    BYTES_EQUAL(123, newTimer->getType());
+    CHECK_EQUAL(contextObject, newTimer->getContextObject());
+    delete newTimer;
+}

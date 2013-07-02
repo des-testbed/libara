@@ -14,8 +14,15 @@ ARA_NAMESPACE_BEGIN
 
 class Timer {
     public:
-        Timer(char type=0);
+
+        /**
+         * Creates a new Timer instance.
+         * The Timer can have a type and also an optional context object.
+         * Both can be used by the TimeoutEventlisteners when the timer has expired.
+         */
+        Timer(char type, void* contextObject=nullptr);
         virtual ~Timer() {}
+
         void addTimeoutListener(TimeoutEventListener* listener);
 
         /**
@@ -37,11 +44,18 @@ class Timer {
          */
         char getType() const;
 
+        /**
+         * Returns the context object.
+         * If there is no context object, this will always return a nullptr.
+         */
+        void* getContextObject();
+
     protected:
         void notifyAllListeners();
 
     protected:
         char type;
+        void* contextObject;
 
     private:
         std::deque<TimeoutEventListener*> listeners;

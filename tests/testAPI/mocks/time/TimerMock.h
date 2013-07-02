@@ -12,7 +12,7 @@ ARA_NAMESPACE_BEGIN
 
 class TimerMock : public Timer {
     public:
-        TimerMock(char type=0) : Timer(type) {};
+        TimerMock(char type=0, void* contextObject=nullptr) : Timer(type, contextObject) {};
         void run(unsigned long timeoutInMicroSeconds);
         void interrupt();
 
