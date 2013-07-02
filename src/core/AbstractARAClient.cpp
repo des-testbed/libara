@@ -8,15 +8,12 @@
 #include "Environment.h"
 #include "Exception.h"
 #include "TimerType.h"
-#include "PANTTimerInfo.h"
+#include "TimerAddressInfo.h"
 
 #include "sstream"
 using namespace std;
 
 ARA_NAMESPACE_BEGIN
-
-typedef std::unordered_map<Timer*, RouteDiscoveryInfo> DiscoveryTimerInfo;
-typedef std::unordered_map<Timer*, AddressPtr> DeliveryTimerInfo;
 
 AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) {
     initialize(configuration, routingTable, packetFactory);
@@ -42,7 +39,6 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
 
     packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = RunningRouteDiscoveriesMap();
-    runningDeliveryTimers = unordered_map<Timer*, AddressPtr>();
 
     if (neighborActivityCheckIntervalInMilliSeconds > 0) {
        neighborActivityTimer = Environment::getClock()->getNewTimer(TimerType::NEIGHBOR_ACTIVITY_TIMER);
@@ -74,8 +70,10 @@ AbstractARAClient::~AbstractARAClient() {
     knownIntermediateHops.clear();
 
     // delete running delivery timers
-    for (DeliveryTimerInfo::iterator iterator=runningDeliveryTimers.begin(); iterator!=runningDeliveryTimers.end(); iterator++) {
-        delete iterator->first;
+    for (DeliveryTimerSet::iterator iterator=runningDeliveryTimers.begin(); iterator!=runningDeliveryTimers.end(); iterator++) {
+        Timer* timer = *iterator;
+        delete (TimerAddressInfo*) timer->getContextObject();
+        delete timer;
     }
     runningDeliveryTimers.clear();
 
@@ -88,7 +86,7 @@ AbstractARAClient::~AbstractARAClient() {
     // delete all running pant timers
     for (ScheduledPANTsMap::iterator iterator=scheduledPANTs.begin(); iterator!=scheduledPANTs.end(); iterator++) {
         Timer* timer = iterator->second;
-        delete (PantTimerInfo*) timer->getContextObject();
+        delete (TimerAddressInfo*) timer->getContextObject();
         delete timer;
     }
     scheduledPANTs.clear();
@@ -371,7 +369,7 @@ void AbstractARAClient::checkPantTimer(const Packet* packet) {
             logDebug("Scheduled PANT to be sent in %u ms", pantIntervalInMilliSeconds);
 
             Clock* clock = Environment::getClock();
-            Timer* pantTimer = clock->getNewTimer(TimerType::PANTS_TIMER, new PantTimerInfo(pantDestination));
+            Timer* pantTimer = clock->getNewTimer(TimerType::PANTS_TIMER, new TimerAddressInfo(pantDestination));
             pantTimer->addTimeoutListener(this);
             pantTimer->run(pantIntervalInMilliSeconds * 1000);
 
@@ -451,10 +449,11 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
 }
 
 void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
-    Timer* timer = Environment::getClock()->getNewTimer();
+    TimerAddressInfo* contextObject = new TimerAddressInfo(destination);
+    Timer* timer = Environment::getClock()->getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
     timer->addTimeoutListener(this);
     timer->run(packetDeliveryDelayInMilliSeconds * 1000);
-    runningDeliveryTimers[timer] = destination;
+    runningDeliveryTimers.insert(timer);
 }
 
 void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
@@ -549,18 +548,14 @@ void AbstractARAClient::timerHasExpired(Timer* responsibleTimer, void* contextOb
         case TimerType::PANTS_TIMER:
             handleExpiredPANTTimer(responsibleTimer);
             return;
+        case TimerType::DELIVERY_TIMER:
+            handleExpiredDeliveryTimer(responsibleTimer);
+            return;
+        default:
+            // if this happens its a bug in our code
+            logError("Could not identify expired timer");
+            delete responsibleTimer;
     }
-
-    // check if this is a delivery timer
-    DeliveryTimerInfo::iterator deliveryTimerInfo = runningDeliveryTimers.find(responsibleTimer);
-    if (deliveryTimerInfo != runningDeliveryTimers.end()) {
-        handleExpiredDeliveryTimer(responsibleTimer, deliveryTimerInfo->second);
-        return;
-    }
-
-    // if this happens its a bug in our code
-    logError("Could not identify expired timer");
-    delete responsibleTimer;
 }
 
 void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer) {
@@ -592,7 +587,10 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
     }
 }
 
-void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination) {
+void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer) {
+    TimerAddressInfo* timerInfo = (TimerAddressInfo*) deliveryTimer->getContextObject();
+    AddressPtr destination = timerInfo->destination;
+
     RunningRouteDiscoveriesMap::const_iterator discovery;
     discovery = runningRouteDiscoveries.find(destination);
 
@@ -600,6 +598,7 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, Address
         // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
         runningRouteDiscoveries.erase(discovery);
         runningDeliveryTimers.erase(deliveryTimer);
+        delete timerInfo;
         delete deliveryTimer;
 
         sendDeliverablePackets(destination);
@@ -610,7 +609,7 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer, Address
 }
 
 void AbstractARAClient::handleExpiredPANTTimer(Timer* pantTimer) {
-    PantTimerInfo* timerInfo = (PantTimerInfo*)pantTimer->getContextObject();
+    TimerAddressInfo* timerInfo = (TimerAddressInfo*)pantTimer->getContextObject();
     scheduledPANTs.erase(timerInfo->destination);
     broadcastPANT(timerInfo->destination);
     delete pantTimer;
