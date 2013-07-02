@@ -5,6 +5,7 @@
 #include <iostream>
 #include "CLibs.h"
 #include "PacketDispatcher.h"
+#include "TestbedTimer.h"
 
 typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
@@ -64,6 +65,7 @@ int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[
 }
 
 int main(int argc, char** argv) {
+
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
      if(dessert_init("ARAT", 0x00, DESSERT_OPT_NODAEMONIZE) != DESSERT_OK) {
