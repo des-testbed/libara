@@ -29,11 +29,13 @@ TEST_GROUP(NetworkInterfaceTest) {
 TEST(NetworkInterfaceTest, notEquals) {
     NetworkInterface* tapInterface = new NetworkInterface("tap1", client, client->getPacketFactory(), 400);
     CHECK_FALSE(interface->equals(tapInterface));
+    delete tapInterface;
 }
 
 TEST(NetworkInterfaceTest, equals) {
     NetworkInterface* ethInterface = new NetworkInterface("eth0", client, client->getPacketFactory(), 400);
     CHECK(interface->equals(ethInterface));
+    delete ethInterface;
 }
 
 TESTBED_NAMESPACE_END
