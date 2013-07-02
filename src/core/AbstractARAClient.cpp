@@ -7,6 +7,7 @@
 #include "Timer.h"
 #include "Environment.h"
 #include "Exception.h"
+#include "TimerType.h"
 
 #include "sstream"
 using namespace std;
@@ -44,7 +45,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     runningDeliveryTimers = unordered_map<Timer*, AddressPtr>();
 
     if (neighborActivityCheckIntervalInMilliSeconds > 0) {
-       neighborActivityTimer = Environment::getClock()->getNewTimer();
+       neighborActivityTimer = Environment::getClock()->getNewTimer(TimerType::NEIGHBOR_ACTIVITY_TIMER);
        neighborActivityTimer->addTimeoutListener(this);
        startNeighborActivityTimer();
     }
@@ -538,11 +539,13 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
 }
 
 void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
-    // check if this is the neighbor activity timer
-    if (responsibleTimer == neighborActivityTimer) {
-        checkInactiveNeighbors();
-        startNeighborActivityTimer();
-        return;
+    char timerType = responsibleTimer->getType();
+    switch (timerType) {
+        case TimerType::NEIGHBOR_ACTIVITY_TIMER:
+//    if (responsibleTimer == neighborActivityTimer) {
+            checkInactiveNeighbors();
+            startNeighborActivityTimer();
+            return;
     }
 
     // check if this is a route discovery timer

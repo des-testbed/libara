@@ -13,7 +13,7 @@ ARA_NAMESPACE_BEGIN
 class UnixClock : public Clock {
     public:
         virtual Time* makeTime();
-        virtual Timer* getNewTimer(char timerType=0);
+        virtual Timer* getNewTimer(char timerType=-1);
 };
 
 ARA_NAMESPACE_END
