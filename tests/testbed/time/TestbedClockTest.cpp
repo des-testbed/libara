@@ -12,20 +12,20 @@ using namespace ARA;
 TEST_GROUP(TestbedClockTest) {};
 
 TEST(TestbedClockTest, makeTime) {
-    TestbedClock clock = TestbedClock();
+    testbed::TestbedClock clock = testbed::TestbedClock();
     Time* newTime = clock.makeTime();
 
-    TestbedTime* testbedTimeInstance = dynamic_cast<TestbedTime*>(newTime);
+    testbed::TestbedTime* testbedTimeInstance = dynamic_cast<testbed::TestbedTime*>(newTime);
     CHECK(testbedTimeInstance != NULL);
 
     delete newTime;
 }
 
 TEST(TestbedClockTest, getNewTimer) {
-    TestbedClock clock = TestbedClock();
+    testbed::TestbedClock clock = testbed::TestbedClock();
     Timer* newTimer = clock.getNewTimer();
 
-    TestbedTimer* testbedTimerInstance = dynamic_cast<TestbedTimer*>(newTimer);
+    testbed::TestbedTimer* testbedTimerInstance = dynamic_cast<testbed::TestbedTimer*>(newTimer);
     CHECK(testbedTimerInstance != NULL);
 
     delete newTimer;
