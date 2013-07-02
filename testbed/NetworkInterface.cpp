@@ -20,8 +20,8 @@ void NetworkInterface::receive(Packet* packet) {
 }
 
 bool NetworkInterface::equals(ARA::NetworkInterface* otherInterface) {
-    //TODO
-    return false;
+    ARA::testbed::NetworkInterface* other = (ARA::testbed::NetworkInterface*)otherInterface;
+    return this->name == other->name;
 }
 
 void NetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> recipient){
