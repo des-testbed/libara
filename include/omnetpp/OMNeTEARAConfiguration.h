@@ -16,11 +16,11 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
     public:
         OMNeTEARAConfiguration(cModule* module);
 
-        virtual unsigned int getEnergyDisseminationTimeout() const;
+        virtual float getInfluenceOfMinimumEnergyValue() const;
         virtual EnergyAwareRoutingTable* getRoutingTable();
 
     private:
-        unsigned int energyDisseminationTimeout;
+        float influenceOfMinimumEnergyValue;
 };
 
 OMNETARA_NAMESPACE_END

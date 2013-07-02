@@ -8,11 +8,14 @@
 OMNETARA_NAMESPACE_BEGIN
 
 OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module) : OMNeTConfiguration(module) {
-    energyDisseminationTimeout = module->par("helloMessageTimeout").longValue();
+    influenceOfMinimumEnergyValue = module->par("influenceOfMinimumEnergyValue").longValue();
+    if (influenceOfMinimumEnergyValue < 1) {
+        throw cRuntimeError("EARA parameter influenceOfMinimumEnergyValue needs to be >= 1");
+    }
 }
 
-unsigned int OMNeTEARAConfiguration::getEnergyDisseminationTimeout() const {
-    return energyDisseminationTimeout;
+float OMNeTEARAConfiguration::getInfluenceOfMinimumEnergyValue() const {
+    return influenceOfMinimumEnergyValue;
 }
 
 EnergyAwareRoutingTable* OMNeTEARAConfiguration::getRoutingTable() {

@@ -19,10 +19,13 @@ public:
     virtual ~EARAConfiguration() {};
 
     /**
-     * Returns the time in milliseconds that shall pass between the
-     * periodic sending of the energy dissemination packets.
+     * Returns a value which indicates the impact of the Minimum energy value when the
+     * route energy fitness is initialized.  The value needs to be >= 1.
+     * Any value 1 <= b < 2 will favor the Minimum value over the Average.
+     * Everything > 2 will put more focus on the Average value. See the Master's Thesis of
+     * Friedrich Große for further explanation.
      */
-    virtual unsigned int getEnergyDisseminationTimeout() const = 0;
+    virtual float getInfluenceOfMinimumEnergyValue() const = 0;
 };
 
 ARA_NAMESPACE_END

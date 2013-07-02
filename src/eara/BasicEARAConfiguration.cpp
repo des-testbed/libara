@@ -14,13 +14,13 @@ BasicEARAConfiguration::BasicEARAConfiguration(
         int maxNrOfRouteDiscoveryRetries,
         unsigned int routeDiscoveryTimeoutInMilliSeconds,
         unsigned int packetDeliveryDelayInMilliSeconds,
-        unsigned int energyDisseminationTimeoutInMilliSeconds) : BasicConfiguration(evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds, packetDeliveryDelayInMilliSeconds) {
+        float influenceOfMinimumEnergyValue) : BasicConfiguration(evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds, packetDeliveryDelayInMilliSeconds) {
 
-    this->energyDisseminationTimeout = energyDisseminationTimeoutInMilliSeconds;
+    this->influenceOfMinimumEnergyValue = influenceOfMinimumEnergyValue;
 }
 
-unsigned int BasicEARAConfiguration::getEnergyDisseminationTimeout() const {
-    return energyDisseminationTimeout;
+float BasicEARAConfiguration::getInfluenceOfMinimumEnergyValue() const {
+    return influenceOfMinimumEnergyValue;
 }
 
 ARA_NAMESPACE_END

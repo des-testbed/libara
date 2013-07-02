@@ -80,3 +80,16 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfFANT) {
     BYTES_EQUAL(100, sentPacket->getTotalEnergyValue());
     BYTES_EQUAL( 40, sentPacket->getMinimumEnergyValue());
 }
+
+/**
+ * In this test a client receives FANT packets which will initialize the route via
+ * the sender. The client is also required to initialize the energy values for the
+ * corresponding route according to the function from the master's thesis of Friedrich Große
+ *
+ *     Energy = Average - ( (Average-Minimum) / b )
+ *
+ * The constant b determines the influence of the minimum on the whole equation.
+ */
+TEST(AbstractEARAClientTest, initializeEnergyValues) {
+
+}
