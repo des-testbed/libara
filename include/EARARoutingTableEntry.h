@@ -16,7 +16,7 @@ ARA_NAMESPACE_BEGIN
 
 class EARARoutingTableEntry : public RoutingTableEntry {
     public:
-        EARARoutingTableEntry(AddressPtr address, NetworkInterface* interface, float pheromoneValue, float energyValue);
+        EARARoutingTableEntry(AddressPtr address, NetworkInterface* interface, float pheromoneValue, float normalizedEnergyValue);
 
         float getEnergyValue();
         void setEnergyValue(float newEnergyValue);

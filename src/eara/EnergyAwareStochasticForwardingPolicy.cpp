@@ -30,7 +30,9 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet,
         for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
             RoutingTableEntry* entry = possibleNextHops.at(i);
             float pheromoneValue = entry->getPheromoneValue();
-            float energyValue = energyAwareRoutingTable->getEnergyValueOf(entry->getAddress()); //FIXME what if we do not have any energy information for this node
+            //float energyValue = energyAwareRoutingTable->getEnergyValue(entry->getAddress()); //FIXME what if we do not have any energy information for this node
+            //FIXME
+            float energyValue = 1;
 
             float potentiatedPheromoneValue = pow(pheromoneValue, alpha);
             float potentiatedEnergyValue = pow(energyValue, beta);

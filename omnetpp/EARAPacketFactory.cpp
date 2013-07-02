@@ -7,7 +7,7 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-Packet* EARAPacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {
+EARAPacket* EARAPacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {
     OMNeTEARAPacket* packet = new OMNeTEARAPacket(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
 
     if(isPreviousHopFeatureEnabled && previousHop != nullptr) {

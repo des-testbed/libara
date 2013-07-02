@@ -40,33 +40,34 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
 }
 
 
-void RoutingTable::update(AddressPtr destination, RoutingTableEntry *pEntry) {
-    if(table.find(destination) == table.end()) {
+void RoutingTable::update(AddressPtr destination, RoutingTableEntry* newEntry) {
+    if (table.find(destination) == table.end()) {
         // this is a new entry
         std::deque<RoutingTableEntry*>* entryList = new std::deque<RoutingTableEntry*>();
-        entryList->push_back(pEntry);
+        entryList->push_back(newEntry);
         table[destination] = entryList;
     } else {
         // there is at least one registered route for this destination
         RoutingTableEntryList* entryList = table[destination];
         bool entryHasBeenUpdated = false;
         for (auto& entry: *entryList) {
-            if(entry->getAddress()->equals(pEntry->getAddress()) && entry->getNetworkInterface()->equals(pEntry->getNetworkInterface())) {
-                updateExistingEntry(entry, pEntry);
+            if (entry->getAddress()->equals(newEntry->getAddress()) && entry->getNetworkInterface()->equals(newEntry->getNetworkInterface())) {
+                updateExistingEntry(entry, newEntry);
                 //entry->setPheromoneValue(pheromoneValue);
                 entryHasBeenUpdated = true;
             }
         }
 
-        if(entryHasBeenUpdated == false) {
-            entryList->push_back(pEntry);
-        }else{
-            delete pEntry;
+        if (entryHasBeenUpdated == false) {
+            entryList->push_back(newEntry);
+        }
+        else{
+            delete newEntry;
         }
     }
 }
 
-void RoutingTable::updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTableEntry *newEntry){
+void RoutingTable::updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry){
     oldEntry->setPheromoneValue(newEntry->getPheromoneValue());
 }
 
@@ -122,7 +123,7 @@ bool RoutingTable::isDeliverable(AddressPtr destination) {
 bool RoutingTable::isDeliverable(const Packet* packet) {
     AddressPtr destination = packet->getDestination();
     if(isDeliverable(destination)) {
-        std::deque<RoutingTableEntry*>* entries = table[destination];
+        RoutingTableEntryList* entries = table[destination];
         if(entries->size() > 1) {
             // more than one route
             return true;
@@ -153,7 +154,7 @@ float RoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop
 
 bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface){
     if(isDeliverable(destination)) {
-        std::deque<RoutingTableEntry*>* entries = table[destination];
+        RoutingTableEntryList* entries = table[destination];
         for (auto& entry: *entries) {
             if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){
                 return true;
