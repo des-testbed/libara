@@ -42,7 +42,7 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
 
     AddressPtr source (new TestbedAddress(ethernetFrame->ether_shost));
     AddressPtr destination (new TestbedAddress(ethernetFrame->ether_dhost));
-    AddressPtr sender; //TODO ?
+    AddressPtr sender; //TODO
 
     char packetType = dessertMessage->u8;
     unsigned int sequenceNumber = dessertMessage->u16;
