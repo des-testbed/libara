@@ -6,9 +6,10 @@
 #include <limits.h>
 ARA_NAMESPACE_BEGIN
 
-BasicConfiguration::BasicConfiguration(RoutingTable* routingTable, EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, unsigned int routeDiscoveryTimeoutInMilliSeconds, unsigned int packetDeliveryDelayInMilliSeconds) {
+BasicConfiguration::BasicConfiguration(RoutingTable* routingTable, PacketFactory* packetFactory, EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, unsigned int routeDiscoveryTimeoutInMilliSeconds, unsigned int packetDeliveryDelayInMilliSeconds) {
     this->routingTable = routingTable;
     this->routingTable->setEvaporationPolicy(evaporationPolicy);
+    this->packetFactory = packetFactory;
     this->evaporationPolicy = evaporationPolicy;
     this->reinforcementPolicy = reinforcementPolicy;
     this->forwardingPolicy = forwardingPolicy;
@@ -30,6 +31,10 @@ BasicConfiguration::BasicConfiguration(RoutingTable* routingTable, EvaporationPo
 
 RoutingTable* BasicConfiguration::getRoutingTable() {
     return routingTable;
+}
+
+PacketFactory* BasicConfiguration::getPacketFactory() {
+    return packetFactory;
 }
 
 EvaporationPolicy* BasicConfiguration::getEvaporationPolicy() {

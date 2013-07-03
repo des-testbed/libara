@@ -9,12 +9,12 @@
 
 ARA_NAMESPACE_BEGIN
 
-AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration, PacketFactory* packetFactory) {
-    initializeEARA(configuration, packetFactory);
+AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration) {
+    initializeEARA(configuration);
 }
 
-void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, PacketFactory* packetFactory) {
-    AbstractARAClient::initialize(configuration, packetFactory);
+void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration) {
+    AbstractARAClient::initialize(configuration);
     energyDisseminationTimeoutInMillis = configuration.getEnergyDisseminationTimeout();
     energyDisseminationTimer = Environment::getClock()->getNewTimer();
     energyDisseminationTimer->addTimeoutListener(this);

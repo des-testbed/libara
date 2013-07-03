@@ -17,7 +17,7 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
         OMNeTEARAConfiguration(cModule* module);
 
         virtual unsigned int getEnergyDisseminationTimeout() const;
-        virtual EnergyAwareRoutingTable* getRoutingTable();
+        virtual ARA::EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const;
 
     private:
         unsigned int energyDisseminationTimeout;

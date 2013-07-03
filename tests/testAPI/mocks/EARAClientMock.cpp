@@ -19,12 +19,13 @@ EARAClientMock::EARAClientMock() {
     float deltaPhi = 5.0;
     BasicEARAConfiguration configuration = BasicEARAConfiguration(
             new EnergyAwareRoutingTable(),
+            new PacketFactory(15),
             new ExponentialEvaporationPolicyMock(),
             new LinearPathReinforcementPolicy(deltaPhi),
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initializeEARA(configuration, new PacketFactory(15));
+    initializeEARA(configuration);
     currentEnergyLevel = 255;
 }
 

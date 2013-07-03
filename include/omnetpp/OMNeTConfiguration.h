@@ -18,6 +18,7 @@ class OMNeTConfiguration : public virtual Configuration {
         OMNeTConfiguration(cModule* module);
 
         virtual RoutingTable* getRoutingTable();
+        virtual PacketFactory* getPacketFactory();
         virtual EvaporationPolicy* getEvaporationPolicy();
         virtual PathReinforcementPolicy* getReinforcementPolicy();
         virtual ForwardingPolicy* getForwardingPolicy();

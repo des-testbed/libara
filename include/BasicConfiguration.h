@@ -8,6 +8,7 @@
 #include "ARAMacros.h"
 #include "Configuration.h"
 #include "RoutingTable.h"
+#include "PacketFactory.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
@@ -20,6 +21,7 @@ namespace ARA {
 class BasicConfiguration : public virtual Configuration {
 public:
     BasicConfiguration(RoutingTable* routingTable,
+                       PacketFactory* packetFactory,
                        EvaporationPolicy* evaporationPolicy,
                        PathReinforcementPolicy* reinforcementPolicy,
                        ForwardingPolicy* forwardingPolicy,
@@ -29,6 +31,7 @@ public:
                        unsigned int packetDeliveryDelayInMilliSeconds=5);
 
     virtual RoutingTable* getRoutingTable();
+    virtual PacketFactory* getPacketFactory();
     virtual EvaporationPolicy* getEvaporationPolicy();
     virtual PathReinforcementPolicy* getReinforcementPolicy();
     virtual ForwardingPolicy* getForwardingPolicy();
@@ -49,6 +52,7 @@ public:
 
 protected:
     RoutingTable* routingTable;
+    PacketFactory* packetFactory;
     EvaporationPolicy* evaporationPolicy;
     PathReinforcementPolicy* reinforcementPolicy;
     ForwardingPolicy* forwardingPolicy;

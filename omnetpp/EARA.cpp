@@ -38,9 +38,8 @@ void EARA::initialize(int stage) {
     if(stage == 4) {
         OMNeTEARAConfiguration config = OMNeTEARAConfiguration(this);
         setLogger(config.getLogger());
-        PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
 
-        AbstractEARAClient::initializeEARA(config, config.getRoutingTable(), packetFactory);
+        AbstractEARAClient::initializeEARA(config);
         initializeNetworkInterfacesOf(this, config);
 
         notificationBoard->subscribe(this, NF_BATTERY_CHANGED);

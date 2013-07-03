@@ -117,6 +117,10 @@ RoutingTable* OMNeTConfiguration::getRoutingTable() {
     return routingTable;
 }
 
+::ARA::PacketFactory* OMNeTConfiguration::getPacketFactory() {
+    return new PacketFactory(maxTTL);
+}
+
 cModule* OMNeTConfiguration::getHostModule() {
     cModule* parent = simpleModule->getParentModule();
     cModule* grandParent = parent->getParentModule();

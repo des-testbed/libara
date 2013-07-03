@@ -7,6 +7,7 @@
 
 #include "ARAMacros.h"
 #include "RoutingTable.h"
+#include "PacketFactory.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
@@ -22,6 +23,7 @@ public:
     virtual ~Configuration() {};
 
     virtual RoutingTable* getRoutingTable() = 0;
+    virtual PacketFactory* getPacketFactory() = 0;
     virtual EvaporationPolicy* getEvaporationPolicy() = 0;
     virtual PathReinforcementPolicy* getReinforcementPolicy() = 0;
     virtual ForwardingPolicy* getForwardingPolicy() = 0;

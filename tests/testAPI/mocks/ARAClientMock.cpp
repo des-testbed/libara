@@ -18,11 +18,11 @@ ARA_NAMESPACE_BEGIN
 
 ARAClientMock::ARAClientMock() {
     BasicConfiguration configuration = getStandardConfiguration();
-    initialize(configuration, new PacketFactory(15));
+    initialize(configuration);
 }
 
 ARAClientMock::ARAClientMock(Configuration& configuration) {
-    initialize(configuration, new PacketFactory(15));
+    initialize(configuration);
 }
 
 BasicConfiguration ARAClientMock::getStandardConfiguration() const {
@@ -30,6 +30,7 @@ BasicConfiguration ARAClientMock::getStandardConfiguration() const {
     float deltaPhi = 5.0;
     return BasicConfiguration(
         new RoutingTableMock(),
+        new PacketFactory(15),
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
         new BestPheromoneForwardingPolicy(),

@@ -15,6 +15,7 @@ ARA_NAMESPACE_BEGIN
 class BasicEARAConfiguration : public virtual BasicConfiguration, public EARAConfiguration {
 public:
     BasicEARAConfiguration(EnergyAwareRoutingTable* routingTable,
+                           PacketFactory* packetFactory,
                            EvaporationPolicy* evaporationPolicy,
                            PathReinforcementPolicy* reinforcementPolicy,
                            ForwardingPolicy* forwardingPolicy,
