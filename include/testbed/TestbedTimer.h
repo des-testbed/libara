@@ -16,12 +16,25 @@ TESTBED_NAMESPACE_BEGIN
 
 class TestbedTimer : public Timer {
     public:
-        TestbedTimer();
         virtual ~TestbedTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
         virtual void interrupt();
 
+        class Runner {
+            public:
+                void run(unsigned long timeoutInMicroSeconds) {
+                    try {
+                        /// set the sleep time
+                        std::chrono::microseconds duration(timeoutInMicroSeconds);
+                        /// set thread to sleep
+                        std::this_thread::sleep_for(duration);
+                    } catch (ThreadInterruptedException&) {
+                        /// do something smart
+		    
+                    }
+                }
+        };
 };
 
 TESTBED_NAMESPACE_END

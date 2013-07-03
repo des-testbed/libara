@@ -4,30 +4,24 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-TestbedTimer::TestbedTimer(){
-
-}
-
 TestbedTimer::~TestbedTimer(){
-//   this->interrupt();
+   /// TODO: check this (since the thread might not receive the exception)	
+   this->interrupt();
 }
 
 void TestbedTimer::run(unsigned long timeoutInMicroSeconds){
-   try {
-       /// set the sleep time
-       std::chrono::microseconds duration(timeoutInMicroSeconds);
-       /// set thread to sleep
-       std::this_thread::sleep_for(duration);
-       std::cout << " foo " << std::endl;
-       /// notify listeners 
-       this->notifyAllListeners();
-   } catch (ThreadInterruptedException&) {
-       /// do something smart
-   }
+    try {
+        Runner runner;
+        std::thread timer(&Runner::run, &runner, timeoutInMicroSeconds);
+        timer.join();
+        this->notifyAllListeners();
+    } catch(ThreadInterruptedException&) {
+
+    }
 }
 
 void TestbedTimer::interrupt(){
-   throw ThreadInterruptedException();
+    throw ThreadInterruptedException();
 }
 
 TESTBED_NAMESPACE_END
