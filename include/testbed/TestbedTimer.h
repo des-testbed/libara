@@ -34,6 +34,10 @@ class TestbedTimer : public Timer {
 		    
                     }
                 }
+
+                void interrupt() {
+                    throw ThreadInterruptedException();
+                }
         };
 };
 
