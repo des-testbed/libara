@@ -7,6 +7,8 @@
 
 #include "ARAMacros.h"
 #include "Configuration.h"
+#include "EnergyAwareRoutingTable.h"
+#include "EARAPacketFactory.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -17,6 +19,9 @@ ARA_NAMESPACE_BEGIN
 class EARAConfiguration : public virtual Configuration {
 public:
     virtual ~EARAConfiguration() {};
+
+    virtual EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const = 0;
+    virtual EARAPacketFactory* getEARAPacketFactory() const = 0;
 
     /**
      * Returns the maximum energy capacity which is expected in the network.

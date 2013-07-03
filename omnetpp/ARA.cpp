@@ -37,8 +37,7 @@ void ARA::initialize(int stage) {
     if(stage == 4) {
         OMNeTConfiguration config = OMNeTConfiguration(this);
         setLogger(config.getLogger());
-        PacketFactory* packetFactory = new PacketFactory(config.getMaxTTL());
-        AbstractARAClient::initialize(config, config.getRoutingTable(), packetFactory);
+        AbstractARAClient::initialize(config);
         initializeNetworkInterfacesOf(this, config);
         maximumBatteryLevel = config.getMaximumBatteryLevel();
 

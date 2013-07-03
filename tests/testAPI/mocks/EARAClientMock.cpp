@@ -14,12 +14,12 @@ ARA_NAMESPACE_BEGIN
 
 EARAClientMock::EARAClientMock() {
     BasicEARAConfiguration configuration = getStandardConfiguration();
-    initializeEARA(configuration, new EnergyAwareRoutingTable(), new EARAPacketFactory(15));
+    initializeEARA(configuration);
     currentEnergyLevel = 255;
 }
 
 EARAClientMock::EARAClientMock(EARAConfiguration& configuration) {
-    initializeEARA(configuration, new EnergyAwareRoutingTable(), new EARAPacketFactory(15));
+    initializeEARA(configuration);
     currentEnergyLevel = 255;
 }
 
@@ -34,6 +34,8 @@ BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
     float influenceOfMinimumEnergyValue = 3;
 
     return BasicEARAConfiguration(
+        new EnergyAwareRoutingTable(),
+        new EARAPacketFactory(15),
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
         new BestPheromoneForwardingPolicy(),

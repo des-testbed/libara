@@ -23,10 +23,14 @@ float OMNeTEARAConfiguration::getInfluenceOfMinimumEnergyValue() const {
     return influenceOfMinimumEnergyValue;
 }
 
-EnergyAwareRoutingTable* OMNeTEARAConfiguration::getRoutingTable() {
+EnergyAwareRoutingTable* OMNeTEARAConfiguration::getEnergyAwareRoutingTable() const {
     EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
     return routingTable;
+}
+
+ARA::EARAPacketFactory* OMNeTEARAConfiguration::getEARAPacketFactory() const {
+    return new EARAPacketFactory(maxTTL);
 }
 
 OMNETARA_NAMESPACE_END

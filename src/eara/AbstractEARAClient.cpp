@@ -9,14 +9,14 @@
 
 ARA_NAMESPACE_BEGIN
 
-AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, EARAPacketFactory* packetFactory) {
-    initializeEARA(configuration, routingTable, packetFactory);
+AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration) {
+    initializeEARA(configuration);
 }
 
-void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, EARAPacketFactory* packetFactory) {
-    AbstractARAClient::initialize(configuration, routingTable, packetFactory);
-    this->routingTable = routingTable;
-    this->packetFactory = packetFactory;
+void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration) {
+    AbstractARAClient::initialize(configuration);
+    routingTable = configuration.getEnergyAwareRoutingTable();
+    packetFactory = configuration.getEARAPacketFactory();
     this->maximumEnergyValue = configuration.getMaximumEnergyValue();
     this->influenceOfMinimumEnergyValue = configuration.getInfluenceOfMinimumEnergyValue();
 }

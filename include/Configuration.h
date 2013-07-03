@@ -6,6 +6,8 @@
 #define CONFIGURATION_H_
 
 #include "ARAMacros.h"
+#include "RoutingTable.h"
+#include "PacketFactory.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
@@ -19,6 +21,9 @@ ARA_NAMESPACE_BEGIN
 class Configuration {
 public:
     virtual ~Configuration() {};
+
+    virtual RoutingTable* getRoutingTable() = 0;
+    virtual PacketFactory* getPacketFactory() = 0;
     virtual EvaporationPolicy* getEvaporationPolicy() = 0;
     virtual PathReinforcementPolicy* getReinforcementPolicy() = 0;
     virtual ForwardingPolicy* getForwardingPolicy() = 0;

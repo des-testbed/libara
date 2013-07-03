@@ -5,7 +5,6 @@
 #ifndef OMNET_EARA_CONFIGURATION_H_
 #define OMNET_EARA_CONFIGURATION_H_
 
-#include "OMNeTARAMacros.h"
 #include "OMNeTConfiguration.h"
 #include "EARAConfiguration.h"
 #include "EnergyAwareRoutingTable.h"
@@ -18,7 +17,9 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
 
         virtual unsigned int getMaximumEnergyValue() const;
         virtual float getInfluenceOfMinimumEnergyValue() const;
-        virtual EnergyAwareRoutingTable* getRoutingTable();
+        virtual unsigned int getEnergyDisseminationTimeout() const;
+        virtual ARA::EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const;
+        virtual ARA::EARAPacketFactory* getEARAPacketFactory() const;
 
     private:
         unsigned int maximumEnergyValue;

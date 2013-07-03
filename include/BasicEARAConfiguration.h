@@ -8,6 +8,8 @@
 #include "ARAMacros.h"
 #include "BasicConfiguration.h"
 #include "EARAConfiguration.h"
+#include "EnergyAwareRoutingTable.h"
+#include "EARAPacketFactory.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -18,8 +20,9 @@ ARA_NAMESPACE_BEGIN
  */
 class BasicEARAConfiguration : public virtual BasicConfiguration, public EARAConfiguration {
 public:
-
-    BasicEARAConfiguration(EvaporationPolicy* evaporationPolicy,
+    BasicEARAConfiguration(EnergyAwareRoutingTable* routingTable,
+                           EARAPacketFactory* packetFactory,
+                           EvaporationPolicy* evaporationPolicy,
                            PathReinforcementPolicy* reinforcementPolicy,
                            ForwardingPolicy* forwardingPolicy,
                            float initialPheromoneValue,
@@ -29,6 +32,8 @@ public:
                            unsigned int maximumEnergyValue=255,
                            float influenceOfMinimumEnergyValue=3);
 
+    virtual EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const;
+    EARAPacketFactory* getEARAPacketFactory() const;
     virtual unsigned int getMaximumEnergyValue() const;
     virtual float getInfluenceOfMinimumEnergyValue() const;
 
@@ -36,6 +41,8 @@ public:
     void setInfluenceOfMinimumEnergyValue(float b);
 
 private:
+    EnergyAwareRoutingTable* routingTable;
+    EARAPacketFactory* packetFactory;
     unsigned int maximumEnergyValue;
     float influenceOfMinimumEnergyValue;
 };
