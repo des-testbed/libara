@@ -17,12 +17,14 @@ BasicEARAConfiguration::BasicEARAConfiguration(
         unsigned int routeDiscoveryTimeoutInMilliSeconds,
         unsigned int packetDeliveryDelayInMilliSeconds,
         unsigned int maximumEnergyValue,
-        float influenceOfMinimumEnergyValue) : BasicConfiguration(routingTable, packetFactory, evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds, packetDeliveryDelayInMilliSeconds) {
+        float influenceOfMinimumEnergyValue,
+        unsigned int routeDiscoveryDelayInMilliSeconds) : BasicConfiguration(routingTable, packetFactory, evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds, packetDeliveryDelayInMilliSeconds) {
 
     this->routingTable = routingTable;
     this->packetFactory = packetFactory;
     this->maximumEnergyValue = maximumEnergyValue;
     this->influenceOfMinimumEnergyValue = influenceOfMinimumEnergyValue;
+    this->routeDiscoveryDelayInMilliSeconds = routeDiscoveryDelayInMilliSeconds;
 }
 
 EnergyAwareRoutingTable* BasicEARAConfiguration::getEnergyAwareRoutingTable() const {
@@ -47,6 +49,10 @@ void BasicEARAConfiguration::setMaximumEnergyValue(unsigned int newMaxEnergy) {
 
 void BasicEARAConfiguration::setInfluenceOfMinimumEnergyValue(float b) {
     influenceOfMinimumEnergyValue = b;
+}
+
+unsigned int BasicEARAConfiguration::getRouteDiscoveryDelayInMilliSeconds() const {
+    return routeDiscoveryDelayInMilliSeconds;
 }
 
 ARA_NAMESPACE_END

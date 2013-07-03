@@ -39,7 +39,7 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     runningRouteDiscoveries = RunningRouteDiscoveriesMap();
 
     if (neighborActivityCheckIntervalInMilliSeconds > 0) {
-       neighborActivityTimer = Environment::getClock()->getNewTimer(TimerType::NEIGHBOR_ACTIVITY_TIMER);
+       neighborActivityTimer = getNewTimer(TimerType::NEIGHBOR_ACTIVITY_TIMER);
        neighborActivityTimer->addTimeoutListener(this);
        startNeighborActivityTimer();
     }
@@ -111,7 +111,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             packetTrap->trapPacket(packet);
         }
         else if (routingTable->isDeliverable(packet)) {
-            NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
+            NextHop* nextHop = forwardingPolicy->getNextHop(packet);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
             packet->setPreviousHop(packet->getSender());
@@ -176,7 +176,7 @@ void AbstractARAClient::sendFANT(AddressPtr destination) {
 
 void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
     RouteDiscoveryInfo* discoveryInfo = new RouteDiscoveryInfo(packet);
-    Timer* timer = Environment::getClock()->getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
+    Timer* timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
     timer->addTimeoutListener(this);
     timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
 
@@ -449,7 +449,7 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
 
 void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
     TimerAddressInfo* contextObject = new TimerAddressInfo(destination);
-    Timer* timer = Environment::getClock()->getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
+    Timer* timer = getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
     timer->addTimeoutListener(this);
     timer->run(packetDeliveryDelayInMilliSeconds * 1000);
     runningDeliveryTimers.insert(timer);
@@ -752,6 +752,10 @@ void AbstractARAClient::setForwardingPolicy(ForwardingPolicy* newForwardingPolic
 
 int AbstractARAClient::getMaxTTL() const {
     return packetFactory->getMaximumNrOfHops();
+}
+
+Timer* AbstractARAClient::getNewTimer(char timerType, void* contextObject) const {
+    return Environment::getClock()->getNewTimer(timerType, contextObject);
 }
 
 ARA_NAMESPACE_END

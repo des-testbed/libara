@@ -5,15 +5,16 @@
 #ifndef ABSTRACT_EARA_CLIENT_H_
 #define ABSTRACT_EARA_CLIENT_H_
 
+#include "ARAMacros.h"
 #include "AbstractARAClient.h"
 #include "EARAConfiguration.h"
 #include "EARAPacketFactory.h"
 #include "EARAPacket.h"
 #include "EnergyAwareRoutingTable.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
-typedef std::shared_ptr<Address> AddressPtr;
+typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RouteDiscoveryDelayTimerMap;
 
 /**
  * TODO write class description
@@ -39,6 +40,8 @@ public:
      */
     AbstractEARAClient(EARAConfiguration& configuration);
 
+    virtual ~AbstractEARAClient();
+
     /**
      * Initializes the EARE specific part of this class.
      */
@@ -57,6 +60,8 @@ public:
      */
     virtual void broadCast(Packet* packet);
 
+    virtual void timerHasExpired(Timer* responsibleTimer);
+
 protected:
 
     /**
@@ -65,6 +70,20 @@ protected:
     virtual void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
 
     float calculateInitialEnergyValue(EARAPacket* packet);
+
+    virtual void handleAntPacket(Packet* packet);
+
+    /**
+     * Checks if a route discovery delay timer is already running for the source of the given packet.
+     * If none is running, a new route discovery delay timer is started.
+     * If there is already a timer running, the given FANT or BANT is compared to the currently best
+     * FANT/BANT in terms of their TTL and energy metric.
+     * Only the best ant packet is stored in the timer context Object and will be broadcasted
+     * when the timer expires.
+     */
+    void handleFANTorBANT(Packet* packet);
+
+    void handleExpiredRouteDiscoveryDelayTimer(Timer* timer);
 
 private:
     /**
@@ -77,12 +96,15 @@ private:
 protected:
     EnergyAwareRoutingTable* routingTable;
     EARAPacketFactory* packetFactory;
+    RouteDiscoveryDelayTimerMap runningRouteDiscoveryDelayTimers;
 
     unsigned int maximumEnergyValue;
+    unsigned int routeDiscoveryDelayInMilliSeconds;
 
     // `b` parameter for energy fitness initialization
     float influenceOfMinimumEnergyValue;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif /* ABSTRACT_EARA_CLIENT_H_ */

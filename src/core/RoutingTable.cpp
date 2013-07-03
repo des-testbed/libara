@@ -96,7 +96,7 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
     }
 }
 
-RoutingTableEntryList  RoutingTable::getPossibleNextHops(const Packet* packet) {
+RoutingTableEntryList RoutingTable::getPossibleNextHops(const Packet* packet) {
     if(isDeliverable(packet)) {
         return *(table[packet->getDestination()]);
     }
@@ -106,7 +106,7 @@ RoutingTableEntryList  RoutingTable::getPossibleNextHops(const Packet* packet) {
     }
 }
 
-RoutingTableEntryList  RoutingTable::getPossibleNextHops(AddressPtr destination) {
+RoutingTableEntryList RoutingTable::getPossibleNextHops(AddressPtr destination) {
     if(isDeliverable(destination)) {
         return *(table[destination]);
     }
@@ -183,7 +183,7 @@ void RoutingTable::triggerEvaporation() {
         if(evaporationPolicy->isEvaporationNecessary(timeDifference)) {
             lastAccessTime->setToCurrentTime();
 
-            std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::iterator i = table.begin();
+            RoutingTableMap::iterator i = table.begin();
             while(i!=table.end()) {
                 std::pair<AddressPtr const, RoutingTableEntryList*> entryPair = *i;
                 AddressPtr destination = entryPair.first;
@@ -239,7 +239,7 @@ unsigned int RoutingTable::getTotalNumberOfEntries() const {
 
 RoutingTableEntryTupel RoutingTable::getEntryAt(int wantedPosition) const {
     int currentPosition = 0;
-    std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::const_iterator iterator;
+    RoutingTableMap::const_iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
         AddressPtr destination = iterator->first;
         RoutingTableEntryList* entryList = iterator->second;
@@ -263,8 +263,7 @@ std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(Addres
     std::deque<RoutingTableEntryTupel> result = std::deque<RoutingTableEntryTupel>();
 
     // TODO this could be made faster with an additional hashmap (but would require more memory)
-    std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::const_iterator iterator;
-    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+    for (RoutingTableMap::const_iterator iterator=table.begin(); iterator!=table.end(); iterator++) {
         AddressPtr destination = iterator->first;
         RoutingTableEntryList* entryList = iterator->second;
         for (auto& entry: *entryList) {

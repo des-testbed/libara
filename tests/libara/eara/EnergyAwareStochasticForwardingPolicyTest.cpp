@@ -12,8 +12,6 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/EnergyAwareStochasticForwardingPolicyMock.h"
 
-#include <iostream>
-
 using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
@@ -47,15 +45,15 @@ TEST(EnergyAwareStochasticForwardingPolicyTest, testGetNextHop) {
     routingTable->update(destination, nextHopB, interface, 2.1, 0.6);
 
     unsigned int randomNumberGeneratorSeed = 23; // the random number produced will be 0.727582
-    EnergyAwareStochasticForwardingPolicyMock policy = EnergyAwareStochasticForwardingPolicyMock(randomNumberGeneratorSeed);
+    EnergyAwareStochasticForwardingPolicyMock policy = EnergyAwareStochasticForwardingPolicyMock(routingTable, randomNumberGeneratorSeed);
     policy.setPheromoneWeight(1.0);
     policy.setEnergyWeight(1.0);
 
-    NextHop* result = policy.getNextHop(&packet, routingTable);
+    NextHop* result = policy.getNextHop(&packet);
     CHECK(result->getAddress()->equals(nextHopB));
 
     randomNumberGeneratorSeed = 42;
-    policy = EnergyAwareStochasticForwardingPolicyMock(randomNumberGeneratorSeed);
-    result = policy.getNextHop(&packet, routingTable);
+    policy = EnergyAwareStochasticForwardingPolicyMock(routingTable, randomNumberGeneratorSeed);
+    result = policy.getNextHop(&packet);
     CHECK(result->getAddress()->equals(nextHopA));
 }

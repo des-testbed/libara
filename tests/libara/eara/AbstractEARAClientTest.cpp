@@ -8,6 +8,7 @@
 #include "EnergyAwareRoutingTable.h"
 #include "EARAPacketFactory.h"
 #include "EARAPacket.h"
+#include "TimerType.h"
 
 #include "testAPI/mocks/EARAClientMock.h"
 #include <iostream>
@@ -80,6 +81,13 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfFANT) {
 
     // start the test
     client->receivePacket(fant, interface);
+
+    // we need the timer to trigger the actual sending of the FANT
+    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source, 123);
+    CHECK(routeDiscoveryDelayTimer != nullptr);
+    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
+    CHECK(routeDiscoveryDelayTimer->isRunning());
+    routeDiscoveryDelayTimer->expire();
 
     // packet should have been updated and broadcasted
     LONGS_EQUAL(1, interface->getNumberOfSentPackets());
@@ -188,9 +196,8 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
  *   └─(C1)──(C2)──(C)──>─┘   |   * after some time another FANT from (A) and then from (C) arrives
  *                            |   * (X) is now required to broadcast only the FANT with the best energy fitness
  */
-/* FIXME continue this test when the timer framework has been refactored
 TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
-    NetworkInterfaceMock* interface;
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr source (new AddressMock("source"));
     AddressPtr nodeA (new AddressMock("A"));
@@ -223,6 +230,8 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     // no packet should have been broadcasted just yet
     BYTES_EQUAL(0, sentPackets->size());
     TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source, seqNumber);
+    CHECK(routeDiscoveryDelayTimer != nullptr);
+    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
     CHECK(routeDiscoveryDelayTimer->isRunning());
 
     // now after some short time the next FANT arrives
@@ -232,7 +241,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     BYTES_EQUAL(0, sentPackets->size());
 
     // now we receive the third FANT
-    client->receivePacket(fant2, interface);
+    client->receivePacket(fant3, interface);
     // still no packet is broadcasted
     BYTES_EQUAL(0, sentPackets->size());
     CHECK(routeDiscoveryDelayTimer->isRunning());
@@ -252,7 +261,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     LONGS_EQUAL( 60, sentPacket->getMinimumEnergyValue());
     LONGS_EQUAL(maxTTL-3, sentPacket->getTTL());
 }
-*/
+
 TEST(AbstractEARAClientTest, overlappingRouteDiscoveryDelays) {
     //FIXME implement this!
 }

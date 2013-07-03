@@ -9,7 +9,7 @@
 
 using namespace ARA;
 
-NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet, RoutingTable* routingTable) {
+NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet) {
     std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
     AddressPtr sender = packet->getSender();
 

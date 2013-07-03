@@ -12,8 +12,6 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/StochasticForwardingPolicyMock.h"
 
-#include <iostream>
-
 using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
@@ -45,9 +43,9 @@ TEST(StochasticForwardingPolicyTest, testGetNextHop) {
     routingTable->update(packet.getDestination(), route2, interface, 2.1);
 
     unsigned int seed = 42;
-    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock(seed);
+    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock(routingTable, seed);
 
-    NextHop* nextHop = policy.getNextHop(&packet, routingTable);
+    NextHop* nextHop = policy.getNextHop(&packet);
     CHECK(nextHop->getAddress()->equals(route1));
 }
 
@@ -66,9 +64,9 @@ TEST(StochasticForwardingPolicyTest, stochasticBehaviour) {
     int nrOfTimesRoute2IsChosen = 0;
     int nrOfTimesRoute3IsChosen = 0;
 
-    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock();
+    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock(routingTable);
     for (int i = 0; i < nrOfIterations; i++) {
-        NextHop* nextHop = policy.getNextHop(&packet, routingTable);
+        NextHop* nextHop = policy.getNextHop(&packet);
         if(nextHop->getAddress()->equals(route1)) {
             nrOfTimesRoute1IsChosen++;
         }
@@ -103,9 +101,9 @@ TEST(StochasticForwardingPolicyTest, neverChooseTheSenderOfAPacket) {
 
     int nrOfIterations = 100;
 
-    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock();
+    StochasticForwardingPolicyMock policy = StochasticForwardingPolicyMock(routingTable);
     for (int i = 0; i < nrOfIterations; i++) {
-        NextHop* nextHop = policy.getNextHop(&packet, routingTable);
+        NextHop* nextHop = policy.getNextHop(&packet);
         CHECK(nextHop->getAddress()->equals(packet.getSender()) == false);
     }
 }

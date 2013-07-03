@@ -5,6 +5,7 @@
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/OMNeTBattery.h"
+#include "omnetpp/OMNeTForwardingPolicy.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
@@ -114,6 +115,7 @@ Logger* OMNeTConfiguration::getLogger() {
 RoutingTable* OMNeTConfiguration::getRoutingTable() {
     RoutingTable* routingTable = new RoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
+    ((OMNeTForwardingPolicy*)forwardingPolicy)->setRoutingTable(routingTable);
     return routingTable;
 }
 

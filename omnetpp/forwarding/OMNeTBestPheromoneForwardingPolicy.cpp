@@ -2,20 +2,18 @@
  * $FU-Copyright$
  */
 
-#include "omnetpp/OMNeTBestPheromoneForwardingPolicy.h"
+#include "OMNeTBestPheromoneForwardingPolicy.h"
 
-namespace ARA {
-    namespace omnetpp {
+OMNETARA_NAMESPACE_BEGIN
 
-        Define_Module(OMNeTBestPheromoneForwardingPolicy);
+Define_Module(OMNeTBestPheromoneForwardingPolicy);
 
-        void OMNeTBestPheromoneForwardingPolicy::initialize(){
+void OMNeTBestPheromoneForwardingPolicy::setRoutingTable(RoutingTable* routingTable) {
+    this->routingTable = routingTable;
+}
 
-        }
+void OMNeTBestPheromoneForwardingPolicy::handleMessage(cMessage* message) {
+    throw cRuntimeError("handleMessage() should never be called on OMNeTBestPheromoneForwardingPolicy!");
+}
 
-        void OMNeTBestPheromoneForwardingPolicy::handleMessage(cMessage *msg) {
-            throw cRuntimeError("OMNeTBestPheromoneForwardingPolicy: handleMessage() should never be called!");
-        }
-
-    } /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END

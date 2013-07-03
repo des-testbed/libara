@@ -155,7 +155,7 @@ protected:
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
     void handleDataPacket(Packet* packet);
-    void handleAntPacket(Packet* packet);
+    virtual void handleAntPacket(Packet* packet);
     void handleAntPacketForThisNode(Packet* packet);
     void handleBANTForThisNode(Packet* bant);
     virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
@@ -184,6 +184,11 @@ protected:
     void registerActivity(AddressPtr neighbor, NetworkInterface* interface);
     void checkInactiveNeighbors();
     bool isNewRouteDiscovery(const Packet* packet);
+
+    /**
+     * A small convenience method to retrieve a timer from the static Environment.
+     */
+    Timer* getNewTimer(char timerType, void* contextObject=nullptr) const;
 
 protected:
     Timer* neighborActivityTimer = nullptr;

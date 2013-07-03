@@ -17,8 +17,12 @@ void OMNeTEnergyAwareStochasticForwardingPolicy::initialize(){
     setEnergyWeight(par("beta").doubleValue());
 }
 
-void OMNeTEnergyAwareStochasticForwardingPolicy::handleMessage(cMessage *msg) {
-    throw cRuntimeError("OMNeTEnergyAwareStochasticForwardingPolicy: handleMessage() should never be called!");
+void OMNeTEnergyAwareStochasticForwardingPolicy::setRoutingTable(EnergyAwareRoutingTable* routingTable) {
+    this->routingTable = routingTable;
+}
+
+void OMNeTEnergyAwareStochasticForwardingPolicy::handleMessage(cMessage* message) {
+    throw cRuntimeError("handleMessage() should never be called on OMNeTEnergyAwareStochasticForwardingPolicy!");
 }
 
 OMNETARA_NAMESPACE_END

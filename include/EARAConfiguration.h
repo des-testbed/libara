@@ -34,10 +34,18 @@ public:
      * Returns a value which indicates the impact of the Minimum energy value when the
      * route energy fitness is initialized.  The value needs to be >= 1.
      * Any value 1 <= b < 2 will favor the Minimum value over the Average.
-     * Everything > 2 will put more focus on the Average value. See the Master's Thesis of
-     * Friedrich Große for further explanation.
+     * Everything > 2 will put more focus on the Average value.
+     * See the Master's Thesis of Friedrich Große for further explanation.
      */
     virtual float getInfluenceOfMinimumEnergyValue() const = 0;
+
+    /**
+     * Returns the time in milliseconds a client should wait for other FANTs/BANTs
+     * to arrive, before it broadcasts the best ant packet of the current generation on
+     * to its neighbors in the route discovery process.
+     * See the Master's Thesis of Friedrich Große for further explanation.
+     */
+    virtual unsigned int getRouteDiscoveryDelayInMilliSeconds() const = 0;
 };
 
 ARA_NAMESPACE_END

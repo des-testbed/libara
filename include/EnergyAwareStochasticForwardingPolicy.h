@@ -7,6 +7,7 @@
 
 #include "ARAMacros.h"
 #include "StochasticForwardingPolicy.h"
+#include "EnergyAwareRoutingTable.h"
 #include "NextHop.h"
 #include "Packet.h"
 #include "RoutingTable.h"
@@ -19,10 +20,10 @@ ARA_NAMESPACE_BEGIN
  */
 class EnergyAwareStochasticForwardingPolicy : public StochasticForwardingPolicy {
     public:
-        EnergyAwareStochasticForwardingPolicy(float pheromoneWeight = 1.0, float energyWeight = 2.0);
+        EnergyAwareStochasticForwardingPolicy(EnergyAwareRoutingTable* routingTable, float pheromoneWeight = 1.0, float energyWeight = 2.0);
         virtual ~EnergyAwareStochasticForwardingPolicy(){};
 
-        virtual NextHop* getNextHop(const Packet* packet, RoutingTable* routingTable);
+        virtual NextHop* getNextHop(const Packet* packet);
 
         void setPheromoneWeight(float alpha);
         void setEnergyWeight(float beta);
@@ -31,6 +32,7 @@ class EnergyAwareStochasticForwardingPolicy : public StochasticForwardingPolicy 
         int getRandomNodeIndex(float cumulativeSum[]);
 
     protected:
+        EnergyAwareRoutingTable* routingTable;
         /** the weight of the pheromone variable in the transmission probability **/
         float alpha;
 

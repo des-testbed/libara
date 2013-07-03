@@ -32,19 +32,23 @@ BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
 
     unsigned int maxEnergyValue = 100;
     float influenceOfMinimumEnergyValue = 3;
+    unsigned int routeDiscoveryDelayInMilliSeconds = 2;
+
+    EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
 
     return BasicEARAConfiguration(
-        new EnergyAwareRoutingTable(),
+        routingTable,
         new EARAPacketFactory(15),
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
-        new BestPheromoneForwardingPolicy(),
+        new BestPheromoneForwardingPolicy(routingTable),
         initialPhi,
         maxNrOfRouteDiscoveryRetries,
         routeDiscoveryTimeoutInMilliSeconds,
         packetDeliveryDelayInMilliSeconds,
         maxEnergyValue,
-        influenceOfMinimumEnergyValue
+        influenceOfMinimumEnergyValue,
+        routeDiscoveryDelayInMilliSeconds
     );
 }
 
@@ -90,6 +94,15 @@ EnergyAwareRoutingTable* EARAClientMock::getRoutingTable() {
 
 EARAPacketFactory* EARAClientMock::getPacketFactory() {
     return packetFactory;
+}
+
+TimerMock* EARAClientMock::getRouteDiscoveryDelayTimer(AddressPtr source, unsigned int seqNumber) {
+    if (runningRouteDiscoveryDelayTimers.find(source) != runningRouteDiscoveryDelayTimers.end()) {
+        return (TimerMock*) runningRouteDiscoveryDelayTimers[source];
+    }
+    else {
+        return nullptr;
+    }
 }
 
 ARA_NAMESPACE_END

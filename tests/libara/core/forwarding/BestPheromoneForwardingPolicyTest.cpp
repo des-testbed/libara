@@ -26,15 +26,16 @@ TEST_GROUP(BestPheromoneForwardingPolicyTest) {
     NetworkInterfaceMock* interface;
 
     void setup() {
-        policy = new BestPheromoneForwardingPolicy();
         client = new ARAClientMock();
         routingTable = client->getRoutingTable();
         client->setForwardingPolicy(policy);
         interface = client->createNewNetworkInterfaceMock();
+        policy = new BestPheromoneForwardingPolicy(routingTable);
     }
 
     void teardown() {
         delete client;
+        delete policy;
     }
 };
 
@@ -49,7 +50,7 @@ TEST(BestPheromoneForwardingPolicyTest, testGetNextHop) {
     routingTable->update(packet.getDestination(), route2, interface, 2.1);
     routingTable->update(packet.getDestination(), route3, interface, 2.3);
     
-    NextHop* nextHop = policy->getNextHop(&packet, routingTable);
+    NextHop* nextHop = policy->getNextHop(&packet);
 
     // check if the chosen node matches the node with the highest pheromone value
     CHECK(nextHop->getAddress()->equals(route3));
@@ -67,7 +68,7 @@ TEST(BestPheromoneForwardingPolicyTest, neverChooseTheSenderOfAPacket) {
     routingTable->update(packet.getDestination(), route2, interface, 2.1);
     routingTable->update(packet.getDestination(), route3, interface, 3.0);
 
-    NextHop* nextHop = policy->getNextHop(&packet, routingTable);
+    NextHop* nextHop = policy->getNextHop(&packet);
 
     // check if the chosen node matches the node with the highest pheromone value
     CHECK(nextHop->getAddress()->equals(route2));

@@ -10,51 +10,45 @@
 #include <cmath>
 #include <deque>
 
-using namespace ARA;
+ARA_NAMESPACE_BEGIN
 
-EnergyAwareStochasticForwardingPolicy::EnergyAwareStochasticForwardingPolicy(float pheromoneWeight, float energyWeight) {
+EnergyAwareStochasticForwardingPolicy::EnergyAwareStochasticForwardingPolicy(EnergyAwareRoutingTable* routingTable, float pheromoneWeight, float energyWeight) : StochasticForwardingPolicy(routingTable) {
+    this->routingTable = routingTable;
     alpha = pheromoneWeight;
     beta = energyWeight;
 }
 
-NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet, RoutingTable* routingTable) {
-    try {
-        EnergyAwareRoutingTable* energyAwareRoutingTable = static_cast<EnergyAwareRoutingTable*>(routingTable);
+NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet) {
+    std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
+    unsigned int nrOfPossibleNextHops = possibleNextHops.size();
 
-        std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
-        unsigned int nrOfPossibleNextHops = possibleNextHops.size();
+    float sum = 0.0;
+    float products[nrOfPossibleNextHops];
 
-        float sum = 0.0;
-        float products[nrOfPossibleNextHops];
+    for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
+        RoutingTableEntry* entry = possibleNextHops.at(i);
+        float pheromoneValue = entry->getPheromoneValue();
+        //float energyValue = energyAwareRoutingTable->getEnergyValue(entry->getAddress()); //FIXME what if we do not have any energy information for this node
+        //FIXME
+        float energyValue = 1;
 
-        for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
-            RoutingTableEntry* entry = possibleNextHops.at(i);
-            float pheromoneValue = entry->getPheromoneValue();
-            //float energyValue = energyAwareRoutingTable->getEnergyValue(entry->getAddress()); //FIXME what if we do not have any energy information for this node
-            //FIXME
-            float energyValue = 1;
+        float potentiatedPheromoneValue = pow(pheromoneValue, alpha);
+        float potentiatedEnergyValue = pow(energyValue, beta);
 
-            float potentiatedPheromoneValue = pow(pheromoneValue, alpha);
-            float potentiatedEnergyValue = pow(energyValue, beta);
-
-            products[i] = potentiatedPheromoneValue * potentiatedEnergyValue;
-            sum += products[i];
-        }
-
-        float probabilities[nrOfPossibleNextHops];
-        for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
-            probabilities[i] = products[i] / sum;
-        }
-
-        float cumulativeSum[nrOfPossibleNextHops];
-        std::partial_sum(probabilities, probabilities + nrOfPossibleNextHops, cumulativeSum);
-
-        int nodeIndex = getRandomNodeIndex(cumulativeSum);
-        return possibleNextHops.at(nodeIndex)->getNextHop();
-
-    } catch (std::bad_cast& exception) {
-        throw Exception("EnergyAwareStochasticForwardingPolicy: cast to EnergyAwareRoutingTable failed");
+        products[i] = potentiatedPheromoneValue * potentiatedEnergyValue;
+        sum += products[i];
     }
+
+    float probabilities[nrOfPossibleNextHops];
+    for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
+        probabilities[i] = products[i] / sum;
+    }
+
+    float cumulativeSum[nrOfPossibleNextHops];
+    std::partial_sum(probabilities, probabilities + nrOfPossibleNextHops, cumulativeSum);
+
+    int nodeIndex = getRandomNodeIndex(cumulativeSum);
+    return possibleNextHops.at(nodeIndex)->getNextHop();
 }
 
 int EnergyAwareStochasticForwardingPolicy::getRandomNodeIndex(float cumulativeSum[]) {
@@ -74,3 +68,5 @@ void EnergyAwareStochasticForwardingPolicy::setPheromoneWeight(float alpha){
 void EnergyAwareStochasticForwardingPolicy::setEnergyWeight(float beta){
     this->beta = beta;
 }
+
+ARA_NAMESPACE_END

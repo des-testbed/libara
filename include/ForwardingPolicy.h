@@ -5,24 +5,43 @@
 #ifndef FORWARDING_POLICY_H_
 #define FORWARDING_POLICY_H_
 
+#include "ARAMacros.h"
+#include "RoutingTable.h"
 #include "NextHop.h"
 #include "Packet.h"
-#include "RoutingTable.h"
 
-namespace ARA { 
-    /**
-     * This purely virtual interface is used by the AbstractARAClient to determine
-     * the next hop for a given packet.
-     */
-    class ForwardingPolicy {
-        public:
-            virtual ~ForwardingPolicy() {};
+ARA_NAMESPACE_BEGIN
 
-            /**
-             * Return the NextHop for the given packet according to this packet forwarding
-             * policy.
-             */
-            virtual NextHop* getNextHop(const Packet*, RoutingTable* routingTable) = 0;
-    };
-}
+/**
+ * This purely virtual interface is used by the AbstractARAClient to determine
+ * the next hop for a given packet.
+ */
+class ForwardingPolicy {
+    public:
+        /**
+         * Creates a new forwarding policy and gives it a RoutingTable object
+         * which will be used in the forwarding decision.
+         */
+        ForwardingPolicy(RoutingTable* routingTable);
+        virtual ~ForwardingPolicy() {};
+
+        /**
+         * Return the NextHop for the given packet according to this packet forwarding
+         * policy.
+         */
+        virtual NextHop* getNextHop(const Packet* packet) = 0;
+
+        /**
+         * Determines the fitness of a given RoutingTableEntry.
+         * The default implementation just returns the corresponding pheromone value.
+         * This could count in additional weighting parameters or combine several metrics.
+         */
+        virtual float calculateFitnessOfRoute(RoutingTableEntry* entry) const;
+
+    protected:
+        RoutingTable* routingTable;
+};
+
+ARA_NAMESPACE_END
+
 #endif

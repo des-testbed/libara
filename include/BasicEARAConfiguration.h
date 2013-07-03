@@ -30,12 +30,14 @@ public:
                            unsigned int routeDiscoveryTimeoutInMilliSeconds=1000,
                            unsigned int packetDeliveryDelayInMilliSeconds=5,
                            unsigned int maximumEnergyValue=255,
-                           float influenceOfMinimumEnergyValue=3);
+                           float influenceOfMinimumEnergyValue=3,
+                           unsigned int routeDiscoveryDelayInMilliSeconds=2);
 
     virtual EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const;
     EARAPacketFactory* getEARAPacketFactory() const;
     virtual unsigned int getMaximumEnergyValue() const;
     virtual float getInfluenceOfMinimumEnergyValue() const;
+    virtual unsigned int getRouteDiscoveryDelayInMilliSeconds() const;
 
     void setMaximumEnergyValue(unsigned int newMaxEnergy);
     void setInfluenceOfMinimumEnergyValue(float b);
@@ -45,6 +47,7 @@ private:
     EARAPacketFactory* packetFactory;
     unsigned int maximumEnergyValue;
     float influenceOfMinimumEnergyValue;
+    unsigned int routeDiscoveryDelayInMilliSeconds;
 };
 
 ARA_NAMESPACE_END

@@ -41,6 +41,7 @@ class OMNeTConfiguration : public virtual Configuration {
         void setLogLevel(const char* logLevelParameter);
 
     protected:
+        RoutingTable* routingTable;
         EvaporationPolicy* evaporationPolicy;
         PathReinforcementPolicy* reinforcementPolicy;
         ForwardingPolicy* forwardingPolicy;

@@ -15,5 +15,11 @@ simple EARA extends ARA {
      	// Friedrich Große for further explanation (corresponds to `b` in Energy initialization equation).
         double influenceOfMinimumEnergyValue;
         
+        // The time a client waits for other arriving ant packets in the route discovery phase
+        // before it rebroadcasts the packet to its neighbors. This gives routes with a higher delay
+        // but better energy fitness a chance of beeing part of the route discovery
+        // See the Master's Thesis of Große for further explanation. 
+        int routeDiscoveryDelay @unit(mS) = default(2mS);
+        
         @statistic[dropPacketBecauseEnergyDepleted](title="Dropped packets because of depleted energy";record=count,vector);
 }
