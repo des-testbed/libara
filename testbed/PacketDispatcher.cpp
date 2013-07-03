@@ -10,31 +10,23 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-_dessert_cb_results PacketToMeshDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t* ProcessingFlags, dessert_sysif_t* SystemInterface, dessert_frameid_t id) {
-    dessert_debug("PacketToMeshDispatcher: Received packet from sys, broadcasting via mesh");
-
-    if(dessert_meshsend(ReceivedMessage,NULL) == DESSERT_OK){
-        return DESSERT_MSG_DROP;
-    }
-
-    return DESSERT_MSG_NEEDNOSPARSE;
+_dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t* interface, dessert_frameid_t id) {
+    dessert_debug("PacketFromNetworkDispatcher");
+    //Convert dessert_msg_t to Packet
+    //Get interface
+    //interface -> receive (replaces syssend)
+    return DESSERT_MSG_DROP; //removes packet from processing pipeline
 }
 
-_dessert_cb_results PacketToSystemDispatcher (dessert_msg_t* ReceivedMessage, uint32_t Length, dessert_msg_proc_t *ProcessingFlags, dessert_meshif_t *MeshInterface, dessert_frameid_t id) {
-    dessert_debug("PacketToSystemDispatcher: Sending packet");
+void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface) {
+    dessert_msg_t* message = extractDessertMessage(packet);
+    dessert_meshif_t* interface = extractDessertMeshInterface(testbedInterface);
+    messageToNetworkDispatcher(message, sizeof(message), NULL, interface, message->u16);
+}
 
-    struct ether_header *eth;
-    size_t eth_len;
-
-    if (ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_DST ||
-        ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_BROADCAST ||
-        ProcessingFlags->lflags & DESSERT_RX_FLAG_L25_MULTICAST ) {
-            eth_len = dessert_msg_ethdecap(ReceivedMessage, &eth);
-            dessert_syssend(eth, eth_len);
-            free(eth);
-    }
-
-    return DESSERT_MSG_KEEP;
+_dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t *interface, dessert_frameid_t id) {
+    dessert_meshsend(messageToSend, interface);
+          return DESSERT_MSG_DROP;
 }
 
 Packet* extractPacket(dessert_msg_t* dessertMessage) {
@@ -87,6 +79,11 @@ dessert_msg_t* extractDessertMessage(Packet* packet) {
     memcpy(payload, packet->getPayload(), payloadSize);
 
     return dessertMessage;
+}
+
+dessert_meshif_t* extractDessertMeshInterface(NetworkInterface* testbedInterface) {
+    //TODO: Currently is set up to send over all Mesh interfaces. Implement logic to select an interface.
+    return NULL;
 }
 
 TESTBED_NAMESPACE_END
