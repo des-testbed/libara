@@ -5,6 +5,7 @@
 #ifndef EARACLIENT_MOCK_H_
 #define EARACLIENT_MOCK_H_
 
+#include "ARAMacros.h"
 #include "AbstractEARAClient.h"
 #include "AbstractClientMockBase.h"
 #include "Packet.h"
@@ -15,7 +16,7 @@
 
 #include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 /**
  * A EARAClientMock implements the abstract EARA Client and holds references to
@@ -46,5 +47,6 @@ private:
     unsigned char currentEnergyLevel;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif /* EARACLIENT_MOCK_H_ */

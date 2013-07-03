@@ -6,7 +6,9 @@
 #include <limits.h>
 ARA_NAMESPACE_BEGIN
 
-BasicConfiguration::BasicConfiguration(EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, unsigned int routeDiscoveryTimeoutInMilliSeconds, unsigned int packetDeliveryDelayInMilliSeconds) {
+BasicConfiguration::BasicConfiguration(RoutingTable* routingTable, EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, unsigned int routeDiscoveryTimeoutInMilliSeconds, unsigned int packetDeliveryDelayInMilliSeconds) {
+    this->routingTable = routingTable;
+    this->routingTable->setEvaporationPolicy(evaporationPolicy);
     this->evaporationPolicy = evaporationPolicy;
     this->reinforcementPolicy = reinforcementPolicy;
     this->forwardingPolicy = forwardingPolicy;
@@ -24,6 +26,10 @@ BasicConfiguration::BasicConfiguration(EvaporationPolicy* evaporationPolicy, Pat
 
     // previousHop feature
     this->previousHopFeatureIsActivated = true; // enabled by default
+}
+
+RoutingTable* BasicConfiguration::getRoutingTable() {
+    return routingTable;
 }
 
 EvaporationPolicy* BasicConfiguration::getEvaporationPolicy() {

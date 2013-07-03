@@ -8,12 +8,14 @@
 #include "ARAMacros.h"
 #include "BasicConfiguration.h"
 #include "EARAConfiguration.h"
+#include "EnergyAwareRoutingTable.h"
 
 ARA_NAMESPACE_BEGIN
 
 class BasicEARAConfiguration : public virtual BasicConfiguration, public EARAConfiguration {
 public:
-    BasicEARAConfiguration(EvaporationPolicy* evaporationPolicy,
+    BasicEARAConfiguration(EnergyAwareRoutingTable* routingTable,
+                           EvaporationPolicy* evaporationPolicy,
                            PathReinforcementPolicy* reinforcementPolicy,
                            ForwardingPolicy* forwardingPolicy,
                            float initialPheromoneValue,
@@ -22,9 +24,11 @@ public:
                            unsigned int packetDeliveryDelayInMilliSeconds=5,
                            unsigned int energyDisseminationTimeoutInMilliSeconds=1000);
 
+    virtual EnergyAwareRoutingTable* getRoutingTable() const;
     virtual unsigned int getEnergyDisseminationTimeout() const;
 
 private:
+    EnergyAwareRoutingTable* routingTable;
     unsigned int energyDisseminationTimeout;
 };
 

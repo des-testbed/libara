@@ -20,6 +20,10 @@ AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable 
 }
 
 void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* routingTable, PacketFactory* packetFactory) {
+    //FIXME remove routingTable parameter
+    this->routingTable = configuration.getRoutingTable();
+    delete routingTable;
+
     forwardingPolicy = configuration.getForwardingPolicy();
     pathReinforcementPolicy = configuration.getReinforcementPolicy();
     evaporationPolicy = configuration.getEvaporationPolicy();
@@ -34,10 +38,8 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
 
     this->packetFactory = packetFactory;
     this->packetFactory->setPreviousHopFeature(isPreviousHopFeatureActivated);
-    this->routingTable = routingTable;
-    routingTable->setEvaporationPolicy(evaporationPolicy);
 
-    packetTrap = new PacketTrap(routingTable);
+    packetTrap = new PacketTrap(this->routingTable);
     runningRouteDiscoveries = RunningRouteDiscoveriesMap();
 
     if (neighborActivityCheckIntervalInMilliSeconds > 0) {

@@ -29,6 +29,7 @@ BasicConfiguration ARAClientMock::getStandardConfiguration() const {
     float initialPhi = 5.0;
     float deltaPhi = 5.0;
     return BasicConfiguration(
+        new RoutingTableMock(),
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
         new BestPheromoneForwardingPolicy(),

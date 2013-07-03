@@ -7,7 +7,6 @@
 
 #include "OMNeTARAMacros.h"
 #include "Configuration.h"
-#include "AbstractARAClient.h"
 #include "RoutingTable.h"
 #include "IInterfaceTable.h"
 #include "OMNeTLogger.h"
@@ -18,6 +17,7 @@ class OMNeTConfiguration : public virtual Configuration {
     public:
         OMNeTConfiguration(cModule* module);
 
+        virtual RoutingTable* getRoutingTable();
         virtual EvaporationPolicy* getEvaporationPolicy();
         virtual PathReinforcementPolicy* getReinforcementPolicy();
         virtual ForwardingPolicy* getForwardingPolicy();
@@ -33,7 +33,6 @@ class OMNeTConfiguration : public virtual Configuration {
 
         double getMaximumBatteryLevel();
 
-        virtual RoutingTable* getRoutingTable();
         Logger* getLogger();
 
     protected:

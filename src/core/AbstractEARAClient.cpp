@@ -19,7 +19,8 @@ void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, Energy
     energyDisseminationTimer = Environment::getClock()->getNewTimer();
     energyDisseminationTimer->addTimeoutListener(this);
     energyDisseminationTimer->run(energyDisseminationTimeoutInMillis * 1000);
-    this->routingTable = routingTable;
+    this->routingTable = configuration.getRoutingTable();
+    //FIXME remove routingTableParameter
 }
 
 AbstractEARAClient::~AbstractEARAClient() {
