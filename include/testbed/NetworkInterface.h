@@ -18,7 +18,7 @@ class NetworkInterface : public ReliableNetworkInterface {
 
     protected:
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
-
+        void deliverToARAClient(Packet* packet);
         static AddressPtr localAddress;
         static AddressPtr broadcastAddress;
         std::string name;

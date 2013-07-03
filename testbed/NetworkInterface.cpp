@@ -16,7 +16,11 @@ NetworkInterface::NetworkInterface(std::string name, AbstractARAClient* client, 
 }
 
 void NetworkInterface::receive(Packet* packet) {
-    //TODO
+        deliverToARAClient(packet);
+}
+
+void NetworkInterface::deliverToARAClient(Packet* packet) {
+        client->receivePacket(packet, this);
 }
 
 bool NetworkInterface::equals(ARA::NetworkInterface* otherInterface) {
