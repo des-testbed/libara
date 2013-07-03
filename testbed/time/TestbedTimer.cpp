@@ -6,7 +6,7 @@ TESTBED_NAMESPACE_BEGIN
 
 TestbedTimer::~TestbedTimer(){
    /// TODO: check this (since the thread might not receive the exception)	
-   this->interrupt();
+///   this->interrupt();
 }
 
 void TestbedTimer::run(unsigned long timeoutInMicroSeconds){
