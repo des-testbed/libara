@@ -24,7 +24,7 @@ public:
                            unsigned int packetDeliveryDelayInMilliSeconds=5,
                            unsigned int energyDisseminationTimeoutInMilliSeconds=1000);
 
-    virtual EnergyAwareRoutingTable* getRoutingTable() const;
+    virtual EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const;
     virtual unsigned int getEnergyDisseminationTimeout() const;
 
 private:

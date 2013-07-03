@@ -21,7 +21,7 @@ BasicEARAConfiguration::BasicEARAConfiguration(
     this->energyDisseminationTimeout = energyDisseminationTimeoutInMilliSeconds;
 }
 
-EnergyAwareRoutingTable* BasicEARAConfiguration::getRoutingTable() const {
+EnergyAwareRoutingTable* BasicEARAConfiguration::getEnergyAwareRoutingTable() const {
     return routingTable;
 }
 

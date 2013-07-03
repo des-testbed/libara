@@ -37,14 +37,14 @@ public:
      * if possible. It will initialize the client with the given configuration so no additional
      * call to AbstractARAClient::initialize is required.
      */
-    AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable *routingTable, PacketFactory* packetFactory);
+    AbstractEARAClient(EARAConfiguration& configuration, PacketFactory* packetFactory);
 
     /**
      * The standard virtual destructor of this abstract class.
      */
     virtual ~AbstractEARAClient();
 
-    void initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, PacketFactory* packetFactory);
+    void initializeEARA(EARAConfiguration& configuration, PacketFactory* packetFactory);
 
     /**
      * This method must be implemented by the concrete EARA client. It returns the current energy

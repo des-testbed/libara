@@ -18,11 +18,11 @@ ARA_NAMESPACE_BEGIN
 
 ARAClientMock::ARAClientMock() {
     BasicConfiguration configuration = getStandardConfiguration();
-    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
+    initialize(configuration, new PacketFactory(15));
 }
 
 ARAClientMock::ARAClientMock(Configuration& configuration) {
-    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
+    initialize(configuration, new PacketFactory(15));
 }
 
 BasicConfiguration ARAClientMock::getStandardConfiguration() const {

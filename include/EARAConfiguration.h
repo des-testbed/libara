@@ -19,7 +19,7 @@ class EARAConfiguration : public virtual Configuration {
 public:
     virtual ~EARAConfiguration() {};
 
-    virtual EnergyAwareRoutingTable* getRoutingTable() const = 0;
+    virtual EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const = 0;
 
     /**
      * Returns the time in milliseconds that shall pass between the

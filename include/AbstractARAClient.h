@@ -64,7 +64,7 @@ public:
      * if possible. It will initialize the client with the given configuration so no additional
      * call to AbstractARAClient::initialize is required.
      */
-    AbstractARAClient(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory);
+    AbstractARAClient(Configuration& configuration, PacketFactory* packetFactory);
 
     /**
      * The standard virtual destructor of this abstract class.
@@ -107,7 +107,7 @@ public:
      * AbstractARAClient::receivePacket. If this object has been created by the
      * standard constructor this method must be called manually.
      */
-    void initialize(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory);
+    void initialize(Configuration& configuration, PacketFactory* packetFactory);
 
     //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     bool hasBeenReceivedEarlier(const Packet* packet);

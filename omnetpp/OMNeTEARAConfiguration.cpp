@@ -15,7 +15,7 @@ unsigned int OMNeTEARAConfiguration::getEnergyDisseminationTimeout() const {
     return energyDisseminationTimeout;
 }
 
-EnergyAwareRoutingTable* OMNeTEARAConfiguration::getRoutingTable() {
+EnergyAwareRoutingTable* OMNeTEARAConfiguration::getEnergyAwareRoutingTable() {
     EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
     return routingTable;

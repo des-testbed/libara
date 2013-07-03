@@ -15,15 +15,12 @@ using namespace std;
 
 ARA_NAMESPACE_BEGIN
 
-AbstractARAClient::AbstractARAClient(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) {
-    initialize(configuration, routingTable, packetFactory);
+AbstractARAClient::AbstractARAClient(Configuration& configuration, PacketFactory* packetFactory) {
+    initialize(configuration, packetFactory);
 }
 
-void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* routingTable, PacketFactory* packetFactory) {
-    //FIXME remove routingTable parameter
-    this->routingTable = configuration.getRoutingTable();
-    delete routingTable;
-
+void AbstractARAClient::initialize(Configuration& configuration, PacketFactory* packetFactory) {
+    routingTable = configuration.getRoutingTable();
     forwardingPolicy = configuration.getForwardingPolicy();
     pathReinforcementPolicy = configuration.getReinforcementPolicy();
     evaporationPolicy = configuration.getEvaporationPolicy();
@@ -39,7 +36,7 @@ void AbstractARAClient::initialize(Configuration& configuration, RoutingTable* r
     this->packetFactory = packetFactory;
     this->packetFactory->setPreviousHopFeature(isPreviousHopFeatureActivated);
 
-    packetTrap = new PacketTrap(this->routingTable);
+    packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = RunningRouteDiscoveriesMap();
 
     if (neighborActivityCheckIntervalInMilliSeconds > 0) {
