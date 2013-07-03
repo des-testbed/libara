@@ -24,7 +24,6 @@ void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterfac
 }
 
 _dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
-    dessert_meshsend(messageToSend, NULL);
           return DESSERT_MSG_DROP;
 }
 
