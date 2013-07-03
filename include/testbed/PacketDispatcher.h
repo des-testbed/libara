@@ -15,7 +15,7 @@ TESTBED_NAMESPACE_BEGIN
 /**
  * Receives a dessert_message_t from the NIC and sends to libARA.
  */
-_dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t* interface, dessert_frameid_t id);
+_dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id);
 
 /**
  * Receives a Packet from an Interface and converts to a message, then dispatches it to DES-SERT
@@ -23,9 +23,11 @@ _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived,
 void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface);
 
 /**
- * Sends a dessert_msg_t over the selected dessert_meshif_t, or all mesh interfaces if interface = null.
+ * Sends a dessert_msg_t over all mesh interfaces when received over TUN/TAP.
+ * Note: LibARA currently does not send packets to DES-SERT via TUN/TAP, however this method is called manually such that
+ * packets are treated the same way.
  */
-_dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t *interface, dessert_frameid_t id);
+_dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id);
 /**
  * Extracts all data from a dessert message that is necessary to create a libARA Packet object.
  */

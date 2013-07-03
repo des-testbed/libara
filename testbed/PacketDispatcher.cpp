@@ -10,8 +10,7 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-_dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t* interface, dessert_frameid_t id) {
-    dessert_debug("PacketFromNetworkDispatcher");
+_dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
     //Convert dessert_msg_t to Packet
     //Get interface
     //interface -> receive (replaces syssend)
@@ -20,12 +19,11 @@ _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived,
 
 void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface) {
     dessert_msg_t* message = extractDessertMessage(packet);
-    dessert_meshif_t* interface = extractDessertMeshInterface(testbedInterface);
-    messageToNetworkDispatcher(message, sizeof(message), NULL, interface, message->u16);
+    messageToNetworkDispatcher(message, sizeof(message), NULL, NULL, message->u16);
 }
 
-_dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t *interface, dessert_frameid_t id) {
-    dessert_meshsend(messageToSend, interface);
+_dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
+    dessert_meshsend(messageToSend, NULL);
           return DESSERT_MSG_DROP;
 }
 
