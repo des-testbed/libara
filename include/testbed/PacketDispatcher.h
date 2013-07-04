@@ -44,6 +44,11 @@ ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage);
 dessert_msg_t* extractDessertMessage(Packet* packet);
 
 /**
+ * Adds a ethernet header to a dessert message.
+ */
+void addEthernetHeader(dessert_msg_t* message, TestbedAddressPtr nextHop);
+
+/**
  * Returns a pointer to the dessert mesh interface represented by a given testbed::NetworkInterface.
  */
 dessert_meshif_t* extractDessertMeshInterface(NetworkInterface* testbedInterface);
