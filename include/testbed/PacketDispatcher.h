@@ -25,7 +25,7 @@ _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived,
 /**
  * Receives a Packet from an Interface and converts to a message, then sends it over selected interface (if NULL sends over all interfaces)
  */
-void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface);
+void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient);
 
 /**
  * Stub; tells DES-SERT to drop packets received from user space.
