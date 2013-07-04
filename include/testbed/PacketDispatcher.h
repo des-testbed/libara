@@ -25,7 +25,7 @@ _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived,
 /**
  * Receives a Packet from an Interface and converts to a message, then sends it over selected interface (if NULL sends over all interfaces)
  */
-void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient);
+void packetToNetworkDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient);
 
 /**
  * Stub; tells DES-SERT to drop packets received from user space.
@@ -51,7 +51,7 @@ routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage);
 /**
  * Extracts all data from a packet and stores in a dessert message.
  */
-dessert_msg_t* extractDessertMessage(Packet* packet);
+dessert_msg_t* extractDessertMessage(const Packet* packet);
 
 /**
  * Adds a ethernet header to a dessert message.

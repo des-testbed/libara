@@ -17,7 +17,7 @@ _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived,
     return DESSERT_MSG_DROP; //removes packet from processing pipeline
 }
 
-void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
+void packetToNetworkDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
     dessert_msg_t* message = extractDessertMessage(packet);
     addEthernetHeader(message, recipient);
     dessert_meshif_t* interface = extractDessertMeshInterface(testbedInterface);
@@ -60,7 +60,7 @@ routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage) {
     return (routingExtension*) extension->data;
 }
 
-dessert_msg_t* extractDessertMessage(Packet* packet) {
+dessert_msg_t* extractDessertMessage(const Packet* packet) {
     dessert_msg_t* dessertMessage;
     dessert_msg_new(&dessertMessage);
 
