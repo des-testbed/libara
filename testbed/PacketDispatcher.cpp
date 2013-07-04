@@ -79,6 +79,18 @@ dessert_msg_t* extractDessertMessage(Packet* packet) {
     return dessertMessage;
 }
 
+void addEthernetHeader(dessert_msg_t* message, TestbedAddressPtr nextHop) {
+    dessert_ext_t* extension;
+    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
+
+    struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
+    u_int8_t* source = DESSERT_LOCAL_ADDRESS;
+    u_int8_t* destination = nextHop->getDessertValue();
+
+    memcpy(ethernetFrame->ether_shost, source, ETHER_ADDR_LEN);
+    memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
+}
+
 dessert_meshif_t* extractDessertMeshInterface(NetworkInterface* testbedInterface) {
     //TODO: Currently is set up to send over all Mesh interfaces. Implement logic to select an interface.
     return NULL;
