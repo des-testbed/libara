@@ -4,6 +4,7 @@
 
 #include "testbed/NetworkInterface.h"
 #include "TestbedAddress.h"
+#include "PacketDispatcher.h"
 
 TESTBED_NAMESPACE_BEGIN
 

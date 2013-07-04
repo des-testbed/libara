@@ -89,13 +89,14 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
     return dessertMessage;
 }
 
-void addEthernetHeader(dessert_msg_t* message, TestbedAddressPtr nextHop) {
+void addEthernetHeader(dessert_msg_t* message, AddressPtr nextHop) {
     dessert_ext_t* extension;
-    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
+    dessert_msg_addext(message, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
 
     struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
     u_int8_t* source = DESSERT_LOCAL_ADDRESS;
-    u_int8_t* destination = nextHop->getDessertValue();
+    TestbedAddressPtr recipient = std::dynamic_pointer_cast<TestbedAddress>(nextHop);
+    u_int8_t* destination = recipient->getDessertValue();
 
     memcpy(ethernetFrame->ether_shost, source, ETHER_ADDR_LEN);
     memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
