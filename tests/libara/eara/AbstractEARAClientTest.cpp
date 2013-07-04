@@ -83,7 +83,7 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfFANT) {
     client->receivePacket(fant, interface);
 
     // we need the timer to trigger the actual sending of the FANT
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source, 123);
+    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
     CHECK(routeDiscoveryDelayTimer != nullptr);
     CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
     CHECK(routeDiscoveryDelayTimer->isRunning());
@@ -137,7 +137,7 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant1->setSender(nextHop);
     fant1->setMinimumEnergyValue(40);
     fant1->setTotalEnergyValue(180);
-    fant1->decreaseTTL(4); // traveled 4 hops
+    fant1->decreaseTTL(3); // traveled 3 hops + 1 hop when the client receives the packet
     client->receivePacket(fant1, interface);
     DOUBLES_EQUAL(0.5, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 
@@ -151,7 +151,7 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant2->setSender(nextHop);
     fant2->setMinimumEnergyValue(40);
     fant2->setTotalEnergyValue(180);
-    fant2->decreaseTTL(4); // traveled 4 hops
+    fant2->decreaseTTL(3); // traveled 3 hops + 1 hop when the client receives the packet
     client->receivePacket(fant2, interface);
     DOUBLES_EQUAL(0.533333333, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 
@@ -165,7 +165,7 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant3->setSender(nextHop);
     fant3->setMinimumEnergyValue(40);
     fant3->setTotalEnergyValue(180);
-    fant3->decreaseTTL(4); // traveled 4 hops
+    fant3->decreaseTTL(3); // traveled 3 hops + 1 hop when the client receives the packet
     client->receivePacket(fant3, interface);
     DOUBLES_EQUAL(0.56, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 
@@ -179,7 +179,7 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant4->setSender(nextHop);
     fant4->setMinimumEnergyValue(40);
     fant4->setTotalEnergyValue(180);
-    fant4->decreaseTTL(4); // traveled 4 hops
+    fant4->decreaseTTL(3); // traveled 3 hops + 1 hop when the client receives the packet
     client->receivePacket(fant4, interface);
     DOUBLES_EQUAL(0.4, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 }
@@ -233,7 +233,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     client->receivePacket(fant1, interface);
     // no packet should have been broadcasted just yet
     BYTES_EQUAL(0, sentPackets->size());
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source, seqNumber);
+    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
     CHECK(routeDiscoveryDelayTimer != nullptr);
     CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
     CHECK(routeDiscoveryDelayTimer->isRunning());
@@ -260,12 +260,76 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     EARAPacket* sentPacket = castToEARAPacket(sentPackets->back()->getLeft());
     CHECK(sentPacket->getType() == PacketType::FANT);
     CHECK(sentPacket->getSource()->equals(source));
+    LONGS_EQUAL(seqNumber, sentPacket->getSequenceNumber());
     CHECK(sentPacket->getDestination()->equals(destination));
     LONGS_EQUAL(140 + client->getCurrentEnergyLevel(), sentPacket->getTotalEnergyValue());
     LONGS_EQUAL( 60, sentPacket->getMinimumEnergyValue());
     LONGS_EQUAL(3, sentPacket->getTTL());
+
+    // the route discovery timer should no longer exist
+    CHECK(client->getRouteDiscoveryDelayTimer(source) == nullptr);
 }
 
-TEST(AbstractEARAClientTest, overlappingRouteDiscoveryDelays) {
-    //FIXME implement this!
+/**
+ * In this test we check that a new route discovery delay timer is started, if the last one
+ * timed out and now there is a new route discovery
+ */
+TEST(AbstractEARAClientTest, routeDiscoveryDelayIsUsedForNextRouteDiscovery) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    EARAPacket* fant1 = castToEARAPacket(packetFactory->makeFANT(source, destination, 1));
+    fant1->setSender(sender);
+
+    // start test by receiving first the first FANT
+    client->receivePacket(fant1, interface);
+
+    // no packet should have been broadcasted just yet
+    BYTES_EQUAL(0, sentPackets->size());
+    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
+    CHECK(routeDiscoveryDelayTimer != nullptr);
+    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
+    CHECK(routeDiscoveryDelayTimer->isRunning());
+
+    // now the first timer expires and the FANT should be broadcasted again
+    routeDiscoveryDelayTimer->expire();
+    BYTES_EQUAL(1, sentPackets->size());
+    AddressPtr receiver = sentPackets->back()->getRight();
+    CHECK(interface->isBroadcastAddress(receiver));
+
+    EARAPacket* sentPacket = castToEARAPacket(sentPackets->back()->getLeft());
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(sentPacket->getSource()->equals(source));
+    LONGS_EQUAL(1, sentPacket->getSequenceNumber());
+    CHECK(sentPacket->getDestination()->equals(destination));
+
+    // the route discovery timer should no longer exist
+    CHECK(client->getRouteDiscoveryDelayTimer(source) == nullptr);
+
+    // now we start a new route discovery
+    EARAPacket* fant2 = castToEARAPacket(packetFactory->makeFANT(source, destination, 2));
+    fant2->setSender(sender);
+    client->receivePacket(fant2, interface);
+
+    // again the client is required to hold the packet back via the delay timer
+    BYTES_EQUAL(1, sentPackets->size());
+    routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
+    CHECK(routeDiscoveryDelayTimer != nullptr);
+    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
+    CHECK(routeDiscoveryDelayTimer->isRunning());
+
+    // now the second timer also expires and the FANT should be broadcasted again
+    routeDiscoveryDelayTimer->expire();
+    BYTES_EQUAL(2, sentPackets->size());
+    receiver = sentPackets->back()->getRight();
+    CHECK(interface->isBroadcastAddress(receiver));
+
+    sentPacket = castToEARAPacket(sentPackets->back()->getLeft());
+    CHECK(sentPacket->getType() == PacketType::FANT);
+    CHECK(sentPacket->getSource()->equals(source));
+    LONGS_EQUAL(2, sentPacket->getSequenceNumber());
+    CHECK(sentPacket->getDestination()->equals(destination));
 }

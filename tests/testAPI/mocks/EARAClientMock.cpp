@@ -96,7 +96,7 @@ EARAPacketFactory* EARAClientMock::getPacketFactory() {
     return packetFactory;
 }
 
-TimerMock* EARAClientMock::getRouteDiscoveryDelayTimer(AddressPtr source, unsigned int seqNumber) {
+TimerMock* EARAClientMock::getRouteDiscoveryDelayTimer(AddressPtr source) {
     if (runningRouteDiscoveryDelayTimers.find(source) != runningRouteDiscoveryDelayTimers.end()) {
         return (TimerMock*) runningRouteDiscoveryDelayTimers[source];
     }

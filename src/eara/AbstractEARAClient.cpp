@@ -40,7 +40,8 @@ void AbstractEARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* in
 }
 
 float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
-    int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL();
+    // the current client will decrease the TTL only after the routing table update so we have to add 1 now to get the actual number of hops including the current one
+    int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL() + 1;
     assert(nrOfHops > 0);
 
     if (nrOfHops == 1) {

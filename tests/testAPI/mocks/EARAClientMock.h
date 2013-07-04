@@ -44,7 +44,7 @@ public:
     EnergyAwareRoutingTable* getRoutingTable();
     EARAPacketFactory* getPacketFactory();
     TimerMock* getEnergyDisseminationTimer();
-    TimerMock* getRouteDiscoveryDelayTimer(AddressPtr source, unsigned int seqNumber);
+    TimerMock* getRouteDiscoveryDelayTimer(AddressPtr source);
 
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
 
