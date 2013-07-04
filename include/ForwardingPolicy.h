@@ -31,13 +31,6 @@ class ForwardingPolicy {
          */
         virtual NextHop* getNextHop(const Packet* packet) = 0;
 
-        /**
-         * Determines the fitness of a given RoutingTableEntry.
-         * The default implementation just returns the corresponding pheromone value.
-         * This could count in additional weighting parameters or combine several metrics.
-         */
-        virtual float calculateFitnessOfRoute(RoutingTableEntry* entry) const;
-
     protected:
         RoutingTable* routingTable;
 };
