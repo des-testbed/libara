@@ -54,6 +54,12 @@ ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage) {
     return (ether_header*) extension->data;
 }
 
+routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage) {
+    dessert_ext_t* extension;
+    dessert_msg_getext(dessertMessage, &extension, DESSERT_EXT_USER, 0);
+    return (routingExtension*) extension->data;
+}
+
 dessert_msg_t* extractDessertMessage(Packet* packet) {
     dessert_msg_t* dessertMessage;
     dessert_msg_new(&dessertMessage);
