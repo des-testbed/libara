@@ -18,9 +18,8 @@ _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived,
 }
 
 void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
-void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface) {
-    addEthernetHeader(message, recipient);
     dessert_msg_t* message = extractDessertMessage(packet);
+    addEthernetHeader(message, recipient);
     dessert_meshif_t* interface = extractDessertMeshInterface(testbedInterface);
     dessert_meshsend(message, interface);
 }
@@ -33,10 +32,11 @@ _dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uin
 
 Packet* extractPacket(dessert_msg_t* dessertMessage) {
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
+    routingExtension* araHeader = extractRoutingExtension(dessertMessage);
 
-    AddressPtr source (new TestbedAddress(ethernetFrame->ether_shost));
-    AddressPtr destination (new TestbedAddress(ethernetFrame->ether_dhost));
-    AddressPtr sender; //TODO
+    AddressPtr source (new TestbedAddress(araHeader->ara_shost));
+    AddressPtr destination (new TestbedAddress(araHeader->ara_dhost));
+    AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
 
     char packetType = dessertMessage->u8;
     unsigned int sequenceNumber = dessertMessage->u16;
@@ -69,17 +69,17 @@ dessert_msg_t* extractDessertMessage(Packet* packet) {
     dessertMessage->u8  = packet->getType();
 
     dessert_ext_t* extension;
-    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
 
-    struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
+    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, DESSERT_MAXEXTDATALEN);
+    struct routingExtension* araRoutingExtension = (struct routingExtension*) extension->data;
+
     TestbedAddressPtr sourceTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getSource());
     u_int8_t* source = sourceTestbedAddress->getDessertValue();
     TestbedAddressPtr destinationTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getDestination());
     u_int8_t* destination = destinationTestbedAddress->getDessertValue();
-    memcpy(ethernetFrame->ether_shost, source, ETHER_ADDR_LEN);
-    memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
 
-    //TODO: Sender
+    memcpy(araRoutingExtension->ara_shost, source, ETHER_ADDR_LEN);
+    memcpy(araRoutingExtension->ara_dhost, destination, ETHER_ADDR_LEN);
 
     void* payload;
     int payloadSize = packet->getPayloadLength();
