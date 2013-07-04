@@ -11,16 +11,15 @@
 TESTBED_NAMESPACE_BEGIN
 
 _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
-    //Convert dessert_msg_t to Packet
-    //Get interface
-    //interface -> receive (replaces syssend)
+    Packet* packet = extractPacket(messageReceived);
+    extractNetworkInterface(interface)->receive(packet);
     return DESSERT_MSG_DROP; //removes packet from processing pipeline
 }
 
 void packetToNetworkDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
     dessert_msg_t* message = extractDessertMessage(packet);
     addEthernetHeader(message, recipient);
-    dessert_meshif_t* interface = extractDessertMeshInterface(testbedInterface);
+    dessert_meshif_t* interface = testbedInterface->getDessertPointer();
     dessert_meshsend(message, interface);
 }
 
@@ -104,9 +103,14 @@ void addEthernetHeader(dessert_msg_t* message, AddressPtr nextHop) {
     memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
 }
 
-dessert_meshif_t* extractDessertMeshInterface(NetworkInterface* testbedInterface) {
-    //TODO: Currently is set up to send over all Mesh interfaces. Implement logic to select an interface.
-    return NULL;
+NetworkInterface* extractNetworkInterface(dessert_meshif_t* dessertInterface) {
+    std::unordered_map<dessert_meshif_t*, NetworkInterface*>::const_iterator got = networkInterfaces.find(dessertInterface);
+    if(got == networkInterfaces.end()) {
+       return(NULL);
+    }
+    else {
+        return got->second;
+    }
 }
 
 TESTBED_NAMESPACE_END
