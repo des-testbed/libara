@@ -16,13 +16,16 @@ TESTBED_NAMESPACE_BEGIN
 
 TEST_GROUP(PacketDispatcherTest) {
     ARAClientMock* client;
+    dessert_meshif_t* interface;
 
     void setup() {
         client = new ARAClientMock();
+        interface = new dessert_meshif_t();
     }
 
     void teardown() {
         delete client;
+        delete interface;
     }
 
     /**
@@ -67,7 +70,8 @@ TEST_GROUP(PacketDispatcherTest) {
      * Create a network interface for testing if some address is broadcast or the local address
      */
     NetworkInterface* createNetworkInterface() {
-        return new NetworkInterface("eth0", client, client->getPacketFactory(), 400);
+        memcpy(interface->hwaddr, DESSERT_LOCAL_ADDRESS, 6);
+        return new NetworkInterface(interface, client, client->getPacketFactory(), 400);
     }
 
     bool isSameAddress(u_char* address1, u_char* address2) {
@@ -152,7 +156,7 @@ TEST(PacketDispatcherTest, extractPacketWithoutPayload) {
     delete packet;
 }
 
-TEST(PacketDispatcherTest, packetToDessertMessage) { //Hangs
+TEST(PacketDispatcherTest, packetToDessertMessage) {
     u_char sourceMAC[] = {5,186,24,3,82,1};
     AddressPtr source (new TestbedAddress(sourceMAC));
     u_char destinationMAC[] = {192,168,1,1,69,18};
