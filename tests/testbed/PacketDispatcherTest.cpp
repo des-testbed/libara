@@ -40,8 +40,14 @@ TEST_GROUP(PacketDispatcherTest) {
         dessert_msg_addext(packet, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
 
         struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
-        memcpy(ethernetFrame->ether_shost, source, ETHER_ADDR_LEN);
+        memcpy(ethernetFrame->ether_shost, DESSERT_LOCAL_ADDRESS, ETHER_ADDR_LEN);
         memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
+
+        dessert_msg_addext(packet, &extension, DESSERT_EXT_USER, sizeof(routingExtension));
+
+        struct routingExtension* araHeader = (struct routingExtension*) extension->data;
+        memcpy(araHeader->ara_shost, source, ETHER_ADDR_LEN);
+        memcpy(araHeader->ara_dhost, destination, ETHER_ADDR_LEN);
 
         if (payload != nullptr) {
             int payloadSize = strlen(*payload)+1;
@@ -146,12 +152,11 @@ TEST(PacketDispatcherTest, extractPacketWithoutPayload) {
     delete packet;
 }
 
-TEST(PacketDispatcherTest, packetToDessertMessage) {
+TEST(PacketDispatcherTest, packetToDessertMessage) { //Hangs
     u_char sourceMAC[] = {5,186,24,3,82,1};
     AddressPtr source = AddressPtr(new TestbedAddress(sourceMAC));
     u_char destinationMAC[] = {192,168,1,1,69,18};
     AddressPtr destination = AddressPtr(new TestbedAddress(destinationMAC));
-
     char type = PacketType::BANT;
     unsigned int sequenceNumber = 37;
     int ttl = 42;
@@ -173,12 +178,11 @@ TEST(PacketDispatcherTest, packetToDessertMessage) {
     CHECK(isSameAddress(ethernetHeader->ether_shost, sourceMAC));
 
     const char* extractedPayload;
-    //ntohs converts payload length from network byte order to hose byte order
 
+    //ntohs converts payload length from network byte order to host byte order
     LONGS_EQUAL(payloadLength, ntohs(dessertMessage->plen));
     dessert_msg_getpayload(dessertMessage, (void**)&extractedPayload);
     STRCMP_EQUAL(payload, extractedPayload);
-
 }
 
 TESTBED_NAMESPACE_END
