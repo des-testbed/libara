@@ -32,13 +32,13 @@ TEST_GROUP(NetworkInterfaceTest) {
 
 TEST(NetworkInterfaceTest, equals) {
     NetworkInterface* otherInterface = new NetworkInterface(dessertInterface, client, client->getPacketFactory(), 600);
-    CHECK_FALSE(interface->equals(otherInterface));
+    CHECK(interface->equals(otherInterface));
     delete otherInterface;
 }
 
 TEST(NetworkInterfaceTest, notEquals) {
     NetworkInterface* ethInterface = new NetworkInterface(nullptr, client, client->getPacketFactory(), 400);
-    CHECK(interface->equals(ethInterface));
+    CHECK_FALSE(interface->equals(ethInterface));
     delete ethInterface;
 }
 
