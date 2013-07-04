@@ -40,8 +40,6 @@ typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>, Addr
 typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> ScheduledPANTsMap;
 typedef std::unordered_set<Timer*> DeliveryTimerSet;
 
-//TODO fix the visibility: most of the methods should be protected instead of public
-
 /**
  * TODO write class description
  */
@@ -109,24 +107,17 @@ public:
      */
     void initialize(Configuration& configuration);
 
-    //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
-    bool hasBeenReceivedEarlier(const Packet* packet);
-    //TODO AbstractARAClient::registerReceivedPacket(...) should be private. It is not because else the AbstractARAClientTest can not see this.. :(
-    void registerReceivedPacket(const Packet* packet);
-
     virtual void timerHasExpired(Timer* responsibleTimer);
 
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
     void setForwardingPolicy(ForwardingPolicy* newForwardingPolicy);
 
-    void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
-
-    void checkPantTimer(const Packet* packet);
-
     int getMaxTTL() const;
 
 protected:
+
+    void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
 
     /**
      * This method either initializes or reinforces a route in the routing table.
@@ -145,6 +136,20 @@ protected:
      * The new pheromone value is returned.
      */
     float reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
+    /**
+     * Checks if the given packet has been received before by checking the source address and
+     * sequence number field.
+     */
+    virtual bool hasBeenReceivedEarlier(const Packet* packet);
+
+    /**
+     * This will register the source address and sequence number of the given packet
+     * so we can determine if we have seen a packet before and also detect loops.
+     * If the previous hop feature is enabled, this will also remember the previous hop
+     * of this packet.
+     */
+    void registerReceivedPacket(const Packet* packet);
 
     /**
      * Handles a packet depending on its type. This method is protected virtual to enable
@@ -175,6 +180,7 @@ protected:
     void deleteRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
     void broadcastRouteFailure(AddressPtr destination);
     void broadcastPANT(AddressPtr destination);
+    void checkPantTimer(const Packet* packet);
 
     void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer);
     void handleExpiredDeliveryTimer(Timer* deliveryTimer);
