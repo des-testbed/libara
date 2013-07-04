@@ -19,26 +19,8 @@ class TestbedTimer : public Timer {
         virtual ~TestbedTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
+        void sleep(unsigned long timeoutInMicroSeconds);
         virtual void interrupt();
-
-        class Runner {
-            public:
-                void run(unsigned long timeoutInMicroSeconds) {
-                    try {
-                        /// set the sleep time
-                        std::chrono::microseconds duration(timeoutInMicroSeconds);
-                        /// set thread to sleep
-                        std::this_thread::sleep_for(duration);
-                    } catch (ThreadInterruptedException&) {
-                        /// do something smart
-		    
-                    }
-                }
-
-                void interrupt() {
-                    throw ThreadInterruptedException();
-                }
-        };
 };
 
 TESTBED_NAMESPACE_END

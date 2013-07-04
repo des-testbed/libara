@@ -19,8 +19,8 @@ _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived,
 
 void packetToNetworkDispatcher(Packet* packet, NetworkInterface* testbedInterface) {
     dessert_msg_t* message = extractDessertMessage(packet);
-    dessert+meshif_t* interface = extractDessertMeshInterface(testbedInterface);
-    dessert_meshsend(messageToSend, interface);
+    dessert_meshif_t* interface = extractDessertMeshInterface(testbedInterface);
+    dessert_meshsend(message, interface);
 }
 
 _dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {

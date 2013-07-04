@@ -10,16 +10,19 @@ TestbedTimer::~TestbedTimer(){
 }
 
 void TestbedTimer::run(unsigned long timeoutInMicroSeconds){
-    /// this class is defined in the header file of class TestbedTimer
-    Runner runner;
+    std::thread timer(&TestbedTimer::sleep, this, timeoutInMicroSeconds);
+    timer.detach();
+}
 
+void TestbedTimer::sleep(unsigned long timeoutInMicroSeconds){
     try {
-        std::thread timer(&Runner::run, &runner, timeoutInMicroSeconds);
-        timer.join();
         this->notifyAllListeners();
+        /// set the sleep time
+        std::chrono::microseconds duration(timeoutInMicroSeconds);
+        /// set thread to sleep
+        std::this_thread::sleep_for(duration);
     } catch(ThreadInterruptedException&) {
-	/// TODO: send exception thread context (better check that)
-        runner.interrupt();
+
     }
 }
 
