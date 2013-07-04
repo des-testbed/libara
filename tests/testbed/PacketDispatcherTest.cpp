@@ -157,7 +157,7 @@ TEST(PacketDispatcherTest, packetToDessertMessage) {
     int ttl = 42;
     const char* payload = "abcd";
     long payloadLength = 5;
-    Packet packet(source, destination, source, type, sequenceNumber, ttl, payload, payloadLength);
+    const Packet packet(source, destination, source, type, sequenceNumber, ttl, payload, payloadLength);
 
     dessert_msg_t* dessertMessage  = extractDessertMessage(&packet);
 
