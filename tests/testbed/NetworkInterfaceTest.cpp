@@ -14,26 +14,30 @@ TESTBED_NAMESPACE_BEGIN
 TEST_GROUP(NetworkInterfaceTest) {
     ARAClientMock* client;
     NetworkInterface* interface;
+    dessert_meshif_t* dessertInterface;
 
     void setup() {
         client = new ARAClientMock();
-        interface = new NetworkInterface("eth0", client, client->getPacketFactory(), 400);
+        dessertInterface = new dessert_meshif_t();
+        memcpy(dessertInterface->hwaddr, DESSERT_LOCAL_ADDRESS, 6);
+        interface = new NetworkInterface(dessertInterface, client, client->getPacketFactory(), 400);
     }
 
     void teardown() {
         delete client;
         delete interface;
+        delete dessertInterface;
     }
 };
 
-TEST(NetworkInterfaceTest, notEquals) {
-    NetworkInterface* tapInterface = new NetworkInterface("tap1", client, client->getPacketFactory(), 400);
-    CHECK_FALSE(interface->equals(tapInterface));
-    delete tapInterface;
+TEST(NetworkInterfaceTest, equals) {
+    NetworkInterface* otherInterface = new NetworkInterface(dessertInterface, client, client->getPacketFactory(), 600);
+    CHECK_FALSE(interface->equals(otherInterface));
+    delete otherInterface;
 }
 
-TEST(NetworkInterfaceTest, equals) {
-    NetworkInterface* ethInterface = new NetworkInterface("eth0", client, client->getPacketFactory(), 400);
+TEST(NetworkInterfaceTest, notEquals) {
+    NetworkInterface* ethInterface = new NetworkInterface(nullptr, client, client->getPacketFactory(), 400);
     CHECK(interface->equals(ethInterface));
     delete ethInterface;
 }
