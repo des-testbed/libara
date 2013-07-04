@@ -29,9 +29,7 @@ bool NetworkInterface::equals(ARA::NetworkInterface* otherInterface) {
 }
 
 void NetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> recipient){
-    dessert_msg_t* message = extractDessertMessage(packet);
-    addEthernetHeader(message, recipient);
-    messageToNetworkDispatcher(message, sizeof(message), NULL, NULL, message->u16);
+    packetToNetworkDispatcher(packet, this, recipient);
 }
 
 TESTBED_NAMESPACE_END
