@@ -14,7 +14,20 @@ AddressPtr NetworkInterface::broadcastAddress = AddressPtr(new TestbedAddress(DE
 NetworkInterface::NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds)
                         : ReliableNetworkInterface(client, packetFactory, ackTimeoutInMicroSeconds, localAddress, broadcastAddress) {
     this->dessertPointer = dessertPointer;
-    networkInterfaces[dessertPointer] = this;
+}
+
+void NetworkInterface::registerInterface() {
+    std::pair<dessert_meshif_t*, NetworkInterface*> interfacePair(dessertPointer, this);
+    networkInterfaces.insert(interfacePair);
+}
+
+bool NetworkInterface::isRegistered() {
+    if(extractNetworkInterface(dessertPointer) == this){
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 void NetworkInterface::receive(Packet* packet) {

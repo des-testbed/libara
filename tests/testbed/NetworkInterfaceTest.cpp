@@ -42,4 +42,9 @@ TEST(NetworkInterfaceTest, notEquals) {
     delete ethInterface;
 }
 
+TEST(NetworkInterfaceTest, registration) {
+    interface->registerInterface();
+    CHECK(interface->isRegistered());
+}
+
 TESTBED_NAMESPACE_END
