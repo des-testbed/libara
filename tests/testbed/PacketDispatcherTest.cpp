@@ -154,9 +154,9 @@ TEST(PacketDispatcherTest, extractPacketWithoutPayload) {
 
 TEST(PacketDispatcherTest, packetToDessertMessage) { //Hangs
     u_char sourceMAC[] = {5,186,24,3,82,1};
-    AddressPtr source = AddressPtr(new TestbedAddress(sourceMAC));
+    AddressPtr source (new TestbedAddress(sourceMAC));
     u_char destinationMAC[] = {192,168,1,1,69,18};
-    AddressPtr destination = AddressPtr(new TestbedAddress(destinationMAC));
+    AddressPtr destination (new TestbedAddress(destinationMAC));
     char type = PacketType::BANT;
     unsigned int sequenceNumber = 37;
     int ttl = 42;
@@ -172,10 +172,15 @@ TEST(PacketDispatcherTest, packetToDessertMessage) { //Hangs
     LONGS_EQUAL(ttl, dessertMessage->ttl);
     BYTES_EQUAL(type, dessertMessage->u8);
 
+    routingExtension* araHeader = extractRoutingExtension(dessertMessage);
+
+    CHECK(isSameAddress(araHeader->ara_dhost, destinationMAC));
+    CHECK(isSameAddress(araHeader->ara_shost, sourceMAC));
+
     ether_header* ethernetHeader = extractEthernetHeader(dessertMessage);
 
     CHECK(isSameAddress(ethernetHeader->ether_dhost, destinationMAC));
-    CHECK(isSameAddress(ethernetHeader->ether_shost, sourceMAC));
+    CHECK(isSameAddress(ethernetHeader->ether_shost, DESSERT_LOCAL_ADDRESS));
 
     const char* extractedPayload;
 
