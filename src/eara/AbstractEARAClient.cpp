@@ -45,7 +45,7 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
 
     if (nrOfHops == 1) {
         // packet has been directly received from the source
-        return packet->getTotalEnergyValue();
+        return packet->getTotalEnergyValue() / (float) maximumEnergyValue;
     }
     else {
         // decrease number of hops, because the energy of the last hop (current node has not been added to the packet)
@@ -65,6 +65,16 @@ void AbstractEARAClient::broadCast(Packet* packet) {
     AbstractARAClient::broadCast(earaPacket);
 }
 
+bool AbstractEARAClient::hasBeenReceivedEarlier(const Packet* packet) {
+    if (runningRouteDiscoveryDelayTimers.find(packet->getSource()) == runningRouteDiscoveryDelayTimers.end()) {
+        return AbstractARAClient::hasBeenReceivedEarlier(packet);
+    }
+    else {
+        // there is a route discovery delay timer running so we need to give this packet a chance
+        return false;
+    }
+}
+
 void AbstractEARAClient::handleAntPacket(Packet* packet) {
     char packetType = packet->getType();
     if ( (packetType == PacketType::FANT || packetType == PacketType::BANT) && isDirectedToThisNode(packet) == false) {
@@ -75,25 +85,39 @@ void AbstractEARAClient::handleAntPacket(Packet* packet) {
     }
 }
 
-void AbstractEARAClient::handleFANTorBANT(Packet* packet) {
-    AddressPtr source = packet->getSource();
-    RouteDiscoveryDelayTimerMap::iterator delayTimer;
-    delayTimer = runningRouteDiscoveryDelayTimers.find(source);
-    if (delayTimer == runningRouteDiscoveryDelayTimers.end()) {
+void AbstractEARAClient::handleFANTorBANT(Packet* antPacket) {
+    AddressPtr source = antPacket->getSource();
+    RouteDiscoveryDelayTimerMap::iterator found = runningRouteDiscoveryDelayTimers.find(source);
+
+    if (found == runningRouteDiscoveryDelayTimers.end()) {
         // no delay timer is yet running, so we start a new one
-        Timer* newDelayTimer = getNewTimer(TimerType::ROUTE_DISCOVERY_DELAY_TIMER, packet);
+        Timer* newDelayTimer = getNewTimer(TimerType::ROUTE_DISCOVERY_DELAY_TIMER, antPacket);
         newDelayTimer->addTimeoutListener(this);
         newDelayTimer->run(routeDiscoveryDelayInMilliSeconds * 1000);
         runningRouteDiscoveryDelayTimers[source] = newDelayTimer;
     }
     else {
         // there is already a timer for this ant generation running
-        float energyFitnessOfNewAnt = calculateInitialEnergyValue((EARAPacket*)packet);
-        // TODO calculate fitness of new ant packet
-        // TODO compare to existing ant packet
-        // TODO if it is better then replace the existing one (don#t forget to delete)
-        // TODo if not then delete the new packet
+        Timer* delayTimer = found->second;
+        //TODO we could cache this value so it doesn't need to be recalculated over and over
+        Packet* bestAntPacket = (Packet*) delayTimer->getContextObject();
+        float bestRouteFitnessSoFar = calculateRouteFitness(bestAntPacket);
+        float routeFitnessOfNewAnt = calculateRouteFitness(antPacket);
+
+        if (routeFitnessOfNewAnt > bestRouteFitnessSoFar) {
+            delete bestAntPacket;
+            delayTimer->setContextObject(antPacket);
+        }
+        else {
+            delete antPacket;
+        }
     }
+}
+
+float AbstractEARAClient::calculateRouteFitness(Packet* packet) {
+    float energyFitnessOfNewAnt = calculateInitialEnergyValue((EARAPacket*)packet);
+    //TODO add weighting parameters (use from forwarding policy)
+    return packet->getTTL() * energyFitnessOfNewAnt;
 }
 
 void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {

@@ -197,6 +197,11 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
  *                            |   * (X) is now required to broadcast only the FANT with the best energy fitness
  */
 TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
+    BasicEARAConfiguration configuration = client->getStandardConfiguration();
+    configuration.setInfluenceOfMinimumEnergyValue(3);
+    configuration.setMaximumHopCount(6);
+    createNewClient(configuration);
+
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr source (new AddressMock("source"));
@@ -205,22 +210,21 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     AddressPtr nodeC (new AddressMock("C"));
     AddressPtr destination (new AddressMock("destination"));
     unsigned int seqNumber = 123;
-    int maxTTL = client->getMaxTTL();
 
     EARAPacket* fant1 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
-    fant1->decreaseTTL(2);
+    fant1->decreaseTTL(1);
     fant1->setSender(nodeB);
     fant1->setMinimumEnergyValue(20);
     fant1->setTotalEnergyValue(20);
 
     EARAPacket* fant2 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
-    fant2->decreaseTTL(3);
+    fant2->decreaseTTL(2);
     fant2->setSender(nodeA);
     fant2->setMinimumEnergyValue(60);
     fant2->setTotalEnergyValue(80 + 60);
 
     EARAPacket* fant3 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
-    fant3->decreaseTTL(4);
+    fant3->decreaseTTL(3);
     fant3->setSender(nodeC);
     fant3->setMinimumEnergyValue(70);
     fant3->setTotalEnergyValue(90 + 90 + 70);
@@ -257,9 +261,9 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     CHECK(sentPacket->getType() == PacketType::FANT);
     CHECK(sentPacket->getSource()->equals(source));
     CHECK(sentPacket->getDestination()->equals(destination));
-    LONGS_EQUAL(140, sentPacket->getTotalEnergyValue());
+    LONGS_EQUAL(140 + client->getCurrentEnergyLevel(), sentPacket->getTotalEnergyValue());
     LONGS_EQUAL( 60, sentPacket->getMinimumEnergyValue());
-    LONGS_EQUAL(maxTTL-3, sentPacket->getTTL());
+    LONGS_EQUAL(3, sentPacket->getTTL());
 }
 
 TEST(AbstractEARAClientTest, overlappingRouteDiscoveryDelays) {

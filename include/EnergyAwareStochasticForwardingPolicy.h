@@ -10,15 +10,13 @@
 #include "EnergyAwareRoutingTable.h"
 #include "NextHop.h"
 #include "Packet.h"
-#include "RoutingTable.h"
 
 ARA_NAMESPACE_BEGIN
 
 /**
- * The class provides the forwarding policy for the energy aware ant routing
- * (EARA).
+ * The class provides the forwarding policy for the energy aware ant routing (EARA).
  */
-class EnergyAwareStochasticForwardingPolicy : public StochasticForwardingPolicy {
+class EnergyAwareStochasticForwardingPolicy : public StochasticForwardingPolicy{
     public:
         EnergyAwareStochasticForwardingPolicy(EnergyAwareRoutingTable* routingTable, float pheromoneWeight = 1.0, float energyWeight = 2.0);
         virtual ~EnergyAwareStochasticForwardingPolicy(){};

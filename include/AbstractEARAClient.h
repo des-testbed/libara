@@ -71,6 +71,8 @@ protected:
 
     float calculateInitialEnergyValue(EARAPacket* packet);
 
+    virtual bool hasBeenReceivedEarlier(const Packet* packet);
+
     virtual void handleAntPacket(Packet* packet);
 
     /**
@@ -82,6 +84,13 @@ protected:
      * when the timer expires.
      */
     void handleFANTorBANT(Packet* packet);
+
+    /**
+     * This calculates the fitness of the route a packet has traveled on.
+     * It is used in the route discovery process together with the route discovery delay
+     * to determine which FANT/BANT should be broadcasted further into the network.
+     */
+    float calculateRouteFitness(Packet* packet);
 
     void handleExpiredRouteDiscoveryDelayTimer(Timer* timer);
 
