@@ -44,6 +44,11 @@ Packet* extractPacket(dessert_msg_t* dessertMessage);
 ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage);
 
 /**
+ * Extracts the LibARA routingExtension from the given dessert message.
+ */
+routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage);
+
+/**
  * Extracts all data from a packet and stores in a dessert message.
  */
 dessert_msg_t* extractDessertMessage(Packet* packet);
