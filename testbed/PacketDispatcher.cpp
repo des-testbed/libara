@@ -70,7 +70,7 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
 
     dessert_ext_t* extension;
 
-    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, DESSERT_MAXEXTDATALEN);
+    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, sizeof(routingExtension));
     struct routingExtension* araRoutingExtension = (struct routingExtension*) extension->data;
 
     TestbedAddressPtr sourceTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getSource());
