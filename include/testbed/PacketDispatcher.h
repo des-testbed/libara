@@ -12,6 +12,11 @@
 
 TESTBED_NAMESPACE_BEGIN
 
+struct routingExtension {
+    u_int8_t  ara_dhost[ETH_ALEN];  /* ARA destination eth addr */
+    u_int8_t  ara_shost[ETH_ALEN];  /* ARA source ether addr    */
+  } __attribute__ ((__packed__));
+
 /**
  * Receives a dessert_message_t from the NIC and sends to libARA.
  */
