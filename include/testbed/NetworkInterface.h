@@ -12,16 +12,17 @@ TESTBED_NAMESPACE_BEGIN
 
 class NetworkInterface : public ReliableNetworkInterface {
     public:
-        NetworkInterface(std::string name, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
+        NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
         void receive(Packet* packet);
         bool equals(ARA::NetworkInterface* otherInterface);
+        dessert_meshif_t* getDessertPointer()  const;
 
     protected:
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
         void deliverToARAClient(Packet* packet);
         static AddressPtr localAddress;
         static AddressPtr broadcastAddress;
-        std::string name;
+        dessert_meshif_t* dessertPointer;
 };
 
 TESTBED_NAMESPACE_END
