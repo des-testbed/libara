@@ -9,6 +9,7 @@
 #include "Testbed.h"
 #include "Packet.h"
 #include "testbed/NetworkInterface.h"
+#include <unordered_map>
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -16,6 +17,11 @@ struct routingExtension {
     u_int8_t  ara_dhost[ETH_ALEN];  /* ARA destination eth addr */
     u_int8_t  ara_shost[ETH_ALEN];  /* ARA source ether addr    */
   } __attribute__ ((__packed__));
+
+/**
+ * Stores a map of network interface pointers by dessert interface pointers.
+ */
+static std::unordered_map<dessert_meshif_t*, NetworkInterface*> networkInterfaces;
 
 /**
  * Receives a dessert_message_t from the NIC and sends to libARA.
@@ -59,9 +65,9 @@ dessert_msg_t* extractDessertMessage(const Packet* packet);
 void addEthernetHeader(dessert_msg_t* message, std::shared_ptr<Address> nextHop);
 
 /**
- * Returns a pointer to the dessert mesh interface represented by a given testbed::NetworkInterface.
+ * Returns a pointer to the testbed network interface paired with a given dessert meshinterface.
  */
-dessert_meshif_t* extractDessertMeshInterface(NetworkInterface* testbedInterface);
+NetworkInterface* extractNetworkInterface(dessert_meshif_t* dessertInterface);
 
 TESTBED_NAMESPACE_END
 
