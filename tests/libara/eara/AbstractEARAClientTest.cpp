@@ -333,3 +333,41 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelayIsUsedForNextRouteDiscovery) {
     LONGS_EQUAL(2, sentPacket->getSequenceNumber());
     CHECK(sentPacket->getDestination()->equals(destination));
 }
+
+/**
+ * In this test we have two route discoveries.
+ * The first one will initialize the energy values and the
+ * second one will refresh them with the current values.
+ */
+IGNORE_TEST(AbstractEARAClientTest, newRouteDiscoveryRefreshesEnergyValues) {
+    BasicEARAConfiguration configuration = client->getStandardConfiguration();
+    configuration.setInfluenceOfMinimumEnergyValue(3);
+    configuration.setMaximumHopCount(6);
+    createNewClient(configuration);
+
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr nextHop (new AddressMock("nextHop"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    EARAPacket* fant1 = castToEARAPacket(packetFactory->makeFANT(source, destination, 1));
+    fant1->setSender(nextHop);
+    fant1->decreaseTTL(3); // + receiving that makes a total of 4 hops
+    fant1->setTotalEnergyValue(120); // average will be 40
+    fant1->setMinimumEnergyValue(10);
+
+    client->receivePacket(fant1, interface);
+    DOUBLES_EQUAL(0.3, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+
+    // after some time there is a new route discovery (maybe for another destination)
+    AddressPtr destination2 (new AddressMock("destination2"));
+    EARAPacket* fant2 = castToEARAPacket(packetFactory->makeFANT(source, destination2, 2));
+    fant2->setSender(nextHop);
+    fant2->decreaseTTL(3); // + receiving that makes a total of 4 hops
+    fant2->setTotalEnergyValue(60); // average will now be only 20
+    fant2->setMinimumEnergyValue(20);
+
+    //the energy should be updated even though no new route is created
+    client->receivePacket(fant2, interface);
+    DOUBLES_EQUAL(0.2, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+}

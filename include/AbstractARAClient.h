@@ -135,7 +135,7 @@ protected:
      * Handles path reinforcement using the currently set PathReinforcementPolicy.
      * The new pheromone value is returned.
      */
-    float reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+    virtual float reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
 
     /**
      * Checks if the given packet has been received before by checking the source address and

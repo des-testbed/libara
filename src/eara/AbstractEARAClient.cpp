@@ -40,17 +40,15 @@ void AbstractEARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* in
 }
 
 float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
-    // the current client will decrease the TTL only after the routing table update so we have to add 1 now to get the actual number of hops including the current one
-    int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL() + 1;
-    assert(nrOfHops > 0);
+    // this number of hops will not include the last hop to this node, because this is only counted after the routing table update
+    int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL();
+    assert(nrOfHops >= 0);
 
-    if (nrOfHops == 1) {
+    if (nrOfHops == 0) {
         // packet has been directly received from the source
         return packet->getTotalEnergyValue() / (float) maximumEnergyValue;
     }
     else {
-        // decrease number of hops, because the energy of the last hop (current node has not been added to the packet)
-        nrOfHops -= 1;
         float averageValue = packet->getTotalEnergyValue() / (float) nrOfHops;
         float averagePercent = averageValue / (float) maximumEnergyValue;
         float minimumPercent = packet->getMinimumEnergyValue() / (float) maximumEnergyValue;
@@ -137,6 +135,13 @@ void AbstractEARAClient::handleExpiredRouteDiscoveryDelayTimer(Timer* timer) {
     runningRouteDiscoveryDelayTimers.erase(bestAntPacket->getSource());
     broadCast(bestAntPacket);
     delete timer;
+}
+
+float AbstractEARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    float currentPheromoneValue = routingTable->getPheromoneValue(destination, nextHop, interface);
+    float newPheromoneValue = pathReinforcementPolicy->calculateReinforcedValue(currentPheromoneValue);
+    routingTable->update(destination, nextHop, interface, newPheromoneValue);
+    return newPheromoneValue;
 }
 
 ARA_NAMESPACE_END

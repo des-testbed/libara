@@ -71,6 +71,8 @@ protected:
 
     float calculateInitialEnergyValue(EARAPacket* packet);
 
+    virtual float reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
     virtual bool hasBeenReceivedEarlier(const Packet* packet);
 
     virtual void handleAntPacket(Packet* packet);
