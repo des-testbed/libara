@@ -11,9 +11,10 @@ TESTBED_NAMESPACE_BEGIN
 AddressPtr NetworkInterface::localAddress = AddressPtr(new TestbedAddress(DESSERT_LOCAL_ADDRESS));
 AddressPtr NetworkInterface::broadcastAddress = AddressPtr(new TestbedAddress(DESSERT_BROADCAST_ADDRESS));
 
-NetworkInterface::NetworkInterface(std::string name, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds)
+NetworkInterface::NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds)
                         : ReliableNetworkInterface(client, packetFactory, ackTimeoutInMicroSeconds, localAddress, broadcastAddress) {
-    this->name = name;
+    this->dessertPointer = dessertPointer;
+    networkInterfaces[dessertPointer] = this;
 }
 
 void NetworkInterface::receive(Packet* packet) {
