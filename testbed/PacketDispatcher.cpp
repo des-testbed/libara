@@ -6,7 +6,7 @@
 #include "TestbedAddress.h"
 
 #include <netinet/in.h>
-#include <iostream>
+
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -80,6 +80,8 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
 
     memcpy(araRoutingExtension->ara_shost, source, ETHER_ADDR_LEN);
     memcpy(araRoutingExtension->ara_dhost, destination, ETHER_ADDR_LEN);
+
+    addEthernetHeader(dessertMessage, packet->getDestination());
 
     void* payload;
     int payloadSize = packet->getPayloadLength();
