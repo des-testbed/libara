@@ -35,7 +35,7 @@ RoutingTable::~RoutingTable() {
 }
 
 void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
-    RoutingTableEntry *entry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
+    RoutingTableEntry* entry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
     update(destination, entry);
 }
 
@@ -53,7 +53,6 @@ void RoutingTable::update(AddressPtr destination, RoutingTableEntry* newEntry) {
         for (auto& entry: *entryList) {
             if (entry->getAddress()->equals(newEntry->getAddress()) && entry->getNetworkInterface()->equals(newEntry->getNetworkInterface())) {
                 updateExistingEntry(entry, newEntry);
-                //entry->setPheromoneValue(pheromoneValue);
                 entryHasBeenUpdated = true;
             }
         }

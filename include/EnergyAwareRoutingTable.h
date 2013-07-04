@@ -20,12 +20,16 @@ typedef std::unordered_map<AddressPtr, float, AddressHash, AddressPredicate> Rou
 
 class EnergyAwareRoutingTable : public RoutingTable {
     public:
+        void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
         void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue, float normalizedEnergyValue);
 
         /**
          * Get the energy value for a specific route in this routing table.
          */
         float getEnergyValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
+    protected:
+        void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
 
     protected:
         RouteEnergyFitnessMap routeEnergyFitnessValues;

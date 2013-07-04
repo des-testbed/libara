@@ -46,9 +46,28 @@ TEST(EnergyAwareRoutingTableTest, energyFitnessEqualsOneIfNotSet) {
 TEST(EnergyAwareRoutingTableTest, updateEnergyValue) {
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr nextHop (new AddressMock("nextHop"));
-    float pheromoneValue = 123.456;
-    float energyValue = 0.87;
-    routingTable->update(destination, nextHop, interface, pheromoneValue, energyValue);
 
+    float pheromoneValue1 = 123.456;
+    float energyValue1 = 0.87;
+    routingTable->update(destination, nextHop, interface, pheromoneValue1, energyValue1);
+    DOUBLES_EQUAL(pheromoneValue1, routingTable->getPheromoneValue(destination, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(energyValue1, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
+
+    float pheromoneValue2 = 323.456;
+    float energyValue2 = 0.56;
+    routingTable->update(destination, nextHop, interface, pheromoneValue2, energyValue2);
+    DOUBLES_EQUAL(pheromoneValue2, routingTable->getPheromoneValue(destination, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(energyValue2, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
+}
+
+TEST(EnergyAwareRoutingTableTest, updatePheromoneValueWithoutAffectingEnergyValue) {
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr nextHop (new AddressMock("nextHop"));
+
+    float energyValue = 0.87;
+    routingTable->update(destination, nextHop, interface, 10, energyValue);
+    DOUBLES_EQUAL(energyValue, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
+
+    routingTable->update(destination, nextHop, interface, 20);
     DOUBLES_EQUAL(energyValue, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
 }
