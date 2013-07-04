@@ -26,7 +26,11 @@ void NetworkInterface::deliverToARAClient(Packet* packet) {
 
 bool NetworkInterface::equals(ARA::NetworkInterface* otherInterface) {
     ARA::testbed::NetworkInterface* other = (ARA::testbed::NetworkInterface*)otherInterface;
-    return this->name == other->name;
+    return this->dessertPointer->hwaddr == other->getDessertPointer()->hwaddr;
+}
+
+dessert_meshif_t* NetworkInterface::getDessertPointer()  const{
+    return this->dessertPointer;
 }
 
 void NetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> recipient){
