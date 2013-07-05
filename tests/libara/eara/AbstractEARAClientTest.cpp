@@ -220,6 +220,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     fant1->setPreviousHop(prevHop1);
     fant1->setMinimumEnergyValue(20);
     fant1->setTotalEnergyValue(20);
+    // the path fitness of FANT 1 should evaluate to 20 * 4
 
     EARAPacket* fant2 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
     fant2->decreaseTTL(2);
@@ -227,6 +228,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     fant2->setPreviousHop(prevHop2);
     fant2->setMinimumEnergyValue(60);
     fant2->setTotalEnergyValue(80 + 60);
+    // the path fitness of FANT 1 should evaluate to 66.6666 * 3 = 200
 
     EARAPacket* fant3 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
     fant3->decreaseTTL(3);
@@ -234,6 +236,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     fant3->setPreviousHop(prevHop3);
     fant3->setMinimumEnergyValue(70);
     fant3->setTotalEnergyValue(90 + 90 + 70);
+    // the path fitness of FANT 1 should evaluate to 75.55 * 2 = 151.111
 
     // start test by receiving first the first FANT from (B)
     client->receivePacket(fant1, interface);
@@ -383,7 +386,7 @@ TEST(AbstractEARAClientTest, newRouteDiscoveryRefreshesEnergyValues) {
  * We check that FANTs and BANTs which arrive at their respective destination are not broadcasted any more
  * but are evaluated like in the regular ARA.
  */
-IGNORE_TEST(AbstractEARAClientTest, fantsAndBantsArestillProcessedByTheirDestinations) {
+TEST(AbstractEARAClientTest, fantsAndBantsArestillProcessedByTheirDestinations) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     SendPacketsList* sentPackets = interface->getSentPackets();
     unsigned int lastSequenceNumber = client->getNextSequenceNumber();
