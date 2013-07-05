@@ -32,12 +32,13 @@
 
 ARA_NAMESPACE_BEGIN
 
+typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RunningRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
 typedef std::unordered_map<AddressPtr, unsigned int, AddressHash, AddressPredicate> LastRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>, AddressHash, AddressPredicate> NeighborActivityMap;
-typedef std::unordered_set<AddressPtr, AddressHash, AddressPredicate> ScheduledPANTsSet;
-typedef std::unordered_map<Timer*, AddressPtr> RunningPANTsMap;
+typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> ScheduledPANTsMap;
+typedef std::unordered_set<Timer*> DeliveryTimerSet;
 
 //TODO fix the visibility: most of the methods should be protected instead of public
 
@@ -63,7 +64,7 @@ public:
      * if possible. It will initialize the client with the given configuration so no additional
      * call to AbstractARAClient::initialize is required.
      */
-    AbstractARAClient(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory);
+    AbstractARAClient(Configuration& configuration);
 
     /**
      * The standard virtual destructor of this abstract class.
@@ -106,7 +107,7 @@ public:
      * AbstractARAClient::receivePacket. If this object has been created by the
      * standard constructor this method must be called manually.
      */
-    void initialize(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory);
+    void initialize(Configuration& configuration);
 
     //TODO AbstractARAClient::hasBeenReceivedEarlier(...) should be protected. It is not because else the AbstractARAClientTest can not see this.. :(
     bool hasBeenReceivedEarlier(const Packet* packet);
@@ -171,9 +172,9 @@ protected:
     void broadcastRouteFailure(AddressPtr destination);
     void broadcastPANT(AddressPtr destination);
 
-    void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer, RouteDiscoveryInfo discoveryInfo);
-    void handleExpiredDeliveryTimer(Timer* deliveryTimer, AddressPtr destination);
-    void handleExpiredPANTTimer(Timer* pantTimer, AddressPtr destination);
+    void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer);
+    void handleExpiredDeliveryTimer(Timer* deliveryTimer);
+    void handleExpiredPANTTimer(Timer* pantTimer);
 
     void startNeighborActivityTimer();
     void registerActivity(AddressPtr neighbor, NetworkInterface* interface);
@@ -181,13 +182,11 @@ protected:
     bool isNewRouteDiscovery(const Packet* packet);
 
 protected:
-    std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> runningRouteDiscoveries;
-    std::unordered_map<Timer*, RouteDiscoveryInfo> runningRouteDiscoveryTimers;
-    std::unordered_map<Timer*, AddressPtr> runningDeliveryTimers;
     Timer* neighborActivityTimer = nullptr;
 
-    ScheduledPANTsSet scheduledPANTs;
-    RunningPANTsMap runningPANTTimers;
+    RunningRouteDiscoveriesMap runningRouteDiscoveries;
+    ScheduledPANTsMap scheduledPANTs;
+    DeliveryTimerSet runningDeliveryTimers;
 
     ForwardingPolicy* forwardingPolicy;
     PathReinforcementPolicy* pathReinforcementPolicy;

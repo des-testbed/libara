@@ -12,20 +12,20 @@
 
 #include <sstream>
 
-namespace ARA {
-
-typedef std::shared_ptr<Address> AddressPtr;
+ARA_NAMESPACE_BEGIN
 
 EARAClientMock::EARAClientMock() {
     float initialPhi = 10.0;
     float deltaPhi = 5.0;
     BasicEARAConfiguration configuration = BasicEARAConfiguration(
+            new EnergyAwareRoutingTable(),
+            new PacketFactory(15),
             new ExponentialEvaporationPolicyMock(),
             new LinearPathReinforcementPolicy(deltaPhi),
             new BestPheromoneForwardingPolicy(),
             initialPhi
     );
-    initializeEARA(configuration, new EnergyAwareRoutingTable(), new PacketFactory(15));
+    initializeEARA(configuration);
     currentEnergyLevel = 255;
 }
 
@@ -73,4 +73,4 @@ TimerMock* EARAClientMock::getEnergyDisseminationTimer() {
     return (TimerMock*) energyDisseminationTimer;
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END

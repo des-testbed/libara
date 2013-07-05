@@ -80,6 +80,7 @@ class OMNeTBattery : public BasicBattery {
         void calculateConsumedEnergyOfStandardDevices();
         void calculateConsumedEnergyOfWirelessDevices();
         void updateBatteryIcon();
+        void recordResidualEnergy();
         void publishEnergyInformation(double publishedEnergyLevel);
 
     private:
@@ -95,7 +96,10 @@ class OMNeTBattery : public BasicBattery {
         double residualCapacityInMilliWattSeconds;
         cMessage* publishMessage;
 
+        // For recording the energy values
         cOutVector residualEnergyOutVector;
+        double energyVectorDelta;
+        double lastStoredResidualEnergyInMilliWattSeconds;
 };
 
 OMNETARA_NAMESPACE_END

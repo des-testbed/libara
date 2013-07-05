@@ -22,6 +22,8 @@ void OMNeTBattery::initialize(int stage) {
         capacityInMilliWattSeconds = capacityInMilliAmpereHours * 60 * 60 * voltageInVolts;
         residualCapacityInMilliWattSeconds = capacityInMilliWattSeconds;
 
+        energyVectorDelta = par("energyVectorDelta");
+        lastStoredResidualEnergyInMilliWattSeconds = residualCapacityInMilliWattSeconds;
         updateInterval = par("updateInterval");
         if (updateInterval > 0) {
             lastUpdateTime = simTime();
@@ -33,7 +35,7 @@ void OMNeTBattery::initialize(int stage) {
             EV << "Warning: Battery is disabled (updateInterval is <= 0)" << std::endl;
         }
 
-        residualEnergyOutVector.setName("Residual Energy");
+        residualEnergyOutVector.setName("energyLevel");
         WATCH(residualCapacityInMilliWattSeconds);
         updateBatteryIcon();
     }
@@ -126,7 +128,7 @@ void OMNeTBattery::updateResidualEnergy(){
     calculateConsumedEnergy();
     publishEnergyInformation(residualCapacityInMilliWattSeconds);
     updateBatteryIcon();
-    residualEnergyOutVector.record(residualCapacityInMilliWattSeconds);
+    recordResidualEnergy();
 }
 
 void OMNeTBattery::calculateConsumedEnergy() {
@@ -179,6 +181,15 @@ void OMNeTBattery::updateBatteryIcon() {
 
     cDisplayString& displayString = getDisplayString();
     displayString.setTagArg("t", 0, buffer);
+}
+
+void OMNeTBattery::recordResidualEnergy() {
+    double energyConsumedSinceLastRecord = lastStoredResidualEnergyInMilliWattSeconds - residualCapacityInMilliWattSeconds;
+    double energyConsumedInPercent = energyConsumedSinceLastRecord / capacityInMilliWattSeconds;
+    if (energyConsumedInPercent >= energyVectorDelta) {
+        residualEnergyOutVector.record(residualCapacityInMilliWattSeconds);
+        lastStoredResidualEnergyInMilliWattSeconds = residualCapacityInMilliWattSeconds;
+    }
 }
 
 void OMNeTBattery::publishEnergyInformation(double publishedEnergyLevel) {
@@ -257,7 +268,7 @@ void OMNeTBattery::draw(int deviceID, DrawAmount& amount, int activity) {
 
 void OMNeTBattery::finish() {
     // do a final update of battery capacity
-    updateResidualEnergy();
+    residualEnergyOutVector.record(residualCapacityInMilliWattSeconds);
     deviceEntryMap.clear();
     deviceEntryVector.clear();
 }

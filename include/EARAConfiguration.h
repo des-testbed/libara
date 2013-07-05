@@ -7,6 +7,7 @@
 
 #include "ARAMacros.h"
 #include "Configuration.h"
+#include "EnergyAwareRoutingTable.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -17,6 +18,8 @@ ARA_NAMESPACE_BEGIN
 class EARAConfiguration : public virtual Configuration {
 public:
     virtual ~EARAConfiguration() {};
+
+    virtual EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const = 0;
 
     /**
      * Returns the time in milliseconds that shall pass between the

@@ -12,6 +12,7 @@
 #include "Pair.h"
 #include "Logger.h"
 #include "Environment.h"
+#include "TimerType.h"
 
 #include "testAPI/mocks/ARAClientMock.h"
 #include "testAPI/mocks/RoutingTableMock.h"
@@ -645,6 +646,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
     ClockMock* clock = (ClockMock*) Environment::getClock();
     TimerMock* routeDiscoveryTimer = clock->getLastTimer();
 
+    CHECK(routeDiscoveryTimer->getType() == TimerType::ROUTE_DISCOVERY_TIMER);
     CHECK(routeDiscoveryTimer->isRunning());
 
     // simulate that the timer has expired (timeout)
@@ -697,6 +699,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
     ClockMock* clock = (ClockMock*) Environment::getClock();
     TimerMock* routeDiscoveryTimer = clock->getLastTimer();
 
+    CHECK(routeDiscoveryTimer->getType() == TimerType::ROUTE_DISCOVERY_TIMER);
     CHECK(routeDiscoveryTimer->isRunning());
 
     for (int i = 1; i <= maxNrOfRouteDiscoveryRetries; i++) {
@@ -1328,6 +1331,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwice) {
     TimerMock* routeDiscoveryTimer = clock->getLastTimer();
 
     // a route discovery should have been started for packet1
+    CHECK(routeDiscoveryTimer->getType() == TimerType::ROUTE_DISCOVERY_TIMER);
     CHECK(routeDiscoveryTimer->isRunning());
 
     // the packet is trapped until delivery
@@ -1370,6 +1374,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceSpecialCase) {
     TimerMock* routeDiscoveryTimer = clock->getLastTimer();
 
     // a route discovery should have been started for packet1
+    CHECK(routeDiscoveryTimer->getType() == TimerType::ROUTE_DISCOVERY_TIMER);
     CHECK(routeDiscoveryTimer->isRunning());
 
     // the packet is trapped until delivery
@@ -2092,6 +2097,7 @@ TEST(AbstractARAClientTest, scheduledPANTTimersAreDeletedInDestructor) {
     // check if the PANT timer is running
     TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(source);
     CHECK(pantTimer != nullptr);
+    CHECK(pantTimer->getType() == TimerType::PANTS_TIMER);
     CHECK(pantTimer->isRunning());
 
     //TODO why do I need to clean this up (ARAClientMock should do this)

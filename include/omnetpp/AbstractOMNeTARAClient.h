@@ -6,7 +6,7 @@
 #define ABSTRACT_OMNET_ARA_CLIENT_H_
 
 #include "AbstractNetworkClient.h"
-
+#include "AbstractARAClient.h"
 #include "omnetpp/OMNeTARAMacros.h"
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/ARANetworkConfigurator.h"

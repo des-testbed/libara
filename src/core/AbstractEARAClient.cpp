@@ -9,17 +9,17 @@
 
 ARA_NAMESPACE_BEGIN
 
-AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, PacketFactory* packetFactory) {
-    initializeEARA(configuration, routingTable, packetFactory);
+AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration) {
+    initializeEARA(configuration);
 }
 
-void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration, EnergyAwareRoutingTable* routingTable, PacketFactory* packetFactory) {
-    AbstractARAClient::initialize(configuration, routingTable, packetFactory);
+void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration) {
+    AbstractARAClient::initialize(configuration);
     energyDisseminationTimeoutInMillis = configuration.getEnergyDisseminationTimeout();
     energyDisseminationTimer = Environment::getClock()->getNewTimer();
     energyDisseminationTimer->addTimeoutListener(this);
     energyDisseminationTimer->run(energyDisseminationTimeoutInMillis * 1000);
-    this->routingTable = routingTable;
+    routingTable = configuration.getEnergyAwareRoutingTable();
 }
 
 AbstractEARAClient::~AbstractEARAClient() {

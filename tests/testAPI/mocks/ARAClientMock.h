@@ -53,7 +53,7 @@ public:
      */
     void forget(AddressPtr neighbor);
 
-    Timer* getPANTsTimer(AddressPtr destination) const;
+    Timer* getPANTsTimer(AddressPtr destination);
 };
 
 ARA_NAMESPACE_END

@@ -18,17 +18,19 @@ ARA_NAMESPACE_BEGIN
 
 ARAClientMock::ARAClientMock() {
     BasicConfiguration configuration = getStandardConfiguration();
-    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
+    initialize(configuration);
 }
 
 ARAClientMock::ARAClientMock(Configuration& configuration) {
-    initialize(configuration, new RoutingTableMock(), new PacketFactory(15));
+    initialize(configuration);
 }
 
 BasicConfiguration ARAClientMock::getStandardConfiguration() const {
     float initialPhi = 5.0;
     float deltaPhi = 5.0;
     return BasicConfiguration(
+        new RoutingTableMock(),
+        new PacketFactory(15),
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
         new BestPheromoneForwardingPolicy(),
@@ -99,17 +101,13 @@ void ARAClientMock::forget(AddressPtr neighbor) {
     }
 }
 
-Timer* ARAClientMock::getPANTsTimer(AddressPtr destination) const {
-    RunningPANTsMap::iterator iterator;
-    for (RunningPANTsMap::const_iterator iterator=runningPANTTimers.begin(); iterator!=runningPANTTimers.end(); iterator++) {
-        std::pair<Timer*, AddressPtr> entryPair = *iterator;
-        if (entryPair.second->equals(destination)) {
-            return entryPair.first;
-        }
+Timer* ARAClientMock::getPANTsTimer(AddressPtr destination) {
+    if (scheduledPANTs.find(destination) == scheduledPANTs.end()) {
+        return nullptr;
     }
-
-    // could not find any timer for that destination
-    return nullptr;
+    else {
+        return scheduledPANTs[destination];
+    }
 }
 
 ARA_NAMESPACE_END

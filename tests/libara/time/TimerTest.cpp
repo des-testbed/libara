@@ -30,3 +30,24 @@ TEST(TimerTest, addTimeoutListener) {
     CHECK_TRUE(listener2.hasBeenNotified());
     CHECK_TRUE(listener3.hasBeenNotified());
 }
+
+TEST(TimerTest, defaultType) {
+    TimerMock timer = TimerMock();
+    BYTES_EQUAL(0, timer.getType());
+}
+
+TEST(TimerTest, defaultContextObject) {
+    TimerMock timer = TimerMock();
+    CHECK(timer.getContextObject() == nullptr);
+}
+
+TEST(TimerTest, getType) {
+    TimerMock timer = TimerMock(123);
+    BYTES_EQUAL(123, timer.getType());
+}
+
+TEST(TimerTest, getContextObject) {
+    const char* contextObject = "Hello World";
+    TimerMock timer = TimerMock(123, (void*) contextObject);
+    CHECK_EQUAL(contextObject, timer.getContextObject());
+}
