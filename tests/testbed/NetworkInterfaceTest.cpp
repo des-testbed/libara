@@ -43,7 +43,6 @@ TEST(NetworkInterfaceTest, notEquals) {
 }
 
 TEST(NetworkInterfaceTest, registration) {
-    interface->registerInterface();
     CHECK(interface->isRegistered());
 }
 

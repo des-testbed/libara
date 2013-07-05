@@ -13,7 +13,7 @@ TESTBED_NAMESPACE_BEGIN
 class NetworkInterface : public ReliableNetworkInterface {
     public:
         NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
-        void registerInterface();
+        ~NetworkInterface();
         bool isRegistered();
         void receive(Packet* packet);
         bool equals(ARA::NetworkInterface* otherInterface);
@@ -25,6 +25,9 @@ class NetworkInterface : public ReliableNetworkInterface {
         static AddressPtr localAddress;
         static AddressPtr broadcastAddress;
         dessert_meshif_t* dessertPointer;
+
+    private:
+        void registerInterface();
 };
 
 TESTBED_NAMESPACE_END
