@@ -5,10 +5,8 @@
 #ifndef _TESTBED_TIMER_H_
 #define _TESTBED_TIMER_H_
 
-#include <mutex>
 #include <chrono>
 #include <thread>
-#include <condition_variable>
 
 #include "Timer.h"
 #include "Testbed.h"
@@ -27,7 +25,6 @@ class TestbedTimer : public Timer {
 
     private:
         bool active;
-        std::mutex mutex;
         std::thread timer;
 };
 
