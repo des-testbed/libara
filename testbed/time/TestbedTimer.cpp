@@ -4,7 +4,7 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-TestbedTimer::TestbedTimer(){
+TestbedTimer::TestbedTimer(char type, void* contextObject) : Timer(type, contextObject) {
     this->active = false;
 }
 

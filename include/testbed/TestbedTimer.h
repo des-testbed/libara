@@ -16,7 +16,7 @@ TESTBED_NAMESPACE_BEGIN
 
 class TestbedTimer : public Timer {
     public:
-        TestbedTimer();
+        TestbedTimer(char type, void* contextObject=nullptr);
         virtual ~TestbedTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
