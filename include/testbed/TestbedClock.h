@@ -18,7 +18,7 @@ TESTBED_NAMESPACE_BEGIN
 class TestbedClock : public Clock {
     public:
         Time* makeTime();
-        Timer* getNewTimer();
+        Timer* getNewTimer(char timerType=-1, void* contextObject=nullptr);
 };
 
 TESTBED_NAMESPACE_END

@@ -6,8 +6,8 @@ Time* TestbedClock::makeTime(){
     return new TestbedTime();
 }
 
-Timer* TestbedClock::getNewTimer(){
-    return new TestbedTimer();
+Timer* TestbedClock::getNewTimer(char timerType, void* contextObject){
+    return new TestbedTimer(timerType, contextObject);
 }
 
 TESTBED_NAMESPACE_END
