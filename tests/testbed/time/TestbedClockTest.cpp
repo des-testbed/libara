@@ -7,26 +7,28 @@
 #include "TestbedTime.h"
 #include "TestbedTimer.h"
 
-using namespace ARA;
+TESTBED_NAMESPACE_BEGIN
 
 TEST_GROUP(TestbedClockTest) {};
 
 TEST(TestbedClockTest, makeTime) {
-    testbed::TestbedClock clock = testbed::TestbedClock();
+    TestbedClock clock = TestbedClock();
     Time* newTime = clock.makeTime();
 
-    testbed::TestbedTime* testbedTimeInstance = dynamic_cast<testbed::TestbedTime*>(newTime);
+    TestbedTime* testbedTimeInstance = dynamic_cast<TestbedTime*>(newTime);
     CHECK(testbedTimeInstance != NULL);
 
     delete newTime;
 }
 
 TEST(TestbedClockTest, getNewTimer) {
-    testbed::TestbedClock clock = testbed::TestbedClock();
+    TestbedClock clock = TestbedClock();
     Timer* newTimer = clock.getNewTimer();
 
-    testbed::TestbedTimer* testbedTimerInstance = dynamic_cast<testbed::TestbedTimer*>(newTimer);
+    TestbedTimer* testbedTimerInstance = dynamic_cast<TestbedTimer*>(newTimer);
     CHECK(testbedTimerInstance != NULL);
 
     delete newTimer;
 }
+
+TESTBED_NAMESPACE_END
