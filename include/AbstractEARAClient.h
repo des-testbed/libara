@@ -106,6 +106,8 @@ protected:
 
     void handleExpiredRouteDiscoveryDelayTimer(Timer* timer);
 
+    virtual void handleDataPacketForThisNode(Packet* packet);
+
 private:
     /**
      * This method is private to prevent anyone from using it because we slightly changed

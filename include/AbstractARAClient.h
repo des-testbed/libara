@@ -160,6 +160,7 @@ protected:
     void handleDuplicatePacket(Packet* packet, NetworkInterface* interface);
     void sendDuplicateWarning(Packet* packet, NetworkInterface* interface);
     void handleDataPacket(Packet* packet);
+    virtual void handleDataPacketForThisNode(Packet* packet);
     virtual void handleAntPacket(Packet* packet, NetworkInterface* interface);
     void handleAntPacketForThisNode(Packet* packet);
     void handleBANTForThisNode(Packet* bant);

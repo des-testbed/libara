@@ -149,4 +149,12 @@ float AbstractEARAClient::reinforcePheromoneValue(AddressPtr destination, Addres
     return newPheromoneValue;
 }
 
+void AbstractEARAClient::handleDataPacketForThisNode(Packet* packet) {
+    AbstractARAClient::handleDataPacketForThisNode(packet);
+    //TODO get the current energy level
+    // check if the difference between the current value and this value has exceeded the threshold
+    // if yes then send a new PEANT
+    // if not do nothing else
+}
+
 ARA_NAMESPACE_END

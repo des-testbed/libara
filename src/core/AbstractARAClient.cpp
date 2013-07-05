@@ -350,13 +350,17 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 
 void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
-        logInfo("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
-        deliverToSystem(packet);
-        checkPantTimer(packet);
+        handleDataPacketForThisNode(packet);
     }
     else {
         sendPacket(packet);
     }
+}
+
+void AbstractARAClient::handleDataPacketForThisNode(Packet* packet) {
+    logInfo("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
+    deliverToSystem(packet);
+    checkPantTimer(packet);
 }
 
 void AbstractARAClient::checkPantTimer(const Packet* packet) {

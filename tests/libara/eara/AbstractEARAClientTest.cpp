@@ -411,3 +411,52 @@ TEST(AbstractEARAClientTest, fantsAndBantsArestillProcessedByTheirDestinations) 
     CHECK(sentPacket->getPreviousHop()->equals(destination));
     LONGS_EQUAL(lastSequenceNumber+1, sentPacket->getSequenceNumber());
 }
+
+/**
+ * In this test we check that the destination starts to send PEANTS through the network
+ * if their energy level has changed enough.
+ */
+TEST(AbstractEARAClientTest, destinationsStartToSendPEANTsIfEnergyHasChangedNoticeably) {
+    // the client should start to send out PEANTs if its own energy has decreased at least 1 % percent since the first traffic has arrived or the last PEANT has been send
+    BasicEARAConfiguration configuration = client->getStandardConfiguration();
+    configuration.setPEANTEnergyThreshold(0.01);
+    createNewClient(configuration);
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr destination = interface->getLocalAddress();
+
+    // set the initial energy level
+    client->setEnergy(100);
+    //TODO set the lastPEANTEnergyLevel to this value in the mock!
+
+    // start the test by receiving the first traffic to this destination
+    Packet* packet1 = packetFactory->makeDataPacket(source, destination, 123, "Hello World", 12);
+    client->receivePacket(packet1, interface);
+    // check that no PEANT or any other packet has been sent by this client
+    CHECK(sentPackets->size() == 0);
+
+    // update energy level to 1% less than the initial level
+    client->setEnergy(99);
+
+    // receive another packet to this destination
+    Packet* packet2 = packetFactory->makeDataPacket(source, destination, 124, "Foo", 4);
+    client->receivePacket(packet2, interface);
+
+    CHECK(sentPackets->size() == 1);
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
+    CHECK(interface->isBroadcastAddress(sentPacketInfo->getRight()));
+    const Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK_EQUAL(PacketType::PEANT, sentPacket->getType());
+    CHECK(sentPacket->getSource()->equals(destination));
+    CHECK(sentPacket->getSender()->equals(destination));
+    CHECK(sentPacket->getPreviousHop()->equals(destination));
+
+    // there is no real destination in a PEANT so it doesn't matter what address we choose here
+    // however, we need to have something in the address field so I chose the source of the PEANt
+    // itself so nobody will ever be tempted to process this packet like it was meant only to him
+    CHECK(sentPacket->getDestination()->equals(destination));
+}
+
+//TODO test that PEANTs feature is disabled if the energyThreshold is -1
