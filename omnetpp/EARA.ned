@@ -21,5 +21,9 @@ simple EARA extends ARA {
         // See the Master's Thesis of Große for further explanation. 
         int routeDiscoveryDelay @unit(mS) = default(2mS);
         
+        // Returns the percent a destination clients energy has to be reduced, before it broadcasts a PEANT.
+     	// A value of -1 means this feature is disabled.
+        double peantEnergyThreshold = default(0.01);
+        
         @statistic[dropPacketBecauseEnergyDepleted](title="Dropped packets because of depleted energy";record=count,vector);
 }

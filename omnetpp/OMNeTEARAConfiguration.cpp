@@ -12,8 +12,13 @@ OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module) : OMNeTConfigura
     maximumEnergyValue = module->par("maximumEnergyValue").longValue();
     influenceOfMinimumEnergyValue = module->par("influenceOfMinimumEnergyValue").longValue();
     routeDiscoveryDelayInMilliSeconds = module->par("routeDiscoveryDelay").longValue();
+    peantEnergyThreshold = module->par("peantEnergyThreshold").doubleValue();
+
     if (influenceOfMinimumEnergyValue < 1) {
         throw cRuntimeError("EARA parameter influenceOfMinimumEnergyValue needs to be >= 1");
+    }
+    if (peantEnergyThreshold > 1 || (peantEnergyThreshold < 0 && peantEnergyThreshold != -1)) {
+        throw cRuntimeError("EARA parameter peantEnergyThreshold needs to be between 0 and 1 (or -1 to be disabled)");
     }
 }
 
@@ -38,6 +43,10 @@ EnergyAwareRoutingTable* OMNeTEARAConfiguration::getEnergyAwareRoutingTable() co
 
 ARA::EARAPacketFactory* OMNeTEARAConfiguration::getEARAPacketFactory() const {
     return new EARAPacketFactory(maxTTL);
+}
+
+float OMNeTEARAConfiguration::getPEANTEnergyThreshold() const {
+    return peantEnergyThreshold;
 }
 
 OMNETARA_NAMESPACE_END

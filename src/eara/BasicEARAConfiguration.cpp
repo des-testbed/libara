@@ -18,13 +18,15 @@ BasicEARAConfiguration::BasicEARAConfiguration(
         unsigned int packetDeliveryDelayInMilliSeconds,
         unsigned int maximumEnergyValue,
         float influenceOfMinimumEnergyValue,
-        unsigned int routeDiscoveryDelayInMilliSeconds) : BasicConfiguration(routingTable, packetFactory, evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds, packetDeliveryDelayInMilliSeconds) {
+        unsigned int routeDiscoveryDelayInMilliSeconds,
+        float peantEnergyThreshold) : BasicConfiguration(routingTable, packetFactory, evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds, packetDeliveryDelayInMilliSeconds) {
 
     this->routingTable = routingTable;
     this->packetFactory = packetFactory;
     this->maximumEnergyValue = maximumEnergyValue;
     this->influenceOfMinimumEnergyValue = influenceOfMinimumEnergyValue;
     this->routeDiscoveryDelayInMilliSeconds = routeDiscoveryDelayInMilliSeconds;
+    this->peantEnergyThreshold = peantEnergyThreshold;
 }
 
 EnergyAwareRoutingTable* BasicEARAConfiguration::getEnergyAwareRoutingTable() const {
@@ -53,6 +55,14 @@ void BasicEARAConfiguration::setInfluenceOfMinimumEnergyValue(float b) {
 
 unsigned int BasicEARAConfiguration::getRouteDiscoveryDelayInMilliSeconds() const {
     return routeDiscoveryDelayInMilliSeconds;
+}
+
+float BasicEARAConfiguration::getPEANTEnergyThreshold() const {
+    return peantEnergyThreshold;
+}
+
+void BasicEARAConfiguration::setPEANTEnergyThreshold(float peantEnergyThreshold) {
+    this->peantEnergyThreshold = peantEnergyThreshold;
 }
 
 ARA_NAMESPACE_END

@@ -46,6 +46,12 @@ public:
      * See the Master's Thesis of Friedrich Große for further explanation.
      */
     virtual unsigned int getRouteDiscoveryDelayInMilliSeconds() const = 0;
+
+    /**
+     * Returns the percent a destination clients energy has to be reduced, before it broadcasts a PEANT.
+     * A value of -1 means this feature is disabled.
+     */
+    virtual float getPEANTEnergyThreshold() const = 0;
 };
 
 ARA_NAMESPACE_END

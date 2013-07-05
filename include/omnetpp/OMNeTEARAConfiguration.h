@@ -20,11 +20,13 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
         virtual unsigned int getRouteDiscoveryDelayInMilliSeconds() const;
         virtual ARA::EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const;
         virtual ARA::EARAPacketFactory* getEARAPacketFactory() const;
+        virtual float getPEANTEnergyThreshold() const;
 
     private:
         unsigned int maximumEnergyValue;
         float influenceOfMinimumEnergyValue;
         unsigned int routeDiscoveryDelayInMilliSeconds;
+        float peantEnergyThreshold;
 };
 
 OMNETARA_NAMESPACE_END
