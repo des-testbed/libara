@@ -266,6 +266,7 @@ bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
     AddressPtr source = packet->getSource();
 
     if (isNewRouteDiscovery(packet)) {
+        //TODO this might become a problem for overlapping route discoveries
         delete knownIntermediateHops[source];
         knownIntermediateHops.erase(source);
         return false;
@@ -330,7 +331,7 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     }
     else if(packet->isAntPacket()) {
         registerActivity(packet->getSender(), interface);
-        handleAntPacket(packet);
+        handleAntPacket(packet, interface);
     }
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
@@ -377,7 +378,7 @@ void AbstractARAClient::checkPantTimer(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::handleAntPacket(Packet* packet) {
+void AbstractARAClient::handleAntPacket(Packet* packet, NetworkInterface* interface) {
     if (hasBeenSentByThisNode(packet)) {
         // do not process ant packets we have sent ourselves
         delete packet;

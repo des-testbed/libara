@@ -3,24 +3,20 @@
  */
 
 #include "EnergyAwareRoutingTable.h"
-#include "EARARoutingTableEntry.h"
+#include "Exception.h"
 
 ARA_NAMESPACE_BEGIN
 
 void EnergyAwareRoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
-    if(isDeliverable(destination)) {
-        RoutingTableEntryList* entries = table[destination];
-        for (auto& entry: *entries) {
-            if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
-                entry->setPheromoneValue(pheromoneValue);
-                return;
-            }
-        }
+    EARARoutingTableEntry* entry = getRoutingTableEntry(destination, nextHop, interface);
+    if (entry == nullptr) {
+        // if no entry does yet exist, create a new one with energy default to 1
+        entry = new EARARoutingTableEntry(nextHop, interface, pheromoneValue, 1);
+        RoutingTable::update(destination, entry);
     }
-
-    // if no entry does yet exist, create a new one with energy default to 1
-    EARARoutingTableEntry* entry = new EARARoutingTableEntry(nextHop, interface, pheromoneValue, 1);
-    RoutingTable::update(destination, entry);
+    else {
+        entry->setPheromoneValue(pheromoneValue);
+    }
 }
 
 void EnergyAwareRoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue, float normalizedEnergyValue) {
@@ -37,18 +33,40 @@ void EnergyAwareRoutingTable::updateExistingEntry(RoutingTableEntry* oldEntry, R
     oldEARAEntry->setEnergyValue(newEARAEntry->getEnergyValue());
 }
 
-float EnergyAwareRoutingTable::getEnergyValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-    if(isDeliverable(destination)) {
-        RoutingTableEntryList* entryList = table[destination];
-        for (auto& entry: *entryList) {
-            if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
-                EARARoutingTableEntry* earaEntry = (EARARoutingTableEntry*) entry;
-                return earaEntry->getEnergyValue();
+bool EnergyAwareRoutingTable::updateEnergyValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float newEnergyValue) {
+    EARARoutingTableEntry* entry = getRoutingTableEntry(destination, nextHop, interface);
+    if (entry != nullptr) {
+        entry->setEnergyValue(newEnergyValue);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+EARARoutingTableEntry* EnergyAwareRoutingTable::getRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    if (isDeliverable(destination)) {
+        RoutingTableEntryList* entries = table[destination];
+        for (auto& entry: *entries) {
+            if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+                //TODO somehow remove this cast (refactor)
+                return (EARARoutingTableEntry*) entry;
             }
         }
     }
 
-    return 1;
+    // if there is no such entry we return the nullptr
+    return nullptr;
+}
+
+float EnergyAwareRoutingTable::getEnergyValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
+    EARARoutingTableEntry* entry = getRoutingTableEntry(destination, nextHop, interface);
+    if (entry == nullptr) {
+        return 1;
+    }
+    else {
+        return entry->getEnergyValue();
+    }
 }
 
 ARA_NAMESPACE_END

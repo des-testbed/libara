@@ -75,7 +75,7 @@ protected:
 
     virtual bool hasBeenReceivedEarlier(const Packet* packet);
 
-    virtual void handleAntPacket(Packet* packet);
+    virtual void handleAntPacket(Packet* packet, NetworkInterface* interface);
 
     /**
      * Checks if a route discovery delay timer is already running for the source of the given packet.
@@ -84,15 +84,25 @@ protected:
      * FANT/BANT in terms of their TTL and energy metric.
      * Only the best ant packet is stored in the timer context Object and will be broadcasted
      * when the timer expires.
+     *
+     * @param packet - the ant packet which has been received
+     * @param routeFitnessOfNewAnt - the energy fitness value of the route over which the ant has travel to this hop
+     *                               this has been calculated previously so it gets passed as parameter so we don't need
+     *                               to calculate it again
      */
-    void handleFANTorBANT(Packet* packet);
+    void handleFANTorBANT(Packet* packet, float energyFitnessOfNewAnt);
+
+    /**
+     * Starts a new route discovery delay timer and stores the given packet as context object of that timer.
+     */
+    void startNewRouteDiscoveryDelayTimer(Packet* antPacket);
 
     /**
      * This calculates the fitness of the route a packet has traveled on.
      * It is used in the route discovery process together with the route discovery delay
      * to determine which FANT/BANT should be broadcasted further into the network.
      */
-    float calculateRouteFitness(Packet* packet);
+    float calculateRouteFitness(int ttl, float energyFitness);
 
     void handleExpiredRouteDiscoveryDelayTimer(Timer* timer);
 

@@ -208,24 +208,30 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr prevHop1 (new AddressMock("prevHop1"));
+    AddressPtr prevHop2 (new AddressMock("prevHop2"));
+    AddressPtr prevHop3 (new AddressMock("prevHop3"));
     AddressPtr destination (new AddressMock("destination"));
     unsigned int seqNumber = 123;
 
     EARAPacket* fant1 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
     fant1->decreaseTTL(1);
     fant1->setSender(nodeB);
+    fant1->setPreviousHop(prevHop1);
     fant1->setMinimumEnergyValue(20);
     fant1->setTotalEnergyValue(20);
 
     EARAPacket* fant2 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
     fant2->decreaseTTL(2);
     fant2->setSender(nodeA);
+    fant2->setPreviousHop(prevHop2);
     fant2->setMinimumEnergyValue(60);
     fant2->setTotalEnergyValue(80 + 60);
 
     EARAPacket* fant3 = castToEARAPacket(packetFactory->makeFANT(source, destination, seqNumber));
     fant3->decreaseTTL(3);
     fant3->setSender(nodeC);
+    fant3->setPreviousHop(prevHop3);
     fant3->setMinimumEnergyValue(70);
     fant3->setTotalEnergyValue(90 + 90 + 70);
 
@@ -260,6 +266,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     EARAPacket* sentPacket = castToEARAPacket(sentPackets->back()->getLeft());
     CHECK(sentPacket->getType() == PacketType::FANT);
     CHECK(sentPacket->getSource()->equals(source));
+    CHECK(sentPacket->getPreviousHop()->equals(nodeA));
     LONGS_EQUAL(seqNumber, sentPacket->getSequenceNumber());
     CHECK(sentPacket->getDestination()->equals(destination));
     LONGS_EQUAL(140 + client->getCurrentEnergyLevel(), sentPacket->getTotalEnergyValue());
@@ -339,7 +346,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelayIsUsedForNextRouteDiscovery) {
  * The first one will initialize the energy values and the
  * second one will refresh them with the current values.
  */
-IGNORE_TEST(AbstractEARAClientTest, newRouteDiscoveryRefreshesEnergyValues) {
+TEST(AbstractEARAClientTest, newRouteDiscoveryRefreshesEnergyValues) {
     BasicEARAConfiguration configuration = client->getStandardConfiguration();
     configuration.setInfluenceOfMinimumEnergyValue(3);
     configuration.setMaximumHopCount(6);
@@ -370,4 +377,34 @@ IGNORE_TEST(AbstractEARAClientTest, newRouteDiscoveryRefreshesEnergyValues) {
     //the energy should be updated even though no new route is created
     client->receivePacket(fant2, interface);
     DOUBLES_EQUAL(0.2, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+}
+
+/**
+ * We check that FANTs and BANTs which arrive at their respective destination are not broadcasted any more
+ * but are evaluated like in the regular ARA.
+ */
+IGNORE_TEST(AbstractEARAClientTest, fantsAndBantsArestillProcessedByTheirDestinations) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    SendPacketsList* sentPackets = interface->getSentPackets();
+    unsigned int lastSequenceNumber = client->getNextSequenceNumber();
+
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr destination = interface->getLocalAddress();
+    Packet* fant = packetFactory->makeFANT(source, destination, 123);
+
+    // start the test
+    client->receivePacket(fant, interface);
+
+    // check the sent packet
+    CHECK(sentPackets->size() == 1);
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = sentPackets->front();
+    CHECK(interface->isBroadcastAddress(sentPacketInfo->getRight()));
+    const Packet* sentPacket = sentPacketInfo->getLeft();
+    CHECK_EQUAL(PacketType::BANT, sentPacket->getType());
+    CHECK(sentPacket->getSource()->equals(destination));
+    CHECK(sentPacket->getDestination()->equals(source));
+    CHECK(sentPacket->getSender()->equals(destination));
+    CHECK(sentPacket->getPreviousHop()->equals(destination));
+    LONGS_EQUAL(lastSequenceNumber+1, sentPacket->getSequenceNumber());
 }
