@@ -2,21 +2,21 @@
  * $FU-Copyright$
  */
 
-#ifndef _ABSTRACT_TESTBED_ARA_CLIENT_H_
-#define _ABSTRACT_TESTBED_ARA_CLIENT_H_
+#ifndef _TESTBED_ARA_CLIENT_H_
+#define _TESTBED_ARA_CLIENT_H_
 
 #include "Testbed.h"
 #include "AbstractARAClient.h"
 
 TESTBED_NAMESPACE_BEGIN
 
-class AbstractTestbedARAClient : public AbstractARAClient {
+class TestbedARAClient : public AbstractARAClient {
     public:
 
         /**
          * The standard virtual destructor of this abstract class.
          */
-        ~AbstractTestbedARAClient();
+        ~TestbedARAClient();
 
         /**
          * Sends the packet to the packets destination.
@@ -42,6 +42,20 @@ class AbstractTestbedARAClient : public AbstractARAClient {
         void receivePacket(Packet* packet, NetworkInterface* interface);
 
         /**
+         * The packet should be directed to this node and must be delivered to the local system.
+         * Please note that this method is responsible for deleting the given packet (or delegating
+         * this responsibility to another method)
+         */
+        void deliverToSystem(const Packet* packet);
+
+        /**
+         * This method is called if the route discovery is unsuccessful and not route to the packets
+         * destination can be established. The task of this method is to notify the upper layers
+         * about this event and delete the packet.
+         */
+        void packetNotDeliverable(const Packet* packet);
+
+        /**
          * This method is called each time packet can not be delivered to a specific next hop address.
          * This is the case if this client never receives an acknowledgment in the timeout period
          * and has tried too many times.
@@ -63,4 +77,4 @@ class AbstractTestbedARAClient : public AbstractARAClient {
 
 TESTBED_NAMESPACE_END
 
-#endif // _ABSTRACT_TESTBED_ARA_CLIENT_H_
+#endif // _TESTBED_ARA_CLIENT_H_
