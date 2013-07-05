@@ -5,7 +5,6 @@
 #include "testbed/NetworkInterface.h"
 #include "TestbedAddress.h"
 #include "PacketDispatcher.h"
-#include <iostream>
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -42,7 +41,7 @@ void NetworkInterface::deliverToARAClient(Packet* packet) {
 
 bool NetworkInterface::equals(ARA::NetworkInterface* otherInterface) {
     ARA::testbed::NetworkInterface* other = (ARA::testbed::NetworkInterface*)otherInterface;
-    return this->dessertPointer->hwaddr == other->getDessertPointer()->hwaddr;
+    return this->dessertPointer->hwaddr == other->dessertPointer->hwaddr;
 }
 
 dessert_meshif_t* NetworkInterface::getDessertPointer()  const{
@@ -51,6 +50,10 @@ dessert_meshif_t* NetworkInterface::getDessertPointer()  const{
 
 void NetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> recipient){
     packetToNetworkDispatcher(packet, this, recipient);
+}
+
+void NetworkInterface::registerInterface() {
+    networkInterfaces[dessertPointer] = this;
 }
 
 TESTBED_NAMESPACE_END
