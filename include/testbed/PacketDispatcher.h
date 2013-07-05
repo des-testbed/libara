@@ -13,15 +13,12 @@
 
 TESTBED_NAMESPACE_BEGIN
 
+typedef std::unordered_map<dessert_meshif_t*, NetworkInterface*> NetworkInterfaceMap; //instantiated in .cpp file
+
 struct routingExtension {
     u_int8_t  ara_dhost[ETH_ALEN];  /* ARA destination eth addr */
     u_int8_t  ara_shost[ETH_ALEN];  /* ARA source ether addr    */
   } __attribute__ ((__packed__));
-
-/**
- * Stores a map of network interface pointers by dessert interface pointers.
- */
-static std::unordered_map<dessert_meshif_t*, NetworkInterface*> networkInterfaces;
 
 /**
  * Receives a dessert_message_t from the NIC and sends to libARA.

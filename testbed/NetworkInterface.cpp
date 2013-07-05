@@ -5,24 +5,26 @@
 #include "testbed/NetworkInterface.h"
 #include "TestbedAddress.h"
 #include "PacketDispatcher.h"
+#include <iostream>
 
 TESTBED_NAMESPACE_BEGIN
 
 AddressPtr NetworkInterface::localAddress = AddressPtr(new TestbedAddress(DESSERT_LOCAL_ADDRESS));
 AddressPtr NetworkInterface::broadcastAddress = AddressPtr(new TestbedAddress(DESSERT_BROADCAST_ADDRESS));
+extern NetworkInterfaceMap networkInterfaces;
 
 NetworkInterface::NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds)
                         : ReliableNetworkInterface(client, packetFactory, ackTimeoutInMicroSeconds, localAddress, broadcastAddress) {
     this->dessertPointer = dessertPointer;
+    registerInterface();
 }
 
-void NetworkInterface::registerInterface() {
-    std::pair<dessert_meshif_t*, NetworkInterface*> interfacePair(dessertPointer, this);
-    networkInterfaces.insert(interfacePair);
+NetworkInterface::~NetworkInterface() {
+    networkInterfaces.erase(dessertPointer);
 }
 
 bool NetworkInterface::isRegistered() {
-    if(extractNetworkInterface(dessertPointer) == this){
+    if (extractNetworkInterface(dessertPointer) == this) {
         return true;
     }
     else {

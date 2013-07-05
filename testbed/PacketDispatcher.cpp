@@ -10,6 +10,11 @@
 
 TESTBED_NAMESPACE_BEGIN
 
+/**
+ * Stores a map of network interface pointers by dessert interface pointers.
+ */
+NetworkInterfaceMap networkInterfaces;
+
 _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
     Packet* packet = extractPacket(messageReceived);
     extractNetworkInterface(interface)->receive(packet);
