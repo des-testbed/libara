@@ -34,24 +34,6 @@ AbstractEARAClient::~AbstractEARAClient() {
     runningRouteDiscoveryDelayTimers.clear();
 }
 
-float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
-    int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL();
-    assert(nrOfHops > 0);
-
-    if (nrOfHops == 1) {
-        // packet has been directly received from the source
-        return packet->getTotalEnergyValue() / (float) maximumEnergyValue;
-    }
-    else {
-        nrOfHops -= 1; // don't count in the last hop, because we also don't coun't in the energy of the current node
-        float averageValue = packet->getTotalEnergyValue() / (float) nrOfHops;
-        float averagePercent = averageValue / (float) maximumEnergyValue;
-        float minimumPercent = packet->getMinimumEnergyValue() / (float) maximumEnergyValue;
-
-        return averagePercent - ( (averagePercent - minimumPercent) / influenceOfMinimumEnergyValue );
-    }
-}
-
 void AbstractEARAClient::broadCast(Packet* packet) {
     EARAPacket* earaPacket = (EARAPacket*) packet;
     unsigned int energyOfCurrentNode = getCurrentEnergyLevel();
@@ -78,6 +60,24 @@ void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* inter
     }
     else {
         AbstractARAClient::handleAntPacket(packet, interface);
+    }
+}
+
+float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
+    int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL();
+    assert(nrOfHops > 0);
+
+    if (nrOfHops == 1) {
+        // packet has been directly received from the source
+        return packet->getTotalEnergyValue() / (float) maximumEnergyValue;
+    }
+    else {
+        nrOfHops -= 1; // don't count in the last hop, because we also don't coun't in the energy of the current node
+        float averageValue = packet->getTotalEnergyValue() / (float) nrOfHops;
+        float averagePercent = averageValue / (float) maximumEnergyValue;
+        float minimumPercent = packet->getMinimumEnergyValue() / (float) maximumEnergyValue;
+
+        return averagePercent - ( (averagePercent - minimumPercent) / influenceOfMinimumEnergyValue );
     }
 }
 
