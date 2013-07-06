@@ -34,14 +34,6 @@ AbstractEARAClient::~AbstractEARAClient() {
     runningRouteDiscoveryDelayTimers.clear();
 }
 
-void AbstractEARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {
-    //FIXME why do we need this method if it does the same as the original one?!
-    // the energy value will be set separately when processing FANTs/BANTs below
-    float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
-    routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
-    logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
-}
-
 float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
     int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL();
     assert(nrOfHops > 0);
@@ -142,13 +134,6 @@ void AbstractEARAClient::handleExpiredRouteDiscoveryDelayTimer(Timer* timer) {
     runningRouteDiscoveryDelayTimers.erase(bestAntPacket->getSource());
     broadCast(bestAntPacket);
     delete timer;
-}
-
-float AbstractEARAClient::reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-    float currentPheromoneValue = routingTable->getPheromoneValue(destination, nextHop, interface);
-    float newPheromoneValue = pathReinforcementPolicy->calculateReinforcedValue(currentPheromoneValue);
-    routingTable->update(destination, nextHop, interface, newPheromoneValue);
-    return newPheromoneValue;
 }
 
 void AbstractEARAClient::handleDataPacketForThisNode(Packet* packet) {

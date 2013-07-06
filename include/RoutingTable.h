@@ -38,8 +38,8 @@ public:
      */
     float getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
    
-    void update(AddressPtr destination, RoutingTableEntry* entry);
-    void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
+    virtual void update(AddressPtr destination, RoutingTableEntry* entry);
+    virtual void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
 
     void removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
     RoutingTableEntryList getPossibleNextHops(const Packet* packet);

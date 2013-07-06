@@ -64,14 +64,7 @@ public:
 
 protected:
 
-    /**
-     * Starts the calculation of the initial pheromone and energy values and creates a new route in the routing table.
-     */
-    virtual void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
-
     float calculateInitialEnergyValue(EARAPacket* packet);
-
-    virtual float reinforcePheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
 
     virtual bool hasBeenReceivedEarlier(const Packet* packet);
 

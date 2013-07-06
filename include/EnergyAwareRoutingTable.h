@@ -9,19 +9,13 @@
 #include "RoutingTable.h"
 #include "EARARoutingTableEntry.h"
 
-#include <unordered_map>
-
 ARA_NAMESPACE_BEGIN
-
-/**
- * This stores the normalized energy values for each route
- */
-typedef std::unordered_map<AddressPtr, float, AddressHash, AddressPredicate> RouteEnergyFitnessMap;
 
 class EnergyAwareRoutingTable : public RoutingTable {
     public:
-        void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
-        void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue, float normalizedEnergyValue);
+        virtual void update(AddressPtr destination, RoutingTableEntry* entry) {RoutingTable::update(destination, entry);};
+        virtual void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
+        virtual void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue, float normalizedEnergyValue);
 
         /**
          * Updates only the energy value of a given hop but not the pheromone value.
@@ -38,9 +32,6 @@ class EnergyAwareRoutingTable : public RoutingTable {
     protected:
         void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
         EARARoutingTableEntry* getRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
-
-    protected:
-        RouteEnergyFitnessMap routeEnergyFitnessValues;
 };
 
 ARA_NAMESPACE_END
