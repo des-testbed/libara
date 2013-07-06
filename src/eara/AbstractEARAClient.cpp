@@ -79,17 +79,17 @@ bool AbstractEARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 
 void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* interface) {
     char packetType = packet->getType();
-    if ( (packetType == PacketType::FANT || packetType == PacketType::BANT) && isDirectedToThisNode(packet) == false) {
+    if ( (packetType == PacketType::FANT || packetType == PacketType::BANT || packetType == PacketType::PEANT) && isDirectedToThisNode(packet) == false) {
         float routeEnergy = calculateInitialEnergyValue((EARAPacket*)packet);
         routingTable->updateEnergyValue(packet->getSource(), packet->getSender(), interface, routeEnergy);
-        handleFANTorBANT(packet, routeEnergy);
+        handleAntPacketWithDelayTimer(packet, routeEnergy);
     }
     else {
         AbstractARAClient::handleAntPacket(packet, interface);
     }
 }
 
-void AbstractEARAClient::handleFANTorBANT(Packet* antPacket, float energyFitnessOfNewAnt) {
+void AbstractEARAClient::handleAntPacketWithDelayTimer(Packet* antPacket, float energyFitnessOfNewAnt) {
     RouteDiscoveryDelayTimerMap::iterator found = runningRouteDiscoveryDelayTimers.find(antPacket->getSource());
 
     if (found == runningRouteDiscoveryDelayTimers.end()) {

@@ -463,4 +463,46 @@ TEST(AbstractEARAClientTest, destinationsStartToSendPEANTsIfEnergyHasChangedNoti
     delete packet2;
 }
 
+/**
+ * In this test we let a client receive a PEANT packet.
+ * It is required to add its own energy value to the PEANt just like with the FANTs/BANTs
+ * and then broadcast the updated PEANT.
+ */
+TEST(AbstractEARAClientTest, aggregateEnergyInformationOfPEANT) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr source (new AddressMock("source"));
+
+    client->setEnergy(40);
+
+    EARAPacket* peant = castToEARAPacket(packetFactory->makePEANT(source, 123));
+    peant->addEnergyValue(60);
+    peant->decreaseTTL(4); // traveled some hops
+
+    // sanity check
+    BYTES_EQUAL(60, peant->getMinimumEnergyValue());
+    BYTES_EQUAL(60, peant->getTotalEnergyValue());
+
+    // start the test
+    client->receivePacket(peant, interface);
+
+    // we need the timer to trigger the actual sending of the PEANT
+    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
+    CHECK(routeDiscoveryDelayTimer != nullptr);
+    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
+    CHECK(routeDiscoveryDelayTimer->isRunning());
+    routeDiscoveryDelayTimer->expire();
+
+    // packet should have been updated and broadcasted
+    LONGS_EQUAL(1, interface->getNumberOfSentPackets());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->front();
+    EARAPacket* sentPacket = castToEARAPacket(sentPacketInfo->getLeft());
+    AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
+
+    CHECK(sentPacket->getType() == PacketType::PEANT);
+    CHECK(interface->isBroadcastAddress(recipientOfSentPacket));
+
+    BYTES_EQUAL(100, sentPacket->getTotalEnergyValue());
+    BYTES_EQUAL( 40, sentPacket->getMinimumEnergyValue());
+}
+
 //TODO test that PEANTs feature is disabled if the energyThreshold is -1

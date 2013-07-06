@@ -90,7 +90,7 @@ protected:
      *                               this has been calculated previously so it gets passed as parameter so we don't need
      *                               to calculate it again
      */
-    void handleFANTorBANT(Packet* packet, float energyFitnessOfNewAnt);
+    void handleAntPacketWithDelayTimer(Packet* packet, float energyFitnessOfNewAnt);
 
     /**
      * Starts a new route discovery delay timer and stores the given packet as context object of that timer.
