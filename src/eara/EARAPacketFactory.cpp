@@ -6,6 +6,10 @@
 
 ARA_NAMESPACE_BEGIN
 
+EARAPacket* EARAPacketFactory::makePEANT(AddressPtr source,  unsigned int sequenceNumber) {
+    return makePacket(source, source, source, PacketType::PEANT, sequenceNumber, maxHopCount);
+}
+
 EARAPacket* EARAPacketFactory::makeClone(const Packet* originalPacket) {
     EARAPacket* clone = makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), originalPacket->getType(), originalPacket->getSequenceNumber(), originalPacket->getTTL(), originalPacket->getPayload(), originalPacket->getPayloadLength(), originalPacket->getPreviousHop());
 

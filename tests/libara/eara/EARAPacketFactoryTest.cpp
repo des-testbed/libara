@@ -105,3 +105,24 @@ TEST(EARAPacketFactoryTest, cloneCopiesTheEnergyValue) {
 
     delete clone;
 }
+
+TEST(EARAPacketFactoryTest, makePEANT) {
+    AddressPtr source (new AddressMock("source"));
+    unsigned int sequenceNumber = 123;
+    Packet* peant = factory->makePEANT(source, sequenceNumber);
+
+    CHECK(peant->getType() == PacketType::PEANT);
+    CHECK(peant->getSource()->equals(source));
+    CHECK(peant->getSender()->equals(source));
+
+    // there is no real destination in a PEANT so it doesn't matter what address we choose here
+    // however, we need to have something in the address field so I chose the source of the PEANt
+    // itself so nobody will ever be tempted to process this packet like it was meant only to him
+    CHECK(peant->getDestination()->equals(source));
+
+    LONGS_EQUAL(sequenceNumber, peant->getSequenceNumber());
+    LONGS_EQUAL(maximumHopCount, peant->getTTL());
+    LONGS_EQUAL(0, peant->getPayloadLength());
+
+    delete peant;
+}

@@ -21,6 +21,7 @@ class EARAPacketFactory : public PacketFactory {
     public:
         EARAPacketFactory(int maxHopCount) : PacketFactory(maxHopCount) {};
 
+        virtual EARAPacket* makePEANT(AddressPtr source,  unsigned int sequenceNumber);
         virtual EARAPacket* makeClone(const Packet* originalPacket);
 
     protected:

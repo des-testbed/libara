@@ -20,6 +20,8 @@ void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration) {
     maximumEnergyValue = configuration.getMaximumEnergyValue();
     influenceOfMinimumEnergyValue = configuration.getInfluenceOfMinimumEnergyValue();
     routeDiscoveryDelayInMilliSeconds = configuration.getRouteDiscoveryDelayInMilliSeconds();
+    peantEnergyThreshold = configuration.getPEANTEnergyThreshold();
+    energyLevelWhenLastPEANTHasBeenSent = maximumEnergyValue;
 }
 
 AbstractEARAClient::~AbstractEARAClient() {
@@ -151,10 +153,21 @@ float AbstractEARAClient::reinforcePheromoneValue(AddressPtr destination, Addres
 
 void AbstractEARAClient::handleDataPacketForThisNode(Packet* packet) {
     AbstractARAClient::handleDataPacketForThisNode(packet);
-    //TODO get the current energy level
-    // check if the difference between the current value and this value has exceeded the threshold
-    // if yes then send a new PEANT
-    // if not do nothing else
+
+    unsigned int differenceInEnergyLevel = energyLevelWhenLastPEANTHasBeenSent - getCurrentEnergyLevel();
+    if (differenceInEnergyLevel / (float) maximumEnergyValue >= peantEnergyThreshold) {
+        broadcastPEANT();
+    }
+}
+
+void AbstractEARAClient::broadcastPEANT() {
+    logDebug("Sending new PEANT over all interfaces");
+    for(auto& interface: interfaces) {
+        AddressPtr source = interface->getLocalAddress();
+        unsigned int sequenceNr = getNextSequenceNumber();
+        Packet* peant = packetFactory->makePEANT(source, sequenceNr);
+        interface->broadcast(peant);
+    }
 }
 
 ARA_NAMESPACE_END

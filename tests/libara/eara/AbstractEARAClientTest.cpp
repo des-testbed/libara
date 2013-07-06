@@ -457,6 +457,10 @@ TEST(AbstractEARAClientTest, destinationsStartToSendPEANTsIfEnergyHasChangedNoti
     // however, we need to have something in the address field so I chose the source of the PEANt
     // itself so nobody will ever be tempted to process this packet like it was meant only to him
     CHECK(sentPacket->getDestination()->equals(destination));
+
+    //TODO the client mock should delete the delivered packets...
+    delete packet1;
+    delete packet2;
 }
 
 //TODO test that PEANTs feature is disabled if the energyThreshold is -1

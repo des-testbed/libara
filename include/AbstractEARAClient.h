@@ -108,6 +108,8 @@ protected:
 
     virtual void handleDataPacketForThisNode(Packet* packet);
 
+    void broadcastPEANT();
+
 private:
     /**
      * This method is private to prevent anyone from using it because we slightly changed
@@ -126,6 +128,10 @@ protected:
 
     // `b` parameter for energy fitness initialization
     float influenceOfMinimumEnergyValue;
+
+    // used to determine when PEANTs shall be send
+    float peantEnergyThreshold;
+    unsigned int energyLevelWhenLastPEANTHasBeenSent;
 };
 
 ARA_NAMESPACE_END

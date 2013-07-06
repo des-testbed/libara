@@ -745,8 +745,8 @@ void AbstractARAClient::broadcastPANT(AddressPtr destination) {
     for(auto& interface: interfaces) {
         AddressPtr source = interface->getLocalAddress();
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* routeFailurePacket = packetFactory->makePANT(source, destination, sequenceNr);
-        interface->broadcast(routeFailurePacket);
+        Packet* pant = packetFactory->makePANT(source, destination, sequenceNr);
+        interface->broadcast(pant);
     }
 }
 
