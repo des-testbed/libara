@@ -15,12 +15,12 @@ ARA_NAMESPACE_BEGIN
 EARAClientMock::EARAClientMock() {
     BasicEARAConfiguration configuration = getStandardConfiguration();
     initializeEARA(configuration);
-    currentEnergyLevel = 255;
+    currentEnergyLevel = maximumEnergyValue;
 }
 
 EARAClientMock::EARAClientMock(EARAConfiguration& configuration) {
     initializeEARA(configuration);
-    currentEnergyLevel = 255;
+    currentEnergyLevel = maximumEnergyValue;
 }
 
 BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
@@ -70,7 +70,7 @@ void EARAClientMock::packetNotDeliverable(const Packet* packet) {
     storeUndeliverablePacket(packet);
 }
 
-unsigned char EARAClientMock::getCurrentEnergyLevel() {
+unsigned int EARAClientMock::getCurrentEnergyLevel() {
     return currentEnergyLevel;
 }
 
@@ -80,7 +80,7 @@ NetworkInterfaceMock* EARAClientMock::createNewNetworkInterfaceMock(const std::s
     return mock;
 }
 
-void EARAClientMock::setEnergy(unsigned char newEnergyLevel) {
+void EARAClientMock::setEnergy(unsigned int newEnergyLevel) {
     currentEnergyLevel = newEnergyLevel;
 }
 

@@ -49,10 +49,10 @@ public:
 
     /**
      * This method must be implemented by the concrete EARA client. It returns the current energy
-     * level in a range between 0 and 255. An energy level of 255 means full battery capacity
-     * and a level of 0 indicates that the energy is as good as depleted.
+     * level. An energy value of 0 indicates that the energy is as good as depleted.
+     * The upper limit should be the maximum energy capacity.
      */
-    virtual unsigned char getCurrentEnergyLevel() = 0;
+    virtual unsigned int getCurrentEnergyLevel() = 0;
 
     /**
      * This method is overwritten to embed the energy values in the packets before they are

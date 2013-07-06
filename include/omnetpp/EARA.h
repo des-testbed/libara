@@ -44,7 +44,7 @@ class EARA: public AbstractEARAClient, public AbstractOMNeTARAClient {
 
         virtual void takeAndSend(cMessage* message, cGate* gate, double sendDelay);
 
-        virtual unsigned char getCurrentEnergyLevel();
+        virtual unsigned int getCurrentEnergyLevel();
 
     private:
         int nrOfDetectedLoops = 0;

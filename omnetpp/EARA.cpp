@@ -104,7 +104,7 @@ void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
     AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);
 }
 
-unsigned char EARA::getCurrentEnergyLevel() {
+unsigned int EARA::getCurrentEnergyLevel() {
     return currentEnergyLevel;
 }
 
