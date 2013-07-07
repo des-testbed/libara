@@ -6,6 +6,7 @@
 #include "TimerType.h"
 
 #include <cassert>
+#include <cmath>
 
 ARA_NAMESPACE_BEGIN
 
@@ -115,8 +116,10 @@ void AbstractEARAClient::startNewRouteDiscoveryDelayTimer(Packet* antPacket) {
 }
 
 float AbstractEARAClient::calculateRouteFitness(int ttl, float energyFitness) {
-    //TODO add weighting parameters (use from forwarding policy)
-    return ttl * energyFitness;
+    float potentiatedPheromoneValue = pow(ttl, forwardingPolicy->getPheromoneWeight());
+    float potentiatedEnergyValue = pow(energyFitness, forwardingPolicy->getEnergyWeight());
+
+    return potentiatedPheromoneValue * potentiatedEnergyValue;
 }
 
 void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
