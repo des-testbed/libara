@@ -13,7 +13,7 @@ OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module) : OMNeTConfigura
     influenceOfMinimumEnergyValue = module->par("influenceOfMinimumEnergyValue").longValue();
     routeDiscoveryDelayInMilliSeconds = module->par("routeDiscoveryDelay").longValue();
     peantEnergyThreshold = module->par("peantEnergyThreshold").doubleValue();
-    forwardingPolicy = ModuleAccess<EARAForwardingPolicy>("forwardingPolicy").get();
+    forwardingPolicy = ModuleAccess<OMNeTEARAForwardingPolicy>("forwardingPolicy").get();
 
     if (influenceOfMinimumEnergyValue < 1) {
         throw cRuntimeError("EARA parameter influenceOfMinimumEnergyValue needs to be >= 1");
@@ -38,7 +38,7 @@ unsigned int OMNeTEARAConfiguration::getRouteDiscoveryDelayInMilliSeconds() cons
 EnergyAwareRoutingTable* OMNeTEARAConfiguration::getEnergyAwareRoutingTable() const {
     EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
-    ((OMNeTEARAForwardingPolicy*)forwardingPolicy)->setRoutingTable(routingTable);
+    forwardingPolicy->setRoutingTable(routingTable);
     return routingTable;
 }
 

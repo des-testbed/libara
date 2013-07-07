@@ -6,6 +6,7 @@
 #define OMNET_FORWARDING_POLICY_H_
 
 #include "OMNeTARAMacros.h"
+#include "ForwardingPolicy.h"
 #include "RoutingTable.h"
 
 OMNETARA_NAMESPACE_BEGIN
@@ -18,7 +19,7 @@ OMNETARA_NAMESPACE_BEGIN
 * It also gives a standard implementation of handleMessage which just throws an exception
 * if the simulation tries to use it (should never be called).
 */
-class OMNeTForwardingPolicy {
+class OMNeTForwardingPolicy : public virtual ForwardingPolicy, public cSimpleModule {
     public:
         virtual ~OMNeTForwardingPolicy() {};
 
@@ -26,6 +27,12 @@ class OMNeTForwardingPolicy {
          * This must be called after the constructor, because stupid OMNeT++ does only allow standard constructors...
          */
         virtual void setRoutingTable(RoutingTable* routingTable) = 0;
+
+    protected:
+
+        virtual void handleMessage(cMessage* message) {
+            throw cRuntimeError("handleMessage() should never be called on an OMNeTForwardingPolicy!");
+        }
 };
 
 OMNETARA_NAMESPACE_END

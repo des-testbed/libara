@@ -8,6 +8,7 @@
 #include "OMNeTConfiguration.h"
 #include "EARAConfiguration.h"
 #include "EnergyAwareRoutingTable.h"
+#include "OMNeTEARAForwardingPolicy.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -24,7 +25,7 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
         virtual float getPEANTEnergyThreshold() const;
 
     private:
-        EARAForwardingPolicy* forwardingPolicy;
+        OMNeTEARAForwardingPolicy* forwardingPolicy;
         unsigned int maximumEnergyValue;
         float influenceOfMinimumEnergyValue;
         unsigned int routeDiscoveryDelayInMilliSeconds;

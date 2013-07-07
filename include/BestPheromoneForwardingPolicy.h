@@ -13,7 +13,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-class BestPheromoneForwardingPolicy : public ForwardingPolicy {
+class BestPheromoneForwardingPolicy : public virtual ForwardingPolicy {
     public:
         BestPheromoneForwardingPolicy(RoutingTable* routingTable);
 

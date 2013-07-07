@@ -21,8 +21,4 @@ void OMNeTEnergyAwareStochasticForwardingPolicy::setRoutingTable(EnergyAwareRout
     this->routingTable = routingTable;
 }
 
-void OMNeTEnergyAwareStochasticForwardingPolicy::handleMessage(cMessage* message) {
-    throw cRuntimeError("handleMessage() should never be called on OMNeTEnergyAwareStochasticForwardingPolicy!");
-}
-
 OMNETARA_NAMESPACE_END

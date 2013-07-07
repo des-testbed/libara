@@ -21,7 +21,7 @@ OMNETARA_NAMESPACE_BEGIN
 * This class implements that and adds a setRoutingTable method which
 * MUST BE CALLED before this object is used.
 */
-class OMNeTStochasticForwardingPolicy : public cSimpleModule, public StochasticForwardingPolicy, public OMNeTForwardingPolicy {
+class OMNeTStochasticForwardingPolicy : public StochasticForwardingPolicy, public OMNeTForwardingPolicy {
     public:
         OMNeTStochasticForwardingPolicy() : StochasticForwardingPolicy(nullptr) {};
 
@@ -35,7 +35,6 @@ class OMNeTStochasticForwardingPolicy : public cSimpleModule, public StochasticF
          * Returns a random number which uses OMNeT++ pseudo random number generators.
          */
         virtual float getRandomNumber();
-        virtual void handleMessage(cMessage *msg);
 };
 
 OMNETARA_NAMESPACE_END

@@ -16,7 +16,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-class StochasticForwardingPolicy : public ForwardingPolicy {
+class StochasticForwardingPolicy : public virtual ForwardingPolicy {
     public:
         StochasticForwardingPolicy(RoutingTable* routingTable);
 

@@ -36,6 +36,7 @@ void OMNeTBattery::initialize(int stage) {
         }
 
         residualEnergyOutVector.setName("energyLevel");
+        residualEnergyOutVector.record(residualCapacityInMilliWattSeconds);
         WATCH(residualCapacityInMilliWattSeconds);
         updateBatteryIcon();
     }

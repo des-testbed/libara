@@ -6,9 +6,8 @@
 #define OMNET_ENERGY_AWARE_STOCHASTIC_FORWARDING_POLICY_H_
 
 #include "OMNeTARAMacros.h"
-#include "EnergyAwareStochasticForwardingPolicy.h"
 #include "OMNeTEARAForwardingPolicy.h"
-#include "EnergyAwareRoutingTable.h"
+#include "EnergyAwareStochasticForwardingPolicy.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -21,7 +20,7 @@ OMNETARA_NAMESPACE_BEGIN
 * This class implements that and adds a setRoutingTable method which
 * MUST BE CALLED before this object is used.
 */
-class OMNeTEnergyAwareStochasticForwardingPolicy : public cSimpleModule, public EnergyAwareStochasticForwardingPolicy, public OMNeTEARAForwardingPolicy {
+class OMNeTEnergyAwareStochasticForwardingPolicy : public EnergyAwareStochasticForwardingPolicy, public OMNeTEARAForwardingPolicy {
     public:
         OMNeTEnergyAwareStochasticForwardingPolicy() : EnergyAwareStochasticForwardingPolicy(nullptr) {};
 
@@ -36,7 +35,6 @@ class OMNeTEnergyAwareStochasticForwardingPolicy : public cSimpleModule, public 
         float getRandomNumber();
 
         virtual void initialize();
-        virtual void handleMessage(cMessage* message);
 };
 
 OMNETARA_NAMESPACE_END

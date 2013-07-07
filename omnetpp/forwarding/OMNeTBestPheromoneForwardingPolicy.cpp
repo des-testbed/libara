@@ -12,8 +12,4 @@ void OMNeTBestPheromoneForwardingPolicy::setRoutingTable(RoutingTable* routingTa
     this->routingTable = routingTable;
 }
 
-void OMNeTBestPheromoneForwardingPolicy::handleMessage(cMessage* message) {
-    throw cRuntimeError("handleMessage() should never be called on OMNeTBestPheromoneForwardingPolicy!");
-}
-
 OMNETARA_NAMESPACE_END

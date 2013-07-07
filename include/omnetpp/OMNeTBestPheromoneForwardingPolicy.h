@@ -19,7 +19,7 @@ OMNETARA_NAMESPACE_BEGIN
 * This class implements that and adds a setRoutingTable method which
 * MUST BE CALLED before this object is used.
 */
-class OMNeTBestPheromoneForwardingPolicy : public cSimpleModule, public BestPheromoneForwardingPolicy, public OMNeTForwardingPolicy {
+class OMNeTBestPheromoneForwardingPolicy : public BestPheromoneForwardingPolicy, public OMNeTForwardingPolicy {
     public:
         OMNeTBestPheromoneForwardingPolicy() : BestPheromoneForwardingPolicy(nullptr) {};
 
@@ -27,9 +27,6 @@ class OMNeTBestPheromoneForwardingPolicy : public cSimpleModule, public BestPher
          * This must be called after the constructor, because stupid OMNeT++ does only allow standard constructors...
          */
         void setRoutingTable(RoutingTable* routingTable);
-
-    protected:
-        virtual void handleMessage(cMessage *msg);
 };
 
 OMNETARA_NAMESPACE_END
