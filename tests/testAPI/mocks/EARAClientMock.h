@@ -8,6 +8,7 @@
 #include "ARAMacros.h"
 #include "AbstractEARAClient.h"
 #include "AbstractClientMockBase.h"
+#include "BasicEARAConfiguration.h"
 #include "Packet.h"
 #include "NetworkInterfaceMock.h"
 #include "PacketTrap.h"
@@ -25,26 +26,30 @@ ARA_NAMESPACE_BEGIN
 class EARAClientMock: public AbstractEARAClient, public AbstractClientMockBase {
 public:
     EARAClientMock();
+    EARAClientMock(EARAConfiguration& configuration);
+    BasicEARAConfiguration getStandardConfiguration() const;
 
-    void receivePacket(Packet* packet, NetworkInterface* interface);
-    virtual bool handleBrokenLink(Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    virtual void receivePacket(Packet* packet, NetworkInterface* interface);
+    bool handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 
-    void deliverToSystem(const Packet* packet);
-    void packetNotDeliverable(const Packet* packet);
+    virtual void deliverToSystem(const Packet* packet);
+    virtual void packetNotDeliverable(const Packet* packet);
 
-    unsigned char getCurrentEnergyLevel();
+    virtual unsigned int getCurrentEnergyLevel();
 
     // Mocking methods
-    void setEnergy(unsigned char newEnergyLevel);
+    void setEnergy(unsigned int newEnergyLevel);
 
     PacketTrap* getPacketTrap();
     EnergyAwareRoutingTable* getRoutingTable();
+    EARAPacketFactory* getPacketFactory();
     TimerMock* getEnergyDisseminationTimer();
+    TimerMock* getRouteDiscoveryDelayTimer(AddressPtr source);
 
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
 
 private:
-    unsigned char currentEnergyLevel;
+    unsigned int currentEnergyLevel;
 };
 
 ARA_NAMESPACE_END

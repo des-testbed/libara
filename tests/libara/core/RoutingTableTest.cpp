@@ -12,6 +12,7 @@
 #include "testAPI/mocks/NetworkInterfaceMock.h"
 #include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/TimeMock.h"
+#include "testAPI/mocks/ARAClientMock.h"
 
 #include <deque>
 
@@ -20,18 +21,20 @@ using namespace ARA;
 typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(RoutingTableTest) {
+    ARAClientMock* client;
     RoutingTable* routingTable;
     ExponentialEvaporationPolicyMock* evaporationPolicy;
+    NetworkInterfaceMock* interface;
 
     void setup() {
-        evaporationPolicy = new ExponentialEvaporationPolicyMock();
-        routingTable = new RoutingTable();
-        routingTable->setEvaporationPolicy(evaporationPolicy);
+        client = new ARAClientMock();
+        routingTable = client->getRoutingTable();
+        evaporationPolicy = (ExponentialEvaporationPolicyMock*) routingTable->getEvaporationPolicy();
+        interface = client->createNewNetworkInterfaceMock();
     }
 
     void teardown() {
-        delete routingTable;
-        delete evaporationPolicy;
+        delete client;
     }
 };
 
@@ -50,18 +53,17 @@ TEST(RoutingTableTest, updateRoutingTable) {
     PacketMock packet = PacketMock();
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     float pheromoneValue = 123.456;
 
     CHECK(routingTable->isDeliverable(&packet) == false);
-    routingTable->update(destination, nextHop, &interface, pheromoneValue);
+    routingTable->update(destination, nextHop, interface, pheromoneValue);
 
     CHECK(routingTable->isDeliverable(&packet));
     std::deque<RoutingTableEntry*> nextHops = routingTable->getPossibleNextHops(&packet);
     CHECK(nextHops.size() == 1);
     RoutingTableEntry* possibleHop = nextHops.front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
-    CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
+    CHECK_EQUAL(interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
 }
 
@@ -69,27 +71,26 @@ TEST(RoutingTableTest, overwriteExistingEntryWithUpdate) {
     PacketMock packet = PacketMock();
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     float pheromoneValue = 123.456;
 
     // first we register a route to a destination the first time
-    routingTable->update(destination, nextHop, &interface, pheromoneValue);
+    routingTable->update(destination, nextHop, interface, pheromoneValue);
 
     CHECK(routingTable->isDeliverable(&packet));
     std::deque<RoutingTableEntry*> nextHops = routingTable->getPossibleNextHops(&packet);
     BYTES_EQUAL(1, nextHops.size());
     RoutingTableEntry* possibleHop = nextHops.front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
-    CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
+    CHECK_EQUAL(interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(pheromoneValue, possibleHop->getPheromoneValue());
 
     // now we want to update the pheromone value of this route
-    routingTable->update(destination, nextHop, &interface, 42);
+    routingTable->update(destination, nextHop, interface, 42);
     nextHops = routingTable->getPossibleNextHops(&packet);
     BYTES_EQUAL(1, nextHops.size());
     possibleHop = nextHops.front();
     CHECK(nextHop->equals(possibleHop->getAddress()));
-    CHECK_EQUAL(&interface, possibleHop->getNetworkInterface());
+    CHECK_EQUAL(interface, possibleHop->getNetworkInterface());
     CHECK_EQUAL(42, possibleHop->getPheromoneValue());
 }
 
@@ -103,9 +104,9 @@ TEST(RoutingTableTest, getPossibleNextHops) {
     AddressPtr nextHop2 (new AddressMock("nextHop2"));
     AddressPtr nextHop3 (new AddressMock("nextHop3"));
     AddressPtr nextHop4 (new AddressMock("nextHop4"));
-    NetworkInterfaceMock interface1 = NetworkInterfaceMock();
-    NetworkInterfaceMock interface2 = NetworkInterfaceMock();
-    NetworkInterfaceMock interface3 = NetworkInterfaceMock();
+    NetworkInterfaceMock interface1 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface2 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface3 = NetworkInterfaceMock(client);
 
     float pheromoneValue1a = 1;
     float pheromoneValue1b = 5;
@@ -168,13 +169,12 @@ TEST(RoutingTableTest, getPheromoneValue) {
     AddressPtr sourceAddress (new AddressMock("Source"));
     AddressPtr destination (new AddressMock("Destination"));
     AddressPtr nextHopAddress (new AddressMock("nextHop"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     // Should be zero because there is no known route to this destination
-    LONGS_EQUAL(0, routingTable->getPheromoneValue(destination, nextHopAddress, &interface));
+    LONGS_EQUAL(0, routingTable->getPheromoneValue(destination, nextHopAddress, interface));
 
-    routingTable->update(destination, nextHopAddress, &interface, 123);
-    LONGS_EQUAL(123, routingTable->getPheromoneValue(destination, nextHopAddress, &interface));
+    routingTable->update(destination, nextHopAddress, interface, 123);
+    LONGS_EQUAL(123, routingTable->getPheromoneValue(destination, nextHopAddress, interface));
 }
 
 TEST(RoutingTableTest, removeEntry) {
@@ -184,15 +184,13 @@ TEST(RoutingTableTest, removeEntry) {
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
 
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
-
-    routingTable->update(destination, nodeA, &interface, 2.5);
-    routingTable->update(destination, nodeB, &interface, 2.5);
-    routingTable->update(destination, nodeC, &interface, 2.5);
+    routingTable->update(destination, nodeA, interface, 2.5);
+    routingTable->update(destination, nodeB, interface, 2.5);
+    routingTable->update(destination, nodeC, interface, 2.5);
 
     // start the test
     BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
-    routingTable->removeEntry(destination, nodeB, &interface);
+    routingTable->removeEntry(destination, nodeB, interface);
     BYTES_EQUAL(2, routingTable->getTotalNumberOfEntries());
 
     for (unsigned int i = 0; i < 2; i++) {
@@ -205,7 +203,6 @@ TEST(RoutingTableTest, removeEntry) {
 
 TEST(RoutingTableTest, evaporatePheromones) {
     AddressPtr destination (new AddressMock("Destination"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
@@ -214,58 +211,57 @@ TEST(RoutingTableTest, evaporatePheromones) {
     float pheromoneValueB = 3.8f;
     float pheromoneValueC = 0.2f;
 
-    routingTable->update(destination, nodeA, &interface, pheromoneValueA);
-    routingTable->update(destination, nodeB, &interface, pheromoneValueB);
-    routingTable->update(destination, nodeC, &interface, pheromoneValueC);
+    routingTable->update(destination, nodeA, interface, pheromoneValueA);
+    routingTable->update(destination, nodeB, interface, pheromoneValueB);
+    routingTable->update(destination, nodeC, interface, pheromoneValueC);
 
     // no time has passed so nothing is evaporated
     routingTable->triggerEvaporation();
-    CHECK_EQUAL(pheromoneValueA, routingTable->getPheromoneValue(destination, nodeA, &interface));
-    CHECK_EQUAL(pheromoneValueB, routingTable->getPheromoneValue(destination, nodeB, &interface));
-    CHECK_EQUAL(pheromoneValueC, routingTable->getPheromoneValue(destination, nodeC, &interface));
+    CHECK_EQUAL(pheromoneValueA, routingTable->getPheromoneValue(destination, nodeA, interface));
+    CHECK_EQUAL(pheromoneValueB, routingTable->getPheromoneValue(destination, nodeB, interface));
+    CHECK_EQUAL(pheromoneValueC, routingTable->getPheromoneValue(destination, nodeC, interface));
 
     // let some time pass to trigger the evaporation
     TimeMock::letTimePass(evaporationPolicy->getTimeInterval());
     routingTable->triggerEvaporation();
     float evaporationFactor = evaporationPolicy->getEvaporationFactor();
-    DOUBLES_EQUAL(pheromoneValueA * evaporationFactor, routingTable->getPheromoneValue(destination, nodeA, &interface), 0.00001);
-    DOUBLES_EQUAL(pheromoneValueB * evaporationFactor, routingTable->getPheromoneValue(destination, nodeB, &interface), 0.00001);
+    DOUBLES_EQUAL(pheromoneValueA * evaporationFactor, routingTable->getPheromoneValue(destination, nodeA, interface), 0.00001);
+    DOUBLES_EQUAL(pheromoneValueB * evaporationFactor, routingTable->getPheromoneValue(destination, nodeB, interface), 0.00001);
 
     // pheromoneValueC should be well below the threshold and therefore be zero
-    CHECK_EQUAL(0.0, routingTable->getPheromoneValue(destination, nodeC, &interface));
+    CHECK_EQUAL(0.0, routingTable->getPheromoneValue(destination, nodeC, interface));
 }
 
 TEST(RoutingTableTest, exists) {
     AddressPtr destination (new AddressMock("Destination"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
 
     // start the test
-    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, interface));
 
-    routingTable->update(destination, nodeA, &interface, 2.5);
-    CHECK_TRUE(routingTable->exists(destination, nodeA, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+    routingTable->update(destination, nodeA, interface, 2.5);
+    CHECK_TRUE(routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, interface));
 
-    routingTable->update(destination, nodeC, &interface, 3.7);
-    CHECK_TRUE(routingTable->exists(destination, nodeA, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
-    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+    routingTable->update(destination, nodeC, interface, 3.7);
+    CHECK_TRUE(routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, interface));
 
-    routingTable->removeEntry(destination, nodeA, &interface);
-    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
-    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+    routingTable->removeEntry(destination, nodeA, interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, interface));
 
-    routingTable->removeEntry(destination, nodeC, &interface);
-    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+    routingTable->removeEntry(destination, nodeC, interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, interface));
 }
 
 TEST(RoutingTableTest, removeAllEntries) {
@@ -275,61 +271,58 @@ TEST(RoutingTableTest, removeAllEntries) {
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
 
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
-
-    routingTable->update(destination, nodeA, &interface, 2.5);
-    routingTable->update(destination, nodeB, &interface, 2.5);
-    routingTable->update(destination, nodeC, &interface, 2.5);
+    routingTable->update(destination, nodeA, interface, 2.5);
+    routingTable->update(destination, nodeB, interface, 2.5);
+    routingTable->update(destination, nodeC, interface, 2.5);
 
     // sanity check
     CHECK(routingTable->isDeliverable(destination) == true);
 
     // start the test
-    routingTable->removeEntry(destination, nodeB, &interface);
-    CHECK_TRUE(routingTable->exists(destination, nodeA, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
-    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+    routingTable->removeEntry(destination, nodeB, interface);
+    CHECK_TRUE(routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, interface));
 
-    routingTable->removeEntry(destination, nodeA, &interface);
-    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
-    CHECK_TRUE(routingTable->exists(destination, nodeC, &interface));
+    routingTable->removeEntry(destination, nodeA, interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_TRUE(routingTable->exists(destination, nodeC, interface));
 
-    routingTable->removeEntry(destination, nodeC, &interface);
-    CHECK_FALSE(routingTable->exists(destination, nodeA, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeB, &interface));
-    CHECK_FALSE(routingTable->exists(destination, nodeC, &interface));
+    routingTable->removeEntry(destination, nodeC, interface);
+    CHECK_FALSE(routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeC, interface));
 
     BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
     CHECK(routingTable->isDeliverable(destination) == false);
 }
 
 TEST(RoutingTableTest, isNewRoute) {
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr source (new AddressMock("Source"));
     AddressPtr destination (new AddressMock("Destination"));
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
 
     // start the test
-    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == true);
-    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == true);
+    CHECK(routingTable->isNewRoute(destination, nodeA, interface) == true);
+    CHECK(routingTable->isNewRoute(destination, nodeB, interface) == true);
 
-    routingTable->update(destination, nodeA, &interface, 2.5);
-    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == false);
-    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == true);
+    routingTable->update(destination, nodeA, interface, 2.5);
+    CHECK(routingTable->isNewRoute(destination, nodeA, interface) == false);
+    CHECK(routingTable->isNewRoute(destination, nodeB, interface) == true);
 
-    routingTable->update(destination, nodeB, &interface, 4.1);
-    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == false);
-    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == false);
+    routingTable->update(destination, nodeB, interface, 4.1);
+    CHECK(routingTable->isNewRoute(destination, nodeA, interface) == false);
+    CHECK(routingTable->isNewRoute(destination, nodeB, interface) == false);
 
-    routingTable->removeEntry(destination, nodeA, &interface);
-    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == true);
-    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == false);
+    routingTable->removeEntry(destination, nodeA, interface);
+    CHECK(routingTable->isNewRoute(destination, nodeA, interface) == true);
+    CHECK(routingTable->isNewRoute(destination, nodeB, interface) == false);
 
-    routingTable->removeEntry(destination, nodeB, &interface);
-    CHECK(routingTable->isNewRoute(destination, nodeA, &interface) == true);
-    CHECK(routingTable->isNewRoute(destination, nodeB, &interface) == true);
+    routingTable->removeEntry(destination, nodeB, interface);
+    CHECK(routingTable->isNewRoute(destination, nodeA, interface) == true);
+    CHECK(routingTable->isNewRoute(destination, nodeB, interface) == true);
 }
 
 /**
@@ -339,15 +332,13 @@ TEST(RoutingTableTest, isNewRoute) {
  *
  */
 TEST(RoutingTableTest, packetIsNotDeliverableIfOnlyRouteLeadsBackToTheSender) {
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     PacketMock packet = PacketMock();
-    routingTable->update(packet.getDestination(), packet.getSender(), &interface, 10.0);
+    routingTable->update(packet.getDestination(), packet.getSender(), interface, 10.0);
 
     CHECK_FALSE(routingTable->isDeliverable(&packet));
 }
 
 TEST(RoutingTableTest, getTotalNumberOfEntries) {
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
@@ -356,20 +347,19 @@ TEST(RoutingTableTest, getTotalNumberOfEntries) {
     BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
 
     // one known route to A
-    routingTable->update(nodeA, nodeB, &interface, 10);
+    routingTable->update(nodeA, nodeB, interface, 10);
     BYTES_EQUAL(1, routingTable->getTotalNumberOfEntries());
 
     // two known routes to A
-    routingTable->update(nodeA, nodeC, &interface, 20);
+    routingTable->update(nodeA, nodeC, interface, 20);
     BYTES_EQUAL(2, routingTable->getTotalNumberOfEntries());
 
     // and another route to B
-    routingTable->update(nodeB, nodeC, &interface, 1.2);
+    routingTable->update(nodeB, nodeC, interface, 1.2);
     BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
 }
 
 TEST(RoutingTableTest, tableEntriesAreDeletedIfEvaporationReachesZero) {
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr nodeA (new AddressMock("A"));
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
@@ -379,9 +369,9 @@ TEST(RoutingTableTest, tableEntriesAreDeletedIfEvaporationReachesZero) {
     BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
 
     // create some routes
-    routingTable->update(nodeA, nodeB, &interface, 2);
-    routingTable->update(nodeA, nodeC, &interface, 2);
-    routingTable->update(nodeB, nodeC, &interface, 2);
+    routingTable->update(nodeA, nodeB, interface, 2);
+    routingTable->update(nodeA, nodeC, interface, 2);
+    routingTable->update(nodeB, nodeC, interface, 2);
     BYTES_EQUAL(3, routingTable->getTotalNumberOfEntries());
 
     // now let them all evaporate
@@ -391,16 +381,15 @@ TEST(RoutingTableTest, tableEntriesAreDeletedIfEvaporationReachesZero) {
 }
 
 TEST(RoutingTableTest, falselyDeleteLastEntryBug) {
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr destination (new AddressMock("dest"));
     AddressPtr nextHop (new AddressMock("A"));
     AddressPtr anotherAddress (new AddressMock("B"));
 
-    routingTable->update(destination, nextHop, &interface, 2);
+    routingTable->update(destination, nextHop, interface, 2);
 
-    CHECK(routingTable->exists(destination, nextHop, &interface));
-    routingTable->removeEntry(destination, anotherAddress, &interface);
-    CHECK(routingTable->exists(destination, nextHop, &interface));
+    CHECK(routingTable->exists(destination, nextHop, interface));
+    routingTable->removeEntry(destination, anotherAddress, interface);
+    CHECK(routingTable->exists(destination, nextHop, interface));
 }
 
 TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
@@ -413,9 +402,9 @@ TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
     AddressPtr nextHop2 (new AddressMock("nextHop2"));
     AddressPtr nextHop3 (new AddressMock("nextHop3"));
     AddressPtr nextHop4 (new AddressMock("nextHop4"));
-    NetworkInterfaceMock interface1 = NetworkInterfaceMock();
-    NetworkInterfaceMock interface2 = NetworkInterfaceMock();
-    NetworkInterfaceMock interface3 = NetworkInterfaceMock();
+    NetworkInterfaceMock interface1 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface2 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface3 = NetworkInterfaceMock(client);
 
     float pheromoneValue1a = 1;
     float pheromoneValue1b = 5;
@@ -483,7 +472,6 @@ TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
  *          └--->(C)--->--┘      |
  */
 TEST(RoutingTableTest, getAllRoutesThatLeadOverSpecificNextHop) {
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr nodeB (new AddressMock("B"));
     AddressPtr nodeC (new AddressMock("C"));
     AddressPtr someUnknownNode (new AddressMock("X"));
@@ -491,10 +479,10 @@ TEST(RoutingTableTest, getAllRoutesThatLeadOverSpecificNextHop) {
     AddressPtr dest2 (new AddressMock("dest2"));
     AddressPtr dest3 (new AddressMock("dest3"));
 
-    routingTable->update(dest1, nodeB, &interface, 10);
-    routingTable->update(dest2, nodeB, &interface, 10);
-    routingTable->update(dest3, nodeB, &interface, 10);
-    routingTable->update(dest3, nodeC, &interface, 10);
+    routingTable->update(dest1, nodeB, interface, 10);
+    routingTable->update(dest2, nodeB, interface, 10);
+    routingTable->update(dest3, nodeB, interface, 10);
+    routingTable->update(dest3, nodeC, interface, 10);
 
     std::deque<RoutingTableEntryTupel> entriesOverB = routingTable->getAllRoutesThatLeadOver(nodeB);
     BYTES_EQUAL(3, entriesOverB.size());

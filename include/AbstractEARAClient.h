@@ -5,15 +5,17 @@
 #ifndef ABSTRACT_EARA_CLIENT_H_
 #define ABSTRACT_EARA_CLIENT_H_
 
+#include "ARAMacros.h"
 #include "AbstractARAClient.h"
 #include "EARAConfiguration.h"
-#include "PacketFactory.h"
+#include "EARAPacketFactory.h"
+#include "EARAPacket.h"
 #include "EnergyAwareRoutingTable.h"
-#include "Timer.h"
+#include "EARAForwardingPolicy.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
-typedef std::shared_ptr<Address> AddressPtr;
+typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RouteDiscoveryDelayTimerMap;
 
 /**
  * TODO write class description
@@ -39,28 +41,68 @@ public:
      */
     AbstractEARAClient(EARAConfiguration& configuration);
 
-    /**
-     * The standard virtual destructor of this abstract class.
-     */
     virtual ~AbstractEARAClient();
 
+    /**
+     * Initializes the EARE specific part of this class.
+     */
     void initializeEARA(EARAConfiguration& configuration);
 
     /**
      * This method must be implemented by the concrete EARA client. It returns the current energy
-     * level in a range between 0 and 255. An energy level of 255 means full battery capactity
-     * and a level of 0 indicates that the energy is as good as depleted.
+     * level. An energy value of 0 indicates that the energy is as good as depleted.
+     * The upper limit should be the maximum energy capacity.
      */
-    virtual unsigned char getCurrentEnergyLevel() = 0;
+    virtual unsigned int getCurrentEnergyLevel() = 0;
 
-    void timerHasExpired(Timer* responsibleTimer);
+    /**
+     * This method is overwritten to embed the energy values in the packets before they are
+     * actually broadcasted on the network interface.
+     */
+    virtual void broadCast(Packet* packet);
+
+    virtual void timerHasExpired(Timer* responsibleTimer);
 
 protected:
+
+    float calculateInitialEnergyValue(EARAPacket* packet);
+
+    virtual bool hasBeenReceivedEarlier(const Packet* packet);
+
+    virtual void handleAntPacket(Packet* packet, NetworkInterface* interface);
+
     /**
-     * Method is overriden to implement the handling of the energy information packets.
-     * @see AbstractARAClient::handlePacket
+     * Checks if a route discovery delay timer is already running for the source of the given packet.
+     * If none is running, a new route discovery delay timer is started.
+     * If there is already a timer running, the given FANT or BANT is compared to the currently best
+     * FANT/BANT in terms of their TTL and energy metric.
+     * Only the best ant packet is stored in the timer context Object and will be broadcasted
+     * when the timer expires.
+     *
+     * @param packet - the ant packet which has been received
+     * @param routeFitnessOfNewAnt - the energy fitness value of the route over which the ant has travel to this hop
+     *                               this has been calculated previously so it gets passed as parameter so we don't need
+     *                               to calculate it again
      */
-    void handlePacket(Packet* packet, NetworkInterface* interface);
+    void handleAntPacketWithDelayTimer(Packet* packet, float energyFitnessOfNewAnt);
+
+    /**
+     * Starts a new route discovery delay timer and stores the given packet as context object of that timer.
+     */
+    void startNewRouteDiscoveryDelayTimer(Packet* antPacket);
+
+    /**
+     * This calculates the fitness of the route a packet has traveled on.
+     * It is used in the route discovery process together with the route discovery delay
+     * to determine which FANT/BANT should be broadcasted further into the network.
+     */
+    float calculateRouteFitness(int ttl, float energyFitness);
+
+    void handleExpiredRouteDiscoveryDelayTimer(Timer* timer);
+
+    virtual void handleDataPacketForThisNode(Packet* packet);
+
+    void broadcastPEANT();
 
 private:
     /**
@@ -70,14 +112,23 @@ private:
      */
     void initialize(Configuration& configuration, RoutingTable *routingTable, PacketFactory* packetFactory) {};
 
-    void sendEnergyDisseminationPacket();
-    void handleEnergyInfoPacket(Packet* packet);
-
 protected:
-    unsigned int energyDisseminationTimeoutInMillis;
-    Timer* energyDisseminationTimer;
     EnergyAwareRoutingTable* routingTable;
+    EARAPacketFactory* packetFactory;
+    EARAForwardingPolicy* forwardingPolicy;
+    RouteDiscoveryDelayTimerMap runningRouteDiscoveryDelayTimers;
+
+    unsigned int maximumEnergyValue;
+    unsigned int routeDiscoveryDelayInMilliSeconds;
+
+    // `b` parameter for energy fitness initialization
+    float influenceOfMinimumEnergyValue;
+
+    // used to determine when PEANTs shall be send
+    float peantEnergyThreshold;
+    unsigned int energyLevelWhenLastPEANTHasBeenSent;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif /* ABSTRACT_EARA_CLIENT_H_ */

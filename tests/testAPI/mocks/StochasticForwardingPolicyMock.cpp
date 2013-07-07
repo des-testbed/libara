@@ -5,13 +5,14 @@
 #include "StochasticForwardingPolicyMock.h"
 #include <ctime>
 
-using namespace ARA;
+ARA_NAMESPACE_BEGIN
 
-StochasticForwardingPolicyMock::StochasticForwardingPolicyMock() {
+StochasticForwardingPolicyMock::StochasticForwardingPolicyMock(RoutingTable* routingTable) : StochasticForwardingPolicy(routingTable) {
     this->initializeRandomNumberGenerator(time(0));
 }
 
-StochasticForwardingPolicyMock::StochasticForwardingPolicyMock(unsigned int seed) {
+StochasticForwardingPolicyMock::StochasticForwardingPolicyMock(RoutingTable* routingTable, unsigned int seed) : StochasticForwardingPolicy(routingTable) {
     this->initializeRandomNumberGenerator(seed);
 }
 
+ARA_NAMESPACE_END

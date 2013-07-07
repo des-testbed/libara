@@ -28,11 +28,6 @@ TEST(EARAClientMockTest, getRoutingTable) {
     CHECK(routingTable != NULL);
 }
 
-TEST(EARAClientMockTest, getEnergyDisseminationTimer) {
-    Timer* timer = client->getEnergyDisseminationTimer();
-    CHECK(timer != NULL);
-}
-
 TEST(EARAClientMockTest, getCurrentEnergyLevel) {
     client->setEnergy(255);
     BYTES_EQUAL(255, client->getCurrentEnergyLevel());

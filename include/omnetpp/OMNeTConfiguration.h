@@ -10,6 +10,7 @@
 #include "RoutingTable.h"
 #include "IInterfaceTable.h"
 #include "OMNeTLogger.h"
+#include "OMNeTForwardingPolicy.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -41,9 +42,10 @@ class OMNeTConfiguration : public virtual Configuration {
         void setLogLevel(const char* logLevelParameter);
 
     protected:
+        RoutingTable* routingTable;
         EvaporationPolicy* evaporationPolicy;
         PathReinforcementPolicy* reinforcementPolicy;
-        ForwardingPolicy* forwardingPolicy;
+        OMNeTForwardingPolicy* forwardingPolicy;
         float initialPheromoneValue;
         int maxNrOfRouteDiscoveryRetries;
         int maxTTL;

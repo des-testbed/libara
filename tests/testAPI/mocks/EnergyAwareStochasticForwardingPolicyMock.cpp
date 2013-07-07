@@ -6,7 +6,9 @@
 
 using namespace ARA;
 
-EnergyAwareStochasticForwardingPolicyMock::EnergyAwareStochasticForwardingPolicyMock(unsigned int seed) {
+EnergyAwareStochasticForwardingPolicyMock::EnergyAwareStochasticForwardingPolicyMock(EnergyAwareRoutingTable* routingTable, unsigned int seed)
+        : EnergyAwareStochasticForwardingPolicy(routingTable) {
+
    this->initializeRandomNumberGenerator(seed);
 }
 

@@ -101,4 +101,8 @@ void BasicConfiguration::deactivatePreviousHopFeature() {
     previousHopFeatureIsActivated = false;
 }
 
+void BasicConfiguration::setMaximumHopCount(int maxTTL) {
+    packetFactory->setMaxHopCount(maxTTL);
+}
+
 ARA_NAMESPACE_END

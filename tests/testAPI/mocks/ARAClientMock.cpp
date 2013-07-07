@@ -28,12 +28,13 @@ ARAClientMock::ARAClientMock(Configuration& configuration) {
 BasicConfiguration ARAClientMock::getStandardConfiguration() const {
     float initialPhi = 5.0;
     float deltaPhi = 5.0;
+    RoutingTable* routingTable = new RoutingTableMock();
     return BasicConfiguration(
-        new RoutingTableMock(),
+        routingTable,
         new PacketFactory(15),
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
-        new BestPheromoneForwardingPolicy(),
+        new BestPheromoneForwardingPolicy(routingTable),
         initialPhi
     );
 }

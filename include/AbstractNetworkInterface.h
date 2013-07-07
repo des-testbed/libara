@@ -7,7 +7,7 @@
 
 #include "ARAMacros.h"
 #include "NetworkInterface.h"
-#include "AbstractARAClient.h"
+#include "AbstractNetworkClient.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -27,7 +27,7 @@ class AbstractNetworkInterface : public NetworkInterface {
          * @param broadcastAddress the Address which is known to be the broadcast address of this interface.
          */
         //TODO replace the first parameter by an interface "Receiver" (this is the only functionality this class requires)
-        AbstractNetworkInterface(AbstractARAClient* client, AddressPtr localAddress = nullptr, AddressPtr broadcastAddress = nullptr);
+        AbstractNetworkInterface(AbstractNetworkClient* client, AddressPtr localAddress = nullptr, AddressPtr broadcastAddress = nullptr);
         virtual ~AbstractNetworkInterface() {}
 
         AddressPtr getLocalAddress() const;
@@ -61,7 +61,7 @@ class AbstractNetworkInterface : public NetworkInterface {
         void deliverToARAClient(Packet* packet);
 
     protected:
-        AbstractARAClient* client;
+        AbstractNetworkClient* client;
         AddressPtr localAddress;
         AddressPtr broadcastAddress;
 };

@@ -5,7 +5,8 @@
 #ifndef ABSTRACT_ARACLIENT_MOCK_BASE_H_
 #define ABSTRACT_ARACLIENT_MOCK_BASE_H_
 
-#include "AbstractARAClient.h"
+#include "ARAMacros.h"
+#include "AbstractNetworkClient.h"
 #include "NetworkInterfaceMock.h"
 #include "Configuration.h"
 #include "RoutingTable.h"
@@ -14,7 +15,7 @@
 #include <string>
 #include <deque>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 class NetworkInterfaceMock;
 
@@ -22,7 +23,7 @@ class NetworkInterfaceMock;
  * The abstract AbstractClientMockBase supplies several mocking methods that can be
  * used by its implementing mocks (ARACLientMock and EARAClientMock)
  */
-class AbstractClientMockBase {
+class AbstractClientMockBase : public virtual AbstractNetworkClient {
 public:
     struct PacketInfo {
         const Packet* packet;
@@ -34,7 +35,7 @@ public:
     virtual ~AbstractClientMockBase();
 
     void storeReceivedPacket(Packet* packet, NetworkInterface* interface);
-    void storeRouteFailurePacket(Packet* packet, std::shared_ptr<Address> nextHop, NetworkInterface* interface);
+    void storeRouteFailurePacket(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
     void storeDeliveredPacket(const Packet* packet);
     void storeUndeliverablePacket(const Packet* packet);
 
@@ -60,5 +61,6 @@ protected:
     std::deque<const Packet*> undeliverablePackets;
 };
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif /* ABSTRACT_ARACLIENT_MOCK_BASE_H_ */

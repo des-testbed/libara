@@ -149,7 +149,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         // node battery
         double maximumBatteryLevel;
         bool hasEnoughBattery = true;
-        int currentEnergyLevel;
+        unsigned int currentEnergyLevel;
 
     friend class OMNeTGate;
 };

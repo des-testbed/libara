@@ -4,7 +4,7 @@
 
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
-#include "omnetpp/PacketFactory.h"
+#include "omnetpp/EARAPacketFactory.h"
 #include "omnetpp/traffic/TrafficPacket_m.h"
 
 OMNETARA_NAMESPACE_BEGIN
@@ -26,7 +26,6 @@ EARA::~EARA() {
     forwardingPolicy = nullptr;
     evaporationPolicy = nullptr;
     pathReinforcementPolicy = nullptr;
-    energyDisseminationTimer = nullptr;
 }
 
 int EARA::numInitStages() const {
@@ -105,7 +104,7 @@ void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
     AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);
 }
 
-unsigned char EARA::getCurrentEnergyLevel() {
+unsigned int EARA::getCurrentEnergyLevel() {
     return currentEnergyLevel;
 }
 

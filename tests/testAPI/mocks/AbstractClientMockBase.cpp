@@ -55,7 +55,7 @@ void AbstractClientMockBase::storeUndeliverablePacket(const Packet* packet) {
 NetworkInterfaceMock* AbstractClientMockBase::createNewNetworkInterfaceMock(const std::string localAddressName) {
     std::stringstream mockName;
     mockName << "InterfaceMock" << (interfaceMocks.size()+1);
-    NetworkInterfaceMock* mock = new NetworkInterfaceMock(mockName.str().c_str(), localAddressName);
+    NetworkInterfaceMock* mock = new NetworkInterfaceMock(mockName.str().c_str(), localAddressName, this);
     interfaceMocks.push_back(mock);
     return mock;
 }

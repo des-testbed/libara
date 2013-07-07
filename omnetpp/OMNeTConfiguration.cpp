@@ -5,6 +5,7 @@
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/OMNeTBattery.h"
+#include "omnetpp/OMNeTForwardingPolicy.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
@@ -21,7 +22,7 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     simpleModule = module;
     evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get();
     reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("reinforcementPolicy").get();
-    forwardingPolicy = ModuleAccess<ForwardingPolicy>("forwardingPolicy").get();
+    forwardingPolicy = ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
     initialPheromoneValue = module->par("initialPhi").doubleValue();
     maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
     maxTTL = module->par("maxTTL").longValue();
@@ -114,6 +115,7 @@ Logger* OMNeTConfiguration::getLogger() {
 RoutingTable* OMNeTConfiguration::getRoutingTable() {
     RoutingTable* routingTable = new RoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
+    forwardingPolicy->setRoutingTable(routingTable);
     return routingTable;
 }
 

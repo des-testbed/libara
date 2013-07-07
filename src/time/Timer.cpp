@@ -20,6 +20,10 @@ void* Timer::getContextObject() {
     return contextObject;
 }
 
+void Timer::setContextObject(void* contextObject) {
+    this->contextObject = contextObject;
+}
+
 void Timer::addTimeoutListener(TimeoutEventListener* listener) {
     listeners.push_back(listener);
 }

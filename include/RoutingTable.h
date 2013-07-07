@@ -25,6 +25,7 @@ struct RoutingTableEntryTupel {
 };
 
 #define RoutingTableEntryList std::deque<RoutingTableEntry*>
+typedef std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate> RoutingTableMap;
 
 class RoutingTable {
 
@@ -37,8 +38,8 @@ public:
      */
     float getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
    
-    void update(AddressPtr destination, RoutingTableEntry* entry);
-    void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
+    virtual void update(AddressPtr destination, RoutingTableEntry* entry);
+    virtual void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
 
     void removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
     RoutingTableEntryList getPossibleNextHops(const Packet* packet);
@@ -96,7 +97,7 @@ protected:
     virtual void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
     Time* lastAccessTime;
 
-    std::unordered_map<std::shared_ptr<Address>, RoutingTableEntryList*, AddressHash, AddressPredicate> table;
+    RoutingTableMap table;
 
     /**
      * The memory management of the evaporationPolicy member is handled in class

@@ -60,6 +60,13 @@ public:
     virtual void packetNotDeliverable(const Packet* packet) = 0;
 
     /**
+     * This method is called each time packet can not be delivered to a specific next hop address.
+     * This is the case if this client never receives an acknowledgment in the timeout period
+     * and has tried too many times.
+     */
+    virtual bool handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface) = 0;
+
+    /**
      * Sets a logger for this network client.
      *
      * This logger will be used to log messages during the routing algorithm.
@@ -97,7 +104,7 @@ public:
      * The sender is automatically set to the corresponding interface address.
      * The previous hop will be the original sender of the packet.
      */
-    void broadCast(Packet* packet);
+    virtual void broadCast(Packet* packet);
 
     /**
      * Returns the next sequence number and advances the sequence number counter by one.

@@ -50,7 +50,7 @@ void AbstractOMNeTARAClient::initialize(int stage) {
             mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
         }
 
-        currentEnergyLevel =  255;
+        currentEnergyLevel =  maximumBatteryLevel;
         energyLevelOutVector.setName("energyLevel");
         routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
         new RoutingTableWatcher(routingTable);
@@ -231,7 +231,7 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
 }
 
 void AbstractOMNeTARAClient::handleBatteryStatusChange(Energy* energyInformation) {
-    currentEnergyLevel = (energyInformation->GetEnergy() / maximumBatteryLevel) * 255;
+    currentEnergyLevel = energyInformation->GetEnergy();
 
     if (currentEnergyLevel <= 0) {
        hasEnoughBattery = false;

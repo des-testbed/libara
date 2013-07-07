@@ -50,6 +50,12 @@ class Timer {
          */
         void* getContextObject();
 
+        /**
+         * Assigns a new context object. The old one (if any) will *not* be deleted by the timer, so the caller
+         * needs to take care of that.
+         */
+        void setContextObject(void* contextObject);
+
     protected:
         void notifyAllListeners();
 

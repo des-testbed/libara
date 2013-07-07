@@ -4,7 +4,7 @@
 
 #include "PacketFactory.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 PacketFactory::PacketFactory(int maxHopCount) {
     this->maxHopCount = maxHopCount;
@@ -43,13 +43,6 @@ Packet* PacketFactory::makeRouteFailurePacket(AddressPtr source, AddressPtr dest
     return makePacket(source, destination, source, PacketType::ROUTE_FAILURE, sequenceNumber, maxHopCount);
 }
 
-Packet* PacketFactory::makeEnergyDisseminationPacket(AddressPtr source, unsigned int seqNr, unsigned char energyLevel) {
-    char payload[1];
-    payload[0] = energyLevel;
-    // FIXME the destination is set to source because we do not use or care for this field. However this seems not like a good idea
-    return makePacket(source, source, source, PacketType::ENERGY_INFO, seqNr, maxHopCount, payload, 1);
-}
-
 Packet* PacketFactory::makeHelloPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
     return makePacket(source, destination, source, PacketType::HELLO, sequenceNumber, maxHopCount);
 }
@@ -74,4 +67,4 @@ int PacketFactory::getMaximumNrOfHops() {
     return maxHopCount;
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
