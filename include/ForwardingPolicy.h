@@ -6,7 +6,6 @@
 #define FORWARDING_POLICY_H_
 
 #include "ARAMacros.h"
-#include "RoutingTable.h"
 #include "NextHop.h"
 #include "Packet.h"
 
@@ -18,11 +17,6 @@ ARA_NAMESPACE_BEGIN
  */
 class ForwardingPolicy {
     public:
-        /**
-         * Creates a new forwarding policy and gives it a RoutingTable object
-         * which will be used in the forwarding decision.
-         */
-        ForwardingPolicy(RoutingTable* routingTable);
         virtual ~ForwardingPolicy() {};
 
         /**
@@ -30,9 +24,6 @@ class ForwardingPolicy {
          * policy.
          */
         virtual NextHop* getNextHop(const Packet* packet) = 0;
-
-    protected:
-        RoutingTable* routingTable;
 };
 
 ARA_NAMESPACE_END

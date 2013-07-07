@@ -11,7 +11,7 @@ BasicEARAConfiguration::BasicEARAConfiguration(
         EARAPacketFactory* packetFactory,
         EvaporationPolicy* evaporationPolicy,
         PathReinforcementPolicy* reinforcementPolicy,
-        ForwardingPolicy* forwardingPolicy,
+        EARAForwardingPolicy* forwardingPolicy,
         float initialPheromoneValue,
         int maxNrOfRouteDiscoveryRetries,
         unsigned int routeDiscoveryTimeoutInMilliSeconds,
@@ -23,6 +23,7 @@ BasicEARAConfiguration::BasicEARAConfiguration(
 
     this->routingTable = routingTable;
     this->packetFactory = packetFactory;
+    this->forwardingPolicy = forwardingPolicy;
     this->maximumEnergyValue = maximumEnergyValue;
     this->influenceOfMinimumEnergyValue = influenceOfMinimumEnergyValue;
     this->routeDiscoveryDelayInMilliSeconds = routeDiscoveryDelayInMilliSeconds;
@@ -35,6 +36,10 @@ EnergyAwareRoutingTable* BasicEARAConfiguration::getEnergyAwareRoutingTable() co
 
 EARAPacketFactory* BasicEARAConfiguration::getEARAPacketFactory() const {
     return packetFactory;
+}
+
+EARAForwardingPolicy* BasicEARAConfiguration::getForwardingPolicy() {
+    return forwardingPolicy;
 }
 
 unsigned int BasicEARAConfiguration::getMaximumEnergyValue() const {

@@ -11,6 +11,7 @@
 #include "EARAPacketFactory.h"
 #include "EARAPacket.h"
 #include "EnergyAwareRoutingTable.h"
+#include "EARAForwardingPolicy.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -114,6 +115,7 @@ private:
 protected:
     EnergyAwareRoutingTable* routingTable;
     EARAPacketFactory* packetFactory;
+    EARAForwardingPolicy* forwardingPolicy;
     RouteDiscoveryDelayTimerMap runningRouteDiscoveryDelayTimers;
 
     unsigned int maximumEnergyValue;

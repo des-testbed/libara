@@ -9,6 +9,7 @@
 #include "Configuration.h"
 #include "EnergyAwareRoutingTable.h"
 #include "EARAPacketFactory.h"
+#include "EARAForwardingPolicy.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -22,6 +23,7 @@ public:
 
     virtual EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const = 0;
     virtual EARAPacketFactory* getEARAPacketFactory() const = 0;
+    virtual EARAForwardingPolicy* getForwardingPolicy() = 0;
 
     /**
      * Returns the maximum energy capacity which is expected in the network.

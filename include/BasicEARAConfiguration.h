@@ -24,7 +24,7 @@ public:
                            EARAPacketFactory* packetFactory,
                            EvaporationPolicy* evaporationPolicy,
                            PathReinforcementPolicy* reinforcementPolicy,
-                           ForwardingPolicy* forwardingPolicy,
+                           EARAForwardingPolicy* forwardingPolicy,
                            float initialPheromoneValue,
                            int maxNrOfRouteDiscoveryRetries=2,
                            unsigned int routeDiscoveryTimeoutInMilliSeconds=1000,
@@ -35,7 +35,8 @@ public:
                            float peantEnergyThreshold=0.01);
 
     virtual EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const;
-    EARAPacketFactory* getEARAPacketFactory() const;
+    virtual EARAPacketFactory* getEARAPacketFactory() const;
+    virtual EARAForwardingPolicy* getForwardingPolicy();
     virtual unsigned int getMaximumEnergyValue() const;
     virtual float getInfluenceOfMinimumEnergyValue() const;
     virtual unsigned int getRouteDiscoveryDelayInMilliSeconds() const;
@@ -48,6 +49,7 @@ public:
 private:
     EnergyAwareRoutingTable* routingTable;
     EARAPacketFactory* packetFactory;
+    EARAForwardingPolicy* forwardingPolicy;
     unsigned int maximumEnergyValue;
     float influenceOfMinimumEnergyValue;
     unsigned int routeDiscoveryDelayInMilliSeconds;

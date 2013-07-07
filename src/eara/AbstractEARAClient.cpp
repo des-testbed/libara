@@ -17,6 +17,7 @@ void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration) {
     AbstractARAClient::initialize(configuration);
     routingTable = configuration.getEnergyAwareRoutingTable();
     packetFactory = configuration.getEARAPacketFactory();
+    forwardingPolicy = configuration.getForwardingPolicy();
     maximumEnergyValue = configuration.getMaximumEnergyValue();
     influenceOfMinimumEnergyValue = configuration.getInfluenceOfMinimumEnergyValue();
     routeDiscoveryDelayInMilliSeconds = configuration.getRouteDiscoveryDelayInMilliSeconds();

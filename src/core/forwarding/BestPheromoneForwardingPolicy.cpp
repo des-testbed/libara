@@ -7,7 +7,11 @@
 
 #include <deque>
 
-using namespace ARA;
+ARA_NAMESPACE_BEGIN
+
+BestPheromoneForwardingPolicy::BestPheromoneForwardingPolicy(RoutingTable* routingTable) {
+    this->routingTable = routingTable;
+}
 
 NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet) {
     std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
@@ -36,3 +40,5 @@ NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet) {
         return bestEntry->getNextHop();
     }
 }
+
+ARA_NAMESPACE_END

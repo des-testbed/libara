@@ -15,13 +15,16 @@ ARA_NAMESPACE_BEGIN
 
 class BestPheromoneForwardingPolicy : public ForwardingPolicy {
     public:
-        BestPheromoneForwardingPolicy(RoutingTable* routingTable) : ForwardingPolicy(routingTable) {};
+        BestPheromoneForwardingPolicy(RoutingTable* routingTable);
 
         /**
          * Returns the next hop with the highest corresponding pheromone
          * value but never the sender of the given packet.
          */
         NextHop* getNextHop(const Packet*);
+
+    protected:
+            RoutingTable* routingTable;
 };
 
 ARA_NAMESPACE_END

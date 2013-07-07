@@ -14,8 +14,8 @@ ARA_NAMESPACE_BEGIN
 
 EnergyAwareStochasticForwardingPolicy::EnergyAwareStochasticForwardingPolicy(EnergyAwareRoutingTable* routingTable, float pheromoneWeight, float energyWeight) : StochasticForwardingPolicy(routingTable) {
     this->routingTable = routingTable;
-    alpha = pheromoneWeight;
-    beta = energyWeight;
+    this->pheromoneWeight = pheromoneWeight;
+    this->energyWeight = energyWeight;
 }
 
 NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet) {
@@ -32,8 +32,8 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
         //FIXME
         float energyValue = 1;
 
-        float potentiatedPheromoneValue = pow(pheromoneValue, alpha);
-        float potentiatedEnergyValue = pow(energyValue, beta);
+        float potentiatedPheromoneValue = pow(pheromoneValue, pheromoneWeight);
+        float potentiatedEnergyValue = pow(energyValue, energyWeight);
 
         products[i] = potentiatedPheromoneValue * potentiatedEnergyValue;
         sum += products[i];
@@ -61,12 +61,20 @@ int EnergyAwareStochasticForwardingPolicy::getRandomNodeIndex(float cumulativeSu
     return nodeIndex;
 }
 
-void EnergyAwareStochasticForwardingPolicy::setPheromoneWeight(float alpha){
-    this->alpha = alpha;
+float EnergyAwareStochasticForwardingPolicy::getPheromoneWeight() {
+    return pheromoneWeight;
 }
 
-void EnergyAwareStochasticForwardingPolicy::setEnergyWeight(float beta){
-    this->beta = beta;
+float EnergyAwareStochasticForwardingPolicy::getEnergyWeight() {
+    return energyWeight;
+}
+
+void EnergyAwareStochasticForwardingPolicy::setPheromoneWeight(float pheromoneWeight){
+    this->pheromoneWeight = pheromoneWeight;
+}
+
+void EnergyAwareStochasticForwardingPolicy::setEnergyWeight(float energyWeight){
+    this->energyWeight = energyWeight;
 }
 
 ARA_NAMESPACE_END

@@ -18,7 +18,7 @@ ARA_NAMESPACE_BEGIN
 
 class StochasticForwardingPolicy : public ForwardingPolicy {
     public:
-        StochasticForwardingPolicy(RoutingTable* routingTable) : ForwardingPolicy(routingTable) {};
+        StochasticForwardingPolicy(RoutingTable* routingTable);
 
         /**
          * Stochastically selects the next hop according to their pheromone value
@@ -27,6 +27,8 @@ class StochasticForwardingPolicy : public ForwardingPolicy {
         virtual NextHop* getNextHop(const Packet* packet);
 
     protected:
+        RoutingTable* routingTable;
+
         void initializeRandomNumberGenerator(unsigned int seed=((unsigned)time(0)));
         float getRandomNumber();
 };

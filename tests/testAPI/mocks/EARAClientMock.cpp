@@ -7,6 +7,7 @@
 #include "EnergyAwareRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
+#include "EnergyAwareStochasticForwardingPolicy.h"
 #include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
 
@@ -41,7 +42,7 @@ BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
         new EARAPacketFactory(15),
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
-        new BestPheromoneForwardingPolicy(routingTable),
+        new EnergyAwareStochasticForwardingPolicy(routingTable),
         initialPhi,
         maxNrOfRouteDiscoveryRetries,
         routeDiscoveryTimeoutInMilliSeconds,

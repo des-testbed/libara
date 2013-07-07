@@ -7,6 +7,10 @@
 
 ARA_NAMESPACE_BEGIN
 
+StochasticForwardingPolicy::StochasticForwardingPolicy(RoutingTable* routingTable) {
+    this->routingTable = routingTable;
+}
+
 NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet) {
     std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
     if(possibleNextHops.empty()) {
