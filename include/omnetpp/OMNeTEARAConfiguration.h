@@ -25,9 +25,8 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
         virtual float getPEANTEnergyThreshold() const;
 
     private:
-        OMNeTEARAForwardingPolicy* forwardingPolicy;
-        unsigned int maximumEnergyValue;
         float influenceOfMinimumEnergyValue;
+        unsigned int maximumEnergyValue;
         unsigned int routeDiscoveryDelayInMilliSeconds;
         float peantEnergyThreshold;
 };

@@ -4,16 +4,17 @@
 
 #include "omnetpp/OMNeTEARAConfiguration.h"
 #include "ModuleAccess.h"
+#include "OMNeTBattery.h"
 #include "OMNeTEARAForwardingPolicy.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
 OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module) : OMNeTConfiguration(module) {
-    maximumEnergyValue = module->par("maximumEnergyValue").longValue();
+    OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
+    maximumEnergyValue = battery->getCapacity();
     influenceOfMinimumEnergyValue = module->par("influenceOfMinimumEnergyValue").longValue();
     routeDiscoveryDelayInMilliSeconds = module->par("routeDiscoveryDelay").longValue();
     peantEnergyThreshold = module->par("peantEnergyThreshold").doubleValue();
-    forwardingPolicy = ModuleAccess<OMNeTEARAForwardingPolicy>("forwardingPolicy").get();
 
     if (influenceOfMinimumEnergyValue < 1) {
         throw cRuntimeError("EARA parameter influenceOfMinimumEnergyValue needs to be >= 1");
@@ -38,6 +39,7 @@ unsigned int OMNeTEARAConfiguration::getRouteDiscoveryDelayInMilliSeconds() cons
 EnergyAwareRoutingTable* OMNeTEARAConfiguration::getEnergyAwareRoutingTable() const {
     EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
+    OMNeTEARAForwardingPolicy* forwardingPolicy = ModuleAccess<OMNeTEARAForwardingPolicy>("forwardingPolicy").get();
     forwardingPolicy->setRoutingTable(routingTable);
     return routingTable;
 }
@@ -47,7 +49,7 @@ ARA::EARAPacketFactory* OMNeTEARAConfiguration::getEARAPacketFactory() const {
 }
 
 EARAForwardingPolicy* OMNeTEARAConfiguration::getForwardingPolicy() {
-    return forwardingPolicy;
+    return ModuleAccess<OMNeTEARAForwardingPolicy>("forwardingPolicy").get();
 }
 
 float OMNeTEARAConfiguration::getPEANTEnergyThreshold() const {

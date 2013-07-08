@@ -45,7 +45,6 @@ class OMNeTConfiguration : public virtual Configuration {
         RoutingTable* routingTable;
         EvaporationPolicy* evaporationPolicy;
         PathReinforcementPolicy* reinforcementPolicy;
-        OMNeTForwardingPolicy* forwardingPolicy;
         float initialPheromoneValue;
         int maxNrOfRouteDiscoveryRetries;
         int maxTTL;

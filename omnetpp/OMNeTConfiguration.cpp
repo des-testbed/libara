@@ -22,7 +22,6 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     simpleModule = module;
     evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get();
     reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("reinforcementPolicy").get();
-    forwardingPolicy = ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
     initialPheromoneValue = module->par("initialPhi").doubleValue();
     maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
     maxTTL = module->par("maxTTL").longValue();
@@ -73,7 +72,7 @@ PathReinforcementPolicy* OMNeTConfiguration::getReinforcementPolicy() {
 }
 
 ForwardingPolicy* OMNeTConfiguration::getForwardingPolicy() {
-    return forwardingPolicy;
+    return ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
 }
 
 float OMNeTConfiguration::getInitialPheromoneValue() {
@@ -115,6 +114,7 @@ Logger* OMNeTConfiguration::getLogger() {
 RoutingTable* OMNeTConfiguration::getRoutingTable() {
     RoutingTable* routingTable = new RoutingTable();
     routingTable->setEvaporationPolicy(evaporationPolicy);
+    OMNeTForwardingPolicy* forwardingPolicy = ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
     forwardingPolicy->setRoutingTable(routingTable);
     return routingTable;
 }
