@@ -23,6 +23,7 @@ EARA::~EARA() {
      * This is necessary because the surround omnetpp simulation will attempt to delete those modules
      * because they are SimpleModules which are owned by other compound modules*/
 
+    AbstractARAClient::forwardingPolicy = nullptr;
     forwardingPolicy = nullptr;
     evaporationPolicy = nullptr;
     pathReinforcementPolicy = nullptr;
