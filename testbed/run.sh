@@ -1,3 +1,4 @@
 #!/bin/zsh
 
-LD_LIBRARY_PATH=../src ./TestbedDaemon default.conf
+export LD_LIBRARY_PATH=/home/newell/Projects/ara-sim/src:$LD_LIBRARY_PATH;
+./TestbedDaemon default.conf
