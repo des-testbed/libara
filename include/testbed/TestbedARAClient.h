@@ -12,6 +12,10 @@ TESTBED_NAMESPACE_BEGIN
 
 class TestbedARAClient : public AbstractARAClient {
     public:
+        /**
+         * Default constructor; handles initialization itself.
+         */
+        TestbedARAClient();
 
         /**
          * The standard virtual destructor of this abstract class.

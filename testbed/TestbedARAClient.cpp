@@ -5,11 +5,17 @@
 #include "Testbed.h"
 #include "TestbedARAClient.h"
 #include "PacketDispatcher.h"
+#include "BasicConfiguration.h"
 
 TESTBED_NAMESPACE_BEGIN
 
-TestbedARAClient::~TestbedARAClient() {
+TestbedARAClient::TestbedARAClient() {
+    //TODO Make configurable
+    Configuration* config = new BasicConfiguration(routingTable, packetFactory, evaporationPolicy, pathReinforcementPolicy, forwardingPolicy, 25.0, 5, 600, 5);
+    initialize(*config);
+}
 
+TestbedARAClient::~TestbedARAClient() {
 }
 
 void TestbedARAClient::sendPacket(Packet* packet) {
@@ -33,6 +39,5 @@ void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
     delete packet;
     //nrOfNotDeliverablePackets++;
 }
-
 
 TESTBED_NAMESPACE_END
