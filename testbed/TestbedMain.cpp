@@ -10,16 +10,12 @@
 
 typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
-using namespace std;
+TESTBED_NAMESPACE_BEGIN
 
 int main(int argc, char** argv) {
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
-     if(dessert_init("ARAT", 0x00, DESSERT_OPT_NODAEMONIZE) != DESSERT_OK) {
-         cout << "dessert_init failed" << endl;
-     } else {
-         cout << "dessert init succeded" << endl;
-     }
+     dessert_init("ARAT", 0x01, DESSERT_OPT_NODAEMONIZE);
 
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
 
@@ -37,10 +33,12 @@ int main(int argc, char** argv) {
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
      dessert_debug("configuration applied");
 
-     TestbedARAClient client = new TestbedARAClient();
+     TestbedARAClient* client = new TestbedARAClient();
 
      dessert_cli_run();
      dessert_run();
 
      return (0);
  }
+
+TESTBED_NAMESPACE_END

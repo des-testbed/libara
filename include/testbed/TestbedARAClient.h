@@ -39,7 +39,7 @@ class TestbedARAClient : public AbstractARAClient {
          * @param packet the received Packet. Please note that the packet will be
          *        deleted by the AbstractARAClient when it has been fully processed.
          */
-        void receivePacket(Packet* packet, NetworkInterface* interface);
+        void receivePacket(Packet* packet, ARA::NetworkInterface* interface);
 
         /**
          * The packet should be directed to this node and must be delivered to the local system.
