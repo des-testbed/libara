@@ -13,9 +13,9 @@ TESTBED_NAMESPACE_BEGIN
 class TestbedARAClient : public AbstractARAClient {
     public:
         /**
-         * Default constructor; handles initialization itself.
+         * Creates a TestbedARAClient and runs initialize() with given configuration.
          */
-        TestbedARAClient();
+        TestbedARAClient(Configuration &config);
 
         /**
          * The standard virtual destructor of this abstract class.
@@ -59,11 +59,11 @@ class TestbedARAClient : public AbstractARAClient {
          */
         void packetNotDeliverable(const Packet* packet);
 
+    protected:
         /**
-         * This method is called each time packet can not be delivered to a specific next hop address.
-         * This is the case if this client never receives an acknowledgment in the timeout period
-         * and has tried too many times.
+         * This method initializes all of the network interfaces available on the device.
          */
+        void initializeNetworkInterfaces();
 };
 
 TESTBED_NAMESPACE_END
