@@ -60,19 +60,6 @@ class TestbedARAClient : public AbstractARAClient {
          * This is the case if this client never receives an acknowledgment in the timeout period
          * and has tried too many times.
          */
-        bool handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
-        void timerHasExpired(Timer* responsibleTimer);
-
-    protected:
-        /**
-         * Handles a packet depending on its type. This method is protected virtual to enable
-         * other ARA implementations (like EARA) to override it to add new packet types.
-         */
-        void handlePacket(Packet* packet, NetworkInterface* interface);
-        void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
-        void startNewRouteDiscovery(Packet* packet);
-        void handleNonSourceRouteDiscovery(Packet* packet);
-        void handlePacketWithZeroTTL(Packet* packet);
 };
 
 TESTBED_NAMESPACE_END

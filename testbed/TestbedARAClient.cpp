@@ -34,33 +34,5 @@ void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
     //nrOfNotDeliverablePackets++;
 }
 
-bool TestbedARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, ARA::NetworkInterface* interface) {
-    return AbstractARAClient::handleBrokenLink(packet, nextHop, interface);
-}
-
-void TestbedARAClient::timerHasExpired(Timer* responsibleTimer) {
-    AbstractARAClient::timerHasExpired(responsibleTimer);
-}
-
-void TestbedARAClient::handlePacket(Packet* packet, ARA::NetworkInterface* interface) {
-    AbstractARAClient::handlePacket(packet, interface);
-}
-
-void TestbedARAClient::handleDuplicateErrorPacket(Packet* packet, ARA::NetworkInterface* interface) {
-    AbstractARAClient::handleDuplicateErrorPacket(packet, interface);
-    //nrOfDetectedLoops++;
-}
-
-void TestbedARAClient::startNewRouteDiscovery(Packet* packet) {
-    AbstractARAClient::startNewRouteDiscovery(packet);
-}
-
-void TestbedARAClient::handleNonSourceRouteDiscovery(Packet* packet) {
-    AbstractARAClient::handleNonSourceRouteDiscovery(packet);
-}
-
-void TestbedARAClient::handlePacketWithZeroTTL(Packet* packet) {
-    AbstractARAClient::handlePacketWithZeroTTL(packet);
-}
 
 TESTBED_NAMESPACE_END
