@@ -6,6 +6,7 @@
 #include "CLibs.h"
 #include "PacketDispatcher.h"
 #include "TestbedTimer.h"
+#include "TestbedARAClient.h"
 
 typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
@@ -35,6 +36,8 @@ int main(int argc, char** argv) {
      dessert_debug("applying configuration");
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
      dessert_debug("configuration applied");
+
+     TestbedARAClient client = new TestbedARAClient();
 
      dessert_cli_run();
      dessert_run();
