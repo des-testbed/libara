@@ -13,11 +13,11 @@
 
 typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
-TESTBED_NAMESPACE_BEGIN
+using namespace std;
 
-BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) {
-    return BasicConfiguration(new RoutingTable(), new PacketFactory(15), new ExponentialEvaporationPolicy(2.0, 100, 15.0),
-                                            new LinearPathReinforcementPolicy(deltaPhi), new BestPheromoneForwardingPolicy(), initialPhi);
+ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) {
+    return ARA::BasicConfiguration(new ARA::RoutingTable(), new ARA::PacketFactory(15), new ARA::ExponentialEvaporationPolicy(2.0, 100, 15.0),
+                                            new ARA::LinearPathReinforcementPolicy(deltaPhi), new ARA::BestPheromoneForwardingPolicy(), initialPhi);
 }
 
 int main(int argc, char** argv) {
@@ -41,8 +41,8 @@ int main(int argc, char** argv) {
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
      dessert_debug("configuration applied");
 
-     BasicConfiguration config = createConfiguration(5.0, 5.0);
-     TestbedARAClient* client = new TestbedARAClient(config);
+     ARA::BasicConfiguration config = createConfiguration(5.0, 5.0);
+     ARA::testbed::TestbedARAClient* client = new ARA::testbed::TestbedARAClient(config);
 
      dessert_cli_run();
      dessert_run();
@@ -50,5 +50,3 @@ int main(int argc, char** argv) {
      delete client;
      return 0;
  }
-
-TESTBED_NAMESPACE_END
