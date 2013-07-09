@@ -12,13 +12,12 @@ TESTBED_NAMESPACE_BEGIN
 
 TestbedARAClient::TestbedARAClient(Configuration& config) : AbstractARAClient(config){
     //TODO Make configurable
-    this->logDebug("initialized testBedARAClient");
+    this->logDebug("initialized testbedARAClient");
     initializeNetworkInterfaces();
-    this->logDebug("initialized testBedARAClient network Interfaces");
+    this->logDebug("initialized testbedARAClient network Interfaces");
 }
 
-TestbedARAClient::~TestbedARAClient() {
-}
+TestbedARAClient::~TestbedARAClient() { }
 
 void TestbedARAClient::sendPacket(Packet* packet) {
     this->logDebug("is sending packet # %u", packet->getSequenceNumber());

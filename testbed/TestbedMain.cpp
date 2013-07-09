@@ -15,7 +15,7 @@ TESTBED_NAMESPACE_BEGIN
 int main(int argc, char** argv) {
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
-     dessert_init("ARAT", 0x01, DESSERT_OPT_NODAEMONIZE);
+     dessert_init("ARA", 0x01, DESSERT_OPT_NODAEMONIZE);
 
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
 
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
      dessert_cli_run();
      dessert_run();
 
-     return (0);
+     return 0;
  }
 
 TESTBED_NAMESPACE_END
