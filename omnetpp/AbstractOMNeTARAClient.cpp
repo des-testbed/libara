@@ -4,7 +4,6 @@
 
 #include "omnetpp/AbstractOMNeTARAClient.h"
 #include "omnetpp/TrafficControllInfo.h"
-#include "omnetpp/RoutingTableWatcher.h"
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/traffic/TrafficPacket_m.h"
 #include "Environment.h"
@@ -53,7 +52,6 @@ void AbstractOMNeTARAClient::initialize(int stage) {
         currentEnergyLevel =  maximumBatteryLevel;
         energyLevelOutVector.setName("energyLevel");
         routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
-        new RoutingTableWatcher(routingTable);
     }
 }
 
