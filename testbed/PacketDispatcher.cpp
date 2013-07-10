@@ -16,9 +16,23 @@ TESTBED_NAMESPACE_BEGIN
 NetworkInterfaceMap networkInterfaces;
 
 _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
+
+    if(!isARAMessage(messageReceived)) {
+        dessert_debug("dessertmessage %u has null routingExtension, sending to sys", ntohs(messageReceived->u16));
+        //TODO Implement logic for sending to system (dessert_syssend)
+        return DESSERT_MSG_DROP;
+    }
+
+
     Packet* packet = extractPacket(messageReceived);
+    std::cout << "Recieved Packet: " << packet->getPayload() << std::endl;
     extractNetworkInterface(interface)->receive(packet);
     return DESSERT_MSG_DROP; //removes packet from processing pipeline
+}
+
+bool isARAMessage(dessert_msg_t* message) {
+    dessert_ext_t* extension;
+    return dessert_msg_getext(message, &extension, DESSERT_EXT_USER, 0) != 0;
 }
 
 void packetToNetworkDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
