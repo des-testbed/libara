@@ -18,10 +18,21 @@
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
+OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTable) {
+    // load child modules
     simpleModule = module;
     evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get();
     reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("reinforcementPolicy").get();
+
+    // configure the routingTable
+    if (routingTable == nullptr) {
+        //TODO why not set the evaporation policy right in the ctor?
+        routingTable = new RoutingTable();
+    }
+    this->routingTable = routingTable;
+    this->routingTable->setEvaporationPolicy(evaporationPolicy);
+
+    // load parameters
     initialPheromoneValue = module->par("initialPhi").doubleValue();
     maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
     maxTTL = module->par("maxTTL").longValue();
@@ -72,7 +83,9 @@ PathReinforcementPolicy* OMNeTConfiguration::getReinforcementPolicy() {
 }
 
 ForwardingPolicy* OMNeTConfiguration::getForwardingPolicy() {
-    return ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
+    OMNeTForwardingPolicy* forwardingPolicy = ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
+    forwardingPolicy->setRoutingTable(routingTable);
+    return forwardingPolicy;
 }
 
 float OMNeTConfiguration::getInitialPheromoneValue() {
@@ -112,10 +125,6 @@ Logger* OMNeTConfiguration::getLogger() {
 }
 
 RoutingTable* OMNeTConfiguration::getRoutingTable() {
-    RoutingTable* routingTable = new RoutingTable();
-    routingTable->setEvaporationPolicy(evaporationPolicy);
-    OMNeTForwardingPolicy* forwardingPolicy = ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
-    forwardingPolicy->setRoutingTable(routingTable);
     return routingTable;
 }
 

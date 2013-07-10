@@ -16,7 +16,7 @@ OMNETARA_NAMESPACE_BEGIN
 
 class OMNeTConfiguration : public virtual Configuration {
     public:
-        OMNeTConfiguration(cModule* module);
+        OMNeTConfiguration(cModule* module, RoutingTable* routingTable=nullptr);
 
         virtual RoutingTable* getRoutingTable();
         virtual PacketFactory* getPacketFactory();

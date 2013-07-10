@@ -14,7 +14,7 @@ OMNETARA_NAMESPACE_BEGIN
 
 class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARAConfiguration {
     public:
-        OMNeTEARAConfiguration(cModule* module);
+        OMNeTEARAConfiguration(cModule* module, EnergyAwareRoutingTable* routingTable=new EnergyAwareRoutingTable());
 
         virtual unsigned int getMaximumEnergyValue() const;
         virtual float getInfluenceOfMinimumEnergyValue() const;
@@ -25,6 +25,7 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
         virtual float getPEANTEnergyThreshold() const;
 
     private:
+        EnergyAwareRoutingTable* routingTable;
         float influenceOfMinimumEnergyValue;
         unsigned int maximumEnergyValue;
         unsigned int routeDiscoveryDelayInMilliSeconds;

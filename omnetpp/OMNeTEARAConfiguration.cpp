@@ -9,8 +9,10 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module) : OMNeTConfiguration(module) {
+OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module, EnergyAwareRoutingTable* routingTable) : OMNeTConfiguration(module, routingTable) {
     OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
+    this->routingTable = routingTable;
+
     maximumEnergyValue = battery->getCapacity();
     influenceOfMinimumEnergyValue = module->par("influenceOfMinimumEnergyValue").longValue();
     routeDiscoveryDelayInMilliSeconds = module->par("routeDiscoveryDelay").longValue();
@@ -37,10 +39,6 @@ unsigned int OMNeTEARAConfiguration::getRouteDiscoveryDelayInMilliSeconds() cons
 }
 
 EnergyAwareRoutingTable* OMNeTEARAConfiguration::getEnergyAwareRoutingTable() const {
-    EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
-    routingTable->setEvaporationPolicy(evaporationPolicy);
-    OMNeTEARAForwardingPolicy* forwardingPolicy = ModuleAccess<OMNeTEARAForwardingPolicy>("forwardingPolicy").get();
-    forwardingPolicy->setRoutingTable(routingTable);
     return routingTable;
 }
 
@@ -49,7 +47,9 @@ ARA::EARAPacketFactory* OMNeTEARAConfiguration::getEARAPacketFactory() const {
 }
 
 EARAForwardingPolicy* OMNeTEARAConfiguration::getForwardingPolicy() {
-    return ModuleAccess<OMNeTEARAForwardingPolicy>("forwardingPolicy").get();
+    OMNeTEARAForwardingPolicy* forwardingPolicy = ModuleAccess<OMNeTEARAForwardingPolicy>("forwardingPolicy").get();
+    forwardingPolicy->setRoutingTable(routingTable);
+    return forwardingPolicy;
 }
 
 float OMNeTEARAConfiguration::getPEANTEnergyThreshold() const {
