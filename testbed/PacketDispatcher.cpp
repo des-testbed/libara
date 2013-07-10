@@ -76,7 +76,7 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
 
     addEthernetHeader(dessertMessage, packet->getDestination());
 
-    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, sizeof(routingExtension));
+    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, ETHER_HDR_LEN);
     struct routingExtension* araRoutingExtension = (struct routingExtension*) extension->data;
 
     TestbedAddressPtr sourceTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getSource());

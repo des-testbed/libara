@@ -18,6 +18,7 @@ typedef std::unordered_map<dessert_meshif_t*, NetworkInterface*> NetworkInterfac
 struct routingExtension {
     u_int8_t  ara_dhost[ETH_ALEN];  /* ARA destination eth addr */
     u_int8_t  ara_shost[ETH_ALEN];  /* ARA source ether addr    */
+    u_int16_t ara_data;             /* reserved for future ARA use */
   } __attribute__ ((__packed__));
 
 /**
