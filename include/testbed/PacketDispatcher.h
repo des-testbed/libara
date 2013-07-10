@@ -27,6 +27,11 @@ struct routingExtension {
 _dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id);
 
 /**
+ * Determines if a given dessert message was created by TestbedARA.
+ */
+bool isARAMessage(dessert_msg_t* message);
+
+/**
  * Receives a Packet from an Interface and converts to a message, then sends it over selected interface (if NULL sends over all interfaces)
  */
 void packetToNetworkDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient);
