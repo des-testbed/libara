@@ -74,6 +74,8 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
 
     dessert_ext_t* extension;
 
+    addEthernetHeader(dessertMessage, packet->getDestination());
+
     dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, sizeof(routingExtension));
     struct routingExtension* araRoutingExtension = (struct routingExtension*) extension->data;
 
@@ -84,8 +86,6 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
 
     memcpy(araRoutingExtension->ara_shost, source, ETHER_ADDR_LEN);
     memcpy(araRoutingExtension->ara_dhost, destination, ETHER_ADDR_LEN);
-
-    addEthernetHeader(dessertMessage, packet->getDestination());
 
     void* payload;
     int payloadSize = packet->getPayloadLength();
