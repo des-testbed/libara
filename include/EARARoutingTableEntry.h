@@ -22,7 +22,7 @@ class EARARoutingTableEntry : public RoutingTableEntry {
         void setEnergyValue(float newEnergyValue);
 
         friend std::ostream& operator<<(std::ostream& out, EARARoutingTableEntry& entry) {
-            out << "[next hop] " << entry.getAddress()->toString() << " [phi] " << entry.getPheromoneValue() << " [energy] " << (entry.getEnergyValue()*100) << "%";
+            out << "[next hop] " << entry.getAddress()->toString() << " [phi] " << entry.getPheromoneValue() << " [energy] " << (entry.getEnergyValue()*10) << "%";
             return out;
         }
 
