@@ -114,8 +114,6 @@ void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* cl
 }
 
 void AbstractOMNeTARAClient::handleMessage(cMessage* message) {
-    energyLevelOutVector.record(currentEnergyLevel);
-
     if (hasEnoughBattery) {
         if(isFromUpperLayer(message)) {
             handleUpperLayerMessage(message);
@@ -244,6 +242,7 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
 
 void AbstractOMNeTARAClient::handleBatteryStatusChange(Energy* energyInformation) {
     currentEnergyLevel = energyInformation->GetEnergy();
+    energyLevelOutVector.record(currentEnergyLevel);
 
     if (currentEnergyLevel <= 0) {
        hasEnoughBattery = false;
