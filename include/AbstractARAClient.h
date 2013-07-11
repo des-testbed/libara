@@ -163,13 +163,14 @@ protected:
     virtual void handleDataPacketForThisNode(Packet* packet);
     virtual void handleAntPacket(Packet* packet, NetworkInterface* interface);
     void handleAntPacketForThisNode(Packet* packet);
+    void broadcastBANT(Packet* fant);
     void handleBANTForThisNode(Packet* bant);
     virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
     virtual void startNewRouteDiscovery(Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
     void forgetKnownIntermediateHopsFor(AddressPtr destination);
-    void sendFANT(AddressPtr destination);
+    void broadcastFANT(AddressPtr destination);
     bool isRouteDiscoveryRunning(AddressPtr destination);
     virtual void handleNonSourceRouteDiscovery(Packet* packet);
     virtual void handlePacketWithZeroTTL(Packet* packet);

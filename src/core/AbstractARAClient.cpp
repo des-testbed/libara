@@ -155,7 +155,7 @@ void AbstractARAClient::startNewRouteDiscovery(Packet* packet) {
     AddressPtr destination = packet->getDestination();
     forgetKnownIntermediateHopsFor(destination);
     startRouteDiscoveryTimer(packet);
-    sendFANT(destination);
+    broadcastFANT(destination);
 }
 
 void AbstractARAClient::forgetKnownIntermediateHopsFor(AddressPtr destination) {
@@ -165,7 +165,7 @@ void AbstractARAClient::forgetKnownIntermediateHopsFor(AddressPtr destination) {
     }
 }
 
-void AbstractARAClient::sendFANT(AddressPtr destination) {
+void AbstractARAClient::broadcastFANT(AddressPtr destination) {
     unsigned int sequenceNr = getNextSequenceNumber();
 
     for(auto& interface: interfaces) {
@@ -407,8 +407,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString().c_str());
-        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber());
-        broadCast(bant);
+        broadcastBANT(packet);
     }
     else if(packetType == PacketType::BANT) {
         handleBANTForThisNode(packet);
@@ -421,6 +420,15 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     }
 
     delete packet;
+}
+
+void AbstractARAClient::broadcastBANT(Packet* fant) {
+    Packet* bant = packetFactory->makeBANT(fant, getNextSequenceNumber());
+    for(auto& interface: interfaces) {
+        Packet* newBant = packetFactory->makeClone(bant);
+        interface->broadcast(newBant);
+    }
+    delete bant;
 }
 
 void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
@@ -573,7 +581,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
         discoveryInfo->nrOfRetries++;
         logInfo("Restarting discovery for destination %s (%u/%u)", destinationString, discoveryInfo->nrOfRetries, maxNrOfRouteDiscoveryRetries);
         forgetKnownIntermediateHopsFor(destination);
-        sendFANT(destination);
+        broadcastFANT(destination);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
     else {
