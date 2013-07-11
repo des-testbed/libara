@@ -9,10 +9,12 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module, EnergyAwareRoutingTable* routingTable) : OMNeTConfiguration(module, routingTable) {
+OMNeTEARAConfiguration::OMNeTEARAConfiguration(cModule* module, EnergyAwareRoutingTable* routingTable, EARAPacketFactory* packetFactory) : OMNeTConfiguration(module, routingTable, packetFactory) {
     OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
     this->routingTable = routingTable;
+    this->packetFactory = packetFactory;
 
+    //TODO this maximumEnergyValue seems very redundant to the OMNeTConfiguration (check this)
     maximumEnergyValue = battery->getCapacity();
     influenceOfMinimumEnergyValue = module->par("influenceOfMinimumEnergyValue").longValue();
     routeDiscoveryDelayInMilliSeconds = module->par("routeDiscoveryDelay").longValue();
@@ -43,7 +45,7 @@ EnergyAwareRoutingTable* OMNeTEARAConfiguration::getEnergyAwareRoutingTable() co
 }
 
 ARA::EARAPacketFactory* OMNeTEARAConfiguration::getEARAPacketFactory() const {
-    return new EARAPacketFactory(maxTTL);
+    return packetFactory;
 }
 
 EARAForwardingPolicy* OMNeTEARAConfiguration::getForwardingPolicy() {

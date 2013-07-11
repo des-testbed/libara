@@ -27,7 +27,9 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTEARAPacket);
 
-OMNeTEARAPacket::OMNeTEARAPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::EARAPacket(source, destination, sender, type, seqNr, ttl, payload, payloadSize) {
+OMNeTEARAPacket::OMNeTEARAPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize)
+: cPacket(PacketType::getAsString(type).c_str(), type),
+  ARA::EARAPacket(source, destination, sender, type, seqNr, ttl, payload, payloadSize) {
 
 }
 
@@ -275,7 +277,7 @@ std::string OMNeTEARAPacketDescriptor::getFieldAsString(void *object, int field,
         case 7: return long2string(pp->getPayloadLength());
         case 8: return long2string(pp->getTTL());
         case 9: return long2string(pp->getTotalEnergyValue());
-        case 10: return long2string(pp->getMinimumEnergyValue());
+        case 10: return pp->getMinimumEnergyValue() == UINT_MAX ? "unset" : long2string(pp->getMinimumEnergyValue());
         default: return "NOT IMPLEMENTED";
     }
 }

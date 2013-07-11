@@ -53,4 +53,8 @@ int EARAPacketFactory::calculatePacketSize(Packet* packet) {
     return totalSize;
 }
 
+void EARAPacketFactory::setMaxHopCount(int newMaxHopCount) {
+    maxHopCount = newMaxHopCount;
+}
+
 OMNETARA_NAMESPACE_END

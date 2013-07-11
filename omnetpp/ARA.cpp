@@ -3,7 +3,6 @@
  */
 
 #include "omnetpp/ARA.h"
-#include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/PacketFactory.h"
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/RoutingTableWatcher.h"
@@ -63,7 +62,7 @@ void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface
     emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
-bool ARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
+bool ARA::handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
     return AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
 }
 

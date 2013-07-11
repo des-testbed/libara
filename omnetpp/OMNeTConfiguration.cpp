@@ -15,10 +15,20 @@
 
 #include <cstring>
 
-using namespace ARA;
-using namespace ARA::omnetpp;
+OMNETARA_NAMESPACE_BEGIN
 
-OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTable) {
+OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTable, ::ARA::PacketFactory* packetFactory) {
+    // load parameters
+    initialPheromoneValue = module->par("initialPhi").doubleValue();
+    maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
+    maxTTL = module->par("maxTTL").longValue();
+    routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
+    packetDeliveryDelayInMilliSeconds = module->par("packetDeliveryDelay").longValue();
+    neighborActivityCheckIntervalInMilliSeconds = module->par("neighborActivityCheckInterval").longValue();
+    maxNeighborInactivityTimeInMilliSeconds = module->par("maxNeighborInactivityTime").longValue();
+    pantIntervalInMilliSeconds = module->par("pantInterval").longValue();
+    previousHopFeatureIsActivated  = module->par("previousHopFeature").boolValue();
+
     // load child modules
     simpleModule = module;
     evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get();
@@ -32,22 +42,16 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTab
     this->routingTable = routingTable;
     this->routingTable->setEvaporationPolicy(evaporationPolicy);
 
-    // load parameters
-    initialPheromoneValue = module->par("initialPhi").doubleValue();
-    maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
-    maxTTL = module->par("maxTTL").longValue();
-    routeDiscoveryTimeoutInMilliSeconds = module->par("routeDiscoveryTimeout").longValue();
-    packetDeliveryDelayInMilliSeconds = module->par("packetDeliveryDelay").longValue();
-    neighborActivityCheckIntervalInMilliSeconds = module->par("neighborActivityCheckInterval").longValue();
-    maxNeighborInactivityTimeInMilliSeconds = module->par("maxNeighborInactivityTime").longValue();
-    pantIntervalInMilliSeconds = module->par("pantInterval").longValue();
-    previousHopFeatureIsActivated  = module->par("previousHopFeature").boolValue();
-
     OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
     maximumBatteryLevel = battery->getCapacity();
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
     setLogLevel(module->par("logLevel").stringValue());
+
+    if (packetFactory == nullptr) {
+        packetFactory = new PacketFactory(maxTTL);
+    }
+    this->packetFactory = packetFactory;
 }
 
 void OMNeTConfiguration::setLogLevel(const char* logLevelParameter) {
@@ -129,7 +133,7 @@ RoutingTable* OMNeTConfiguration::getRoutingTable() {
 }
 
 ::ARA::PacketFactory* OMNeTConfiguration::getPacketFactory() {
-    return new PacketFactory(maxTTL);
+    return packetFactory;
 }
 
 cModule* OMNeTConfiguration::getHostModule() {
@@ -145,3 +149,5 @@ bool OMNeTConfiguration::isPreviousHopFeatureActivated() {
 double OMNeTConfiguration::getMaximumBatteryLevel() {
     return maximumBatteryLevel;
 }
+
+OMNETARA_NAMESPACE_END

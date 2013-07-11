@@ -16,7 +16,7 @@ OMNETARA_NAMESPACE_BEGIN
 
 class OMNeTConfiguration : public virtual Configuration {
     public:
-        OMNeTConfiguration(cModule* module, RoutingTable* routingTable=nullptr);
+        OMNeTConfiguration(cModule* module, RoutingTable* routingTable=nullptr, PacketFactory* packetFactory=nullptr);
 
         virtual RoutingTable* getRoutingTable();
         virtual PacketFactory* getPacketFactory();
@@ -45,6 +45,7 @@ class OMNeTConfiguration : public virtual Configuration {
         RoutingTable* routingTable;
         EvaporationPolicy* evaporationPolicy;
         PathReinforcementPolicy* reinforcementPolicy;
+        PacketFactory* packetFactory;
         float initialPheromoneValue;
         int maxNrOfRouteDiscoveryRetries;
         int maxTTL;

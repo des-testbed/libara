@@ -13,7 +13,7 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-class OMNeTPacket : public cPacket, public Packet {
+class OMNeTPacket : public cPacket, public virtual Packet {
   private:
     void copy(const OMNeTPacket& other);
 

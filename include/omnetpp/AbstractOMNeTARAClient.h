@@ -10,7 +10,6 @@
 #include "omnetpp/OMNeTARAMacros.h"
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/ARANetworkConfigurator.h"
-#include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/RoutingTableDataPersistor.h"
 #include "omnetpp/MobilityDataPersistor.h"
 
@@ -61,7 +60,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         void handleUpperLayerMessage(cMessage* message);
 
         /**
-         * This casts the given message to OMNeTPacket and dispatches it to the correct arrival gate
+         * This will dispatch the given message to the correct arrival gate
          */
         void handleARAMessage(cMessage* message);
 
@@ -99,7 +98,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
          * It should return true if the link breakage results in a complete route failure.
          * Return false otherwise
          */
-        virtual bool handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) = 0;
+        virtual bool handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, NetworkInterface* interface) = 0;
 
         /**
          * Determines the host module which acts as a container to this simple module.

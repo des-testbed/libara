@@ -11,18 +11,18 @@
 OMNETARA_NAMESPACE_BEGIN
 
 /**
- * This class overrides the basic ARA::PacketFactory to let it produce
- * OMneTPackets.
+ * This class overrides the basic ARA::PacketFactory to let it produce OMNeTEARAPacket.
  */
 class EARAPacketFactory : public ::ARA::EARAPacketFactory {
-public:
-    EARAPacketFactory(int maxHopCount) : ::ARA::EARAPacketFactory(maxHopCount) {};
+    public:
+        EARAPacketFactory(int maxHopCount=20) : ::ARA::EARAPacketFactory(maxHopCount) {};
+        void setMaxHopCount(int newMaxHopCount);
 
-protected:
-    virtual EARAPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
+    protected:
+        virtual EARAPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
 
-private:
-    int calculatePacketSize(Packet* packet);
+    private:
+        int calculatePacketSize(Packet* packet);
 };
 
 OMNETARA_NAMESPACE_END

@@ -66,7 +66,7 @@ void EARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interfac
     emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
-bool EARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
+bool EARA::handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
     return AbstractEARAClient::handleBrokenLink(packet, receiverAddress, interface);
 }
 
@@ -96,10 +96,11 @@ void EARA::startNewRouteDiscovery(Packet* packet) {
 }
 
 void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
-    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(message);
+    cPacket* simPacket = check_and_cast<cPacket*>(message);
+    Packet* packet = check_and_cast<Packet*>(message);
     if (packet->isDataPacket()) {
         // record our energy level for the whole path energy of this packet
-        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
+        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(simPacket->getEncapsulatedPacket());
         int oldRouteEnergy = encapsulatedPacket->getRouteEnergy();
         encapsulatedPacket->setRouteEnergy(oldRouteEnergy + getCurrentEnergyLevel());
     }

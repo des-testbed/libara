@@ -144,17 +144,21 @@ void AbstractOMNeTARAClient::handleUpperLayerMessage(cMessage* message) {
     const char* payload = nullptr;
     unsigned int payloadSize = 0;
 
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) packetFactory->makeDataPacket(source, destination, sequenceNumber, payload, payloadSize);
-    omnetPacket->encapsulate(check_and_cast<cPacket*>(message));
+    Packet* packet = packetFactory->makeDataPacket(source, destination, sequenceNumber, payload, payloadSize);
+    cPacket* simPacket = dynamic_cast<cPacket*>(packet);
+    ASSERT2(simPacket, "Model error: Something is wrong with the PacketFactory. It does not create cPacket compatible packets..");
 
-    sendPacket(omnetPacket);
+    simPacket->encapsulate(check_and_cast<cPacket*>(message));
+    sendPacket(packet);
 }
 
 void AbstractOMNeTARAClient::handleARAMessage(cMessage* message) {
-      OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(message);
-      ASSERT(omnetPacket->getTTL() > 0);
-      OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(message->getArrivalGate()->getIndex());
-      arrivalGate->receive(omnetPacket);
+    Packet* packet = dynamic_cast<Packet*>(message);
+    ASSERT2(packet, "Model error: AbstractOMNeTARAClient tried to handle ARA message but can not cast to Packet*..");
+    ASSERT(packet->getTTL() > 0);
+
+    OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(message->getArrivalGate()->getIndex());
+    arrivalGate->receive(packet);
 }
 
 void AbstractOMNeTARAClient::persistRoutingTableData() {
@@ -165,9 +169,10 @@ void AbstractOMNeTARAClient::takeAndSend(cMessage* msg, cGate* gate, double send
     Enter_Method_Silent("takeAndSend(msg)");
     take(msg);
 
-    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(msg);
-    if (packet->isDataPacket()) {
-        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
+    Packet* araPacket = check_and_cast<Packet*>(msg);
+    cPacket* simPacket = check_and_cast<cPacket*>(msg);
+    if (araPacket->isDataPacket()) {
+        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(simPacket->getEncapsulatedPacket());
         //TODO inject our own address and energy level
         Route route = encapsulatedPacket->getRoute();
         route.push_back(getLocalAddress());
@@ -178,15 +183,15 @@ void AbstractOMNeTARAClient::takeAndSend(cMessage* msg, cGate* gate, double send
 
 void AbstractOMNeTARAClient::deliverToSystem(const Packet* packet) {
     Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
-    OMNeTPacket* omnetPacket = dynamic_cast<OMNeTPacket*>(pckt);
-    ASSERT(omnetPacket);
+    cPacket* simPacket = dynamic_cast<cPacket*>(pckt);
+    ASSERT2(simPacket, "Model error: AbstractOMNeTARAClient tried to deliver packet to system, but it can not cast to Packet*..");
 
-    cPacket* encapsulatedData = omnetPacket->decapsulate();
+    cPacket* encapsulatedData = simPacket->decapsulate();
     ASSERT(encapsulatedData);
 
     TrafficControlInfo* controlInfo = new TrafficControlInfo();
     int maxTTL = packetFactory->getMaximumNrOfHops();
-    controlInfo->setHopCount(maxTTL - omnetPacket->getTTL());
+    controlInfo->setHopCount(maxTTL - packet->getTTL());
     encapsulatedData->setControlInfo(controlInfo);
 
     send(encapsulatedData, "upperLayerGate$o");
@@ -194,7 +199,7 @@ void AbstractOMNeTARAClient::deliverToSystem(const Packet* packet) {
     nrOfDeliverablePackets++;
     emit(PACKET_DELIVERED_SIGNAL, 1);
 
-    delete omnetPacket;
+    delete packet;
 }
 
 void AbstractOMNeTARAClient::packetNotDeliverable(const Packet* packet) {
@@ -208,17 +213,17 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
         Ieee80211DataOrMgmtFrame* frame = check_and_cast<Ieee80211DataOrMgmtFrame*>(details);
         cPacket* encapsulatedPacket = frame->decapsulate();
 
-        if(dynamic_cast<OMNeTPacket*>(encapsulatedPacket) != NULL) {
+        if (dynamic_cast<Packet*>(encapsulatedPacket) != NULL) {
             // extract the receiver address
             MACAddress receiverMACAddress = frame->getReceiverAddress();
             IPv4Address receiverIPv4Address = networkConfig->getIPAddressFromMAC(receiverMACAddress);
             AddressPtr omnetAddress (new OMNeTAddress(receiverIPv4Address));
 
-            OMNeTPacket* omnetPacket = check_and_cast<OMNeTPacket*>(encapsulatedPacket);
+            Packet* packet = check_and_cast<Packet*>(encapsulatedPacket);
 
             // TODO this does only work if we have only one network interface card
             NetworkInterface* interface = getNetworkInterface(0);
-            if (handleBrokenOMNeTLink(omnetPacket, omnetAddress, interface)) {
+            if (handleBrokenOMNeTLink(packet, omnetAddress, interface)) {
                 emit(ROUTE_FAILURE_SIGNAL, 1);
             }
         }

@@ -9,12 +9,13 @@
 #include "EARAConfiguration.h"
 #include "EnergyAwareRoutingTable.h"
 #include "OMNeTEARAForwardingPolicy.h"
+#include "EARAPacketFactory.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
 class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARAConfiguration {
     public:
-        OMNeTEARAConfiguration(cModule* module, EnergyAwareRoutingTable* routingTable=new EnergyAwareRoutingTable());
+        OMNeTEARAConfiguration(cModule* module, EnergyAwareRoutingTable* routingTable=new EnergyAwareRoutingTable(), ::ARA::omnetpp::EARAPacketFactory* packetFactory=new EARAPacketFactory(20));
 
         virtual unsigned int getMaximumEnergyValue() const;
         virtual float getInfluenceOfMinimumEnergyValue() const;
@@ -26,6 +27,7 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
 
     private:
         EnergyAwareRoutingTable* routingTable;
+        EARAPacketFactory* packetFactory;
         float influenceOfMinimumEnergyValue;
         unsigned int maximumEnergyValue;
         unsigned int routeDiscoveryDelayInMilliSeconds;

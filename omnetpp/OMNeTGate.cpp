@@ -3,7 +3,6 @@
  */
 
 #include "omnetpp/OMNeTGate.h"
-#include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/OMNeTAddress.h"
 #include "Environment.h"
 #include "IInterfaceTable.h"
@@ -36,16 +35,18 @@ OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClien
     this->nrOfSentDataPackets = 0;
 }
 
-void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient) {
+void OMNeTGate::send(const Packet* packet, AddressPtr recipient) {
     send(packet, recipient, omnetARAModule->par("uniCastDelay").doubleValue());
 }
 
-void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double sendDelay) {
-    OMNeTPacket* omnetPacket = (OMNeTPacket*) packet;
+void OMNeTGate::send(const Packet* packet, AddressPtr recipient, double sendDelay) {
     OMNeTAddressPtr nextHopAddress = getNextHopAddress(recipient);
 
     // first remove the control info from the lower level (Ieee802Ctrl)
-    omnetPacket->removeControlInfo();
+    Packet* pckt = const_cast<Packet*>(packet);
+    cPacket* simPacket = dynamic_cast<cPacket*>(pckt);
+    ASSERT2(simPacket, "Model error: OMNeTGate could not cast the packet to cPacket for sending it via the simulation");
+    simPacket->removeControlInfo();
 
     // then fill in the control info (our routing decision)
     MACAddress macOfNextHop;
@@ -58,23 +59,19 @@ void OMNeTGate::send(const Packet* packet, shared_ptr<Address> recipient, double
 
     Ieee802Ctrl* controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macOfNextHop);
-    omnetPacket->setControlInfo(controlInfo);
+    simPacket->setControlInfo(controlInfo);
 
-    recordNumberOfSentBits(omnetPacket);
-
-    // we might have switched the context from the OMNeTTimer
-    omnetARAModule->takeAndSend(omnetPacket, outGate, sendDelay);
-}
-
-void OMNeTGate::recordNumberOfSentBits(OMNeTPacket* packet) {
     if (packet->isDataPacket()) {
-        nrOfSentDataBits += packet->getBitLength();
+        nrOfSentDataBits += simPacket->getBitLength();
         nrOfSentDataPackets++;
     }
     else {
-        nrOfSentControlBits += packet->getBitLength();
+        nrOfSentControlBits += simPacket->getBitLength();
         nrOfSentControlPackets++;
     }
+
+    // we might have switched the context from the OMNeTTimer
+    omnetARAModule->takeAndSend(simPacket, outGate, sendDelay);
 }
 
 int64 OMNeTGate::getNrOfSentDataBits() {
