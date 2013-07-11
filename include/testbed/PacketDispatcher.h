@@ -22,7 +22,7 @@ struct routingExtension {
   } __attribute__ ((__packed__));
 
 /**
- * Receives a dessert_message_t from the NIC and sends to libARA.
+ * The first ara callback of the mesh processing pipeline, determines if a packet belongs to libARA and sends to araMessageDispatcher, or the kernel, accordingly.
  */
 _dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id);
 
@@ -30,6 +30,11 @@ _dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageRec
  * Determines if a given dessert message was created by TestbedARA.
  */
 bool isARAMessage(dessert_msg_t* message);
+
+/**
+ * The second ara callback of the mesh processing pipeline, extracts a packet from the dessert message and sends to libARA.
+ */
+_dessert_cb_results araMessageDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id);
 
 /**
  * Receives a Packet from an Interface and converts to a message, then sends it over selected interface (if NULL sends over all interfaces)
