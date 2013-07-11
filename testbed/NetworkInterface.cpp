@@ -49,7 +49,7 @@ dessert_meshif_t* NetworkInterface::getDessertPointer()  const{
 }
 
 void NetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> recipient){
-    packetToNetworkDispatcher(packet, this, recipient);
+    packetToMeshInterfaceDispatcher(packet, this, recipient);
 }
 
 void NetworkInterface::registerInterface() {
