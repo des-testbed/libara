@@ -39,7 +39,6 @@ void ARA::initialize(int stage) {
         setLogger(config.getLogger());
         AbstractARAClient::initialize(config);
         initializeNetworkInterfacesOf(this, config);
-        maximumBatteryLevel = config.getMaximumBatteryLevel();
 
         WATCH(nrOfDetectedLoops);
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");

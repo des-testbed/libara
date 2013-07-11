@@ -7,6 +7,7 @@
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/traffic/TrafficPacket_m.h"
 #include "omnetpp/OMNeTPacket.h"
+#include "omnetpp/OMNeTBattery.h"
 #include "Environment.h"
 
 #include "Ieee80211Frame_m.h"
@@ -50,7 +51,8 @@ void AbstractOMNeTARAClient::initialize(int stage) {
             mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
         }
 
-        currentEnergyLevel =  maximumBatteryLevel;
+        OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
+        currentEnergyLevel = battery->getCapacity();
         energyLevelOutVector.setName("energyLevel");
         routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
     }

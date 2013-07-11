@@ -45,7 +45,6 @@ void EARA::initialize(int stage) {
         initializeNetworkInterfacesOf(this, config);
 
         notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
-        maximumBatteryLevel = config.getMaximumBatteryLevel();
         WATCH(nrOfDetectedLoops);
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
         DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");

@@ -148,7 +148,6 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         ARANetworkConfigurator* networkConfig;
 
         // node battery
-        double maximumBatteryLevel;
         bool hasEnoughBattery = true;
         unsigned int currentEnergyLevel;
 

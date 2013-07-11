@@ -4,7 +4,6 @@
 
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/OMNeTGate.h"
-#include "omnetpp/OMNeTBattery.h"
 #include "omnetpp/OMNeTForwardingPolicy.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
@@ -41,9 +40,6 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTab
     }
     this->routingTable = routingTable;
     this->routingTable->setEvaporationPolicy(evaporationPolicy);
-
-    OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
-    maximumBatteryLevel = battery->getCapacity();
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
     setLogLevel(module->par("logLevel").stringValue());
@@ -144,10 +140,6 @@ cModule* OMNeTConfiguration::getHostModule() {
 
 bool OMNeTConfiguration::isPreviousHopFeatureActivated() {
     return previousHopFeatureIsActivated;
-}
-
-double OMNeTConfiguration::getMaximumBatteryLevel() {
-    return maximumBatteryLevel;
 }
 
 OMNETARA_NAMESPACE_END
