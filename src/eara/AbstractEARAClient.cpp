@@ -55,7 +55,8 @@ bool AbstractEARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 
 void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* interface) {
     char packetType = packet->getType();
-    if ( (packetType == PacketType::FANT || packetType == PacketType::BANT || packetType == PacketType::PEANT) && isDirectedToThisNode(packet) == false) {
+    if ( hasBeenSentByThisNode(packet) == false && isDirectedToThisNode(packet) == false
+         && (packetType == PacketType::FANT || packetType == PacketType::BANT || packetType == PacketType::PEANT)) {
         float routeEnergy = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
         routingTable->updateEnergyValue(packet->getSource(), packet->getSender(), interface, routeEnergy);
         handleAntPacketWithDelayTimer(packet, routeEnergy);
