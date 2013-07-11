@@ -7,6 +7,7 @@
 #include "TestbedARAClient.h"
 #include "PacketDispatcher.h"
 #include "BasicConfiguration.h"
+#include <iostream>
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -26,6 +27,7 @@ void TestbedARAClient::sendPacket(Packet* packet) {
         nextHop->getInterface()->send(packet, nextHop->getAddress());
     }
     this->logDebug("sending FANT");
+    std::cout << "sending FANT" << std::endl;
     this->sendFANT(packet->getDestination());
 }
 
