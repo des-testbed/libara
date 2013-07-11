@@ -72,7 +72,7 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
 
     if (nrOfHops == 1) {
         // packet has been directly received from the source so we return the maximum normalized energy
-        return 1;
+        return 10;
     }
     else {
         nrOfHops -= 1; // don't count in the last hop, because we also don't coun't in the energy of the current node
