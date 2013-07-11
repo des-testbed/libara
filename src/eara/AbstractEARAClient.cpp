@@ -55,11 +55,17 @@ bool AbstractEARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 
 void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* interface) {
     char packetType = packet->getType();
-    if ( hasBeenSentByThisNode(packet) == false && isDirectedToThisNode(packet) == false
+    if ( hasBeenSentByThisNode(packet) == false
          && (packetType == PacketType::FANT || packetType == PacketType::BANT || packetType == PacketType::PEANT)) {
         float routeEnergy = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
         routingTable->updateEnergyValue(packet->getSource(), packet->getSender(), interface, routeEnergy);
-        handleAntPacketWithDelayTimer(packet, routeEnergy);
+
+        if (isDirectedToThisNode(packet) == false) {
+            handleAntPacketWithDelayTimer(packet, routeEnergy);
+        }
+        else {
+            AbstractARAClient::handleAntPacket(packet, interface);
+        }
     }
     else {
         AbstractARAClient::handleAntPacket(packet, interface);
@@ -75,7 +81,7 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
         return 10;
     }
     else {
-        nrOfHops -= 1; // don't count in the last hop, because we also don't coun't in the energy of the current node
+        nrOfHops -= 1; // don't count in the last hop, because we also don't count in the energy of the current node
         unsigned int totalEnergy = packet->getTotalEnergyValue();
         unsigned int minimumEnergy = packet->getMinimumEnergyValue();
         assert(totalEnergy > 0);
@@ -151,8 +157,10 @@ void AbstractEARAClient::handleExpiredRouteDiscoveryDelayTimer(Timer* timer) {
 void AbstractEARAClient::handleDataPacketForThisNode(Packet* packet) {
     AbstractARAClient::handleDataPacketForThisNode(packet);
 
-    unsigned int differenceInEnergyLevel = energyLevelWhenLastPEANTHasBeenSent - getCurrentEnergyLevel();
+    unsigned int currentEnergy = getCurrentEnergyLevel();
+    unsigned int differenceInEnergyLevel = energyLevelWhenLastPEANTHasBeenSent - currentEnergy;
     if (differenceInEnergyLevel / (float) maximumEnergyValue >= peantEnergyThreshold) {
+        energyLevelWhenLastPEANTHasBeenSent = currentEnergy;
         broadcastPEANT();
     }
 }
