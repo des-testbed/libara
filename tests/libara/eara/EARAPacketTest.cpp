@@ -107,8 +107,8 @@ TEST(EARAPacketTest, overflow) {
     EARAPacket packet = EARAPacket(source, destination, source, PacketType::DATA, 123, 10);
     LONGS_EQUAL(0, packet.getTotalEnergyValue());
 
-    packet.addEnergyValue(UINT_MAX);
-    LONGS_EQUAL(UINT_MAX, packet.getTotalEnergyValue());
+    packet.addEnergyValue(UINT_MAX-10);
+    LONGS_EQUAL(UINT_MAX-10, packet.getTotalEnergyValue());
 
     // if we add more than that it stays at the maximum
     packet.addEnergyValue(100);

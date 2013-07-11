@@ -31,6 +31,9 @@ void EARAPacket::addEnergyValue(unsigned int newEnergyValue) {
     if (UINT_MAX - totalEnergyValue >= newEnergyValue) {
         totalEnergyValue += newEnergyValue;
     }
+    else {
+        totalEnergyValue = UINT_MAX;
+    }
 }
 
 void EARAPacket::setTotalEnergyValue(unsigned int energyValue) {
