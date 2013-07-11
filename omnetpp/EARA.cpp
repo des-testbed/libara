@@ -5,6 +5,7 @@
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
 #include "omnetpp/EARAPacketFactory.h"
+#include "omnetpp/OMNeTEARAPacket.h"
 #include "omnetpp/traffic/TrafficPacket_m.h"
 #include "omnetpp/RoutingTableWatcher.h"
 
@@ -93,19 +94,6 @@ void EARA::handleNonSourceRouteDiscovery(Packet* packet) {
 void EARA::startNewRouteDiscovery(Packet* packet) {
     emit(NEW_ROUTE_DISCOVERY, 1);
     AbstractEARAClient::startNewRouteDiscovery(packet);
-}
-
-void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
-    cPacket* simPacket = check_and_cast<cPacket*>(message);
-    Packet* packet = check_and_cast<Packet*>(message);
-    if (packet->isDataPacket()) {
-        // record our energy level for the whole path energy of this packet
-        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(simPacket->getEncapsulatedPacket());
-        int oldRouteEnergy = encapsulatedPacket->getRouteEnergy();
-        encapsulatedPacket->setRouteEnergy(oldRouteEnergy + getCurrentEnergyLevel());
-    }
-
-    AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);
 }
 
 unsigned int EARA::getCurrentEnergyLevel() {

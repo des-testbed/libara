@@ -34,7 +34,7 @@ OMNeTEARAPacket::OMNeTEARAPacket(AddressPtr source, AddressPtr destination, Addr
 }
 
 OMNeTEARAPacket::OMNeTEARAPacket(const OMNeTEARAPacket& other) : cPacket(other), ARA::EARAPacket(other.source, other.destination, other.sender, other.type, other.seqNr, other.ttl, other.payload, other.payloadSize) {
-    this->previousHop = other.previousHop;
+    copy(other);
 }
 
 OMNeTEARAPacket& OMNeTEARAPacket::operator=(const OMNeTEARAPacket& other) {

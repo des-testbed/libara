@@ -37,7 +37,7 @@ AbstractEARAClient::~AbstractEARAClient() {
 }
 
 void AbstractEARAClient::broadCast(Packet* packet) {
-    EARAPacket* earaPacket = (EARAPacket*) packet;
+    EARAPacket* earaPacket = static_cast<EARAPacket*>(packet);
     unsigned int energyOfCurrentNode = getCurrentEnergyLevel();
     earaPacket->addEnergyValue(energyOfCurrentNode);
     AbstractARAClient::broadCast(earaPacket);
@@ -56,7 +56,7 @@ bool AbstractEARAClient::hasBeenReceivedEarlier(const Packet* packet) {
 void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* interface) {
     char packetType = packet->getType();
     if ( (packetType == PacketType::FANT || packetType == PacketType::BANT || packetType == PacketType::PEANT) && isDirectedToThisNode(packet) == false) {
-        float routeEnergy = calculateInitialEnergyValue((EARAPacket*)packet);
+        float routeEnergy = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
         routingTable->updateEnergyValue(packet->getSource(), packet->getSender(), interface, routeEnergy);
         handleAntPacketWithDelayTimer(packet, routeEnergy);
     }
@@ -70,14 +70,19 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
     assert(nrOfHops > 0);
 
     if (nrOfHops == 1) {
-        // packet has been directly received from the source
-        return packet->getTotalEnergyValue() / (float) maximumEnergyValue;
+        // packet has been directly received from the source so we return the maximum normalized energy
+        return 1;
     }
     else {
         nrOfHops -= 1; // don't count in the last hop, because we also don't coun't in the energy of the current node
-        float averageValue = packet->getTotalEnergyValue() / (float) nrOfHops;
-        float averagePercent = averageValue / (float) maximumEnergyValue;
-        float minimumPercent = packet->getMinimumEnergyValue() / (float) maximumEnergyValue;
+        unsigned int totalEnergy = packet->getTotalEnergyValue();
+        unsigned int minimumEnergy = packet->getMinimumEnergyValue();
+        assert(totalEnergy > 0);
+        assert(minimumEnergy > 0);
+
+        float averageEnergy = totalEnergy / (float) nrOfHops;
+        float averagePercent = averageEnergy / (float) maximumEnergyValue;
+        float minimumPercent = minimumEnergy / (float) maximumEnergyValue;
 
         return averagePercent - ( (averagePercent - minimumPercent) / influenceOfMinimumEnergyValue );
     }
@@ -91,7 +96,7 @@ void AbstractEARAClient::handleAntPacketWithDelayTimer(Packet* antPacket, float 
     }
     else {
         Timer* delayTimer = found->second;
-        EARAPacket* bestAntPacket = (EARAPacket*) delayTimer->getContextObject();
+        EARAPacket* bestAntPacket = static_cast<EARAPacket*>(delayTimer->getContextObject());
 
         //TODO we could cache this value so it doesn't need to be recalculated over and over
         float routeEnergyOfBestAnt = calculateInitialEnergyValue(bestAntPacket);

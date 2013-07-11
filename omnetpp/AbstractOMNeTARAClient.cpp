@@ -6,6 +6,7 @@
 #include "omnetpp/TrafficControllInfo.h"
 #include "omnetpp/OMNeTGate.h"
 #include "omnetpp/traffic/TrafficPacket_m.h"
+#include "omnetpp/OMNeTPacket.h"
 #include "Environment.h"
 
 #include "Ieee80211Frame_m.h"
@@ -165,20 +166,26 @@ void AbstractOMNeTARAClient::persistRoutingTableData() {
     routingTablePersistor->write(routingTable);
 }
 
-void AbstractOMNeTARAClient::takeAndSend(cMessage* msg, cGate* gate, double sendDelay) {
-    Enter_Method_Silent("takeAndSend(msg)");
-    take(msg);
+void AbstractOMNeTARAClient::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
+    Enter_Method_Silent("AbstractOMNeTARAClient::takeAndSend(...)");
+    take(message);
 
+    updatePacketRouteStatistics(message);
+    sendDelayed(message, sendDelay, gate);
+}
+
+void AbstractOMNeTARAClient::updatePacketRouteStatistics(cMessage* msg) {
     Packet* araPacket = check_and_cast<Packet*>(msg);
     cPacket* simPacket = check_and_cast<cPacket*>(msg);
     if (araPacket->isDataPacket()) {
+        // store the route and energy along that route for statistics later (not used in the routing algorithm itself)
         TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(simPacket->getEncapsulatedPacket());
-        //TODO inject our own address and energy level
         Route route = encapsulatedPacket->getRoute();
         route.push_back(getLocalAddress());
-    }
 
-    sendDelayed(msg, sendDelay, gate);
+        int oldRouteEnergy = encapsulatedPacket->getRouteEnergy();
+        encapsulatedPacket->setRouteEnergy(oldRouteEnergy + currentEnergyLevel);
+    }
 }
 
 void AbstractOMNeTARAClient::deliverToSystem(const Packet* packet) {

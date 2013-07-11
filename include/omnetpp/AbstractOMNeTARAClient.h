@@ -71,7 +71,9 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
          * with the given delay.
          */
         //TODO rename this to sendToNetwork() and remove the gate parameter
-        virtual void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
+        virtual void takeAndSend(cMessage* message, cGate* gate, double sendDelay = 0);
+
+        void updatePacketRouteStatistics(cMessage* msg);
 
         /**
          * The given packet is sent to the next upper layer.
