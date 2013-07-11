@@ -15,8 +15,8 @@ EARARoutingTableEntry::EARARoutingTableEntry(AddressPtr address, NetworkInterfac
 }
 
 void EARARoutingTableEntry::checkIsNormalized(float energyValue) const {
-    if(energyValue < 0 || energyValue > 1) {
-        throw Exception("Normalized energy values must be between 0 and 1");
+    if(energyValue < 1 || energyValue > 10) {
+        throw Exception("Normalized energy values must be between 1 and 10");
     }
 }
 

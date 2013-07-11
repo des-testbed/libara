@@ -139,7 +139,7 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant1->setTotalEnergyValue(180);
     fant1->decreaseTTL(3); // traveled 3 hops + 1 hop when the client receives the packet
     client->receivePacket(fant1, interface);
-    DOUBLES_EQUAL(0.5, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(5.0, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 
     // then with b = 3 (more weight on the average)
     configuration = client->getStandardConfiguration();
@@ -153,7 +153,7 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant2->setTotalEnergyValue(180);
     fant2->decreaseTTL(3); // traveled 3 hops + 1 hop when the client receives the packet
     client->receivePacket(fant2, interface);
-    DOUBLES_EQUAL(0.533333333, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(5.33333333, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 
     // then with b = 5 (even more weight on the average)
     configuration = client->getStandardConfiguration();
@@ -167,7 +167,7 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant3->setTotalEnergyValue(180);
     fant3->decreaseTTL(3); // traveled 3 hops + 1 hop when the client receives the packet
     client->receivePacket(fant3, interface);
-    DOUBLES_EQUAL(0.56, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(5.6, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 
     // now with b = 1 (only the minimum counts)
     configuration = client->getStandardConfiguration();
@@ -181,7 +181,7 @@ TEST(AbstractEARAClientTest, initializeEnergyValues) {
     fant4->setTotalEnergyValue(180);
     fant4->decreaseTTL(3); // traveled 3 hops + 1 hop when the client receives the packet
     client->receivePacket(fant4, interface);
-    DOUBLES_EQUAL(0.4, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(4.0, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 }
 
 /**
@@ -367,7 +367,7 @@ TEST(AbstractEARAClientTest, newRouteDiscoveryRefreshesEnergyValues) {
     fant1->setMinimumEnergyValue(10);
 
     client->receivePacket(fant1, interface);
-    DOUBLES_EQUAL(0.3, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(3.0, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 
     // after some time there is a new route discovery (maybe for another destination)
     AddressPtr destination2 (new AddressMock("destination2"));
@@ -379,7 +379,7 @@ TEST(AbstractEARAClientTest, newRouteDiscoveryRefreshesEnergyValues) {
 
     //the energy should be updated even though no new route is created
     client->receivePacket(fant2, interface);
-    DOUBLES_EQUAL(0.2, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(2.0, routingTable->getEnergyValue(source, nextHop, interface), 0.0001);
 }
 
 /**

@@ -62,7 +62,7 @@ EARARoutingTableEntry* EnergyAwareRoutingTable::getRoutingTableEntry(AddressPtr 
 float EnergyAwareRoutingTable::getEnergyValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
     EARARoutingTableEntry* entry = getRoutingTableEntry(destination, nextHop, interface);
     if (entry == nullptr) {
-        return 1;
+        return 10;
     }
     else {
         return entry->getEnergyValue();

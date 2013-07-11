@@ -82,10 +82,12 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
         assert(minimumEnergy > 0);
 
         float averageEnergy = totalEnergy / (float) nrOfHops;
-        float averagePercent = averageEnergy / (float) maximumEnergyValue;
-        float minimumPercent = minimumEnergy / (float) maximumEnergyValue;
+        float normalizedAverage = (averageEnergy / (float) maximumEnergyValue) * 10;
+        float normalizedMinimum = (minimumEnergy / (float) maximumEnergyValue) * 10;
 
-        return averagePercent - ( (averagePercent - minimumPercent) / influenceOfMinimumEnergyValue );
+        float initialEnergyValue = normalizedAverage - ( (normalizedAverage - normalizedMinimum) / influenceOfMinimumEnergyValue );
+        assert(initialEnergyValue >= 1 && initialEnergyValue <= 10);
+        return initialEnergyValue;
     }
 }
 

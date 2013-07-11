@@ -32,7 +32,7 @@ TEST_GROUP(EARARoutingTableEntryTest) {
 TEST(EARARoutingTableEntryTest, testGetters) {
     AddressPtr nextHop (new AddressMock());
     float pheromoneValue = 1.234;
-    float energyValue = 0.8;
+    float energyValue = 8.5;
     EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, pheromoneValue, energyValue);
 
     CHECK(nextHop->equals(entry.getAddress()));
@@ -47,57 +47,71 @@ TEST(EARARoutingTableEntryTest, testOnlyAcceptNormalizedEnergy) {
         EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, -1);
         FAIL("Should have thrown an exception (energy < 0)");
     } catch(Exception &exception) {
-        STRCMP_EQUAL("Normalized energy values must be between 0 and 1", exception.getMessage());
+        STRCMP_EQUAL("Normalized energy values must be between 1 and 10", exception.getMessage());
     }
 
     try {
-        EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 1.05);
-        FAIL("Should have thrown an exception (energy < 0)");
+        EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 0.0);
+        FAIL("Should have thrown an exception (energy = 0)");
     } catch(Exception &exception) {
-        STRCMP_EQUAL("Normalized energy values must be between 0 and 1", exception.getMessage());
+        STRCMP_EQUAL("Normalized energy values must be between 1 and 10", exception.getMessage());
     }
 
     try {
-        EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 10);
-        FAIL("Should have thrown an exception (energy < 0)");
+        EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 0.5);
+        FAIL("Should have thrown an exception (0 < energy < 1)");
     } catch(Exception &exception) {
-        STRCMP_EQUAL("Normalized energy values must be between 0 and 1", exception.getMessage());
+        STRCMP_EQUAL("Normalized energy values must be between 1 and 10", exception.getMessage());
+    }
+
+    try {
+        EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 10.05);
+        FAIL("Should have thrown an exception (energy > 10)");
+    } catch(Exception &exception) {
+        STRCMP_EQUAL("Normalized energy values must be between 1 and 10", exception.getMessage());
+    }
+
+    try {
+        EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 1000);
+        FAIL("Should have thrown an exception (energy > 10)");
+    } catch(Exception &exception) {
+        STRCMP_EQUAL("Normalized energy values must be between 1 and 10", exception.getMessage());
     }
 
     try {
         EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 1);
-        entry.setEnergyValue(1.23);
-        FAIL("Should have thrown an exception (energy < 0)");
+        entry.setEnergyValue(10.23);
+        FAIL("Should have thrown an exception (energy > 10)");
     } catch(Exception &exception) {
-        STRCMP_EQUAL("Normalized energy values must be between 0 and 1", exception.getMessage());
+        STRCMP_EQUAL("Normalized energy values must be between 1 and 10", exception.getMessage());
     }
 
     try {
-        EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 1);
+        EARARoutingTableEntry entry = EARARoutingTableEntry(nextHop, interface, 123, 8);
         entry.setEnergyValue(-0.3);
         FAIL("Should have thrown an exception (energy < 0)");
     } catch(Exception &exception) {
-        STRCMP_EQUAL("Normalized energy values must be between 0 and 1", exception.getMessage());
+        STRCMP_EQUAL("Normalized energy values must be between 1 and 10", exception.getMessage());
     }
 }
 
 TEST(EARARoutingTableEntryTest, testOutputStreamOperator) {
     AddressPtr address(new AddressMock);
     float pheromoneValue = 1.234;
-    float energyValue = 0.875;
+    float energyValue = 8.75;
     EARARoutingTableEntry entry = EARARoutingTableEntry(address, interface, pheromoneValue, energyValue);
     std::ostringstream stream;
     stream << entry;
-    STRCMP_EQUAL("[next hop] Foo [phi] 1.234 [energy] 0.875", stream.str().c_str());
+    STRCMP_EQUAL("[next hop] Foo [phi] 1.234 [energy] 87.5%", stream.str().c_str());
 }
 
 
 TEST(EARARoutingTableEntryTest, testSetEnergyValue) {
     AddressPtr address (new AddressMock());
     float pheromoneValue = 1.234;
-    float energyValue = 0.875;
+    float energyValue = 8.75;
     EARARoutingTableEntry entry = EARARoutingTableEntry(address, interface, pheromoneValue, energyValue);
 
-    entry.setEnergyValue(0.6123);
-    DOUBLES_EQUAL(0.6123, entry.getEnergyValue(), 0.0001);
+    entry.setEnergyValue(6.123);
+    DOUBLES_EQUAL(6.123, entry.getEnergyValue(), 0.0001);
 }
