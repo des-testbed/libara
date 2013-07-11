@@ -6,6 +6,7 @@
 #include "TestbedAddress.h"
 
 #include <netinet/in.h>
+#include <iostream>
 
 
 TESTBED_NAMESPACE_BEGIN
@@ -15,19 +16,19 @@ TESTBED_NAMESPACE_BEGIN
  */
 NetworkInterfaceMap networkInterfaces;
 
-_dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
+_dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
 
     if(!isARAMessage(messageReceived)) {
         dessert_debug("dessertmessage %u has null routingExtension, sending to sys", ntohs(messageReceived->u16));
-        //TODO Implement logic for sending to system (dessert_syssend)
+        void* payload;
+        dessert_msg_getpayload(messageReceived, &payload);
+        dessert_syssend(payload, messageReceived->plen);
         return DESSERT_MSG_DROP;
     }
+    else {
+        return DESSERT_MSG_KEEP;
+    }
 
-
-    Packet* packet = extractPacket(messageReceived);
-    std::cout << "Recieved Packet: " << packet->getPayload() << std::endl;
-    extractNetworkInterface(interface)->receive(packet);
-    return DESSERT_MSG_DROP; //removes packet from processing pipeline
 }
 
 bool isARAMessage(dessert_msg_t* message) {
@@ -35,14 +36,22 @@ bool isARAMessage(dessert_msg_t* message) {
     return dessert_msg_getext(message, &extension, DESSERT_EXT_USER, 0) != 0;
 }
 
-void packetToNetworkDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
+_dessert_cb_results araMessageDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
+    Packet* packet = extractPacket(messageReceived);
+    std::cout << "Recieved Packet: " << packet->getPayload() << std::endl;
+    extractNetworkInterface(interface)->receive(packet);
+    return DESSERT_MSG_DROP;
+}
+
+void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
     dessert_msg_t* message = extractDessertMessage(packet);
     addEthernetHeader(message, recipient);
     dessert_meshif_t* interface = testbedInterface->getDessertPointer();
     dessert_meshsend(message, interface);
 }
 
-_dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
+_dessert_cb_results messageToMeshInterfaceDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
+    std::cout << "Received packet " << messageToSend->u16 << " of size " << ntohs(messageToSend->plen) << " bits via tap, broadcasting" << std::endl;
     dessert_meshsend(messageToSend, NULL);
     //TODO: log packets received via user space
     return DESSERT_MSG_DROP;

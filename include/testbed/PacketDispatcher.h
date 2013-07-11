@@ -24,7 +24,7 @@ struct routingExtension {
 /**
  * Receives a dessert_message_t from the NIC and sends to libARA.
  */
-_dessert_cb_results messageFromNetworkDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id);
+_dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id);
 
 /**
  * Determines if a given dessert message was created by TestbedARA.
@@ -34,13 +34,13 @@ bool isARAMessage(dessert_msg_t* message);
 /**
  * Receives a Packet from an Interface and converts to a message, then sends it over selected interface (if NULL sends over all interfaces)
  */
-void packetToNetworkDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient);
+void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient);
 
 /**
  * Stub; tells DES-SERT to drop packets received from user space.
  * Note, libARA currently does not use the sys interface to inject data to DES-SERT
  */
-_dessert_cb_results messageToNetworkDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id);
+_dessert_cb_results messageToMeshInterfaceDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id);
 
 /**
  * Extracts all data from a dessert message that is necessary to create a libARA Packet object.
