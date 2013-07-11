@@ -7,7 +7,7 @@
 #include "omnetpp/EARAPacketFactory.h"
 #include "omnetpp/OMNeTEARAPacket.h"
 #include "omnetpp/traffic/TrafficPacket_m.h"
-#include "omnetpp/RoutingTableWatcher.h"
+#include "omnetpp/EARARoutingTableWatcher.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -52,7 +52,7 @@ void EARA::initialize(int stage) {
         ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
         ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
-        new RoutingTableWatcher(routingTable);
+        new EARARoutingTableWatcher(routingTable);
     }
 }
 

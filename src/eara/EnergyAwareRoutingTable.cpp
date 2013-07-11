@@ -69,4 +69,26 @@ float EnergyAwareRoutingTable::getEnergyValue(AddressPtr destination, AddressPtr
     }
 }
 
+EARARoutingTableEntryTupel EnergyAwareRoutingTable::getEntryAt(int wantedPosition) const {
+    int currentPosition = 0;
+    RoutingTableMap::const_iterator iterator;
+    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+        AddressPtr destination = iterator->first;
+        RoutingTableEntryList* entryList = iterator->second;
+        for (auto& entry: *entryList) {
+            if(currentPosition == wantedPosition) {
+                EARARoutingTableEntryTupel tupel;
+                tupel.destination = destination;
+                tupel.entry = (EARARoutingTableEntry*) entry;
+                return tupel;
+            }
+            else {
+                currentPosition++;
+            }
+        }
+    }
+
+    throw Exception("EnergyAwareRoutingTable::getEntryAt: Index out of bounds");
+}
+
 ARA_NAMESPACE_END

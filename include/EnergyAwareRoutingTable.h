@@ -11,6 +11,11 @@
 
 ARA_NAMESPACE_BEGIN
 
+struct EARARoutingTableEntryTupel {
+    AddressPtr destination;
+    EARARoutingTableEntry* entry;
+};
+
 class EnergyAwareRoutingTable : public RoutingTable {
     public:
         virtual void update(AddressPtr destination, RoutingTableEntry* entry) {RoutingTable::update(destination, entry);};
@@ -28,6 +33,12 @@ class EnergyAwareRoutingTable : public RoutingTable {
          * Get the energy value for a specific route in this routing table.
          */
         float getEnergyValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
+        /**
+         * Returns the n'th ~RoutingTableEntry.
+         * This method is only used to display the routing table entries to the user.
+         */
+        EARARoutingTableEntryTupel getEntryAt(int wantedPosition) const;
 
     protected:
         void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
