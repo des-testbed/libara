@@ -122,12 +122,6 @@ void OMNeTBattery::handleMessage(cMessage* message) {
 }
 
 void OMNeTBattery::updateResidualEnergy(){
-    if (residualCapacityInMilliWattSeconds <= 0) {
-        // The battery is already depleted and devices should have stopped sending drawMsg. However leftover messages in queue are caught
-        residualEnergyOutVector.record(0);
-        return;
-    }
-
     calculateConsumedEnergy();
     publishEnergyInformation(residualCapacityInMilliWattSeconds);
     updateBatteryIcon();
