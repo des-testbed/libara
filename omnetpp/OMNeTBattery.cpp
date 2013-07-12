@@ -118,7 +118,9 @@ void OMNeTBattery::handleMessage(cMessage* message) {
     }
 
     updateResidualEnergy();
-    scheduleAt(simTime() + updateInterval, publishMessage);
+    if(residualCapacityInMilliWattSeconds > 0) {
+        scheduleAt(simTime() + updateInterval, publishMessage);
+    }
 }
 
 void OMNeTBattery::updateResidualEnergy(){
