@@ -53,7 +53,6 @@ void AbstractOMNeTARAClient::initialize(int stage) {
 
         OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
         currentEnergyLevel = battery->getCapacity();
-        energyLevelOutVector.setName("energyLevel");
         routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
     }
 }
@@ -242,7 +241,6 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
 
 void AbstractOMNeTARAClient::handleBatteryStatusChange(Energy* energyInformation) {
     currentEnergyLevel = energyInformation->GetEnergy();
-    energyLevelOutVector.record(currentEnergyLevel);
 
     if (currentEnergyLevel <= 0) {
        hasEnoughBattery = false;
