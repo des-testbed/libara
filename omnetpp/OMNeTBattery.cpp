@@ -123,7 +123,7 @@ void OMNeTBattery::handleMessage(cMessage* message) {
 
 void OMNeTBattery::updateResidualEnergy(){
     calculateConsumedEnergy();
-    publishEnergyInformation(residualCapacityInMilliWattSeconds);
+    publishEnergyInformation();
     updateBatteryIcon();
     recordResidualEnergy();
 }
@@ -189,8 +189,8 @@ void OMNeTBattery::recordResidualEnergy() {
     }
 }
 
-void OMNeTBattery::publishEnergyInformation(double publishedEnergyLevel) {
-    Energy* energyInformation = new Energy(publishedEnergyLevel);
+void OMNeTBattery::publishEnergyInformation() {
+    Energy* energyInformation = new Energy(residualCapacityInMilliWattSeconds);
     notificationBoard->fireChangeNotification(NF_BATTERY_CHANGED, energyInformation);
     delete energyInformation;
 }

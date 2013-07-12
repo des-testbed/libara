@@ -33,6 +33,7 @@ void AbstractOMNeTARAClient::initialize(int stage) {
     if(stage == 0) {
         notificationBoard = NotificationBoardAccess().get();
         notificationBoard->subscribe(this, NF_LINK_BREAK);
+        notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
         mobility = ModuleAccess<MobilityBase>("mobility").get();
         interfaceTable = ModuleAccess<IInterfaceTable>("interfaceTable").get();
         networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
@@ -43,10 +44,6 @@ void AbstractOMNeTARAClient::initialize(int stage) {
         ROUTE_FAILURE_SIGNAL = registerSignal("routeFailure");
         DROP_PACKET_BECAUSE_ENERGY_DEPLETED =  registerSignal("dropPacketBecauseEnergyDepleted");
 
-        WATCH(currentEnergyLevel);
-        WATCH(nrOfDeliverablePackets);
-        WATCH(nrOfNotDeliverablePackets);
-
         if(par("activateMobileTrace").boolValue()){
             mobilityDataPersistor = new MobilityDataPersistor(mobility, findHost());
         }
@@ -54,6 +51,12 @@ void AbstractOMNeTARAClient::initialize(int stage) {
         OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
         currentEnergyLevel = battery->getCapacity();
         routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
+        nodeEnergyDepletionTimestamp = currentEnergyLevel > 0 ? -1: simTime(); // not yet depleted
+
+        WATCH(currentEnergyLevel);
+        WATCH(nrOfDeliverablePackets);
+        WATCH(nrOfNotDeliverablePackets);
+        WATCH(nodeEnergyDepletionTimestamp);
     }
 }
 

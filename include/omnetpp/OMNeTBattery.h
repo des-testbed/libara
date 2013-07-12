@@ -81,7 +81,7 @@ class OMNeTBattery : public BasicBattery {
         void calculateConsumedEnergyOfWirelessDevices();
         void updateBatteryIcon();
         void recordResidualEnergy();
-        void publishEnergyInformation(double publishedEnergyLevel);
+        void publishEnergyInformation();
 
     private:
         NotificationBoard*  notificationBoard;
