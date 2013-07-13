@@ -48,6 +48,8 @@ public:
 
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
 
+    // make some methods public for testing purposes
+    using AbstractEARAClient::normalizeEnergyValue;
 private:
     unsigned int currentEnergyLevel;
 };

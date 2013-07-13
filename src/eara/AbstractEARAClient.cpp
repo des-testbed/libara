@@ -88,13 +88,22 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
         assert(minimumEnergy > 0);
 
         float averageEnergy = totalEnergy / (float) nrOfHops;
-        float normalizedAverage = (averageEnergy / (float) maximumEnergyValue) * 10;
-        float normalizedMinimum = (minimumEnergy / (float) maximumEnergyValue) * 10;
+        float normalizedAverage = normalizeEnergyValue(averageEnergy);
+        float normalizedMinimum = normalizeEnergyValue(minimumEnergy);
 
         float initialEnergyValue = normalizedAverage - ( (normalizedAverage - normalizedMinimum) / influenceOfMinimumEnergyValue );
         assert(initialEnergyValue >= 1 && initialEnergyValue <= 10);
         return initialEnergyValue;
     }
+}
+
+float AbstractEARAClient::normalizeEnergyValue(float energyValue) const {
+    // the returned value lies in the interval (1, 10)
+    return (energyValue / (float) maximumEnergyValue) * 9 + 1;
+}
+
+float AbstractEARAClient::getEnergyPercentage(float energyValue) const {
+    return (energyValue - 1) * 100 / 9.0;
 }
 
 void AbstractEARAClient::handleAntPacketWithDelayTimer(Packet* antPacket, float energyFitnessOfNewAnt) {

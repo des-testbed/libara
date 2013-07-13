@@ -8,18 +8,18 @@
 #include "Exception.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/ARAClientMock.h"
+#include "testAPI/mocks/EARAClientMock.h"
 
 using namespace ARA;
 
 typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(EARARoutingTableEntryTest) {
-    ARAClientMock* client;
+    EARAClientMock* client;
     NetworkInterfaceMock* interface;
 
     void setup() {
-        client = new ARAClientMock();
+        client = new EARAClientMock();
         interface = new NetworkInterfaceMock("wlan0", client);
     }
 
@@ -98,7 +98,7 @@ TEST(EARARoutingTableEntryTest, testOnlyAcceptNormalizedEnergy) {
 TEST(EARARoutingTableEntryTest, testOutputStreamOperator) {
     AddressPtr address(new AddressMock);
     float pheromoneValue = 1.234;
-    float energyValue = 8.75;
+    float energyValue = client->normalizeEnergyValue(87.5);
     EARARoutingTableEntry entry = EARARoutingTableEntry(address, interface, pheromoneValue, energyValue);
     std::ostringstream stream;
     stream << entry;

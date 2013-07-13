@@ -63,6 +63,12 @@ public:
 
     virtual void timerHasExpired(Timer* responsibleTimer);
 
+    /**
+     * Returns the percentage (between 1 and 100) that an energy value in the routing table represents
+     * This will be only used in tests and for output but not in the calculations itself.
+     */
+    float getEnergyPercentage(float energyValue) const;
+
 protected:
 
     float calculateInitialEnergyValue(EARAPacket* packet);
@@ -97,6 +103,8 @@ protected:
      * to determine which FANT/BANT should be broadcasted further into the network.
      */
     float calculateRouteFitness(int ttl, float energyFitness);
+
+    float normalizeEnergyValue(float energyValue) const;
 
     void handleExpiredRouteDiscoveryDelayTimer(Timer* timer);
 

@@ -22,7 +22,9 @@ class EARARoutingTableEntry : public RoutingTableEntry {
         void setEnergyValue(float newEnergyValue);
 
         friend std::ostream& operator<<(std::ostream& out, EARARoutingTableEntry& entry) {
-            out << "[next hop] " << entry.getAddress()->toString() << " [phi] " << entry.getPheromoneValue() << " [energy] " << (entry.getEnergyValue()*10) << "%";
+            // we need to calculate the percent value from the normalized value
+            float procentValue = ((entry.getEnergyValue() - 1) / 9.0) * 100;
+            out << "[next hop] " << entry.getAddress()->toString() << " [phi] " << entry.getPheromoneValue() << " [energy] " << procentValue << "%";
             return out;
         }
 
