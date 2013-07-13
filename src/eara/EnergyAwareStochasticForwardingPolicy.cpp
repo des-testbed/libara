@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <deque>
+#include <cassert>
 
 ARA_NAMESPACE_BEGIN
 
@@ -26,11 +27,11 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
     float products[nrOfPossibleNextHops];
 
     for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
-        RoutingTableEntry* entry = possibleNextHops.at(i);
+        EARARoutingTableEntry* entry = dynamic_cast<EARARoutingTableEntry*>(possibleNextHops.at(i));
+        assert(entry);
+
         float pheromoneValue = entry->getPheromoneValue();
-        //float energyValue = energyAwareRoutingTable->getEnergyValue(entry->getAddress()); //FIXME what if we do not have any energy information for this node
-        //FIXME
-        float energyValue = 1;
+        float energyValue = entry->getEnergyValue();
 
         float potentiatedPheromoneValue = pow(pheromoneValue, pheromoneWeight);
         float potentiatedEnergyValue = pow(energyValue, energyWeight);

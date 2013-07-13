@@ -16,7 +16,7 @@ ARA_NAMESPACE_BEGIN
 class RoutingTableEntry {
     public:
         RoutingTableEntry(std::shared_ptr<Address> address, NetworkInterface* interface, float pheromoneValue);
-        ~RoutingTableEntry();
+        virtual ~RoutingTableEntry();
 
         NextHop* getNextHop();
         std::shared_ptr<Address> getAddress();
