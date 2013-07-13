@@ -60,7 +60,7 @@ void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* inter
         float routeEnergy = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
         routingTable->updateEnergyValue(packet->getSource(), packet->getSender(), interface, routeEnergy);
 
-        if (isDirectedToThisNode(packet) == false) {
+        if (isDirectedToThisNode(packet) == false && routeDiscoveryDelayInMilliSeconds > 0) {
             handleAntPacketWithDelayTimer(packet, routeEnergy);
         }
         else {
