@@ -18,6 +18,7 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
         OMNeTEARAConfiguration(cModule* module, EnergyAwareRoutingTable* routingTable=new EnergyAwareRoutingTable(), ::ARA::omnetpp::EARAPacketFactory* packetFactory=new EARAPacketFactory(20));
 
         virtual unsigned int getMaximumEnergyValue() const;
+        virtual unsigned int getMaximumBatteryCapacityInNetwork() const;
         virtual float getInfluenceOfMinimumEnergyValue() const;
         virtual unsigned int getRouteDiscoveryDelayInMilliSeconds() const;
         virtual ARA::EnergyAwareRoutingTable* getEnergyAwareRoutingTable() const;
@@ -30,6 +31,7 @@ class OMNeTEARAConfiguration : public virtual OMNeTConfiguration, public EARACon
         EARAPacketFactory* packetFactory;
         float influenceOfMinimumEnergyValue;
         unsigned int maximumEnergyValue;
+        unsigned int maximumBatteryCapacityInNetwork;
         unsigned int routeDiscoveryDelayInMilliSeconds;
         float peantEnergyThreshold;
 };

@@ -33,6 +33,12 @@ public:
     virtual unsigned int getMaximumEnergyValue() const = 0;
 
     /**
+     * Returns the capacity of the biggest battery in the network.
+     * This is used for energy value normalization.
+     */
+    virtual unsigned int getMaximumBatteryCapacityInNetwork() const = 0;
+
+    /**
      * Returns a value which indicates the impact of the Minimum energy value when the
      * route energy fitness is initialized.  The value needs to be >= 1.
      * Any value 1 <= b < 2 will favor the Minimum value over the Average.

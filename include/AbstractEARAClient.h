@@ -135,7 +135,8 @@ protected:
      * Maximum energy capacity in the whole network.
      * This is used for normalization.
      */
-    unsigned int maximumEnergyValueInNetwork;
+    unsigned int maximumBatteryCapacityInNetwork;
+
     unsigned int routeDiscoveryDelayInMilliSeconds;
 
     // `b` parameter for energy fitness initialization

@@ -20,7 +20,7 @@ void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration) {
     packetFactory = configuration.getEARAPacketFactory();
     forwardingPolicy = configuration.getForwardingPolicy();
     maximumEnergyValue = configuration.getMaximumEnergyValue();
-    maximumEnergyValueInNetwork = 1512000; //TODO read this from configuration
+    maximumBatteryCapacityInNetwork = configuration.getMaximumBatteryCapacityInNetwork(); //TODO read this from configuration
     influenceOfMinimumEnergyValue = configuration.getInfluenceOfMinimumEnergyValue();
     routeDiscoveryDelayInMilliSeconds = configuration.getRouteDiscoveryDelayInMilliSeconds();
     peantEnergyThreshold = configuration.getPEANTEnergyThreshold();
@@ -101,8 +101,12 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
 }
 
 float AbstractEARAClient::normalizeEnergyValue(float energyValue) const {
+    if (energyValue > maximumBatteryCapacityInNetwork) {
+        logError("Configuration error: Evaluating an energy value which is greater than the maximum configured energy capacity of a nodes battery in the network");
+        energyValue = maximumBatteryCapacityInNetwork;
+    }
     // the returned value lies in the interval (1, 10)
-    return (energyValue / (float) maximumEnergyValueInNetwork) * 9 + 1;
+    return (energyValue / (float) maximumBatteryCapacityInNetwork) * 9 + 1;
 }
 
 float AbstractEARAClient::getEnergyPercentage(float energyValue) const {

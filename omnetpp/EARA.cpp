@@ -46,6 +46,7 @@ void EARA::initialize(int stage) {
 
         notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
         WATCH(nrOfDetectedLoops);
+        WATCH(maximumBatteryCapacityInNetwork);
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
         DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
         ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");

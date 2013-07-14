@@ -48,6 +48,7 @@ class ARANetworkConfigurator : public cSimpleModule {
 public:
     MACAddress getMACAddressByIP(IPv4Address address);
     IPv4Address getIPAddressFromMAC(MACAddress address);
+    unsigned int getMaximumBatteryCapacityInNetwork();
 
 protected:
     struct NodeInfo {
@@ -76,6 +77,7 @@ private:
     cModule* channelControl;
     NodeInfoVector nodeInfo;
     std::unordered_map<IPv4Address, MACAddress, IPv4AddressHash, IPv4AddressPredicate> ipMACMapping;
+    unsigned int maximumBatteryCapacityInNetwork;
 
 };
 

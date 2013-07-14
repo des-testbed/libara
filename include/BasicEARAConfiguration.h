@@ -30,6 +30,7 @@ public:
                            unsigned int routeDiscoveryTimeoutInMilliSeconds=1000,
                            unsigned int packetDeliveryDelayInMilliSeconds=5,
                            unsigned int maximumEnergyValue=255,
+                           unsigned int maximumBatteryCapacityInNetwork=255,
                            float influenceOfMinimumEnergyValue=3,
                            unsigned int routeDiscoveryDelayInMilliSeconds=2,
                            float peantEnergyThreshold=0.01);
@@ -38,11 +39,13 @@ public:
     virtual EARAPacketFactory* getEARAPacketFactory() const;
     virtual EARAForwardingPolicy* getForwardingPolicy();
     virtual unsigned int getMaximumEnergyValue() const;
+    virtual unsigned int getMaximumBatteryCapacityInNetwork() const;
     virtual float getInfluenceOfMinimumEnergyValue() const;
     virtual unsigned int getRouteDiscoveryDelayInMilliSeconds() const;
     virtual float getPEANTEnergyThreshold() const;
 
     void setMaximumEnergyValue(unsigned int newMaxEnergy);
+    void setMaximumBatteryCapacityInNetwork(unsigned int newMaxEnergy);
     void setInfluenceOfMinimumEnergyValue(float b);
     void setPEANTEnergyThreshold(float peantEnergyThreshold);
 
@@ -51,6 +54,7 @@ private:
     EARAPacketFactory* packetFactory;
     EARAForwardingPolicy* forwardingPolicy;
     unsigned int maximumEnergyValue;
+    unsigned int maximumBatteryCapacityInNetwork;
     float influenceOfMinimumEnergyValue;
     unsigned int routeDiscoveryDelayInMilliSeconds;
     float peantEnergyThreshold;

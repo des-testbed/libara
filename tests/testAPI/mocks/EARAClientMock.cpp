@@ -32,6 +32,7 @@ BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
     unsigned int packetDeliveryDelayInMilliSeconds = 5;
 
     unsigned int maxEnergyValue = 100;
+    unsigned int maxBatteryCapacityInNetwork = maxEnergyValue;
     float influenceOfMinimumEnergyValue = 3;
     unsigned int routeDiscoveryDelayInMilliSeconds = 2;
 
@@ -48,6 +49,7 @@ BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
         routeDiscoveryTimeoutInMilliSeconds,
         packetDeliveryDelayInMilliSeconds,
         maxEnergyValue,
+        maxBatteryCapacityInNetwork,
         influenceOfMinimumEnergyValue,
         routeDiscoveryDelayInMilliSeconds
     );
