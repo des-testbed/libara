@@ -43,7 +43,7 @@ void AbstractEARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* in
     float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
     float initialEnergyValue = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
     routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue, initialEnergyValue);
-    //TODO log energy value 8in percent)
+    //TODO log energy value (in percent)
     logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
 }
 
@@ -109,12 +109,13 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
     else {
         unsigned int totalEnergy = packet->getTotalEnergyValue();
         unsigned int minimumEnergy = packet->getMinimumEnergyValue();
+        float averageEnergy = totalEnergy / (float) nrOfHops;
 
         // some asserts for easy debugging
         assert(totalEnergy > 0);
         assert(minimumEnergy > 0);
+        assert(minimumEnergy <= averageEnergy);
 
-        float averageEnergy = totalEnergy / (float) nrOfHops;
         float normalizedAverage = normalizeEnergyValue(averageEnergy);
         float normalizedMinimum = normalizeEnergyValue(minimumEnergy);
 

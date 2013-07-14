@@ -73,7 +73,7 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfFANT) {
 
     EARAPacket* fant = castToEARAPacket(packetFactory->makeFANT(source, destination, 123));
     fant->addEnergyValue(60);
-    fant->decreaseTTL(4); // traveled some hops
+    fant->decreaseTTL(1); // traveled one hops
 
     // sanity check
     BYTES_EQUAL(60, fant->getMinimumEnergyValue());
@@ -479,7 +479,7 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfPEANT) {
 
     EARAPacket* peant = castToEARAPacket(packetFactory->makePEANT(source, 123));
     peant->addEnergyValue(60);
-    peant->decreaseTTL(4); // traveled some hops
+    peant->decreaseTTL(1); // traveled one hops
 
     // sanity check
     BYTES_EQUAL(60, peant->getMinimumEnergyValue());
