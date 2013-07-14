@@ -52,6 +52,10 @@ void AbstractEARAClient::updateRoutingTable(Packet* packet, NetworkInterface* in
     AddressPtr sender = packet->getSender();
     if (packet->isAntPacket() && isLocalAddress(packet->getPreviousHop()) == false
         && routingTable->isNewRoute(source, sender, interface) == false) {
+
+        // trigger the evaporation first so this does not effect the new route or update
+        routingTable->triggerEvaporation();
+
         // the route for this ant packet needs to be reinforced so we can completely replace the energy values
         float currentPheromoneValue = routingTable->getPheromoneValue(source, sender, interface);
         float newPheromoneValue = pathReinforcementPolicy->calculateReinforcedValue(currentPheromoneValue);
