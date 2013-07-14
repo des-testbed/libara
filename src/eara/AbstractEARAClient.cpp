@@ -84,8 +84,10 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
         nrOfHops -= 1; // don't count in the last hop, because we also don't count in the energy of the current node
         unsigned int totalEnergy = packet->getTotalEnergyValue();
         unsigned int minimumEnergy = packet->getMinimumEnergyValue();
-        assert(totalEnergy > 0 && totalEnergy <= nrOfHops * maximumEnergyValue);
-        assert(minimumEnergy > 0 && minimumEnergy <= maximumEnergyValue);
+
+        // some asserts for easy debugging
+        assert(totalEnergy > 0);
+        assert(minimumEnergy > 0);
 
         float averageEnergy = totalEnergy / (float) nrOfHops;
         float normalizedAverage = normalizeEnergyValue(averageEnergy);
