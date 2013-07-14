@@ -59,6 +59,7 @@ simple ARA {
         @statistic[routeFailureNoHopAvailable](title="Route Failure (no hop available)";record=count);
         @statistic[routeFailureNextHopIsSender](title="Route Failure (next hop = sender)";record=count);
         @statistic[newRouteDiscovery](title="Nr of Route Discoveries";record=count);
+        @statistic[dropPacketBecauseEnergyDepleted](title="Dropped because of depleted energy";record=count);
 
     gates:
         inout  upperLayerGate;
