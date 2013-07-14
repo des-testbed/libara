@@ -30,17 +30,7 @@ TEST_GROUP(EnergyAwareRoutingTableTest) {
     }
 };
 
-/**
- * This test checks, that the energy fitness equals to 1 if it has not yet
- * been set.
- */
-TEST(EnergyAwareRoutingTableTest, energyFitnessEqualsOneIfNotSet) {
-    AddressPtr someDestination (new AddressMock("destination"));
-    AddressPtr someNextHop (new AddressMock("foo"));
-    LONGS_EQUAL(10, routingTable->getEnergyValue(someNextHop, someDestination, interface));
-}
-
-TEST(EnergyAwareRoutingTableTest, updateEnergyValue) {
+TEST(EnergyAwareRoutingTableTest, update) {
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr nextHop (new AddressMock("nextHop"));
 
@@ -57,26 +47,14 @@ TEST(EnergyAwareRoutingTableTest, updateEnergyValue) {
     DOUBLES_EQUAL(energyValue2, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
 }
 
-TEST(EnergyAwareRoutingTableTest, updatePheromoneValueWithoutAffectingEnergyValue) {
-    AddressPtr destination (new AddressMock("destination"));
-    AddressPtr nextHop (new AddressMock("nextHop"));
-
-    float energyValue = 8.7;
-    routingTable->update(destination, nextHop, interface, 10, energyValue);
-    DOUBLES_EQUAL(energyValue, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
-
-    routingTable->update(destination, nextHop, interface, 20);
-    DOUBLES_EQUAL(energyValue, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
-}
-
-TEST(EnergyAwareRoutingTableTest, updateOnlyEnergyValue) {
+TEST(EnergyAwareRoutingTableTest, updateEnergyValue) {
     AddressPtr destination (new AddressMock("destination"));
     AddressPtr nextHop (new AddressMock("nextHop"));
 
     float pheromoneValue = 123.456;
-    routingTable->update(destination, nextHop, interface, pheromoneValue);
+    routingTable->update(destination, nextHop, interface, pheromoneValue, 10);
     DOUBLES_EQUAL(pheromoneValue, routingTable->getPheromoneValue(destination, nextHop, interface), 0.0001);
-    DOUBLES_EQUAL(1.0, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
+    DOUBLES_EQUAL(10, routingTable->getEnergyValue(destination, nextHop, interface), 0.0001);
 
     float energyValue = 8.7;
     routingTable->updateEnergyValue(destination, nextHop, interface, energyValue);

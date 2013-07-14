@@ -122,7 +122,7 @@ protected:
     /**
      * This method either initializes or reinforces a route in the routing table.
      */
-    void updateRoutingTable(Packet* packet, NetworkInterface* interface);
+    virtual void updateRoutingTable(Packet* packet, NetworkInterface* interface);
 
     /**
      * Calculates an initial pheromone value based on the initialPhi value from the Configuration

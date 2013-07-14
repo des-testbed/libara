@@ -17,6 +17,11 @@ ARA_NAMESPACE_BEGIN
 
 typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RouteDiscoveryDelayTimerMap;
 
+struct AntPacketRouteFitness {
+    Packet* packet;
+    float routeEnergyFitness;
+};
+
 /**
  * TODO write class description
  */
@@ -70,6 +75,9 @@ public:
     float getEnergyPercentage(float energyValue) const;
 
 protected:
+    virtual void updateRoutingTable(Packet* packet, NetworkInterface* interface);
+
+    virtual void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
 
     float calculateInitialEnergyValue(EARAPacket* packet);
 
@@ -84,18 +92,13 @@ protected:
      * FANT/BANT in terms of their TTL and energy metric.
      * Only the best ant packet is stored in the timer context Object and will be broadcasted
      * when the timer expires.
-     *
-     * @param packet - the ant packet which has been received
-     * @param routeFitnessOfNewAnt - the energy fitness value of the route over which the ant has travel to this hop
-     *                               this has been calculated previously so it gets passed as parameter so we don't need
-     *                               to calculate it again
      */
-    void handleAntPacketWithDelayTimer(Packet* packet, float energyFitnessOfNewAnt);
+    void handleAntPacketWithDelayTimer(Packet* packet, NetworkInterface* interface);
 
     /**
-     * Starts a new route discovery delay timer and stores the given packet as context object of that timer.
+     * Starts a new route discovery delay timer and stores the given packet and routeEnergy as context object for that timer.
      */
-    void startNewRouteDiscoveryDelayTimer(Packet* antPacket);
+    void startNewRouteDiscoveryDelayTimer(Packet* antPacket, float routeEnergyOfNewAnt);
 
     /**
      * This calculates the fitness of the route a packet has traveled on.

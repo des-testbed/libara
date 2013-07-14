@@ -31,10 +31,37 @@ AbstractEARAClient::~AbstractEARAClient() {
     // delete running delivery timers
     for (RouteDiscoveryDelayTimerMap::iterator iterator=runningRouteDiscoveryDelayTimers.begin(); iterator!=runningRouteDiscoveryDelayTimers.end(); iterator++) {
         Timer* timer = iterator->second;
-        delete (Packet*) timer->getContextObject();
+        AntPacketRouteFitness* bestAnt = (AntPacketRouteFitness*) timer->getContextObject();
+        delete bestAnt->packet;
+        delete bestAnt;
         delete timer;
     }
     runningRouteDiscoveryDelayTimers.clear();
+}
+
+void AbstractEARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {
+    float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
+    float initialEnergyValue = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
+    routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue, initialEnergyValue);
+    //TODO log energy value 8in percent)
+    logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
+}
+
+void AbstractEARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
+    AddressPtr source = packet->getSource();
+    AddressPtr sender = packet->getSender();
+    if (packet->isAntPacket() && isLocalAddress(packet->getPreviousHop()) == false
+        && routingTable->isNewRoute(source, sender, interface) == false) {
+        // the route for this ant packet needs to be reinforced so we can completely replace the energy values
+        float currentPheromoneValue = routingTable->getPheromoneValue(source, sender, interface);
+        float newPheromoneValue = pathReinforcementPolicy->calculateReinforcedValue(currentPheromoneValue);
+
+        float newEnergyValue = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
+        routingTable->update(source, sender, interface, newPheromoneValue, newEnergyValue);
+    }
+    else {
+        AbstractARAClient::updateRoutingTable(packet, interface);
+    }
 }
 
 void AbstractEARAClient::broadCast(Packet* packet) {
@@ -58,11 +85,9 @@ void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* inter
     char packetType = packet->getType();
     if ( hasBeenSentByThisNode(packet) == false
          && (packetType == PacketType::FANT || packetType == PacketType::BANT || packetType == PacketType::PEANT)) {
-        float routeEnergy = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
-        routingTable->updateEnergyValue(packet->getSource(), packet->getSender(), interface, routeEnergy);
 
         if (isDirectedToThisNode(packet) == false && routeDiscoveryDelayInMilliSeconds > 0) {
-            handleAntPacketWithDelayTimer(packet, routeEnergy);
+            handleAntPacketWithDelayTimer(packet, interface);
         }
         else {
             AbstractARAClient::handleAntPacket(packet, interface);
@@ -75,14 +100,13 @@ void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* inter
 
 float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
     int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL();
-    assert(nrOfHops > 0);
+    assert(nrOfHops >= 0);
 
-    if (nrOfHops == 1) {
+    if (nrOfHops == 0) {
         // packet has been directly received from the source so we return the maximum normalized energy
         return 10;
     }
     else {
-        nrOfHops -= 1; // don't count in the last hop, because we also don't count in the energy of the current node
         unsigned int totalEnergy = packet->getTotalEnergyValue();
         unsigned int minimumEnergy = packet->getMinimumEnergyValue();
 
@@ -113,24 +137,22 @@ float AbstractEARAClient::getEnergyPercentage(float energyValue) const {
     return (energyValue - 1) * 100 / 9.0;
 }
 
-void AbstractEARAClient::handleAntPacketWithDelayTimer(Packet* antPacket, float energyFitnessOfNewAnt) {
+void AbstractEARAClient::handleAntPacketWithDelayTimer(Packet* antPacket, NetworkInterface* interface) {
     RouteDiscoveryDelayTimerMap::iterator found = runningRouteDiscoveryDelayTimers.find(antPacket->getSource());
+    float routeEnergyOfNewAnt = routingTable->getEnergyValue(antPacket->getSource(), antPacket->getSender(), interface);
 
     if (found == runningRouteDiscoveryDelayTimers.end()) {
-        startNewRouteDiscoveryDelayTimer(antPacket);
+        startNewRouteDiscoveryDelayTimer(antPacket, routeEnergyOfNewAnt);
     }
     else {
         Timer* delayTimer = found->second;
-        EARAPacket* bestAntPacket = static_cast<EARAPacket*>(delayTimer->getContextObject());
+        AntPacketRouteFitness* bestAnt = (AntPacketRouteFitness*) delayTimer->getContextObject();
 
-        //TODO we could cache this value so it doesn't need to be recalculated over and over
-        float routeEnergyOfBestAnt = calculateInitialEnergyValue(bestAntPacket);
-        float bestRouteFitnessSoFar = calculateRouteFitness(bestAntPacket->getTTL(), routeEnergyOfBestAnt);
-        float routeFitnessOfNewAnt = calculateRouteFitness(antPacket->getTTL(), energyFitnessOfNewAnt);
-
-        if (routeFitnessOfNewAnt > bestRouteFitnessSoFar) {
-            delete bestAntPacket;
-            delayTimer->setContextObject(antPacket);
+        float routeFitnessOfNewAnt = calculateRouteFitness(antPacket->getTTL(), routeEnergyOfNewAnt);
+        if (routeFitnessOfNewAnt > bestAnt->routeEnergyFitness) {
+            delete bestAnt->packet;
+            bestAnt->packet = antPacket;
+            bestAnt->routeEnergyFitness = routeFitnessOfNewAnt;
         }
         else {
             delete antPacket;
@@ -138,8 +160,12 @@ void AbstractEARAClient::handleAntPacketWithDelayTimer(Packet* antPacket, float 
     }
 }
 
-void AbstractEARAClient::startNewRouteDiscoveryDelayTimer(Packet* antPacket) {
-    Timer* newDelayTimer = getNewTimer(TimerType::ROUTE_DISCOVERY_DELAY_TIMER, antPacket);
+void AbstractEARAClient::startNewRouteDiscoveryDelayTimer(Packet* antPacket, float routeEnergyOfNewAnt) {
+    AntPacketRouteFitness* contextObject = new AntPacketRouteFitness();
+    contextObject->packet = antPacket;
+    contextObject->routeEnergyFitness = calculateRouteFitness(antPacket->getTTL(), routeEnergyOfNewAnt);
+
+    Timer* newDelayTimer = getNewTimer(TimerType::ROUTE_DISCOVERY_DELAY_TIMER, contextObject);
     newDelayTimer->addTimeoutListener(this);
     newDelayTimer->run(routeDiscoveryDelayInMilliSeconds * 1000);
     runningRouteDiscoveryDelayTimers[antPacket->getSource()] = newDelayTimer;
@@ -164,9 +190,10 @@ void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
 }
 
 void AbstractEARAClient::handleExpiredRouteDiscoveryDelayTimer(Timer* timer) {
-    Packet* bestAntPacket = (Packet*) timer->getContextObject();
-    runningRouteDiscoveryDelayTimers.erase(bestAntPacket->getSource());
-    broadCast(bestAntPacket);
+    AntPacketRouteFitness* bestAnt = (AntPacketRouteFitness*) timer->getContextObject();
+    runningRouteDiscoveryDelayTimers.erase(bestAnt->packet->getSource());
+    broadCast(bestAnt->packet);
+    delete bestAnt;
     delete timer;
 }
 

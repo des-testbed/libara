@@ -10,9 +10,7 @@ ARA_NAMESPACE_BEGIN
 void EnergyAwareRoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
     EARARoutingTableEntry* entry = getRoutingTableEntry(destination, nextHop, interface);
     if (entry == nullptr) {
-        // if no entry does yet exist, create a new one with energy default to 1
-        entry = new EARARoutingTableEntry(nextHop, interface, pheromoneValue, 1);
-        RoutingTable::update(destination, entry);
+        throw Exception("EnergyAwareRoutingTable can only create/update entries when an energy value is supplied (Most likely a bug in EARA code?!)");
     }
     else {
         entry->setPheromoneValue(pheromoneValue);
