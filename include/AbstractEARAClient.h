@@ -126,7 +126,16 @@ protected:
     EARAForwardingPolicy* forwardingPolicy;
     RouteDiscoveryDelayTimerMap runningRouteDiscoveryDelayTimers;
 
+    /**
+     * Maximum energy capacity of this node
+     */
     unsigned int maximumEnergyValue;
+
+    /**
+     * Maximum energy capacity in the whole network.
+     * This is used for normalization.
+     */
+    unsigned int maximumEnergyValueInNetwork;
     unsigned int routeDiscoveryDelayInMilliSeconds;
 
     // `b` parameter for energy fitness initialization
