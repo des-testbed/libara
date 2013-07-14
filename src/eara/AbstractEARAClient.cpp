@@ -75,6 +75,13 @@ void AbstractEARAClient::broadCast(Packet* packet) {
     AbstractARAClient::broadCast(earaPacket);
 }
 
+void AbstractEARAClient::sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver) {
+    EARAPacket* earaPacket = static_cast<EARAPacket*>(packet);
+    unsigned int energyOfCurrentNode = getCurrentEnergyLevel();
+    earaPacket->addEnergyValue(energyOfCurrentNode);
+    AbstractARAClient::sendUnicast(earaPacket, interface, receiver);
+}
+
 bool AbstractEARAClient::hasBeenReceivedEarlier(const Packet* packet) {
     if (runningRouteDiscoveryDelayTimers.find(packet->getSource()) == runningRouteDiscoveryDelayTimers.end()) {
         return AbstractARAClient::hasBeenReceivedEarlier(packet);

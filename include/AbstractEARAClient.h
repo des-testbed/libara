@@ -75,6 +75,9 @@ public:
     float getEnergyPercentage(float energyValue) const;
 
 protected:
+
+    virtual void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
+
     virtual void updateRoutingTable(Packet* packet, NetworkInterface* interface);
 
     virtual void createNewRouteFrom(Packet* packet, NetworkInterface* interface);

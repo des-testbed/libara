@@ -508,4 +508,57 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfPEANT) {
     BYTES_EQUAL( 40, sentPacket->getMinimumEnergyValue());
 }
 
+TEST(AbstractEARAClientTest, aggregateEnergyInformationOfDataPackets) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr nextHop (new AddressMock("nextHop"));
+
+    client->setEnergy(40);
+
+    EARAPacket* dataPacket = castToEARAPacket(packetFactory->makeDataPacket(source, destination, 123, "Hello World", 12));
+    dataPacket->addEnergyValue(60);
+    dataPacket->decreaseTTL(1); // traveled one hops
+
+    // sanity check
+    BYTES_EQUAL(60, dataPacket->getMinimumEnergyValue());
+    BYTES_EQUAL(60, dataPacket->getTotalEnergyValue());
+
+    // start the test
+    routingTable->update(destination, nextHop, interface, 105, 10);
+    client->receivePacket(dataPacket, interface);
+
+    // packet should have been updated and sent
+    LONGS_EQUAL(1, interface->getNumberOfSentPackets());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->front();
+    EARAPacket* sentPacket = castToEARAPacket(sentPacketInfo->getLeft());
+    AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
+
+    CHECK(sentPacket->getType() == PacketType::DATA);
+    CHECK(recipientOfSentPacket->equals(nextHop));
+
+    BYTES_EQUAL(100, sentPacket->getTotalEnergyValue());
+    BYTES_EQUAL( 40, sentPacket->getMinimumEnergyValue());
+}
+
+TEST(AbstractEARAClientTest, routeCanBeCreatedByDataPackets) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr sender (new AddressMock("sender"));
+
+    EARAPacket* dataPacket = castToEARAPacket(packetFactory->makeDataPacket(source, destination, 123, "Hello World", 12));
+    dataPacket->setSender(sender);
+    dataPacket->addEnergyValue(60);
+    dataPacket->decreaseTTL(1); // traveled one hops
+
+    // sanity check
+    CHECK_FALSE(routingTable->exists(source, sender, interface));
+
+    // start the test
+    client->receivePacket(dataPacket, interface);
+
+    CHECK_TRUE(routingTable->exists(source, sender, interface));
+}
+
 //TODO test that PEANTs feature is disabled if the energyThreshold is -1

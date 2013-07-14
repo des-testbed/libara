@@ -251,9 +251,7 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
         else {
             reinforcePheromoneValue(source, sender, interface);
         }
-
     }
-
 }
 
 void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {

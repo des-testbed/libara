@@ -117,7 +117,7 @@ public:
 
 protected:
 
-    void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
+    virtual void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
 
     /**
      * This method either initializes or reinforces a route in the routing table.
