@@ -12,6 +12,7 @@
 
 #include "testAPI/mocks/EARAClientMock.h"
 #include <iostream>
+#include <climits>
 
 using namespace ARA;
 using namespace std;
@@ -559,6 +560,38 @@ TEST(AbstractEARAClientTest, routeCanBeCreatedByDataPackets) {
     client->receivePacket(dataPacket, interface);
 
     CHECK_TRUE(routingTable->exists(source, sender, interface));
+}
+
+TEST(AbstractEARAClientTest, energyInformationIsNotAddedToDataPacketsDirectlySentBySource) {
+    NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
+    AddressPtr source = interface->getLocalAddress();
+    AddressPtr nextHop (new AddressMock("nextHop"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    EARAPacket* dataPacket = castToEARAPacket(packetFactory->makeDataPacket(source, destination, 123, "Hello World", 12));
+
+    // sanity check
+    LONGS_EQUAL(0, dataPacket->getTotalEnergyValue());
+    LONGS_EQUAL(UINT_MAX, dataPacket->getMinimumEnergyValue());
+
+    // start the test
+    routingTable->update(destination, nextHop, interface, 105, 10);
+    client->receivePacket(dataPacket, interface);
+
+    // packet should have been updated and sent
+    LONGS_EQUAL(1, interface->getNumberOfSentPackets());
+    Pair<const Packet*, AddressPtr>* sentPacketInfo = interface->getSentPackets()->front();
+    EARAPacket* sentPacket = castToEARAPacket(sentPacketInfo->getLeft());
+    AddressPtr recipientOfSentPacket = sentPacketInfo->getRight();
+
+    CHECK(sentPacket->getType() == PacketType::DATA);
+    CHECK(recipientOfSentPacket->equals(nextHop));
+    BYTES_EQUAL(123, sentPacket->getSequenceNumber())
+    CHECK(sentPacket->getSource()->equals(source));
+
+    // no energy information should be embedded in this packet because it has been sent by the source
+    BYTES_EQUAL(0, sentPacket->getTotalEnergyValue());
+    BYTES_EQUAL(UINT_MAX, sentPacket->getMinimumEnergyValue());
 }
 
 //TODO test that PEANTs feature is disabled if the energyThreshold is -1

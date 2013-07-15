@@ -69,17 +69,22 @@ void AbstractEARAClient::updateRoutingTable(Packet* packet, NetworkInterface* in
 }
 
 void AbstractEARAClient::broadCast(Packet* packet) {
-    EARAPacket* earaPacket = static_cast<EARAPacket*>(packet);
-    unsigned int energyOfCurrentNode = getCurrentEnergyLevel();
-    earaPacket->addEnergyValue(energyOfCurrentNode);
-    AbstractARAClient::broadCast(earaPacket);
+    addEnergyInformationToPacket(packet);
+    AbstractARAClient::broadCast(packet);
 }
 
 void AbstractEARAClient::sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver) {
-    EARAPacket* earaPacket = static_cast<EARAPacket*>(packet);
-    unsigned int energyOfCurrentNode = getCurrentEnergyLevel();
-    earaPacket->addEnergyValue(energyOfCurrentNode);
-    AbstractARAClient::sendUnicast(earaPacket, interface, receiver);
+    addEnergyInformationToPacket(packet);
+    AbstractARAClient::sendUnicast(packet, interface, receiver);
+}
+
+void AbstractEARAClient::addEnergyInformationToPacket(Packet* packet) {
+    if (isLocalAddress(packet->getSource()) == false) {
+        // only add the energy value if this is relayed by an intermediate node
+        EARAPacket* earaPacket = static_cast<EARAPacket*>(packet);
+        unsigned int energyOfCurrentNode = getCurrentEnergyLevel();
+        earaPacket->addEnergyValue(energyOfCurrentNode);
+    }
 }
 
 bool AbstractEARAClient::hasBeenReceivedEarlier(const Packet* packet) {

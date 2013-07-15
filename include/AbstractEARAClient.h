@@ -118,6 +118,8 @@ protected:
 
     void broadcastPEANT();
 
+    void addEnergyInformationToPacket(Packet* packet);
+
 private:
     /**
      * This method is private to prevent anyone from using it because we slightly changed
