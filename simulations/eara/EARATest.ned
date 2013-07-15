@@ -23,7 +23,7 @@ import inet.world.radio.ChannelControl;
 network EARATest
 {
     parameters:
-        @display("b=297,203;bgb=758,337");
+        @display("b=297,203;bgb=750,482");
         volatile double nodeSpeed @unit(mps) = default(0mps);
         volatile double nodePauseTime @unit(s) = default(1000s);
 
@@ -32,7 +32,7 @@ network EARATest
 
     submodules:
         clock: OMNeTClock {
-            @display("p=153,41;is=s");
+            @display("p=14,16;is=s");
         }
 
         channelControl: ChannelControl {
@@ -44,7 +44,7 @@ network EARATest
             parameters:
                 networkAddress = "192.168.0.0";
                 netmask = "255.255.0.0";
-                @display("p=78,97");
+                @display("p=14,64");
         }
 
         node1: EnergyAwareNetworkNode {
@@ -53,7 +53,7 @@ network EARATest
                 mobility.speed = nodeSpeed;
                 mobility.waitTime = nodePauseTime;
                 mobility.updateInterval = mobilityUpdateIntervall;
-                @display("p=86,181");
+                @display("p=28,262");
         }
         node2: EnergyAwareNetworkNode {
             parameters:
@@ -61,7 +61,7 @@ network EARATest
                 mobility.speed = nodeSpeed;
                 mobility.waitTime = nodePauseTime;
                 mobility.updateInterval = mobilityUpdateIntervall;
-                @display("p=287,181");
+                @display("p=153,92");
         }
         node3: EnergyAwareNetworkNode {
             parameters:
@@ -69,7 +69,55 @@ network EARATest
                 mobility.speed = nodeSpeed;
                 mobility.waitTime = nodePauseTime;
                 mobility.updateInterval = mobilityUpdateIntervall;
-                @display("p=483,181");
+                @display("p=153,450");
+        }
+        node4: EnergyAwareNetworkNode {
+            parameters:
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = mobilityUpdateIntervall;
+                @display("p=349,92");
+        }
+        node5: EnergyAwareNetworkNode {
+            parameters:
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = mobilityUpdateIntervall;
+                @display("p=349,262");
+        }
+        node6: EnergyAwareNetworkNode {
+            parameters:
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = mobilityUpdateIntervall;
+                @display("p=349,450");
+        }
+        node7: EnergyAwareNetworkNode {
+            parameters:
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = mobilityUpdateIntervall;
+                @display("p=538,189");
+        }
+        node8: EnergyAwareNetworkNode {
+            parameters:
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = mobilityUpdateIntervall;
+                @display("p=538,356");
+        }
+        node9: EnergyAwareNetworkNode {
+            parameters:
+                mobilityType = mobilityType;
+                mobility.speed = nodeSpeed;
+                mobility.waitTime = nodePauseTime;
+                mobility.updateInterval = mobilityUpdateIntervall;
+                @display("p=716,262");
         }
 }
 
