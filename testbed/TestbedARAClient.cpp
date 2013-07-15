@@ -14,6 +14,7 @@ TESTBED_NAMESPACE_BEGIN
 TestbedARAClient::TestbedARAClient(Configuration& config) : AbstractARAClient(config){
     //TODO Make configurable
     this->logDebug("initialized testbedARAClient");
+    std::cout << "initialized testbedARAClient" << std::endl;
     initializeNetworkInterfaces();
     this->logDebug("initialized testbedARAClient network Interfaces");
 }
@@ -53,6 +54,7 @@ void TestbedARAClient::initializeNetworkInterfaces() {
     while(dessertInterfaces != NULL) {
         NetworkInterface* newInterface = new NetworkInterface(dessertInterfaces, this, packetFactory, 400);
         addNetworkInterface(newInterface);
+        std::cout << "Initialized network interface: " << dessertInterfaces->if_name << std::endl;
         dessertInterfaces = dessertInterfaces->next;
     }
 }
