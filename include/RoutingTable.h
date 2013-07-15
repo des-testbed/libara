@@ -92,6 +92,9 @@ public:
      */
     std::deque<RoutingTableEntryTupel> getAllRoutesThatLeadOver(AddressPtr nextHop) const;
 
+private:
+    void applyEvaporation(Time* currentTime);
+
 protected:
     bool hasTableBeenAccessedEarlier();
     virtual void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
@@ -104,6 +107,7 @@ protected:
      * ARA. Thus, there is no delete call to the evaporationPolicy member.
      */
     EvaporationPolicy* evaporationPolicy;
+
 };
 
 ARA_NAMESPACE_END

@@ -175,39 +175,44 @@ void RoutingTable::triggerEvaporation() {
         lastAccessTime = currentTime;
     }
     else {
-        long timeDifference = currentTime->getDifferenceInMilliSeconds(lastAccessTime);
-        delete currentTime;
+        applyEvaporation(currentTime);
+    }
+}
 
-        if (evaporationPolicy->isEvaporationNecessary(timeDifference)) {
-            lastAccessTime->setToCurrentTime();
+void RoutingTable::applyEvaporation(Time* currentTime) {
+    long timeDifference = currentTime->getDifferenceInMilliSeconds(lastAccessTime);
+    delete currentTime;
 
-            RoutingTableMap::iterator i = table.begin();
-            while (i!=table.end()) {
-                std::pair<AddressPtr const, RoutingTableEntryList*> entryPair = *i;
-                AddressPtr destination = entryPair.first;
-                RoutingTableEntryList* entryList = entryPair.second;
+    if (evaporationPolicy->isEvaporationNecessary(timeDifference)) {
+        lastAccessTime->setToCurrentTime();
 
-                RoutingTableEntryList::iterator j = entryList->begin();
-                while (j != entryList->end()) {
-                    RoutingTableEntry* entry = *j;
-                    float newPheromoneValue = evaporationPolicy->evaporate(entry->getPheromoneValue(), timeDifference);
-                    if (newPheromoneValue > 0) {
-                        entry->setPheromoneValue(newPheromoneValue);
-                        j++;
-                    }
-                    else {
-                        delete entry;
-                        j = entryList->erase(j);
-                    }
-                }
+        RoutingTableMap::iterator i = table.begin();
+        while (i!=table.end()) {
+            std::pair<AddressPtr const, RoutingTableEntryList*> entryPair = *i;
+            AddressPtr destination = entryPair.first;
+            RoutingTableEntryList* nextHopsForDestination = entryPair.second;
 
-                if (entryList->empty()) {
-                    delete entryList;
-                    i = table.erase(i);
+            // apply evaporation to all next hops for that destination
+            RoutingTableEntryList::iterator j = nextHopsForDestination->begin();
+            while (j != nextHopsForDestination->end()) {
+                RoutingTableEntry* entry = *j;
+                float newPheromoneValue = evaporationPolicy->evaporate(entry->getPheromoneValue(), timeDifference);
+                if (newPheromoneValue > 0) {
+                    entry->setPheromoneValue(newPheromoneValue);
+                    j++;
                 }
                 else {
-                    i++;
+                    delete entry;
+                    j = nextHopsForDestination->erase(j); // this does not invalidate the iterator, because j is set to the valid return value of erase (will point to end() if empty)
                 }
+            }
+
+            if (nextHopsForDestination->empty()) {
+                delete nextHopsForDestination;
+                i = table.erase(i); // this does not invalidate the iterator, because i is set to the valid return value of erase (will point to end() if empty)
+            }
+            else {
+                i++;
             }
         }
     }
@@ -227,7 +232,7 @@ EvaporationPolicy* RoutingTable::getEvaporationPolicy() const{
 
 unsigned int RoutingTable::getTotalNumberOfEntries() const {
     unsigned int tableSize = 0;
-    std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::const_iterator iterator;
+    RoutingTableMap::const_iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
         RoutingTableEntryList* entryList = iterator->second;
         tableSize += entryList->size();
@@ -263,8 +268,8 @@ std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(Addres
     // TODO this could be made faster with an additional hashmap (but would require more memory)
     for (RoutingTableMap::const_iterator iterator=table.begin(); iterator!=table.end(); iterator++) {
         AddressPtr destination = iterator->first;
-        RoutingTableEntryList* entryList = iterator->second;
-        for (auto& entry: *entryList) {
+        RoutingTableEntryList* nextHopsForDestination = iterator->second;
+        for (auto& entry: *nextHopsForDestination) {
             if(entry->getAddress()->equals(nextHop)) {
                 RoutingTableEntryTupel tupel;
                 tupel.destination = destination;

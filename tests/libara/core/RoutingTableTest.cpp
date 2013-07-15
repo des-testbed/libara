@@ -497,3 +497,30 @@ TEST(RoutingTableTest, getAllRoutesThatLeadOverSpecificNextHop) {
     std::deque<RoutingTableEntryTupel> entriesOverUnkown = routingTable->getAllRoutesThatLeadOver(someUnknownNode);
     CHECK(entriesOverUnkown.empty());
 }
+
+/**
+ * This test checks if an evaporation can delete elements from the routing table.
+ * Also I want to know if there are any internal problems with the iterators when
+ * erasing elements from the map while iterating over it (iterator invalidation).
+ */
+TEST(RoutingTableTest, evporateCanRemoveEntries) {
+    AddressPtr nodeA (new AddressMock("A"));
+    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr nodeD (new AddressMock("D"));
+    AddressPtr destination (new AddressMock("dest"));
+
+    routingTable->update(destination, nodeA, interface, 10);
+    routingTable->update(destination, nodeB, interface, 0.5); // this one should be removed due to evaporation
+    routingTable->update(destination, nodeC, interface, 10);
+    routingTable->update(destination, nodeD, interface, 10);
+    // nothing should happen right now (no time passed)
+    routingTable->triggerEvaporation();
+
+    TimeMock::letTimePass(evaporationPolicy->getTimeInterval());
+    routingTable->triggerEvaporation();
+    CHECK_TRUE (routingTable->exists(destination, nodeA, interface));
+    CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
+    CHECK_TRUE (routingTable->exists(destination, nodeC, interface));
+    CHECK_TRUE (routingTable->exists(destination, nodeD, interface));
+}
