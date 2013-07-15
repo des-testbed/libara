@@ -7,44 +7,45 @@
 #include "TestbedARAClient.h"
 #include "PacketDispatcher.h"
 #include "BasicConfiguration.h"
-#include <iostream>
+#include "SimpleLogger.h"
 
 TESTBED_NAMESPACE_BEGIN
 
 TestbedARAClient::TestbedARAClient(Configuration& config) : AbstractARAClient(config){
     //TODO Make configurable
-    this->logDebug("initialized testbedARAClient");
-    std::cout << "initialized testbedARAClient" << std::endl;
+    Logger* logger = new SimpleLogger("ara");
+    setLogger(logger);
+    logDebug("Initialized testbedARAClient");
     initializeNetworkInterfaces();
-    this->logDebug("initialized testbedARAClient network Interfaces");
+    logDebug("Initialized testbedARAClient network Interfaces");
 }
 
 TestbedARAClient::~TestbedARAClient() { }
 
 void TestbedARAClient::sendPacket(Packet* packet) {
-    this->logDebug("is sending packet # %u", packet->getSequenceNumber());
+    logDebug("is sending packet # %u", packet->getSequenceNumber());
     if(routingTable->isDeliverable(packet)) {
         NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
         nextHop->getInterface()->send(packet, nextHop->getAddress());
     }
-    this->logDebug("sending FANT");
+    logDebug("sending FANT");
     std::cout << "sending FANT" << std::endl;
-    this->sendFANT(packet->getDestination());
+    sendFANT(packet->getDestination());
 }
 
 void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* interface) {
-    this->logDebug("receiving packet # %u over interface at %s", packet->getSequenceNumber(), interface->getLocalAddress()->toString().c_str());
+    logDebug("receiving packet # %u over interface at %s", packet->getSequenceNumber(), interface->getLocalAddress()->toString().c_str());
     AbstractARAClient::receivePacket(packet, interface);
     //TODO: persistRoutingTableData
 }
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
-    this->logDebug("sending packet # %u to System via TAP", packet->getSequenceNumber());
+    logDebug("sending packet # %u to System via TAP", packet->getSequenceNumber());
     dessert_syssend_msg(extractDessertMessage(packet));
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
-    this->logDebug("packet # %u is undeliverable", packet->getSequenceNumber());
+    logDebug("packet # %u is undeliverable", packet->getSequenceNumber());
     delete packet;
     //nrOfNotDeliverablePackets++;
 }
@@ -54,7 +55,7 @@ void TestbedARAClient::initializeNetworkInterfaces() {
     while(dessertInterfaces != NULL) {
         NetworkInterface* newInterface = new NetworkInterface(dessertInterfaces, this, packetFactory, 400);
         addNetworkInterface(newInterface);
-        std::cout << "Initialized network interface: " << dessertInterfaces->if_name << std::endl;
+        logDebug("Initialized network interface: %s", dessertInterfaces->if_name);
         dessertInterfaces = dessertInterfaces->next;
     }
 }
