@@ -115,7 +115,7 @@ void AbstractEARAClient::handleAntPacket(Packet* packet, NetworkInterface* inter
 }
 
 float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
-    int nrOfHops = packetFactory->getMaximumNrOfHops() - packet->getTTL();
+    int nrOfHops = getMaxTTL() - packet->getTTL();
     assert(nrOfHops >= 0);
 
     if (nrOfHops == 0) {
