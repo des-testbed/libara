@@ -53,7 +53,7 @@ void NetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> rec
 }
 
 void NetworkInterface::registerInterface() {
-    networkInterfaces.insert(std::make_pair<dessert_meshif_t*, NetworkInterface*>(this->getDessertPointer(), this));
+    networkInterfaces[this->getDessertPointer()] = this;
 }
 
 TESTBED_NAMESPACE_END
