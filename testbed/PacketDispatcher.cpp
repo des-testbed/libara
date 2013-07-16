@@ -50,13 +50,6 @@ void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* tes
     dessert_meshsend(message, interface);
 }
 
-_dessert_cb_results messageFromTapInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
-    std::cout << "Received packet " << messageReceived->u16 << " of size " << ntohs(messageReceived->plen) << " bits via tap, sending to client" << std::endl;
-    Packet* packet = extractPacket(messageReceived);
-
-    return DESSERT_MSG_DROP;
-}
-
 Packet* extractPacket(dessert_msg_t* dessertMessage) {
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
     routingExtension* araHeader = extractRoutingExtension(dessertMessage);
