@@ -21,8 +21,7 @@ class StochasticForwardingPolicy : public virtual ForwardingPolicy {
         StochasticForwardingPolicy(RoutingTable* routingTable);
 
         /**
-         * Stochastically selects the next hop according to their pheromone value
-         * but never the sender of the given packet.
+         * Stochastically selects the next hop according to the pheromone values in the routing table.
          */
         virtual NextHop* getNextHop(const Packet* packet);
 

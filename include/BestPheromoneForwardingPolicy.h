@@ -18,8 +18,7 @@ class BestPheromoneForwardingPolicy : public virtual ForwardingPolicy {
         BestPheromoneForwardingPolicy(RoutingTable* routingTable);
 
         /**
-         * Returns the next hop with the highest corresponding pheromone
-         * value but never the sender of the given packet.
+         * Returns the next hop with the highest corresponding pheromone value.
          */
         NextHop* getNextHop(const Packet*);
 

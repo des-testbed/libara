@@ -524,3 +524,34 @@ TEST(RoutingTableTest, evporateCanRemoveEntries) {
     CHECK_TRUE (routingTable->exists(destination, nodeC, interface));
     CHECK_TRUE (routingTable->exists(destination, nodeD, interface));
 }
+
+TEST(RoutingTableTest, notDeliverableifOnlyRouteLeadsOverSourceNode) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+
+    routingTable->update(destination, source, interface, 10);
+
+    // start test, if the only way to a destination would lead over the source of the packet, there is effectively no route that would not introduce loops
+    PacketMock packet = PacketMock("source", "destination", "someSender");
+    CHECK_FALSE(routingTable->isDeliverable(&packet));
+}
+
+TEST(RoutingTableTest, doNotReturnSourceOrSenderOfAPacketAsPossibleNextHop) {
+    AddressPtr source (new AddressMock("source"));
+    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr sender (new AddressMock("sender"));
+    AddressPtr nextHop (new AddressMock("nextHop"));
+
+    // prepare three routes, but only the route over nextHop is actually viable (others introduce loops)
+    routingTable->update(destination, source, interface, 10);
+    routingTable->update(destination, sender, interface, 10);
+    routingTable->update(destination, nextHop, interface, 10);
+
+    PacketMock packet = PacketMock("source", "destination", "sender");
+    std::deque<RoutingTableEntry*> nextHops = routingTable->getPossibleNextHops(&packet);
+
+    BYTES_EQUAL(1, nextHops.size());
+    RoutingTableEntry* possibleHop = nextHops.front();
+    CHECK(nextHop->equals(possibleHop->getAddress()));
+    CHECK_EQUAL(interface, possibleHop->getNetworkInterface());
+}

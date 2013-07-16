@@ -96,7 +96,26 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
 
 RoutingTableEntryList RoutingTable::getPossibleNextHops(const Packet* packet) {
     if (isDeliverable(packet)) {
-        return *(table[packet->getDestination()]);
+        AddressPtr source = packet->getSource();
+        AddressPtr sender = packet->getSender();
+
+        RoutingTableEntryList* availableHops = table[packet->getDestination()];
+        RoutingTableEntryList returnedList = RoutingTableEntryList(*availableHops);
+
+        // remove all entries that would route the packet back over the source or sender of the packet (would create a loop)
+        RoutingTableEntryList::iterator iterator = returnedList.begin();
+        while (iterator != returnedList.end()) {
+            RoutingTableEntry* entry = *iterator;
+            AddressPtr possibleNextHop = entry->getAddress();
+            if (possibleNextHop->equals(source) || possibleNextHop->equals(sender) ) {
+                iterator = returnedList.erase(iterator);
+            }
+            else {
+                iterator++;
+            }
+        }
+
+        return returnedList;
     }
     else {
         // return empty list
@@ -127,9 +146,9 @@ bool RoutingTable::isDeliverable(const Packet* packet) {
             return true;
         }
         else {
-            // check if the only available route leads to where we've got the packets from
+            // check if the only available route leads to where we've got the packets from or the source of the address
             AddressPtr availableAddress = entries->front()->getAddress();
-            return availableAddress->equals(packet->getSender()) == false;
+            return availableAddress->equals(packet->getSender()) == false && availableAddress->equals(packet->getSource()) == false;
         }
     }
     else {
