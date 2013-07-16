@@ -97,8 +97,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
 
         /**
          * This handles the broken link in some fashion.
-         * It should return true if the link breakage results in a complete route failure.
-         * Return false otherwise
+         * @return False if the packet could not be handled and has been dropped, True otherwise
          */
         virtual bool handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, NetworkInterface* interface) = 0;
 

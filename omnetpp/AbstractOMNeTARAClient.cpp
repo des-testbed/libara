@@ -232,7 +232,8 @@ void AbstractOMNeTARAClient::receiveChangeNotification(int category, const cObje
 
             // TODO this does only work if we have only one network interface card
             NetworkInterface* interface = getNetworkInterface(0);
-            if (handleBrokenOMNeTLink(packet, omnetAddress, interface)) {
+            if (handleBrokenOMNeTLink(packet, omnetAddress, interface) == false) {
+                // packet could not be handled and has been dropped
                 emit(ROUTE_FAILURE_SIGNAL, 1);
             }
         }

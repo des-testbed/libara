@@ -96,6 +96,7 @@ public:
      * This method is called each time packet can not be delivered to a specific next hop address.
      * This is the case if this client never receives an acknowledgment in the timeout period
      * and has tried too many times.
+     * @return False if the packet could not be handled and has been dropped, True otherwise
      */
     virtual bool handleBrokenLink(Packet* packet, AddressPtr nextHop, NetworkInterface* interface);
 

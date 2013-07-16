@@ -661,6 +661,7 @@ bool AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
         return true;
     }
     else {
+        // packet can not be delivered on another route so we can only drop it
         delete packet;
         return false;
     }
