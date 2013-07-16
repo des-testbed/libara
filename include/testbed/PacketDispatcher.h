@@ -45,7 +45,7 @@ void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* tes
  * Stub; tells DES-SERT to drop packets received from user space.
  * Note, libARA currently does not use the sys interface to inject data to DES-SERT
  */
-_dessert_cb_results messageToMeshInterfaceDispatcher(dessert_msg_t* messageToSend, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id);
+_dessert_cb_results messageFromTapInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id);
 
 /**
  * Extracts all data from a dessert message that is necessary to create a libARA Packet object.
