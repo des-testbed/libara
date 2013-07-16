@@ -2,7 +2,6 @@
  * $FU-Copyright$
  */
 
-#include <iostream>
 #include "CLibs.h"
 #include "PacketDispatcher.h"
 #include "TestbedTimer.h"
@@ -21,8 +20,6 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
 }
 
 int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[], int argc){
-    /// DEBUG:
-    cout << "prepare to send packet " << endl;
 
     /// set the address to
     ///ara_address_t address = "00:21:9b:79:22:02";
@@ -63,9 +60,7 @@ int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[
     dessert_msg_dummy_payload(testPacket, 128);
 
     if(testPacket != nullptr) {
-        cout << "send packet " << endl;
         dessert_meshsend(testPacket, NULL);
-        cout << "packet sent" << endl;
         dessert_msg_destroy(testPacket);
         return 0;
     }
@@ -100,7 +95,7 @@ int main(int argc, char** argv) {
      dessert_debug("configuration applied");
 
      ARA::BasicConfiguration config = createConfiguration(5.0, 5.0);
-     ARA::testbed::TestbedARAClient* client = new ARA::testbed::TestbedARAClient(config);
+     client = new ARA::testbed::TestbedARAClient(config);
 
      dessert_cli_run();
      dessert_run();
