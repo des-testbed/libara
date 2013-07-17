@@ -95,7 +95,7 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
 }
 
 RoutingTableEntryList RoutingTable::getPossibleNextHops(const Packet* packet) {
-    if (isDeliverable(packet)) {
+    if (isDeliverable(packet->getDestination())) {
         AddressPtr source = packet->getSource();
         AddressPtr sender = packet->getSender();
 
@@ -138,22 +138,8 @@ bool RoutingTable::isDeliverable(AddressPtr destination) {
 }
 
 bool RoutingTable::isDeliverable(const Packet* packet) {
-    AddressPtr destination = packet->getDestination();
-    if (isDeliverable(destination)) {
-        RoutingTableEntryList* entries = table[destination];
-        if (entries->size() > 1) {
-            // more than one route
-            return true;
-        }
-        else {
-            // check if the only available route leads to where we've got the packets from or the source of the address
-            AddressPtr availableAddress = entries->front()->getAddress();
-            return availableAddress->equals(packet->getSender()) == false && availableAddress->equals(packet->getSource()) == false;
-        }
-    }
-    else {
-        return false;
-    }
+    RoutingTableEntryList possibleNextHops = getPossibleNextHops(packet);
+    return possibleNextHops.empty() == false;
 }
 
 float RoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
