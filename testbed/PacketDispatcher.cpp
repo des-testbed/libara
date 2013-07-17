@@ -38,8 +38,10 @@ bool isARAMessage(dessert_msg_t* message) {
 
 _dessert_cb_results araMessageDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
     Packet* packet = extractPacket(messageReceived);
-    std::cout << "Recieved Packet: " << packet->getPayload() << std::endl;
-    extractNetworkInterface(interface)->receive(packet);
+    std::cout << "Recieved Packet, payload size: " << packet->getPayloadLength() << std::endl;
+    NetworkInterface* networkInterface = extractNetworkInterface(interface);
+    std::cout << networkInterface <<std::endl;
+    networkInterface->receive(packet);
     return DESSERT_MSG_DROP;
 }
 

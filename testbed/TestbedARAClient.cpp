@@ -29,7 +29,6 @@ void TestbedARAClient::sendPacket(Packet* packet) {
         nextHop->getInterface()->send(packet, nextHop->getAddress());
     }
     logDebug("sending FANT");
-    std::cout << "sending FANT" << std::endl;
     sendFANT(packet->getDestination());
 }
 
