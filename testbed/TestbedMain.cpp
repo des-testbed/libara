@@ -37,8 +37,6 @@ int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[
 int main(int argc, char** argv) {
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
-     std::cout << "c " << ether_broadcast << std::endl;
-
      dessert_init("ARA", 0x01, DESSERT_OPT_NODAEMONIZE);
 
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
@@ -51,17 +49,17 @@ int main(int argc, char** argv) {
      _dessert_cb_results (*fromMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &ARA::testbed::messageFromMeshInterfaceDispatcher;
      _dessert_cb_results (*araMessage)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &ARA::testbed::araMessageDispatcher;
 
-     dessert_sysrxcb_add(fromTAP, 15);
-     dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 15);
-     dessert_meshrxcb_add(fromMesh, 30);
-     dessert_meshrxcb_add(araMessage, 50);
-
      dessert_debug("applying configuration");
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
      dessert_debug("configuration applied");
 
      ARA::BasicConfiguration config = createConfiguration(5.0, 5.0);
      client = new ARA::testbed::TestbedARAClient(config);
+
+     dessert_sysrxcb_add(fromTAP, 15);
+     dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 15);
+     dessert_meshrxcb_add(fromMesh, 30);
+     dessert_meshrxcb_add(araMessage, 50);
 
      dessert_cli_run();
      dessert_run();
