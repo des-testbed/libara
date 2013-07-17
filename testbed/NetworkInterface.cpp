@@ -32,10 +32,12 @@ bool NetworkInterface::isRegistered() {
 }
 
 void NetworkInterface::receive(Packet* packet) {
+    std::cout << "Network interface " << this << " receive packet, payload length " << packet->getPayloadLength() << std::endl;
     deliverToARAClient(packet);
 }
 
 void NetworkInterface::deliverToARAClient(Packet* packet) {
+    std::cout << "Delivering packet, payload length " << packet->getPayloadLength() <<", to ara client"<< std::endl;
     client->receivePacket(packet, this);
 }
 
