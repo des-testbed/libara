@@ -13,7 +13,7 @@ AddressPtr NetworkInterface::broadcastAddress = AddressPtr(new TestbedAddress(DE
 extern NetworkInterfaceMap networkInterfaces;
 
 NetworkInterface::NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds)
-                        : ReliableNetworkInterface(client, packetFactory, ackTimeoutInMicroSeconds, localAddress, broadcastAddress) {
+                        : ReliableNetworkInterface(client, packetFactory, ackTimeoutInMicroSeconds, AddressPtr(new TestbedAddress(dessertPointer->hwaddr)), broadcastAddress) {
     this->dessertPointer = dessertPointer;
     registerInterface();
 }
