@@ -11,8 +11,8 @@ TestbedAddress::TestbedAddress(u_char* address){
 }
 
 std::string TestbedAddress::toString() const{
-    char buffer[12];
-    snprintf(buffer, ETHER_ADDR_LEN+6, "%X:%X:%X:%X:%X:%X", address[0], address[1], address[2], address[3], address[4], address[5]);
+    char buffer[18];
+    snprintf(buffer, 18, "%X:%X:%X:%X:%X:%X", address[0], address[1], address[2], address[3], address[4], address[5]);
     return buffer;
 }
 
