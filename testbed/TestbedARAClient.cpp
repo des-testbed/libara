@@ -35,7 +35,7 @@ void TestbedARAClient::sendPacket(Packet* packet) {
 }
 
 void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* interface) {
-    logDebug("receiving packet # %u over interface at %s", packet->getSequenceNumber(), interface->getLocalAddress()->toString().c_str());
+    logDebug("receiving packet # %u type %c over interface at %s", packet->getSequenceNumber(), packet->getType(), interface->getLocalAddress()->toString().c_str());
     AbstractARAClient::receivePacket(packet, interface);
     //TODO: persistRoutingTableData
 }
