@@ -28,8 +28,10 @@ void TestbedARAClient::sendPacket(Packet* packet) {
         NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
         nextHop->getInterface()->send(packet, nextHop->getAddress());
     }
-    logDebug("sending FANT");
-    sendFANT(packet->getDestination());
+    logDebug("Packet not deliverable, starting route discovery.");
+    startNewRouteDiscovery(packet);
+    logDebug("Trapping packet.");
+    packetTrap->trapPacket(packet);
 }
 
 void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* interface) {

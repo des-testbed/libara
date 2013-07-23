@@ -27,9 +27,8 @@ class TestbedARAClient : public AbstractARAClient {
          *
          * If the packet is deliverable (e.g there is at least one route known
          * in the routing table), the next hop is calculated via the current
-         * forwarding policy. If there is no known route to the packet destination
-         * a FANT is generated and send according to the Abstract Ant Routing
-         * Algorithm (ARA).
+         * forwarding policy. If there is no known route to the packet destination,
+         * a new route discovery begins.
          *
          * @param packet the Packet to be send. Please note that the packet will be
          *        deleted by the AbstractARAClient when it is no longer needed.
