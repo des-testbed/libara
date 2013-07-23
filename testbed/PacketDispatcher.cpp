@@ -59,11 +59,10 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
     AddressPtr destination(new TestbedAddress(ethernetFrame->ether_dhost));
     AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
 
-    char packetType = ntohs(dessertMessage->u8);
-    unsigned int sequenceNumber = ntohs(dessertMessage->u16);
-    int ttl = ntohs(dessertMessage->ttl);
+    char packetType = dessertMessage->u8;
+    unsigned int sequenceNumber = dessertMessage->u16;
+    int ttl = dessertMessage->ttl;
 
-    std::cout << "packet ttl = " << ttl << std::endl;
 
     void* payload;
     unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
@@ -90,9 +89,9 @@ Packet* extractAraPacket(dessert_msg_t* dessertMessage, ether_header* ethernetFr
     AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
     AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
 
-    char packetType = ntohs(dessertMessage->u8);
-    unsigned int sequenceNumber = ntohs(dessertMessage->u16);
-    int ttl = ntohs(dessertMessage->ttl);
+    char packetType = dessertMessage->u8;
+    unsigned int sequenceNumber = dessertMessage->u16;
+    int ttl = dessertMessage->ttl;
 
     void* payload;
     unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
