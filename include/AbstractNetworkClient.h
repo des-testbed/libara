@@ -180,7 +180,7 @@ protected:
      * Checks if the given address equals the local address of one of
      * this nodes interfaces.
      */
-    bool isLocalAddress(AddressPtr address) const;
+    virtual bool isLocalAddress(AddressPtr address) const;
 
 protected:
     std::deque<NetworkInterface*> interfaces;
