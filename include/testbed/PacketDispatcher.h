@@ -72,6 +72,11 @@ dessert_msg_t* extractDessertMessage(const Packet* packet);
 void addEthernetHeader(dessert_msg_t* message, std::shared_ptr<Address> nextHop);
 
 /**
+ * Adds an ARA routing extension to a dessert message.
+ */
+void addRoutingExtension(dessert_msg_t* message, u_int8_t* source, u_int8_t* destination);
+
+/**
  * Returns a pointer to the testbed network interface paired with a given dessert meshinterface.
  */
 NetworkInterface* extractNetworkInterface(dessert_meshif_t* dessertInterface);
