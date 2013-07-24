@@ -159,7 +159,7 @@ protected:
     virtual void startNewRouteDiscovery(Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
     void forgetKnownIntermediateHopsFor(AddressPtr destination);
-    void sendFANT(AddressPtr destination);
+    virtual void sendFANT(AddressPtr destination);
     bool isRouteDiscoveryRunning(AddressPtr destination);
     virtual void handleNonSourceRouteDiscovery(Packet* packet);
     virtual void handlePacketWithZeroTTL(Packet* packet);

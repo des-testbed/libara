@@ -23,7 +23,7 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
 
 _dessert_cb_results messageFromTapInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
     ether_header* ethernetFrame = ARA::testbed::extractEthernetHeader(messageReceived);
-    ARA::testbed::addRoutingExtension(messageReceived, interface->hwaddr, ethernetFrame->ether_dhost);
+    ARA::testbed::addRoutingExtension(messageReceived, dessert_l25_defsrc, ethernetFrame->ether_dhost);
     ARA::Packet* packet = ARA::testbed::extractPacket(messageReceived);
     client->sendPacket(packet);
     return DESSERT_MSG_DROP;
