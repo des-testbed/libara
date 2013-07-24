@@ -57,11 +57,6 @@ ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage);
 routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage);
 
 /**
- * Used to create packets when a dessertMessage contains ARA routing data.
- */
-Packet* extractAraPacket(dessert_msg_t* dessertMessage, ether_header* ethernetFrame, routingExtension* araHeader);
-
-/**
  * Extracts all data from a packet and stores in a dessert message.
  */
 dessert_msg_t* extractDessertMessage(const Packet* packet);
