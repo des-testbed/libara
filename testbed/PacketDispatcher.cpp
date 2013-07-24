@@ -138,7 +138,7 @@ void addEthernetHeader(dessert_msg_t* message, AddressPtr nextHop) {
 
 void addRoutingExtension(dessert_msg_t* message, u_int8_t* source, u_int8_t* destination) {
     dessert_ext_t* extension;
-    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, ETHER_HDR_LEN);
+    dessert_msg_addext(message, &extension, DESSERT_EXT_USER, ETHER_HDR_LEN);
     struct routingExtension* araRoutingExtension = (struct routingExtension*) extension->data;
 
     memcpy(araRoutingExtension->ara_shost, source, ETHER_ADDR_LEN);
