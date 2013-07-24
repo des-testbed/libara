@@ -49,7 +49,6 @@ int main(int argc, char** argv) {
 
      dessert_cb_result (*fromTAP)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &messageFromTapInterfaceDispatcher;
      _dessert_cb_results (*fromMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &ARA::testbed::messageFromMeshInterfaceDispatcher;
-     _dessert_cb_results (*araMessage)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &ARA::testbed::araMessageDispatcher;
 
      dessert_debug("applying configuration");
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
@@ -61,7 +60,6 @@ int main(int argc, char** argv) {
      dessert_sysrxcb_add(fromTAP, 15);
      dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 15);
      dessert_meshrxcb_add(fromMesh, 30);
-     dessert_meshrxcb_add(araMessage, 50);
 
      dessert_cli_run();
      dessert_run();

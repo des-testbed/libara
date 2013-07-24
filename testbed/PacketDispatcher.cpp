@@ -15,26 +15,6 @@ TESTBED_NAMESPACE_BEGIN
 NetworkInterfaceMap networkInterfaces;
 
 _dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
-
-    if(!isARAMessage(messageReceived)) {
-        dessert_debug("dessertmessage %u has null routingExtension, sending to sys", ntohs(messageReceived->u16));
-        void* payload;
-        dessert_msg_getpayload(messageReceived, &payload);
-        dessert_syssend(payload, messageReceived->plen);
-        return DESSERT_MSG_DROP;
-    }
-    else {
-        return DESSERT_MSG_KEEP;
-    }
-
-}
-
-bool isARAMessage(dessert_msg_t* message) {
-    dessert_ext_t* extension;
-    return dessert_msg_getext(message, &extension, DESSERT_EXT_USER, 0) != 0;
-}
-
-_dessert_cb_results araMessageDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
     Packet* packet = extractPacket(messageReceived);
     NetworkInterface* networkInterface = extractNetworkInterface(interface);
     networkInterface->receive(packet);
