@@ -8,7 +8,6 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-AddressPtr NetworkInterface::localAddress = AddressPtr(new TestbedAddress(DESSERT_LOCAL_ADDRESS));
 AddressPtr NetworkInterface::broadcastAddress = AddressPtr(new TestbedAddress(DESSERT_BROADCAST_ADDRESS));
 extern NetworkInterfaceMap networkInterfaces;
 
