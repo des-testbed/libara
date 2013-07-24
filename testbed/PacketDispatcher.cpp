@@ -51,18 +51,14 @@ void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* tes
 Packet* extractPacket(dessert_msg_t* dessertMessage) {
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
     routingExtension* araHeader = extractRoutingExtension(dessertMessage);
-    if(araHeader != nullptr) {
-        return extractAraPacket(dessertMessage, ethernetFrame, araHeader);
-    }
 
-    AddressPtr source(new TestbedAddress(ethernetFrame->ether_shost));
-    AddressPtr destination(new TestbedAddress(ethernetFrame->ether_dhost));
+    AddressPtr source(new TestbedAddress(araHeader->ara_shost));
+    AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
     AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
 
     char packetType = dessertMessage->u8;
     unsigned int sequenceNumber = dessertMessage->u16;
     int ttl = dessertMessage->ttl;
-
 
     void* payload;
     unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
@@ -82,21 +78,6 @@ routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage) {
         return nullptr;
     }
     return (routingExtension*) extension->data;
-}
-
-Packet* extractAraPacket(dessert_msg_t* dessertMessage, ether_header* ethernetFrame, routingExtension* araHeader) {
-    AddressPtr source(new TestbedAddress(araHeader->ara_shost));
-    AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
-    AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
-
-    char packetType = dessertMessage->u8;
-    unsigned int sequenceNumber = dessertMessage->u16;
-    int ttl = dessertMessage->ttl;
-
-    void* payload;
-    unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
-
-    return new Packet(source, destination, sender, packetType, sequenceNumber, ttl, (const char*)payload, payloadSize);
 }
 
 dessert_msg_t* extractDessertMessage(const Packet* packet) {
