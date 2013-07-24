@@ -23,15 +23,7 @@ TestbedARAClient::TestbedARAClient(Configuration& config) : AbstractARAClient(co
 TestbedARAClient::~TestbedARAClient() { }
 
 void TestbedARAClient::sendPacket(Packet* packet) {
-    logDebug("is sending packet # %u", packet->getSequenceNumber());
-    if(routingTable->isDeliverable(packet)) {
-        NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
-        nextHop->getInterface()->send(packet, nextHop->getAddress());
-    }
-    logDebug("Packet not deliverable, starting route discovery.");
-    startNewRouteDiscovery(packet);
-    logDebug("Trapping packet.");
-    packetTrap->trapPacket(packet);
+    AbstractARAClient::sendPacket(packet);
 }
 
 void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* interface) {
