@@ -6,6 +6,7 @@
 #define _TESTBED_ARA_CLIENT_H_
 
 #include "Testbed.h"
+#include "TestbedAddress.h"
 #include "AbstractARAClient.h"
 
 TESTBED_NAMESPACE_BEGIN
@@ -63,6 +64,11 @@ class TestbedARAClient : public AbstractARAClient {
          * This method initializes all of the network interfaces available on the device.
          */
         void initializeNetworkInterfaces();
+
+        /**
+         * Extends AbstractNetworkClient isLocalAddress to check the MAC address of the TAP interface as well.
+         */
+        virtual bool isLocalAddress(AddressPtr address) const;
 };
 
 TESTBED_NAMESPACE_END
