@@ -107,20 +107,13 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
     dessertMessage->ttl = packet->getTTL();
     dessertMessage->u8  = packet->getType();
 
-    dessert_ext_t* extension;
-
-    addEthernetHeader(dessertMessage, packet->getDestination());
-
-    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, ETHER_HDR_LEN);
-    struct routingExtension* araRoutingExtension = (struct routingExtension*) extension->data;
-
     TestbedAddressPtr sourceTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getSource());
     u_int8_t* source = sourceTestbedAddress->getDessertValue();
     TestbedAddressPtr destinationTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getDestination());
     u_int8_t* destination = destinationTestbedAddress->getDessertValue();
 
-    memcpy(araRoutingExtension->ara_shost, source, ETHER_ADDR_LEN);
-    memcpy(araRoutingExtension->ara_dhost, destination, ETHER_ADDR_LEN);
+    addEthernetHeader(dessertMessage, packet->getDestination());
+    addRoutingExtension(dessertMessage, source, destination);
 
     void* payload;
     int payloadSize = packet->getPayloadLength();
@@ -141,6 +134,15 @@ void addEthernetHeader(dessert_msg_t* message, AddressPtr nextHop) {
 
     memcpy(ethernetFrame->ether_shost, source, ETHER_ADDR_LEN);
     memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
+}
+
+void addRoutingExtension(dessert_msg_t* message, u_int8_t* source, u_int8_t* destination) {
+    dessert_ext_t* extension;
+    dessert_msg_addext(dessertMessage, &extension, DESSERT_EXT_USER, ETHER_HDR_LEN);
+    struct routingExtension* araRoutingExtension = (struct routingExtension*) extension->data;
+
+    memcpy(araRoutingExtension->ara_shost, source, ETHER_ADDR_LEN);
+    memcpy(araRoutingExtension->ara_dhost, destination, ETHER_ADDR_LEN);
 }
 
 NetworkInterface* extractNetworkInterface(dessert_meshif_t* dessertInterface) {
