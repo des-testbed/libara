@@ -255,6 +255,13 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
         routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
         logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
+        logDebug("Routing Table:");
+        RoutingTableEntryTupel routingTableEntry;
+        for (int i = 0; i < routingTable->getTotalNumberOfEntries(); ++i) {
+            routingTableEntry = routingTable->getEntryAt(i);
+            logDebug("Route %n to %s over %s via %s, pheremone value %f", i, routingTableEntry.destination.get(), routingTableEntry.entry->getNextHop()->getAddress().get(),
+                        routingTableEntry.entry->getNetworkInterface()->getLocalAddress().get(), routingTableEntry.entry->getPheromoneValue());
+        }
     }
     else {
         logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
