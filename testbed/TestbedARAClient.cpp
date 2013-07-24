@@ -58,14 +58,4 @@ bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
     return(address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
 }
 
-void TestbedARAClient::sendFANT(AddressPtr destination) {
-    unsigned int sequenceNr = getNextSequenceNumber();
-    TestbedAddressPtr localAddress(new TestbedAddress(dessert_l25_defsrc));
-
-    for(auto& interface: interfaces) {
-        Packet* fant = packetFactory->makeFANT(localAddress, destination, sequenceNr);
-        interface->broadcast(fant);
-    }
-}
-
 TESTBED_NAMESPACE_END
