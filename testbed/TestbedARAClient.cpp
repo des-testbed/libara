@@ -48,7 +48,7 @@ void TestbedARAClient::initializeNetworkInterfaces() {
     while(dessertInterfaces != NULL) {
         NetworkInterface* newInterface = new NetworkInterface(dessertInterfaces, this, packetFactory, 400);
         addNetworkInterface(newInterface);
-        logDebug("Initialized network interface: %s", dessertInterfaces->if_name);
+        logDebug("initialized network interface: %s", dessertInterfaces->if_name);
         dessertInterfaces = dessertInterfaces->next;
     }
 }
