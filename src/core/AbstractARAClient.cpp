@@ -259,8 +259,15 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
         RoutingTableEntryTupel routingTableEntry;
         for (int i = 0; i < routingTable->getTotalNumberOfEntries(); ++i) {
             routingTableEntry = routingTable->getEntryAt(i);
-            logDebug("Route %n to %s over %s via %s, pheremone value %ting of", i, routingTableEntry.destination.get()->toString().c_str(), routingTableEntry.entry->getNextHop()->getAddress().get()->toString().c_str(),
-                        routingTableEntry.entry->getNetworkInterface()->getLocalAddress().get()->toString().c_str(), routingTableEntry.entry->getPheromoneValue());
+
+            /// get the destination
+            std::string destination = routingTableEntry.destination.get()->toString();
+            /// get the next hop
+            std::string nextHop = routingTableEntry.entry->getNextHop()->getAddress().get()->toString();
+            /// get the pheromone value
+            float phi = routingTableEntry.entry->getPheromoneValue();
+
+            logDebug("[%d] next hop: %s, destination %s, phi: %d", i, nextHop.c_str(), destination.c_str(), phi);
         }
     }
     else {
