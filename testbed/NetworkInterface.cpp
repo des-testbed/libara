@@ -22,12 +22,7 @@ NetworkInterface::~NetworkInterface() {
 }
 
 bool NetworkInterface::isRegistered() {
-    if (extractNetworkInterface(dessertPointer) == this) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    return extractNetworkInterface(dessertPointer) == this;
 }
 
 void NetworkInterface::receive(Packet* packet) {
