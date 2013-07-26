@@ -88,7 +88,7 @@ void addEthernetHeader(dessert_msg_t* message, AddressPtr nextHop) {
     dessert_msg_addext(message, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
 
     struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
-    u_int8_t* source = DESSERT_LOCAL_ADDRESS;
+    u_int8_t* source = dessert_l25_defsrc;
     TestbedAddressPtr recipient = std::dynamic_pointer_cast<TestbedAddress>(nextHop);
     u_int8_t* destination = recipient->getDessertValue();
 
