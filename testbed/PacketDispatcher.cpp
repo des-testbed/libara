@@ -23,8 +23,8 @@ _dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageRec
 
 void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
     dessert_msg_t* message = extractDessertMessage(packet);
-    addEthernetHeader(message, recipient);
     dessert_meshif_t* interface = testbedInterface->getDessertPointer();
+    addEthernetHeader(message, interface, recipient);
     dessert_meshsend(message, interface);
 }
 
@@ -83,16 +83,16 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
     return dessertMessage;
 }
 
-void addEthernetHeader(dessert_msg_t* message, AddressPtr nextHop) {
+void addEthernetHeader(dessert_msg_t* message, dessert_meshif_t* interface, AddressPtr nextHop) {
     dessert_ext_t* extension;
     dessert_msg_addext(message, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
 
     struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
-    u_int8_t* source = dessert_l25_defsrc;
+    u_int8_t* sender = interface->hwaddr;
     TestbedAddressPtr recipient = std::dynamic_pointer_cast<TestbedAddress>(nextHop);
     u_int8_t* destination = recipient->getDessertValue();
 
-    memcpy(ethernetFrame->ether_shost, source, ETHER_ADDR_LEN);
+    memcpy(ethernetFrame->ether_shost, sender, ETHER_ADDR_LEN);
     memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
 }
 

@@ -169,7 +169,7 @@ TEST(PacketDispatcherTest, packetToDessertMessage) {
     const Packet packet(source, destination, source, type, sequenceNumber, ttl, payload, payloadLength);
 
     dessert_msg_t* dessertMessage  = extractDessertMessage(&packet);
-    addEthernetHeader(dessertMessage, destination);
+    addEthernetHeader(dessertMessage, interface, destination);
 
     CHECK(dessertMessage != NULL);
     CHECK(dessertMessage != nullptr);

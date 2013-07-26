@@ -64,7 +64,7 @@ dessert_msg_t* extractDessertMessage(const Packet* packet);
 /**
  * Adds a ethernet header to a dessert message.
  */
-void addEthernetHeader(dessert_msg_t* message, std::shared_ptr<Address> nextHop);
+void addEthernetHeader(dessert_msg_t* message, dessert_meshif_t* interface, std::shared_ptr<Address> nextHop);
 
 /**
  * Adds an ARA routing extension to a dessert message.
