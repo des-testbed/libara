@@ -103,9 +103,9 @@ TEST(PacketDispatcherTest, extractSimpleFields) {
     dessert_msg_t* dessertMessage  = createDessertMessage(sequenceNumber, ttl, type);
     Packet* packet = extractPacket(dessertMessage);
 
-    //BYTES_EQUAL(ttl, packet->getTTL());
-    //BYTES_EQUAL(sequenceNumber, packet->getSequenceNumber());
-    //BYTES_EQUAL(type, packet->getType());
+    BYTES_EQUAL(ttl, packet->getTTL());
+    BYTES_EQUAL(sequenceNumber, packet->getSequenceNumber());
+    BYTES_EQUAL(type, packet->getType());
 
     delete packet;
 }
@@ -169,6 +169,7 @@ TEST(PacketDispatcherTest, packetToDessertMessage) {
     const Packet packet(source, destination, source, type, sequenceNumber, ttl, payload, payloadLength);
 
     dessert_msg_t* dessertMessage  = extractDessertMessage(&packet);
+    addEthernetHeader(dessertMessage, destination);
 
     CHECK(dessertMessage != NULL);
     CHECK(dessertMessage != nullptr);

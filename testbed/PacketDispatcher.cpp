@@ -73,7 +73,6 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
     TestbedAddressPtr destinationTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getDestination());
     u_int8_t* destination = destinationTestbedAddress->getDessertValue();
 
-    addEthernetHeader(dessertMessage, packet->getDestination());
     addRoutingExtension(dessertMessage, source, destination);
 
     void* payload;
