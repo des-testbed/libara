@@ -35,6 +35,7 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
     AddressPtr source(new TestbedAddress(araHeader->ara_shost));
     AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
     AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
+    std::cout << "||Extract Packet|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << " sender: " << sender.get()->toString() << std::endl;
 
     char packetType = dessertMessage->u8;
     unsigned int sequenceNumber = dessertMessage->u16;
