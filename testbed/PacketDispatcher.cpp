@@ -88,12 +88,12 @@ void addEthernetHeader(dessert_msg_t* message, dessert_meshif_t* interface, Addr
     dessert_msg_addext(message, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
 
     struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
-    u_int8_t* sender = interface->hwaddr;
+    u_int8_t* senderMac = interface->hwaddr;
     TestbedAddressPtr recipient = std::dynamic_pointer_cast<TestbedAddress>(nextHop);
-    u_int8_t* destination = recipient->getDessertValue();
+    u_int8_t* nextHopMac = recipient->getDessertValue();
 
-    memcpy(ethernetFrame->ether_shost, sender, ETHER_ADDR_LEN);
-    memcpy(ethernetFrame->ether_dhost, destination, ETHER_ADDR_LEN);
+    memcpy(ethernetFrame->ether_shost, senderMac, ETHER_ADDR_LEN);
+    memcpy(ethernetFrame->ether_dhost, nextHopMac, ETHER_ADDR_LEN);
 }
 
 void addRoutingExtension(dessert_msg_t* message, u_int8_t* source, u_int8_t* destination) {
