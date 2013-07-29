@@ -25,7 +25,7 @@ class TestbedTimer : public Timer {
 
     private:
         bool active;
-        std::thread timer;
+        std::thread* timer;
 };
 
 TESTBED_NAMESPACE_END
