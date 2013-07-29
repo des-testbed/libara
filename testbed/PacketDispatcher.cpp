@@ -76,6 +76,9 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
 
     addRoutingExtension(dessertMessage, source, destination);
 
+    std::cout << "||Extract DES-SERT|| source: " << sourceTestbedAddress.get()->toString() << " destination: " << destinationTestbedAddress.get()->toString() << " sender: " << packet->getSenderString() << std::endl;
+
+
     void* payload;
     int payloadSize = packet->getPayloadLength();
     dessert_msg_addpayload(dessertMessage, &payload, payloadSize);
