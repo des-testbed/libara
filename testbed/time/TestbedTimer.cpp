@@ -21,8 +21,7 @@ void TestbedTimer::run(unsigned long timeoutInMicroSeconds){
 }
 
 void TestbedTimer::sleep(unsigned long timeoutInMicroSeconds){
-    /// determine the sleep intervals
-    int interval = timeoutInMicroSeconds / 10;
+    int interval = 500000;
 
     while(timeoutInMicroSeconds > 0){
         if (active) {
@@ -43,6 +42,7 @@ void TestbedTimer::sleep(unsigned long timeoutInMicroSeconds){
 
 void TestbedTimer::interrupt(){
     this->active = false;
+    this->timer.join();
 }
 
 TESTBED_NAMESPACE_END
