@@ -49,7 +49,7 @@ void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
 void TestbedARAClient::initializeNetworkInterfaces() {
     dessert_meshif_t* dessertInterfaces = dessert_meshiflist_get();
     while(dessertInterfaces != NULL) {
-        NetworkInterface* newInterface = new NetworkInterface(dessertInterfaces, this, packetFactory, 40000);
+        NetworkInterface* newInterface = new NetworkInterface(dessertInterfaces, this, packetFactory, 400000);
         addNetworkInterface(newInterface);
         logDebug("initialized network interface: %s", dessertInterfaces->if_name);
         dessertInterfaces = dessertInterfaces->next;
