@@ -9,7 +9,7 @@
 #include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "LinearPathReinforcementPolicy.h"
 #include "BestPheromoneForwardingPolicy.h"
-
+#include "Environment.h"
 #include "TestbedARAClient.h"
 
 
@@ -25,6 +25,7 @@ TEST_GROUP(TestbedARAClientTest) {
     }
 
     void teardown() {
+        Environment::setClock(nullptr);
         delete client;
     }
 };
