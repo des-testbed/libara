@@ -23,7 +23,7 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
 
 void dumpDessertMessage(dessert_msg_t* message){
     ether_header* etherHeader = ARA::testbed::extractEthernetHeader(message);
-    cout << "!!! source: " << etherHeader->ether_shost << " destination: " << etherHeader->ether_dhost << " type: " << etherHeader->ether_type << std::endl;
+    //cout << "!!! source: " << etherHeader->ether_shost << " destination: " << etherHeader->ether_dhost << " type: " << etherHeader->ether_type << std::endl;
 
 }
 

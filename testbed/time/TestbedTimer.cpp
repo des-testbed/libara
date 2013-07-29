@@ -39,7 +39,11 @@ void TestbedTimer::run(unsigned long timeoutInMicroSeconds){
 }
 
 void TestbedTimer::sleep(unsigned long timeoutInMicroSeconds){
-    int interval = 500000;
+    long interval = 500000;
+
+    if(timeoutInMicroSeconds < interval){
+        interval = timeoutInMicroSeconds;
+    }
 
     while((timeoutInMicroSeconds > 0) && (active == true)){
         if (active) {
@@ -61,7 +65,7 @@ void TestbedTimer::interrupt(){
     //std::cout << "interrupt has been called" << std::endl;
     this->timer->join();
     //std::cout << "thread has rejoined main scope" << std::endl;
-    //delete timer;
+    delete timer;
 }
 
 TESTBED_NAMESPACE_END
