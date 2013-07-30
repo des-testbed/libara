@@ -38,11 +38,8 @@ _dessert_cb_results tapPacketFilter(dessert_msg_t* messageReceived, uint32_t len
 }
 
 _dessert_cb_results messageFromTapInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
-    ether_header* ethernetFrame = ARA::testbed::extractEthernetHeader(messageReceived);
     dumpDessertMessage(messageReceived);
-    ARA::testbed::addRoutingExtension(messageReceived, interface->hwaddr, ethernetFrame->ether_dhost);
-    ARA::Packet* packet = ARA::testbed::extractPacket(messageReceived);
-    client->sendPacket(packet);
+    client->sendPacket(ARA::testbed::tapMessageToPacket(messageReceived, client));
     return DESSERT_MSG_DROP;
 }
 

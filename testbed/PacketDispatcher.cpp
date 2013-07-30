@@ -4,6 +4,7 @@
 
 #include "PacketDispatcher.h"
 #include "TestbedAddress.h"
+#include "TestbedARAClient.h"
 
 #include <netinet/in.h>
 
@@ -45,6 +46,19 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
     unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
 
     return new Packet(source, destination, sender, packetType, sequenceNumber, ttl, (const char*)payload, payloadSize);
+}
+
+Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* client) {
+    ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
+
+    AddressPtr source(new TestbedAddress(ethernetFrame->ether_shost));
+    AddressPtr destination(new TestbedAddress(ethernetFrame->ether_dhost));
+    std::cout << "||Create Packet from TapMessage|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << std::endl;
+
+    void* payload;
+    unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
+
+    return client->getPacketFactory()->makeDataPacket(source, destination, client->getNextSequenceNumber(), (const char*)payload, payloadSize);
 }
 
 ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage) {
