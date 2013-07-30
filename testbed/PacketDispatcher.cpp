@@ -4,7 +4,6 @@
 
 #include "PacketDispatcher.h"
 #include "TestbedAddress.h"
-#include "TestbedARAClient.h"
 
 #include <netinet/in.h>
 
@@ -36,7 +35,7 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
     AddressPtr source(new TestbedAddress(araHeader->ara_shost));
     AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
     AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
-    std::cout << "||Extract Packet|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << " sender: " << sender.get()->toString() << std::endl;
+    //std::cout << "||Extract Packet|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << " sender: " << sender.get()->toString() << std::endl;
 
     char packetType = dessertMessage->u8;
     unsigned int sequenceNumber = dessertMessage->u16;
@@ -53,7 +52,7 @@ Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* clie
 
     AddressPtr source(new TestbedAddress(ethernetFrame->ether_shost));
     AddressPtr destination(new TestbedAddress(ethernetFrame->ether_dhost));
-    std::cout << "||Create Packet from TapMessage|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << std::endl;
+    //std::cout << "||Create Packet from TapMessage|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << std::endl;
 
     void* payload;
     unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
@@ -90,7 +89,7 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
 
     addRoutingExtension(dessertMessage, source, destination);
 
-    std::cout << "||Extract DES-SERT|| source: " << sourceTestbedAddress.get()->toString() << " destination: " << destinationTestbedAddress.get()->toString() << " sender: " << packet->getSenderString() << std::endl;
+    //std::cout << "||Extract DES-SERT|| source: " << sourceTestbedAddress.get()->toString() << " destination: " << destinationTestbedAddress.get()->toString() << " sender: " << packet->getSenderString() << std::endl;
 
 
     void* payload;
