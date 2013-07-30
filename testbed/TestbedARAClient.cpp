@@ -37,8 +37,8 @@ void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* inte
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
     logDebug("sending packet # %u to System via TAP", packet->getSequenceNumber());
-    dessert_syssend((void*) packet->getPayload(), packet->getPayloadLength());
     std::cout << "deliverToSystem " << packet->getPayload() << " delivered to system." << std::endl;
+    dessert_syssend((void*) packet->getPayload(), packet->getPayloadLength());
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
