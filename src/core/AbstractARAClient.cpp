@@ -273,7 +273,7 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
             /// get the pheromone value
             float phi = routingTableEntry.entry->getPheromoneValue();
 
-            logDebug("[%d] next hop: %s, destination %s, phi: %d", i, nextHop.c_str(), destination.c_str(), phi);
+            logDebug("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
         }
     }
     else {
