@@ -27,6 +27,16 @@ void dumpDessertMessage(dessert_msg_t* message){
 
 }
 
+_dessert_cb_results tapPacketFilter(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
+    ether_header* ethernetFrame = ARA::testbed::extractEthernetHeader(messageReceived);
+    if(ethernetFrame->ether_dhost[0] == 51) {
+        return DESSERT_MSG_DROP;
+    }
+    else {
+        return DESSERT_MSG_KEEP;
+    }
+}
+
 _dessert_cb_results messageFromTapInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
     ether_header* ethernetFrame = ARA::testbed::extractEthernetHeader(messageReceived);
     dumpDessertMessage(messageReceived);
@@ -64,6 +74,7 @@ int main(int argc, char** argv) {
      ARA::BasicConfiguration config = createConfiguration(5.0, 5.0);
      client = new ARA::testbed::TestbedARAClient(config);
 
+     dessert_sysrxcb_add(&tapPacketFilter, 5);
      dessert_sysrxcb_add(fromTAP, 15);
      dessert_meshrxcb_add(dessert_msg_ifaceflags_cb, 15);
      dessert_meshrxcb_add(fromMesh, 30);
