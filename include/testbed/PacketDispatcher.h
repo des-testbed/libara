@@ -9,6 +9,7 @@
 #include "Testbed.h"
 #include "Packet.h"
 #include "testbed/NetworkInterface.h"
+#include "TestbedARAClient.h"
 #include <unordered_map>
 
 TESTBED_NAMESPACE_BEGIN
@@ -45,6 +46,11 @@ void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* tes
  * Extracts all data from a dessert message that is necessary to create a libARA Packet object.
  */
 Packet* extractPacket(dessert_msg_t* dessertMessage);
+
+/**
+ * Creates a packet from a message received from the system.
+ */
+Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* client);
 
 /**
  * Extracts the ethernet header struct from the given dessert message.
