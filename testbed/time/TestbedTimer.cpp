@@ -14,6 +14,7 @@ TestbedTimer::~TestbedTimer(){
     if (this->active) {
         this->active = false;
         std::cout << "destructor has been called" << std::endl;
+        interrupt();
 /*
         if(this->timer->joinable()){
             std::cout << "thread is joinable" << std::endl;
@@ -27,8 +28,9 @@ TestbedTimer::~TestbedTimer(){
             std::cout << "no need to join" << std::endl;
         }
 */
-       // FIX IT!!!
-       // delete timer;
+       if(timer != nullptr) {
+           delete timer;
+       }
     }
 }
 
