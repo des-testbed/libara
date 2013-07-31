@@ -17,8 +17,13 @@ using namespace std;
 ARA::testbed::TestbedARAClient* client;
 
 ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) {
-    return ARA::BasicConfiguration(new ARA::RoutingTable(), new ARA::PacketFactory(15), new ARA::ExponentialEvaporationPolicy(2.0, 100, 15.0),
-                                            new ARA::LinearPathReinforcementPolicy(deltaPhi), new ARA::BestPheromoneForwardingPolicy(), initialPhi);
+    int maxTTL = 15;
+    ARA::RoutingTable* routingTable = new ARA::RoutingTable();
+    ARA::PacketFactory* packetFactory = new ARA::PacketFactory(maxTTL);
+    ARA::EvaporationPolicy* evaporationPolicy = new ARA::ExponentialEvaporationPolicy(2.0, 100, 15.0);
+    ARA::PathReinforcementPolicy* reinforcementPolicy = new ARA::LinearPathReinforcementPolicy(deltaPhi);
+    ARA::ForwardingPolicy* forwardingPolicy = new ARA::BestPheromoneForwardingPolicy(routingTable);
+    return ARA::BasicConfiguration(routingTable, packetFactory, evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPhi);
 }
 
 void dumpDessertMessage(dessert_msg_t* message){
