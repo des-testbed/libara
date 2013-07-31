@@ -302,7 +302,8 @@ testbedTests: $(TESTS_FOLDER)/$(TESTBED_ARA_TEST_EXECUTABLE)
 $(TESTS_FOLDER)/$(TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) \
                                     $(OMNETARA_O) \
                                     $(CPPUTEST_LIB) \
-                                    $(ALL_TEST_BINARIES)
+                                    $(ALL_TEST_BINARIES) \
+                                    $(TESTBEDARA_EXECUTABLE) # include this as dependency to make sure the main is also build
 	@echo "Building the comlete test suit ($@)"
 	@$(CXX) $(TESTS_CFLAGS) $(OMNETARA_O) $(ALL_TEST_BINARIES) \
                 $(INCLUDE_PATH) $(TESTS_LINKFLAGS) $(OMNETPP_LINKFLAGS) \
