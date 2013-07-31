@@ -62,7 +62,7 @@ TEST(EARAPacketFactoryTest, returnEARAPacketInstances) {
     CHECK(isEARAPacket(bant));
     delete bant;
 
-    Packet* duplicateWarningPacket = factory->makeDulicateWarningPacket(&somePacket, sender, 123);
+    Packet* duplicateWarningPacket = factory->makeDuplicateWarningPacket(&somePacket, sender, 123);
     CHECK(isEARAPacket(duplicateWarningPacket));
     delete duplicateWarningPacket;
 

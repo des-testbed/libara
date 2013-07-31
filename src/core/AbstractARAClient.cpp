@@ -226,7 +226,7 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
 void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
     AddressPtr sender = interface->getLocalAddress();
     logWarn("Routing loop for packet %u from %s detected. Sending duplicate warning back to %s", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
-    Packet* duplicateWarningPacket = packetFactory->makeDulicateWarningPacket(packet, sender, getNextSequenceNumber());
+    Packet* duplicateWarningPacket = packetFactory->makeDuplicateWarningPacket(packet, sender, getNextSequenceNumber());
     sendUnicast(duplicateWarningPacket, interface, packet->getSender());
 }
 

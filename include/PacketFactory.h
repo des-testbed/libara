@@ -82,7 +82,7 @@ class PacketFactory {
           * Note: The result of this method is a newly created object which must be
           * deleted later by the calling class.
           */
-         Packet* makeDulicateWarningPacket(const Packet* originalPacket, AddressPtr senderOfDuplicateWarning, unsigned int newSequenceNumber);
+         Packet* makeDuplicateWarningPacket(const Packet* originalPacket, AddressPtr senderOfDuplicateWarning, unsigned int newSequenceNumber);
 
          /**
           * Creates a new acknowledgment packet based on this packet. The source,

@@ -106,7 +106,7 @@ TEST(PacketFactoryTest, makeBANT) {
     delete bant;
 }
 
-TEST(PacketFactoryTest, makeDulicateErrorPacket) {
+TEST(PacketFactoryTest, makeDuplicateErrorPacket) {
     AddressPtr originalSource (new AddressMock("source"));
     AddressPtr originalDestination (new AddressMock("destination"));
     AddressPtr originalSender (new AddressMock("sender"));
@@ -117,7 +117,7 @@ TEST(PacketFactoryTest, makeDulicateErrorPacket) {
 
     Packet packet = Packet(originalSource, originalDestination, originalSender, type, originalseqenceNumber, originalTTL);
     unsigned int newSequenceNumber = 12345;
-    Packet* duplicateWarning = factory->makeDulicateWarningPacket(&packet, senderOfDuplicateWarning, newSequenceNumber);
+    Packet* duplicateWarning = factory->makeDuplicateWarningPacket(&packet, senderOfDuplicateWarning, newSequenceNumber);
 
     CHECK(duplicateWarning->getSource()->equals(senderOfDuplicateWarning));
     CHECK(duplicateWarning->getDestination()->equals(originalDestination));
