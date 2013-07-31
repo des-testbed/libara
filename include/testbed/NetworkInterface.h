@@ -15,7 +15,6 @@ class NetworkInterface : public ReliableNetworkInterface {
         NetworkInterface(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, int ackTimeoutInMicroSeconds);
         ~NetworkInterface();
         bool isRegistered();
-        void receive(Packet* packet);
         bool equals(ARA::NetworkInterface* otherInterface);
         dessert_meshif_t* getDessertPointer()  const;
 

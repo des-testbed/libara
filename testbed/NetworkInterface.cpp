@@ -25,10 +25,6 @@ bool NetworkInterface::isRegistered() {
     return extractNetworkInterface(dessertPointer) == this;
 }
 
-void NetworkInterface::receive(Packet* packet) {
-    deliverToARAClient(packet);
-}
-
 void NetworkInterface::deliverToARAClient(Packet* packet) {
     client->receivePacket(packet, this);
 }
