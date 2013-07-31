@@ -54,6 +54,10 @@ public:
     void forget(AddressPtr neighbor);
 
     Timer* getPANTsTimer(AddressPtr destination);
+
+    // make some methods public for testing purposes
+    using AbstractARAClient::hasBeenReceivedEarlier;
+    using AbstractARAClient::registerReceivedPacket;
 };
 
 ARA_NAMESPACE_END

@@ -4,8 +4,10 @@
 
 #include "omnetpp/EARA.h"
 #include "omnetpp/OMNeTEARAConfiguration.h"
-#include "omnetpp/PacketFactory.h"
+#include "omnetpp/EARAPacketFactory.h"
+#include "omnetpp/OMNeTEARAPacket.h"
 #include "omnetpp/traffic/TrafficPacket_m.h"
+#include "omnetpp/EARARoutingTableWatcher.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -23,10 +25,10 @@ EARA::~EARA() {
      * This is necessary because the surround omnetpp simulation will attempt to delete those modules
      * because they are SimpleModules which are owned by other compound modules*/
 
+    AbstractARAClient::forwardingPolicy = nullptr;
     forwardingPolicy = nullptr;
     evaporationPolicy = nullptr;
     pathReinforcementPolicy = nullptr;
-    energyDisseminationTimer = nullptr;
 }
 
 int EARA::numInitStages() const {
@@ -43,13 +45,14 @@ void EARA::initialize(int stage) {
         initializeNetworkInterfacesOf(this, config);
 
         notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
-        maximumBatteryLevel = config.getMaximumBatteryLevel();
         WATCH(nrOfDetectedLoops);
+        WATCH(maximumBatteryCapacityInNetwork);
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
         DROP_PACKET_WITH_ZERO_TTL = registerSignal("dropZeroTTLPacket");
         ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
         ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
+        new EARARoutingTableWatcher(routingTable);
     }
 }
 
@@ -64,7 +67,7 @@ void EARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interfac
     emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
-bool EARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
+bool EARA::handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
     return AbstractEARAClient::handleBrokenLink(packet, receiverAddress, interface);
 }
 
@@ -93,19 +96,7 @@ void EARA::startNewRouteDiscovery(Packet* packet) {
     AbstractEARAClient::startNewRouteDiscovery(packet);
 }
 
-void EARA::takeAndSend(cMessage* message, cGate* gate, double sendDelay) {
-    OMNeTPacket* packet = check_and_cast<OMNeTPacket*>(message);
-    if (packet->isDataPacket()) {
-        // record our energy level for the whole path energy of this packet
-        TrafficPacket* encapsulatedPacket = check_and_cast<TrafficPacket*>(packet->getEncapsulatedPacket());
-        int oldRouteEnergy = encapsulatedPacket->getRouteEnergy();
-        encapsulatedPacket->setRouteEnergy(oldRouteEnergy + getCurrentEnergyLevel());
-    }
-
-    AbstractOMNeTARAClient::takeAndSend(message, gate, sendDelay);
-}
-
-unsigned char EARA::getCurrentEnergyLevel() {
+unsigned int EARA::getCurrentEnergyLevel() {
     return currentEnergyLevel;
 }
 

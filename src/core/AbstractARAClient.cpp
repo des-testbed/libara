@@ -39,7 +39,7 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     runningRouteDiscoveries = RunningRouteDiscoveriesMap();
 
     if (neighborActivityCheckIntervalInMilliSeconds > 0) {
-       neighborActivityTimer = Environment::getClock()->getNewTimer(TimerType::NEIGHBOR_ACTIVITY_TIMER);
+       neighborActivityTimer = getNewTimer(TimerType::NEIGHBOR_ACTIVITY_TIMER);
        neighborActivityTimer->addTimeoutListener(this);
        startNeighborActivityTimer();
     }
@@ -111,7 +111,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             packetTrap->trapPacket(packet);
         }
         else if (routingTable->isDeliverable(packet)) {
-            NextHop* nextHop = forwardingPolicy->getNextHop(packet, routingTable);
+            NextHop* nextHop = forwardingPolicy->getNextHop(packet);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
             packet->setPreviousHop(packet->getSender());
@@ -155,7 +155,7 @@ void AbstractARAClient::startNewRouteDiscovery(Packet* packet) {
     AddressPtr destination = packet->getDestination();
     forgetKnownIntermediateHopsFor(destination);
     startRouteDiscoveryTimer(packet);
-    sendFANT(destination);
+    broadcastFANT(destination);
 }
 
 void AbstractARAClient::forgetKnownIntermediateHopsFor(AddressPtr destination) {
@@ -165,7 +165,7 @@ void AbstractARAClient::forgetKnownIntermediateHopsFor(AddressPtr destination) {
     }
 }
 
-void AbstractARAClient::sendFANT(AddressPtr destination) {
+void AbstractARAClient::broadcastFANT(AddressPtr destination) {
     unsigned int sequenceNr = getNextSequenceNumber();
 
     for(auto& interface: interfaces) {
@@ -176,7 +176,7 @@ void AbstractARAClient::sendFANT(AddressPtr destination) {
 
 void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
     RouteDiscoveryInfo* discoveryInfo = new RouteDiscoveryInfo(packet);
-    Timer* timer = Environment::getClock()->getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
+    Timer* timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
     timer->addTimeoutListener(this);
     timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
 
@@ -240,45 +240,46 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
         AddressPtr source = packet->getSource();
         AddressPtr sender = packet->getSender();
         if (routingTable->isNewRoute(source, sender, interface)) {
-            createNewRouteFrom(packet, interface);
+
+            if(hasPreviousNodeBeenSeenBefore(packet) == false) {
+                createNewRouteFrom(packet, interface);
+            }
+            else {
+                logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
+            }
         }
         else {
             reinforcePheromoneValue(source, sender, interface);
         }
-
     }
-
 }
 
 void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {
-    if(hasPreviousNodeBeenSeenBefore(packet) == false) {
-        float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
-        routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
-        logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
-        logDebug("Routing Table:");
-        RoutingTableEntryTupel routingTableEntry;
-        for (int i = 0; i < routingTable->getTotalNumberOfEntries(); ++i) {
-            routingTableEntry = routingTable->getEntryAt(i);
+    float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
+    routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
+    logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
+    logAllRoutingTableEntries();
+}
 
-            /// get the destination
-            std::string destination = routingTableEntry.destination.get()->toString();
-            /// get the next hop
-            std::string nextHop = routingTableEntry.entry->getNextHop()->getAddress().get()->toString();
-            /// get the pheromone value
-            float phi = routingTableEntry.entry->getPheromoneValue();
+void AbstractARAClient::logAllRoutingTableEntries() {
+    logTrace("Routing Table:");
+    RoutingTableEntryTupel routingTableEntry;
+    int nrOfEntries = routingTable->getTotalNumberOfEntries();
+    for (int i = 0; i < nrOfEntries; ++i) {
+        routingTableEntry = routingTable->getEntryAt(i);
 
-            logDebug("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
-        }
-    }
-    else {
-        logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
-    }
+        std::string destination = routingTableEntry.destination->toString();
+        std::string nextHop = routingTableEntry.entry->getNextHop()->getAddress()->toString();
+        float phi = routingTableEntry.entry->getPheromoneValue();
+        logDebug("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
+    }    
 }
 
 bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
     AddressPtr source = packet->getSource();
 
     if (isNewRouteDiscovery(packet)) {
+        //TODO this might become a problem for overlapping route discoveries
         delete knownIntermediateHops[source];
         knownIntermediateHops.erase(source);
         return false;
@@ -343,7 +344,7 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     }
     else if(packet->isAntPacket()) {
         registerActivity(packet->getSender(), interface);
-        handleAntPacket(packet);
+        handleAntPacket(packet, interface);
     }
     else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
@@ -362,13 +363,17 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 
 void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
-        logInfo("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
-        deliverToSystem(packet);
-        checkPantTimer(packet);
+        handleDataPacketForThisNode(packet);
     }
     else {
         sendPacket(packet);
     }
+}
+
+void AbstractARAClient::handleDataPacketForThisNode(Packet* packet) {
+    logInfo("Packet %u from %s reached its destination", packet->getSequenceNumber(), packet->getSourceString().c_str());
+    deliverToSystem(packet);
+    checkPantTimer(packet);
 }
 
 void AbstractARAClient::checkPantTimer(const Packet* packet) {
@@ -390,7 +395,7 @@ void AbstractARAClient::checkPantTimer(const Packet* packet) {
     }
 }
 
-void AbstractARAClient::handleAntPacket(Packet* packet) {
+void AbstractARAClient::handleAntPacket(Packet* packet, NetworkInterface* interface) {
     if (hasBeenSentByThisNode(packet)) {
         // do not process ant packets we have sent ourselves
         delete packet;
@@ -415,8 +420,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
 
     if(packetType == PacketType::FANT) {
         logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString().c_str());
-        Packet* bant = packetFactory->makeBANT(packet, getNextSequenceNumber());
-        broadCast(bant);
+        broadcastBANT(packet);
     }
     else if(packetType == PacketType::BANT) {
         handleBANTForThisNode(packet);
@@ -429,6 +433,15 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     }
 
     delete packet;
+}
+
+void AbstractARAClient::broadcastBANT(Packet* fant) {
+    Packet* bant = packetFactory->makeBANT(fant, getNextSequenceNumber());
+    for(auto& interface: interfaces) {
+        Packet* newBant = packetFactory->makeClone(bant);
+        interface->broadcast(newBant);
+    }
+    delete bant;
 }
 
 void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
@@ -462,7 +475,7 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
 
 void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
     TimerAddressInfo* contextObject = new TimerAddressInfo(destination);
-    Timer* timer = Environment::getClock()->getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
+    Timer* timer = getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
     timer->addTimeoutListener(this);
     timer->run(packetDeliveryDelayInMilliSeconds * 1000);
     runningDeliveryTimers.insert(timer);
@@ -581,7 +594,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
         discoveryInfo->nrOfRetries++;
         logInfo("Restarting discovery for destination %s (%u/%u)", destinationString, discoveryInfo->nrOfRetries, maxNrOfRouteDiscoveryRetries);
         forgetKnownIntermediateHopsFor(destination);
-        sendFANT(destination);
+        broadcastFANT(destination);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
     else {
@@ -663,6 +676,7 @@ bool AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
         return true;
     }
     else {
+        // packet can not be delivered on another route so we can only drop it
         delete packet;
         return false;
     }
@@ -753,9 +767,22 @@ void AbstractARAClient::broadcastPANT(AddressPtr destination) {
     for(auto& interface: interfaces) {
         AddressPtr source = interface->getLocalAddress();
         unsigned int sequenceNr = getNextSequenceNumber();
-        Packet* routeFailurePacket = packetFactory->makePANT(source, destination, sequenceNr);
-        interface->broadcast(routeFailurePacket);
+        Packet* pant = packetFactory->makePANT(source, destination, sequenceNr);
+        interface->broadcast(pant);
     }
+}
+
+void AbstractARAClient::setForwardingPolicy(ForwardingPolicy* newForwardingPolicy) {
+    DELETE_IF_NOT_NULL(forwardingPolicy);
+    forwardingPolicy = newForwardingPolicy;
+}
+
+int AbstractARAClient::getMaxTTL() const {
+    return packetFactory->getMaximumNrOfHops();
+}
+
+Timer* AbstractARAClient::getNewTimer(char timerType, void* contextObject) const {
+    return Environment::getClock()->getNewTimer(timerType, contextObject);
 }
 
 ARA_NAMESPACE_END

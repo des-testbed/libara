@@ -6,8 +6,6 @@
 #include "Environment.h"
 #include "Exception.h"
 
-#include <utility>
-
 ARA_NAMESPACE_BEGIN
 
 RoutingTable::RoutingTable() {
@@ -15,12 +13,12 @@ RoutingTable::RoutingTable() {
 }
 
 RoutingTable::~RoutingTable() {
-    std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::iterator iterator;
+    RoutingTableMap::iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-        std::pair<AddressPtr const, std::deque<RoutingTableEntry*>*> entryPair = *iterator;
-        std::deque<RoutingTableEntry*>* entryList = entryPair.second;
+        RoutingTableEntryList* entryList = iterator->second;
+
         // delete all RoutingTableEntries in the List
-        while(entryList->empty() == false) {
+        while (entryList->empty() == false) {
             RoutingTableEntry* entry = entryList->back();
             entryList->pop_back();
             delete entry;
@@ -35,50 +33,51 @@ RoutingTable::~RoutingTable() {
 }
 
 void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
-    RoutingTableEntry *entry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
+    RoutingTableEntry* entry = new RoutingTableEntry(nextHop, interface, pheromoneValue);
     update(destination, entry);
 }
 
 
-void RoutingTable::update(AddressPtr destination, RoutingTableEntry *pEntry) {
-    if(table.find(destination) == table.end()) {
+void RoutingTable::update(AddressPtr destination, RoutingTableEntry* newEntry) {
+    if (table.find(destination) == table.end()) {
         // this is a new entry
-        std::deque<RoutingTableEntry*>* entryList = new std::deque<RoutingTableEntry*>();
-        entryList->push_back(pEntry);
+        RoutingTableEntryList* entryList = new RoutingTableEntryList();
+        entryList->push_back(newEntry);
         table[destination] = entryList;
-    } else {
+    }
+    else {
         // there is at least one registered route for this destination
         RoutingTableEntryList* entryList = table[destination];
         bool entryHasBeenUpdated = false;
         for (auto& entry: *entryList) {
-            if(entry->getAddress()->equals(pEntry->getAddress()) && entry->getNetworkInterface()->equals(pEntry->getNetworkInterface())) {
-                updateExistingEntry(entry, pEntry);
-                //entry->setPheromoneValue(pheromoneValue);
+            if (entry->getAddress()->equals(newEntry->getAddress()) && entry->getNetworkInterface()->equals(newEntry->getNetworkInterface())) {
+                updateExistingEntry(entry, newEntry);
                 entryHasBeenUpdated = true;
             }
         }
 
-        if(entryHasBeenUpdated == false) {
-            entryList->push_back(pEntry);
-        }else{
-            delete pEntry;
+        if (entryHasBeenUpdated == false) {
+            entryList->push_back(newEntry);
+        }
+        else{
+            delete newEntry;
         }
     }
 }
 
-void RoutingTable::updateExistingEntry(RoutingTableEntry *oldEntry, RoutingTableEntry *newEntry){
+void RoutingTable::updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry){
     oldEntry->setPheromoneValue(newEntry->getPheromoneValue());
 }
 
 void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-    if(table.find(destination) != table.end()) {
-        std::deque<RoutingTableEntry*>* entryList = table[destination];
-        std::deque<RoutingTableEntry*>::iterator iterator = entryList->begin();
+    if (table.find(destination) != table.end()) {
+        RoutingTableEntryList* entryList = table[destination];
+        RoutingTableEntryList::iterator iterator = entryList->begin();
 
-        if(iterator != entryList->end()) {
-            while(iterator != entryList->end()) {
+        if (iterator != entryList->end()) {
+            while (iterator != entryList->end()) {
                 RoutingTableEntry* entry = *iterator;
-                if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+                if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
                     entryList->erase(iterator);
                     delete entry;
                     break;
@@ -86,7 +85,7 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
                 iterator++;
             }
 
-            if(entryList->empty()) {
+            if (entryList->empty()) {
                 // this was the last entry so we can delete the whole list
                 table.erase(destination);
                 delete entryList;
@@ -95,23 +94,42 @@ void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, Netwo
     }
 }
 
-RoutingTableEntryList  RoutingTable::getPossibleNextHops(const Packet* packet) {
-    if(isDeliverable(packet)) {
-        return *(table[packet->getDestination()]);
+RoutingTableEntryList RoutingTable::getPossibleNextHops(const Packet* packet) {
+    if (isDeliverable(packet->getDestination())) {
+        AddressPtr source = packet->getSource();
+        AddressPtr sender = packet->getSender();
+
+        RoutingTableEntryList* availableHops = table[packet->getDestination()];
+        RoutingTableEntryList returnedList = RoutingTableEntryList(*availableHops);
+
+        // remove all entries that would route the packet back over the source or sender of the packet (would create a loop)
+        RoutingTableEntryList::iterator iterator = returnedList.begin();
+        while (iterator != returnedList.end()) {
+            RoutingTableEntry* entry = *iterator;
+            AddressPtr possibleNextHop = entry->getAddress();
+            if (possibleNextHop->equals(source) || possibleNextHop->equals(sender) ) {
+                iterator = returnedList.erase(iterator);
+            }
+            else {
+                iterator++;
+            }
+        }
+
+        return returnedList;
     }
     else {
         // return empty list
-        return std::deque<RoutingTableEntry*>();
+        return RoutingTableEntryList();
     }
 }
 
-RoutingTableEntryList  RoutingTable::getPossibleNextHops(AddressPtr destination) {
-    if(isDeliverable(destination)) {
+RoutingTableEntryList RoutingTable::getPossibleNextHops(AddressPtr destination) {
+    if (isDeliverable(destination)) {
         return *(table[destination]);
     }
     else {
         // return empty list
-        return std::deque<RoutingTableEntry*>();
+        return RoutingTableEntryList();
     }
 }
 
@@ -120,29 +138,15 @@ bool RoutingTable::isDeliverable(AddressPtr destination) {
 }
 
 bool RoutingTable::isDeliverable(const Packet* packet) {
-    AddressPtr destination = packet->getDestination();
-    if(isDeliverable(destination)) {
-        std::deque<RoutingTableEntry*>* entries = table[destination];
-        if(entries->size() > 1) {
-            // more than one route
-            return true;
-        }
-        else {
-            // check if the only available route leads to where we've got the packets from
-            AddressPtr availableAddress = entries->front()->getAddress();
-            return availableAddress->equals(packet->getSender()) == false;
-        }
-    }
-    else {
-        return false;
-    }
+    RoutingTableEntryList possibleNextHops = getPossibleNextHops(packet);
+    return possibleNextHops.empty() == false;
 }
 
 float RoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-    if(isDeliverable(destination)) {
+    if (isDeliverable(destination)) {
         RoutingTableEntryList* entryList = table[destination];
         for (auto& entry: *entryList) {
-            if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+            if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
                 return entry->getPheromoneValue();
             }
         }
@@ -152,10 +156,10 @@ float RoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop
 }
 
 bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface){
-    if(isDeliverable(destination)) {
-        std::deque<RoutingTableEntry*>* entries = table[destination];
+    if (isDeliverable(destination)) {
+        RoutingTableEntryList* entries = table[destination];
         for (auto& entry: *entries) {
-            if(entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){
+            if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){
                 return true;
             }
         }
@@ -176,39 +180,44 @@ void RoutingTable::triggerEvaporation() {
         lastAccessTime = currentTime;
     }
     else {
-        long timeDifference = currentTime->getDifferenceInMilliSeconds(lastAccessTime);
-        delete currentTime;
+        applyEvaporation(currentTime);
+    }
+}
 
-        if(evaporationPolicy->isEvaporationNecessary(timeDifference)) {
-            lastAccessTime->setToCurrentTime();
+void RoutingTable::applyEvaporation(Time* currentTime) {
+    long timeDifference = currentTime->getDifferenceInMilliSeconds(lastAccessTime);
+    delete currentTime;
 
-            std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::iterator i = table.begin();
-            while(i!=table.end()) {
-                std::pair<AddressPtr const, RoutingTableEntryList*> entryPair = *i;
-                AddressPtr destination = entryPair.first;
-                RoutingTableEntryList* entryList = entryPair.second;
+    if (evaporationPolicy->isEvaporationNecessary(timeDifference)) {
+        lastAccessTime->setToCurrentTime();
 
-                RoutingTableEntryList::iterator j = entryList->begin();
-                while(j != entryList->end()) {
-                    RoutingTableEntry* entry = *j;
-                    float newPheromoneValue = evaporationPolicy->evaporate(entry->getPheromoneValue(), timeDifference);
-                    if(newPheromoneValue > 0) {
-                        entry->setPheromoneValue(newPheromoneValue);
-                        j++;
-                    }
-                    else {
-                        delete entry;
-                        j = entryList->erase(j);
-                    }
-                }
+        RoutingTableMap::iterator i = table.begin();
+        while (i!=table.end()) {
+            std::pair<AddressPtr const, RoutingTableEntryList*> entryPair = *i;
+            AddressPtr destination = entryPair.first;
+            RoutingTableEntryList* nextHopsForDestination = entryPair.second;
 
-                if(entryList->empty()) {
-                    delete entryList;
-                    i = table.erase(i);
+            // apply evaporation to all next hops for that destination
+            RoutingTableEntryList::iterator j = nextHopsForDestination->begin();
+            while (j != nextHopsForDestination->end()) {
+                RoutingTableEntry* entry = *j;
+                float newPheromoneValue = evaporationPolicy->evaporate(entry->getPheromoneValue(), timeDifference);
+                if (newPheromoneValue > 0) {
+                    entry->setPheromoneValue(newPheromoneValue);
+                    j++;
                 }
                 else {
-                    i++;
+                    delete entry;
+                    j = nextHopsForDestination->erase(j); // this does not invalidate the iterator, because j is set to the valid return value of erase (will point to end() if empty)
                 }
+            }
+
+            if (nextHopsForDestination->empty()) {
+                delete nextHopsForDestination;
+                i = table.erase(i); // this does not invalidate the iterator, because i is set to the valid return value of erase (will point to end() if empty)
+            }
+            else {
+                i++;
             }
         }
     }
@@ -228,7 +237,7 @@ EvaporationPolicy* RoutingTable::getEvaporationPolicy() const{
 
 unsigned int RoutingTable::getTotalNumberOfEntries() const {
     unsigned int tableSize = 0;
-    std::unordered_map<AddressPtr, std::deque<RoutingTableEntry*>*, AddressHash, AddressPredicate>::const_iterator iterator;
+    RoutingTableMap::const_iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
         RoutingTableEntryList* entryList = iterator->second;
         tableSize += entryList->size();
@@ -238,7 +247,7 @@ unsigned int RoutingTable::getTotalNumberOfEntries() const {
 
 RoutingTableEntryTupel RoutingTable::getEntryAt(int wantedPosition) const {
     int currentPosition = 0;
-    std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::const_iterator iterator;
+    RoutingTableMap::const_iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
         AddressPtr destination = iterator->first;
         RoutingTableEntryList* entryList = iterator->second;
@@ -262,11 +271,10 @@ std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(Addres
     std::deque<RoutingTableEntryTupel> result = std::deque<RoutingTableEntryTupel>();
 
     // TODO this could be made faster with an additional hashmap (but would require more memory)
-    std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate>::const_iterator iterator;
-    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+    for (RoutingTableMap::const_iterator iterator=table.begin(); iterator!=table.end(); iterator++) {
         AddressPtr destination = iterator->first;
-        RoutingTableEntryList* entryList = iterator->second;
-        for (auto& entry: *entryList) {
+        RoutingTableEntryList* nextHopsForDestination = iterator->second;
+        for (auto& entry: *nextHopsForDestination) {
             if(entry->getAddress()->equals(nextHop)) {
                 RoutingTableEntryTupel tupel;
                 tupel.destination = destination;

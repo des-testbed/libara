@@ -7,32 +7,28 @@
 
 #include <deque>
 
-using namespace ARA;
+ARA_NAMESPACE_BEGIN
 
-NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet, RoutingTable* routingTable) {
-    std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
-    AddressPtr sender = packet->getSender();
+BestPheromoneForwardingPolicy::BestPheromoneForwardingPolicy(RoutingTable* routingTable) {
+    this->routingTable = routingTable;
+}
+
+NextHop* BestPheromoneForwardingPolicy::getNextHop(const Packet* packet) {
+    RoutingTableEntryList possibleNextHops = routingTable->getPossibleNextHops(packet);
+    if(possibleNextHops.empty()) {
+        throw Exception("Could not determine next hop: there are no known routes to the destination");
+    }
 
     RoutingTableEntry* bestEntry = nullptr;
     float globalMaximum = 0;
     for(auto& possibleNextHop: possibleNextHops) {
-        if(possibleNextHop->getAddress()->equals(sender)== false) {
-            if(possibleNextHop->getPheromoneValue() > globalMaximum) {
-                bestEntry = possibleNextHop;
-                globalMaximum = bestEntry->getPheromoneValue();
-            }
+        if(possibleNextHop->getPheromoneValue() > globalMaximum) {
+            bestEntry = possibleNextHop;
+            globalMaximum = bestEntry->getPheromoneValue();
         }
     }
 
-    if(bestEntry == nullptr) {
-        if(possibleNextHops.empty()) {
-            throw Exception("Could not determine next hop: there are no known routes to the destination");
-        }
-        else {
-            throw Exception("Could not determine next hop: only possible route to destination leads back to the sender");
-        }
-    }
-    else {
-        return bestEntry->getNextHop();
-    }
+    return bestEntry->getNextHop();
 }
+
+ARA_NAMESPACE_END

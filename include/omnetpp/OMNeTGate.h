@@ -37,7 +37,6 @@ class OMNeTGate: public AbstractNetworkInterface {
 
     private:
         std::shared_ptr<OMNeTAddress> getNextHopAddress(std::shared_ptr<Address> recipient);
-        void recordNumberOfSentBits(OMNeTPacket* packet);
 
     private:
         AbstractOMNeTARAClient* omnetARAModule;

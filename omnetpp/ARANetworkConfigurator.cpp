@@ -3,6 +3,7 @@
  */
 
 #include "omnetpp/ARANetworkConfigurator.h"
+#include "omnetpp/OMNeTBattery.h"
 #include "IPvXAddressResolver.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4Address.h"
@@ -44,6 +45,7 @@ void ARANetworkConfigurator::extractTopology(cTopology& topology) {
         throw cRuntimeError("Error while setting up the network configuration: Could not find any ara.NetworkNode");
     }
 
+    maximumBatteryCapacityInNetwork = 0;
     nodeInfo.resize(numberOfNodes);
     for (int i=0; i<numberOfNodes; i++) {
         cModule* module = topology.getNode(i)->getModule();
@@ -60,6 +62,12 @@ void ARANetworkConfigurator::extractTopology(cTopology& topology) {
 
         nodeInfo[i].mobility = ModuleAccess<IMobility>("mobility").get(module);
         nodeInfo[i].radio = ModuleAccess<Radio>("radio").get(module);
+
+        OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get(module);
+        double batteryCapacity = battery->getCapacity();
+        if(batteryCapacity > maximumBatteryCapacityInNetwork) {
+            maximumBatteryCapacityInNetwork = batteryCapacity;
+        }
     }
 }
 
@@ -175,6 +183,10 @@ double ARANetworkConfigurator::calculateMaximumRadioReceptionRadius(Radio* radio
     double receiverPower = FWMath::dBm2mW(radio->par("sensitivity"));
 
     return pow(waveLength * waveLength * transmitterPower / (16.0 * M_PI * M_PI * receiverPower), 1.0 / alpha);
+}
+
+unsigned int ARANetworkConfigurator::getMaximumBatteryCapacityInNetwork() {
+    return maximumBatteryCapacityInNetwork;
 }
 
 OMNETARA_NAMESPACE_END

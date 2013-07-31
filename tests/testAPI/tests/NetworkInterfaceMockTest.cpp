@@ -16,14 +16,17 @@ using namespace ARA;
 typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(NetworkInterfaceMockTest) {
+    ARAClientMock* client;
     NetworkInterfaceMock* interface;
 
     void setup() {
-        interface = new NetworkInterfaceMock("wlan0");
+        client = new ARAClientMock();
+        interface = new NetworkInterfaceMock("wlan0", client);
     }
 
     void teardown() {
         delete interface;
+        delete client;
     }
 };
 
@@ -82,8 +85,8 @@ TEST(NetworkInterfaceMockTest, hasPacketBeenSent) {
 }
 
 TEST(NetworkInterfaceMockTest, equals) {
-    NetworkInterfaceMock sameInterface = NetworkInterfaceMock("wlan0");
-    NetworkInterfaceMock otherInterface = NetworkInterfaceMock("wlan1");
+    NetworkInterfaceMock sameInterface = NetworkInterfaceMock("wlan0", client);
+    NetworkInterfaceMock otherInterface = NetworkInterfaceMock("wlan1", client);
 
     CHECK(interface->equals(interface));
     CHECK(interface->equals(&sameInterface));
@@ -118,7 +121,7 @@ TEST(NetworkInterfaceMockTest, getLocalAddress) {
     CHECK(defaultLocalAddress->equals(expectedLocalAddress));
 
     delete interface;
-    interface = new NetworkInterfaceMock("wlan0", "192.168.0.1");
+    interface = new NetworkInterfaceMock("wlan0", "192.168.0.1", client);
     expectedLocalAddress.reset(new AddressMock("192.168.0.1"));
     defaultLocalAddress = interface->getLocalAddress();
     CHECK(defaultLocalAddress->equals(expectedLocalAddress));

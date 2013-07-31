@@ -36,7 +36,7 @@ module NetworkNodeBase {
         int nrOfNetworkInterfaces = default(1);
         int nrOfTrafficGenerators = default(1);
 
-        string mobilityType = default("RandomWPMobility");
+        string mobilityType = default("RandomWaypointMobility");
 
     gates:
         input radioIn @directIn;

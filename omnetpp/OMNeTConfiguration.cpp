@@ -4,7 +4,7 @@
 
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/OMNeTGate.h"
-#include "omnetpp/OMNeTBattery.h"
+#include "omnetpp/OMNeTForwardingPolicy.h"
 #include "EvaporationPolicy.h"
 #include "PathReinforcementPolicy.h"
 #include "ForwardingPolicy.h"
@@ -14,14 +14,10 @@
 
 #include <cstring>
 
-using namespace ARA;
-using namespace ARA::omnetpp;
+OMNETARA_NAMESPACE_BEGIN
 
-OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
-    simpleModule = module;
-    evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get();
-    reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("reinforcementPolicy").get();
-    forwardingPolicy = ModuleAccess<ForwardingPolicy>("forwardingPolicy").get();
+OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTable, ::ARA::PacketFactory* packetFactory) {
+    // load parameters
     initialPheromoneValue = module->par("initialPhi").doubleValue();
     maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
     maxTTL = module->par("maxTTL").longValue();
@@ -32,11 +28,26 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module) {
     pantIntervalInMilliSeconds = module->par("pantInterval").longValue();
     previousHopFeatureIsActivated  = module->par("previousHopFeature").boolValue();
 
-    OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
-    maximumBatteryLevel = battery->getCapacity();
+    // load child modules
+    simpleModule = module;
+    evaporationPolicy = ModuleAccess<EvaporationPolicy>("evaporationPolicy").get();
+    reinforcementPolicy = ModuleAccess<PathReinforcementPolicy>("reinforcementPolicy").get();
+
+    // configure the routingTable
+    if (routingTable == nullptr) {
+        //TODO why not set the evaporation policy right in the ctor?
+        routingTable = new RoutingTable();
+    }
+    this->routingTable = routingTable;
+    this->routingTable->setEvaporationPolicy(evaporationPolicy);
 
     logger = new OMNeTLogger(getHostModule()->getFullName());
     setLogLevel(module->par("logLevel").stringValue());
+
+    if (packetFactory == nullptr) {
+        packetFactory = new PacketFactory(maxTTL);
+    }
+    this->packetFactory = packetFactory;
 }
 
 void OMNeTConfiguration::setLogLevel(const char* logLevelParameter) {
@@ -72,6 +83,8 @@ PathReinforcementPolicy* OMNeTConfiguration::getReinforcementPolicy() {
 }
 
 ForwardingPolicy* OMNeTConfiguration::getForwardingPolicy() {
+    OMNeTForwardingPolicy* forwardingPolicy = ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
+    forwardingPolicy->setRoutingTable(routingTable);
     return forwardingPolicy;
 }
 
@@ -112,13 +125,11 @@ Logger* OMNeTConfiguration::getLogger() {
 }
 
 RoutingTable* OMNeTConfiguration::getRoutingTable() {
-    RoutingTable* routingTable = new RoutingTable();
-    routingTable->setEvaporationPolicy(evaporationPolicy);
     return routingTable;
 }
 
 ::ARA::PacketFactory* OMNeTConfiguration::getPacketFactory() {
-    return new PacketFactory(maxTTL);
+    return packetFactory;
 }
 
 cModule* OMNeTConfiguration::getHostModule() {
@@ -131,6 +142,4 @@ bool OMNeTConfiguration::isPreviousHopFeatureActivated() {
     return previousHopFeatureIsActivated;
 }
 
-double OMNeTConfiguration::getMaximumBatteryLevel() {
-    return maximumBatteryLevel;
-}
+OMNETARA_NAMESPACE_END

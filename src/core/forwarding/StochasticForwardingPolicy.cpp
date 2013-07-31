@@ -5,20 +5,16 @@
 #include "StochasticForwardingPolicy.h"
 #include "Exception.h"
 
-using namespace ARA;
+ARA_NAMESPACE_BEGIN
 
-NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet, RoutingTable* routingTable) {
+StochasticForwardingPolicy::StochasticForwardingPolicy(RoutingTable* routingTable) {
+    this->routingTable = routingTable;
+}
+
+NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet) {
     std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
     if(possibleNextHops.empty()) {
         throw Exception("Could not determine next hop: there are no known routes to the destination");
-    }
-
-    // check if the sender is among the possible next hops and remove it
-    for (std::deque<RoutingTableEntry*>::iterator entry = possibleNextHops.begin(); entry != possibleNextHops.end(); entry++) {
-        if ((*entry)->getAddress()->equals(packet->getSender())) {
-            possibleNextHops.erase(entry);
-            break;
-        }
     }
 
     unsigned int nrOfPossibleNextHops = possibleNextHops.size();
@@ -58,6 +54,7 @@ void StochasticForwardingPolicy::initializeRandomNumberGenerator(unsigned int se
 }
 
 float StochasticForwardingPolicy::getRandomNumber() {
-    // not sure if this really works
     return (float)rand() / (float)RAND_MAX;
 }
+
+ARA_NAMESPACE_END

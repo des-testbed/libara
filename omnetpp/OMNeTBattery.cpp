@@ -36,6 +36,7 @@ void OMNeTBattery::initialize(int stage) {
         }
 
         residualEnergyOutVector.setName("energyLevel");
+        residualEnergyOutVector.record(residualCapacityInMilliWattSeconds);
         WATCH(residualCapacityInMilliWattSeconds);
         updateBatteryIcon();
     }
@@ -89,14 +90,15 @@ void OMNeTBattery::registerWirelessDevice(int deviceID, double usageWhenIdleInMi
     Enter_Method_Silent();
     checkIfWirelessDeviceHasBeenRegisteredBefore(deviceID);
 
-    int nrofActivities = 4;
-    DeviceEntry* newDevice = new DeviceEntry(nrofActivities);
+    int nrOfActivities = 4;
+    DeviceEntry* newDevice = new DeviceEntry(nrOfActivities);
     newDevice->radioUsageCurrent[RadioState::IDLE] = usageWhenIdleInMilliAmpere;
     newDevice->radioUsageCurrent[RadioState::RECV] = usageWhenReceivingInMilliAmpere;
     newDevice->radioUsageCurrent[RadioState::TRANSMIT] = usageWhenSendingInMilliAmpere;
     newDevice->radioUsageCurrent[RadioState::SLEEP] = usageWhenSleepingInMilliAmpere;
 
-    deviceEntryMap.insert(std::pair<int,DeviceEntry*>(deviceID, newDevice));
+    deviceEntryMap.insert(std::pair<int, DeviceEntry*>(deviceID, newDevice));
+    EV << "Registered new wireless device with ID " << deviceID << std::endl;
 
     if (hasAlreadySubscribedToRadioStateChanged == false) {
         notificationBoard->subscribe(this, NF_RADIOSTATE_CHANGED);
@@ -116,17 +118,20 @@ void OMNeTBattery::handleMessage(cMessage* message) {
     }
 
     updateResidualEnergy();
-    scheduleAt(simTime() + updateInterval, publishMessage);
+    if(residualCapacityInMilliWattSeconds > 0) {
+        scheduleAt(simTime() + updateInterval, publishMessage);
+    }
 }
 
 void OMNeTBattery::updateResidualEnergy(){
     if (residualCapacityInMilliWattSeconds <= 0) {
         // The battery is already depleted and devices should have stopped sending drawMsg. However leftover messages in queue are caught
+        residualEnergyOutVector.record(0);
         return;
     }
 
     calculateConsumedEnergy();
-    publishEnergyInformation(residualCapacityInMilliWattSeconds);
+    publishEnergyInformation();
     updateBatteryIcon();
     recordResidualEnergy();
 }
@@ -192,8 +197,8 @@ void OMNeTBattery::recordResidualEnergy() {
     }
 }
 
-void OMNeTBattery::publishEnergyInformation(double publishedEnergyLevel) {
-    Energy* energyInformation = new Energy(publishedEnergyLevel);
+void OMNeTBattery::publishEnergyInformation() {
+    Energy* energyInformation = new Energy(residualCapacityInMilliWattSeconds);
     notificationBoard->fireChangeNotification(NF_BATTERY_CHANGED, energyInformation);
     delete energyInformation;
 }
@@ -214,7 +219,7 @@ void OMNeTBattery::receiveChangeNotification(int category, const cObject* notifi
 
         DeviceEntry* deviceEntry = foundDeviceEntry->second;
         if (radioState->getState() >= deviceEntry->numberOfActivities) {
-            error("Can not handle change in radio state (unkown state)");
+            error("Can not handle change in radio state for radio id %u (%u registered activities, but state was %u)", radioState->getRadioId(), deviceEntry->numberOfActivities, radioState->getState());
         }
 
         double current = deviceEntry->radioUsageCurrent[radioState->getState()];

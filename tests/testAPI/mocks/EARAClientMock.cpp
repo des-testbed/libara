@@ -3,30 +3,56 @@
  */
 
 #include "EARAClientMock.h"
-#include "BasicEARAConfiguration.h"
+#include "EARAPacketFactory.h"
 #include "EnergyAwareRoutingTable.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
+#include "EnergyAwareStochasticForwardingPolicy.h"
 #include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 #include "testAPI/mocks/time/ClockMock.h"
-
-#include <sstream>
 
 ARA_NAMESPACE_BEGIN
 
 EARAClientMock::EARAClientMock() {
+    BasicEARAConfiguration configuration = getStandardConfiguration();
+    initializeEARA(configuration);
+    currentEnergyLevel = maximumEnergyValue;
+}
+
+EARAClientMock::EARAClientMock(EARAConfiguration& configuration) {
+    initializeEARA(configuration);
+    currentEnergyLevel = maximumEnergyValue;
+}
+
+BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
     float initialPhi = 10.0;
     float deltaPhi = 5.0;
-    BasicEARAConfiguration configuration = BasicEARAConfiguration(
-            new EnergyAwareRoutingTable(),
-            new PacketFactory(15),
-            new ExponentialEvaporationPolicyMock(),
-            new LinearPathReinforcementPolicy(deltaPhi),
-            new BestPheromoneForwardingPolicy(),
-            initialPhi
+    int maxNrOfRouteDiscoveryRetries = 2;
+    unsigned int routeDiscoveryTimeoutInMilliSeconds = 1000;
+    unsigned int packetDeliveryDelayInMilliSeconds = 5;
+
+    unsigned int maxEnergyValue = 100;
+    unsigned int maxBatteryCapacityInNetwork = maxEnergyValue;
+    float influenceOfMinimumEnergyValue = 3;
+    unsigned int routeDiscoveryDelayInMilliSeconds = 2;
+
+    EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
+
+    return BasicEARAConfiguration(
+        routingTable,
+        new EARAPacketFactory(15),
+        new ExponentialEvaporationPolicyMock(),
+        new LinearPathReinforcementPolicy(deltaPhi),
+        new EnergyAwareStochasticForwardingPolicy(routingTable),
+        initialPhi,
+        maxNrOfRouteDiscoveryRetries,
+        routeDiscoveryTimeoutInMilliSeconds,
+        packetDeliveryDelayInMilliSeconds,
+        maxEnergyValue,
+        maxBatteryCapacityInNetwork,
+        influenceOfMinimumEnergyValue,
+        routeDiscoveryDelayInMilliSeconds
     );
-    initializeEARA(configuration);
-    currentEnergyLevel = 255;
 }
 
 void EARAClientMock::receivePacket(Packet* packet, NetworkInterface* interface) {
@@ -47,7 +73,7 @@ void EARAClientMock::packetNotDeliverable(const Packet* packet) {
     storeUndeliverablePacket(packet);
 }
 
-unsigned char EARAClientMock::getCurrentEnergyLevel() {
+unsigned int EARAClientMock::getCurrentEnergyLevel() {
     return currentEnergyLevel;
 }
 
@@ -57,7 +83,7 @@ NetworkInterfaceMock* EARAClientMock::createNewNetworkInterfaceMock(const std::s
     return mock;
 }
 
-void EARAClientMock::setEnergy(unsigned char newEnergyLevel) {
+void EARAClientMock::setEnergy(unsigned int newEnergyLevel) {
     currentEnergyLevel = newEnergyLevel;
 }
 
@@ -69,8 +95,17 @@ EnergyAwareRoutingTable* EARAClientMock::getRoutingTable() {
     return (EnergyAwareRoutingTable*) routingTable;
 }
 
-TimerMock* EARAClientMock::getEnergyDisseminationTimer() {
-    return (TimerMock*) energyDisseminationTimer;
+EARAPacketFactory* EARAClientMock::getPacketFactory() {
+    return packetFactory;
+}
+
+TimerMock* EARAClientMock::getRouteDiscoveryDelayTimer(AddressPtr source) {
+    if (runningRouteDiscoveryDelayTimers.find(source) != runningRouteDiscoveryDelayTimers.end()) {
+        return (TimerMock*) runningRouteDiscoveryDelayTimers[source];
+    }
+    else {
+        return nullptr;
+    }
 }
 
 ARA_NAMESPACE_END

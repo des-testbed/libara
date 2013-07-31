@@ -51,3 +51,12 @@ TEST(TimerTest, getContextObject) {
     TimerMock timer = TimerMock(123, (void*) contextObject);
     CHECK_EQUAL(contextObject, timer.getContextObject());
 }
+
+TEST(TimerTest, setContextObject) {
+    TimerMock timer = TimerMock();
+    CHECK(timer.getContextObject() == nullptr);
+
+    const char* contextObject = "Hello World";
+    timer.setContextObject((void*)contextObject);
+    CHECK_EQUAL(contextObject, timer.getContextObject());
+}

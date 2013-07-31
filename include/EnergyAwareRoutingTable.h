@@ -5,24 +5,46 @@
 #ifndef ENERGY_AWARE_ROUTINGTABLE_H_
 #define ENERGY_AWARE_ROUTINGTABLE_H_
 
+#include "ARAMacros.h"
 #include "RoutingTable.h"
-#include "Address.h"
+#include "EARARoutingTableEntry.h"
 
-#include <unordered_map>
+ARA_NAMESPACE_BEGIN
 
-namespace ARA {
-    typedef std::shared_ptr<Address> AddressPtr;
-
-    class EnergyAwareRoutingTable : public RoutingTable {
-        public:
-            void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue, unsigned char energyValue);
-            void updateEnergyOfNode(AddressPtr nodeAddress, unsigned char newEnergyLevel);
-            bool hasEnergyInformationFor(AddressPtr nodeAddress);
-            unsigned char getEnergyValueOf(AddressPtr nodeAddress);
-
-        protected:
-            std::unordered_map<AddressPtr, unsigned char, AddressHash, AddressPredicate> neighborEnergyValues;
+struct EARARoutingTableEntryTupel {
+    AddressPtr destination;
+    EARARoutingTableEntry* entry;
 };
 
-} /* namespace ARA */
+class EnergyAwareRoutingTable : public RoutingTable {
+    public:
+        virtual void update(AddressPtr destination, RoutingTableEntry* entry) {RoutingTable::update(destination, entry);};
+        virtual void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
+        virtual void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue, float normalizedEnergyValue);
+
+        /**
+         * Updates only the energy value of a given hop but not the pheromone value.
+         * If the route does not yet exist this method will do nothing.
+         * @return true if the energy of an existing routing table entry has been updated, false otherwise
+         */
+        bool updateEnergyValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float newEnergyValue);
+
+        /**
+         * Get the energy value for a specific route in this routing table.
+         */
+        float getEnergyValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+
+        /**
+         * Returns the n'th ~RoutingTableEntry.
+         * This method is only used to display the routing table entries to the user.
+         */
+        EARARoutingTableEntryTupel getEntryAt(int wantedPosition) const;
+
+    protected:
+        void updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry);
+        EARARoutingTableEntry* getRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+};
+
+ARA_NAMESPACE_END
+
 #endif /* ROUTINGTABLE_H_ */

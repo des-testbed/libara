@@ -28,7 +28,7 @@ simple ARA {
         
         // Determines if the previousHop feature is activated or not.
         // If it is, a node does also use the previous hop of a packet for decide if a route has been seen before.  
-        bool previousHopFeature = default(true);
+        bool previousHopFeature = default(false);
         
         // If this value is greater 0 the client will check each neighborActivityCheckInterval milliseconds
         // if there are neighbors which have been inactive for to long. If so they are contacted which could
@@ -50,7 +50,7 @@ simple ARA {
         volatile double broadCastDelay @unit("s") = default(uniform(0s,0.003s));  // the delay added to broadcast operations to prevent packet collision by perfect synchronization in the simulation 
         volatile double uniCastDelay @unit("s") = default(0s);  // a delay added to unicast messaged (i.e. data packet forwarding) (used to model processing time)
         
-        int routingTableStatisticsUpdate @unit("ms") = default(500ms)
+        int routingTableStatisticsUpdate @unit("ms") = default(0ms) // disabled by default
         @statistic[packetDelivered](title="Packets devlivered";record=count,vector);
         @statistic[packetUnDeliverable](title="Packets undevliverable";record=count,vector);
         @statistic[routingLoopDetected](title="Routing loops";record=count,vector);
@@ -59,6 +59,7 @@ simple ARA {
         @statistic[routeFailureNoHopAvailable](title="Route Failure (no hop available)";record=count);
         @statistic[routeFailureNextHopIsSender](title="Route Failure (next hop = sender)";record=count);
         @statistic[newRouteDiscovery](title="Nr of Route Discoveries";record=count);
+        @statistic[dropPacketBecauseEnergyDepleted](title="Dropped because of depleted energy";record=count);
 
     gates:
         inout  upperLayerGate;

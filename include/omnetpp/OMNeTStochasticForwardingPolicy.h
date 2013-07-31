@@ -5,28 +5,38 @@
 #ifndef OMNET_STOCHASTIC_FORWARDING_POLICY_H_
 #define OMNET_STOCHASTIC_FORWARDING_POLICY_H_
 
+#include "OMNeTARAMacros.h"
 #include "StochasticForwardingPolicy.h"
+#include "OMNeTForwardingPolicy.h"
+#include "RoutingTable.h"
 
-#include <omnetpp.h>
+OMNETARA_NAMESPACE_BEGIN
 
-namespace ARA {
-    namespace omnetpp {
-           /**
-            * The class provides a stochastic forwarding policy for class OMNeTARA. The
-            * class overwrites the getRandomNumber() method of the base class. It uses a
-            * pseudo-random number generator provided by OMNeT++.
-            */
-           class OMNeTStochasticForwardingPolicy : public cSimpleModule, public StochasticForwardingPolicy {
-              protected:
-                 /// The method returns a random number which uses OMNeT++ pseudo random number generators
-                 float getRandomNumber();
+/**
+* The class provides a stochastic forwarding policy for class OMNeTARA. The
+* class overwrites the getRandomNumber() method of the base class. It uses a
+* pseudo-random number generator provided by OMNeT++.
+*
+* OMNeT++ does only support the standard constructor for its SimpleModules.
+* This class implements that and adds a setRoutingTable method which
+* MUST BE CALLED before this object is used.
+*/
+class OMNeTStochasticForwardingPolicy : public StochasticForwardingPolicy, public OMNeTForwardingPolicy {
+    public:
+        OMNeTStochasticForwardingPolicy() : StochasticForwardingPolicy(nullptr) {};
 
-                 virtual void initialize();
+        /**
+         * This must be called after the constructor, because stupid OMNeT++ does only allow standard constructors...
+         */
+        void setRoutingTable(RoutingTable* routingTable);
 
-                 virtual void handleMessage(cMessage *msg);
-           };
+    protected:
+        /**
+         * Returns a random number which uses OMNeT++ pseudo random number generators.
+         */
+        virtual float getRandomNumber();
+};
 
-    } /* namespace omnetpp */
-} /* namespace ARA */
+OMNETARA_NAMESPACE_END
 
 #endif

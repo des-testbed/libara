@@ -2,8 +2,8 @@
  * $FU-Copyright$
  */
 
-#ifndef _OMNETPACKET_H_
-#define _OMNETPACKET_H_
+#ifndef OMNET_PACKET_H_
+#define OMNET_PACKET_H_
 
 #include "OMNeTARAMacros.h"
 #include "Packet.h"
@@ -13,7 +13,7 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-class OMNeTPacket : public cPacket, public Packet {
+class OMNeTPacket : public cPacket, public virtual Packet {
   private:
     void copy(const OMNeTPacket& other);
 
@@ -44,4 +44,4 @@ inline void doUnpacking(cCommBuffer *b, OMNeTPacket& obj) {obj.parsimUnpack(b);}
 
 OMNETARA_NAMESPACE_END
 
-#endif // _OMNETPACKET_H_
+#endif // OMNET_PACKET_H_

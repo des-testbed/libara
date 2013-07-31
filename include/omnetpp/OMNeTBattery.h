@@ -42,7 +42,7 @@ class OMNeTBattery : public BasicBattery {
                 owner = NULL;
                 accts = new double[nrOfActivities];
                 for (int i=0; i<nrOfActivities; i++) {
-                    radioUsageCurrent[nrOfActivities] = 0.0;
+                    radioUsageCurrent[i] = 0.0;
                     accts[i] = 0;
                 }
             }
@@ -81,7 +81,7 @@ class OMNeTBattery : public BasicBattery {
         void calculateConsumedEnergyOfWirelessDevices();
         void updateBatteryIcon();
         void recordResidualEnergy();
-        void publishEnergyInformation(double publishedEnergyLevel);
+        void publishEnergyInformation();
 
     private:
         NotificationBoard*  notificationBoard;

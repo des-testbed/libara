@@ -167,3 +167,27 @@ TEST(PacketTest, setPreviousHop) {
     CHECK(packet.getPreviousHop()->equals(prevHop2));
 }
 
+TEST(PacketTest, decreaseTTL) {
+    AddressPtr source (new AddressMock("A"));
+    AddressPtr destination (new AddressMock("B"));
+    AddressPtr sender (new AddressMock("C"));
+    Packet packet = Packet(source, destination, sender, PacketType::DATA, 1, 15);
+
+    BYTES_EQUAL(15, packet.getTTL())
+
+    packet.decreaseTTL();
+    BYTES_EQUAL(14, packet.getTTL())
+
+    packet.decreaseTTL(1);
+    BYTES_EQUAL(13, packet.getTTL())
+
+    packet.decreaseTTL(2);
+    BYTES_EQUAL(11, packet.getTTL())
+
+    packet.decreaseTTL(6);
+    BYTES_EQUAL(5, packet.getTTL())
+
+    packet.decreaseTTL(20);
+    BYTES_EQUAL(0, packet.getTTL())
+}
+

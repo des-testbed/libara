@@ -10,12 +10,13 @@
 #include "RoutingTable.h"
 #include "IInterfaceTable.h"
 #include "OMNeTLogger.h"
+#include "OMNeTForwardingPolicy.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
 class OMNeTConfiguration : public virtual Configuration {
     public:
-        OMNeTConfiguration(cModule* module);
+        OMNeTConfiguration(cModule* module, RoutingTable* routingTable=nullptr, PacketFactory* packetFactory=nullptr);
 
         virtual RoutingTable* getRoutingTable();
         virtual PacketFactory* getPacketFactory();
@@ -32,8 +33,6 @@ class OMNeTConfiguration : public virtual Configuration {
         virtual unsigned int getPANTIntervalInMilliSeconds();
         virtual bool isPreviousHopFeatureActivated();
 
-        double getMaximumBatteryLevel();
-
         Logger* getLogger();
 
     protected:
@@ -41,9 +40,10 @@ class OMNeTConfiguration : public virtual Configuration {
         void setLogLevel(const char* logLevelParameter);
 
     protected:
+        RoutingTable* routingTable;
         EvaporationPolicy* evaporationPolicy;
         PathReinforcementPolicy* reinforcementPolicy;
-        ForwardingPolicy* forwardingPolicy;
+        PacketFactory* packetFactory;
         float initialPheromoneValue;
         int maxNrOfRouteDiscoveryRetries;
         int maxTTL;
@@ -53,7 +53,6 @@ class OMNeTConfiguration : public virtual Configuration {
         unsigned int maxNeighborInactivityTimeInMilliSeconds;
         unsigned int pantIntervalInMilliSeconds;
         bool previousHopFeatureIsActivated;
-        double maximumBatteryLevel;
 
         cModule* simpleModule;
         OMNeTLogger* logger;

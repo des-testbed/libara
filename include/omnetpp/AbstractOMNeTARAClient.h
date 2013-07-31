@@ -10,7 +10,6 @@
 #include "omnetpp/OMNeTARAMacros.h"
 #include "omnetpp/OMNeTConfiguration.h"
 #include "omnetpp/ARANetworkConfigurator.h"
-#include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/RoutingTableDataPersistor.h"
 #include "omnetpp/MobilityDataPersistor.h"
 
@@ -61,7 +60,7 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         void handleUpperLayerMessage(cMessage* message);
 
         /**
-         * This casts the given message to OMNeTPacket and dispatches it to the correct arrival gate
+         * This will dispatch the given message to the correct arrival gate
          */
         void handleARAMessage(cMessage* message);
 
@@ -72,7 +71,9 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
          * with the given delay.
          */
         //TODO rename this to sendToNetwork() and remove the gate parameter
-        virtual void takeAndSend(cMessage* msg, cGate* gate, double sendDelay = 0);
+        virtual void takeAndSend(cMessage* message, cGate* gate, double sendDelay = 0);
+
+        void updatePacketRouteStatistics(cMessage* msg);
 
         /**
          * The given packet is sent to the next upper layer.
@@ -96,10 +97,9 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
 
         /**
          * This handles the broken link in some fashion.
-         * It should return true if the link breakage results in a complete route failure.
-         * Return false otherwise
+         * @return False if the packet could not be handled and has been dropped, True otherwise
          */
-        virtual bool handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) = 0;
+        virtual bool handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, NetworkInterface* interface) = 0;
 
         /**
          * Determines the host module which acts as a container to this simple module.
@@ -135,7 +135,6 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         int nrOfDeliverablePackets = 0;
         int nrOfNotDeliverablePackets = 0;
         SimTime nodeEnergyDepletionTimestamp = -1;
-        cOutVector energyLevelOutVector;
 
         MobilityDataPersistor* mobilityDataPersistor = nullptr;
         RoutingTableDataPersistor* routingTablePersistor = nullptr;
@@ -147,9 +146,8 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         ARANetworkConfigurator* networkConfig;
 
         // node battery
-        double maximumBatteryLevel;
         bool hasEnoughBattery = true;
-        int currentEnergyLevel;
+        unsigned int currentEnergyLevel;
 
     friend class OMNeTGate;
 };

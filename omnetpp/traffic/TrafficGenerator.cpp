@@ -5,6 +5,8 @@
 #include "TrafficGenerator.h"
 #include "TrafficControllInfo.h"
 #include "TrafficPacket_m.h"
+#include "NotificationBoard.h"
+#include "Energy.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -13,7 +15,17 @@ Define_Module(TrafficGenerator);
 void TrafficGenerator::initialize(int level) {
     TrafGen::initialize(level);
     if(level == 0) {
+        NotificationBoard* notificationBoard = NotificationBoardAccess().get();
+        notificationBoard->subscribe(this, NF_BATTERY_CHANGED);
         nrOfPacketsToSend = par("nrOfPackets").longValue();
+        isEnergyDepleted = false;
+        WATCH(nrOfSentMessages);
+    }
+}
+
+void TrafficGenerator::handleSelfMsg(cMessage* message) {
+    if (isEnergyDepleted == false) {
+        TrafGen::handleSelfMsg(message);
     }
 }
 
@@ -46,6 +58,16 @@ void TrafficGenerator::sendTraffic(cPacket* originalTrafGenMessage, const char* 
     nrOfSentMessages++;
 
     delete originalTrafGenMessage;
+}
+
+void TrafficGenerator::receiveChangeNotification(int category, const cObject* details) {
+    if(category == NF_BATTERY_CHANGED) {
+        Energy* energyInformation = check_and_cast<Energy*>(details);
+        if (energyInformation->GetEnergy() <= 0) {
+            EV << "TrafficGenerator detected that the battery is depleted and will stop sending traffic" << std::endl;
+            isEnergyDepleted = true;
+        }
+    }
 }
 
 OMNETARA_NAMESPACE_END

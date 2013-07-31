@@ -5,9 +5,10 @@
 #ifndef PACKETTYPE_H_
 #define PACKETTYPE_H_
 
+#include "ARAMacros.h"
 #include <string>
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 /**
  * The PacketType is an abstract class that encapsulates the PacketTypeEnum and
@@ -30,8 +31,8 @@ public:
         DUPLICATE_ERROR,
         ACK,
         ROUTE_FAILURE,
-        ENERGY_INFO,
-        HELLO
+        HELLO,
+        PEANT
     };
 
     static bool isAntPacket(char type);
@@ -46,8 +47,8 @@ public:
             case PacketType::ACK: return "ACK";
             case PacketType::DUPLICATE_ERROR: return "DUPLICATE_ERROR";
             case PacketType::ROUTE_FAILURE: return "ROUTE_FAILURE";
-            case PacketType::ENERGY_INFO: return "ENERGY_INFO";
             case PacketType::HELLO: return "HELLO";
+            case PacketType::PEANT: return "PEANT";
             default: return "UNKOWN";
         }
     }
@@ -61,6 +62,7 @@ inline bool PacketType::isAntPacket(char type) {
         case PacketType::FANT:
         case PacketType::BANT:
         case PacketType::PANT:
+        case PacketType::PEANT:
             return true;
         default:
             return false;
@@ -79,5 +81,6 @@ inline bool PacketType::isDataPacket(char type) {
     }
 }
 
-} /* namespace ARA */
+ARA_NAMESPACE_END
+
 #endif // PACKETTYPE_H_

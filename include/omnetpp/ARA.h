@@ -42,7 +42,7 @@ class ARA: public AbstractARAClient, public AbstractOMNeTARAClient {
 
         virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
 
-        virtual bool handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface);
+        virtual bool handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, NetworkInterface* interface);
 
         virtual void handlePacketWithZeroTTL(Packet* packet);
 

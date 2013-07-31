@@ -44,6 +44,7 @@ public:
     virtual unsigned int getPANTIntervalInMilliSeconds();
     virtual bool isPreviousHopFeatureActivated();
 
+    void setMaximumHopCount(int maxTTL);
     void setNeighborActivityCheckInterval(unsigned int newIntervalInMilliSeconds);
     void setMaxNeighborInactivityTime(unsigned int newTimeInMilliSeconds);
     void setPANTInterval(unsigned int newIntervalInMilliSeconds);

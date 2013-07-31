@@ -4,7 +4,7 @@
 
 #include "RoutingTableEntry.h"
 
-namespace ARA {
+ARA_NAMESPACE_BEGIN
 
 RoutingTableEntry::RoutingTableEntry(std::shared_ptr<Address> address, NetworkInterface* interface, float pheromoneValue) {
     nextHop = new NextHop(address, interface);
@@ -35,5 +35,4 @@ void RoutingTableEntry::setPheromoneValue(float newPheromoneValue) {
     this->pheromoneValue = newPheromoneValue;
 }
 
-
-} /* namespace ARA */
+ARA_NAMESPACE_END

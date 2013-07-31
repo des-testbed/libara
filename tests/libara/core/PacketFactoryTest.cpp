@@ -173,28 +173,6 @@ TEST(PacketFactoryTest, makeRouteFailurePacket) {
     delete routeFailurePacket;
 }
 
-TEST(PacketFactoryTest, makeEnergyDisseminationPacket) {
-    AddressPtr originalSource (new AddressMock("source"));
-    unsigned int seqNr = 123;
-    unsigned char energyLevel = 255;
-    Packet* energyPacket = factory->makeEnergyDisseminationPacket(originalSource, seqNr, energyLevel);
-
-    CHECK(energyPacket->getSource()->equals(originalSource));
-    CHECK(energyPacket->getSender()->equals(originalSource));
-    // we do not need to check the destination field because it will be set to the broadcast address by the NIC
-    CHECK(energyPacket->getPreviousHop()->equals(originalSource));
-
-    CHECK(energyPacket->getType() == PacketType::ENERGY_INFO);
-    LONGS_EQUAL(seqNr, energyPacket->getSequenceNumber());
-    LONGS_EQUAL(maximumHopCount, energyPacket->getTTL());
-    LONGS_EQUAL(1, energyPacket->getPayloadLength());
-
-    const char* payload = energyPacket->getPayload();
-    BYTES_EQUAL(energyLevel, payload[0]);
-
-    delete energyPacket;
-}
-
 TEST(PacketFactoryTest, getMaximumNrOfHops){
     BYTES_EQUAL(maximumHopCount, factory->getMaximumNrOfHops());
 }

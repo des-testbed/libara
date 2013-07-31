@@ -92,8 +92,13 @@ void Packet::increaseTTL() {
     ttl++;
 }
 
-void Packet::decreaseTTL() {
-    ttl--;
+void Packet::decreaseTTL(int times) {
+    ttl -= times;
+
+    // ensure, TTL is at least zero
+    if (ttl < 0) {
+        ttl = 0;
+    }
 }
 
 bool Packet::equals(const Packet* otherPacket) const {

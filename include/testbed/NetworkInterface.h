@@ -2,8 +2,8 @@
  * $FU-Copyright$
  */
 
-#ifndef _NETWORK_INTERFACE_H_
-#define _NETWORK_INTERFACE_H_
+#ifndef TESTBED_NETWORK_INTERFACE_H_
+#define TESTBED_NETWORK_INTERFACE_H_
 
 #include "Testbed.h"
 #include "ReliableNetworkInterface.h"
@@ -12,7 +12,7 @@ TESTBED_NAMESPACE_BEGIN
 
 class NetworkInterface : public ReliableNetworkInterface {
     public:
-        NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
+        NetworkInterface(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, int ackTimeoutInMicroSeconds);
         ~NetworkInterface();
         bool isRegistered();
         void receive(Packet* packet);
@@ -32,4 +32,4 @@ class NetworkInterface : public ReliableNetworkInterface {
 
 TESTBED_NAMESPACE_END
 
-#endif // _TESTBED_INTERFACE_H_
+#endif // TESTBED_NETWORK_INTERFACE_H_

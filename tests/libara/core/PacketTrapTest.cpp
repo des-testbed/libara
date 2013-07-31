@@ -6,10 +6,10 @@
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "EvaporationPolicy.h"
+#include "testAPI/mocks/ARAClientMock.h"
 #include "testAPI/mocks/PacketMock.h"
 #include "testAPI/mocks/AddressMock.h"
 #include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
 
 #include <memory>
 #include <deque>
@@ -20,21 +20,22 @@ using namespace ARA;
 typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(PacketTrapTest) {
+    ARAClientMock* client;
     PacketTrap* packetTrap;
     RoutingTable* routingTable;
     EvaporationPolicy* evaporationPolicy;
+    NetworkInterfaceMock* interface;
 
     void setup() {
-        evaporationPolicy = new ExponentialEvaporationPolicyMock();
-        routingTable = new RoutingTable();
-        routingTable->setEvaporationPolicy(evaporationPolicy);
-        packetTrap = new PacketTrap(routingTable);
+        client = new ARAClientMock();
+        packetTrap = client->getPacketTrap();
+        routingTable = client->getRoutingTable();
+        evaporationPolicy = routingTable->getEvaporationPolicy();
+        interface = client->createNewNetworkInterfaceMock();
     }
 
     void teardown() {
-        delete packetTrap;
-        delete routingTable;
-        delete evaporationPolicy;
+        delete client;
     }
 };
 
@@ -89,7 +90,6 @@ TEST(PacketTrapTest, untrapDeliverablePackets) {
     AddressPtr destination1 = trappedPacket1->getDestination();
     AddressPtr destination2 = trappedPacket2->getDestination();
     AddressPtr someAddress (new AddressMock("bar"));
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
 
     // Start the test
     PacketQueue deliverablePackets = packetTrap->untrapDeliverablePackets(destination1);
@@ -101,7 +101,7 @@ TEST(PacketTrapTest, untrapDeliverablePackets) {
     BYTES_EQUAL(1, packetTrap->getNumberOfTrappedPackets());
 
     // update the route to some other destination which should not make this destination deliverable
-    routingTable->update(someAddress, someAddress, &interface, 8);
+    routingTable->update(someAddress, someAddress, interface, 8);
     deliverablePackets = packetTrap->untrapDeliverablePackets(destination1);
     CHECK(deliverablePackets.empty());
     BYTES_EQUAL(1, packetTrap->getNumberOfTrappedPackets());
@@ -111,7 +111,7 @@ TEST(PacketTrapTest, untrapDeliverablePackets) {
     BYTES_EQUAL(2, packetTrap->getNumberOfTrappedPackets());
 
     // now update the route to our wanted destination which should make it deliverable
-    routingTable->update(trappedPacket1->getDestination(), someAddress, &interface, 10);
+    routingTable->update(trappedPacket1->getDestination(), someAddress, interface, 10);
     deliverablePackets = packetTrap->untrapDeliverablePackets(destination1);
     CHECK(deliverablePackets.size() == 1);
 
@@ -122,7 +122,7 @@ TEST(PacketTrapTest, untrapDeliverablePackets) {
     delete deliverablePacket;
 
     // also get the other trapped packet
-    routingTable->update(trappedPacket2->getDestination(), someAddress, &interface, 10);
+    routingTable->update(trappedPacket2->getDestination(), someAddress, interface, 10);
     deliverablePackets = packetTrap->untrapDeliverablePackets(destination2);
     CHECK(deliverablePackets.size() == 1);
 
@@ -142,9 +142,8 @@ TEST(PacketTrapTest, testIsEmpty) {
     CHECK(packetTrap->isEmpty() == false);
 
     // make the trapped packet deliverable
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
     AddressPtr destination = packet.getDestination();
-    routingTable->update(destination, destination, &interface, 10);
+    routingTable->update(destination, destination, interface, 10);
 
     packetTrap->untrapDeliverablePackets(destination);
     CHECK(packetTrap->isEmpty());
@@ -210,8 +209,7 @@ TEST(PacketTrapTest, packetOrderIsPreserved) {
     packetTrap->trapPacket(packet6);
     packetTrap->trapPacket(packet7);
 
-    NetworkInterfaceMock interface = NetworkInterfaceMock();
-    routingTable->update(destination, destination, &interface, 10);
+    routingTable->update(destination, destination, interface, 10);
     PacketQueue trappedPackets = packetTrap->untrapDeliverablePackets(destination);
     BYTES_EQUAL(4, trappedPackets.size());
     CHECK(trappedPackets.at(0) == packet1);

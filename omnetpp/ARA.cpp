@@ -3,9 +3,9 @@
  */
 
 #include "omnetpp/ARA.h"
-#include "omnetpp/OMNeTPacket.h"
 #include "omnetpp/PacketFactory.h"
 #include "omnetpp/OMNeTGate.h"
+#include "omnetpp/RoutingTableWatcher.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -39,7 +39,6 @@ void ARA::initialize(int stage) {
         setLogger(config.getLogger());
         AbstractARAClient::initialize(config);
         initializeNetworkInterfacesOf(this, config);
-        maximumBatteryLevel = config.getMaximumBatteryLevel();
 
         WATCH(nrOfDetectedLoops);
         LOOP_DETECTION_SIGNAL = registerSignal("routingLoopDetected");
@@ -47,6 +46,7 @@ void ARA::initialize(int stage) {
         ROUTE_FAILURE_NO_HOP = registerSignal("routeFailureNoHopAvailable");
         NEW_ROUTE_DISCOVERY = registerSignal("newRouteDiscovery");
         ROUTE_FAILURE_NEXT_HOP_IS_SENDER =  registerSignal("routeFailureNextHopIsSender");
+        new RoutingTableWatcher(routingTable);
     }
 }
 
@@ -61,7 +61,7 @@ void ARA::handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface
     emit(LOOP_DETECTION_SIGNAL, 1);
 }
 
-bool ARA::handleBrokenOMNeTLink(OMNeTPacket* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
+bool ARA::handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, NetworkInterface* interface) {
     return AbstractARAClient::handleBrokenLink(packet, receiverAddress, interface);
 }
 

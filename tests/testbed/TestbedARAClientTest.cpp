@@ -17,10 +17,11 @@ TESTBED_NAMESPACE_BEGIN
 
 TEST_GROUP(TestbedARAClientTest) {
     TestbedARAClient* client;
+    RoutingTableMock* routingTable;
 
     void setup() {
-        BasicConfiguration config = BasicConfiguration(new RoutingTableMock(), new PacketFactory(15), new ExponentialEvaporationPolicyMock(),
-                                        new LinearPathReinforcementPolicy(5.0), new BestPheromoneForwardingPolicy(), 5.0);
+	routingTable = new RoutingTableMock();
+        BasicConfiguration config = BasicConfiguration(routingTable, new PacketFactory(15), new ExponentialEvaporationPolicyMock(), new LinearPathReinforcementPolicy(5.0), new BestPheromoneForwardingPolicy(routingTable), 5.0);
         client = new TestbedARAClient(config);
     }
 

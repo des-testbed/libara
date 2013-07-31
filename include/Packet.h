@@ -152,10 +152,10 @@ public:
     void increaseTTL();
 
     /**
-     * Decreases the TTL value by 1.
+     * Decreases the TTL value by the `times' parameter.
      * This is only used for testing.
      */
-    void decreaseTTL();
+    void decreaseTTL(int times=1);
 
     const char* getPayload() const;
 
