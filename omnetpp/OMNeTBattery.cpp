@@ -5,6 +5,7 @@
 #include "omnetpp/OMNeTBattery.h"
 #include "RadioState.h"
 #include "Energy.h"
+#include "IPowerControl.h"
 
 OMNETARA_NAMESPACE_BEGIN
 
@@ -79,7 +80,7 @@ int OMNeTBattery::registerDevice(cObject* device, int numberOfActvities) {
 
 void OMNeTBattery::checkIfDeviceHasBeenRegisteredBefore(cObject* device) {
     int nrOfRegisteredDevices = deviceEntryVector.size();
-    for (unsigned int i = 0; i < nrOfRegisteredDevices; i++) {
+    for (int i = 0; i < nrOfRegisteredDevices; i++) {
         if (deviceEntryVector[i]->owner == device) {
             error("Device %s has been already registered!", device->getFullName());
         }
@@ -141,8 +142,7 @@ void OMNeTBattery::calculateConsumedEnergy() {
     calculateConsumedEnergyOfWirelessDevices();
 
     if (residualCapacityInMilliWattSeconds <= 0.0 ) {
-        EV << "[BATTERY]: " << getParentModule()->getFullName() <<" 's battery exhausted" << "\n";
-        residualCapacityInMilliWattSeconds = 0;
+        handleDepletedEnergy();
     }
     else {
         EV << "[BATTERY]: residual capacity = " << residualCapacityInMilliWattSeconds << "\n";
@@ -176,6 +176,24 @@ void OMNeTBattery::calculateConsumedEnergyOfWirelessDevices() {
                 deviceEntry->accts[currentActivity] += usedEnergy;
                 residualCapacityInMilliWattSeconds -= usedEnergy;
             }
+        }
+    }
+}
+
+void OMNeTBattery::handleDepletedEnergy() {
+    EV << "[BATTERY]: " << getParentModule()->getFullName() <<" 's battery exhausted" << std::endl;
+    residualCapacityInMilliWattSeconds = 0;
+    deactivateAllRegisteredDevices();
+}
+
+void OMNeTBattery::deactivateAllRegisteredDevices() {
+    for (DeviceEntryMap::iterator iterator = deviceEntryMap.begin(); iterator!=deviceEntryMap.end(); iterator++) {
+        int deviceID = iterator->first;
+        cModule* module = simulation.getModule(deviceID);
+        IPowerControl* controlableDevice = dynamic_cast<IPowerControl*>(module);
+        if (controlableDevice != NULL) {
+            EV << "[BATTERY]: Deactivating device " << module->getFullName() <<  std::endl;
+            controlableDevice->disableModule();
         }
     }
 }
