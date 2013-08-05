@@ -25,10 +25,6 @@ bool NetworkInterface::isRegistered() {
     return extractNetworkInterface(dessertPointer) == this;
 }
 
-void NetworkInterface::deliverToARAClient(Packet* packet) {
-    client->receivePacket(packet, this);
-}
-
 bool NetworkInterface::equals(ARA::NetworkInterface* otherInterface) {
     ARA::testbed::NetworkInterface* other = (ARA::testbed::NetworkInterface*)otherInterface;
     return this->dessertPointer->hwaddr == other->dessertPointer->hwaddr;
