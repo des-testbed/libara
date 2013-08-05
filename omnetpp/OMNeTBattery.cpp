@@ -242,7 +242,7 @@ void OMNeTBattery::receiveChangeNotification(int category, const cObject* notifi
 
         double current = deviceEntry->radioUsageCurrent[radioState->getState()];
 
-        EV << simTime() << " Wireless device " << radioState->getRadioId() << " drew current " << current << "mA, new state = " << radioState->getState() << std::endl;
+        EV << "[BATTERY:] Wireless device consumes energy from now on with " << current << "mA, new radio state = " << RadioState::stateName(radioState->getState()) << std::endl;
 
         // update the residual capacity (finish previous current draw)
         updateResidualEnergy();
