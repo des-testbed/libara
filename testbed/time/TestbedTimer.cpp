@@ -13,7 +13,6 @@ TestbedTimer::TestbedTimer(char type, void* contextObject) : Timer(type, context
 TestbedTimer::~TestbedTimer(){
     if (this->active) {
         this->active = false;
-/*
         std::cout << "destructor has been called" << std::endl;
 
         if(this->timer->joinable()){
@@ -30,15 +29,15 @@ TestbedTimer::~TestbedTimer(){
 
        if(timer != nullptr) {
            delete timer;
-       }*/
+       }
     }
 }
 
 void TestbedTimer::run(unsigned long timeoutInMicroSeconds){
     this->active = true;
-    //timer = new std::thread(&TestbedTimer::sleep, this, timeoutInMicroSeconds);
-    std::thread timer(&TestbedTimer::sleep, this, timeoutInMicroSeconds);
-    timer.detach();
+    timer = new std::thread(&TestbedTimer::sleep, this, timeoutInMicroSeconds);
+    //std::thread timer(&TestbedTimer::sleep, this, timeoutInMicroSeconds);
+    //timer.detach();
 
 }
 
