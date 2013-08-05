@@ -35,6 +35,7 @@ dessert_meshif_t* NetworkInterface::getDessertPointer()  const{
 }
 
 void NetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> recipient){
+    printf("receiving packet # %u type %s over interface at %s", packet->getSequenceNumber(), PacketType::getAsString(packet->getType()).c_str(), this->getLocalAddress()->toString().c_str());
     packetToMeshInterfaceDispatcher(packet, this, recipient);
 }
 
