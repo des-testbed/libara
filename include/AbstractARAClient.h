@@ -171,7 +171,7 @@ protected:
     virtual void startNewRouteDiscovery(Packet* packet);
     void startRouteDiscoveryTimer(const Packet* packet);
     void forgetKnownIntermediateHopsFor(AddressPtr destination);
-    void broadcastFANT(AddressPtr destination);
+    virtual void broadcastFANT(AddressPtr destination); //overrided in testbedARAClient
     bool isRouteDiscoveryRunning(AddressPtr destination);
     virtual void handleNonSourceRouteDiscovery(Packet* packet);
     virtual void handlePacketWithZeroTTL(Packet* packet);

@@ -69,6 +69,13 @@ class TestbedARAClient : public AbstractARAClient {
          * Extends AbstractNetworkClient isLocalAddress to check the MAC address of the TAP interface as well.
          */
         virtual bool isLocalAddress(AddressPtr address) const;
+
+        /**
+         * Overrides AbstractARAClient's sendFANT method to prevent duplicate route establishment
+         */
+        void broadcastFANT(AddressPtr destination);
+
+        TestbedAddressPtr tapAddress;
 };
 
 TESTBED_NAMESPACE_END

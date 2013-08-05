@@ -55,11 +55,20 @@ void TestbedARAClient::initializeNetworkInterfaces() {
         logDebug("initialized network interface: %s", dessertInterfaces->if_name);
         dessertInterfaces = dessertInterfaces->next;
     }
+    tapAddress = TestbedAddressPtr(new TestbedAddress(dessert_l25_defsrc));
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
-    TestbedAddressPtr tapAddress(new TestbedAddress(dessert_l25_defsrc));
     return(address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
+}
+
+void TestbedARAClient::broadcastFANT(AddressPtr destination) {
+    unsigned int sequenceNr = getNextSequenceNumber();
+
+    for(auto& interface: interfaces) {
+        Packet* fant = packetFactory->makeFANT(tapAddress, destination, sequenceNr);
+        interface->broadcast(fant);
+    }
 }
 
 TESTBED_NAMESPACE_END
