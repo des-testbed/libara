@@ -74,6 +74,7 @@ class TestbedARAClient : public AbstractARAClient {
          * Overrides AbstractARAClient's sendFANT method to prevent duplicate route establishment
          */
         void broadcastFANT(AddressPtr destination);
+
         TestbedAddressPtr tapAddress;
 };
 
