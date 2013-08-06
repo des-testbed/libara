@@ -9,7 +9,6 @@
 #include "BasicConfiguration.h"
 #include "SimpleLogger.h"
 #include "Environment.h"
-#include "TestbedClock.h"
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -20,7 +19,6 @@ TestbedARAClient::TestbedARAClient(Configuration& config) : AbstractARAClient(co
     logDebug("Initialized testbedARAClient");
     initializeNetworkInterfaces();
     logDebug("Initialized testbedARAClient network Interfaces");
-    Environment::setClock(new TestbedClock());
 }
 
 TestbedARAClient::~TestbedARAClient() { }

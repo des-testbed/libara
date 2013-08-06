@@ -8,6 +8,7 @@
 #include "ARAMacros.h"
 #include "Time.h"
 
+#include <ctime>
 #include <chrono>
 
 ARA_NAMESPACE_BEGIN

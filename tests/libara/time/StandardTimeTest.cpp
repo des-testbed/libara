@@ -3,21 +3,22 @@
  */
 
 #include "CppUTest/TestHarness.h"
+#include "StandardTime.h"
 
-#include "TestbedTime.h"
+ARA_NAMESPACE_BEGIN
 
-using namespace ARA::testbed;
-
-TEST_GROUP(TestbedTimeTest) {
+TEST_GROUP(StandardTimeTest) {
     std::chrono::time_point<std::chrono::system_clock> timestampA;
     std::chrono::time_point<std::chrono::system_clock> timestampB;
+
     void setup() {
         // we just get the current time
         time_t rawtime;
         time(&rawtime);
+
         // pass it to our own timeval data structure
-        struct tm* timeinfo;
-        timeinfo = localtime(&rawtime);
+        tm* timeinfo = localtime(&rawtime);
+
         // customize the fields
         timeinfo->tm_year = 2013 - 1900;
         timeinfo->tm_mon = 7 - 1;
@@ -35,16 +36,16 @@ TEST_GROUP(TestbedTimeTest) {
     }
 };
 
-TEST(TestbedTimeTest, create) {
-    TestbedTime time = TestbedTime(timestampA);
+TEST(StandardTimeTest, create) {
+    StandardTime time = StandardTime(timestampA);
     LONGS_EQUAL(1372770122, time.getSeconds());
     LONGS_EQUAL(1372770122000, time.getMilliSeconds());
 }
 
-TEST(TestbedTimeTest, equality) {
-    TestbedTime originalTime = TestbedTime(timestampA);
-    TestbedTime anotherTime = TestbedTime(timestampB);
-    TestbedTime sameTime = TestbedTime(timestampA);
+TEST(StandardTimeTest, equality) {
+    StandardTime originalTime = StandardTime(timestampA);
+    StandardTime anotherTime = StandardTime(timestampB);
+    StandardTime sameTime = StandardTime(timestampA);
 
     CHECK_FALSE(originalTime == anotherTime);
     CHECK_TRUE(originalTime == originalTime);
@@ -52,25 +53,27 @@ TEST(TestbedTimeTest, equality) {
     CHECK_TRUE(sameTime == originalTime);
 }
 
-TEST(TestbedTimeTest, copyConstructor) {
-    TestbedTime originalTime = TestbedTime(timestampA);
-    TestbedTime timeCopy = TestbedTime(originalTime);
+TEST(StandardTimeTest, copyConstructor) {
+    StandardTime originalTime = StandardTime(timestampA);
+    StandardTime timeCopy = StandardTime(originalTime);
 
     CHECK(originalTime == timeCopy);
 }
-TEST(TestbedTimeTest, getSeconds) {
-    TestbedTime time = TestbedTime(timestampA);
+TEST(StandardTimeTest, getSeconds) {
+    StandardTime time = StandardTime(timestampA);
     LONGS_EQUAL(1372770122, time.getSeconds());
 }
 
-TEST(TestbedTimeTest, getMilliSeconds) {
-    TestbedTime time = TestbedTime(timestampA);
+TEST(StandardTimeTest, getMilliSeconds) {
+    StandardTime time = StandardTime(timestampA);
     LONGS_EQUAL(1372770122000, time.getMilliSeconds());
 }
 
-TEST(TestbedTimeTest, getDifferenceInMilliSeconds) {
-    TestbedTime timeA = TestbedTime(timestampA);
-    TestbedTime timeB = TestbedTime(timestampB);
+TEST(StandardTimeTest, getDifferenceInMilliSeconds) {
+    StandardTime timeA = StandardTime(timestampA);
+    StandardTime timeB = StandardTime(timestampB);
     /// FIXME: BETTER CHECK THIS
     LONGS_EQUAL(-86400000, timeB.getDifferenceInMilliSeconds(&timeA));
 }
+
+ARA_NAMESPACE_END

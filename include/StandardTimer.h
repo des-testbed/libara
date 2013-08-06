@@ -23,13 +23,9 @@ class StandardTimer : public Timer {
         virtual void interrupt();
 
     private:
-        bool isCalledFromTimerThreadContext();
-        void makeSureTimeIsNotRunning();
-        void forcefullyStopTimer();
-
-        bool timerHasBeenInterrupted;
+        bool active;
         bool timerIsRunning;
-        std::shared_ptr<std::thread> timer;
+        std::thread* timer;
 };
 
 ARA_NAMESPACE_END
