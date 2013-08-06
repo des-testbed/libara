@@ -6,13 +6,8 @@
 
 ARA_NAMESPACE_BEGIN
 
-StandardTime::StandardTime() {
-    //FIXME do we need this? should there be initialization?
-}
-
-StandardTime::StandardTime(std::chrono::time_point<std::chrono::system_clock> timestamp):time(timestamp){
-
-}
+StandardTime::StandardTime() {}
+StandardTime::StandardTime(std::chrono::time_point<std::chrono::system_clock> timestamp) : time(timestamp){}
 
 long StandardTime::getSeconds() const {
     return std::chrono::duration_cast<std::chrono::seconds>(this->time.time_since_epoch()).count();

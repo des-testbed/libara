@@ -23,7 +23,11 @@ class StandardTimer : public Timer {
         virtual void interrupt();
 
     private:
-        bool active;
+        void makeSureTimeIsNotRunning();
+        void forcefullyStopTimer();
+
+    private:
+        bool timerHasBeenInterrupted;
         bool timerIsRunning;
         std::thread* timer;
 };
