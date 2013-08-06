@@ -38,7 +38,6 @@ TEST_GROUP(StandardTimeTest) {
 
 TEST(StandardTimeTest, create) {
     StandardTime time(timestampA);
-
     LONGS_EQUAL(1372773722, time.getSeconds());
     LONGS_EQUAL(1372773722000, time.getMilliSeconds());
 }
