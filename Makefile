@@ -123,7 +123,7 @@ OMNETPP_ARA_TEST_EXECUTABLE = runOmnetAraTests
 TESTBED_ARA_TEST_EXECUTABLE = runTestbedAraTests
 
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-CFLAGS += -std=c++11 -fPIC
+CFLAGS += -std=c++11 -fPIC -D_GLIBCXX_USE_NANOSLEEP
 ifeq ("$(NO_OMNET)", "TRUE")
     INCLUDE_PATH = -I$(INCLUDE_DIR)
 else
