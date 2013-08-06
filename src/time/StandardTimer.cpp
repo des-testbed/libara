@@ -1,18 +1,22 @@
-#include "TestbedTimer.h"
+/*
+ * $FU-Copyright$
+ */
+
+#include "StandardTimer.h"
+#include "ThreadInterruptedException.h"
 
 #include <iostream>
 #include <system_error>
 
+ARA_NAMESPACE_BEGIN
 
-TESTBED_NAMESPACE_BEGIN
-
-TestbedTimer::TestbedTimer(char type, void* contextObject) : Timer(type, contextObject) {
+StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) {
     this->active = false;
     this->timerIsRunning = false;
     this->timer = nullptr;
 }
 
-TestbedTimer::~TestbedTimer(){
+StandardTimer::~StandardTimer(){
     if (this->active) {
         this->active = false;
 
@@ -32,7 +36,7 @@ TestbedTimer::~TestbedTimer(){
     }
 }
 
-void TestbedTimer::run(unsigned long timeoutInMicroSeconds){
+void StandardTimer::run(unsigned long timeoutInMicroSeconds){
     if (this->timerIsRunning) {
        this->active = false;
        this->timer->join();
@@ -41,10 +45,10 @@ void TestbedTimer::run(unsigned long timeoutInMicroSeconds){
     if (this->timer != nullptr) {
         delete timer;
     }
-    timer = new std::thread(&TestbedTimer::sleep, this, timeoutInMicroSeconds);
+    timer = new std::thread(&StandardTimer::sleep, this, timeoutInMicroSeconds);
 }
 
-void TestbedTimer::sleep(unsigned long timeoutInMicroSeconds){
+void StandardTimer::sleep(unsigned long timeoutInMicroSeconds){
     this->active = true;
     this->timerIsRunning = true;
     unsigned long interval = 500000;
@@ -70,8 +74,8 @@ void TestbedTimer::sleep(unsigned long timeoutInMicroSeconds){
     this->timerIsRunning = false;
 }
 
-void TestbedTimer::interrupt(){
+void StandardTimer::interrupt(){
     this->active = false;
 }
 
-TESTBED_NAMESPACE_END
+ARA_NAMESPACE_END

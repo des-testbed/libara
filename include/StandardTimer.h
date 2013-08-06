@@ -2,22 +2,21 @@
  * $FU-Copyright$
  */
 
-#ifndef _TESTBED_TIMER_H_
-#define _TESTBED_TIMER_H_
+#ifndef _STANDARD_TIMER_H_
+#define _STANDARD_TIMER_H_
+
+#include "ARAMacros.h"
+#include "Timer.h"
 
 #include <chrono>
 #include <thread>
 
-#include "Timer.h"
-#include "Testbed.h"
-#include "ThreadInterruptedException.h"
+ARA_NAMESPACE_BEGIN
 
-TESTBED_NAMESPACE_BEGIN
-
-class TestbedTimer : public Timer {
+class StandardTimer : public Timer {
     public:
-        TestbedTimer(char type, void* contextObject=nullptr);
-        virtual ~TestbedTimer();
+        StandardTimer(char type, void* contextObject=nullptr);
+        virtual ~StandardTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
         void sleep(unsigned long timeoutInMicroSeconds);
@@ -29,6 +28,6 @@ class TestbedTimer : public Timer {
         std::thread* timer;
 };
 
-TESTBED_NAMESPACE_END
+ARA_NAMESPACE_END
 
 #endif

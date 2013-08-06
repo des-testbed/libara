@@ -5,10 +5,10 @@
 #ifndef THREAD_INTERRUPTED_EXCEPTION_H_
 #define THREAD_INTERRUPTED_EXCEPTION_H_
 
-#include "Testbed.h"
+#include "ARAMacros.h"
 #include "Exception.h"
 
-TESTBED_NAMESPACE_BEGIN
+ARA_NAMESPACE_BEGIN
 
 class ThreadInterruptedException : public Exception  {
     public:
@@ -16,6 +16,6 @@ class ThreadInterruptedException : public Exception  {
         ThreadInterruptedException(const char* message);
 };
 
-TESTBED_NAMESPACE_END
+ARA_NAMESPACE_END
 
 #endif 

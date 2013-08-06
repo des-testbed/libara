@@ -4,7 +4,6 @@
 
 #include "CLibs.h"
 #include "PacketDispatcher.h"
-#include "TestbedTimer.h"
 #include "TestbedARAClient.h"
 #include "BasicConfiguration.h"
 #include "LinearPathReinforcementPolicy.h"
