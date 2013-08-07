@@ -214,7 +214,7 @@ protected:
     unsigned int packetDeliveryDelayInMilliSeconds;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;
     unsigned int neighborActivityCheckIntervalInMilliSeconds;
-    unsigned int maxNeighborInactivityTimeInMilliSeconds;
+    long maxNeighborInactivityTimeInMilliSeconds;
     unsigned int pantIntervalInMilliSeconds;
     bool isPreviousHopFeatureActivated;
     int maxNrOfRouteDiscoveryRetries;
