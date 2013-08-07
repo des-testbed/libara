@@ -23,6 +23,7 @@ class StandardTimer : public Timer {
         virtual void interrupt();
 
     private:
+        bool isCalledFromTimerThreadContext();
         void makeSureTimeIsNotRunning();
         void forcefullyStopTimer();
 
