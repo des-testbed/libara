@@ -19,6 +19,7 @@ StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, conte
 StandardTimer::~StandardTimer(){
     if (isCalledFromTimerThreadContext() == false) {
         makeSureTimeIsNotRunning();
+        DELETE_IF_NOT_NULL(timer);
     }
     else {
         // FIXME will cause a memory leak for timer
@@ -33,8 +34,6 @@ void StandardTimer::makeSureTimeIsNotRunning() {
     if (timerIsRunning) {
         forcefullyStopTimer();
     }
-
-    DELETE_IF_NOT_NULL(timer);
 }
 
 void StandardTimer::forcefullyStopTimer() {
@@ -52,6 +51,7 @@ void StandardTimer::run(unsigned long timeoutInMicroSeconds){
     }
     else {
         makeSureTimeIsNotRunning();
+        DELETE_IF_NOT_NULL(timer);
         timer = new std::thread(&StandardTimer::sleep, this, timeoutInMicroSeconds);
     }
 }
