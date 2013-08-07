@@ -51,12 +51,10 @@ void AbstractOMNeTARAClient::initialize(int stage) {
         OMNeTBattery* battery = ModuleAccess<OMNeTBattery>("battery").get();
         currentEnergyLevel = battery->getCapacity();
         routingTablePersistor = new RoutingTableDataPersistor(findHost(), par("routingTableStatisticsUpdate").longValue());
-        nodeEnergyDepletionTimestamp = currentEnergyLevel > 0 ? -1: simTime(); // not yet depleted
 
         WATCH(currentEnergyLevel);
         WATCH(nrOfDeliverablePackets);
         WATCH(nrOfNotDeliverablePackets);
-        WATCH(nodeEnergyDepletionTimestamp);
     }
 }
 
@@ -248,7 +246,6 @@ void AbstractOMNeTARAClient::handleBatteryStatusChange(Energy* energyInformation
 
     if (currentEnergyLevel <= 0) {
        hasEnoughBattery = false;
-       nodeEnergyDepletionTimestamp = simTime();
 
        // change the node color
        cDisplayString& displayString = getParentModule()->getParentModule()->getDisplayString();
@@ -315,10 +312,6 @@ void AbstractOMNeTARAClient::finish() {
     recordScalar("nrOfSentControlBits", nrOfSentControlBits);
     recordScalar("nrOfControlPackets", nrOfControlPackets);
     recordScalar("nrOfDataPackets", nrOfDataPackets);
-
-    if (nodeEnergyDepletionTimestamp > 0) {
-        recordScalar("nodeEnergyDepletionTimestamp", nodeEnergyDepletionTimestamp);
-    }
 }
 
 OMNETARA_NAMESPACE_END

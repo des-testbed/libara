@@ -134,7 +134,6 @@ class AbstractOMNeTARAClient: public virtual AbstractNetworkClient, public cSimp
         // some statistics collection
         int nrOfDeliverablePackets = 0;
         int nrOfNotDeliverablePackets = 0;
-        SimTime nodeEnergyDepletionTimestamp = -1;
 
         MobilityDataPersistor* mobilityDataPersistor = nullptr;
         RoutingTableDataPersistor* routingTablePersistor = nullptr;

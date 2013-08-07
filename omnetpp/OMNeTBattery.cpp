@@ -184,6 +184,7 @@ void OMNeTBattery::handleDepletedEnergy() {
     EV << "[BATTERY]: " << getParentModule()->getFullName() <<" 's battery exhausted" << std::endl;
     residualCapacityInMilliWattSeconds = 0;
     deactivateAllRegisteredDevices();
+    recordScalar("nodeEnergyDepletionTimestamp", simTime());
 }
 
 void OMNeTBattery::deactivateAllRegisteredDevices() {
