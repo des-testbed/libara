@@ -23,6 +23,8 @@ StandardTimer::~StandardTimer(){
     }
     else {
         // FIXME will cause a memory leak for timer
+        // After the destructor will be finished, the this pointer for StandardTimer::sleep will be invalidated.
+        // I am not sure if this will result in undefined behavior :/
     }
 }
 
