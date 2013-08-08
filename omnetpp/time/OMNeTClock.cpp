@@ -7,6 +7,8 @@
 #include "omnetpp/OMNeTTimer.h"
 #include "Environment.h"
 
+#include <memory>
+
 using namespace ARA;
 using namespace ARA::omnetpp;
 
@@ -23,9 +25,9 @@ Time* OMNeTClock::makeTime(){
     return new OMNeTTime();
 }
 
-Timer* OMNeTClock::getNewTimer(char timerType, void* contextObject) {
+TimerPtr OMNeTClock::getNewTimer(char timerType, void* contextObject) {
     unsigned int timerID = timerIDCounter++;
-    runningTimers[timerID] = new OMNeTTimer(timerID, this, timerType, contextObject);
+    runningTimers[timerID] = TimerPtr(new OMNeTTimer(timerID, this, timerType, contextObject));
     return runningTimers[timerID];
 }
 
@@ -81,8 +83,11 @@ void OMNeTClock::handleMessage(cMessage* msg) {
     pendingSelfMessages.erase(timerID);
 
     // dispatch the message
-    OMNeTTimer* expiredTimer = runningTimers[timerID];
-    expiredTimer->notifyTimeExpired();
+    TimerPtr expiredTimer = runningTimers[timerID];
+    // we need to dynamically cast the shared ptr
+    std::shared_ptr<OMNeTTimer> timer;
+    timer = std::dynamic_pointer_cast<OMNeTTimer>(expiredTimer.get());
+    timer->notifyTimeExpired();
 
     delete msg;
 }

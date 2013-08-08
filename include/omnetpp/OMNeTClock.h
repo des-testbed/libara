@@ -20,7 +20,7 @@ namespace omnetpp {
     class OMNeTClock : public Clock, public cSimpleModule {
         public:
             Time* makeTime();
-            Timer* getNewTimer(char timerType=0, void* contextObject=nullptr);
+            TimerPtr getNewTimer(char timerType=0, void* contextObject=nullptr);
 
             void startTimer(unsigned int timerID, unsigned long timeoutInMicroSeconds);
             void stopTimer(unsigned int timerID);
@@ -33,7 +33,7 @@ namespace omnetpp {
         private:
             bool isInitialized = false;
             unsigned int timerIDCounter = 0;
-            std::unordered_map<unsigned int, OMNeTTimer*> runningTimers;
+            std::unordered_map<unsigned int, TimerPtr> runningTimers;
             std::unordered_map<unsigned int, cMessage*> pendingSelfMessages;
 
             void cancelTimerEvents(unsigned int timerID);
