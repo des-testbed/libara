@@ -9,8 +9,6 @@
 
 ARA_NAMESPACE_BEGIN
 
-class Timer;
-
 /**
  * The TimeoutEventListener is used by the Timer class. Its the listener interface
  * which is notified in case a timer timed out.
