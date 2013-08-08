@@ -67,6 +67,25 @@ class Timer {
         std::deque<TimeoutEventListener*> listeners;
 };
 
+/**
+ * This Functor is needed for std::unordered_map (hashmap implementation)
+ */
+struct TimerHash {
+    size_t operator()(std::shared_ptr<Timer> timer) const {
+        // use the pointer address as
+        return (size_t) timer.get();
+    }
+};
+
+/**
+ * This Functor is needed for std::unordered_map (hashmap implementation)
+ */
+struct TimerPredicate {
+    size_t operator()(std::shared_ptr<Timer> timer1, std::shared_ptr<Timer> timer2) const {
+        return timer1.get() == timer2.get();
+    }
+};
+
 ARA_NAMESPACE_END
 
 #endif 

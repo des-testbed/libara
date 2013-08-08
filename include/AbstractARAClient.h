@@ -38,7 +38,7 @@ typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressH
 typedef std::unordered_map<AddressPtr, unsigned int, AddressHash, AddressPredicate> LastRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>, AddressHash, AddressPredicate> NeighborActivityMap;
 typedef std::unordered_map<AddressPtr, TimerPtr, AddressHash, AddressPredicate> ScheduledPANTsMap;
-typedef std::unordered_set<TimerPtr> DeliveryTimerSet;
+typedef std::unordered_set<TimerPtr, TimerHash, TimerPredicate> DeliveryTimerSet;
 
 /**
  * TODO write class description

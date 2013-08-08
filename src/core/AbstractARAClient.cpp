@@ -575,7 +575,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(TimerPtr routeDiscovery
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     }
     else {
-        // delete the route discovery timer
+        // delete the route discovery timer info
         runningRouteDiscoveries.erase(destination);
         delete discoveryInfo;
 
@@ -625,8 +625,6 @@ bool AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
 
     NeighborActivityMap::const_iterator foundNeighbor = neighborActivityTimes.find(nextHop);
     if(foundNeighbor != neighborActivityTimes.end()) {
-        // delete the associated Time object first
-        delete foundNeighbor->second.first;
         neighborActivityTimes.erase(nextHop);
     }
 
