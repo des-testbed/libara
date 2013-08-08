@@ -30,6 +30,6 @@ void Timer::addTimeoutListener(TimeoutEventListener* listener) {
 
 void Timer::notifyAllListeners() {
     for(auto& listener: listeners) {
-        listener->timerHasExpired(this);
+        listener->timerHasExpired(TimerPtr(this));
     }
 }

@@ -11,11 +11,9 @@
 #define ARA_NAMESPACE_BEGIN namespace ARA {
 #define ARA_NAMESPACE_END }
 
-#include "Timer.h"
-#include "Address.h"
-
 ARA_NAMESPACE_BEGIN
 class Timer;
+class Address;
 
 typedef std::shared_ptr<Address> AddressPtr;
 typedef std::shared_ptr<Timer> TimerPtr;
