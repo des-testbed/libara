@@ -27,8 +27,8 @@ Time* OMNeTClock::makeTime(){
 
 TimerPtr OMNeTClock::getNewTimer(char timerType, void* contextObject) {
     unsigned int timerID = timerIDCounter++;
-    runningTimers[timerID] = TimerPtr(new OMNeTTimer(timerID, this, timerType, contextObject));
-    return runningTimers[timerID];
+    runningTimers[timerID] = OMNeTTimerPtr(new OMNeTTimer(timerID, this, timerType, contextObject));
+    return std::dynamic_pointer_cast<Timer>(runningTimers[timerID]);
 }
 
 void OMNeTClock::startTimer(unsigned int timerID, unsigned long timeoutInMicroSeconds) {
@@ -83,11 +83,9 @@ void OMNeTClock::handleMessage(cMessage* msg) {
     pendingSelfMessages.erase(timerID);
 
     // dispatch the message
-    TimerPtr expiredTimer = runningTimers[timerID];
+    OMNeTTimerPtr expiredTimer = runningTimers[timerID];
     // we need to dynamically cast the shared ptr
-    std::shared_ptr<OMNeTTimer> timer;
-    timer = std::dynamic_pointer_cast<OMNeTTimer>(expiredTimer.get());
-    timer->notifyTimeExpired();
+    expiredTimer->notifyTimeExpired();
 
     delete msg;
 }

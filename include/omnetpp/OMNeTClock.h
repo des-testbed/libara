@@ -16,6 +16,7 @@ namespace ARA {
 namespace omnetpp {
 
     class OMNeTTimer;
+    typedef std::shared_ptr<OMNeTTimer> OMNeTTimerPtr;
 
     class OMNeTClock : public Clock, public cSimpleModule {
         public:
@@ -33,7 +34,7 @@ namespace omnetpp {
         private:
             bool isInitialized = false;
             unsigned int timerIDCounter = 0;
-            std::unordered_map<unsigned int, TimerPtr> runningTimers;
+            std::unordered_map<unsigned int, OMNeTTimerPtr> runningTimers;
             std::unordered_map<unsigned int, cMessage*> pendingSelfMessages;
 
             void cancelTimerEvents(unsigned int timerID);
