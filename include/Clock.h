@@ -5,8 +5,8 @@
 #ifndef CLOCK_H_
 #define CLOCK_H_
 
-#include "Time.h"
 #include "ARAMacros.h"
+#include "Time.h"
 #include "Timer.h"
 
 ARA_NAMESPACE_BEGIN

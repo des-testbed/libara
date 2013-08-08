@@ -99,9 +99,9 @@ EARAPacketFactory* EARAClientMock::getPacketFactory() {
     return packetFactory;
 }
 
-TimerMock* EARAClientMock::getRouteDiscoveryDelayTimer(AddressPtr source) {
+TimerMockPtr EARAClientMock::getRouteDiscoveryDelayTimer(AddressPtr source) {
     if (runningRouteDiscoveryDelayTimers.find(source) != runningRouteDiscoveryDelayTimers.end()) {
-        return (TimerMock*) runningRouteDiscoveryDelayTimers[source];
+        return std::dynamic_pointer_cast<TimerMock>(runningRouteDiscoveryDelayTimers[source]);
     }
     else {
         return nullptr;

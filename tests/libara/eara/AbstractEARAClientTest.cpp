@@ -84,7 +84,7 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfFANT) {
     client->receivePacket(fant, interface);
 
     // we need the timer to trigger the actual sending of the FANT
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
+    TimerMockPtr routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
     CHECK(routeDiscoveryDelayTimer != nullptr);
     CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
     CHECK(routeDiscoveryDelayTimer->isRunning());
@@ -242,7 +242,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
 
     // no packet should have been broadcasted just yet
     BYTES_EQUAL(0, sentPackets->size());
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
+    TimerMockPtr routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
     CHECK(routeDiscoveryDelayTimer != nullptr);
     CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
     CHECK(routeDiscoveryDelayTimer->isRunning());
@@ -303,7 +303,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelayIsUsedForNextRouteDiscovery) {
 
     // no packet should have been broadcasted just yet
     BYTES_EQUAL(0, sentPackets->size());
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
+    TimerMockPtr routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
     CHECK(routeDiscoveryDelayTimer != nullptr);
     CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
     CHECK(routeDiscoveryDelayTimer->isRunning());
@@ -490,7 +490,7 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfPEANT) {
     client->receivePacket(peant, interface);
 
     // we need the timer to trigger the actual sending of the PEANT
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
+    TimerMockPtr routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
     CHECK(routeDiscoveryDelayTimer != nullptr);
     CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
     CHECK(routeDiscoveryDelayTimer->isRunning());

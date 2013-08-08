@@ -14,12 +14,14 @@
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "BasicConfiguration.h"
+#include "testAPI/mocks/time/TimerMock.h"
 
 #include <string>
 
 ARA_NAMESPACE_BEGIN
 
 class NetworkInterfaceMock;
+typedef std::shared_ptr<TimerMock> TimerMockPtr;
 
 /**
  * A ARAClientMock implements the abstract ARA Client and holds references to
@@ -45,7 +47,7 @@ public:
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "localhost");
     unsigned int getPacketDeliveryDelay() const;
 
-    Timer* getNeighborActivityTimer() const;
+    TimerMockPtr getNeighborActivityTimer() const;
 
     /**
      * Makes this client forget this neighbor (if he ever knew it)
@@ -53,7 +55,7 @@ public:
      */
     void forget(AddressPtr neighbor);
 
-    Timer* getPANTsTimer(AddressPtr destination);
+    TimerMockPtr getPANTsTimer(AddressPtr destination);
 
     // make some methods public for testing purposes
     using AbstractARAClient::hasBeenReceivedEarlier;

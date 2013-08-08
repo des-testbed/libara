@@ -23,18 +23,14 @@ TEST(ClockMockTest, makeTime) {
 
 TEST(ClockMockTest, getNewTimer) {
     ClockMock clock = ClockMock();
-    Timer* newTimer = clock.getNewTimer();
+    TimerPtr newTimer = clock.getNewTimer();
 
-    TimerMock* timerMockInstance = dynamic_cast<TimerMock*>(newTimer);
+    TimerMockPtr timerMockInstance = std::dynamic_pointer_cast<TimerMock>(newTimer);
     CHECK(timerMockInstance != NULL);
-
-    delete newTimer;
 }
 
 TEST(ClockMockTest, getLastTimer) {
     ClockMock clock = ClockMock();
-    Timer* timer = clock.getNewTimer();
+    TimerPtr timer = clock.getNewTimer();
     CHECK(clock.getLastTimer() == timer);
-
-    delete timer;
 }

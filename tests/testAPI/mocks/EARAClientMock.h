@@ -19,6 +19,8 @@
 
 ARA_NAMESPACE_BEGIN
 
+typedef std::shared_ptr<TimerMock> TimerMockPtr;
+
 /**
  * A EARAClientMock implements the abstract EARA Client and holds references to
  * other mocks for testing the routing table, packet trap and network interfaces.
@@ -43,8 +45,8 @@ public:
     PacketTrap* getPacketTrap();
     EnergyAwareRoutingTable* getRoutingTable();
     EARAPacketFactory* getPacketFactory();
-    TimerMock* getEnergyDisseminationTimer();
-    TimerMock* getRouteDiscoveryDelayTimer(AddressPtr source);
+    TimerMockPtr getEnergyDisseminationTimer();
+    TimerMockPtr getRouteDiscoveryDelayTimer(AddressPtr source);
 
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
 

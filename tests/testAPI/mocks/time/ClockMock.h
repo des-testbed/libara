@@ -9,17 +9,21 @@
 #include "TimeMock.h"
 #include "TimerMock.h"
 
-namespace ARA {
-    class ClockMock : public Clock {
-        public:
-            Time* makeTime();
-            Timer* getNewTimer(char timerType=-1, void* contextObject=nullptr);
+ARA_NAMESPACE_BEGIN
 
-            TimerMock* getLastTimer();
+typedef std::shared_ptr<TimerMock> TimerMockPtr;
 
-        private:
-            TimerMock* lastTimer = nullptr;
-    };
-}
+class ClockMock : public Clock {
+    public:
+        Time* makeTime();
+        TimerPtr getNewTimer(char timerType=-1, void* contextObject=nullptr);
+
+        TimerMockPtr getLastTimer();
+
+    private:
+        TimerMockPtr lastTimer = nullptr;
+};
+
+ARA_NAMESPACE_END
 
 #endif

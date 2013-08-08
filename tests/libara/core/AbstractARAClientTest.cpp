@@ -644,7 +644,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsStartedAgainOnTimeout) {
 
     // get the route discovery timer which is used by the client
     ClockMock* clock = (ClockMock*) Environment::getClock();
-    TimerMock* routeDiscoveryTimer = clock->getLastTimer();
+    TimerMockPtr routeDiscoveryTimer = clock->getLastTimer();
 
     CHECK(routeDiscoveryTimer->getType() == TimerType::ROUTE_DISCOVERY_TIMER);
     CHECK(routeDiscoveryTimer->isRunning());
@@ -697,7 +697,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsAbortedIfToManyTimeoutsOccured) {
 
     // get the route discovery timer which is used by the client
     ClockMock* clock = (ClockMock*) Environment::getClock();
-    TimerMock* routeDiscoveryTimer = clock->getLastTimer();
+    TimerMockPtr routeDiscoveryTimer = clock->getLastTimer();
 
     CHECK(routeDiscoveryTimer->getType() == TimerType::ROUTE_DISCOVERY_TIMER);
     CHECK(routeDiscoveryTimer->isRunning());
@@ -1250,7 +1250,7 @@ TEST(AbstractARAClientTest, clientWaitsBeforeSendingTheDATA) {
 
     // Let the send timer expire
     ClockMock* clock = (ClockMock*) Environment::getClock();
-    TimerMock* sendTimer = clock->getLastTimer();
+    TimerMockPtr sendTimer = clock->getLastTimer();
     sendTimer->expire();
     BYTES_EQUAL(2, sentPackets->size());
     CHECK(packetTrap->isEmpty());
@@ -1328,7 +1328,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwice) {
     client->sendPacket(packet1);
 
     ClockMock* clock = (ClockMock*) Environment::getClock();
-    TimerMock* routeDiscoveryTimer = clock->getLastTimer();
+    TimerMockPtr routeDiscoveryTimer = clock->getLastTimer();
 
     // a route discovery should have been started for packet1
     CHECK(routeDiscoveryTimer->getType() == TimerType::ROUTE_DISCOVERY_TIMER);
@@ -1371,7 +1371,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceSpecialCase) {
     client->sendPacket(packet1);
 
     ClockMock* clock = (ClockMock*) Environment::getClock();
-    TimerMock* routeDiscoveryTimer = clock->getLastTimer();
+    TimerMockPtr routeDiscoveryTimer = clock->getLastTimer();
 
     // a route discovery should have been started for packet1
     CHECK(routeDiscoveryTimer->getType() == TimerType::ROUTE_DISCOVERY_TIMER);
@@ -1391,7 +1391,7 @@ TEST(AbstractARAClientTest, routeDiscoveryIsNotStartedTwiceSpecialCase) {
     client->receivePacket(bant, interface);
 
     // now a delivery timer should be running as long as the client waits for other BANTs to come back from the destination
-    TimerMock* deliveryTimer = clock->getLastTimer();
+    TimerMockPtr deliveryTimer = clock->getLastTimer();
 
     // meanwhile the upper layer has generated another packet to send to the destination
     Packet* packet2 = new Packet(source, destination, source, PacketType::DATA, 2, 10);
@@ -1772,7 +1772,7 @@ TEST(AbstractARAClientTest, deleteAllKnownRoutesViaNextHopwhenLinkIsBroken) {
  */
 TEST(AbstractARAClientTest, sendHelloPacketToInactiveNeighbors) {
     activateNeighborActivityCheck(500);
-    TimerMock* neighborActivityTimer = (TimerMock*) client->getNeighborActivityTimer();
+    TimerMockPtr neighborActivityTimer = client->getNeighborActivityTimer();
 
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock("A");
     SendPacketsList* sentPackets = interface->getSentPackets();
@@ -1953,7 +1953,7 @@ TEST(AbstractARAClientTest, chainRouteFailuresIfCriticalLinkBroke) {
  */
 TEST(AbstractARAClientTest, helloPacketTimersAreOnlystartedForDataAndAntPackets) {
     activateNeighborActivityCheck(500);
-    TimerMock* neighborActivityTimer = (TimerMock*) client->getNeighborActivityTimer();
+    TimerMockPtr neighborActivityTimer = client->getNeighborActivityTimer();
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
     SendPacketsList* sentPackets = interface->getSentPackets();
     AddressPtr localAddress = interface->getLocalAddress();
@@ -2095,7 +2095,7 @@ TEST(AbstractARAClientTest, scheduledPANTTimersAreDeletedInDestructor) {
     client->receivePacket(somePacket, interface);
 
     // check if the PANT timer is running
-    TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(source);
+    TimerMockPtr pantTimer = client->getPANTsTimer(source);
     CHECK(pantTimer != nullptr);
     CHECK(pantTimer->getType() == TimerType::PANTS_TIMER);
     CHECK(pantTimer->isRunning());
@@ -2126,7 +2126,7 @@ TEST(AbstractARAClientTest, PANTSAreNotSendByIntermediateNodes) {
     client->sendPacket(somePacket);
 
     // check that a PANT timer has *not* been started
-    TimerMock* pantTimer = (TimerMock*) client->getPANTsTimer(destination);
+    TimerMockPtr pantTimer = client->getPANTsTimer(destination);
     CHECK(pantTimer == nullptr);
 }
 
@@ -2200,7 +2200,7 @@ TEST(AbstractARAClientTest, startToSendPacketsOnlyIfclientReceivesData) {
     CHECK(client->getPANTsTimer(source2) == nullptr);
 
     // check if PANT1 is sent
-    TimerMock* pantTimer1 = (TimerMock*) client->getPANTsTimer(source1);
+    TimerMockPtr pantTimer1 = client->getPANTsTimer(source1);
     CHECK(pantTimer1->isRunning());
     TimeMock::letTimePass(1000);
     pantTimer1->expire();
@@ -2221,7 +2221,7 @@ TEST(AbstractARAClientTest, startToSendPacketsOnlyIfclientReceivesData) {
     CHECK(client->getPANTsTimer(source2) != nullptr);
 
     // check if PANT1 is sent
-    TimerMock* pantTimer2 = (TimerMock*) client->getPANTsTimer(source2);
+    TimerMockPtr pantTimer2 = client->getPANTsTimer(source2);
     CHECK(pantTimer2->isRunning());
     TimeMock::letTimePass(1000);
     pantTimer2->expire();

@@ -83,8 +83,8 @@ unsigned int ARAClientMock::getPacketDeliveryDelay() const {
     return packetDeliveryDelayInMilliSeconds;
 }
 
-Timer* ARAClientMock::getNeighborActivityTimer() const {
-    return neighborActivityTimer;
+TimerMockPtr ARAClientMock::getNeighborActivityTimer() const {
+    return std::dynamic_pointer_cast<TimerMock>(neighborActivityTimer);
 }
 
 void ARAClientMock::forget(AddressPtr neighbor) {
@@ -102,12 +102,12 @@ void ARAClientMock::forget(AddressPtr neighbor) {
     }
 }
 
-Timer* ARAClientMock::getPANTsTimer(AddressPtr destination) {
+TimerMockPtr ARAClientMock::getPANTsTimer(AddressPtr destination) {
     if (scheduledPANTs.find(destination) == scheduledPANTs.end()) {
         return nullptr;
     }
     else {
-        return scheduledPANTs[destination];
+        return std::dynamic_pointer_cast<TimerMock>(scheduledPANTs[destination]);
     }
 }
 
