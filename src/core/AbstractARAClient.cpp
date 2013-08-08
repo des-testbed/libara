@@ -56,8 +56,6 @@ AbstractARAClient::~AbstractARAClient() {
     for (RunningRouteDiscoveriesMap::iterator iterator=runningRouteDiscoveries.begin(); iterator!=runningRouteDiscoveries.end(); iterator++) {
         TimerPtr timer = iterator->second;
         delete (RouteDiscoveryInfo*) timer->getContextObject();
- // TODO: Delete?
-//        delete timer;
     }
     runningRouteDiscoveries.clear();
 
@@ -71,8 +69,6 @@ AbstractARAClient::~AbstractARAClient() {
     for (DeliveryTimerSet::iterator iterator=runningDeliveryTimers.begin(); iterator!=runningDeliveryTimers.end(); iterator++) {
         TimerPtr timer = *iterator;
         delete (TimerAddressInfo*) timer->getContextObject();
-// TODO Delete?
-//        delete timer;
     }
     runningDeliveryTimers.clear();
 
@@ -86,8 +82,6 @@ AbstractARAClient::~AbstractARAClient() {
     for (ScheduledPANTsMap::iterator iterator=scheduledPANTs.begin(); iterator!=scheduledPANTs.end(); iterator++) {
         TimerPtr timer = iterator->second;
         delete (TimerAddressInfo*) timer->getContextObject();
-// TODO: Delete?
-//        delete timer;
     }
     scheduledPANTs.clear();
 
