@@ -5,8 +5,9 @@
 #ifndef LINEAR_EVAPORATION_POLICY_H_
 #define LINEAR_EVAPORATION_POLICY_H_
 
-#include "EvaporationPolicy.h"
 #include "Clock.h"
+#include "ARAMacros.h"
+#include "EvaporationPolicy.h"
 
 namespace ARA {
 

@@ -12,8 +12,8 @@ Time* UnixClock::makeTime() {
    return new UnixTime();
 }
 
-Timer* UnixClock::getNewTimer(char timerType, void* contextObject) {
-    return new UnixTimer(timerType, contextObject);
+TimerPtr UnixClock::getNewTimer(char timerType, void* contextObject) {
+    return TimerPtr(new UnixTimer(timerType, contextObject));
 }
 
 ARA_NAMESPACE_END

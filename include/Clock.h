@@ -5,8 +5,8 @@
 #ifndef CLOCK_H_
 #define CLOCK_H_
 
-#include "ARAMacros.h"
 #include "Time.h"
+#include "ARAMacros.h"
 #include "Timer.h"
 
 ARA_NAMESPACE_BEGIN
@@ -35,7 +35,7 @@ class Clock {
          *                    This is helpful to distinguish conceptually different timers.
          * @param contextObject: an optional parameter which can provide some context when the timer is expired
          */
-        virtual Timer* getNewTimer(char timerType=-1, void* contextObject=nullptr) = 0;
+        virtual TimerPtr getNewTimer(char timerType=-1, void* contextObject=nullptr) = 0;
         //TODO use the TimerType enum and remove the default parameter
 };
 

@@ -30,11 +30,10 @@ void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration) {
 AbstractEARAClient::~AbstractEARAClient() {
     // delete running delivery timers
     for (RouteDiscoveryDelayTimerMap::iterator iterator=runningRouteDiscoveryDelayTimers.begin(); iterator!=runningRouteDiscoveryDelayTimers.end(); iterator++) {
-        Timer* timer = iterator->second;
+        TimerPtr timer = iterator->second;
         AntPacketRouteFitness* bestAnt = (AntPacketRouteFitness*) timer->getContextObject();
         delete bestAnt->packet;
         delete bestAnt;
-        delete timer;
     }
     runningRouteDiscoveryDelayTimers.clear();
 }
@@ -162,7 +161,7 @@ void AbstractEARAClient::handleAntPacketWithDelayTimer(Packet* antPacket, Networ
         startNewRouteDiscoveryDelayTimer(antPacket, routeEnergyOfNewAnt);
     }
     else {
-        Timer* delayTimer = found->second;
+        TimerPtr delayTimer = found->second;
         AntPacketRouteFitness* bestAnt = (AntPacketRouteFitness*) delayTimer->getContextObject();
 
         float routeFitnessOfNewAnt = calculateRouteFitness(antPacket->getTTL(), routeEnergyOfNewAnt);
@@ -182,7 +181,7 @@ void AbstractEARAClient::startNewRouteDiscoveryDelayTimer(Packet* antPacket, flo
     contextObject->packet = antPacket;
     contextObject->routeEnergyFitness = calculateRouteFitness(antPacket->getTTL(), routeEnergyOfNewAnt);
 
-    Timer* newDelayTimer = getNewTimer(TimerType::ROUTE_DISCOVERY_DELAY_TIMER, contextObject);
+    TimerPtr newDelayTimer = getNewTimer(TimerType::ROUTE_DISCOVERY_DELAY_TIMER, contextObject);
     newDelayTimer->addTimeoutListener(this);
     newDelayTimer->run(routeDiscoveryDelayInMilliSeconds * 1000);
     runningRouteDiscoveryDelayTimers[antPacket->getSource()] = newDelayTimer;
@@ -195,7 +194,7 @@ float AbstractEARAClient::calculateRouteFitness(int ttl, float energyFitness) {
     return potentiatedPheromoneValue * potentiatedEnergyValue;
 }
 
-void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
+void AbstractEARAClient::timerHasExpired(TimerPtr responsibleTimer) {
     char timerType = responsibleTimer->getType();
     switch (timerType) {
         case TimerType::ROUTE_DISCOVERY_DELAY_TIMER:
@@ -206,12 +205,11 @@ void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
     }
 }
 
-void AbstractEARAClient::handleExpiredRouteDiscoveryDelayTimer(Timer* timer) {
+void AbstractEARAClient::handleExpiredRouteDiscoveryDelayTimer(TimerPtr timer) {
     AntPacketRouteFitness* bestAnt = (AntPacketRouteFitness*) timer->getContextObject();
     runningRouteDiscoveryDelayTimers.erase(bestAnt->packet->getSource());
     broadCast(bestAnt->packet);
     delete bestAnt;
-    delete timer;
 }
 
 void AbstractEARAClient::handleDataPacketForThisNode(Packet* packet) {

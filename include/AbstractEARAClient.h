@@ -15,7 +15,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RouteDiscoveryDelayTimerMap;
+typedef std::unordered_map<AddressPtr, TimerPtr, AddressHash, AddressPredicate> RouteDiscoveryDelayTimerMap;
 
 struct AntPacketRouteFitness {
     Packet* packet;
@@ -66,7 +66,7 @@ public:
      */
     virtual void broadCast(Packet* packet);
 
-    virtual void timerHasExpired(Timer* responsibleTimer);
+    virtual void timerHasExpired(TimerPtr responsibleTimer);
 
     /**
      * Returns the percentage (between 1 and 100) that an energy value in the routing table represents
@@ -112,7 +112,7 @@ protected:
 
     float normalizeEnergyValue(float energyValue) const;
 
-    void handleExpiredRouteDiscoveryDelayTimer(Timer* timer);
+    void handleExpiredRouteDiscoveryDelayTimer(TimerPtr timer);
 
     virtual void handleDataPacketForThisNode(Packet* packet);
 
