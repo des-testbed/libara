@@ -49,7 +49,7 @@ int PacketFactory::calculatePacketSize(Packet* packet) {
     // TTL (256 values will suffice)
     totalSize += 8;
 
-    // should be 140 bits = 7.5 bytes
+    // should be 140 bits = 17.5 bytes
     return totalSize;
 }
 
