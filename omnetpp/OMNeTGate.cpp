@@ -26,13 +26,28 @@ OMNeTGate::OMNeTGate(AbstractOMNeTARAClient* module, AbstractARAClient* araClien
 
     this->localAddress = shared_ptr<Address>(new OMNeTAddress(localAddress));
     this->broadcastAddress = shared_ptr<Address>(new OMNeTAddress(broadcastAddress));
-    this->interfaceID = interfaceEntry->getInterfaceId();
-    this->packetFactory = araClient->getPacketFactory();
-    this->networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
-    this->nrOfSentControlBits = 0;
-    this->nrOfSentDataBits = 0;
-    this->nrOfSentControlPackets = 0;
-    this->nrOfSentDataPackets = 0;
+    interfaceID = interfaceEntry->getInterfaceId();
+    packetFactory = araClient->getPacketFactory();
+    networkConfig = check_and_cast<ARANetworkConfigurator*>(simulation.getModuleByPath("networkConfigurator"));
+
+    // initialize statistics
+    nrOfSentControlPackets = 0;
+    nrOfSentDataPackets = 0;
+    nrOfSentFANTs = 0;
+    nrOfSentBANTs = 0;
+    nrOfSentPEANTs = 0;
+    nrOfSentDuplicateErrors = 0;
+    nrOfSentRouteErrors = 0;
+    nrOfSentOtherPackets = 0;
+
+    nrOfSentControlBits = 0;
+    nrOfSentDataBits = 0;
+    nrOfSentFANTBits = 0;
+    nrOfSentBANTBits = 0;
+    nrOfSentPEANTBits = 0;
+    nrOfSentDuplicateErrorBits = 0;
+    nrOfSentRouteErrorBits = 0;
+    nrOfSentOtherBits = 0;
 }
 
 void OMNeTGate::send(const Packet* packet, AddressPtr recipient) {
@@ -61,33 +76,50 @@ void OMNeTGate::send(const Packet* packet, AddressPtr recipient, double sendDela
     controlInfo->setDest(macOfNextHop);
     simPacket->setControlInfo(controlInfo);
 
-    if (packet->isDataPacket()) {
-        nrOfSentDataBits += simPacket->getBitLength();
-        nrOfSentDataPackets++;
-    }
-    else {
-        nrOfSentControlBits += simPacket->getBitLength();
-        nrOfSentControlPackets++;
-    }
+    collectStatistics(packet, simPacket);
 
     // we might have switched the context from the OMNeTTimer
     omnetARAModule->takeAndSend(simPacket, outGate, sendDelay);
 }
 
-int64 OMNeTGate::getNrOfSentDataBits() {
-    return nrOfSentDataBits;
-}
+void OMNeTGate::collectStatistics(const Packet* packet, cPacket* simPacket) {
+    if (packet->isDataPacket()) {
+        nrOfSentDataBits += simPacket->getBitLength();
+        nrOfSentDataPackets++;
+    }
+    else {
+        nrOfSentControlPackets++;
 
-int64 OMNeTGate::getNrOfSentControlBits() {
-    return nrOfSentControlBits;
-}
+        int64 packetBitSize = simPacket->getBitLength();
+        nrOfSentControlBits += packetBitSize;
 
-unsigned int OMNeTGate::getNrOfControlPackets() {
-    return nrOfSentControlPackets;
-}
-
-unsigned int OMNeTGate::getNrOfDataPackets() {
-    return nrOfSentDataPackets;
+        switch (packet->getType()) {
+            case PacketType::FANT:
+                nrOfSentFANTs++;
+                nrOfSentFANTBits += packetBitSize;
+                break;
+            case PacketType::BANT:
+                nrOfSentBANTs++;
+                nrOfSentBANTBits += packetBitSize;
+                break;
+            case PacketType::PEANT:
+                nrOfSentPEANTs++;
+                nrOfSentPEANTBits += packetBitSize;
+                break;
+            case PacketType::DUPLICATE_ERROR:
+                nrOfSentDuplicateErrors++;
+                nrOfSentDuplicateErrorBits += packetBitSize;
+                break;
+            case PacketType::ROUTE_FAILURE:
+                nrOfSentRouteErrors++;
+                nrOfSentRouteErrorBits += packetBitSize;
+                break;
+            default:
+                nrOfSentOtherPackets++;
+                nrOfSentOtherBits += packetBitSize;
+                break;
+        }
+    }
 }
 
 OMNeTAddressPtr OMNeTGate::getNextHopAddress(shared_ptr<Address> recipient) {

@@ -298,20 +298,61 @@ void AbstractOMNeTARAClient::finish() {
 
     int64 nrOfSentDataBits = 0;
     int64 nrOfSentControlBits = 0;
+    int64 nrOfSentFANTBits = 0;
+    int64 nrOfSentBANTBits = 0;
+    int64 nrOfSentPEANTBits = 0;
+    int64 nrOfSentDuplicateErrorBits = 0;
+    int64 nrOfSentRouteErrorBits = 0;
+    int64 nrOfSentOtherBits = 0;
     unsigned int nrOfControlPackets = 0;
     unsigned int nrOfDataPackets = 0;
+    unsigned int nrOfSentFANTs = 0;
+    unsigned int nrOfSentBANTs = 0;
+    unsigned int nrOfSentPEANTs = 0;
+    unsigned int nrOfSentDuplicateErrors = 0;
+    unsigned int nrOfSentRouteErrors = 0;
+    unsigned int nrOfSentOtherPackets = 0;
+
     for(auto& interface: interfaces) {
         OMNeTGate* gate = (OMNeTGate*) interface;
-        nrOfSentDataBits += gate->getNrOfSentDataBits();
-        nrOfSentControlBits += gate->getNrOfSentControlBits();
-        nrOfControlPackets += gate->getNrOfControlPackets();
-        nrOfDataPackets += gate->getNrOfDataPackets();
+        // count packets
+        nrOfControlPackets += gate->nrOfSentControlPackets;
+        nrOfDataPackets += gate->nrOfSentDataPackets;
+        nrOfSentFANTs += gate->nrOfSentFANTs;
+        nrOfSentBANTs += gate->nrOfSentBANTs;
+        nrOfSentPEANTs += gate->nrOfSentPEANTs;
+        nrOfSentDuplicateErrors += gate->nrOfSentDuplicateErrors;
+        nrOfSentRouteErrors += gate->nrOfSentRouteErrors;
+        nrOfSentOtherPackets += gate->nrOfSentOtherPackets;
+
+        // count bits
+        nrOfSentDataBits += gate->nrOfSentDataBits;
+        nrOfSentControlBits += gate->nrOfSentControlBits;
+        nrOfSentFANTBits += gate->nrOfSentFANTBits;
+        nrOfSentBANTBits += gate->nrOfSentBANTBits;
+        nrOfSentPEANTBits += gate->nrOfSentPEANTBits;
+        nrOfSentDuplicateErrorBits += gate->nrOfSentDuplicateErrorBits;
+        nrOfSentRouteErrorBits += gate->nrOfSentRouteErrorBits;
+        nrOfSentOtherBits += gate->nrOfSentOtherBits;
     }
+
+    recordScalar("nrOfControlPackets", nrOfControlPackets);
+    recordScalar("nrOfDataPackets", nrOfDataPackets);
+    recordScalar("nrOfSentFANTs", nrOfSentFANTs);
+    recordScalar("nrOfSentBANTs", nrOfSentBANTs);
+    recordScalar("nrOfSentPEANTs", nrOfSentPEANTs);
+    recordScalar("nrOfSentDuplicateErrors", nrOfSentDuplicateErrors);
+    recordScalar("nrOfSentRouteErrors", nrOfSentRouteErrors);
+    recordScalar("nrOfSentOtherPackets", nrOfSentOtherPackets);
 
     recordScalar("nrOfSentDataBits", nrOfSentDataBits);
     recordScalar("nrOfSentControlBits", nrOfSentControlBits);
-    recordScalar("nrOfControlPackets", nrOfControlPackets);
-    recordScalar("nrOfDataPackets", nrOfDataPackets);
+    recordScalar("nrOfSentFANTBits", nrOfSentFANTBits);
+    recordScalar("nrOfSentBANTBits", nrOfSentBANTBits);
+    recordScalar("nrOfSentPEANTBits", nrOfSentPEANTBits);
+    recordScalar("nrOfSentDuplicateErrorBits", nrOfSentDuplicateErrorBits);
+    recordScalar("nrOfSentRouteErrorBits", nrOfSentRouteErrorBits);
+    recordScalar("nrOfSentOtherBits", nrOfSentOtherBits);
 }
 
 OMNETARA_NAMESPACE_END
