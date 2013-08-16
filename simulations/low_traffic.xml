@@ -8,7 +8,7 @@
 <configurations>
 	<!-- Traffic for receiver [1] -->
     <config id="1"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.1"
@@ -18,7 +18,7 @@
         
     <!-- Traffic for receiver [2] -->
     <config id="2"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.2"
@@ -28,7 +28,7 @@
     
     <!-- Traffic for receiver [3] -->
     <config id="3"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.3"
@@ -38,7 +38,7 @@
         
     <!-- Traffic for receiver [4] -->
     <config id="4"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.4"
@@ -48,7 +48,7 @@
         
     <!-- Traffic for receiver [5] -->
     <config id="5"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.5"
@@ -58,7 +58,7 @@
         
      <!-- Traffic for receiver [6] -->
     <config id="6"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.6"
@@ -68,7 +68,7 @@
         
      <!-- Traffic for receiver [7] -->
     <config id="7"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.7"
@@ -78,7 +78,7 @@
         
     <!-- Traffic for receiver [8] -->
     <config id="8"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.8"
@@ -88,7 +88,7 @@
         
     <!-- Traffic for receiver [9] -->
     <config id="9"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.9"
@@ -98,7 +98,7 @@
         
      <!-- Traffic for receiver [10] -->
     <config id="10"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.10"
@@ -108,7 +108,7 @@
         
      <!-- Traffic for receiver [11] -->
     <config id="11"
-        packetSize="5120"
+        packetSize="1280"
         interDepartureTime="0.2"
         firstPacketTime="0"
         trafDest="192.168.0.11"
