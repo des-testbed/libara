@@ -46,6 +46,13 @@ Have a bug or feature request? Please create an issue here on GitHub!
 
 https://github.com/des-testbed/ara-sim/issues
 
+
+
+Publications
+------------
+1. Friedrich Grosse, **Optimization and Evaluation of Energy Aware Ant Routing Algorithm Strategies Based on Network Simulations**, Master Thesis, August 2013
+
+
 License
 -------
 tba.
