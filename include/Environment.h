@@ -42,7 +42,6 @@ public:
     static void notifyClockHasBeenDeleted();
 
 private:
-    static Environment* instance;
     Clock* clock;
 
     /**

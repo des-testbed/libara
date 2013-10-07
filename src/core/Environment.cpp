@@ -7,8 +7,6 @@
 
 ARA_NAMESPACE_BEGIN
 
-Environment* Environment::instance = nullptr;
-
 Environment::Environment() {
     clock = new UnixClock();
 }
@@ -27,10 +25,8 @@ void Environment::notifyClockHasBeenDeleted() {
 }
 
 Environment& Environment::getInstance() {
-    if (instance == nullptr) {
-       instance = new Environment();
-    }
-    return *instance;
+    static Environment instance;
+    return instance;
 }
 
 Clock* Environment::getClock() {
