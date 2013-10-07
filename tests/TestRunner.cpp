@@ -6,7 +6,7 @@
 
 #include "CppUTest/TestRegistry.h"
 #include "CppUTest/CommandLineTestRunner.h"
-#include "EnvironmentPlugin.h"
+#include "testAPI/plugins/EnvironmentPlugin.h"
 #include "Exception.h"
 #include "testAPI/mocks/time/ClockMock.h"
 #include <iostream>
