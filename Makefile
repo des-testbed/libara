@@ -51,7 +51,7 @@ else
 endif
 
 CFLAGS_DEBUG = -g -Wall
-CFLAGS_RELEASE = -O2 -DNDEBUG=1
+FLAGS_RELEASE = -O2 -DNDEBUG=1
 
 MKPATH = mkdir -p
 

@@ -18,7 +18,7 @@ Environment::~Environment() {
 }
 
 void Environment::setTheClock(Clock* newClock) {
-    delete clock;
+    DELETE_IF_NOT_NULL(clock);
     clock = newClock;
 }
 
