@@ -200,19 +200,24 @@ void AbstractARAClient::handlePacketWithZeroTTL(Packet* packet) {
 
 void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interface) {
     updateRoutingTable(packet, interface);
+    logTrace("receivePacket: will decrease TTL");
     packet->decreaseTTL();
 
     if(hasBeenReceivedEarlier(packet)) {
+        logTrace("receivePacket: packet has been received earlier");
         handleDuplicatePacket(packet, interface);
     }
     else {
+        logTrace("receivePacket: will register received packet");
         registerReceivedPacket(packet);
+        logTrace("receivePacket: handle packet");
         handlePacket(packet, interface);
     }
 }
 
 void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* interface) {
     if(packet->isDataPacket()) {
+        logTrace("receivePacket: packet is data packet and will send now duplicate warning");
         sendDuplicateWarning(packet, interface);
     }
     else if(packet->getType() == PacketType::BANT && isDirectedToThisNode(packet)) {
@@ -481,17 +486,22 @@ void AbstractARAClient::handleDuplicateErrorPacket(Packet* duplicateErrorPacket,
 }
 
 bool AbstractARAClient::hasBeenReceivedEarlier(const Packet* packet) {
+    logTrace("hasBeenReceivedEarlier: get source");
     AddressPtr source = packet->getSource();
+    logTrace("hasBeenReceivedEarlier: get sequence number");
     unsigned int sequenceNumber = packet->getSequenceNumber();
 
+    logTrace("hasBeenReceivedEarlier: iterate over last received packets");
     LastReceivedPacketsMap::const_iterator receivedPacketSeqNumbersFromSource = lastReceivedPackets.find(source);
     if(receivedPacketSeqNumbersFromSource != lastReceivedPackets.end()) {
         unordered_set<unsigned int>* sequenceNumbers = receivedPacketSeqNumbersFromSource->second;
         unordered_set<unsigned int>::const_iterator got = sequenceNumbers->find(sequenceNumber);
         if(got != sequenceNumbers->end()) {
+            logTrace("hasBeenReceivedEarlier: found packet");
             return true;
         }
     }
+    logTrace("hasBeenReceivedEarlier: found no packet");
     return false;
 }
 

@@ -15,6 +15,8 @@
 #include "Clock.h"
 
 #include <deque>
+#include <iostream>
+#include <stdexcept>
 #include <unordered_map>
 
 ARA_NAMESPACE_BEGIN

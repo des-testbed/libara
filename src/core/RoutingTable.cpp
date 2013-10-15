@@ -39,98 +39,113 @@ void RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInt
 
 
 void RoutingTable::update(AddressPtr destination, RoutingTableEntry* newEntry) {
-    if (table.find(destination) == table.end()) {
-        // this is a new entry
-        RoutingTableEntryList* entryList = new RoutingTableEntryList();
-        entryList->push_back(newEntry);
-        table[destination] = entryList;
-    }
-    else {
-        // there is at least one registered route for this destination
-        RoutingTableEntryList* entryList = table[destination];
-        bool entryHasBeenUpdated = false;
-        for (auto& entry: *entryList) {
-            if (entry->getAddress()->equals(newEntry->getAddress()) && entry->getNetworkInterface()->equals(newEntry->getNetworkInterface())) {
-                updateExistingEntry(entry, newEntry);
-                entryHasBeenUpdated = true;
+    try {
+        if (table.find(destination) == table.end()) {
+            // this is a new entry
+            RoutingTableEntryList* entryList = new RoutingTableEntryList();
+            entryList->push_back(newEntry);
+            table[destination] = entryList;
+        } else {
+            // there is at least one registered route for this destination
+            RoutingTableEntryList* entryList = table[destination];
+            bool entryHasBeenUpdated = false;
+
+            for (auto& entry: *entryList) {
+                if (entry->getAddress()->equals(newEntry->getAddress()) && entry->getNetworkInterface()->equals(newEntry->getNetworkInterface())) {
+                    updateExistingEntry(entry, newEntry);
+                    entryHasBeenUpdated = true;
+                }
+            }
+
+            if (entryHasBeenUpdated == false) {
+                entryList->push_back(newEntry);
+            } else {
+                delete newEntry;
             }
         }
-
-        if (entryHasBeenUpdated == false) {
-            entryList->push_back(newEntry);
-        }
-        else{
-            delete newEntry;
-        }
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::updateExistingEntry: An out of range error occured! Reason was: " << rangeError.what() << std::endl;
     }
+    
 }
 
 void RoutingTable::updateExistingEntry(RoutingTableEntry* oldEntry, RoutingTableEntry* newEntry){
-    oldEntry->setPheromoneValue(newEntry->getPheromoneValue());
+    try {
+        oldEntry->setPheromoneValue(newEntry->getPheromoneValue());
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::updateExistingEntry: An out of range error occured! Reason was: " << rangeError.what() << std::endl;
+    }
 }
 
 void RoutingTable::removeEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-    if (table.find(destination) != table.end()) {
-        RoutingTableEntryList* entryList = table[destination];
-        RoutingTableEntryList::iterator iterator = entryList->begin();
+    try {
+        if (table.find(destination) != table.end()) {
+            RoutingTableEntryList* entryList = table[destination];
+            RoutingTableEntryList::iterator iterator = entryList->begin();
 
-        if (iterator != entryList->end()) {
-            while (iterator != entryList->end()) {
-                RoutingTableEntry* entry = *iterator;
-                if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
-                    entryList->erase(iterator);
-                    delete entry;
-                    break;
+            if (iterator != entryList->end()) {
+                while (iterator != entryList->end()) {
+                    RoutingTableEntry* entry = *iterator;
+                    if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+                        entryList->erase(iterator);
+                        delete entry;
+                        break;
+                    }
+                    iterator++;
                 }
-                iterator++;
-            }
 
-            if (entryList->empty()) {
-                // this was the last entry so we can delete the whole list
-                table.erase(destination);
-                delete entryList;
+                if (entryList->empty()) {
+                    // this was the last entry so we can delete the whole list
+                    table.erase(destination);
+                    delete entryList;
+                }
             }
         }
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::removeEntry: An out of range error occured! Reason was: " << rangeError.what() << std::endl;
     }
 }
 
 RoutingTableEntryList RoutingTable::getPossibleNextHops(const Packet* packet) {
-    if (isDeliverable(packet->getDestination())) {
-        AddressPtr source = packet->getSource();
-        AddressPtr sender = packet->getSender();
+    try {
+        if (isDeliverable(packet->getDestination())) {
+            AddressPtr source = packet->getSource();
+            AddressPtr sender = packet->getSender();
 
-        RoutingTableEntryList* availableHops = table[packet->getDestination()];
-        RoutingTableEntryList returnedList = RoutingTableEntryList(*availableHops);
+            RoutingTableEntryList* availableHops = table[packet->getDestination()];
+            RoutingTableEntryList returnedList = RoutingTableEntryList(*availableHops);
 
-        // remove all entries that would route the packet back over the source or sender of the packet (would create a loop)
-        RoutingTableEntryList::iterator iterator = returnedList.begin();
-        while (iterator != returnedList.end()) {
-            RoutingTableEntry* entry = *iterator;
-            AddressPtr possibleNextHop = entry->getAddress();
-            if (possibleNextHop->equals(source) || possibleNextHop->equals(sender) ) {
-                iterator = returnedList.erase(iterator);
+            // remove all entries that would route the packet back over the source or sender of the packet (would create a loop)
+            RoutingTableEntryList::iterator iterator = returnedList.begin();
+            while (iterator != returnedList.end()) {
+                RoutingTableEntry* entry = *iterator;
+                AddressPtr possibleNextHop = entry->getAddress();
+                if (possibleNextHop->equals(source) || possibleNextHop->equals(sender) ) {
+                    iterator = returnedList.erase(iterator);
+                } else {
+                    iterator++;
+                }
             }
-            else {
-                iterator++;
-            }
+
+            return returnedList;
         }
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::getPossibleNextHops: An out of range error occured! Reason was: " << rangeError.what() << std::endl;
+    }
 
-        return returnedList;
-    }
-    else {
-        // return empty list
-        return RoutingTableEntryList();
-    }
+    return RoutingTableEntryList();
 }
 
 RoutingTableEntryList RoutingTable::getPossibleNextHops(AddressPtr destination) {
-    if (isDeliverable(destination)) {
-        return *(table[destination]);
+    try {
+        if (isDeliverable(destination)) {
+            return *(table[destination]);
+        } 
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::getPossibleNextHops: An out of range error occured! Reason was: " << rangeError.what() << std::endl;
     }
-    else {
-        // return empty list
-        return RoutingTableEntryList();
-    }
+    
+    return RoutingTableEntryList();
 }
 
 bool RoutingTable::isDeliverable(AddressPtr destination) {
@@ -143,26 +158,34 @@ bool RoutingTable::isDeliverable(const Packet* packet) {
 }
 
 float RoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
-    if (isDeliverable(destination)) {
-        RoutingTableEntryList* entryList = table[destination];
-        for (auto& entry: *entryList) {
-            if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
-                return entry->getPheromoneValue();
+    try {
+        if (isDeliverable(destination)) {
+            RoutingTableEntryList* entryList = table[destination];
+            for (auto& entry: *entryList) {
+                if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
+                    return entry->getPheromoneValue();
+                }
             }
         }
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::getPheromoneValue: An out of range error occured! Reason was: " << rangeError.what() << std::endl;
     }
 
     return 0;
 }
 
 bool RoutingTable::exists(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface){
-    if (isDeliverable(destination)) {
-        RoutingTableEntryList* entries = table[destination];
-        for (auto& entry: *entries) {
-            if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){
-                return true;
+    try {
+        if (isDeliverable(destination)) {
+            RoutingTableEntryList* entries = table[destination];
+            for (auto& entry: *entries) {
+                if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)){
+                    return true;
+                }
             }
         }
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::exists: An out of range error occured! Reason was: " << rangeError.what() << std::endl;
     }
 
     return false;
@@ -178,8 +201,7 @@ void RoutingTable::triggerEvaporation() {
 
     if (hasTableBeenAccessedEarlier() == false) {
         lastAccessTime = currentTime;
-    }
-    else {
+    } else {
         applyEvaporation(currentTime);
     }
 }
@@ -188,39 +210,41 @@ void RoutingTable::applyEvaporation(Time* currentTime) {
     long timeDifference = currentTime->getDifferenceInMilliSeconds(lastAccessTime);
     delete currentTime;
 
-    if (evaporationPolicy->isEvaporationNecessary(timeDifference)) {
-        lastAccessTime->setToCurrentTime();
+    try {
+        if (evaporationPolicy->isEvaporationNecessary(timeDifference)) {
+            lastAccessTime->setToCurrentTime();
 
-        RoutingTableMap::iterator i = table.begin();
-        while (i!=table.end()) {
-            std::pair<AddressPtr const, RoutingTableEntryList*> entryPair = *i;
-            AddressPtr destination = entryPair.first;
-            RoutingTableEntryList* nextHopsForDestination = entryPair.second;
+            RoutingTableMap::iterator i = table.begin();
+            while (i!=table.end()) {
+                std::pair<AddressPtr const, RoutingTableEntryList*> entryPair = *i;
+                AddressPtr destination = entryPair.first;
+                RoutingTableEntryList* nextHopsForDestination = entryPair.second;
 
-            // apply evaporation to all next hops for that destination
-            RoutingTableEntryList::iterator j = nextHopsForDestination->begin();
-            while (j != nextHopsForDestination->end()) {
-                RoutingTableEntry* entry = *j;
-                float newPheromoneValue = evaporationPolicy->evaporate(entry->getPheromoneValue(), timeDifference);
-                if (newPheromoneValue > 0) {
-                    entry->setPheromoneValue(newPheromoneValue);
-                    j++;
+                // apply evaporation to all next hops for that destination
+                RoutingTableEntryList::iterator j = nextHopsForDestination->begin();
+                while (j != nextHopsForDestination->end()) {
+                    RoutingTableEntry* entry = *j;
+                    float newPheromoneValue = evaporationPolicy->evaporate(entry->getPheromoneValue(), timeDifference);
+                    if (newPheromoneValue > 0) {
+                        entry->setPheromoneValue(newPheromoneValue);
+                        j++;
+                    } else {
+                        delete entry;
+                        j = nextHopsForDestination->erase(j); // this does not invalidate the iterator, because j is set to the valid return value of erase (will point to end() if empty)
+                    }
                 }
-                else {
-                    delete entry;
-                    j = nextHopsForDestination->erase(j); // this does not invalidate the iterator, because j is set to the valid return value of erase (will point to end() if empty)
-                }
-            }
 
-            if (nextHopsForDestination->empty()) {
-                delete nextHopsForDestination;
-                i = table.erase(i); // this does not invalidate the iterator, because i is set to the valid return value of erase (will point to end() if empty)
-            }
-            else {
-                i++;
+                if (nextHopsForDestination->empty()) {
+                    delete nextHopsForDestination;
+                    i = table.erase(i); // this does not invalidate the iterator, because i is set to the valid return value of erase (will point to end() if empty)
+                } else {
+                    i++;
+                }
             }
         }
-    }
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::applyEvaporationTime: A out of range error occured! Reason was: " << rangeError.what() << std::endl;
+    } 
 }
 
 bool RoutingTable::hasTableBeenAccessedEarlier() {
@@ -237,11 +261,16 @@ EvaporationPolicy* RoutingTable::getEvaporationPolicy() const{
 
 unsigned int RoutingTable::getTotalNumberOfEntries() const {
     unsigned int tableSize = 0;
-    RoutingTableMap::const_iterator iterator;
-    for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-        RoutingTableEntryList* entryList = iterator->second;
-        tableSize += entryList->size();
-    }
+
+    try {
+        RoutingTableMap::const_iterator iterator;
+        for (iterator=table.begin(); iterator!=table.end(); iterator++) {
+            RoutingTableEntryList* entryList = iterator->second;
+            tableSize += entryList->size();
+        }
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::getTotalNumberOfEntries: A out of range error occured! Reason was: " << rangeError.what() << std::endl;
+    } 
     return tableSize;
 }
 
@@ -257,8 +286,7 @@ RoutingTableEntryTupel RoutingTable::getEntryAt(int wantedPosition) const {
                 tupel.destination = destination;
                 tupel.entry = entry;
                 return tupel;
-            }
-            else {
+            } else {
                 currentPosition++;
             }
         }
@@ -268,20 +296,25 @@ RoutingTableEntryTupel RoutingTable::getEntryAt(int wantedPosition) const {
 }
 
 std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(AddressPtr nextHop) const {
-    std::deque<RoutingTableEntryTupel> result = std::deque<RoutingTableEntryTupel>();
+    std::deque<RoutingTableEntryTupel> result;
 
-    // TODO this could be made faster with an additional hashmap (but would require more memory)
-    for (RoutingTableMap::const_iterator iterator=table.begin(); iterator!=table.end(); iterator++) {
-        AddressPtr destination = iterator->first;
-        RoutingTableEntryList* nextHopsForDestination = iterator->second;
-        for (auto& entry: *nextHopsForDestination) {
-            if(entry->getAddress()->equals(nextHop)) {
-                RoutingTableEntryTupel tupel;
-                tupel.destination = destination;
-                tupel.entry = entry;
-                result.push_back(tupel);
+    try {
+        // TODO this could be made faster with an additional hashmap (but would require more memory)
+        for (RoutingTableMap::const_iterator iterator=table.begin(); iterator!=table.end(); iterator++) {
+            AddressPtr destination = iterator->first;
+            RoutingTableEntryList* nextHopsForDestination = iterator->second;
+
+            for (auto& entry: *nextHopsForDestination) {
+                if (entry->getAddress()->equals(nextHop)) {
+                    RoutingTableEntryTupel tupel;
+                    tupel.destination = destination;
+                    tupel.entry = entry;
+                    result.push_back(tupel);
+                }
             }
         }
+    } catch (const std::out_of_range& rangeError) {
+        std::cerr << "RoutingTable::getAllRoutesThatLeadOver: An out of range error occured! Reason was: " << rangeError.what() << std::endl;
     }
 
     return result;
