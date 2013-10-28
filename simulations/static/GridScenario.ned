@@ -53,7 +53,7 @@ network GridScenario
                 mobility.marginX = playgroundSizeX;
                 mobility.marginY = playgroundSizeY;
                 mobility.numHosts = numberOfNodes;
-                mobility.seperation = 100.0m;
+                mobility.seperation = 10.0m;
                 mobility.constraintAreaMinX = 0m;
                 mobility.constraintAreaMinY = 0m;
                 mobility.constraintAreaMinZ = 0m;
