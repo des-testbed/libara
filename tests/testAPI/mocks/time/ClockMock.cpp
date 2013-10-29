@@ -15,7 +15,6 @@ Time* ClockMock::makeTime() {
 
 TimerPtr ClockMock::getNewTimer(char timerType, void* contextObject) {
     lastTimer = TimerMockPtr(new TimerMock(timerType, contextObject));
-    //return std::dynamic_pointer_cast<Timer>(lastTimer);
     return lastTimer;
 }
 
