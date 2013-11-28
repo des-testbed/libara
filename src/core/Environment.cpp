@@ -18,7 +18,7 @@ Environment::~Environment() {
 }
 
 void Environment::setTheClock(Clock* newClock) {
-    delete clock;
+    DELETE_IF_NOT_NULL(clock);
     clock = newClock;
 }
 
@@ -27,10 +27,8 @@ void Environment::notifyClockHasBeenDeleted() {
 }
 
 Environment& Environment::getInstance() {
-    if (instance == nullptr) {
-       instance = new Environment();
-    }
-    return *instance;
+    static Environment instance;
+    return instance;
 }
 
 Clock* Environment::getClock() {

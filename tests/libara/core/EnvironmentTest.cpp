@@ -22,3 +22,16 @@ TEST(EnvironmentTest, getClock) {
     time->setToCurrentTime();
     delete time;
 }
+
+/**
+ * We test if we can set the clock get a time and set a new clock
+IGNORE_TEST(EnvironmentTest, setNewClock) {
+    Environment::setClock(new ClockMock());
+    Clock* clock = Environment::getClock();
+    Time* time = clock->makeTime();
+    time->setToCurrentTime();
+    delete time;
+    Environment::setClock(nullptr);
+    Clock* differentClock = Environment::getClock();
+}
+ */
