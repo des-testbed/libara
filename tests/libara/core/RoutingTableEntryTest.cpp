@@ -59,10 +59,9 @@ TEST(RoutingTableEntryTest, testSetPheromoneValue) {
 }
 
 TEST(RoutingTableEntryTest, testGetNextHop) {
-    AddressPtr address (new AddressMock());
     float pheromoneValue = 1.234;
+    AddressPtr address (new AddressMock());
     RoutingTableEntry entry = RoutingTableEntry(address, interface, pheromoneValue);
-
     NextHop* nextHop = entry.getNextHop();
     CHECK(nextHop->getAddress()->equals(address));
     CHECK(nextHop->getInterface()->equals(interface));

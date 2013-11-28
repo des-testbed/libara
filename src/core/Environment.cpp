@@ -3,14 +3,14 @@
  */
 
 #include "Environment.h"
-#include "UnixClock.h"
+#include "StandardClock.h"
 
 ARA_NAMESPACE_BEGIN
 
 Environment* Environment::instance = nullptr;
 
 Environment::Environment() {
-    clock = new UnixClock();
+    clock = new StandardClock();
 }
 
 Environment::~Environment() {
