@@ -10,78 +10,30 @@
 
 ARA_NAMESPACE_BEGIN
 
-StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) {
-    timerHasBeenInterrupted = false;
-    timerIsRunning = false;
-}
+StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { }
 
-StandardTimer::~StandardTimer(){
-/*
-    if (isCalledFromTimerThreadContext() == false) {
-        makeSureTimeIsNotRunning();
-        DELETE_IF_NOT_NULL(timer);
-    } else {
-        // FIXME will cause a memory leak for timer
-        // After the destructor will be finished, the this pointer for StandardTimer::sleep will be invalidated.
-        // I am not sure if this will result in undefined behavior :/
-    }
-*/
-}
-
-bool StandardTimer::isCalledFromTimerThreadContext() {
-    return timer != nullptr && std::this_thread::get_id() == timer->get_id();
-}
-
-void StandardTimer::makeSureTimeIsNotRunning() {
-    if (timerIsRunning) {
-        forcefullyStopTimer();
-    }
-}
-
-void StandardTimer::forcefullyStopTimer() {
-    try {
-        interrupt();
-        timer->join();
-    } catch (const std::system_error& e) {
-        std::cout << "Caught system_error with code " << e.code()  << " meaning " << e.what() << '\n';
-    }
-}
-
-void StandardTimer::run(unsigned long timeoutInMicroSeconds){
-    if (isCalledFromTimerThreadContext()) {
-        sleep(timeoutInMicroSeconds);
-    } else {
-        makeSureTimeIsNotRunning();
-//        DELETE_IF_NOT_NULL(timer);
-        timer = std::make_shared<std::thread>(&StandardTimer::sleep, this, timeoutInMicroSeconds);
-//        timer = new std::thread(&StandardTimer::sleep, this, timeoutInMicroSeconds);
-    }
-}
-
-void StandardTimer::sleep(unsigned long timeoutInMicroSeconds){
-    timerHasBeenInterrupted = false;
-    timerIsRunning = true;
-    unsigned long interruptionCheckInterval = 500000;
-
-    if (timeoutInMicroSeconds < interruptionCheckInterval) {
-        interruptionCheckInterval = timeoutInMicroSeconds;
-    }
-
-    while ((timeoutInMicroSeconds > 0) && (timerHasBeenInterrupted == false)) {
-        timeoutInMicroSeconds -= interruptionCheckInterval;
-        std::chrono::microseconds duration(interruptionCheckInterval);
-        std::this_thread::sleep_for(duration);
-    }
-
-    if (timeoutInMicroSeconds <= 0) {
-        notifyAllListeners();
-    }
-
-    timerIsRunning = false;
-}
+StandardTimer::~StandardTimer(){ }
 
 void StandardTimer::interrupt(){
-    timerHasBeenInterrupted = true;
+    conditionVariable.notify_all();
+}
+
+void StandardTimer::run(unsigned long timeoutInMicroseconds){
+    std::thread thread(&StandardTimer::sleep, this, timeoutInMicroseconds);
+    thread.join();
+}
+
+void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
+    std::unique_lock<std::mutex> lock(conditionVariableMutex);
+
+    try {
+		if(conditionVariable.wait_for(lock, std::chrono::microseconds(timeoutInMicroseconds)) == std::cv_status::timeout){ 
+		  notifyAllListeners();   
+		}
+    } catch (const std::system_error& error) {
+       std::cout << "Caught system_error with code " << error.code() 
+                  << " meaning " << error.what() << '\n';
+    }
 }
 
 ARA_NAMESPACE_END
