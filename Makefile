@@ -26,9 +26,9 @@ endif
 
 # TODO we might want to make this more generic (i.e. enable compiling with gcc)
 # A simple ifndef does not work because this will always be set by the OMNeT+ makefile.inc to gcc
-ifndef CXX
+#ifndef CXX
 CXX = clang
-endif
+#endif
 
 # Configname determines where (in which subdirectory of out/)
 # makemake-generated makefiles create object files and other
@@ -368,8 +368,8 @@ $(CPPUTEST_BASE_DIR)/.git:
 $(OUTPUT_DIR)/%.o: %.cpp
 	@$(MKPATH) $(dir $@)
 	@echo "Compiling $<";
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -c $< -o $@
-	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) -MM -MT $@ $< > $(OUTPUT_DIR)/$*.d;
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -c $< -o $@
+	@$(CXX) $(CFLAGS) $(INCLUDE_PATH) $(ADDITIONAL_INCLUDES) $(INETMANET_FOLDERS_INCLUDE) -MM -MT $@ $< > $(OUTPUT_DIR)/$*.d;
 
 #
 # Clean up only the dependencies

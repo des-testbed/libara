@@ -1607,7 +1607,7 @@ TEST(AbstractARAClientTest, brodcastRouteFailureIfAllAvailableroutesHaveBeenDele
 
     // start the test by receiving the DUPLICATE_WARNING packet from (B)
     Packet* packetThatCausedTheDuplicate = new Packet(source, destination, nodeA, PacketType::DATA, 123, 10);
-    Packet* duplicateWarning = packetFactory->makeDulicateWarningPacket(packetThatCausedTheDuplicate, nodeB, 1);
+    Packet* duplicateWarning = packetFactory->makeDuplicateWarningPacket(packetThatCausedTheDuplicate, nodeB, 1);
     client->receivePacket(duplicateWarning, interface);
 
     CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
@@ -1650,7 +1650,7 @@ TEST(AbstractARAClientTest, sendRouteFailureIfOnlyOneRouteIsLeftDueToDuplicateWa
 
     // start the test by receiving the DUPLICATE_WARNING packet from (B)
     Packet* packetThatCausedTheDuplicate = new Packet(source, destination, nodeA, PacketType::DATA, 123, 10);
-    Packet* duplicateWarning = packetFactory->makeDulicateWarningPacket(packetThatCausedTheDuplicate, nodeB, 1);
+    Packet* duplicateWarning = packetFactory->makeDuplicateWarningPacket(packetThatCausedTheDuplicate, nodeB, 1);
     client->receivePacket(duplicateWarning, interface);
 
     CHECK_FALSE(routingTable->exists(destination, nodeB, interface));
@@ -2004,7 +2004,7 @@ TEST(AbstractARAClientTest, helloPacketTimersAreOnlystartedForDataAndAntPackets)
 
     // receiving a DUPLICATE_WARNING should *not* trigger a HELLO later
     Packet packetThatCausedLoop = Packet(source, destination, localAddress, PacketType::DATA, seqNr++, 10);
-    Packet* duplicateWarning = packetFactory->makeDulicateWarningPacket(&packetThatCausedLoop, neighbor4, seqNr++);
+    Packet* duplicateWarning = packetFactory->makeDuplicateWarningPacket(&packetThatCausedLoop, neighbor4, seqNr++);
     client->receivePacket(duplicateWarning, interface);
     TimeMock::letTimePass(500);
     neighborActivityTimer->expire();

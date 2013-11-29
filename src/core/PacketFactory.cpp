@@ -31,7 +31,7 @@ Packet* PacketFactory::makeBANT(const Packet* originalPacket, unsigned int seque
     return makePacket(originalPacket->getDestination(), originalPacket->getSource(), originalPacket->getDestination(), PacketType::BANT, sequenceNumber, maxHopCount);
 }
 
-Packet* PacketFactory::makeDulicateWarningPacket(const Packet* originalPacket, AddressPtr senderOfDuplicateWarning, unsigned int sequenceNumber) {
+Packet* PacketFactory::makeDuplicateWarningPacket(const Packet* originalPacket, AddressPtr senderOfDuplicateWarning, unsigned int sequenceNumber) {
     return makePacket(senderOfDuplicateWarning, originalPacket->getDestination(), senderOfDuplicateWarning, PacketType::DUPLICATE_ERROR, sequenceNumber, maxHopCount);
 }
 

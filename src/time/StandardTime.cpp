@@ -7,6 +7,7 @@
 ARA_NAMESPACE_BEGIN
 
 StandardTime::StandardTime() {}
+
 StandardTime::StandardTime(std::chrono::time_point<std::chrono::system_clock> timestamp) : time(timestamp){}
 
 long StandardTime::getSeconds() const {

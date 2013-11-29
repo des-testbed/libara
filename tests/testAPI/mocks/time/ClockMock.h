@@ -19,6 +19,7 @@ namespace ARA {
 
         private:
             TimerMock* lastTimer = nullptr;
+            //std::weak_ptr<TimerMock> lastTimer = nullptr;
     };
 }
 

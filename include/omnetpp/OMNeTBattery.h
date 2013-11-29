@@ -79,6 +79,8 @@ class OMNeTBattery : public BasicBattery {
         void calculateConsumedEnergy();
         void calculateConsumedEnergyOfStandardDevices();
         void calculateConsumedEnergyOfWirelessDevices();
+        void handleDepletedEnergy();
+        void deactivateAllRegisteredDevices();
         void updateBatteryIcon();
         void recordResidualEnergy();
         void publishEnergyInformation();

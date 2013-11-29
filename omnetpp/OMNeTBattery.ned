@@ -1,9 +1,9 @@
 @namespace(ARA::omnetpp);
 package ara;
 
-import inet.battery.models.InetSimpleBattery;
+import inet.battery.IBattery;
 
-simple OMNeTBattery {
+simple OMNeTBattery like IBattery {
     parameters:
         double capacity @unit("mAh");
         double voltage @unit("V");  

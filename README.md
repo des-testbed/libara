@@ -1,4 +1,4 @@
-Ara-Sim [![Build Status](https://travis-ci.org/des-testbed/Ara-Sim.png?branch=develop)](https://travis-ci.org/des-testbed/Ara-Sim)
+Ara-Sim [![Build Status](https://travis-ci.org/des-testbed/libara.png?branch=develop)](https://travis-ci.org/des-testbed/libara)
 =======
 An enhanceable framework for developing and testing the Ant Routing Algorithm (ARA) as proposed by M. Güneş, U. Sorges and I. Bouazizi in 2002.
 
@@ -45,6 +45,16 @@ Bug tracker
 Have a bug or feature request? Please create an issue here on GitHub!
 
 https://github.com/des-testbed/ara-sim/issues
+
+
+
+Publications
+------------
+You are using libARA in a scientific context? Please cite libARA with publication **2**.
+
+1. Friedrich Grosse, **Optimization and Evaluation of Energy Aware Ant Routing Algorithm Strategies Based on Network Simulations**, Master Thesis, August 2013
+2. Michael Frey, Friedrich Grosse, Mesut Günes, **libARA: A framework for simulation and testbed based studies on ant routing algorithms in wireless multi-hop networks**, [7th International Conference on Performance Evaluation Methodologies and Tools](http://valuetools.org/2013/show/home) (to appear), December 2013
+
 
 License
 -------

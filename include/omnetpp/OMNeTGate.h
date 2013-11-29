@@ -30,13 +30,9 @@ class OMNeTGate: public AbstractNetworkInterface {
         void broadcast(const Packet* packet);
         bool equals(NetworkInterface* interface);
 
-        int64 getNrOfSentDataBits();
-        int64 getNrOfSentControlBits();
-        unsigned int getNrOfControlPackets();
-        unsigned int getNrOfDataPackets();
-
     private:
         std::shared_ptr<OMNeTAddress> getNextHopAddress(std::shared_ptr<Address> recipient);
+        void collectStatistics(const Packet* packet, cPacket* simPacket);
 
     private:
         AbstractOMNeTARAClient* omnetARAModule;
@@ -45,11 +41,25 @@ class OMNeTGate: public AbstractNetworkInterface {
         cGate* outGate;
         int interfaceID;
 
+    public:
         // this is only for statistics
-        int64 nrOfSentControlBits;
-        int64 nrOfSentDataBits;
         unsigned int nrOfSentControlPackets;
         unsigned int nrOfSentDataPackets;
+        unsigned int nrOfSentFANTs;
+        unsigned int nrOfSentBANTs;
+        unsigned int nrOfSentPEANTs;
+        unsigned int nrOfSentDuplicateErrors;
+        unsigned int nrOfSentRouteErrors;
+        unsigned int nrOfSentOtherPackets;
+
+        int64 nrOfSentControlBits;
+        int64 nrOfSentDataBits;
+        int64 nrOfSentFANTBits;
+        int64 nrOfSentBANTBits;
+        int64 nrOfSentPEANTBits;
+        int64 nrOfSentDuplicateErrorBits;
+        int64 nrOfSentRouteErrorBits;
+        int64 nrOfSentOtherBits;
 };
 
 OMNETARA_NAMESPACE_END

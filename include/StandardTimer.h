@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <thread>
+#include <condition_variable>
 
 ARA_NAMESPACE_BEGIN
 
@@ -23,14 +24,8 @@ class StandardTimer : public Timer {
         virtual void interrupt();
 
     private:
-        bool isCalledFromTimerThreadContext();
-        void makeSureTimeIsNotRunning();
-        void forcefullyStopTimer();
-
-    private:
-        bool timerHasBeenInterrupted;
-        bool timerIsRunning;
-        std::thread* timer;
+        std::condition_variable conditionVariable;
+        std::mutex conditionVariableMutex;
 };
 
 ARA_NAMESPACE_END

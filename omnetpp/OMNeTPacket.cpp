@@ -30,11 +30,11 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(OMNeTPacket);
 
-OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) : cPacket(PacketType::getAsString(type).c_str(), type), ARA::Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize) {
+OMNeTPacket::OMNeTPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) : ARA::Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize), cPacket(PacketType::getAsString(type).c_str(), type) {
 
 }
 
-OMNeTPacket::OMNeTPacket(const OMNeTPacket& other) : cPacket(other), ARA::Packet(other.source, other.destination, other.sender, other.type, other.seqNr, other.ttl, other.payload, other.payloadSize) {
+OMNeTPacket::OMNeTPacket(const OMNeTPacket& other) : ARA::Packet(other.source, other.destination, other.sender, other.type, other.seqNr, other.ttl, other.payload, other.payloadSize), cPacket(other) {
     this->previousHop = other.previousHop;
 }
 

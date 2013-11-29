@@ -16,5 +16,14 @@
     onLength="10"
     offLength="0"
     onIdenticalTrafDest="true" />
+
+<config id="24"
+	packetSize="512"
+	interDepartureTime="0.02"
+	firstPacketTime="0"
+	trafDest="192.168.0.24"
+	onLength="10"
+	offLength="0"
+	onIdenticalTrafDest="true" />
  </configurations>
 

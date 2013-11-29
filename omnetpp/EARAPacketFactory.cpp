@@ -49,7 +49,13 @@ int EARAPacketFactory::calculatePacketSize(Packet* packet) {
     // TTL (256 values will suffice)
     totalSize += 8;
 
-    // should be 140 bits = 7.5 bytes
+    // minimum energy value (32 bit unsigned integer)
+    totalSize += 32;
+
+    // total energy value (32 bit unsigned integer)
+    totalSize += 32;
+
+    // should be 204 bits = 25.5 bytes
     return totalSize;
 }
 
