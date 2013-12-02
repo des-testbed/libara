@@ -259,7 +259,7 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
     //logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
     //logAllRoutingTableEntries();
 }
-
+/*
 void AbstractARAClient::logAllRoutingTableEntries() {
     logTrace("Routing Table:");
     RoutingTableEntryTupel routingTableEntry;
@@ -290,12 +290,11 @@ void AbstractARAClient::logAllRoutingTableEntries() {
 
             //logDebug("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
         }
-    }
-/*    else {
+    } else {
         logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
     }
-    */
 }
+*/
 
 bool AbstractARAClient::hasPreviousNodeBeenSeenBefore(const Packet* packet) {
     AddressPtr source = packet->getSource();

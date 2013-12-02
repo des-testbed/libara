@@ -13,7 +13,7 @@ TESTBED_NAMESPACE_BEGIN
 
 class NetworkInterface : public ReliableNetworkInterface {
     public:
-        NetworkInterface(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, int ackTimeoutInMicroSeconds);
+        NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, int ackTimeoutInMicroSeconds);
         ~NetworkInterface();
         bool isRegistered();
         bool equals(ARA::NetworkInterface* otherInterface);

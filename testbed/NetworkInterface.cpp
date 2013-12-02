@@ -8,11 +8,11 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-AddressPtr NetworkInterface::broadcastAddress = AddressPtr(new TestbedAddress(DESSERT_BROADCAST_ADDRESS));
+AddressPtr NetworkInterface::broadcastAddress = std::make_shared<TestbedAddress>(DESSERT_BROADCAST_ADDRESS);
 extern NetworkInterfaceMap networkInterfaces;
 
-NetworkInterface::NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds)
-  : ReliableNetworkInterface(client, ackTimeoutInMicroSeconds, AddressPtr(new TestbedAddress(dessertPointer->hwaddr)), broadcastAddress) {
+NetworkInterface::NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, int ackTimeoutInMicroSeconds)
+  : ReliableNetworkInterface(client, ackTimeoutInMicroSeconds, std::make_shared<TestbedAddress>(dessertPointer->hwaddr), broadcastAddress) {
     this->dessertPointer = dessertPointer;
     registerInterface();
 }
@@ -23,10 +23,6 @@ NetworkInterface::~NetworkInterface() {
 
 bool NetworkInterface::isRegistered() {
     return extractNetworkInterface(dessertPointer) == this;
-}
-
-void NetworkInterface::deliverToARAClient(Packet* packet) {
-    client->receivePacket(packet, this);
 }
 
 bool NetworkInterface::equals(ARA::NetworkInterface* otherInterface) {
