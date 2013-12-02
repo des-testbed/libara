@@ -11,7 +11,7 @@ TESTBED_NAMESPACE_BEGIN
 AddressPtr NetworkInterface::broadcastAddress = std::make_shared<TestbedAddress>(DESSERT_BROADCAST_ADDRESS);
 extern NetworkInterfaceMap networkInterfaces;
 
-NetworkInterface::NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, int ackTimeoutInMicroSeconds)
+NetworkInterface::NetworkInterface(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, int ackTimeoutInMicroSeconds)
   : ReliableNetworkInterface(client, ackTimeoutInMicroSeconds, std::make_shared<TestbedAddress>(dessertPointer->hwaddr), broadcastAddress) {
     this->dessertPointer = dessertPointer;
     registerInterface();
