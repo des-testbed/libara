@@ -27,8 +27,7 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
 
 void dumpDessertMessage(dessert_msg_t* message){
     ether_header* etherHeader = ARA::testbed::extractEthernetHeader(message);
-    //cout << "!!! source: " << etherHeader->ether_shost << " destination: " << etherHeader->ether_dhost << " type: " << etherHeader->ether_type << std::endl;
-
+    std::cout << "!!! source: " << etherHeader->ether_shost << " destination: " << etherHeader->ether_dhost << " type: " << etherHeader->ether_type << std::endl;
 }
 
 _dessert_cb_results tapPacketFilter(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
