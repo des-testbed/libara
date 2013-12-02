@@ -167,7 +167,6 @@ TEST(PacketTest, setPreviousHop) {
     CHECK(packet.getPreviousHop()->equals(prevHop2));
 }
 
-<<<<<<< HEAD
 TEST(PacketTest, decreaseTTL) {
     AddressPtr source (new AddressMock("A"));
     AddressPtr destination (new AddressMock("B"));

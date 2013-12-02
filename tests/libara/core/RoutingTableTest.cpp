@@ -44,6 +44,18 @@ TEST(RoutingTableTest, getPossibleNextHopsReturnsEmptyList) {
     CHECK(list.empty());
 }
 
+TEST(RoutingTableTest, testOutputStreamOperator) {
+    PacketMock packet = PacketMock();
+    AddressPtr destination = packet.getDestination();
+    AddressPtr nextHop = std::make_shared<AddressMock>("nextHop");
+    float pheromoneValue = 123.456;
+    routingTable->update(destination, nextHop, interface, pheromoneValue);
+
+    std::ostringstream stream;
+    stream << routingTable;
+//    STRCMP_EQUAL("[destinaton] [next hop] Foo [phi] 1.234", stream.str().c_str());
+}
+
 TEST(RoutingTableTest, packetWithUnregisteredAddressIsNotDeliverable) {
     PacketMock packet = PacketMock();
     CHECK(routingTable->isDeliverable(&packet) == false);

@@ -287,4 +287,7 @@ std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(Addres
     return result;
 }
 
+RoutingTableMap RoutingTable::getRoutingTable(void) const {
+    return table;
+}
 ARA_NAMESPACE_END

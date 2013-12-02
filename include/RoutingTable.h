@@ -31,7 +31,16 @@ class RoutingTable {
 
 public:
     RoutingTable();
+
     virtual ~RoutingTable();
+
+    friend std::ostream& operator<<(std::ostream& out, RoutingTable table) {
+	RoutingTableMap routingTable = table.getRoutingTable();
+	for (auto i = routingTable.begin(); i != routingTable.end(); i++) {
+	   out << "[destination] " << (*i).first << (*i).second << std::endl;
+	}
+        return out;
+    }
 
     /**
      * Get the pheromone value for a specific route in this routing table.
@@ -91,6 +100,8 @@ public:
      * Returns all known routes that lead over the given next hop.
      */
     std::deque<RoutingTableEntryTupel> getAllRoutesThatLeadOver(AddressPtr nextHop) const;
+
+    RoutingTableMap getRoutingTable() const;
 
 private:
     void applyEvaporation(Time* currentTime);
