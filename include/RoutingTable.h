@@ -37,7 +37,9 @@ public:
     friend std::ostream& operator<<(std::ostream& out, RoutingTable table) {
 	RoutingTableMap routingTable = table.getRoutingTable();
 	for (auto i = routingTable.begin(); i != routingTable.end(); i++) {
-	   out << "[destination] " << (*i).first << (*i).second << std::endl;
+           for (auto j = (*i).second->begin(); j != (*i).second->end(); j++) {
+	      out << "[destination] " << (*i).first.get() << (*j) << std::endl;
+	   }
 	}
         return out;
     }

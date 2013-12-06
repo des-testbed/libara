@@ -108,8 +108,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         if (isRouteDiscoveryRunning(destination)) {
             logDebug("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
             packetTrap->trapPacket(packet);
-        }
-        else if (routingTable->isDeliverable(packet)) {
+        } else if (routingTable->isDeliverable(packet)) {
             NextHop* nextHop = forwardingPolicy->getNextHop(packet);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
@@ -120,8 +119,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             logDebug("Forwarding DATA packet %u from %s to %s via %s (phi=%.2f)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str(), newPheromoneValue);
 
             sendUnicast(packet, interface, nextHopAddress);
-        }
-        else {
+        } else {
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
                 logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
@@ -152,6 +150,7 @@ float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, Address
 
 void AbstractARAClient::startNewRouteDiscovery(Packet* packet) {
     AddressPtr destination = packet->getDestination();
+    logDebug("Destination is %s", destination->toString().c_str());
     forgetKnownIntermediateHopsFor(destination);
     startRouteDiscoveryTimer(packet);
     broadcastFANT(destination);
@@ -176,10 +175,14 @@ void AbstractARAClient::broadcastFANT(AddressPtr destination) {
 void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
     RouteDiscoveryInfo* discoveryInfo = new RouteDiscoveryInfo(packet);
     Timer* timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
+    logDebug("1");
     timer->addTimeoutListener(this);
+    logDebug("2");
     timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
+    logDebug("3");
 
     AddressPtr destination = packet->getDestination();
+    logDebug("add route discovery timer for address %s", destination->toString().c_str());
     runningRouteDiscoveries[destination] = timer;
 }
 
@@ -204,8 +207,7 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
 
     if(hasBeenReceivedEarlier(packet)) {
         handleDuplicatePacket(packet, interface);
-    }
-    else {
+    } else {
         registerReceivedPacket(packet);
         handlePacket(packet, interface);
     }
@@ -362,22 +364,17 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
     if (packet->isDataPacket()) {
         registerActivity(packet->getSender(), interface);
         handleDataPacket(packet);
-    }
-    else if(packet->isAntPacket()) {
+    } else if(packet->isAntPacket()) {
         registerActivity(packet->getSender(), interface);
         handleAntPacket(packet, interface);
-    }
-    else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
+    } else if (packet->getType() == PacketType::DUPLICATE_ERROR) {
         handleDuplicateErrorPacket(packet, interface);
-    }
-    else if (packet->getType() == PacketType::ROUTE_FAILURE) {
+    } else if (packet->getType() == PacketType::ROUTE_FAILURE) {
         handleRouteFailurePacket(packet, interface);
-    }
-    else if (packet->getType() == PacketType::HELLO) {
+    } else if (packet->getType() == PacketType::HELLO) {
         // this has already been acknowledged on the layer 2 so we can ignore this one
         delete packet;
-    }
-    else {
+    } else {
         throw Exception("Can not handle packet");
     }
 }
@@ -385,8 +382,7 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 void AbstractARAClient::handleDataPacket(Packet* packet) {
     if(isDirectedToThisNode(packet)) {
         handleDataPacketForThisNode(packet);
-    }
-    else {
+    } else {
         sendPacket(packet);
     }
 }
@@ -469,8 +465,7 @@ void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
     AddressPtr routeDiscoveryDestination = bant->getSource();
     if(packetTrap->getNumberOfTrappedPackets(routeDiscoveryDestination) == 0) {
         logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str());
-    }
-    else {
+    } else {
         logDebug("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
         stopRouteDiscoveryTimer(routeDiscoveryDestination);
         startDeliveryTimer(routeDiscoveryDestination);
@@ -488,18 +483,22 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
         // only then is runningRouteDiscoveries.erase(discovery) called!
         delete (RouteDiscoveryInfo*) timer->getContextObject();
         delete timer;
-    }
-    else {
+    } else {
         logError("Could not stop route discovery timer (not found for destination %s)", destination->toString().c_str());
     }
 }
 
 void AbstractARAClient::startDeliveryTimer(AddressPtr destination) {
     TimerAddressInfo* contextObject = new TimerAddressInfo(destination);
+    logDebug("<temp> 1");
     Timer* timer = getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
+    logDebug("<temp> 2");
     timer->addTimeoutListener(this);
+    logDebug("<temp> 3");
     timer->run(packetDeliveryDelayInMilliSeconds * 1000);
+    logDebug("<temp> 4");
     runningDeliveryTimers.insert(timer);
+    logDebug("<temp> 5");
 }
 
 void AbstractARAClient::sendDeliverablePackets(AddressPtr destination) {
@@ -648,8 +647,7 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer) {
         delete deliveryTimer;
 
         sendDeliverablePackets(destination);
-    }
-    else {
+    } else {
         logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
     }
 }

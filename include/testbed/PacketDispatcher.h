@@ -20,7 +20,7 @@ struct routingExtension {
     u_int8_t  ara_dhost[ETH_ALEN];  /* ARA destination eth addr */
     u_int8_t  ara_shost[ETH_ALEN];  /* ARA source ether addr    */
     u_int16_t ara_data;             /* reserved for future ARA use */
-  } __attribute__ ((__packed__));
+} __attribute__ ((__packed__));
 
 /**
  * The first ara callback of the mesh processing pipeline, determines if a packet belongs to libARA and sends to araMessageDispatcher, or the kernel, accordingly.

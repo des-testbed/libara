@@ -28,13 +28,16 @@ void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* tes
     dessert_meshsend(message, interface);
 }
 
+/**
+ *
+ */
 Packet* extractPacket(dessert_msg_t* dessertMessage) {
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
     routingExtension* araHeader = extractRoutingExtension(dessertMessage);
 
-    AddressPtr source(new TestbedAddress(araHeader->ara_shost));
-    AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
-    AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
+    AddressPtr source = std::make_shared<TestbedAddress>(araHeader->ara_shost);
+    AddressPtr destination = std::make_shared<TestbedAddress>(araHeader->ara_dhost);
+    AddressPtr sender = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
     //std::cout << "||Extract Packet|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << " sender: " << sender.get()->toString() << std::endl;
 
     char packetType = dessertMessage->u8;
@@ -50,8 +53,8 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
 Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* client) {
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
 
-    AddressPtr source(new TestbedAddress(ethernetFrame->ether_shost));
-    AddressPtr destination(new TestbedAddress(ethernetFrame->ether_dhost));
+    AddressPtr source = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
+    AddressPtr destination = std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost);
     //std::cout << "||Create Packet from TapMessage|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << std::endl;
 
     void* payload;
@@ -68,9 +71,11 @@ ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage) {
 
 routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage) {
     dessert_ext_t* extension;
-    if(dessert_msg_getext(dessertMessage, &extension, DESSERT_EXT_USER, 0) == 0){
+
+    if (dessert_msg_getext(dessertMessage, &extension, DESSERT_EXT_USER, 0) == 0) {
         return nullptr;
     }
+
     return (routingExtension*) extension->data;
 }
 
@@ -90,7 +95,6 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
     addRoutingExtension(dessertMessage, source, destination);
 
     //std::cout << "||Extract DES-SERT|| source: " << sourceTestbedAddress.get()->toString() << " destination: " << destinationTestbedAddress.get()->toString() << " sender: " << packet->getSenderString() << std::endl;
-
 
     void* payload;
     int payloadSize = packet->getPayloadLength();
@@ -124,12 +128,12 @@ void addRoutingExtension(dessert_msg_t* message, u_int8_t* source, u_int8_t* des
 
 NetworkInterface* extractNetworkInterface(dessert_meshif_t* dessertInterface) {
     std::unordered_map<dessert_meshif_t*, NetworkInterface*>::const_iterator got = networkInterfaces.find(dessertInterface);
-    if(got == networkInterfaces.end()) {
-       return(NULL);
-    }
-    else {
-        return got->second;
-    }
+
+    if (got == networkInterfaces.end()) {
+        return nullptr;
+    } 
+
+    return got->second;
 }
 
 TESTBED_NAMESPACE_END

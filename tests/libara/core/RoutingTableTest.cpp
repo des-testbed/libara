@@ -53,6 +53,7 @@ TEST(RoutingTableTest, testOutputStreamOperator) {
 
     std::ostringstream stream;
     stream << routingTable;
+    std::cout << " xyz " << stream.str().c_str() << std::endl;
 //    STRCMP_EQUAL("[destinaton] [next hop] Foo [phi] 1.234", stream.str().c_str());
 }
 

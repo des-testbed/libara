@@ -7,6 +7,7 @@
 
 #include "ARAMacros.h"
 #include "Timer.h"
+#include "StandardTimerThread.h"
 
 #include <chrono>
 #include <thread>

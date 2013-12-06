@@ -35,8 +35,10 @@ void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* inte
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
     logDebug("sending packet # %u to System via TAP", packet->getSequenceNumber());
-    std::cout << "deliverToSystem " << packet->getPayload() << " delivered to system." << std::endl;
-    dessert_syssend((void*) packet->getPayload(), packet->getPayloadLength());
+//    std::cout << "deliverToSystem " << packet->getPayload() << " delivered to system." << std::endl;
+    if (dessert_syssend((void*) packet->getPayload(), packet->getPayloadLength()) == EIO) {
+        logError("deliverToSystem failed");
+    }
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
