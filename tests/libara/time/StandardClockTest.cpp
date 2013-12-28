@@ -12,23 +12,22 @@ ARA_NAMESPACE_BEGIN
 TEST_GROUP(StandardClockTest) {};
 
 TEST(StandardClockTest, makeTime) {
-    StandardClock clock = StandardClock();
+    StandardClock clock;
     Time* newTime = clock.makeTime();
 
-    StandardTime* standardTimeInstance = dynamic_cast<StandardTime*>(newTime);
-    CHECK(standardTimeInstance != NULL);
+    StandardTime* time = dynamic_cast<StandardTime*>(newTime);
+    CHECK(time != nullptr);
 
     delete newTime;
 }
 
 TEST(StandardClockTest, getNewTimer) {
-    StandardClock clock = StandardClock();
-    Timer* newTimer = clock.getNewTimer();
+    StandardClock clock;
 
-    StandardTimer* standardTimerInstance = dynamic_cast<StandardTimer*>(newTimer);
-    CHECK(standardTimerInstance != NULL);
+    StandardTimer* timer = dynamic_cast<StandardTimer*>(clock.getNewTimer());
+    CHECK(timer != nullptr);
 
-    delete newTimer;
+    delete timer;
 }
 
 ARA_NAMESPACE_END

@@ -12,8 +12,10 @@ ARA_NAMESPACE_BEGIN
 StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { }
 
 StandardTimer::~StandardTimer(){ 
-    if (timer->joinable()) {
-        timer->join();
+    if (timer != nullptr) {
+        if (timer->joinable()) {
+            timer->join();
+        }
     }
 }
 
