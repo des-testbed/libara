@@ -27,6 +27,7 @@ class StandardTimer : public Timer {
     private:
         std::condition_variable conditionVariable;
         std::mutex conditionVariableMutex;
+        std::shared_ptr<std::thread> timer;
 };
 
 ARA_NAMESPACE_END

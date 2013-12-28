@@ -55,6 +55,7 @@ AbstractARAClient::~AbstractARAClient() {
     // delete the running discovery timers and their context objects
     for (RunningRouteDiscoveriesMap::iterator iterator=runningRouteDiscoveries.begin(); iterator!=runningRouteDiscoveries.end(); iterator++) {
         Timer* timer = iterator->second;
+        timer->interrupt();
         delete (RouteDiscoveryInfo*) timer->getContextObject();
         delete timer;
     }
@@ -69,6 +70,7 @@ AbstractARAClient::~AbstractARAClient() {
     // delete running delivery timers
     for (DeliveryTimerSet::iterator iterator=runningDeliveryTimers.begin(); iterator!=runningDeliveryTimers.end(); iterator++) {
         Timer* timer = *iterator;
+        timer->interrupt();
         delete (TimerAddressInfo*) timer->getContextObject();
         delete timer;
     }
@@ -83,6 +85,7 @@ AbstractARAClient::~AbstractARAClient() {
     // delete all running pant timers
     for (ScheduledPANTsMap::iterator iterator=scheduledPANTs.begin(); iterator!=scheduledPANTs.end(); iterator++) {
         Timer* timer = iterator->second;
+        timer->interrupt();
         delete (TimerAddressInfo*) timer->getContextObject();
         delete timer;
     }

@@ -11,7 +11,11 @@ ARA_NAMESPACE_BEGIN
 
 StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { }
 
-StandardTimer::~StandardTimer(){ }
+StandardTimer::~StandardTimer(){ 
+    if (timer->joinable()) {
+        timer->join();
+    }
+}
 
 void StandardTimer::interrupt(){
     std::cout << "[StandardTimer] interrupting timer" << std::endl;
@@ -20,8 +24,7 @@ void StandardTimer::interrupt(){
 
 void StandardTimer::run(unsigned long timeoutInMicroseconds){
     std::cout << "[StandardTimer] starting timer with a timeout of " << timeoutInMicroseconds << " us" << std::endl;
-    std::thread thread(&StandardTimer::sleep, this, timeoutInMicroseconds);
-    StandardTimerThread timer(thread);
+    timer = std::make_shared<std::thread>(&StandardTimer::sleep, this, timeoutInMicroseconds);
 }
 
 void StandardTimer::sleep(unsigned long timeoutInMicroseconds){

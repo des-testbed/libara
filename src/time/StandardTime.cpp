@@ -40,5 +40,4 @@ void StandardTime::setToCurrentTime() {
     this->time = std::chrono::system_clock::now();
 }
 
-
 ARA_NAMESPACE_END
