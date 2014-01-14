@@ -53,7 +53,7 @@ Publications
 You are using libARA in a scientific context? Please cite libARA with publication **2**.
 
 1. Friedrich Grosse, **Optimization and Evaluation of Energy Aware Ant Routing Algorithm Strategies Based on Network Simulations**, Master Thesis, August 2013
-2. Michael Frey, Friedrich Grosse, Mesut Günes, **libARA: A framework for simulation and testbed based studies on ant routing algorithms in wireless multi-hop networks**, [7th International Conference on Performance Evaluation Methodologies and Tools](http://valuetools.org/2013/show/home) (to appear), December 2013
+2. Michael Frey, Friedrich Grosse, Mesut Günes, **libARA: A framework for simulation and testbed based studies on ant routing algorithms in wireless multi-hop networks**, [7th International Conference on Performance Evaluation Methodologies and Tools](http://valuetools.org/2013/show/home), December 2013
 
 
 License
