@@ -8,12 +8,13 @@
 #include "Clock.h"
 #include "TimeMock.h"
 #include "TimerMock.h"
+#include "TimerType.h"
 
 namespace ARA {
     class ClockMock : public Clock {
         public:
             Time* makeTime();
-            Timer* getNewTimer(char timerType=-1, void* contextObject=nullptr);
+            Timer* getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr);
 
             TimerMock* getLastTimer();
 
