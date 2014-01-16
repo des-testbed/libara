@@ -567,7 +567,7 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
 }
 
 void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
-    char timerType = responsibleTimer->getType();
+    TimerType timerType = responsibleTimer->getType();
     switch (timerType) {
         case TimerType::NEIGHBOR_ACTIVITY_TIMER:
             checkInactiveNeighbors();
@@ -787,7 +787,7 @@ int AbstractARAClient::getMaxTTL() const {
     return packetFactory->getMaximumNrOfHops();
 }
 
-Timer* AbstractARAClient::getNewTimer(char timerType, void* contextObject) const {
+Timer* AbstractARAClient::getNewTimer(TimerType timerType, void* contextObject) const {
     return Environment::getClock()->getNewTimer(timerType, contextObject);
 }
 

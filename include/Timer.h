@@ -5,8 +5,9 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include "ARAMacros.h"
 #include "TimeoutEventListener.h"
+#include "ARAMacros.h"
+#include "TimerType.h"
 
 #include <deque>
 
@@ -20,7 +21,8 @@ class Timer {
          * The Timer can have a type and also an optional context object.
          * Both can be used by the TimeoutEventlisteners when the timer has expired.
          */
-        Timer(char type, void* contextObject=nullptr);
+        Timer(TimerType type, void* contextObject=nullptr);
+
         virtual ~Timer() {}
 
         void addTimeoutListener(TimeoutEventListener* listener);
@@ -42,7 +44,7 @@ class Timer {
          * Returns the type of this timer. This is useful for objects to distinguish
          * several conceptually different timers.
          */
-        char getType() const;
+        TimerType getType() const;
 
         /**
          * Returns the context object.
@@ -60,12 +62,14 @@ class Timer {
         void notifyAllListeners();
 
     protected:
-        char type;
+        TimerType type;
         void* contextObject;
 
     private:
         std::deque<TimeoutEventListener*> listeners;
 };
+
+typedef std::shared_ptr<Timer> TimerPtr;
 
 ARA_NAMESPACE_END
 

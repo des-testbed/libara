@@ -6,6 +6,7 @@
 #define _NETWORK_INTERFACE_H_
 
 #include "Testbed.h"
+#include "AbstractARAClient.h"
 #include "ReliableNetworkInterface.h"
 
 TESTBED_NAMESPACE_BEGIN

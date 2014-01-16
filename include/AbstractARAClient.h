@@ -31,6 +31,8 @@
 #include <string>
 
 ARA_NAMESPACE_BEGIN
+// TODO: This definition should be in the ARAMacros header
+typedef std::shared_ptr<Timer> TimerPtr;
 
 typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RunningRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
@@ -197,7 +199,7 @@ protected:
     /**
      * A small convenience method to retrieve a timer from the static Environment.
      */
-    Timer* getNewTimer(char timerType, void* contextObject=nullptr) const;
+    Timer* getNewTimer(TimerType timerType, void* contextObject=nullptr) const;
 
 protected:
     Timer* neighborActivityTimer = nullptr;

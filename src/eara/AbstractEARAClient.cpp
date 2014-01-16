@@ -196,7 +196,7 @@ float AbstractEARAClient::calculateRouteFitness(int ttl, float energyFitness) {
 }
 
 void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
-    char timerType = responsibleTimer->getType();
+    TimerType timerType = responsibleTimer->getType();
     switch (timerType) {
         case TimerType::ROUTE_DISCOVERY_DELAY_TIMER:
             handleExpiredRouteDiscoveryDelayTimer(responsibleTimer);

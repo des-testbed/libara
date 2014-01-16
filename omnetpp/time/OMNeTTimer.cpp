@@ -7,7 +7,7 @@
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-OMNeTTimer::OMNeTTimer(unsigned int id, OMNeTClock* clock, char type, void* contextObject) : Timer(type, contextObject) {
+OMNeTTimer::OMNeTTimer(unsigned int id, OMNeTClock* clock, TimerType type, void* contextObject) : Timer(type, contextObject) {
     this->id = id;
     this->clock = clock;
 }

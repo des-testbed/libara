@@ -10,12 +10,13 @@
 
 #include <chrono>
 #include <thread>
+#include <condition_variable>
 
 ARA_NAMESPACE_BEGIN
 
 class StandardTimer : public Timer {
     public:
-        StandardTimer(char type, void* contextObject=nullptr);
+        StandardTimer(TimerType type, void* contextObject=nullptr);
         virtual ~StandardTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
@@ -23,14 +24,9 @@ class StandardTimer : public Timer {
         virtual void interrupt();
 
     private:
-        bool isCalledFromTimerThreadContext();
-        void makeSureTimeIsNotRunning();
-        void forcefullyStopTimer();
-
-    private:
-        bool timerHasBeenInterrupted;
-        bool timerIsRunning;
-        std::thread* timer;
+        std::condition_variable conditionVariable;
+        std::mutex conditionVariableMutex;
+        std::shared_ptr<std::thread> timer;
 };
 
 ARA_NAMESPACE_END
