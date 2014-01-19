@@ -23,10 +23,16 @@ Time* OMNeTClock::makeTime(){
     return new OMNeTTime();
 }
 
-Timer* OMNeTClock::getNewTimer(TimerType timerType, void* contextObject) {
+TimerPtr OMNeTClock::getNewTimer(TimerType timerType, void* contextObject) {
     unsigned int timerID = timerIDCounter++;
-    runningTimers[timerID] = new OMNeTTimer(timerID, this, timerType, contextObject);
-    return runningTimers[timerID];
+
+    /// TODO: This should be investigated - this does not look very smart
+    std::shared_ptr<OMNeTTimer> timer = std::make_shared<OMNeTTimer>(timerID, this, timerType, contextObject);
+
+    std::weak_ptr<OMNeTTimer> weakTimer = timer;
+    runningTimers[timerID] = weakTimer;
+
+    return timer;
 }
 
 void OMNeTClock::startTimer(unsigned int timerID, unsigned long timeoutInMicroSeconds) {
@@ -81,7 +87,7 @@ void OMNeTClock::handleMessage(cMessage* msg) {
     pendingSelfMessages.erase(timerID);
 
     // dispatch the message
-    OMNeTTimer* expiredTimer = runningTimers[timerID];
+    std::shared_ptr<OMNeTTimer> expiredTimer = runningTimers[timerID].lock();
     expiredTimer->notifyTimeExpired();
 
     delete msg;

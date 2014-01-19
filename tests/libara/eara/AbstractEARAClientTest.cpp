@@ -84,11 +84,10 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfFANT) {
     client->receivePacket(fant, interface);
 
     // we need the timer to trigger the actual sending of the FANT
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
-    CHECK(routeDiscoveryDelayTimer != nullptr);
-    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
-    CHECK(routeDiscoveryDelayTimer->isRunning());
-    routeDiscoveryDelayTimer->expire();
+    CHECK(client->isRouteDiscoveryDelayTimerExpired(source) != true);
+    CHECK(client->isRouteDiscoveryDelayTimerType(source, TimerType::ROUTE_DISCOVERY_DELAY_TIMER) == true);
+    CHECK(client->isRouteDiscoveryDelayTimerRunning(source));
+    client->expireRouteDiscoveryDelayTimer(source);
 
     // packet should have been updated and broadcasted
     LONGS_EQUAL(1, interface->getNumberOfSentPackets());
@@ -242,17 +241,16 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
 
     // no packet should have been broadcasted just yet
     BYTES_EQUAL(0, sentPackets->size());
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
-    CHECK(routeDiscoveryDelayTimer != nullptr);
-    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
-    CHECK(routeDiscoveryDelayTimer->isRunning());
+    CHECK(client->isRouteDiscoveryDelayTimerExpired(source) != true);
+    CHECK(client->isRouteDiscoveryDelayTimerType(source, TimerType::ROUTE_DISCOVERY_DELAY_TIMER) == true);
+    CHECK(client->isRouteDiscoveryDelayTimerRunning(source));
 
     // now after some short time the next FANT arrives
     client->receivePacket(fant2, interface);
     DOUBLES_EQUAL(client->normalizeEnergyValue(66.6666), routingTable->getEnergyValue(source, nodeA, interface), 0.0001);
 
     //  still no packet is broadcasted (timer has not expired)
-    CHECK(routeDiscoveryDelayTimer->isRunning());
+    CHECK(client->isRouteDiscoveryDelayTimerRunning(source));
     BYTES_EQUAL(0, sentPackets->size());
 
     // now we receive the third FANT
@@ -261,10 +259,11 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
 
     // still no packet is broadcasted
     BYTES_EQUAL(0, sentPackets->size());
-    CHECK(routeDiscoveryDelayTimer->isRunning());
+    CHECK(client->isRouteDiscoveryDelayTimerRunning(source));
 
     // now finally the wait time is over and the client sends the best FANT (from B)
-    routeDiscoveryDelayTimer->expire();
+    client->expireRouteDiscoveryDelayTimer(source);
+
 
     BYTES_EQUAL(1, sentPackets->size());
     AddressPtr receiver = sentPackets->back()->getRight();
@@ -281,7 +280,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelay) {
     LONGS_EQUAL(3, sentPacket->getTTL());
 
     // the route discovery timer should no longer exist
-    CHECK(client->getRouteDiscoveryDelayTimer(source) == nullptr);
+    CHECK(client->isRouteDiscoveryDelayTimerExpired(source));
 }
 
 /**
@@ -303,13 +302,12 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelayIsUsedForNextRouteDiscovery) {
 
     // no packet should have been broadcasted just yet
     BYTES_EQUAL(0, sentPackets->size());
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
-    CHECK(routeDiscoveryDelayTimer != nullptr);
-    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
-    CHECK(routeDiscoveryDelayTimer->isRunning());
+    CHECK(client->isRouteDiscoveryDelayTimerExpired(source) != true);
+    CHECK(client->isRouteDiscoveryDelayTimerType(source, TimerType::ROUTE_DISCOVERY_DELAY_TIMER) == true);
+    CHECK(client->isRouteDiscoveryDelayTimerRunning(source));
 
     // now the first timer expires and the FANT should be broadcasted again
-    routeDiscoveryDelayTimer->expire();
+    client->expireRouteDiscoveryDelayTimer(source);
     BYTES_EQUAL(1, sentPackets->size());
     AddressPtr receiver = sentPackets->back()->getRight();
     CHECK(interface->isBroadcastAddress(receiver));
@@ -321,7 +319,7 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelayIsUsedForNextRouteDiscovery) {
     CHECK(sentPacket->getDestination()->equals(destination));
 
     // the route discovery timer should no longer exist
-    CHECK(client->getRouteDiscoveryDelayTimer(source) == nullptr);
+//    CHECK((client->getRouteDiscoveryDelayTimer(source)).lock() == nullptr);
 
     // now we start a new route discovery
     EARAPacket* fant2 = castToEARAPacket(packetFactory->makeFANT(source, destination, 2));
@@ -330,13 +328,12 @@ TEST(AbstractEARAClientTest, routeDiscoveryDelayIsUsedForNextRouteDiscovery) {
 
     // again the client is required to hold the packet back via the delay timer
     BYTES_EQUAL(1, sentPackets->size());
-    routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
-    CHECK(routeDiscoveryDelayTimer != nullptr);
-    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
-    CHECK(routeDiscoveryDelayTimer->isRunning());
+    CHECK(client->isRouteDiscoveryDelayTimerExpired(source) != true);
+    CHECK(client->isRouteDiscoveryDelayTimerType(source, TimerType::ROUTE_DISCOVERY_DELAY_TIMER) == true);
+    CHECK(client->isRouteDiscoveryDelayTimerRunning(source));
 
     // now the second timer also expires and the FANT should be broadcasted again
-    routeDiscoveryDelayTimer->expire();
+    client->expireRouteDiscoveryDelayTimer(source);
     BYTES_EQUAL(2, sentPackets->size());
     receiver = sentPackets->back()->getRight();
     CHECK(interface->isBroadcastAddress(receiver));
@@ -490,11 +487,10 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfPEANT) {
     client->receivePacket(peant, interface);
 
     // we need the timer to trigger the actual sending of the PEANT
-    TimerMock* routeDiscoveryDelayTimer = client->getRouteDiscoveryDelayTimer(source);
-    CHECK(routeDiscoveryDelayTimer != nullptr);
-    CHECK(routeDiscoveryDelayTimer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
-    CHECK(routeDiscoveryDelayTimer->isRunning());
-    routeDiscoveryDelayTimer->expire();
+    CHECK(client->isRouteDiscoveryDelayTimerExpired(source) != true);
+    CHECK(client->isRouteDiscoveryDelayTimerType(source, TimerType::ROUTE_DISCOVERY_DELAY_TIMER) == true);
+    CHECK(client->isRouteDiscoveryDelayTimerRunning(source));
+    client->expireRouteDiscoveryDelayTimer(source);
 
     // packet should have been updated and broadcasted
     LONGS_EQUAL(1, interface->getNumberOfSentPackets());

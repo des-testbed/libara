@@ -27,6 +27,18 @@ class Timer {
 
         void addTimeoutListener(TimeoutEventListener* listener);
 
+        bool operator==(const Timer& otherTimer) const {
+            return this->equals(&otherTimer);
+        }
+
+        bool operator==(const std::shared_ptr<Timer> otherTimer) const {
+            return this->equals(otherTimer);
+        }
+
+        virtual bool equals(const Timer* otherTimer) const = 0;
+        virtual bool equals(const std::shared_ptr<Timer> otherTimer) const = 0; // FIXME 2 abstract equals definitions is not necessary
+        virtual size_t getHashValue() const = 0;
+
         /**
          * This method is used to start the timer. The timer is required to run
          * the stated amount of microseconds.
@@ -70,6 +82,24 @@ class Timer {
 };
 
 typedef std::shared_ptr<Timer> TimerPtr;
+
+/**
+ * This functor is needed for std::unordered_set
+ */
+struct TimerHash {
+    size_t operator()(std::shared_ptr<Timer> timer) const {
+        return timer->getHashValue();
+    }
+};
+
+/**
+ * This functor is needed for std::unordered_set 
+ */
+struct TimerPredicate {
+    size_t operator()(std::shared_ptr<Timer> timer, std::shared_ptr<Timer> anotherTimer) const {
+        return timer->equals(anotherTimer);
+    }
+};
 
 ARA_NAMESPACE_END
 

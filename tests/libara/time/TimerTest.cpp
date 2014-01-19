@@ -11,7 +11,7 @@ using namespace ARA;
 TEST_GROUP(TimerTest) {};
 
 TEST(TimerTest, addTimeoutListener) {
-    TimerMock timer = TimerMock();
+    TimerMock timer;
     TimeoutEventListenerMock listener1 = TimeoutEventListenerMock();
     TimeoutEventListenerMock listener2 = TimeoutEventListenerMock();
     TimeoutEventListenerMock listener3 = TimeoutEventListenerMock();
@@ -32,12 +32,12 @@ TEST(TimerTest, addTimeoutListener) {
 }
 
 TEST(TimerTest, defaultType) {
-    TimerMock timer = TimerMock();
-    BYTES_EQUAL(0, timer.getType());
+    TimerMock timer;
+    BYTES_EQUAL(5, timer.getType());
 }
 
 TEST(TimerTest, defaultContextObject) {
-    TimerMock timer = TimerMock();
+    TimerMock timer;
     CHECK(timer.getContextObject() == nullptr);
 }
 

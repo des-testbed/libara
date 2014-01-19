@@ -13,7 +13,7 @@ ARA_NAMESPACE_BEGIN
 class StandardClock : public Clock {
     public:
         Time* makeTime();
-        Timer* getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr);
+        TimerPtr getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr);
 };
 
 ARA_NAMESPACE_END

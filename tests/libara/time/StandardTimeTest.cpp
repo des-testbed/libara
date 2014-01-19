@@ -38,8 +38,8 @@ TEST_GROUP(StandardTimeTest) {
 
 TEST(StandardTimeTest, create) {
     StandardTime time = StandardTime(timestampA);
-    LONGS_EQUAL(1372770122, time.getSeconds());
-    LONGS_EQUAL(1372770122000, time.getMilliSeconds());
+    LONGS_EQUAL(1372773722, time.getSeconds());
+    LONGS_EQUAL(1372773722000, time.getMilliSeconds());
 }
 
 TEST(StandardTimeTest, equality) {
@@ -61,12 +61,12 @@ TEST(StandardTimeTest, copyConstructor) {
 }
 TEST(StandardTimeTest, getSeconds) {
     StandardTime time = StandardTime(timestampA);
-    LONGS_EQUAL(1372770122, time.getSeconds());
+    LONGS_EQUAL(1372773722, time.getSeconds());
 }
 
 TEST(StandardTimeTest, getMilliSeconds) {
     StandardTime time = StandardTime(timestampA);
-    LONGS_EQUAL(1372770122000, time.getMilliSeconds());
+    LONGS_EQUAL(1372773722000, time.getMilliSeconds());
 }
 
 TEST(StandardTimeTest, getDifferenceInMilliSeconds) {

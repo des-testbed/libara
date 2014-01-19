@@ -83,7 +83,7 @@ unsigned int ARAClientMock::getPacketDeliveryDelay() const {
     return packetDeliveryDelayInMilliSeconds;
 }
 
-Timer* ARAClientMock::getNeighborActivityTimer() const {
+std::weak_ptr<Timer> ARAClientMock::getNeighborActivityTimer() const {
     return neighborActivityTimer;
 }
 
@@ -102,12 +102,36 @@ void ARAClientMock::forget(AddressPtr neighbor) {
     }
 }
 
-Timer* ARAClientMock::getPANTsTimer(AddressPtr destination) {
-    if (scheduledPANTs.find(destination) == scheduledPANTs.end()) {
-        return nullptr;
+bool ARAClientMock::isPANTsTimerExpired(AddressPtr destination) {
+    if (scheduledPANTs.find(destination) != scheduledPANTs.end()) {
+        if ((scheduledPANTs[destination]).use_count() != 0) {
+            return false;
+        }
     }
-    else {
-        return scheduledPANTs[destination];
+    return true;
+}
+
+bool ARAClientMock::isPANTsTimerType(AddressPtr destination, TimerType type) {
+    if (scheduledPANTs.find(destination) != scheduledPANTs.end()) {
+        if ((scheduledPANTs[destination])->getType() == type) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ARAClientMock::isPANTsTimerRunning(AddressPtr destination) {
+    if (scheduledPANTs.find(destination) != scheduledPANTs.end()) {
+        std::shared_ptr<TimerMock> timer = std::dynamic_pointer_cast<TimerMock>(scheduledPANTs[destination]);
+        return timer->isRunning();
+    }
+    return false;
+}
+
+void ARAClientMock::expirePANTsTimer(AddressPtr destination) {
+    if (scheduledPANTs.find(destination) != scheduledPANTs.end()) {
+        std::shared_ptr<TimerMock> timer = std::dynamic_pointer_cast<TimerMock>(scheduledPANTs[destination]);
+        timer->expire();
     }
 }
 

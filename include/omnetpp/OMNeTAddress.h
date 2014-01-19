@@ -43,12 +43,12 @@ public:
       */
      OMNeTAddress(const IPv4Address& someIPv4Address) : IPv4Address(someIPv4Address) {}
 
-    std::string toString() const;
-    bool equals(const Address* otherAddress) const;
-    bool equals(const std::shared_ptr<Address> otherAddress) const;
-    bool equals(const IPv4Address& ipAddress) const {return IPv4Address::equals(ipAddress);}
+     std::string toString() const;
+     bool equals(const Address* otherAddress) const;
+     bool equals(const std::shared_ptr<Address> otherAddress) const;
+     bool equals(const IPv4Address& ipAddress) const {return IPv4Address::equals(ipAddress);}
 
-    size_t getHashValue() const;
+     size_t getHashValue() const;
 };
 
 OMNETARA_NAMESPACE_END

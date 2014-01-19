@@ -21,6 +21,11 @@ class TimerMock : public Timer {
         bool isRunning() const;
         bool hasBeenInterrupted() const;
 
+        bool equals(const Timer* otherTimer) const;
+        bool equals(const std::shared_ptr<Timer> otherTimer) const;
+
+        size_t getHashValue() const;
+
     private:
         bool isTimerRunning = false;
         bool hasTimerExpired = false;

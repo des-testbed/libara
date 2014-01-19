@@ -24,6 +24,11 @@ namespace omnetpp {
 
         void notifyTimeExpired();
 
+        bool equals(const Timer* otherTimer) const;
+        bool equals(const std::shared_ptr<Timer> otherTimer) const;
+
+        size_t getHashValue() const;
+
     private:
         OMNeTClock* clock;
         unsigned int id;

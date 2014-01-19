@@ -35,7 +35,7 @@ class Clock {
          *                    This is helpful to distinguish conceptually different timers.
          * @param contextObject: an optional parameter which can provide some context when the timer is expired
          */
-        virtual Timer* getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr) = 0;
+        virtual TimerPtr getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr) = 0;
 };
 
 ARA_NAMESPACE_END

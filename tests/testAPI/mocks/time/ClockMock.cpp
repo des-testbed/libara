@@ -13,14 +13,12 @@ Time* ClockMock::makeTime() {
     return new TimeMock();
 }
 
-Timer* ClockMock::getNewTimer(TimerType timerType, void* contextObject) {
-    lastTimer = new TimerMock(timerType, contextObject);
-    return lastTimer;
+std::shared_ptr<Timer> ClockMock::getNewTimer(TimerType timerType, void* contextObject) {
+    std::shared_ptr<TimerMock> timer = std::make_shared<TimerMock>(timerType, contextObject);
+    lastTimer = timer;
+    return timer;
 }
 
-TimerMock* ClockMock::getLastTimer() {
-    if(lastTimer == nullptr) {
-        FAIL("Error in ClockMock: Can not get last timer: not initialized yet!");
-    }
+std::weak_ptr<TimerMock> ClockMock::getLastTimer() {
     return lastTimer;
 }

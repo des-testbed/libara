@@ -12,23 +12,20 @@ ARA_NAMESPACE_BEGIN
 TEST_GROUP(StandardClockTest) {};
 
 TEST(StandardClockTest, makeTime) {
-    StandardClock clock = StandardClock();
+    StandardClock clock;
     Time* newTime = clock.makeTime();
 
     StandardTime* standardTimeInstance = dynamic_cast<StandardTime*>(newTime);
-    CHECK(standardTimeInstance != NULL);
+    CHECK(standardTimeInstance != nullptr);
 
     delete newTime;
 }
 
 TEST(StandardClockTest, getNewTimer) {
-    StandardClock clock = StandardClock();
-    Timer* newTimer = clock.getNewTimer();
+    StandardClock clock;
+    std::shared_ptr<Timer> newTimer = clock.getNewTimer();
 
-    StandardTimer* standardTimerInstance = dynamic_cast<StandardTimer*>(newTimer);
-    CHECK(standardTimerInstance != NULL);
-
-    delete newTimer;
+    CHECK(newTimer.get() != nullptr);
 }
 
 ARA_NAMESPACE_END

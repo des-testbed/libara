@@ -81,13 +81,13 @@ class ReliableNetworkInterface : public AbstractNetworkInterface, public Timeout
     protected:
         PacketFactory* packetFactory;
         std::deque<const Packet*> unacknowledgedPackets;
-        std::unordered_map<Timer*, AckTimerData> runningTimers;
+        std::unordered_map<TimerPtr, AckTimerData> runningTimers;
         double ackTimeoutInMicroSeconds;
         int maxNrOfRetransmissions = 5;
 
     private:
         void startAcknowledgmentTimer(const Packet* packet, std::shared_ptr<Address> recipient);
-        void handleUndeliverablePacket(Timer* ackTimer, AckTimerData& timerData);
+        void handleUndeliverablePacket(TimerPtr ackTimer, AckTimerData& timerData);
         void handleNonAckPacket(Packet* packet);
         void handleAckPacket(Packet* packet);
 };

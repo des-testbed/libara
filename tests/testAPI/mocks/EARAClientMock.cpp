@@ -99,12 +99,36 @@ EARAPacketFactory* EARAClientMock::getPacketFactory() {
     return packetFactory;
 }
 
-TimerMock* EARAClientMock::getRouteDiscoveryDelayTimer(AddressPtr source) {
-    if (runningRouteDiscoveryDelayTimers.find(source) != runningRouteDiscoveryDelayTimers.end()) {
-        return (TimerMock*) runningRouteDiscoveryDelayTimers[source];
+bool EARAClientMock::isRouteDiscoveryDelayTimerExpired(AddressPtr destination) {
+    if (runningRouteDiscoveryDelayTimers.find(destination) != runningRouteDiscoveryDelayTimers.end()) {
+        if ((runningRouteDiscoveryDelayTimers[destination]).use_count() != 0) {
+            return false;
+        }
     }
-    else {
-        return nullptr;
+    return true;
+}
+
+bool EARAClientMock::isRouteDiscoveryDelayTimerType(AddressPtr destination, TimerType type) {
+    if (runningRouteDiscoveryDelayTimers.find(destination) != runningRouteDiscoveryDelayTimers.end()) {
+        if ((runningRouteDiscoveryDelayTimers[destination])->getType() == type) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool EARAClientMock::isRouteDiscoveryDelayTimerRunning(AddressPtr destination) {
+    if (runningRouteDiscoveryDelayTimers.find(destination) != runningRouteDiscoveryDelayTimers.end()) {
+        std::shared_ptr<TimerMock> timer = std::dynamic_pointer_cast<TimerMock>(runningRouteDiscoveryDelayTimers[destination]);
+        return timer->isRunning();
+    }
+    return false;
+}
+
+void EARAClientMock::expireRouteDiscoveryDelayTimer(AddressPtr destination) {
+    if (runningRouteDiscoveryDelayTimers.find(destination) != runningRouteDiscoveryDelayTimers.end()) {
+        std::shared_ptr<TimerMock> timer = std::dynamic_pointer_cast<TimerMock>(runningRouteDiscoveryDelayTimers[destination]);
+        timer->expire();
     }
 }
 
