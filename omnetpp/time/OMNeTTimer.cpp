@@ -7,7 +7,7 @@
 using namespace ARA;
 using namespace ARA::omnetpp;
 
-OMNeTTimer::OMNeTTimer(unsigned int id, OMNeTClock* clock, char type, void* contextObject) : Timer(type, contextObject) {
+OMNeTTimer::OMNeTTimer(unsigned int id, OMNeTClock* clock, TimerType type, void* contextObject) : Timer(type, contextObject) {
     this->id = id;
     this->clock = clock;
 }
@@ -27,4 +27,21 @@ void OMNeTTimer::interrupt() {
 
 void OMNeTTimer::notifyTimeExpired() {
     notifyAllListeners();
+}
+
+bool OMNeTTimer::equals(const Timer* otherTimer) const {
+    const OMNeTTimer* otherOMNeTTimer = dynamic_cast<const OMNeTTimer*>(otherTimer);
+    if (otherOMNeTTimer == nullptr) {
+        return false;
+    } 
+    return (this->getHashValue() == otherOMNeTTimer->getHashValue());
+}
+
+bool OMNeTTimer::equals(const std::shared_ptr<Timer> otherTimer) const {
+    return this->equals(otherTimer.get());
+}
+
+size_t OMNeTTimer::getHashValue() const {
+    std::hash<void*> voidPtrHash;
+    return voidPtrHash(contextObject);
 }

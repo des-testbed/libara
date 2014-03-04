@@ -15,19 +15,16 @@ TEST(StandardClockTest, makeTime) {
     StandardClock clock;
     Time* newTime = clock.makeTime();
 
-    StandardTime* time = dynamic_cast<StandardTime*>(newTime);
-    CHECK(time != nullptr);
+    StandardTime* standardTimeInstance = dynamic_cast<StandardTime*>(newTime);
+    CHECK(standardTimeInstance != nullptr);A
 
     delete newTime;
 }
 
 TEST(StandardClockTest, getNewTimer) {
     StandardClock clock;
-
-    StandardTimer* timer = dynamic_cast<StandardTimer*>(clock.getNewTimer());
-    CHECK(timer != nullptr);
-
-    delete timer;
+    std::shared_ptr<Timer> newTimer = clock.getNewTimer();
+    CHECK(newTimer.get() != nullptr);
 }
 
 ARA_NAMESPACE_END

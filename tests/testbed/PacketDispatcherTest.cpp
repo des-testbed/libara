@@ -71,7 +71,7 @@ TEST_GROUP(PacketDispatcherTest) {
      */
     NetworkInterface* createNetworkInterface() {
         memcpy(interface->hwaddr, DESSERT_LOCAL_ADDRESS, 6);
-        return new NetworkInterface(interface, client, 400);
+        return new NetworkInterface(interface, client, client->getPacketFactory(), 400);
     }
 
     bool isSameAddress(u_char* address1, u_char* address2) {

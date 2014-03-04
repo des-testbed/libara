@@ -44,7 +44,11 @@ public:
     EnergyAwareRoutingTable* getRoutingTable();
     EARAPacketFactory* getPacketFactory();
     TimerMock* getEnergyDisseminationTimer();
-    TimerMock* getRouteDiscoveryDelayTimer(AddressPtr source);
+
+    bool isRouteDiscoveryDelayTimerExpired(AddressPtr source);
+	bool isRouteDiscoveryDelayTimerType(AddressPtr destination, TimerType type);
+    bool isRouteDiscoveryDelayTimerRunning(AddressPtr destination);
+    void expireRouteDiscoveryDelayTimer(AddressPtr destination);
 
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "DEFAULT");
 

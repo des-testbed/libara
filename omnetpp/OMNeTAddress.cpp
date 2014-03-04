@@ -22,10 +22,8 @@ bool OMNeTAddress::equals(const Address* otherAddress) const {
     if(otherOMNeTAddress == NULL) {
         return false;
     }
-    else {
-        // use the native implementation of IPv4Address
-        return IPv4Address::equals(*otherOMNeTAddress);
-    }
+    // use the native implementation of IPv4Address
+    return IPv4Address::equals(*otherOMNeTAddress);
 }
 
 bool OMNeTAddress::equals(const AddressPtr otherAddress) const {

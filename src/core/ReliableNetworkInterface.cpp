@@ -13,8 +13,6 @@ namespace ARA {
 typedef std::shared_ptr<Address> AddressPtr;
 
 ReliableNetworkInterface::ReliableNetworkInterface(AbstractNetworkClient* client, int ackTimeoutInMicroSeconds, AddressPtr localAddress, AddressPtr broadcastAddress) : AbstractNetworkInterface(client, localAddress, broadcastAddress) {
-    unacknowledgedPackets = deque<const Packet*>();
-    runningTimers = unordered_map<Timer*, AckTimerData>();
     this->ackTimeoutInMicroSeconds = ackTimeoutInMicroSeconds;
     this->packetFactory = client->getPacketFactory();
 }
@@ -24,12 +22,6 @@ ReliableNetworkInterface::~ReliableNetworkInterface() {
         delete packet;
     }
 
-    unordered_map<Timer*, AckTimerData>::iterator iterator;
-    for (iterator=runningTimers.begin(); iterator!=runningTimers.end(); iterator++) {
-        pair<Timer*, AckTimerData> entryPair = *iterator;
-        Timer* timer = entryPair.first;
-        delete timer;
-    }
     runningTimers.clear();
 }
 
@@ -40,7 +32,7 @@ void ReliableNetworkInterface::send(const Packet* packet, AddressPtr recipient) 
 }
 
 void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, AddressPtr recipient) {
-    Timer* ackTimer = Environment::getClock()->getNewTimer();
+    TimerPtr ackTimer = Environment::getClock()->getNewTimer();
     ackTimer->addTimeoutListener(this);
     ackTimer->run(ackTimeoutInMicroSeconds);
 
@@ -53,23 +45,39 @@ void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, Ad
 }
 
 void ReliableNetworkInterface::timerHasExpired(Timer* ackTimer) {
-    // some acknowledgment timed out so we need to send the packet again or tell the client
-    AckTimerData timerData = runningTimers[ackTimer];
-    if(timerData.nrOfRetries < maxNrOfRetransmissions) {
-        timerData.nrOfRetries++;
-        runningTimers[ackTimer] = timerData;
-        doSend(timerData.packet, timerData.recipient);
-        ackTimer->run(ackTimeoutInMicroSeconds);
-    }
-    else {
-        handleUndeliverablePacket(ackTimer, timerData);
-    }
+    AckTimerData timerData;
+    // FIXME: That's the same problem as described in file AbstractARAClient.cpp in line 630
+    std::unordered_map<TimerPtr, AckTimerData>::iterator timer;
+    for (timer = runningTimers.begin(); timer != runningTimers.end(); timer++) {
+        if (ackTimer == (timer->first).get()) {
+            // some acknowledgment timed out so we need to send the packet again or tell the client
+            timerData = runningTimers[timer->first];
+
+			if (timerData.nrOfRetries < maxNrOfRetransmissions) {
+				timerData.nrOfRetries++;
+				runningTimers[timer->first] = timerData;
+				doSend(timerData.packet, timerData.recipient);
+				ackTimer->run(ackTimeoutInMicroSeconds);
+			} else {
+			    handleUndeliverablePacket(timer->first, timerData);
+			}
+            break;
+        }
+    } 
 }
 
-void ReliableNetworkInterface::handleUndeliverablePacket(Timer* ackTimer, AckTimerData& timerData) {
-    // remove the acknowledgment timer
+void ReliableNetworkInterface::handleUndeliverablePacket(TimerPtr ackTimer, AckTimerData& timerData) {
+    // FIXME: That's the same problem as described in file AbstractARAClient.cpp in line 630
+/*
+    std::unordered_map<TimerPtr, AckTimerData>::iterator timer;
+    for (timer = runningTimers.begin(); timer != runningTimers.end(); timer++) {
+        if (ackTimer == (timer->first).get()) {
+            // remove the acknowledgment timer
+            runningTimers.erase(timer->first);
+        }
+    } 
+*/
     runningTimers.erase(ackTimer);
-    delete ackTimer;
 
     // delete the packet from the list of unacknowledged packets
     deque<const Packet*>::iterator currentPacket;
@@ -114,18 +122,16 @@ void ReliableNetworkInterface::handleAckPacket(Packet* ackPacket) {
     AddressPtr acknowledgedSource = ackPacket->getSource();
 
     // stop the timer
-    unordered_map<Timer*, AckTimerData>::iterator iterator;
+    unordered_map<TimerPtr, AckTimerData>::iterator iterator;
     for (iterator=runningTimers.begin(); iterator!=runningTimers.end(); iterator++) {
-        pair<Timer*, AckTimerData> entryPair = *iterator;
-        Timer* timer = entryPair.first;
+        pair<TimerPtr, AckTimerData> entryPair = *iterator;
+        TimerPtr timer = entryPair.first;
         AckTimerData timerData = entryPair.second;
 
         if(timerData.packet->getSequenceNumber() == acknowledgedSeqNr
            && timerData.packet->getSource()->equals(acknowledgedSource) ) {
             timer->interrupt();
             runningTimers.erase(timer);
-            delete timer;
-
             break;
         }
     }

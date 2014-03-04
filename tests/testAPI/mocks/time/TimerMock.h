@@ -12,7 +12,7 @@ ARA_NAMESPACE_BEGIN
 
 class TimerMock : public Timer {
     public:
-        TimerMock(char type=0, void* contextObject=nullptr) : Timer(type, contextObject) {};
+        TimerMock(TimerType type=TimerType::INVALID_TIMER, void* contextObject=nullptr) : Timer(type, contextObject) {};
         void run(unsigned long timeoutInMicroSeconds);
         void interrupt();
 
@@ -20,6 +20,11 @@ class TimerMock : public Timer {
         bool hasExpired() const;
         bool isRunning() const;
         bool hasBeenInterrupted() const;
+
+        bool equals(const Timer* otherTimer) const;
+        bool equals(const std::shared_ptr<Timer> otherTimer) const;
+
+        size_t getHashValue() const;
 
     private:
         bool isTimerRunning = false;

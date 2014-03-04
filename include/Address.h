@@ -32,7 +32,7 @@ public:
 
     bool operator==(const Address& otherAddress) const {
             return this->equals(&otherAddress);
-        }
+    }
 
     bool operator==(const std::shared_ptr<Address> otherAddress) const {
         return this->equals(otherAddress);

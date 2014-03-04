@@ -2,18 +2,18 @@
  * $FU-Copyright$
  */
 
-#ifndef TESTBED_NETWORK_INTERFACE_H_
-#define TESTBED_NETWORK_INTERFACE_H_
+#ifndef _NETWORK_INTERFACE_H_
+#define _NETWORK_INTERFACE_H_
 
 #include "Testbed.h"
-#include "AbstractNetworkClient.h"
+#include "AbstractARAClient.h"
 #include "ReliableNetworkInterface.h"
 
 TESTBED_NAMESPACE_BEGIN
 
 class NetworkInterface : public ReliableNetworkInterface {
     public:
-        NetworkInterface(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, int ackTimeoutInMicroSeconds);
+        NetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
         ~NetworkInterface();
         bool isRegistered();
         bool equals(ARA::NetworkInterface* otherInterface);
@@ -31,4 +31,4 @@ class NetworkInterface : public ReliableNetworkInterface {
 
 TESTBED_NAMESPACE_END
 
-#endif // TESTBED_NETWORK_INTERFACE_H_
+#endif // _NETWORK_INTERFACE_H_

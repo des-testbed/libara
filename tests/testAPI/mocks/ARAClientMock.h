@@ -45,7 +45,7 @@ public:
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "localhost");
     unsigned int getPacketDeliveryDelay() const;
 
-    Timer* getNeighborActivityTimer() const;
+    std::weak_ptr<Timer> getNeighborActivityTimer() const;
 
     /**
      * Makes this client forget this neighbor (if he ever knew it)
@@ -53,11 +53,16 @@ public:
      */
     void forget(AddressPtr neighbor);
 
-    Timer* getPANTsTimer(AddressPtr destination);
+    std::weak_ptr<Timer> getPANTsTimer(AddressPtr destination);
 
     // make some methods public for testing purposes
     using AbstractARAClient::hasBeenReceivedEarlier;
     using AbstractARAClient::registerReceivedPacket;
+    
+    bool isPANTsTimerExpired(AddressPtr destination);
+	bool isPANTsTimerType(AddressPtr destination, TimerType type);
+    bool isPANTsTimerRunning(AddressPtr destination);
+    void expirePANTsTimer(AddressPtr destination);
 };
 
 ARA_NAMESPACE_END

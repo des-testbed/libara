@@ -23,7 +23,7 @@ TEST_GROUP(NetworkInterfaceTest) {
         otherDessertInterface = new dessert_meshif_t();
         memcpy(dessertInterface->hwaddr, DESSERT_LOCAL_ADDRESS, 6);
         memcpy(otherDessertInterface->hwaddr, DESSERT_BROADCAST_ADDRESS, 6);
-        interface = new NetworkInterface(dessertInterface, client, 400);
+        interface = new NetworkInterface(dessertInterface, client, client->getPacketFactory(), 400);
     }
 
     void teardown() {
@@ -35,13 +35,13 @@ TEST_GROUP(NetworkInterfaceTest) {
 };
 
 TEST(NetworkInterfaceTest, equals) {
-    NetworkInterface* otherInterface = new NetworkInterface(dessertInterface, client, 600);
+    NetworkInterface* otherInterface = new NetworkInterface(dessertInterface, client, client->getPacketFactory(), 600);
     CHECK(interface->equals(otherInterface));
     delete otherInterface;
 }
 
 TEST(NetworkInterfaceTest, notEquals) {
-    NetworkInterface* ethInterface = new NetworkInterface(otherDessertInterface, client, 400);
+    NetworkInterface* ethInterface = new NetworkInterface(otherDessertInterface, client, client->getPacketFactory(), 400);
     CHECK_FALSE(interface->equals(ethInterface));
     delete ethInterface;
 }
@@ -51,4 +51,3 @@ TEST(NetworkInterfaceTest, registration) {
 }
 
 TESTBED_NAMESPACE_END
-

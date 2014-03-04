@@ -17,15 +17,16 @@ TESTBED_NAMESPACE_BEGIN
 
 TEST_GROUP(TestbedARAClientTest) {
     TestbedARAClient* client;
-    RoutingTableMock* routingTable;
 
     void setup() {
-	routingTable = new RoutingTableMock();
-        BasicConfiguration config = BasicConfiguration(routingTable, new PacketFactory(15), new ExponentialEvaporationPolicyMock(), new LinearPathReinforcementPolicy(5.0), new BestPheromoneForwardingPolicy(routingTable), 5.0);
+        RoutingTableMock* routingTable = new RoutingTableMock();
+        BasicConfiguration config = BasicConfiguration(routingTable, new PacketFactory(15), new ExponentialEvaporationPolicyMock(),
+                                        new LinearPathReinforcementPolicy(5.0), new BestPheromoneForwardingPolicy(routingTable), 5.0);
         client = new TestbedARAClient(config);
     }
 
     void teardown() {
+        /// TODO: check if that's a bright idea!
         Environment::setClock(nullptr);
         delete client;
     }

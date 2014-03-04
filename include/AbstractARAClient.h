@@ -31,14 +31,16 @@
 #include <string>
 
 ARA_NAMESPACE_BEGIN
+// TODO: This definition should be in the ARAMacros header
+typedef std::shared_ptr<Timer> TimerPtr;
 
-typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RunningRouteDiscoveriesMap;
+typedef std::unordered_map<AddressPtr, TimerPtr, AddressHash, AddressPredicate> RunningRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<unsigned int>*, AddressHash, AddressPredicate> LastReceivedPacketsMap;
 typedef std::unordered_map<AddressPtr, std::unordered_set<AddressPtr>*, AddressHash, AddressPredicate> KnownIntermediateHopsMap;
 typedef std::unordered_map<AddressPtr, unsigned int, AddressHash, AddressPredicate> LastRouteDiscoveriesMap;
 typedef std::unordered_map<AddressPtr, std::pair<Time*, NetworkInterface*>, AddressHash, AddressPredicate> NeighborActivityMap;
-typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> ScheduledPANTsMap;
-typedef std::unordered_set<Timer*> DeliveryTimerSet;
+typedef std::unordered_map<AddressPtr, TimerPtr, AddressHash, AddressPredicate> ScheduledPANTsMap;
+typedef std::unordered_set<TimerPtr> DeliveryTimerSet;
 
 /**
  * TODO write class description
@@ -198,10 +200,10 @@ protected:
     /**
      * A small convenience method to retrieve a timer from the static Environment.
      */
-    Timer* getNewTimer(char timerType, void* contextObject=nullptr) const;
+    TimerPtr getNewTimer(TimerType timerType, void* contextObject=nullptr) const;
 
 protected:
-    Timer* neighborActivityTimer = nullptr;
+    TimerPtr neighborActivityTimer;
 
     RunningRouteDiscoveriesMap runningRouteDiscoveries;
     ScheduledPANTsMap scheduledPANTs;

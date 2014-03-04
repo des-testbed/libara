@@ -28,16 +28,13 @@ void packetToMeshInterfaceDispatcher(const Packet* packet, NetworkInterface* tes
     dessert_meshsend(message, interface);
 }
 
-/**
- *
- */
 Packet* extractPacket(dessert_msg_t* dessertMessage) {
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
     routingExtension* araHeader = extractRoutingExtension(dessertMessage);
 
-    AddressPtr source = std::make_shared<TestbedAddress>(araHeader->ara_shost);
-    AddressPtr destination = std::make_shared<TestbedAddress>(araHeader->ara_dhost);
-    AddressPtr sender = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
+    AddressPtr source(new TestbedAddress(araHeader->ara_shost));
+    AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
+    AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
     //std::cout << "||Extract Packet|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << " sender: " << sender.get()->toString() << std::endl;
 
     char packetType = dessertMessage->u8;
@@ -53,8 +50,8 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
 Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* client) {
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
 
-    AddressPtr source = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
-    AddressPtr destination = std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost);
+    AddressPtr source(new TestbedAddress(ethernetFrame->ether_shost));
+    AddressPtr destination(new TestbedAddress(ethernetFrame->ether_dhost));
     //std::cout << "||Create Packet from TapMessage|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << std::endl;
 
     void* payload;
@@ -72,7 +69,7 @@ ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage) {
 routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage) {
     dessert_ext_t* extension;
 
-    if (dessert_msg_getext(dessertMessage, &extension, DESSERT_EXT_USER, 0) == 0) {
+    if(dessert_msg_getext(dessertMessage, &extension, DESSERT_EXT_USER, 0) == 0){
         return nullptr;
     }
 

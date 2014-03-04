@@ -35,10 +35,8 @@ void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* inte
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
     logDebug("sending packet # %u to System via TAP", packet->getSequenceNumber());
-//    std::cout << "deliverToSystem " << packet->getPayload() << " delivered to system." << std::endl;
-    if (dessert_syssend((void*) packet->getPayload(), packet->getPayloadLength()) == EIO) {
-        logError("deliverToSystem failed");
-    }
+    std::cout << "deliverToSystem " << packet->getPayload() << " delivered to system." << std::endl;
+    dessert_syssend((void*) packet->getPayload(), packet->getPayloadLength());
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
@@ -50,7 +48,7 @@ void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
 void TestbedARAClient::initializeNetworkInterfaces() {
     dessert_meshif_t* dessertInterfaces = dessert_meshiflist_get();
     while(dessertInterfaces != NULL) {
-        NetworkInterface* newInterface = new NetworkInterface(dessertInterfaces, this, 400000);
+        NetworkInterface* newInterface = new NetworkInterface(dessertInterfaces, this, packetFactory, 400000);
         addNetworkInterface(newInterface);
         logDebug("initialized network interface: %s", dessertInterfaces->if_name);
         dessertInterfaces = dessertInterfaces->next;

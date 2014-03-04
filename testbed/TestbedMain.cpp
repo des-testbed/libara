@@ -27,7 +27,7 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
 
 void dumpDessertMessage(dessert_msg_t* message){
     ether_header* etherHeader = ARA::testbed::extractEthernetHeader(message);
-    std::cout << "!!! source: " << etherHeader->ether_shost << " destination: " << etherHeader->ether_dhost << " type: " << etherHeader->ether_type << std::endl;
+    //cout << "!!! source: " << etherHeader->ether_shost << " destination: " << etherHeader->ether_dhost << " type: " << etherHeader->ether_type << std::endl;
 }
 
 _dessert_cb_results tapPacketFilter(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
@@ -46,7 +46,7 @@ _dessert_cb_results messageFromTapInterfaceDispatcher(dessert_msg_t* messageRece
     return DESSERT_MSG_DROP;
 }
 
-int testbed_cli_cmd_testsendmesh(struct cli_def* cli, const char* command, char* argv[], int argc){
+int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[], int argc){
     ARA::AddressPtr destination = ARA::AddressPtr(new ARA::testbed::TestbedAddress(DESSERT_BROADCAST_ADDRESS));
     ARA::Packet* packet = client->getPacketFactory()->makeDataPacket(client->getNetworkInterface(0)->getLocalAddress(), destination, client->getNextSequenceNumber(), "test", 5);
     client->sendPacket(packet);
@@ -99,11 +99,9 @@ int main(int argc, char** argv) {
 
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
 
-     cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", cli_setup_sysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize sys interface");
-     cli_register_command(dessert_cli, dessert_cli_show, "testSendMesh", testbed_cli_cmd_testsendmesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "send a test packet to mesh interface");
-     cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", cli_setup_meshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
-     cli_register_command(dessert_cli, dessert_cli_show, "testSendMesh", testbed_cli_cmd_testsendmesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "send a test packet to mesh interface");
-     cli_register_command(dessert_cli, dessert_cli_show, "show rt", cli_showroutingtable, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "displays the content of the routing table");
+     cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("sys"), dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize tap interface"));
+     cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("mesh"), dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize mesh interface"));
+     cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("testSendMesh"), testbed_cli_cmd_testsendmesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("send a test packet to mesh interface"));
 
      dessert_cb_result (*fromTAP)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &messageFromTapInterfaceDispatcher;
      _dessert_cb_results (*fromMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &ARA::testbed::messageFromMeshInterfaceDispatcher;
