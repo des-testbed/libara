@@ -32,7 +32,7 @@ TEST(PacketTest, create) {
     LONGS_EQUAL(ttl, packet.getTTL());
 
     CHECK_EQUAL(0, packet.getPayloadLength());
-    CHECK(packet.getPayload() == false);
+    CHECK(packet.getPayload() == nullptr);
 }
 
 TEST(PacketTest, createWithPayload) {
