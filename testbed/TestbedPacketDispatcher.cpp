@@ -1,0 +1,138 @@
+/*
+ * $FU-Copyright$
+ */
+
+#include "TestbedPacketDispatcher.h"
+#include "TestbedAddress.h"
+
+#include <netinet/in.h>
+
+TESTBED_NAMESPACE_BEGIN
+
+/**
+ * Stores a map of network interface pointers by dessert interface pointers.
+ */
+NetworkInterfaceMap networkInterfaces;
+
+_dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
+    Packet* packet = extractPacket(messageReceived);
+    TestbedNetworkInterface* networkInterface = extractNetworkInterface(interface);
+    networkInterface->receive(packet);
+    return DESSERT_MSG_DROP;
+}
+
+void packetToMeshInterfaceDispatcher(const Packet* packet, TestbedNetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
+    dessert_msg_t* message = extractDessertMessage(packet);
+    dessert_meshif_t* interface = testbedInterface->getDessertPointer();
+    addEthernetHeader(message, interface, recipient);
+    dessert_meshsend(message, interface);
+}
+
+Packet* extractPacket(dessert_msg_t* dessertMessage) {
+    ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
+    routingExtension* araHeader = extractRoutingExtension(dessertMessage);
+
+    AddressPtr source(new TestbedAddress(araHeader->ara_shost));
+    AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
+    AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
+    //std::cout << "||Extract Packet|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << " sender: " << sender.get()->toString() << std::endl;
+
+    char packetType = dessertMessage->u8;
+    unsigned int sequenceNumber = dessertMessage->u16;
+    int ttl = dessertMessage->ttl;
+
+    void* payload;
+    unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
+
+    return new Packet(source, destination, sender, packetType, sequenceNumber, ttl, (const char*)payload, payloadSize);
+}
+
+Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* client) {
+    ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
+
+    AddressPtr source(new TestbedAddress(ethernetFrame->ether_shost));
+    AddressPtr destination(new TestbedAddress(ethernetFrame->ether_dhost));
+    //std::cout << "||Create Packet from TapMessage|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << std::endl;
+
+    void* payload;
+    unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
+
+    return client->getPacketFactory()->makeDataPacket(source, destination, client->getNextSequenceNumber(), (const char*)payload, payloadSize);
+}
+
+ether_header* extractEthernetHeader(dessert_msg_t* dessertMessage) {
+    dessert_ext_t* extension;
+    dessert_msg_getext(dessertMessage, &extension, DESSERT_EXT_ETH, 0);
+    return (ether_header*) extension->data;
+}
+
+routingExtension* extractRoutingExtension(dessert_msg_t* dessertMessage) {
+    dessert_ext_t* extension;
+
+    if(dessert_msg_getext(dessertMessage, &extension, DESSERT_EXT_USER, 0) == 0){
+        return nullptr;
+    }
+
+    return (routingExtension*) extension->data;
+}
+
+dessert_msg_t* extractDessertMessage(const Packet* packet) {
+    dessert_msg_t* dessertMessage;
+    dessert_msg_new(&dessertMessage);
+
+    dessertMessage->u16 = packet->getSequenceNumber();
+    dessertMessage->ttl = packet->getTTL();
+    dessertMessage->u8  = packet->getType();
+
+    TestbedAddressPtr sourceTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getSource());
+    u_int8_t* source = sourceTestbedAddress->getDessertValue();
+    TestbedAddressPtr destinationTestbedAddress = std::dynamic_pointer_cast<TestbedAddress>(packet->getDestination());
+    u_int8_t* destination = destinationTestbedAddress->getDessertValue();
+
+    addRoutingExtension(dessertMessage, source, destination);
+
+    //std::cout << "||Extract DES-SERT|| source: " << sourceTestbedAddress.get()->toString() << " destination: " << destinationTestbedAddress.get()->toString() << " sender: " << packet->getSenderString() << std::endl;
+
+    void* payload;
+    int payloadSize = packet->getPayloadLength();
+    dessert_msg_addpayload(dessertMessage, &payload, payloadSize);
+    // memcpy(payload, packet->getPayload(), payloadSize);
+    /// TODO: BETTER CHECK
+    td::copy(packet->getPayload(), packet->getPayload() + payloadSize, payload);
+
+    return dessertMessage;
+}
+
+void addEthernetHeader(dessert_msg_t* message, dessert_meshif_t* interface, AddressPtr nextHop) {
+    dessert_ext_t* extension;
+    dessert_msg_addext(message, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
+
+    struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
+    u_int8_t* senderMac = interface->hwaddr;
+    TestbedAddressPtr recipient = std::dynamic_pointer_cast<TestbedAddress>(nextHop);
+    u_int8_t* nextHopMac = recipient->getDessertValue();
+
+    std::copy(senderMac, senderMac + ETHER_ADDR_LEN, ethernetFrame->ether_shost);
+    std::copy(nextHopMac, nextHopMac + ETHER_ADDR_LEN, ethernetFrame->ether_dhost);
+}
+
+void addRoutingExtension(dessert_msg_t* message, u_int8_t* source, u_int8_t* destination) {
+    dessert_ext_t* extension;
+    dessert_msg_addext(message, &extension, DESSERT_EXT_USER, ETHER_HDR_LEN);
+    struct routingExtension* araRoutingExtension = (struct routingExtension*) extension->data;
+
+    std::copy(source, source + ETHER_ADDR_LEN, araRoutingExtension->ara_shost);
+    std::copy(destination, destination + ETHER_ADDR_LEN, araRoutingExtension->ara_dhost);
+}
+
+TestbedNetworkInterface* extractNetworkInterface(dessert_meshif_t* dessertInterface) {
+    std::unordered_map<dessert_meshif_t*, TestbedNetworkInterface*>::const_iterator got = networkInterfaces.find(dessertInterface);
+
+    if (got == networkInterfaces.end()) {
+        return nullptr;
+    } 
+
+    return got->second;
+}
+
+TESTBED_NAMESPACE_END

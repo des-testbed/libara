@@ -27,7 +27,7 @@ endif
 # TODO we might want to make this more generic (i.e. enable compiling with gcc)
 # A simple ifndef does not work because this will always be set by the OMNeT+ makefile.inc to gcc
 #ifndef CXX
-CXX = clang
+CXX = g++
 #endif
 
 # Configname determines where (in which subdirectory of out/)
@@ -65,6 +65,7 @@ endif
 LIBARA_SRC_FOLDER = src
 TESTS_FOLDER = tests
 OMNETARA_SRC_FOLDER = omnetpp
+TESTBEDARA_SRC_FOLDER = testbed
 INETMANET_FOLDER = inetmanet
 OUTPUT_DIR = out/$(CONFIGNAME)
 INCLUDE_DIR = include
@@ -84,12 +85,27 @@ OMNETARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(OMNETARA_SRC)))
 OMNETARA_DEPENDENCIES = $(OMNETARA_O:.o=.d)
 OMNETARA_EXECUTABLE_NAME = ara-sim
 OMNETARA_EXECUTABLE = $(OUTPUT_DIR)/$(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME)
+
+# testbedARA files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TESTBEDARA_MAIN = TestbedMain
+TESTBEDARA_SRC_MAIN = $(shell find $(TESTBEDARA_SRC_FOLDER)/ -type f -name '*$(TESTBEDARA_MAIN).cpp')
+TESTBEDARA_SRC_MAIN_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(TESTBEDARA_SRC_MAIN)))
+TESTBEDARA_SRC = $(shell find $(TESTBEDARA_SRC_FOLDER)/ -type f -name '*.cpp' -a -not -name '$(TESTBEDARA_MAIN).cpp')
+TESTBEDARA_O = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(TESTBEDARA_SRC)))
+TESTBEDARA_DEPENDENCIES = $(TESTBEDARA_O:.o=.d)
+TESTBEDARA_EXECUTABLE_NAME = TestbedDaemon
+TESTBEDARA_EXECUTABLE = $(OUTPUT_DIR)/$(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME)
+TESTBEDARA_LINKFLAGS = $(LINKFLAGS) -L/home/mfrey/testbed/software/dessert/lib -ldessert -lcli -lstdc++ -lm -lpthread
+
 # Tests files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LIBARA_TESTS_SRC = $(shell find $(TESTS_FOLDER)/libara -type f -name '*Test.cpp')
 LIBARA_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(LIBARA_TESTS_SRC)))
 
 OMNETPP_ARA_TESTS_SRC = $(shell find $(TESTS_FOLDER)/omnetpp -type f -name '*Test.cpp')
 OMNETPP_ARA_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(OMNETPP_ARA_TESTS_SRC)))
+
+TESTBED_ARA_TESTS_SRC = $(shell find $(TESTS_FOLDER)/testbed -type f -name '*Test.cpp')
+TESTBED_ARA_TESTS_BIN = $(subst .cpp,.o, $(addprefix $(OUTPUT_DIR)/, $(TESTBED_ARA_TESTS_SRC)))
 
 TESTAPI_SRC = $(shell find $(TESTS_FOLDER)/testAPI/ -name tests -prune -o -type f -name '*.cpp' -print)
 TESTAPI_SRC += $(TESTS_FOLDER)/TestRunner.cpp
@@ -104,13 +120,20 @@ TESTS_DEPENDENCIES = $(ALL_TEST_BINARIES:.o=.d)
 TEST_EXECUTABLE = runAllTests
 LIBARA_TEST_EXECUTABLE = runLibAraTests
 OMNETPP_ARA_TEST_EXECUTABLE = runOmnetAraTests
+TESTBED_ARA_TEST_EXECUTABLE = runTestbedAraTests
 
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-CFLAGS += -std=c++11 -fPIC
+CFLAGS += -std=c++11 -fPIC -D_GLIBCXX_USE_NANOSLEEP
 ifeq ("$(NO_OMNET)", "TRUE")
     INCLUDE_PATH = -I$(INCLUDE_DIR)
 else
-    INCLUDE_PATH += -I. -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/omnetpp -I$(INCLUDE_DIR)/inetmanet -I$(OMNETPP_INCL_DIR) -I$(INETMANET_SRC_FOLDER)
+    INCLUDE_PATH += -I. \
+                    -I$(INCLUDE_DIR) \
+                    -I$(INCLUDE_DIR)/omnetpp \
+                    -I$(INCLUDE_DIR)/testbed \
+                    -I$(INCLUDE_DIR)/inetmanet \
+                    -I$(OMNETPP_INCL_DIR) \
+                    -I$(INETMANET_SRC_FOLDER)
 endif
 INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include
 LINK_TO_LIB_ARA = -L$(LIBARA_SRC_FOLDER) -l$(ARA_TARGET_NAME)
@@ -153,6 +176,7 @@ $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
 -include $(LIBARA_DEPENDENCIES)
 -include $(OMNETARA_DEPENDENCIES)
 -include $(TESTS_DEPENDENCIES)
+-include $(TESTBEDARA_DEPENDENCIES)
 
 # OMNeTARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -214,12 +238,26 @@ $(INETMANET_FOLDER)/.git:
 	git submodule init $(INETMANET_FOLDER)
 	git submodule update $(INETMANET_FOLDER)
 
+
+# testbedARA target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.PHONY: testbedARA
+testbedARA: $(TESTBEDARA_EXECUTABLE)
+
+#
+# Build the DES-Testbed version of libARA
+#
+$(TESTBEDARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(TESTBEDARA_O) $(TESTBEDARA_SRC_MAIN_O)
+	@echo "Linking $@"
+	@$(CXX) $(TESTBEDARA_O) $(TESTBEDARA_SRC_MAIN_O) -o $(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_LINKFLAGS) $(LINK_TO_LIB_ARA)
+	@cd $(TESTBEDARA_SRC_FOLDER) && ln -s -f ../$(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_EXECUTABLE_NAME)
+
+
 # Test targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .PHONY: test
-test: libAraTests
+test: libAraTests testbedTests
 
 .PHONY: allTests
-allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OMNETARA_EXECUTABLE)
+allTests: $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OMNETARA_EXECUTABLE) $(TESTS_FOLDER)/$(TESTBED_ARA_TEST_EXECUTABLE)
 	@echo -e "\n~~~ RUNNING complete TEST SUIT ~~~~~~"
 	@if $(LD_LIBRARY_PATH) $(TESTS_FOLDER)/$(TEST_EXECUTABLE); then \
  		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
@@ -248,18 +286,29 @@ omnetTests: $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
 		exit 1; \
 	fi
 
+.PHONY: testbedTests
+testbedTests: $(TESTS_FOLDER)/$(TESTBED_ARA_TEST_EXECUTABLE)
+	@echo -e "\n~~~ RUNNING Testbed ARA TEST SUIT ~~~~~"	
+	@if $(LD_LIBRARY_PATH) $(TESTS_FOLDER)/$(TESTBED_ARA_TEST_EXECUTABLE); then \
+		echo -e "~~~ TESTS PASSED SUCCESSFULLY ~~~~~~~\n"; \
+	else \
+		echo -e "~~~ ERROR WHILE RUNNING TEST ~~~~~~~~\n"; \
+		exit 1; \
+	fi
+
 #
 # Builds all available tests (libara and omnet ARA)
 #
 $(TESTS_FOLDER)/$(TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) \
                                     $(OMNETARA_O) \
                                     $(CPPUTEST_LIB) \
-                                    $(ALL_TEST_BINARIES)
-	@echo "Building the comlete test suit ($(TESTS_FOLDER)/$(TEST_EXECUTABLE))"
+                                    $(ALL_TEST_BINARIES) \
+                                    $(TESTBEDARA_EXECUTABLE) # include this as dependency to make sure the main is also build
+	@echo "Building the comlete test suit ($@)"
 	@$(CXX) $(TESTS_CFLAGS) $(OMNETARA_O) $(ALL_TEST_BINARIES) \
                 $(INCLUDE_PATH) $(TESTS_LINKFLAGS) $(OMNETPP_LINKFLAGS) \
-                -o $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TEST_EXECUTABLE)
-	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(TEST_EXECUTABLE)
+                -o $(OUTPUT_DIR)/$@
+	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$@ $(TEST_EXECUTABLE)
 
 #
 # Tests only the libara sources
@@ -267,11 +316,11 @@ $(TESTS_FOLDER)/$(TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) \
 $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) \
                                            $(CPPUTEST_LIB) \
                                            $(TESTAPI_BIN) $(TESTAPI_TESTS_BIN) $(LIBARA_TESTS_BIN)
-	@echo "Building the libara test suit ($(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE))"
+	@echo "Building the libara test suit ($@)"
 	@$(CXX) $(TESTS_CFLAGS) $(TESTAPI_BIN) $(TESTAPI_TESTS_BIN) $(LIBARA_TESTS_BIN) \
                 $(INCLUDE_PATH) $(TESTS_LINKFLAGS) \
-                -o $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE)
-	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE) $(LIBARA_TEST_EXECUTABLE)
+                -o $(OUTPUT_DIR)/$@
+	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$@ $(LIBARA_TEST_EXECUTABLE)
 
 #
 # Tests only the omnetpp ARA sources
@@ -280,11 +329,24 @@ $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_N
                                                 $(CPPUTEST_LIB) \
                                                 $(OMNETARA_O) \
                                                 $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN)
-	@echo "Building the omnetara test suit ($(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE))"
+	@echo "Building the omnetara test suit ($@)"
 	@$(CXX) $(TESTS_CFLAGS) $(TESTAPI_BIN) $(OMNETPP_ARA_TESTS_BIN) $(OMNETARA_O) \
                 $(INCLUDE_PATH) $(TESTS_LINKFLAGS) $(OMNETPP_LINKFLAGS) \
-                -o $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
-	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OMNETPP_ARA_TEST_EXECUTABLE)
+                -o $(OUTPUT_DIR)/$@
+	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$@ $(OMNETPP_ARA_TEST_EXECUTABLE)
+	
+#
+# Tests only the omnetpp ARA sources
+#
+$(TESTS_FOLDER)/$(TESTBED_ARA_TEST_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) \
+                                                $(CPPUTEST_LIB) \
+                                                $(TESTBEDARA_O) \
+                                                $(TESTAPI_BIN) $(TESTBED_ARA_TESTS_BIN)
+	@echo "Building the testbed test suit ($@)"
+	@$(CXX) $(TESTS_CFLAGS) $(TESTAPI_BIN) $(TESTBED_ARA_TESTS_BIN) $(TESTBEDARA_O) \
+                $(INCLUDE_PATH) $(TESTS_LINKFLAGS) $(TESTBEDARA_LINKFLAGS) \
+                -o $(OUTPUT_DIR)/$@
+	@cd $(TESTS_FOLDER) && ln -s -f ../$(OUTPUT_DIR)/$@ $(TESTBED_ARA_TEST_EXECUTABLE)
 
 #
 # Builds the CppUTest Framework
@@ -328,11 +390,17 @@ clean: cleandep
 	@rm -f $(OMNETARA_SRC_FOLDER)/$(OMNETARA_EXECUTABLE_NAME) $(OMNETARA_EXECUTABLE)
 	@rm -f $(OMNETARA_O)
 	@rm -f $(OMNETARA_MESSAGE_HEADERS) $(OMNETARA_MESSAGE_SRC)
+	@echo "Cleaning testbedARA.."
+	@rm -f $(TESTBEDARA_SRC_FOLDER)/$(TESTBEDARA_EXECUTABLE_NAME) $(TESTBEDARA_EXECUTABLE)
+	@rm -f $(TESTBEDARA_O)
+	@rm -f $(TESTBEDARA_SRC_O)
+	@rm -f $(TESTBEDARA_SRC_MAIN_O)
 	@echo "Cleaning tests.."
 	@rm -f $(ALL_TEST_BINARIES)
 	@rm -f $(TESTS_FOLDER)/$(TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TEST_EXECUTABLE)
 	@rm -f $(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(LIBARA_TEST_EXECUTABLE)
 	@rm -f $(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(OMNETPP_ARA_TEST_EXECUTABLE)
+	@rm -f $(TESTS_FOLDER)/$(TESTBED_ARA_TEST_EXECUTABLE) $(OUTPUT_DIR)/$(TESTS_FOLDER)/$(TESTBED_ARA_TEST_EXECUTABLE)
 
 .PHONY: clobber
 clobber: clean
