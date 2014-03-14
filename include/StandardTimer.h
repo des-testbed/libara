@@ -7,8 +7,9 @@
 
 #include "ARAMacros.h"
 #include "Timer.h"
+#include "Environment.h"
+#include "StandardClock.h"
 
-#include <chrono>
 #include <thread>
 
 ARA_NAMESPACE_BEGIN
@@ -19,17 +20,12 @@ class StandardTimer : public Timer {
         virtual ~StandardTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
-        void sleep(unsigned long timeoutInMicroSeconds);
         virtual void interrupt();
 
-    private:
-        bool isCalledFromTimerThreadContext();
-        void makeSureTimeIsNotRunning();
-        void forcefullyStopTimer();
+	void setThreadIdentifier(std::thread::id identifier);
 
-        bool timerHasBeenInterrupted;
-        bool timerIsRunning;
-        std::shared_ptr<std::thread> timer;
+    private:
+	std::thread::id timerIdentifier;
 };
 
 ARA_NAMESPACE_END

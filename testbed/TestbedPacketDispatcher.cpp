@@ -96,9 +96,9 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
     void* payload;
     int payloadSize = packet->getPayloadLength();
     dessert_msg_addpayload(dessertMessage, &payload, payloadSize);
-    // memcpy(payload, packet->getPayload(), payloadSize);
+    memcpy(payload, packet->getPayload(), payloadSize);
     /// TODO: BETTER CHECK
-    td::copy(packet->getPayload(), packet->getPayload() + payloadSize, payload);
+    //std::copy(packet->getPayload(), packet->getPayload() + payloadSize, payload);
 
     return dessertMessage;
 }

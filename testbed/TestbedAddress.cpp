@@ -17,7 +17,7 @@ std::string TestbedAddress::toString() const {
     /// insert colons between hex values
     std::copy(this->address, this->address+6, std::ostream_iterator<short>(result, ":"));
     /// the 'substr' workaround does not work if there are hex values with one digit in the address (so we have to determine the size)
-    short length = result.str().size() - 1
+    short length = result.str().size() - 1;
     /// since we don't want to write an infix operator and git rid of the last colon we return a substring
     return result.str().substr(0, length);
 }

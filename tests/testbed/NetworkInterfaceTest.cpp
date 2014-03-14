@@ -5,7 +5,7 @@
 #include "CppUTest/TestHarness.h"
 #include "testbed/CLibs.h"
 
-#include "testbed/NetworkInterface.h"
+#include "testbed/TestbedNetworkInterface.h"
 #include "testAPI/mocks/ARAClientMock.h"
 
 
@@ -13,7 +13,7 @@ TESTBED_NAMESPACE_BEGIN
 
 TEST_GROUP(NetworkInterfaceTest) {
     ARAClientMock* client;
-    NetworkInterface* interface;
+    TestbedNetworkInterface* interface;
     dessert_meshif_t* dessertInterface;
     dessert_meshif_t* otherDessertInterface;
 
@@ -21,9 +21,11 @@ TEST_GROUP(NetworkInterfaceTest) {
         client = new ARAClientMock();
         dessertInterface = new dessert_meshif_t();
         otherDessertInterface = new dessert_meshif_t();
-        memcpy(dessertInterface->hwaddr, DESSERT_LOCAL_ADDRESS, 6);
-        memcpy(otherDessertInterface->hwaddr, DESSERT_BROADCAST_ADDRESS, 6);
-        interface = new NetworkInterface(dessertInterface, client, client->getPacketFactory(), 400);
+     //   memcpy(dessertInterface->hwaddr, DESSERT_LOCAL_ADDRESS, 6);
+	std::copy(DESSERT_LOCAL_ADDRESS, DESSERT_LOCAL_ADDRESS+6, dessertInterface->hwaddr);
+//        memcpy(otherDessertInterface->hwaddr, DESSERT_BROADCAST_ADDRESS, 6);
+	std::copy(DESSERT_BROADCAST_ADDRESS, DESSERT_BROADCAST_ADDRESS + 6, otherDessertInterface->hwaddr);
+        interface = new TestbedNetworkInterface(dessertInterface, client, client->getPacketFactory(), 400);
     }
 
     void teardown() {
@@ -35,13 +37,13 @@ TEST_GROUP(NetworkInterfaceTest) {
 };
 
 TEST(NetworkInterfaceTest, equals) {
-    NetworkInterface* otherInterface = new NetworkInterface(dessertInterface, client, client->getPacketFactory(), 600);
+    TestbedNetworkInterface* otherInterface = new TestbedNetworkInterface(dessertInterface, client, client->getPacketFactory(), 600);
     CHECK(interface->equals(otherInterface));
     delete otherInterface;
 }
 
 TEST(NetworkInterfaceTest, notEquals) {
-    NetworkInterface* ethInterface = new NetworkInterface(otherDessertInterface, client, client->getPacketFactory(), 400);
+    TestbedNetworkInterface* ethInterface = new TestbedNetworkInterface(otherDessertInterface, client, client->getPacketFactory(), 400);
     CHECK_FALSE(interface->equals(ethInterface));
     delete ethInterface;
 }

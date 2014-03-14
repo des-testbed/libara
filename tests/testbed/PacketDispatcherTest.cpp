@@ -5,9 +5,9 @@
 #include "CppUTest/TestHarness.h"
 #include "testbed/CLibs.h"
 
-#include "PacketDispatcher.h"
+#include "TestbedPacketDispatcher.h"
 #include "PacketType.h"
-#include "testbed/NetworkInterface.h"
+#include "TestbedNetworkInterface.h"
 #include "testAPI/mocks/ARAClientMock.h"
 #include <cstring>
 #include "TestbedAddress.h"
@@ -69,9 +69,10 @@ TEST_GROUP(PacketDispatcherTest) {
     /**
      * Create a network interface for testing if some address is broadcast or the local address
      */
-    NetworkInterface* createNetworkInterface() {
-        memcpy(interface->hwaddr, DESSERT_LOCAL_ADDRESS, 6);
-        return new NetworkInterface(interface, client, client->getPacketFactory(), 400);
+    TestbedNetworkInterface* createNetworkInterface() {
+        //memcpy(interface->hwaddr, DESSERT_LOCAL_ADDRESS, 6);
+	std::copy(DESSERT_LOCAL_ADDRESS, DESSERT_LOCAL_ADDRESS+6, interface->hwaddr);
+        return new TestbedNetworkInterface(interface, client, client->getPacketFactory(), 400);
     }
 
     bool isSameAddress(u_char* address1, u_char* address2) {
@@ -111,7 +112,7 @@ TEST(PacketDispatcherTest, extractSimpleFields) {
 }
 
 TEST(PacketDispatcherTest, extractSourceAndDestination) {
-    NetworkInterface* interface = createNetworkInterface();
+    TestbedNetworkInterface* interface = createNetworkInterface();
 
     int ttl = 45;
     unsigned int sequenceNumber = 123;

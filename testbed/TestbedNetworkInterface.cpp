@@ -8,11 +8,11 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-AddressPtr TestbedNetworkInterface::broadcastAddress = std::make_shared<TestbedAddress>(DESSERT_BROADCAST_ADDRESS);
+AddressPtr TestbedNetworkInterface::broadcastAddress = std::dynamic_pointer_cast<Address>(std::make_shared<TestbedAddress>(DESSERT_BROADCAST_ADDRESS));
 extern NetworkInterfaceMap networkInterfaces;
 
 TestbedNetworkInterface::TestbedNetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds) 
-  : ReliableNetworkInterface(client, ackTimeoutInMicroSeconds, std::make_shared<TestbedAddress>(dessertPointer->hwaddr), broadcastAddress) {
+  : ReliableNetworkInterface(client, ackTimeoutInMicroSeconds, std::dynamic_pointer_cast<Address>(std::make_shared<TestbedAddress>(dessertPointer->hwaddr)), broadcastAddress) {
     this->dessertPointer = dessertPointer;
     registerInterface();
 }
