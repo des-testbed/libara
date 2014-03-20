@@ -3,6 +3,7 @@
  */
 
 #include "CLibs.h"
+#include "TestbedAddress.h"
 #include "TestbedARAClient.h"
 #include "BasicConfiguration.h"
 #include "TestbedPacketDispatcher.h"
@@ -26,8 +27,11 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
 }
 
 void dumpDessertMessage(dessert_msg_t* message){
-    ether_header* etherHeader = ARA::testbed::extractEthernetHeader(message);
-    //cout << "!!! source: " << etherHeader->ether_shost << " destination: " << etherHeader->ether_dhost << " type: " << etherHeader->ether_type << std::endl;
+    ether_header* header = ARA::testbed::extractEthernetHeader(message);
+    ARA::testbed::TestbedAddress source(header->ether_shost);
+    ARA::testbed::TestbedAddress destination(header->ether_dhost);
+    cout << "[dumpDessertMessage] source: " << source.toString() << " destination: " << destination.toString() << std::endl;
+    cout << "[dumpDessertMessage] type: " << header->ether_type << std::endl;
 }
 
 _dessert_cb_results tapPacketFilter(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
@@ -41,6 +45,7 @@ _dessert_cb_results tapPacketFilter(dessert_msg_t* messageReceived, uint32_t len
 }
 
 _dessert_cb_results messageFromTapInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id) {
+    std::cout << "[messageFromTapInterfaceDispatcher] heyho i've got a packet" << std::endl;
     dumpDessertMessage(messageReceived);
     client->sendPacket(ARA::testbed::tapMessageToPacket(messageReceived, client));
     return DESSERT_MSG_DROP;

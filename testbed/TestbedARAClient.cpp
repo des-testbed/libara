@@ -24,6 +24,7 @@ TestbedARAClient::TestbedARAClient(Configuration& config) : AbstractARAClient(co
 TestbedARAClient::~TestbedARAClient() { }
 
 void TestbedARAClient::sendPacket(Packet* packet) {
+    logDebug("will send packet");
     AbstractARAClient::sendPacket(packet);
 }
 
@@ -57,6 +58,8 @@ void TestbedARAClient::initializeNetworkInterfaces() {
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
+    std::cout << "address is "  << address.get()->toString() << std::endl;
+    std::cout << "other address is "  << tapAddress.get()->toString() << std::endl;
     return(address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
 }
 

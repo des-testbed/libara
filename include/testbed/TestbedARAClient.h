@@ -37,7 +37,7 @@ class TestbedARAClient : public AbstractARAClient {
         void sendPacket(Packet* packet);
 
         /**
-         * Receive a Packet over the given NetworkInterface. The packet will be
+          Receive a Packet over the given NetworkInterface. The packet will be
          * processed according to the Ant Routing Algorithm (ARA).
          *
          * @param packet the received Packet. Please note that the packet will be

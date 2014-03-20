@@ -122,6 +122,8 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             sendUnicast(packet, interface, nextHopAddress);
         }
         else {
+            logDebug("address of packet is %s", packet->getSourceString().c_str()); 
+            logDebug("address is local address %d", isLocalAddress(packet->getSource()));
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
                 logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());

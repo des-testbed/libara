@@ -6,7 +6,8 @@
 #define CLIBS_H
 
 extern "C" {
- #include <dessert.h>
+ #include "/home/mfrey/testbed/software/dessert/include/dessert.h"
+ //#include <dessert.h>
  #ifdef min
  #undef min
  #endif
