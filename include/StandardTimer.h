@@ -10,7 +10,10 @@
 #include "Environment.h"
 #include "StandardClock.h"
 
+#include <chrono>
 #include <thread>
+#include <functional>
+#include <condition_variable>
 
 ARA_NAMESPACE_BEGIN
 
@@ -20,12 +23,12 @@ class StandardTimer : public Timer {
         virtual ~StandardTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
+	void sleep(unsigned long timeout);
         virtual void interrupt();
 
-	void setThreadIdentifier(std::thread::id identifier);
-
     private:
-	std::thread::id timerIdentifier;
+	std::condition_variable conditionVariable;
+	std::mutex conditionVariableMutex;
 };
 
 ARA_NAMESPACE_END

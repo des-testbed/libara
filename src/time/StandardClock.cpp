@@ -16,12 +16,8 @@ Timer* StandardClock::getNewTimer(char timerType, void* contextObject){
     return new StandardTimer(timerType, contextObject);
 }
 
-void StandardClock::runTimer(std::thread::id id, unsigned long timeout){
-
-}
-
-void StandardClock::interruptTimer(std::thread::id id){
-     //this->threadPool->interrupt(id);
+void StandardClock::scheduleTimer(std::function<void()> timer){
+    threadPool.schedule(timer);
 }
 
 ARA_NAMESPACE_END

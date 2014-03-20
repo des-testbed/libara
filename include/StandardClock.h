@@ -6,7 +6,7 @@
 #define STANDARD_CLOCK_H_
 
 #include "ARAMacros.h"
-//#include "ThreadPool.h"
+#include "ThreadPool.h"
 #include "Clock.h"
 
 #include <thread>
@@ -19,12 +19,10 @@ class StandardClock : public Clock {
         Time* makeTime();
         Timer* getNewTimer(char timerType=-1, void* contextObject=nullptr);
 
-	void runTimer(std::thread::id id, unsigned long timeout);
-	void interruptTimer(std::thread::id id);
-	void setTimeoutListener(std::thread::id id, std::vector<TimeoutEventListener*> listener);
+        void scheduleTimer(std::function<void()> timer);
 
     private:
-//	ThreadPool threadPool;
+	ThreadPool threadPool;
 };
 
 ARA_NAMESPACE_END

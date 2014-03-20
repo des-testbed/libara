@@ -2,10 +2,10 @@
 
 ARA_NAMESPACE_BEGIN
 
-ThreadPool::ThreadPool(size_t numberOfThreads){
+ThreadPool::ThreadPool(size_t numberOfThreads) : finished(false), workers(numberOfThreads) {
     try {
-        for (unsigned int i = 0; i < numberOfThreads; i++) {
-            threads.push_back(std::thread(&ThreadPool::worker, this));
+        for (std::unique_ptr<std::thread>& worker: workers) {
+            worker.reset(new std::thread(&ThreadPool::worker, this));
         }
     } catch (...) {
         finished = true;
@@ -14,19 +14,51 @@ ThreadPool::ThreadPool(size_t numberOfThreads){
 }
 
 ThreadPool::~ThreadPool(){
-    finished = true;
+    {
+        std::unique_lock<std::mutex> lockList(lockJobList);
+        finished = true;
+        notifyJob.notify_all();
+    }
+
+    for (std::unique_ptr<std::thread>& worker : workers){
+        worker->join();
+    }
 }
 
 void ThreadPool::worker(){
-    while (!finished) {
-        std::function<void()> task;
+    std::function<void()> job;
 
-        if (workQueue.tryPop(task)) {
-            task();
-        } else {
-            std::this_thread::yield();
-        }
+    for (;;) {
+	{
+            std::unique_lock<std::mutex> lockList(lockJobList);
+
+	    for (;;) {
+
+		if (finished) {
+                    return;
+	        }
+
+		if (!jobs.empty()) {
+                    job = jobs.front();
+                    jobs.pop();
+		    break;
+		}
+
+                notifyJob.wait(lockList);
+	    }
+	}
+
+	job();
     }
+}
+
+void ThreadPool::schedule(std::function<void()> job){
+    /// acquire the lock
+    std::unique_lock<std::mutex> lockList(lockJobList);
+    /// enqueue the job
+    jobs.push(job);
+    /// notify a waiting work
+    notifyJob.notify_one();
 }
 
 ARA_NAMESPACE_END
