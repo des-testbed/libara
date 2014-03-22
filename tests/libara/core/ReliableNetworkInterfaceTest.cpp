@@ -207,7 +207,7 @@ TEST(ReliableNetworkInterfaceTest, unacknowledgedPacketsAreSentAgain) {
 
     // get the acknowledgment timer which is used by the interface
     ClockMock* clock = (ClockMock*) Environment::getClock();
-    TimerMock* ackTimer = clock->getLastTimer();
+    std::shared_ptr<TimerMock> ackTimer = (clock->getLastTimer()).lock();
 
     CHECK(ackTimer->isRunning());
 
@@ -249,7 +249,7 @@ TEST(ReliableNetworkInterfaceTest, routeFailuresAreReportedToARAClient) {
 
     // get the acknowledgment timer which is used by the interface
     ClockMock* clock = (ClockMock*) Environment::getClock();
-    TimerMock* ackTimer = clock->getLastTimer();
+    std::shared_ptr<TimerMock> ackTimer = (clock->getLastTimer()).lock();
 
     // simulate that the timer does expire 3 times
     ackTimer->expire();
@@ -290,7 +290,7 @@ TEST(ReliableNetworkInterfaceTest, packetAcknowledgmentStopsTimer) {
 
     // get the acknowledgment timer which is used by the interface
     ClockMock* clock = (ClockMock*) Environment::getClock();
-    TimerMock* ackTimer = clock->getLastTimer();
+    std::shared_ptr<TimerMock> ackTimer = (clock->getLastTimer()).lock();
 
     // the timer should have been started
     CHECK(ackTimer->isRunning());

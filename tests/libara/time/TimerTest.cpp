@@ -11,7 +11,7 @@ using namespace ARA;
 TEST_GROUP(TimerTest) {};
 
 TEST(TimerTest, addTimeoutListener) {
-    TimerMock timer = TimerMock();
+    TimerMock timer;
     TimeoutEventListenerMock listener1 = TimeoutEventListenerMock();
     TimeoutEventListenerMock listener2 = TimeoutEventListenerMock();
     TimeoutEventListenerMock listener3 = TimeoutEventListenerMock();
@@ -32,23 +32,23 @@ TEST(TimerTest, addTimeoutListener) {
 }
 
 TEST(TimerTest, defaultType) {
-    TimerMock timer = TimerMock();
-    BYTES_EQUAL(0, timer.getType());
+    TimerMock timer;
+    BYTES_EQUAL(5, timer.getType());
 }
 
 TEST(TimerTest, defaultContextObject) {
-    TimerMock timer = TimerMock();
+    TimerMock timer;
     CHECK(timer.getContextObject() == nullptr);
 }
 
 TEST(TimerTest, getType) {
-    TimerMock timer = TimerMock(123);
-    BYTES_EQUAL(123, timer.getType());
+    TimerMock timer = TimerMock(TimerType::ROUTE_DISCOVERY_DELAY_TIMER);
+    BYTES_EQUAL(TimerType::ROUTE_DISCOVERY_DELAY_TIMER, timer.getType());
 }
 
 TEST(TimerTest, getContextObject) {
     const char* contextObject = "Hello World";
-    TimerMock timer = TimerMock(123, (void*) contextObject);
+    TimerMock timer = TimerMock(TimerType::PANTS_TIMER, (void*) contextObject);
     CHECK_EQUAL(contextObject, timer.getContextObject());
 }
 

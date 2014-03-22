@@ -6,7 +6,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { }
+StandardTimer::StandardTimer(TimerType type, void* contextObject) : Timer(type, contextObject) { }
 
 StandardTimer::~StandardTimer(){ }
 
@@ -32,6 +32,24 @@ void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
     } catch (const std::system_error& error) {
 	std::cerr << "Caught system_error with code " << error.code() << " meaning " << error.what() << std::endl;
     }
+}
+
+bool StandardTimer::equals(const Timer* otherTimer) const {
+    const StandardTimer* otherStandardTimer = dynamic_cast<const StandardTimer*>(otherTimer);
+    if (otherStandardTimer == nullptr) {
+        return false;
+    } 
+    return (this->getHashValue() == otherStandardTimer->getHashValue());
+}
+
+
+bool StandardTimer::equals(const std::shared_ptr<Timer> otherTimer) const {
+    return this->equals(otherTimer.get());
+}
+
+size_t StandardTimer::getHashValue() const {
+    std::hash<void*> voidPtrHash;
+    return voidPtrHash(contextObject);
 }
 
 ARA_NAMESPACE_END

@@ -5,12 +5,14 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include "ARAMacros.h"
 #include "TimeoutEventListener.h"
+#include "ARAMacros.h"
+#include "TimerType.h"
 
 #include <deque>
 
 ARA_NAMESPACE_BEGIN
+class TimeoutEventListener;
 
 class Timer {
     public:
@@ -20,10 +22,23 @@ class Timer {
          * The Timer can have a type and also an optional context object.
          * Both can be used by the TimeoutEventlisteners when the timer has expired.
          */
-        Timer(char type, void* contextObject=nullptr);
+        Timer(TimerType type, void* contextObject=nullptr);
+
         virtual ~Timer() {}
 
         void addTimeoutListener(TimeoutEventListener* listener);
+
+        bool operator==(const Timer& otherTimer) const {
+            return this->equals(&otherTimer);
+        }
+
+        bool operator==(const std::shared_ptr<Timer> otherTimer) const {
+            return this->equals(otherTimer);
+        }
+
+        virtual bool equals(const Timer* otherTimer) const = 0;
+        virtual bool equals(const std::shared_ptr<Timer> otherTimer) const = 0; // FIXME 2 abstract equals definitions is not necessary
+        virtual size_t getHashValue() const = 0;
 
         /**
          * This method is used to start the timer. The timer is required to run
@@ -42,7 +57,7 @@ class Timer {
          * Returns the type of this timer. This is useful for objects to distinguish
          * several conceptually different timers.
          */
-        char getType() const;
+        TimerType getType() const;
 
         /**
          * Returns the context object.
@@ -60,11 +75,31 @@ class Timer {
         void notifyAllListeners();
 
     protected:
-        char type;
+        TimerType type;
         void* contextObject;
 
     private:
         std::deque<TimeoutEventListener*> listeners;
+};
+
+typedef std::shared_ptr<Timer> TimerPtr;
+
+/**
+ * This functor is needed for std::unordered_set
+ */
+struct TimerHash {
+    size_t operator()(std::shared_ptr<Timer> timer) const {
+        return timer->getHashValue();
+    }
+};
+
+/**
+ * This functor is needed for std::unordered_set 
+ */
+struct TimerPredicate {
+    size_t operator()(std::shared_ptr<Timer> timer, std::shared_ptr<Timer> anotherTimer) const {
+        return timer->equals(anotherTimer);
+    }
 };
 
 ARA_NAMESPACE_END

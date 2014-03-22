@@ -19,12 +19,17 @@ ARA_NAMESPACE_BEGIN
 
 class StandardTimer : public Timer {
     public:
-        StandardTimer(char type, void* contextObject=nullptr);
+        StandardTimer(TimerType type, void* contextObject=nullptr);
         virtual ~StandardTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
 	void sleep(unsigned long timeout);
         virtual void interrupt();
+
+        bool equals(const Timer* otherTimer) const;
+        bool equals(const std::shared_ptr<Timer> otherTimer) const;
+
+        size_t getHashValue() const;
 
     private:
 	std::condition_variable conditionVariable;

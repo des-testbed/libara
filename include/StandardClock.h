@@ -13,15 +13,18 @@
 #include <vector>
 
 ARA_NAMESPACE_BEGIN
-
 class StandardClock : public Clock {
     public:
         Time* makeTime();
-        Timer* getNewTimer(char timerType=-1, void* contextObject=nullptr);
+        TimerPtr getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr);
 
         void scheduleTimer(std::function<void()> timer);
 
     private:
+	/**
+	 * @brief The member manages the access to a thread pool implementation 
+	 *        the timer tasks. 
+	 */
 	ThreadPool threadPool;
 };
 

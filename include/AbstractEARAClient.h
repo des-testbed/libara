@@ -15,7 +15,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-typedef std::unordered_map<AddressPtr, Timer*, AddressHash, AddressPredicate> RouteDiscoveryDelayTimerMap;
+typedef std::unordered_map<AddressPtr, TimerPtr, AddressHash, AddressPredicate> RouteDiscoveryDelayTimerMap;
 
 struct AntPacketRouteFitness {
     Packet* packet;

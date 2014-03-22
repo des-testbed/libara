@@ -12,8 +12,8 @@ Time* StandardClock::makeTime(){
     return new StandardTime();
 }
 
-Timer* StandardClock::getNewTimer(char timerType, void* contextObject){
-    return new StandardTimer(timerType, contextObject);
+TimerPtr StandardClock::getNewTimer(TimerType timerType, void* contextObject){
+    return std::make_shared<StandardTimer>(timerType, contextObject);
 }
 
 void StandardClock::scheduleTimer(std::function<void()> timer){
