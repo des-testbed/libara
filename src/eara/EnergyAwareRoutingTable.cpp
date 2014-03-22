@@ -44,7 +44,7 @@ bool EnergyAwareRoutingTable::updateEnergyValue(AddressPtr destination, AddressP
 
 EARARoutingTableEntry* EnergyAwareRoutingTable::getRoutingTableEntry(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
     if (isDeliverable(destination)) {
-        RoutingTableEntryList* entries = table[destination];
+	std::shared_ptr<RoutingTableEntryList> entries = table[destination];
         for (auto& entry: *entries) {
             if (entry->getAddress()->equals(nextHop) && entry->getNetworkInterface()->equals(interface)) {
                 //TODO somehow remove this cast (refactor)
@@ -72,7 +72,7 @@ EARARoutingTableEntryTupel EnergyAwareRoutingTable::getEntryAt(int wantedPositio
     RoutingTableMap::const_iterator iterator;
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
         AddressPtr destination = iterator->first;
-        RoutingTableEntryList* entryList = iterator->second;
+	std::shared_ptr<RoutingTableEntryList> entryList = iterator->second;
         for (auto& entry: *entryList) {
             if(currentPosition == wantedPosition) {
                 EARARoutingTableEntryTupel tupel;

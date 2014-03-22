@@ -25,7 +25,7 @@ struct RoutingTableEntryTupel {
 };
 
 #define RoutingTableEntryList std::deque<RoutingTableEntry*>
-typedef std::unordered_map<AddressPtr, RoutingTableEntryList*, AddressHash, AddressPredicate> RoutingTableMap;
+typedef std::unordered_map<AddressPtr, std::shared_ptr<RoutingTableEntryList>, AddressHash, AddressPredicate> RoutingTableMap;
 
 class RoutingTable {
 
@@ -80,7 +80,7 @@ public:
      * Returns the n'th ~RoutingTableEntry.
      * This method is only used to display the routing table entries to the user.
      */
-    RoutingTableEntryTupel getEntryAt(int wantedPosition) const;
+    RoutingTableEntryTupel getEntryAt(int position) const;
 
     /**
      * Triggers the evaporation process if enough time since the last evaporation has passed.
