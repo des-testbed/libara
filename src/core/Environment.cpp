@@ -4,13 +4,15 @@
 
 #include "Environment.h"
 #include "DummyClock.h"
+#include "StandardClock.h"
 
 ARA_NAMESPACE_BEGIN
 
 Environment* Environment::instance = nullptr;
 
 Environment::Environment() {
-    clock = new DummyClock();
+    clock = new StandardClock();
+//    clock = new DummyClock();
 }
 
 Environment::~Environment() {

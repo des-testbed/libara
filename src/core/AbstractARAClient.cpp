@@ -593,8 +593,9 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
     this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
 }
 
-void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
-    TimerType timerType = responsibleTimer->getType();
+void AbstractARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
+    std::shared_ptr<Timer> timer = responsibleTimer.lock();
+    TimerType timerType = timer->getType();
     switch (timerType) {
         case TimerType::NEIGHBOR_ACTIVITY_TIMER:
             checkInactiveNeighbors();
@@ -615,8 +616,9 @@ void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
     }
 }
 
-void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer) {
-    RouteDiscoveryInfo* discoveryInfo = (RouteDiscoveryInfo*) routeDiscoveryTimer->getContextObject();
+void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer) {
+    std::shared_ptr<Timer> timer = routeDiscoveryTimer.lock();
+    RouteDiscoveryInfo* discoveryInfo = (RouteDiscoveryInfo*) timer->getContextObject();
     AddressPtr destination = discoveryInfo->originalPacket->getDestination();
     logInfo("Route discovery for destination %s timed out", destination->toString().c_str());
 
@@ -627,8 +629,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
         forgetKnownIntermediateHopsFor(destination);
         broadcastFANT(destination);
 
-        // TODO: check if we have to find the route discovery (shared_ptr) timer in the map
-        routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
+        timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
     } else {
         // delete the route discovery timer
         runningRouteDiscoveries.erase(destination);
@@ -643,8 +644,9 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
     }
 }
 
-void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer) {
-    TimerAddressInfo* timerInfo = (TimerAddressInfo*) deliveryTimer->getContextObject();
+void AbstractARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer) {
+    std::shared_ptr<Timer> timer = deliveryTimer.lock();
+    TimerAddressInfo* timerInfo = (TimerAddressInfo*) timer->getContextObject();
     AddressPtr destination = timerInfo->destination;
 
     RunningRouteDiscoveriesMap::const_iterator discovery;
@@ -653,26 +655,7 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer) {
     if (discovery != runningRouteDiscoveries.end()) {
         // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
         runningRouteDiscoveries.erase(discovery);
-
-        // FIXME
-        bool statusFlag = false;
-
-        /**
-         * FIXME: This is a terrible, terrible work around and should be fixed soon. Since we can't 
-         * erase an element of this set by means of the raw pointer (since we use shared pointers as
-         * keys), we first have to find the shared_ptr which corresponds to the raw pointer.
-         */
-        std::unordered_set<TimerPtr>::iterator timer;
-        for (timer = runningDeliveryTimers.begin(); timer != runningDeliveryTimers.end(); timer++) {
-             if (deliveryTimer == (*timer).get()) {
-                 runningDeliveryTimers.erase(*timer);
-                 statusFlag = true;
-             }
-        } 
-
-        if (!statusFlag) {
-            logError("Could not find running delivery timer object!)");
-        }
+        runningDeliveryTimers.erase(timer);
 
         delete timerInfo;
 
@@ -682,8 +665,9 @@ void AbstractARAClient::handleExpiredDeliveryTimer(Timer* deliveryTimer) {
     }
 }
 
-void AbstractARAClient::handleExpiredPANTTimer(Timer* pantTimer) {
-    TimerAddressInfo* timerInfo = (TimerAddressInfo*)pantTimer->getContextObject();
+void AbstractARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer) {
+    std::shared_ptr<Timer> timer = pantTimer.lock();
+    TimerAddressInfo* timerInfo = (TimerAddressInfo*)timer->getContextObject();
     scheduledPANTs.erase(timerInfo->destination);
     broadcastPANT(timerInfo->destination);
     delete timerInfo;

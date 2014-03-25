@@ -24,7 +24,7 @@ public:
      * To distinguish several timers from one another, the listener can use
      * Timer::getType(). Additionally an optional contextObject can be given by the timer.
      */
-    virtual void timerHasExpired(Timer* responsibleTimer) = 0;
+    virtual void timerHasExpired(std::weak_ptr<Timer> responsibleTimer) = 0;
 };
 
 ARA_NAMESPACE_END

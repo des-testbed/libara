@@ -21,13 +21,17 @@ void StandardTimer::interrupt(){
     conditionVariable.notify_all();
 }
 
+void StandardTimer::setCallback(std::weak_ptr<StandardTimerProxy> proxy){
+    this->callback = proxy;
+}
+
 void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
     std::unique_lock<std::mutex> lock(conditionVariableMutex);
 
     try {
 	if(conditionVariable.wait_for(lock, std::chrono::microseconds(timeoutInMicroseconds)) == std::cv_status::timeout){
-            // std::cout << "[StandardTimer] timer expired " << std::endl;
-            notifyAllListeners();
+	    auto proxy = callback.lock();
+	    proxy->notify();
 	}
     } catch (const std::system_error& error) {
 	std::cerr << "Caught system_error with code " << error.code() << " meaning " << error.what() << std::endl;

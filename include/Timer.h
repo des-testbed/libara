@@ -1,4 +1,4 @@
-/*
+	/*
  * $FU-Copyright$
  */
 
@@ -14,7 +14,7 @@
 ARA_NAMESPACE_BEGIN
 class TimeoutEventListener;
 
-class Timer {
+class Timer : public std::enable_shared_from_this<Timer> {
     public:
 
         /**
@@ -26,7 +26,7 @@ class Timer {
 
         virtual ~Timer() {}
 
-        void addTimeoutListener(TimeoutEventListener* listener);
+        virtual void addTimeoutListener(TimeoutEventListener* listener);
 
         bool operator==(const Timer& otherTimer) const {
             return this->equals(&otherTimer);
@@ -70,6 +70,8 @@ class Timer {
          * needs to take care of that.
          */
         void setContextObject(void* contextObject);
+
+	std::shared_ptr<Timer> getTimer() { return shared_from_this(); }
 
     protected:
         void notifyAllListeners();

@@ -66,7 +66,7 @@ public:
      */
     virtual void broadCast(Packet* packet);
 
-    virtual void timerHasExpired(Timer* responsibleTimer);
+    virtual void timerHasExpired(std::weak_ptr<Timer> responsibleTimer);
 
     /**
      * Returns the percentage (between 1 and 100) that an energy value in the routing table represents
@@ -112,7 +112,7 @@ protected:
 
     float normalizeEnergyValue(float energyValue) const;
 
-    void handleExpiredRouteDiscoveryDelayTimer(Timer* timer);
+    void handleExpiredRouteDiscoveryDelayTimer(std::weak_ptr<Timer> timer);
 
     virtual void handleDataPacketForThisNode(Packet* packet);
 

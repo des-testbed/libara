@@ -44,40 +44,26 @@ void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, Ad
     runningTimers[ackTimer] = timerData;
 }
 
-void ReliableNetworkInterface::timerHasExpired(Timer* ackTimer) {
+void ReliableNetworkInterface::timerHasExpired(std::weak_ptr<Timer> ackTimer) {
     AckTimerData timerData;
-    // FIXME: That's the same problem as described in file AbstractARAClient.cpp in line 630
-    std::unordered_map<TimerPtr, AckTimerData>::iterator timer;
-    for (timer = runningTimers.begin(); timer != runningTimers.end(); timer++) {
-        if (ackTimer == (timer->first).get()) {
-            // some acknowledgment timed out so we need to send the packet again or tell the client
-            timerData = runningTimers[timer->first];
+    std::shared_ptr<Timer> timer = ackTimer.lock();
 
-			if (timerData.nrOfRetries < maxNrOfRetransmissions) {
-				timerData.nrOfRetries++;
-				runningTimers[timer->first] = timerData;
-				doSend(timerData.packet, timerData.recipient);
-				ackTimer->run(ackTimeoutInMicroSeconds);
-			} else {
-			    handleUndeliverablePacket(timer->first, timerData);
-			}
-            break;
-        }
-    } 
+    // some acknowledgment timed out so we need to send the packet again or tell the client
+    timerData = runningTimers[timer];
+
+    if (timerData.nrOfRetries < maxNrOfRetransmissions) {
+        timerData.nrOfRetries++;
+        runningTimers[timer] = timerData;
+        doSend(timerData.packet, timerData.recipient);
+        timer->run(ackTimeoutInMicroSeconds);
+    } else {
+        handleUndeliverablePacket(ackTimer, timerData);
+    }
 }
 
-void ReliableNetworkInterface::handleUndeliverablePacket(TimerPtr ackTimer, AckTimerData& timerData) {
-    // FIXME: That's the same problem as described in file AbstractARAClient.cpp in line 630
-/*
-    std::unordered_map<TimerPtr, AckTimerData>::iterator timer;
-    for (timer = runningTimers.begin(); timer != runningTimers.end(); timer++) {
-        if (ackTimer == (timer->first).get()) {
-            // remove the acknowledgment timer
-            runningTimers.erase(timer->first);
-        }
-    } 
-*/
-    runningTimers.erase(ackTimer);
+void ReliableNetworkInterface::handleUndeliverablePacket(std::weak_ptr<Timer> ackTimer, AckTimerData& timerData) {
+    std::shared_ptr<Timer> timer = ackTimer.lock();
+    runningTimers.erase(timer);
 
     // delete the packet from the list of unacknowledged packets
     deque<const Packet*>::iterator currentPacket;

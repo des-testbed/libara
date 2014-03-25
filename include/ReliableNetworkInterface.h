@@ -64,7 +64,7 @@ class ReliableNetworkInterface : public AbstractNetworkInterface, public Timeout
 
         void setMaxNrOfRetransmissions(int n);
 
-        void timerHasExpired(Timer* responsibleTimer);
+        void timerHasExpired(std::weak_ptr<Timer> responsibleTimer);
 
     protected:
 
@@ -87,7 +87,7 @@ class ReliableNetworkInterface : public AbstractNetworkInterface, public Timeout
 
     private:
         void startAcknowledgmentTimer(const Packet* packet, std::shared_ptr<Address> recipient);
-        void handleUndeliverablePacket(TimerPtr ackTimer, AckTimerData& timerData);
+        void handleUndeliverablePacket(std::weak_ptr<Timer> ackTimer, AckTimerData& timerData);
         void handleNonAckPacket(Packet* packet);
         void handleAckPacket(Packet* packet);
 };

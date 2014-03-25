@@ -108,7 +108,7 @@ public:
      */
     void initialize(Configuration& configuration);
 
-    virtual void timerHasExpired(Timer* responsibleTimer);
+    virtual void timerHasExpired(std::weak_ptr<Timer> responsibleTimer);
 
     void setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscoveryRetries);
 
@@ -187,9 +187,9 @@ protected:
     void broadcastPANT(AddressPtr destination);
     void checkPantTimer(const Packet* packet);
 
-    void handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer);
-    void handleExpiredDeliveryTimer(Timer* deliveryTimer);
-    void handleExpiredPANTTimer(Timer* pantTimer);
+    void handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer);
+    void handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer);
+    void handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer);
 
     void startNeighborActivityTimer();
     void registerActivity(AddressPtr neighbor, NetworkInterface* interface);

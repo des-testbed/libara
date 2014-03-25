@@ -193,8 +193,9 @@ float AbstractEARAClient::calculateRouteFitness(int ttl, float energyFitness) {
     return potentiatedPheromoneValue * potentiatedEnergyValue;
 }
 
-void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
-    TimerType timerType = responsibleTimer->getType();
+void AbstractEARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
+    TimerPtr timer = responsibleTimer.lock();
+    TimerType timerType = timer->getType();
     switch (timerType) {
         case TimerType::ROUTE_DISCOVERY_DELAY_TIMER:
             handleExpiredRouteDiscoveryDelayTimer(responsibleTimer);
@@ -204,7 +205,8 @@ void AbstractEARAClient::timerHasExpired(Timer* responsibleTimer) {
     }
 }
 
-void AbstractEARAClient::handleExpiredRouteDiscoveryDelayTimer(Timer* timer) {
+void AbstractEARAClient::handleExpiredRouteDiscoveryDelayTimer(std::weak_ptr<Timer> responsibleTimer) {
+    TimerPtr timer = responsibleTimer.lock();
     AntPacketRouteFitness* bestAnt = (AntPacketRouteFitness*) timer->getContextObject();
     runningRouteDiscoveryDelayTimers.erase(bestAnt->packet->getSource());
     broadCast(bestAnt->packet);

@@ -15,7 +15,7 @@ TESTBED_NAMESPACE_BEGIN
 NetworkInterfaceMap networkInterfaces;
 
 _dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
-    std::cout << "[messageFromMeshInterfaceDispatcher] heyho i've got a packet" << std::endl;
+    /// DEBUG: std::cout << "[messageFromMeshInterfaceDispatcher] heyho i've got a packet" << std::endl;
     Packet* packet = extractPacket(messageReceived);
     TestbedNetworkInterface* networkInterface = extractNetworkInterface(interface);
     networkInterface->receive(packet);
@@ -23,7 +23,7 @@ _dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageRec
 }
 
 void packetToMeshInterfaceDispatcher(const Packet* packet, TestbedNetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
-    std::cout << "[packetToMeshInterfaceDispatcher] heyho i've got a packet" << std::endl;
+    // DEBUG: std::cout << "[packetToMeshInterfaceDispatcher] heyho i've got a packet" << std::endl;
     dessert_msg_t* message = extractDessertMessage(packet);
     dessert_meshif_t* interface = testbedInterface->getDessertPointer();
     addEthernetHeader(message, interface, recipient);
@@ -86,10 +86,14 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
     dessertMessage->ttl = packet->getTTL();
     dessertMessage->u8  = packet->getType();
    
-    std::cout << "[extractDessertMessage] source " << packet->getSource()->toString() << std::endl; 
+    std::cout << "[extractDessertMessage] use count of source shared_ptr: " << packet->getSource().use_count() << std::endl; 
+    std::cout << "[extractDessertMessage] use count of destination shared_ptr: " << packet->getDestination().use_count() << std::endl; 
 
-    TestbedAddress* source = dynamic_cast<TestbedAddress*>(packet->getSource().get());
-    TestbedAddress* destination = dynamic_cast<TestbedAddress*>(packet->getDestination().get());
+    TestbedAddressPtr source = std::dynamic_pointer_cast<TestbedAddress>(packet->getSource());
+    std::cout << "[extractDessertMessage] use count of source shared_ptr after cast: " << source.use_count() << std::endl; 
+    TestbedAddressPtr destination = std::dynamic_pointer_cast<TestbedAddress>(packet->getDestination());
+    std::cout << "[extractDessertMessage] use count of destination shared_ptr after cast: " << destination.use_count() << std::endl; 
+
     addRoutingExtension(dessertMessage, source->getDessertValue(), destination->getDessertValue());
 
     //std::cout << "||Extract DES-SERT|| source: " << sourceTestbedAddress.get()->toString() << " destination: " << destinationTestbedAddress.get()->toString() << " sender: " << packet->getSenderString() << std::endl;
