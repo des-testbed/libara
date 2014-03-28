@@ -50,7 +50,7 @@ Packet* extractPacket(dessert_msg_t* dessertMessage);
 /**
  * Creates a packet from a message received from the system.
  */
-Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* client);
+Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, std::weak_ptr<TestbedARAClient> testbedClient);
 
 /**
  * Extracts the ethernet header struct from the given dessert message.

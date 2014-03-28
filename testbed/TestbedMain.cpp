@@ -3,6 +3,7 @@
  */
 
 #include "CLibs.h"
+#include "Testbed.h"
 #include "TestbedAddress.h"
 #include "TestbedARAClient.h"
 #include "BasicConfiguration.h"
@@ -14,7 +15,7 @@ typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
 using namespace std;
 
-ARA::testbed::TestbedARAClient* client;
+std::shared_ptr<ARA::testbed::TestbedARAClient> client;
 
 ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) {
     int maxTTL = 15;
@@ -98,6 +99,9 @@ int cli_setup_sysif(struct cli_def* cli, const char* command, char* argv[], int 
 }
 
 int main(int argc, char** argv) {
+     ARA::BasicConfiguration config = createConfiguration(5.0, 5.0);
+     client = std::make_shared<ARA::testbed::TestbedARAClient>(config);
+
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
      dessert_init("ARA", 0x01, DESSERT_OPT_NODAEMONIZE);
@@ -115,8 +119,6 @@ int main(int argc, char** argv) {
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
      dessert_debug("configuration applied");
 
-     ARA::BasicConfiguration config = createConfiguration(5.0, 5.0);
-     client = new ARA::testbed::TestbedARAClient(config);
 
      dessert_sysrxcb_add(&tapPacketFilter, 5);
      dessert_sysrxcb_add(fromTAP, 15);

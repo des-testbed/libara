@@ -15,15 +15,19 @@ TESTBED_NAMESPACE_BEGIN
 NetworkInterfaceMap networkInterfaces;
 
 _dessert_cb_results messageFromMeshInterfaceDispatcher(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_meshif_t* interface, dessert_frameid_t id) {
-    /// DEBUG: std::cout << "[messageFromMeshInterfaceDispatcher] heyho i've got a packet" << std::endl;
+    /// DEBUG: 
+    std::cout << "[messageFromMeshInterfaceDispatcher] heyho i've got a packet" << std::endl;
     Packet* packet = extractPacket(messageReceived);
+    std::cout << " Packet Dump " << std::endl;
+    std::cout << packet->toString() << std::endl;
     TestbedNetworkInterface* networkInterface = extractNetworkInterface(interface);
     networkInterface->receive(packet);
     return DESSERT_MSG_DROP;
 }
 
 void packetToMeshInterfaceDispatcher(const Packet* packet, TestbedNetworkInterface* testbedInterface, std::shared_ptr<Address> recipient) {
-    // DEBUG: std::cout << "[packetToMeshInterfaceDispatcher] heyho i've got a packet" << std::endl;
+    // DEBUG: 
+    std::cout << "[packetToMeshInterfaceDispatcher] heyho i've got a packet" << std::endl;
     dessert_msg_t* message = extractDessertMessage(packet);
     dessert_meshif_t* interface = testbedInterface->getDessertPointer();
     addEthernetHeader(message, interface, recipient);
@@ -34,10 +38,9 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
     routingExtension* araHeader = extractRoutingExtension(dessertMessage);
 
-    AddressPtr source(new TestbedAddress(araHeader->ara_shost));
-    AddressPtr destination(new TestbedAddress(araHeader->ara_dhost));
-    AddressPtr sender (new TestbedAddress(ethernetFrame->ether_shost));
-    //std::cout << "||Extract Packet|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << " sender: " << sender.get()->toString() << std::endl;
+    AddressPtr source = std::make_shared<TestbedAddress>(araHeader->ara_shost);
+    AddressPtr destination = std::make_shared<TestbedAddress>(araHeader->ara_dhost);
+    AddressPtr sender = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
 
     char packetType = dessertMessage->u8;
     unsigned int sequenceNumber = dessertMessage->u16;
@@ -45,11 +48,17 @@ Packet* extractPacket(dessert_msg_t* dessertMessage) {
 
     void* payload;
     unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
+    std::cout << "[extractPacket] payload length is " <<  payloadSize << std::endl;
+
+    if (payloadSize == 0){
+        payload = nullptr;
+    }
 
     return new Packet(source, destination, sender, packetType, sequenceNumber, ttl, (const char*)payload, payloadSize);
 }
 
-Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* client) {
+Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, std::weak_ptr<TestbedARAClient> testbedClient) {
+    auto client = testbedClient.lock();
     ether_header* ethernetFrame = extractEthernetHeader(dessertMessage);
 
     AddressPtr source = std::dynamic_pointer_cast<Address>(std::make_shared<TestbedAddress>(ethernetFrame->ether_shost));
@@ -58,6 +67,10 @@ Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, TestbedARAClient* clie
 
     void* payload;
     unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
+    std::cout << "[tapMessageToPacket] payload length is " <<  payloadSize << std::endl;
+    if (payloadSize == 0){
+        payload = nullptr;
+    }
 
     return client->getPacketFactory()->makeDataPacket(source, destination, client->getNextSequenceNumber(), (const char*)payload, payloadSize);
 }
@@ -100,10 +113,14 @@ dessert_msg_t* extractDessertMessage(const Packet* packet) {
 
     void* payload;
     int payloadSize = packet->getPayloadLength();
-    dessert_msg_addpayload(dessertMessage, &payload, payloadSize);
-    memcpy(payload, packet->getPayload(), payloadSize);
-    /// TODO: BETTER CHECK
-    //std::copy(packet->getPayload(), packet->getPayload() + payloadSize, payload);
+    std::cout << "[extractDessertMessage] payload length is " <<  packet->getPayloadLength() << std::endl;
+
+    if (dessert_msg_addpayload(dessertMessage, &payload, payloadSize) == DESSERT_OK){
+        memcpy(payload, packet->getPayload(), payloadSize);
+        //std::copy(packet->getPayload(), packet->getPayload() + payloadSize, payload);
+    } else {
+	std::cerr << "[extractDessertMessage] error on adding payload to dessert message " << std::endl;
+    }
 
     return dessertMessage;
 }
