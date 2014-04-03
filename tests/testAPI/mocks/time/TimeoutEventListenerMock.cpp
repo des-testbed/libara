@@ -6,7 +6,7 @@
 
 using namespace ARA;
 
-void TimeoutEventListenerMock::timerHasExpired(Timer* responsibleTimer) {
+void TimeoutEventListenerMock::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
     hasListenerBeenNotified = true;
 }
 

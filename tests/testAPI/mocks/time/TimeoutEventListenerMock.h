@@ -10,7 +10,7 @@
 namespace ARA {
     class TimeoutEventListenerMock : public TimeoutEventListener {
     public:
-        void timerHasExpired(Timer* responsibleTimer);
+        void timerHasExpired(std::weak_ptr<Timer> responsibleTimer);
         bool hasBeenNotified();
 
     private:
