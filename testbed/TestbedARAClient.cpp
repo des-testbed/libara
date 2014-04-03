@@ -49,17 +49,18 @@ void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
 void TestbedARAClient::initializeNetworkInterfaces() {
     dessert_meshif_t* dessertInterfaces = dessert_meshiflist_get();
     while(dessertInterfaces != NULL) {
-        TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(dessertInterfaces, this, packetFactory, 400000);
+	TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(dessertInterfaces, this, packetFactory, 400000);
         addNetworkInterface(newInterface);
         logDebug("initialized network interface: %s", dessertInterfaces->if_name);
         dessertInterfaces = dessertInterfaces->next;
     }
-    tapAddress = TestbedAddressPtr(new TestbedAddress(dessert_l25_defsrc));
+    tapAddress = std::make_shared<TestbedAddress>(dessert_l25_defsrc);
+    std::cout << "[initializeNetworkInterfaces] tap address is: " << tapAddress->toString() << std::endl;
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
-    std::cout << "address is "  << address.get()->toString() << std::endl;
-    std::cout << "other address is "  << tapAddress.get()->toString() << std::endl;
+    std::cout << "address is "  << address->toString() << std::endl;
+    std::cout << "other address is "  << tapAddress->toString() << std::endl;
     return(address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
 }
 
