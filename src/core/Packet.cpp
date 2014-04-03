@@ -110,4 +110,14 @@ size_t Packet::getHashValue() const {
     return sourceHash + seqNr;
 }
 
+std::string Packet::toString(){
+    std::ostringstream result;
+  
+    result << "[sender] " << sender->toString() << " [previous hop] " << previousHop->toString() << std::endl;
+    result << "[source] " << source->toString() << " [destination] " << destination->toString() << std::endl;
+    result << "[type] " << type << " [sequence number] " << seqNr << " [ttl] " << ttl << " [payload length] " << payloadSize << std::endl;
+
+    return result.str();
+}
+
 } /* namespace ARA */

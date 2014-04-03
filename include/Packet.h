@@ -179,6 +179,8 @@ public:
         return PacketType::isAntPacket((this->type));
     }
 
+    std::string toString();
+
 protected:
     AddressPtr source;
     AddressPtr destination;
