@@ -12,9 +12,9 @@ TEST_GROUP(TimerTest) {};
 
 TEST(TimerTest, addTimeoutListener) {
     TimerMock timer;
-    TimeoutEventListenerMock listener1 = TimeoutEventListenerMock();
-    TimeoutEventListenerMock listener2 = TimeoutEventListenerMock();
-    TimeoutEventListenerMock listener3 = TimeoutEventListenerMock();
+    TimeoutEventListenerMock listener1;
+    TimeoutEventListenerMock listener2;
+    TimeoutEventListenerMock listener3;
 
     timer.addTimeoutListener(&listener1);
     timer.addTimeoutListener(&listener2);
@@ -26,9 +26,9 @@ TEST(TimerTest, addTimeoutListener) {
 
     timer.expire();
 
-    CHECK_TRUE(listener1.hasBeenNotified());
-    CHECK_TRUE(listener2.hasBeenNotified());
-    CHECK_TRUE(listener3.hasBeenNotified());
+    CHECK_TRUE(listener1->hasBeenNotified());
+    CHECK_TRUE(listener2->hasBeenNotified());
+    CHECK_TRUE(listener3->hasBeenNotified());
 }
 
 TEST(TimerTest, defaultType) {
