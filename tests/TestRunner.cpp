@@ -18,6 +18,8 @@ int main(int ac, char** av) {
         EnvironmentPlugin environmentPlugin("EnvironmentPlugin");
         r->installPlugin(&environmentPlugin);
         return CommandLineTestRunner::RunAllTests(ac, av);
+    } catch(const std::bad_weak_ptr& error) {
+         std::cout << error.what() << '\n';
     } catch(ARA::Exception& exception) {
         std::cout << "\nERROR: Tests failed with ARA::Exception: " << exception.getMessage() << "\n\n";
         return 1;

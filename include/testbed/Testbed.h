@@ -14,6 +14,7 @@
 #define TESTBED_NAMESPACE_END }}
 
 typedef u_char ara_address_t[ETHER_ADDR_LEN];
+
 #include "TestbedAddress.h"
 class TestbedAddress;
 

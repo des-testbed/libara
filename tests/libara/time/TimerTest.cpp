@@ -26,9 +26,9 @@ TEST(TimerTest, addTimeoutListener) {
 
     timer.expire();
 
-    CHECK_TRUE(listener1->hasBeenNotified());
-    CHECK_TRUE(listener2->hasBeenNotified());
-    CHECK_TRUE(listener3->hasBeenNotified());
+    CHECK_TRUE(listener1.hasBeenNotified());
+    CHECK_TRUE(listener2.hasBeenNotified());
+    CHECK_TRUE(listener3.hasBeenNotified());
 }
 
 TEST(TimerTest, defaultType) {

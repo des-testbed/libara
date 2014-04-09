@@ -53,7 +53,7 @@ _dessert_cb_results messageFromTapInterfaceDispatcher(dessert_msg_t* messageRece
 }
 
 int testbed_cli_cmd_testsendmesh(struct cli_def* cli, char* command, char* argv[], int argc){
-    ARA::AddressPtr destination = ARA::AddressPtr(new ARA::testbed::TestbedAddress(DESSERT_BROADCAST_ADDRESS));
+    ARA::AddressPtr destination = std::make_shared<ARA::testbed::TestbedAddress>(DESSERT_BROADCAST_ADDRESS);
     ARA::Packet* packet = client->getPacketFactory()->makeDataPacket(client->getNetworkInterface(0)->getLocalAddress(), destination, client->getNextSequenceNumber(), "test", 5);
     client->sendPacket(packet);
     return 0;
@@ -99,9 +99,6 @@ int cli_setup_sysif(struct cli_def* cli, const char* command, char* argv[], int 
 }
 
 int main(int argc, char** argv) {
-     ARA::BasicConfiguration config = createConfiguration(5.0, 5.0);
-     client = std::make_shared<ARA::testbed::TestbedARAClient>(config);
-
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
      dessert_init("ARA", 0x01, DESSERT_OPT_NODAEMONIZE);
@@ -119,6 +116,8 @@ int main(int argc, char** argv) {
      cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
      dessert_debug("configuration applied");
 
+     ARA::BasicConfiguration config = createConfiguration(5.0, 5.0);
+     client = std::make_shared<ARA::testbed::TestbedARAClient>(config);
 
      dessert_sysrxcb_add(&tapPacketFilter, 5);
      dessert_sysrxcb_add(fromTAP, 15);

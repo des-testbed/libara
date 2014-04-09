@@ -104,8 +104,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         if (isRouteDiscoveryRunning(destination)) {
             logDebug("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
             packetTrap->trapPacket(packet);
-        }
-        else if (routingTable->isDeliverable(packet)) {
+        } else if (routingTable->isDeliverable(packet)) {
             NextHop* nextHop = forwardingPolicy->getNextHop(packet);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
@@ -116,15 +115,13 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             logDebug("Forwarding DATA packet %u from %s to %s via %s (phi=%.2f)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str(), newPheromoneValue);
 
             sendUnicast(packet, interface, nextHopAddress);
-        }
-        else {
+        } else {
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
                 logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
                 packetTrap->trapPacket(packet);
                 startNewRouteDiscovery(packet);
-            }
-            else {
+            } else {
                 handleNonSourceRouteDiscovery(packet);
             }
         }
@@ -173,7 +170,7 @@ void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
     RouteDiscoveryInfo* discoveryInfo = new RouteDiscoveryInfo(packet);
     TimerPtr timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
     timer->addTimeoutListener(this);
-    timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
+    timer->run(routeDiscoveryTimeoutInMilliSeconds * 1001);
 
     AddressPtr destination = packet->getDestination();
     runningRouteDiscoveries[destination] = timer;

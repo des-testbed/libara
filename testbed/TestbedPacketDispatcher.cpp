@@ -63,7 +63,8 @@ Packet* tapMessageToPacket(dessert_msg_t* dessertMessage, std::weak_ptr<TestbedA
 
     AddressPtr source = std::dynamic_pointer_cast<Address>(std::make_shared<TestbedAddress>(ethernetFrame->ether_shost));
     AddressPtr destination = std::dynamic_pointer_cast<Address>(std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost));
-    //std::cout << "||Create Packet from TapMessage|| source: " << source.get()->toString() << " destination: " << destination.get()->toString() << std::endl;
+    std::cout << "[tapMessageToPacket] create packet from dessert message received over tap interface" << std::endl;
+    std::cout << "[tapMessageToPacket] source: " << source->toString() << " destination: " << destination->toString() << std::endl;
 
     void* payload;
     unsigned int payloadSize = ntohs(dessert_msg_getpayload(dessertMessage, &payload));
