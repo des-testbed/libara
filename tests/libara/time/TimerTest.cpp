@@ -11,20 +11,20 @@ using namespace ARA;
 TEST_GROUP(TimerTest) {};
 
 TEST(TimerTest, addTimeoutListener) {
-    TimerMock timer;
+    std::shared_ptr<TimerMock> timer = std::make_shared<TimerMock>();
     TimeoutEventListenerMock listener1;
     TimeoutEventListenerMock listener2;
     TimeoutEventListenerMock listener3;
 
-    timer.addTimeoutListener(&listener1);
-    timer.addTimeoutListener(&listener2);
-    timer.addTimeoutListener(&listener3);
+    timer->addTimeoutListener(&listener1);
+    timer->addTimeoutListener(&listener2);
+    timer->addTimeoutListener(&listener3);
 
     CHECK_FALSE(listener1.hasBeenNotified());
     CHECK_FALSE(listener2.hasBeenNotified());
     CHECK_FALSE(listener3.hasBeenNotified());
 
-    timer.expire();
+    timer->expire();
 
     CHECK_TRUE(listener1.hasBeenNotified());
     CHECK_TRUE(listener2.hasBeenNotified());
