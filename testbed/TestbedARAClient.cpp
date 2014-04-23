@@ -9,10 +9,13 @@
 #include "BasicConfiguration.h"
 #include "SimpleLogger.h"
 #include "Environment.h"
+#include "StandardClock.h"
 
 TESTBED_NAMESPACE_BEGIN
 
 TestbedARAClient::TestbedARAClient(Configuration& config) : AbstractARAClient(config){
+    // set the clock to the standard clock (if it is not pre-set to the dummy clock, the tests fail)
+    Environment::setClock(new StandardClock());
     //TODO Make configurable
     Logger* logger = new SimpleLogger("ara");
     setLogger(logger);
