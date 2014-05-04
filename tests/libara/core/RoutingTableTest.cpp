@@ -39,7 +39,7 @@ TEST_GROUP(RoutingTableTest) {
 };
 
 TEST(RoutingTableTest, getPossibleNextHopsReturnsEmptyList) {
-    PacketMock packet = PacketMock();
+    PacketMock packet;
     std::deque<RoutingTableEntry*> list = routingTable->getPossibleNextHops(&packet);
     CHECK(list.empty());
 }
@@ -52,7 +52,7 @@ TEST(RoutingTableTest, packetWithUnregisteredAddressIsNotDeliverable) {
 TEST(RoutingTableTest, updateRoutingTable) {
     PacketMock packet;
     AddressPtr destination = packet.getDestination();
-    AddressPtr nextHop (new AddressMock("nextHop"));
+    AddressPtr nextHop = std::make_shared<AddressMock>("nextHop");
     float pheromoneValue = 123.456;
 
     CHECK(routingTable->isDeliverable(&packet) == false);
@@ -70,7 +70,7 @@ TEST(RoutingTableTest, updateRoutingTable) {
 TEST(RoutingTableTest, overwriteExistingEntryWithUpdate) {
     PacketMock packet;
     AddressPtr destination = packet.getDestination();
-    AddressPtr nextHop (new AddressMock("nextHop"));
+    AddressPtr nextHop = std::make_shared<AddressMock>("nextHop");
     float pheromoneValue = 123.456;
 
     // first we register a route to a destination the first time
@@ -95,15 +95,16 @@ TEST(RoutingTableTest, overwriteExistingEntryWithUpdate) {
 }
 
 TEST(RoutingTableTest, getPossibleNextHops) {
-    AddressPtr sourceAddress (new AddressMock("Source"));
-    AddressPtr destination1 (new AddressMock("Destination1"));
-    AddressPtr destination2 (new AddressMock("Destination2"));
+    AddressPtr sourceAddress = std::make_shared<AddressMock>("Source");
+    AddressPtr destination1 = std::make_shared<AddressMock>("Destination1");
+    AddressPtr destination2 = std::make_shared<AddressMock>("Destination2");
 
-    AddressPtr nextHop1a (new AddressMock("nextHop1a"));
-    AddressPtr nextHop1b (new AddressMock("nextHop1b"));
-    AddressPtr nextHop2 (new AddressMock("nextHop2"));
-    AddressPtr nextHop3 (new AddressMock("nextHop3"));
-    AddressPtr nextHop4 (new AddressMock("nextHop4"));
+    AddressPtr nextHop1a = std::make_shared<AddressMock>("nextHop1a");
+    AddressPtr nextHop1b = std::make_shared<AddressMock>("nextHop1b");
+    AddressPtr nextHop2 = std::make_shared<AddressMock>("nextHop2");
+    AddressPtr nextHop3 = std::make_shared<AddressMock>("nextHop3");
+    AddressPtr nextHop4 = std::make_shared<AddressMock>("nextHop4");
+
     NetworkInterfaceMock interface1(client);
     NetworkInterfaceMock interface2(client);
     NetworkInterfaceMock interface3(client);
@@ -166,9 +167,9 @@ TEST(RoutingTableTest, getPossibleNextHops) {
 }
 
 TEST(RoutingTableTest, getPheromoneValue) {
-    AddressPtr sourceAddress (new AddressMock("Source"));
-    AddressPtr destination (new AddressMock("Destination"));
-    AddressPtr nextHopAddress (new AddressMock("nextHop"));
+    AddressPtr sourceAddress = std::make_shared<AddressMock>("Source");
+    AddressPtr destination = std::make_shared<AddressMock>("Destination");
+    AddressPtr nextHopAddress = std::make_shared<AddressMock>("nextHop");
 
     // Should be zero because there is no known route to this destination
     LONGS_EQUAL(0, routingTable->getPheromoneValue(destination, nextHopAddress, interface));
@@ -178,11 +179,10 @@ TEST(RoutingTableTest, getPheromoneValue) {
 }
 
 TEST(RoutingTableTest, removeEntry) {
-    AddressPtr destination (new AddressMock("Destination"));
-
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr destination = std::make_shared<AddressMock>("Destination");
+    AddressPtr nodeA = std::make_shared<AddressMock>("A");
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr nodeC = std::make_shared<AddressMock>("C");
 
     routingTable->update(destination, nodeA, interface, 2.5);
     routingTable->update(destination, nodeB, interface, 2.5);
@@ -202,11 +202,11 @@ TEST(RoutingTableTest, removeEntry) {
 }
 
 TEST(RoutingTableTest, evaporatePheromones) {
-    AddressPtr destination (new AddressMock("Destination"));
+    AddressPtr destination = std::make_shared<AddressMock>("Destination");
+    AddressPtr nodeA = std::make_shared<AddressMock>("A");
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr nodeC = std::make_shared<AddressMock>("C");
 
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
     float pheromoneValueA = 2.5f;
     float pheromoneValueB = 3.8f;
     float pheromoneValueC = 0.2f;
@@ -233,10 +233,10 @@ TEST(RoutingTableTest, evaporatePheromones) {
 }
 
 TEST(RoutingTableTest, exists) {
-    AddressPtr destination (new AddressMock("Destination"));
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr destination = std::make_shared<AddressMock>("Destination");
+    AddressPtr nodeA = std::make_shared<AddressMock>("A");
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr nodeC = std::make_shared<AddressMock>("C");
 
     // start the test
     CHECK_FALSE(routingTable->exists(destination, nodeA, interface));
@@ -265,11 +265,10 @@ TEST(RoutingTableTest, exists) {
 }
 
 TEST(RoutingTableTest, removeAllEntries) {
-    AddressPtr destination (new AddressMock("Destination"));
-
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr destination = std::make_shared<AddressMock>("Destination");
+    AddressPtr nodeA = std::make_shared<AddressMock>("A");
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr nodeC = std::make_shared<AddressMock>("C");
 
     routingTable->update(destination, nodeA, interface, 2.5);
     routingTable->update(destination, nodeB, interface, 2.5);
@@ -299,10 +298,10 @@ TEST(RoutingTableTest, removeAllEntries) {
 }
 
 TEST(RoutingTableTest, isNewRoute) {
-    AddressPtr source (new AddressMock("Source"));
-    AddressPtr destination (new AddressMock("Destination"));
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
+    AddressPtr destination = std::make_shared<AddressMock>("Destination");
+    AddressPtr nodeA = std::make_shared<AddressMock>("A");
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr source = std::make_shared<AddressMock>("Source");
 
     // start the test
     CHECK(routingTable->isNewRoute(destination, nodeA, interface) == true);
@@ -339,9 +338,9 @@ TEST(RoutingTableTest, packetIsNotDeliverableIfOnlyRouteLeadsBackToTheSender) {
 }
 
 TEST(RoutingTableTest, getTotalNumberOfEntries) {
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr nodeA = std::make_shared<AddressMock>("A");
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr nodeC = std::make_shared<AddressMock>("C");
 
     // empty at the beginning
     BYTES_EQUAL(0, routingTable->getTotalNumberOfEntries());
@@ -360,9 +359,9 @@ TEST(RoutingTableTest, getTotalNumberOfEntries) {
 }
 
 TEST(RoutingTableTest, tableEntriesAreDeletedIfEvaporationReachesZero) {
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
+    AddressPtr nodeA = std::make_shared<AddressMock>("A");
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr nodeC = std::make_shared<AddressMock>("C");
 
     // empty at the beginning
     routingTable->triggerEvaporation();
@@ -381,9 +380,9 @@ TEST(RoutingTableTest, tableEntriesAreDeletedIfEvaporationReachesZero) {
 }
 
 TEST(RoutingTableTest, falselyDeleteLastEntryBug) {
-    AddressPtr destination (new AddressMock("dest"));
-    AddressPtr nextHop (new AddressMock("A"));
-    AddressPtr anotherAddress (new AddressMock("B"));
+    AddressPtr destination = std::make_shared<AddressMock>("dest");
+    AddressPtr nextHop = std::make_shared<AddressMock>("A");
+    AddressPtr anotherAddress = std::make_shared<AddressMock>("B");
 
     routingTable->update(destination, nextHop, interface, 2);
 
@@ -393,15 +392,16 @@ TEST(RoutingTableTest, falselyDeleteLastEntryBug) {
 }
 
 TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
-    AddressPtr sourceAddress (new AddressMock("Source"));
-    AddressPtr destination1 (new AddressMock("Destination1"));
-    AddressPtr destination2 (new AddressMock("Destination2"));
+    AddressPtr sourceAddress = std::make_shared<AddressMock>("Source");
+    AddressPtr destination1 = std::make_shared<AddressMock>("Destination1");
+    AddressPtr destination2 = std::make_shared<AddressMock>("Destination2");
 
-    AddressPtr nextHop1a (new AddressMock("nextHop1a"));
-    AddressPtr nextHop1b (new AddressMock("nextHop1b"));
-    AddressPtr nextHop2 (new AddressMock("nextHop2"));
-    AddressPtr nextHop3 (new AddressMock("nextHop3"));
-    AddressPtr nextHop4 (new AddressMock("nextHop4"));
+    AddressPtr nextHop1a = std::make_shared<AddressMock>("nextHop1a");
+    AddressPtr nextHop1b = std::make_shared<AddressMock>("nextHop1b");
+    AddressPtr nextHop2 = std::make_shared<AddressMock>("nextHop2");
+    AddressPtr nextHop3 = std::make_shared<AddressMock>("nextHop3");
+    AddressPtr nextHop4 = std::make_shared<AddressMock>("nextHop4");
+
     NetworkInterfaceMock interface1(client);
     NetworkInterfaceMock interface2(client);
     NetworkInterfaceMock interface3(client);
@@ -472,12 +472,12 @@ TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
  *          └--->(C)--->--┘      |
  */
 TEST(RoutingTableTest, getAllRoutesThatLeadOverSpecificNextHop) {
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
-    AddressPtr someUnknownNode (new AddressMock("X"));
-    AddressPtr dest1 (new AddressMock("dest1"));
-    AddressPtr dest2 (new AddressMock("dest2"));
-    AddressPtr dest3 (new AddressMock("dest3"));
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr nodeC = std::make_shared<AddressMock>("C");
+    AddressPtr someUnknownNode = std::make_shared<AddressMock>("X");
+    AddressPtr dest1 = std::make_shared<AddressMock>("dest1");
+    AddressPtr dest2 = std::make_shared<AddressMock>("dest2");
+    AddressPtr dest3 = std::make_shared<AddressMock>("dest3");
 
     routingTable->update(dest1, nodeB, interface, 10);
     routingTable->update(dest2, nodeB, interface, 10);
@@ -504,11 +504,11 @@ TEST(RoutingTableTest, getAllRoutesThatLeadOverSpecificNextHop) {
  * erasing elements from the map while iterating over it (iterator invalidation).
  */
 TEST(RoutingTableTest, evporateCanRemoveEntries) {
-    AddressPtr nodeA (new AddressMock("A"));
-    AddressPtr nodeB (new AddressMock("B"));
-    AddressPtr nodeC (new AddressMock("C"));
-    AddressPtr nodeD (new AddressMock("D"));
-    AddressPtr destination (new AddressMock("dest"));
+    AddressPtr nodeA = std::make_shared<AddressMock>("A");
+    AddressPtr nodeB = std::make_shared<AddressMock>("B");
+    AddressPtr nodeC = std::make_shared<AddressMock>("C");
+    AddressPtr nodeD = std::make_shared<AddressMock>("D");
+    AddressPtr destination = std::make_shared<AddressMock>("dest");
 
     routingTable->update(destination, nodeA, interface, 10);
     routingTable->update(destination, nodeB, interface, 0.5); // this one should be removed due to evaporation
@@ -540,10 +540,10 @@ TEST(RoutingTableTest, notDeliverableifOnlyRouteLeadsOverSourceNode) {
 }
 
 TEST(RoutingTableTest, doNotReturnSourceOrSenderOfAPacketAsPossibleNextHop) {
-    AddressPtr source (new AddressMock("source"));
-    AddressPtr destination (new AddressMock("destination"));
-    AddressPtr sender (new AddressMock("sender"));
-    AddressPtr nextHop (new AddressMock("nextHop"));
+    AddressPtr source = std::make_shared<AddressMock>("source");
+    AddressPtr destination = std::make_shared<AddressMock>("destination");
+    AddressPtr sender = std::make_shared<AddressMock>("sender");
+    AddressPtr nextHop = std::make_shared<AddressMock>("nextHop");
 
     // prepare three routes, but only the route over nextHop is actually viable (others introduce loops)
     routingTable->update(destination, source, interface, 10);
@@ -560,10 +560,9 @@ TEST(RoutingTableTest, doNotReturnSourceOrSenderOfAPacketAsPossibleNextHop) {
 }
 
 TEST(RoutingTableTest, toString) {
-    std::shared_ptr<AddressMock> destination = std::make_shared<AddressMock>("Destination");
-
-    std::shared_ptr<AddressMock> a = std::make_shared<AddressMock>("A");
-    std::shared_ptr<AddressMock> b = std::make_shared<AddressMock>("B");
+    AddressPtr destination = std::make_shared<AddressMock>("Destination");
+    AddressPtr a = std::make_shared<AddressMock>("A");
+    AddressPtr b = std::make_shared<AddressMock>("B");
 
     routingTable->update(destination, a, interface, 2.5);
     routingTable->update(destination, b, interface, 1.2);
