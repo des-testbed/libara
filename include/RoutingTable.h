@@ -92,6 +92,26 @@ public:
      */
     std::deque<RoutingTableEntryTupel> getAllRoutesThatLeadOver(AddressPtr nextHop) const;
 
+    /**
+     * The method provides an output stream for the routing table by overloading
+     * the '<<' operator.
+     *
+     */
+    friend std::ostream& operator<<(std::ostream& out, RoutingTable& routingTable) {
+        RoutingTableMap::const_iterator i;
+
+        for (i = routingTable.table.begin(); i != routingTable.table.end(); i++) {
+            AddressPtr destination = i->first;
+            std::shared_ptr<RoutingTableEntryList> entryList = i->second;
+
+            for (auto& entry: *entryList) {
+              out << "[destination] " << destination << " " << entry;
+            }
+         }
+
+         return out;
+    }
+
 private:
     void applyEvaporation(Time* currentTime);
 
