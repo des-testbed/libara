@@ -93,6 +93,11 @@ public:
     std::deque<RoutingTableEntryTupel> getAllRoutesThatLeadOver(AddressPtr nextHop) const;
 
     /**
+     *
+     */
+    virtual std::string toString(int position=-1);
+
+    /**
      * The method provides an output stream for the routing table by overloading
      * the '<<' operator.
      *

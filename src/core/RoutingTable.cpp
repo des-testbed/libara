@@ -287,4 +287,30 @@ std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(Addres
     return result;
 }
 
+std::string RoutingTable::toString(int position) {
+    int currentPosition = 0;
+    std::ostringstream result;
+    RoutingTableMap::const_iterator i;
+
+    for (i = table.begin(); i !=table.end(); i++) {
+        AddressPtr destination = i->first;
+    	std::shared_ptr<RoutingTableEntryList> entryList = i->second;
+
+        for (auto& entry: *entryList) {
+	        if (position < 0) {
+	            result << "[destination] " << *destination << " " << *entry << std::endl;
+	        } else {
+	            if (currentPosition == position) {
+	                result << "[destination] " << *destination << " " << *entry << std::endl;
+		            return result.str();
+	            } else {
+	                currentPosition++;
+	            }
+            }
+        }
+    }
+
+    return result.str();
+}
+
 ARA_NAMESPACE_END

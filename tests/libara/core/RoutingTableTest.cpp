@@ -555,3 +555,21 @@ TEST(RoutingTableTest, doNotReturnSourceOrSenderOfAPacketAsPossibleNextHop) {
     CHECK(nextHop->equals(possibleHop->getAddress()));
     CHECK_EQUAL(interface, possibleHop->getNetworkInterface());
 }
+
+TEST(RoutingTableTest, toString) {
+    std::shared_ptr<AddressMock> destination = std::make_shared<AddressMock>("Destination");
+
+    std::shared_ptr<AddressMock> a = std::make_shared<AddressMock>("A");
+    std::shared_ptr<AddressMock> b = std::make_shared<AddressMock>("B");
+
+    routingTable->update(destination, a, interface, 2.5);
+    routingTable->update(destination, b, interface, 1.2);
+
+    // get the content of the routing table
+    std::string routingTableString = routingTable->toString();
+    STRCMP_EQUAL("[destination] Destination [next hop] A [phi] 2.5\n[destination] Destination [next hop] B [phi] 1.2\n", routingTableString.c_str());
+
+    // get a specific routing table entry
+    routingTableString = routingTable->toString(1);
+    STRCMP_EQUAL("[destination] Destination [next hop] B [phi] 1.2\n", routingTableString.c_str());
+}
