@@ -45,12 +45,12 @@ TEST(RoutingTableTest, getPossibleNextHopsReturnsEmptyList) {
 }
 
 TEST(RoutingTableTest, packetWithUnregisteredAddressIsNotDeliverable) {
-    PacketMock packet = PacketMock();
+    PacketMock packet;
     CHECK(routingTable->isDeliverable(&packet) == false);
 }
 
 TEST(RoutingTableTest, updateRoutingTable) {
-    PacketMock packet = PacketMock();
+    PacketMock packet;
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
     float pheromoneValue = 123.456;
@@ -68,7 +68,7 @@ TEST(RoutingTableTest, updateRoutingTable) {
 }
 
 TEST(RoutingTableTest, overwriteExistingEntryWithUpdate) {
-    PacketMock packet = PacketMock();
+    PacketMock packet;
     AddressPtr destination = packet.getDestination();
     AddressPtr nextHop (new AddressMock("nextHop"));
     float pheromoneValue = 123.456;
@@ -104,9 +104,9 @@ TEST(RoutingTableTest, getPossibleNextHops) {
     AddressPtr nextHop2 (new AddressMock("nextHop2"));
     AddressPtr nextHop3 (new AddressMock("nextHop3"));
     AddressPtr nextHop4 (new AddressMock("nextHop4"));
-    NetworkInterfaceMock interface1 = NetworkInterfaceMock(client);
-    NetworkInterfaceMock interface2 = NetworkInterfaceMock(client);
-    NetworkInterfaceMock interface3 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface1(client);
+    NetworkInterfaceMock interface2(client);
+    NetworkInterfaceMock interface3(client);
 
     float pheromoneValue1a = 1;
     float pheromoneValue1b = 5;
@@ -121,8 +121,8 @@ TEST(RoutingTableTest, getPossibleNextHops) {
     routingTable->update(destination2, nextHop3, &interface3, pheromoneValue3);
     routingTable->update(destination2, nextHop4, &interface1, pheromoneValue4);
 
-    Packet packet1 = Packet(sourceAddress, destination1, sourceAddress, PacketType::DATA, 123, 10);
-    Packet packet2 = Packet(sourceAddress, destination2, sourceAddress, PacketType::DATA, 124, 10);
+    Packet packet1(sourceAddress, destination1, sourceAddress, PacketType::DATA, 123, 10);
+    Packet packet2(sourceAddress, destination2, sourceAddress, PacketType::DATA, 124, 10);
 
     std::deque<RoutingTableEntry*> nextHopsForDestination1 = routingTable->getPossibleNextHops(&packet1);
     BYTES_EQUAL(3, nextHopsForDestination1.size());
@@ -332,7 +332,7 @@ TEST(RoutingTableTest, isNewRoute) {
  *
  */
 TEST(RoutingTableTest, packetIsNotDeliverableIfOnlyRouteLeadsBackToTheSender) {
-    PacketMock packet = PacketMock();
+    PacketMock packet;
     routingTable->update(packet.getDestination(), packet.getSender(), interface, 10.0);
 
     CHECK_FALSE(routingTable->isDeliverable(&packet));
@@ -402,9 +402,9 @@ TEST(RoutingTableTest, getPossibleNextHopsForDestination) {
     AddressPtr nextHop2 (new AddressMock("nextHop2"));
     AddressPtr nextHop3 (new AddressMock("nextHop3"));
     AddressPtr nextHop4 (new AddressMock("nextHop4"));
-    NetworkInterfaceMock interface1 = NetworkInterfaceMock(client);
-    NetworkInterfaceMock interface2 = NetworkInterfaceMock(client);
-    NetworkInterfaceMock interface3 = NetworkInterfaceMock(client);
+    NetworkInterfaceMock interface1(client);
+    NetworkInterfaceMock interface2(client);
+    NetworkInterfaceMock interface3(client);
 
     float pheromoneValue1a = 1;
     float pheromoneValue1b = 5;
@@ -531,8 +531,11 @@ TEST(RoutingTableTest, notDeliverableifOnlyRouteLeadsOverSourceNode) {
 
     routingTable->update(destination, source, interface, 10);
 
-    // start test, if the only way to a destination would lead over the source of the packet, there is effectively no route that would not introduce loops
-    PacketMock packet = PacketMock("source", "destination", "someSender");
+    /**
+     * start test, if the only way to a destination would lead over the source of the packet, 
+     * there is effectively no route that would not introduce loops
+     */
+    PacketMock packet("source", "destination", "someSender");
     CHECK_FALSE(routingTable->isDeliverable(&packet));
 }
 
@@ -547,7 +550,7 @@ TEST(RoutingTableTest, doNotReturnSourceOrSenderOfAPacketAsPossibleNextHop) {
     routingTable->update(destination, sender, interface, 10);
     routingTable->update(destination, nextHop, interface, 10);
 
-    PacketMock packet = PacketMock("source", "destination", "sender");
+    PacketMock packet("source", "destination", "sender");
     std::deque<RoutingTableEntry*> nextHops = routingTable->getPossibleNextHops(&packet);
 
     BYTES_EQUAL(1, nextHops.size());
