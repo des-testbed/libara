@@ -11,8 +11,8 @@ using namespace std;
 ARA_NAMESPACE_BEGIN
 
 string NetworkInterfaceMock::DEFAULT_INTERFACE_NAME = "NetworkInterfaceMock";
-AddressPtr NetworkInterfaceMock::DEFAULT_LOCAL_ADDRESS = AddressPtr(new AddressMock("DEFAULT"));
-AddressPtr NetworkInterfaceMock::DEFAULT_BROADCAST_ADDRESS = AddressPtr(new AddressMock("BROADCAST"));
+AddressPtr NetworkInterfaceMock::DEFAULT_LOCAL_ADDRESS = std::make_shared<AddressMock>("DEFAULT");
+AddressPtr NetworkInterfaceMock::DEFAULT_BROADCAST_ADDRESS = std::make_shared<AddressMock>("BROADCAST");
 int NetworkInterfaceMock::DEFAULT_ACK_TIMEOUT = 5000;
 
 NetworkInterfaceMock::NetworkInterfaceMock(AbstractNetworkClient* client) : ReliableNetworkInterface(client, DEFAULT_ACK_TIMEOUT, DEFAULT_LOCAL_ADDRESS, DEFAULT_BROADCAST_ADDRESS) {
@@ -23,7 +23,7 @@ NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, AbstractN
     this->name = interfaceName;
 }
 
-NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, const string localAddressName, AbstractNetworkClient* client) : ReliableNetworkInterface(client, DEFAULT_ACK_TIMEOUT, AddressPtr(new AddressMock(localAddressName)), AddressPtr(new AddressMock("BROADCAST"))) {
+NetworkInterfaceMock::NetworkInterfaceMock(const string interfaceName, const string localAddressName, AbstractNetworkClient* client) : ReliableNetworkInterface(client, DEFAULT_ACK_TIMEOUT, std::make_shared<AddressMock>(localAddressName), std::make_shared<AddressMock>("BROADCAST")) {
     this->name = interfaceName;
 }
 
