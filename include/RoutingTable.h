@@ -74,7 +74,7 @@ public:
      * Returns the total number of all entries in this table.
      * This is the sum of all routes to all destinations.
      */
-    unsigned int getTotalNumberOfEntries() const;
+    virtual unsigned int getTotalNumberOfEntries() const;
 
     /**
      * Returns the n'th ~RoutingTableEntry.
