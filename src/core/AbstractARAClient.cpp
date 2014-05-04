@@ -250,23 +250,13 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
     float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
     routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
     logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
+
     if(hasPreviousNodeBeenSeenBefore(packet) == false) {
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
         routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
         logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
         logDebug("Routing Table:");
-        RoutingTableEntryTupel routingTableEntry;
-        for (unsigned int i = 0; i < routingTable->getTotalNumberOfEntries(); ++i) {
-            routingTableEntry = routingTable->getEntryAt(i);
-            /// get the destination
-            std::string destination = routingTableEntry.destination.get()->toString();
-            /// get the next hop
-            std::string nextHop = routingTableEntry.entry->getNextHop()->getAddress().get()->toString();
-            /// get the pheromone value
-            float phi = routingTableEntry.entry->getPheromoneValue();
-
-            logDebug("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
-        }
+        logDebug("%s", routingTable->toString().c_str());
     }
     else {
         logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
