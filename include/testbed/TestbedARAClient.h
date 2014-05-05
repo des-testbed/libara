@@ -59,6 +59,8 @@ class TestbedARAClient : public AbstractARAClient {
          */
         void packetNotDeliverable(const Packet* packet);
 
+        std::string routingTableToString();
+
     protected:
         /**
          * This method initializes all of the network interfaces available on the device.

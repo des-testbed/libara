@@ -46,17 +46,18 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
     logDebug("packet # %u is undeliverable", packet->getSequenceNumber());
     delete packet;
-    //nrOfNotDeliverablePackets++;
 }
 
 void TestbedARAClient::initializeNetworkInterfaces() {
     dessert_meshif_t* dessertInterfaces = dessert_meshiflist_get();
-    while(dessertInterfaces != NULL) {
-	TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(dessertInterfaces, this, packetFactory, 400000);
+
+    while(dessertInterfaces != nullptr) {
+        TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(dessertInterfaces, this, packetFactory, 400000);
         addNetworkInterface(newInterface);
         logDebug("initialized network interface: %s", dessertInterfaces->if_name);
         dessertInterfaces = dessertInterfaces->next;
     }
+
     tapAddress = std::make_shared<TestbedAddress>(dessert_l25_defsrc);
     std::cout << "[initializeNetworkInterfaces] tap address is: " << tapAddress->toString() << std::endl;
 }
@@ -64,7 +65,7 @@ void TestbedARAClient::initializeNetworkInterfaces() {
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
     std::cout << "address is "  << address->toString() << std::endl;
     std::cout << "other address is "  << tapAddress->toString() << std::endl;
-    return(address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
+    return (address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
 }
 
 void TestbedARAClient::broadcastFANT(AddressPtr destination) {
@@ -74,6 +75,10 @@ void TestbedARAClient::broadcastFANT(AddressPtr destination) {
         Packet* fant = packetFactory->makeFANT(tapAddress, destination, sequenceNr);
         interface->broadcast(fant);
     }
+}
+
+std::string TestbedARAClient::routingTableToString() {
+    return this->routingTable->toString();
 }
 
 TESTBED_NAMESPACE_END
