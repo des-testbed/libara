@@ -238,10 +238,12 @@ EvaporationPolicy* RoutingTable::getEvaporationPolicy() const{
 unsigned int RoutingTable::getTotalNumberOfEntries() const {
     unsigned int tableSize = 0;
     RoutingTableMap::const_iterator iterator;
+
     for (iterator=table.begin(); iterator!=table.end(); iterator++) {
-	std::shared_ptr<RoutingTableEntryList> entryList = iterator->second;
+	    std::shared_ptr<RoutingTableEntryList> entryList = iterator->second;
         tableSize += entryList->size();
     }
+
     return tableSize;
 }
 
