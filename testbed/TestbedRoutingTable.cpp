@@ -13,11 +13,13 @@ void TestbedRoutingTable::update(AddressPtr destination, RoutingTableEntry* newE
     std::lock_guard<std::mutex> lock(mutex);
     RoutingTable::update(destination, newEntry);
 }
+
 /*
 void TestbedRoutingTable::applyEvaporation(Time* currentTime) {
     std::lock_guard<std::mutex> lock(mutex);
     RoutingTable::applyEvaporation(currentTime);
-}*/
+}
+*/
 
 float TestbedRoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
     std::unique_lock<std::mutex> lock(mutex);
