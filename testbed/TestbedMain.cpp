@@ -7,6 +7,7 @@
 #include "TestbedAddress.h"
 #include "TestbedARAClient.h"
 #include "BasicConfiguration.h"
+#include "TestbedRoutingTable.h"
 #include "TestbedPacketDispatcher.h"
 #include "TestbedCommandLineInterface.h"
 #include "LinearPathReinforcementPolicy.h"
@@ -23,7 +24,7 @@ std::shared_ptr<ARA::testbed::TestbedARAClient> client;
  */
 ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) {
     int maxTTL = 15;
-    ARA::RoutingTable* routingTable = new ARA::RoutingTable();
+    ARA::testbed::TestbedRoutingTable* routingTable = new ARA::testbed::TestbedRoutingTable();
     ARA::PacketFactory* packetFactory = new ARA::PacketFactory(maxTTL);
     ARA::EvaporationPolicy* evaporationPolicy = new ARA::ExponentialEvaporationPolicy(2.0, 100, 15.0);
     ARA::PathReinforcementPolicy* reinforcementPolicy = new ARA::LinearPathReinforcementPolicy(deltaPhi);
