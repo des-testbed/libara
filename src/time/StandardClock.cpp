@@ -9,10 +9,12 @@
 ARA_NAMESPACE_BEGIN
 
 Time* StandardClock::makeTime(){
+    std::unique_lock<std::mutex> lock(mutex);
     return new StandardTime();
 }
 
 TimerPtr StandardClock::getNewTimer(TimerType timerType, void* contextObject){
+    std::unique_lock<std::mutex> lock(mutex);
     /// create a proxy for the standard timer	    
     std::shared_ptr<StandardTimerProxy> result = std::make_shared<StandardTimerProxy>(timerType, contextObject);
     /// set the identifier of the timer
@@ -30,6 +32,7 @@ TimerPtr StandardClock::getNewTimer(TimerType timerType, void* contextObject){
 }
 
 void StandardClock::scheduleTimer(unsigned long identifier, unsigned long timeoutInMicroseconds){
+    std::unique_lock<std::mutex> lock(mutex);
     try {
 	std::shared_ptr<StandardTimer> timer = timerList.at(identifier); 
 	timer->run(timeoutInMicroseconds);
@@ -39,10 +42,12 @@ void StandardClock::scheduleTimer(unsigned long identifier, unsigned long timeou
 }
 
 void StandardClock::scheduleTimer(std::function<void()> timer){
+    std::unique_lock<std::mutex> lock(mutex);
     threadPool.schedule(timer);
 }
 
 void StandardClock::interruptTimer(unsigned long identifier){
+    std::unique_lock<std::mutex> lock(mutex);
     try {
 	std::shared_ptr<StandardTimer> timer = timerList.at(identifier); 
 	timer->interrupt();

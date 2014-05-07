@@ -11,6 +11,7 @@
 #include "StandardTimer.h"
 #include "StandardTimerProxy.h"
 
+#include <mutex>
 #include <thread>
 #include <vector>
 #include <iostream>
@@ -31,12 +32,20 @@ class StandardClock : public Clock {
     private:
 
 	/**
-	 * @brief The member manages the access to a thread pool implementation 
-	 *        the timer tasks. 
+	 * @brief The member manages the access to a thread pool implementation.
 	 */
 	ThreadPool threadPool;
 
+	/**
+	 *
+	 */
 	std::vector<std::shared_ptr<StandardTimer> > timerList;
+
+	/**
+	 * The mutex protects the access to critical sections, such as the access to members
+	 * of this class.
+	 */
+	std::mutex mutex;
 };
 
 ARA_NAMESPACE_END
