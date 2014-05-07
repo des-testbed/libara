@@ -15,7 +15,7 @@ namespace ARA {
         SimpleLogger(const char* instanceName) : instanceName(instanceName) {};
 
     protected:
-        void performLoggingAction(const std::string &logMessage, Level level, va_list args) const;
+        virtual void performLoggingAction(const std::string &logMessage, Level level, va_list args) const;
 
     private:
         const char* instanceName;
