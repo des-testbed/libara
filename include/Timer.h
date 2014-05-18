@@ -9,7 +9,10 @@
 #include "ARAMacros.h"
 #include "TimerType.h"
 
+#include "StackTrace.h"
+
 #include <deque>
+#include <iostream>
 
 ARA_NAMESPACE_BEGIN
 class TimeoutEventListener;
@@ -24,7 +27,10 @@ class Timer : public std::enable_shared_from_this<Timer> {
          */
         Timer(TimerType type, void* contextObject=nullptr);
 
-        virtual ~Timer() {}
+        virtual ~Timer() {
+           printStacktrace();
+           std::cout << "[Timer] destructor called " << std::endl;
+        }
 
         virtual void addTimeoutListener(TimeoutEventListener* listener);
 
