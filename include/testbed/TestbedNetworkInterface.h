@@ -14,19 +14,12 @@ TESTBED_NAMESPACE_BEGIN
 class TestbedNetworkInterface : public ReliableNetworkInterface {
     public:
         TestbedNetworkInterface(dessert_meshif_t* dessertPointer, AbstractARAClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
-        ~TestbedNetworkInterface();
-        bool isRegistered();
+        ~TestbedNetworkInterface(){};
+
         bool equals(NetworkInterface* otherInterface);
-        dessert_meshif_t* getDessertPointer()  const;
 
     protected:
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
-        static AddressPtr localAddress;
-        static AddressPtr broadcastAddress;
-        dessert_meshif_t* dessertPointer;
-
-    private:
-        void registerInterface();
 };
 
 TESTBED_NAMESPACE_END
