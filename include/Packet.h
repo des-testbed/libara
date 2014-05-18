@@ -22,7 +22,7 @@ ARA_NAMESPACE_BEGIN
 class Packet {
 public:
     Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
-    Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr, int ttl);
+    //Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr, int ttl);
     virtual ~Packet();
 
     /**
@@ -35,7 +35,7 @@ public:
      * @see Packet::getSender()
      * @see Packet::getPenultimateHop()
      */
-    AddressPtr getSource() const;
+    virtual AddressPtr getSource() const;
 
     /**
      * Returns the address of the node to whom the payload of this packet is directed.
@@ -46,7 +46,7 @@ public:
      * @see Packet::getSender()
      * @see Packet::getPenultimateHop()
      */
-    AddressPtr getDestination() const;
+    virtual AddressPtr getDestination() const;
 
     /**
      * Returns the address of the node from which this packet has been received (layer 2).
@@ -57,7 +57,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getPenultimateHop()
      */
-    AddressPtr getSender() const;
+    virtual AddressPtr getSender() const;
 
     /**
      * Returns the address of the node from which the sender has received this packet.
@@ -67,7 +67,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getSender()
      */
-    AddressPtr getPreviousHop() const;
+    virtual AddressPtr getPreviousHop() const;
 
     /**
      * Returns the null-terminated string representation of the address of the source.
@@ -76,7 +76,7 @@ public:
      *
      * @see Packet::getSource()
      */
-    std::string getSourceString() const {
+    virtual std::string getSourceString() const {
         return getSource()->toString();
     }
 
@@ -87,7 +87,7 @@ public:
      *
      * @see Packet::getSender()
      */
-    std::string getSenderString() const {
+    virtual std::string getSenderString() const {
         return getSender()->toString();
     }
 
@@ -98,7 +98,7 @@ public:
      *
      * @see Packet::getDestination()
      */
-    std::string getDestinationString() const {
+    virtual std::string getDestinationString() const {
         return getDestination()->toString();
     }
 
@@ -107,26 +107,26 @@ public:
      * This returns a copy to self which makes chaining methods pretty ease.
      * Example: Packet* packet = packetFactory->makeFANT(source, destination, seqNr)->setSender(foo);
      */
-    Packet* setSender(AddressPtr newSender);
+    virtual Packet* setSender(AddressPtr newSender);
 
     /**
      * Assigns a new penultimate hop to this packet.
      * This returns a copy to self which makes chaining methods pretty ease.
      * Example: Packet* packet = packetFactory->makeFANT(source, destination, seqNr)->setSender(foo);
      */
-    Packet* setPreviousHop(AddressPtr newPreviousHop);
+    virtual Packet* setPreviousHop(AddressPtr newPreviousHop);
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
      * the PacketType enum class.
      */
-    char getType() const;
+    virtual char getType() const;
 
     /**
      * Returns the sequence number of this packet. It has been set once by the packets
      * source and will not be modified on the packets path through the network.
      */
-    unsigned int getSequenceNumber() const;
+    virtual unsigned int getSequenceNumber() const;
 
     /**
      * Calculates and returns the has value of this object based on the hash value
@@ -134,7 +134,7 @@ public:
      * This method is used to put packets in HashSets from where they can be retrieved
      * in O(1) time like in the packet trap.
      */
-    size_t getHashValue() const;
+    virtual size_t getHashValue() const;
 
     /**
      * Returns the time to live (TTL) of this packet.
@@ -142,24 +142,24 @@ public:
      * Note: The number of hops this packet has traveled so far can be calculated by
      * subtracting the TTL from the globally configured maximum number of hops.
      */
-    unsigned int getTTL() const;
+    virtual unsigned int getTTL() const;
 
     /**
      * Increases the TTL value by 1.
      * This may be necessary in route failure handling when we must make sure, the TTL
      * value is not decreased multiple times.
      */
-    void increaseTTL();
+    virtual void increaseTTL();
 
     /**
      * Decreases the TTL value by the `times' parameter.
      * This is only used for testing.
      */
-    void decreaseTTL(int times=1);
+    virtual void decreaseTTL(int times=1);
 
-    const char* getPayload() const;
+    virtual const char* getPayload() const;
 
-    unsigned int getPayloadLength() const;
+    virtual unsigned int getPayloadLength() const;
 
     /**
      * Two packets are defined to be equal if they have the same source and sequence number
@@ -171,15 +171,27 @@ public:
         return this->equals(&other);
     }
 
-    bool isDataPacket() const {
+    virtual bool isDataPacket() const {
         return PacketType::isDataPacket(this->type);
     }
 
-    bool isAntPacket() const {
+    virtual bool isAntPacket() const {
         return PacketType::isAntPacket((this->type));
     }
 
-    std::string toString();
+    virtual std::string toString();
+
+    /**
+     * The method provides an output stream for a packet by overloading
+     * the '<<' operator.
+     *
+     */
+    friend std::ostream& operator<<(std::ostream& out, Packet& packet) {
+        out << "[sender] " << packet.sender->toString() << " [previous hop] " << packet.previousHop->toString() << std::endl;
+        out << "[source] " << packet.source->toString() << " [destination] " << packet.destination->toString() << std::endl;
+        out << "[type] " << PacketType::getAsString(packet.type) << " [sequence number] " << packet.seqNr << " [ttl] " << packet.ttl << " [payload length] " << packet.payloadSize << std::endl;
+        return out;
+    }
 
 protected:
     AddressPtr source;
