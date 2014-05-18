@@ -29,20 +29,27 @@ void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
     std::unique_lock<std::mutex> lock(conditionVariableMutex);
 
     try {
-	if(conditionVariable.wait_for(lock, std::chrono::microseconds(timeoutInMicroseconds)) == std::cv_status::timeout){
-	    auto proxy = callback.lock();
-	    proxy->notify();
-	}
+	    if (conditionVariable.wait_for(lock, std::chrono::microseconds(timeoutInMicroseconds)) == std::cv_status::timeout){
+	        auto proxy = callback.lock();
+
+	        if (proxy) {
+	            proxy->notify();
+	        } else {
+	            std::cerr << "shared_ptr expired and hence, no object to call for expired timer " << std::endl;
+	        }
+	    }
     } catch (const std::system_error& error) {
-	std::cerr << "Caught system_error with code " << error.code() << " meaning " << error.what() << std::endl;
+	    std::cerr << "Caught system_error with code " << error.code() << " meaning " << error.what() << std::endl;
     }
 }
 
 bool StandardTimer::equals(const Timer* otherTimer) const {
     const StandardTimer* otherStandardTimer = dynamic_cast<const StandardTimer*>(otherTimer);
+
     if (otherStandardTimer == nullptr) {
         return false;
-    } 
+    }
+
     return (this->getHashValue() == otherStandardTimer->getHashValue());
 }
 
