@@ -30,7 +30,7 @@ void Timer::addTimeoutListener(TimeoutEventListener* listener) {
 
 void Timer::notifyAllListeners() {
     for(auto& listener: listeners) {
-	std::weak_ptr<Timer> timer = this->getTimer();
+	    std::weak_ptr<Timer> timer = this->getTimer();
         listener->timerHasExpired(timer);
     }
 }
