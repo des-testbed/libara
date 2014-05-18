@@ -115,7 +115,7 @@ std::string Packet::toString(){
   
     result << "[sender] " << sender->toString() << " [previous hop] " << previousHop->toString() << std::endl;
     result << "[source] " << source->toString() << " [destination] " << destination->toString() << std::endl;
-    result << "[type] " << type << " [sequence number] " << seqNr << " [ttl] " << ttl << " [payload length] " << payloadSize << std::endl;
+    result << "[type] " << PacketType::getAsString(type) << " [sequence number] " << seqNr << " [ttl] " << ttl << " [payload length] " << payloadSize << std::endl;
 
     return result.str();
 }
