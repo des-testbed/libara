@@ -1,5 +1,5 @@
 /*
- * $FU-Copyright$
+* $FU-Copyright$
  */
 
 #ifndef _TESTBED_ARA_CLIENT_H_
@@ -7,7 +7,10 @@
 
 #include "Testbed.h"
 #include "TestbedAddress.h"
+#include "TestbedNetworkInterface.h"
 #include "AbstractARAClient.h"
+
+#include <mutex>
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -59,7 +62,17 @@ class TestbedARAClient : public AbstractARAClient {
          */
         void packetNotDeliverable(const Packet* packet);
 
+        void handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer);
+
+        void handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer);
+    
+        void handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer);
+
+        void stopRouteDiscoveryTimer(AddressPtr destination);
+
         std::string routingTableToString();
+
+        TestbedNetworkInterface* getTestbedNetworkInterface(std::shared_ptr<TestbedAddress> address);
 
     protected:
         /**
@@ -78,6 +91,23 @@ class TestbedARAClient : public AbstractARAClient {
         void broadcastFANT(AddressPtr destination);
 
         TestbedAddressPtr tapAddress;
+
+
+    private:
+	/**
+	 * This mutex protects the access to the map which holds the delivery timers.
+	 */
+	std::mutex deliveryTimerMutex;
+
+	/**
+	 * This mutex protects the access to the map which holds the route discovery timers.
+	 */
+	std::mutex routeDiscoveryTimerMutex;
+
+	/**
+	 * This mutex protects the access to the map which holds the pant timers.
+	 */
+	std::mutex pantTimerMutex;
 };
 
 TESTBED_NAMESPACE_END
