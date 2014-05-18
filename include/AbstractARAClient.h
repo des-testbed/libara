@@ -177,7 +177,7 @@ protected:
     bool isRouteDiscoveryRunning(AddressPtr destination);
     virtual void handleNonSourceRouteDiscovery(Packet* packet);
     virtual void handlePacketWithZeroTTL(Packet* packet);
-    void stopRouteDiscoveryTimer(AddressPtr destination);
+    virtual void stopRouteDiscoveryTimer(AddressPtr destination);
     void startDeliveryTimer(AddressPtr destination);
     void sendDeliverablePackets(AddressPtr destination);
     virtual void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
@@ -187,9 +187,9 @@ protected:
     void broadcastPANT(AddressPtr destination);
     void checkPantTimer(const Packet* packet);
 
-    void handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer);
-    void handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer);
-    void handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer);
+    virtual void handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer);
+    virtual void handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer);
+    virtual void handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer);
 
     void startNeighborActivityTimer();
     void registerActivity(AddressPtr neighbor, NetworkInterface* interface);
