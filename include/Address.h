@@ -18,7 +18,7 @@ namespace ARA {
  */
 class Address {
 public:
-    virtual ~Address() {}
+    virtual ~Address() { }
 
     /**
      * Returns a null-terminated textual representation of this address.
@@ -31,8 +31,8 @@ public:
     virtual size_t getHashValue() const = 0;
 
     bool operator==(const Address& otherAddress) const {
-            return this->equals(&otherAddress);
-        }
+        return this->equals(&otherAddress);
+    }
 
     bool operator==(const std::shared_ptr<Address> otherAddress) const {
         return this->equals(otherAddress);
