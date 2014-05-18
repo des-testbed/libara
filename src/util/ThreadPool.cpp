@@ -29,26 +29,25 @@ void ThreadPool::worker(){
     std::function<void()> job;
 
     for (;;) {
-	{
+	    {
             std::unique_lock<std::mutex> lockList(lockJobList);
 
-	    for (;;) {
-
-		if (finished) {
+	        for (;;) {
+                if (finished) {
                     return;
-	        }
+	            }
 
-		if (!jobs.empty()) {
+		        if (!jobs.empty()) {
                     job = jobs.front();
                     jobs.pop();
-		    break;
-		}
+		            break;
+		        }
 
                 notifyJob.wait(lockList);
+	        }
 	    }
-	}
 
-	job();
+	    job();
     }
 }
 
@@ -58,7 +57,7 @@ void ThreadPool::schedule(std::function<void()> job){
     /// enqueue the job
     jobs.push(job);
     /// notify a waiting work
-    notifyJob.notify_one();
+    notifyJob.notify_one(); 
 }
 
 ARA_NAMESPACE_END
