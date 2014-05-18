@@ -44,7 +44,7 @@ class PacketFactory {
          * Note: The result of this method is a newly created object which must be
          * deleted later by the calling class.
          */
-        Packet* makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber, const char* payload, unsigned int payloadSize);
+        virtual Packet* makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int newSequenceNumber, const char* payload, unsigned int payloadSize);
 
         /**
          * Creates a new FANT based on the given addresses and sequence number.
