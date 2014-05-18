@@ -7,17 +7,17 @@
 #include "TestbedARAClient.h"
 #include "TestbedPacketDispatcher.h"
 #include "BasicConfiguration.h"
-#include "SimpleLogger.h"
+#include "SimpleLoggerExtended.h"
 #include "Environment.h"
 #include "StandardClock.h"
 
 TESTBED_NAMESPACE_BEGIN
 
-TestbedARAClient::TestbedARAClient(Configuration& config) : AbstractARAClient(config){
+TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARAClient(configuration){
     // set the clock to the standard clock (if it is not pre-set to the dummy clock, the tests fail)
     Environment::setClock(new StandardClock());
     //TODO Make configurable
-    Logger* logger = new SimpleLogger("ara");
+    Logger* logger = new SimpleLoggerExtended("ara");
     setLogger(logger);
     logDebug("Initialized testbedARAClient");
     initializeNetworkInterfaces();
@@ -63,8 +63,8 @@ void TestbedARAClient::initializeNetworkInterfaces() {
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
-    std::cout << "address is "  << address->toString() << std::endl;
-    std::cout << "other address is "  << tapAddress->toString() << std::endl;
+    // DEBUG: std::cout << "address is "  << address->toString() << std::endl;
+    // DEBUG: std::cout << "other address is "  << tapAddress->toString() << std::endl;
     return (address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
 }
 
@@ -80,5 +80,46 @@ void TestbedARAClient::broadcastFANT(AddressPtr destination) {
 std::string TestbedARAClient::routingTableToString() {
     return this->routingTable->toString();
 }
+
+void TestbedARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer){
+    std::lock_guard<std::mutex> lock(routeDiscoveryTimerMutex);
+    AbstractARAClient::handleExpiredRouteDiscoveryTimer(routeDiscoveryTimer);
+}
+
+void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer){
+    std::lock_guard<std::mutex> lock(deliveryTimerMutex);
+    AbstractARAClient::handleExpiredDeliveryTimer(deliveryTimer);
+}
+
+void TestbedARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer){
+    std::lock_guard<std::mutex> lock(pantTimerMutex);
+    AbstractARAClient::handleExpiredPANTTimer(pantTimer);
+}
+
+void TestbedARAClient::stopRouteDiscoveryTimer(AddressPtr destination){
+    std::lock_guard<std::mutex> lock(routeDiscoveryTimerMutex);
+    AbstractARAClient::stopRouteDiscoveryTimer(destination);
+}
+
+TestbedNetworkInterface* TestbedARAClient::getTestbedNetworkInterface(std::shared_ptr<TestbedAddress> address){
+    if (interfaces.size() == 0) {
+
+    } else if (interfaces.size() == 1) {
+        return dynamic_cast<TestbedNetworkInterface*>(interfaces[0]);
+    /** 
+     * if we really use at some point multiple interfaces, we have to improve
+     * the management of the interfaces
+     */
+    } else {
+        for (unsigned int i = 0; i < interfaces.size(); i++) {
+            if (interfaces[i]->getLocalAddress() == address) {
+                return dynamic_cast<TestbedNetworkInterface*>(interfaces[i]);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 
 TESTBED_NAMESPACE_END
