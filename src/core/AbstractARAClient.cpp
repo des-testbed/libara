@@ -101,6 +101,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
     if (packet->getTTL() > 0) {
         AddressPtr destination = packet->getDestination();
+
         if (isRouteDiscoveryRunning(destination)) {
             logDebug("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
             packetTrap->trapPacket(packet);
@@ -197,8 +198,7 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
 
     if(hasBeenReceivedEarlier(packet)) {
         handleDuplicatePacket(packet, interface);
-    }
-    else {
+    } else {
         registerReceivedPacket(packet);
         handlePacket(packet, interface);
     }
@@ -255,10 +255,9 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
         routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
         logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
-        logDebug("Routing Table:");
-        logDebug("%s", routingTable->toString().c_str());
-    }
-    else {
+        //logDebug("Routing Table:");
+        //logDebug("%s", routingTable->toString().c_str());
+    } else {
         logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
     }
     //logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
@@ -469,9 +468,8 @@ void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
     AddressPtr routeDiscoveryDestination = bant->getSource();
     if(packetTrap->getNumberOfTrappedPackets(routeDiscoveryDestination) == 0) {
         logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str());
-    }
-    else {
-        logDebug("First BANT %u came back from %s via %s. Waiting %ums until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
+    } else {
+        logDebug("First BANT %u came back from %s via %s. Waiting %u ms until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
         stopRouteDiscoveryTimer(routeDiscoveryDestination);
         startDeliveryTimer(routeDiscoveryDestination);
     }
@@ -487,8 +485,7 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
         // the route discovery is not completely finished until the delivery timer expired.
         // only then is runningRouteDiscoveries.erase(discovery) called!
         delete (RouteDiscoveryInfo*) timer->getContextObject();
-    }
-    else {
+    } else {
         logError("Could not stop route discovery timer (not found for destination %s)", destination->toString().c_str());
     }
 }
@@ -681,14 +678,12 @@ bool AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
         logDebug("Sending %u from %s over alternative route", packet->getSequenceNumber(), packet->getSourceString().c_str());
         sendPacket(packet);
         return true;
-    }
-    else if(packet->isDataPacket() && isLocalAddress(packet->getSource())) {
+    } else if(packet->isDataPacket() && isLocalAddress(packet->getSource())) {
         packetTrap->trapPacket(packet);
 
         if (isRouteDiscoveryRunning(packet->getDestination())) {
             logDebug("No alternative route is available. Trapping packet %u from %s because route discovery is already running for destination %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
-        }
-        else {
+        } else {
             logDebug("No alternative route is available. Starting new route discovery for packet %u from %s.", packet->getSequenceNumber(), packet->getSourceString().c_str());
             startNewRouteDiscovery(packet);
         }

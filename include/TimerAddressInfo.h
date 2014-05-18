@@ -18,7 +18,7 @@ ARA_NAMESPACE_BEGIN
  */
 class TimerAddressInfo {
     public:
-    TimerAddressInfo(AddressPtr destination) {
+        TimerAddressInfo(AddressPtr destination) {
             this->destination = destination;
         }
 

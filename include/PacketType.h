@@ -33,7 +33,7 @@ public:
         ROUTE_FAILURE,
         HELLO,
         PEANT
-    };
+   };
 
     static bool isAntPacket(char type);
     static bool isDataPacket(char type);

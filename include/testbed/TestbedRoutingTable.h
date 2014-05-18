@@ -40,13 +40,15 @@ class TestbedRoutingTable : public RoutingTable {
         RoutingTableEntryList getPossibleNextHops(const Packet* packet);
         RoutingTableEntryList getPossibleNextHops(AddressPtr destination);
 
-        void triggerEvaporation();
-	unsigned int getTotalNumberOfEntries() const;
+//        void triggerEvaporation();
+        unsigned int getTotalNumberOfEntries() const;
         RoutingTableEntryTupel getEntryAt(int position) const;
         std::deque<RoutingTableEntryTupel> getAllRoutesThatLeadOver(AddressPtr nextHop) const;
+    
+        std::string toString(int position=-1);
 
     private:
-	mutable std::mutex mutex;
+        mutable std::mutex mutex;
 };
 
 TESTBED_NAMESPACE_END

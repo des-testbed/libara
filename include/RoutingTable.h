@@ -85,7 +85,7 @@ public:
     /**
      * Triggers the evaporation process if enough time since the last evaporation has passed.
      */
-    void triggerEvaporation();
+    virtual void triggerEvaporation();
 
     /**
      * Returns all known routes that lead over the given next hop.

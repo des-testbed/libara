@@ -50,7 +50,7 @@ else
     D=
 endif
 
-CFLAGS_DEBUG = -g -Wall
+CFLAGS_DEBUG = -g -Wall -rdynamic
 CFLAGS_RELEASE = -O2 -DNDEBUG=1
 
 MKPATH = mkdir -p

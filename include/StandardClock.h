@@ -26,10 +26,11 @@ class StandardClock : public Clock {
         TimerPtr getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr);
 
         void scheduleTimer(unsigned long identifier, unsigned long timeoutInMicroseconds);
-	void scheduleTimer(std::function<void()> timer);
+        void scheduleTimer(std::function<void()> timer);
         void interruptTimer(unsigned long identifier);
 
     private:
+        unsigned long identifier = 0;
 
 	/**
 	 * @brief The member manages the access to a thread pool implementation.
@@ -39,7 +40,7 @@ class StandardClock : public Clock {
 	/**
 	 *
 	 */
-	std::vector<std::shared_ptr<StandardTimer> > timerList;
+	std::vector<std::shared_ptr<StandardTimer>> timerList;
 
 	/**
 	 * The mutex protects the access to critical sections, such as the access to members
