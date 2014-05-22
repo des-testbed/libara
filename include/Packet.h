@@ -21,6 +21,8 @@ ARA_NAMESPACE_BEGIN
  */
 class Packet {
 public:
+    Packet(){};
+
     Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
     //Packet(AddressPtr source, AddressPtr destination, char type, unsigned int seqNr, int ttl);
     virtual ~Packet();
@@ -35,7 +37,7 @@ public:
      * @see Packet::getSender()
      * @see Packet::getPenultimateHop()
      */
-    virtual AddressPtr getSource() const;
+    AddressPtr getSource() const;
 
     /**
      * Returns the address of the node to whom the payload of this packet is directed.
@@ -46,7 +48,7 @@ public:
      * @see Packet::getSender()
      * @see Packet::getPenultimateHop()
      */
-    virtual AddressPtr getDestination() const;
+    AddressPtr getDestination() const;
 
     /**
      * Returns the address of the node from which this packet has been received (layer 2).
@@ -57,7 +59,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getPenultimateHop()
      */
-    virtual AddressPtr getSender() const;
+    AddressPtr getSender() const;
 
     /**
      * Returns the address of the node from which the sender has received this packet.
@@ -67,7 +69,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getSender()
      */
-    virtual AddressPtr getPreviousHop() const;
+    AddressPtr getPreviousHop() const;
 
     /**
      * Returns the null-terminated string representation of the address of the source.
@@ -76,7 +78,7 @@ public:
      *
      * @see Packet::getSource()
      */
-    virtual std::string getSourceString() const {
+    std::string getSourceString() const {
         return getSource()->toString();
     }
 
@@ -87,7 +89,7 @@ public:
      *
      * @see Packet::getSender()
      */
-    virtual std::string getSenderString() const {
+    std::string getSenderString() const {
         return getSender()->toString();
     }
 
@@ -98,7 +100,7 @@ public:
      *
      * @see Packet::getDestination()
      */
-    virtual std::string getDestinationString() const {
+    std::string getDestinationString() const {
         return getDestination()->toString();
     }
 
@@ -107,26 +109,26 @@ public:
      * This returns a copy to self which makes chaining methods pretty ease.
      * Example: Packet* packet = packetFactory->makeFANT(source, destination, seqNr)->setSender(foo);
      */
-    virtual Packet* setSender(AddressPtr newSender);
+    Packet* setSender(AddressPtr newSender);
 
     /**
      * Assigns a new penultimate hop to this packet.
      * This returns a copy to self which makes chaining methods pretty ease.
      * Example: Packet* packet = packetFactory->makeFANT(source, destination, seqNr)->setSender(foo);
      */
-    virtual Packet* setPreviousHop(AddressPtr newPreviousHop);
+    Packet* setPreviousHop(AddressPtr newPreviousHop);
 
     /**
      * Returns the type of this packet as an integer. The integer mapping is defined in
      * the PacketType enum class.
      */
-    virtual char getType() const;
+    char getType() const;
 
     /**
      * Returns the sequence number of this packet. It has been set once by the packets
      * source and will not be modified on the packets path through the network.
      */
-    virtual unsigned int getSequenceNumber() const;
+    unsigned int getSequenceNumber() const;
 
     /**
      * Calculates and returns the has value of this object based on the hash value
@@ -134,7 +136,7 @@ public:
      * This method is used to put packets in HashSets from where they can be retrieved
      * in O(1) time like in the packet trap.
      */
-    virtual size_t getHashValue() const;
+    size_t getHashValue() const;
 
     /**
      * Returns the time to live (TTL) of this packet.
@@ -142,24 +144,24 @@ public:
      * Note: The number of hops this packet has traveled so far can be calculated by
      * subtracting the TTL from the globally configured maximum number of hops.
      */
-    virtual unsigned int getTTL() const;
+    unsigned int getTTL() const;
 
     /**
      * Increases the TTL value by 1.
      * This may be necessary in route failure handling when we must make sure, the TTL
      * value is not decreased multiple times.
      */
-    virtual void increaseTTL();
+    void increaseTTL();
 
     /**
      * Decreases the TTL value by the `times' parameter.
      * This is only used for testing.
      */
-    virtual void decreaseTTL(int times=1);
+    void decreaseTTL(int times=1);
 
-    virtual const char* getPayload() const;
+    const char* getPayload() const;
 
-    virtual unsigned int getPayloadLength() const;
+    unsigned int getPayloadLength() const;
 
     /**
      * Two packets are defined to be equal if they have the same source and sequence number
