@@ -16,6 +16,7 @@
 
 #include <string>
 #include <deque>
+#include <cassert>
 
 ARA_NAMESPACE_BEGIN
 
@@ -193,7 +194,7 @@ protected:
     std::deque<NetworkInterface*> interfaces;
     PacketFactory* packetFactory;
     RoutingTable* routingTable;
-    PacketTrap* packetTrap;
+    std::shared_ptr<PacketTrap> packetTrap;
 
 private:
     Logger* logger = nullptr;
