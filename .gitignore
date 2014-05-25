@@ -15,6 +15,7 @@ doc/doxygen/html
 include/inetmanet/*
 *_m.cpp
 *_m.h
+testbed/TestbedDaemon
 
 # Test output files #
 tests/TestResults.xml
@@ -31,6 +32,9 @@ extern/cpputest
 *.tkenvlog
 results/
 log.txt
+testbed/*.conf
+*.default
+*.init
 
 # valgrind core dumps
 *vgcore*
