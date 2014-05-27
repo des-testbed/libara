@@ -6,6 +6,7 @@
 #define TESTBED_PACKET_FACTORY_H_
 
 #include "Testbed.h"
+#include "Exception.h"
 #include "PacketFactory.h"
 #include "TestbedPacket.h"
 #include "TestbedARAClient.h"
@@ -28,23 +29,55 @@ class TestbedPacketFactory : public PacketFactory {
         TestbedPacketFactory(int maxHopCount);
         virtual ~TestbedPacketFactory() {};
 
+        /**
+         * @see PacketFactory::makeClone(const Packet* packet)
+         */
+        Packet* makeClone(const Packet* packet);
+
         //TODO: refactor
         virtual TestbedPacket* makeNewPacket(dessert_msg_t* message);
 
         TestbedPacket* makeDataPacket(dessert_msg_t* message);
-        TestbedPacket* makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, const char* payload, unsigned int payloadSize);
+        TestbedPacket* makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, struct ether_header* payload, unsigned int payloadSize);
+        TestbedPacket* makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, 
+            const char* payload, unsigned int payloadSize);
 
         dessert_msg_t* makeDessertMessage(const Packet* packet, dessert_meshif_t* interface, AddressPtr nextHop);
 
+        /**
+         * @see PacketFactory::makeFANT(const Packet* packet)
+         */
+        dessert_msg_t* makeFANT(const Packet *packet);
+        /**
+         * @see PacketFactory::makeBANT(const Packet* packet)
+         */
+        dessert_msg_t* makeBANT(const Packet *packet);
+
     protected:
         virtual TestbedPacket* makePacket(dessert_msg_t* message);
+        /**
+         * @see PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr)
+         */
         virtual TestbedPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
+
+        virtual TestbedPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, struct ether_header* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
         
     private:
         /**
+         * The method creates a forward or backward agent depending of the type
+         * of the packet.
+         *
+         * @args packet The (ant) packet which should be converted into a
+         * dessert_msg_t type.
+         *
+         * @return on success the dessert_msg_t representation of the packet
+         */
+        dessert_msg_t* makeAntAgent(const Packet *packet);
+
+        /**
          *
          */
-        ether_header* getEthernetHeader(dessert_msg_t* message);
+        struct ether_header* getEthernetHeader(dessert_msg_t* message);
         /**
          *
          */
@@ -58,6 +91,18 @@ class TestbedPacketFactory : public PacketFactory {
          *
          */
         void setRoutingExtension(dessert_msg_t* message, u_int8_t* source, u_int8_t* destination);
+
+        /**
+         * The method extracts an ethernet frame from a dessert message. The
+         * memory allocation of the ethernet frame happens in the method. 
+         *
+         * @param message the dessert message where the payload should be
+         * extracted
+         * @param payload the resulting ethernet frame
+         *
+         * @return the size of the freshly allocated ethernet frame 
+         */
+        int getPayload(dessert_msg_t* message, struct ether_header **payload);
 };
 
 TESTBED_NAMESPACE_END
