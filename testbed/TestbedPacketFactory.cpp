@@ -11,58 +11,46 @@ TESTBED_NAMESPACE_BEGIN
 TestbedPacketFactory::TestbedPacketFactory(int maxHopCount) : PacketFactory(maxHopCount) {}
 
 TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
-    ether_header* ethernetFrame = this->getEthernetHeader(message);
-    RoutingExtension* araHeader = this->getRoutingExtension(message);
+    /// obtain the ethernet header
+    dessert_ext_t* extension = nullptr;
+    dessert_msg_getext(message, &extension, DESSERT_EXT_ETH, 0);
+    ether_header* ethernetFrame = (ether_header*) extension->data;
 
-    AddressPtr source = std::make_shared<TestbedAddress>(araHeader->ara_shost);
-    AddressPtr destination = std::make_shared<TestbedAddress>(araHeader->ara_dhost);
-    AddressPtr sender = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
+    /// get the sender
+    TestbedAddressPtr source = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
+    TestbedAddressPtr destination = std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost);
 
+    /// get the ARA routing extension
+    /*
+    dessert_ext_t* routingExtension = nullptr;
+    dessert_msg_getext(message, &routingExtension, DESSERT_EXT_USER, 0);
+    RoutingExtension* araHeader = (RoutingExtension*) routingExtension->data;
+    TestbedAddressPtr source = std::make_shared<TestbedAddress>(araHeader->ara_shost);
+    TestbedAddressPtr destination = std::make_shared<TestbedAddress>(araHeader->ara_dhost);
+*/
+
+    // TODO: check if we should do a ntohs/htons
     char packetType = message->u8;
-    unsigned int sequenceNumber = message->u16;
+    // 
+    unsigned int sequenceNumber = ntohs(message->u16);
+    // TODO: check if we should do a ntohs/htons
     int ttl = message->ttl;
- 
-    struct ether_header *payload = nullptr;
-    int payloadSize = 0;
+    // TODO: check the payloadsize (hlen, hlen + plen, ...?)
+    int payloadSize = message->hlen;
 
-    /**
-     * TODO: We should check if we should add payload by libdessert  even if there is no
-     * paylaod in the first place (well, sounds absurd)
-     */
-    if (message->plen > 0) {
-        struct ether_header *payload = nullptr;
-        payloadSize = getPayload(message, &payload);
-    }
-
-    return new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl, payload, payloadSize);
+    return new TestbedPacket(source, destination, source, packetType, sequenceNumber, ttl, message, payloadSize);
 }
-
-
 
 TestbedPacket* TestbedPacketFactory::makeNewPacket(dessert_msg_t* message) {
     return this->makePacket(message);
 }
 
-
-TestbedPacket* TestbedPacketFactory::makeDataPacket(dessert_msg_t* message) {
-    ether_header* ethernetFrame = this->getEthernetHeader(message);
-
-    AddressPtr source = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
-    AddressPtr destination = std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost);
-
-    struct ether_header *payload;
-    int payloadSize = getPayload(message, &payload);
-
-    return makeDataPacket(source, destination, client->getNextSequenceNumber(), payload, payloadSize);
-}
-
-
 Packet* TestbedPacketFactory::makeClone(const Packet* packet) {
     const TestbedPacket *originalPacket = dynamic_cast<const TestbedPacket*>(packet);
-    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), originalPacket->getType(), originalPacket->getSequenceNumber(), originalPacket->getTTL(), originalPacket->getDessertPayload(), originalPacket->getPayloadLength(), originalPacket->getPreviousHop());
+    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), originalPacket->getSender(), originalPacket->getType(), originalPacket->getSequenceNumber(), originalPacket->getTTL(), originalPacket->getMessage(), originalPacket->getPayloadLength(), originalPacket->getPreviousHop());
 }
 
-TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, struct ether_header* payload, unsigned int payloadSize) {
+TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, dessert_msg_t* payload, unsigned int payloadSize) {
     return makePacket(source, destination, source, PacketType::DATA, sequenceNumber, this->maxHopCount, payload, payloadSize);
 }
 
@@ -70,15 +58,13 @@ TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPt
     return makePacket(source, destination, source, PacketType::DATA, sequenceNumber, this->maxHopCount, (const char*)payload, payloadSize);
 }
 
-TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, struct ether_header* payload, unsigned int payloadSize, AddressPtr previousHop) {
+TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, dessert_msg_t* payload, unsigned int payloadSize, AddressPtr previousHop) {
     return new TestbedPacket(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
 }
 
 TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {
     return new TestbedPacket(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
 }
-
-
 
 dessert_msg_t* TestbedPacketFactory::makeDessertMessage(const Packet* packet, dessert_meshif_t* interface, AddressPtr nextHop) {
     assert(packet != nullptr);
@@ -89,91 +75,23 @@ dessert_msg_t* TestbedPacketFactory::makeDessertMessage(const Packet* packet, de
     } else if (packet->getType() == PacketType::BANT) {
         return this->makeBANT(packet);
     } else if (packet->getType() == PacketType::DATA){
-        return this->makeDataPacket(packet);
+        /// first we have to convert the packet
+        const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
+        /// simply return the previously stored dessert message 
+        dessert_msg_t* message = testbedPacket->getMessage();
+        /// TODO: update the data, sequence number, etc.
+        
+        return message;
     } else {
         throw Exception("unsupported packet type");
     }
 }
 
-
-ether_header* TestbedPacketFactory::getEthernetHeader(dessert_msg_t* message){
-    dessert_ext_t* extension;
-    dessert_msg_getext(message, &extension, DESSERT_EXT_ETH, 0);
-    return ((ether_header*) extension->data);
-}
-
-void TestbedPacketFactory::setEthernetHeader(dessert_msg_t* message, dessert_meshif_t* interface, AddressPtr nextHop) {
-    dessert_ext_t* extension;
-    dessert_msg_addext(message, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
-
-    struct ether_header* ethernetFrame = (struct ether_header*) extension->data;
-    u_int8_t* senderMac = interface->hwaddr;
-    TestbedAddressPtr recipient = std::dynamic_pointer_cast<TestbedAddress>(nextHop);
-    u_int8_t* nextHopMac = recipient->getDessertValue();
-
-    std::copy(senderMac, senderMac + ETHER_ADDR_LEN, ethernetFrame->ether_shost);
-    std::copy(nextHopMac, nextHopMac + ETHER_ADDR_LEN, ethernetFrame->ether_dhost);
-}
-
-
-RoutingExtension* TestbedPacketFactory::getRoutingExtension(dessert_msg_t* message){
-    dessert_ext_t* extension;
-    RoutingExtension* araHeader;
-
-    if(dessert_msg_getext(message, &extension, DESSERT_EXT_USER, 0) == 0){
-       araHeader = nullptr;
-    } else {
-       araHeader = (RoutingExtension*) extension->data;
-
-    }
-
-    return araHeader;
-}
-
-
-void TestbedPacketFactory::setRoutingExtension(dessert_msg_t* message, u_int8_t* source, u_int8_t* destination) {
-    dessert_ext_t* extension;
-    dessert_msg_addext(message, &extension, DESSERT_EXT_USER, ETHER_HDR_LEN);
-    RoutingExtension* araRoutingExtension = (RoutingExtension*) extension->data;
-
-    std::copy(source, source + ETHER_ADDR_LEN, araRoutingExtension->ara_shost);
-    std::copy(destination, destination + ETHER_ADDR_LEN, araRoutingExtension->ara_dhost);
-}
-
-/**
- * This method is a copy of the function dessert_msg_ethdecap() from libdessert.
- * However, we changed the calls to malloc and free to new and delete. We also
- * replaced memcpy with std::copy.
- */
-int TestbedPacketFactory::getPayload(dessert_msg_t* message, struct ether_header **payload) {
-    dessert_ext_t* extension;
-
-    /// create message 
-    uint32_t length = ntohs(message->plen) + ETHER_HDR_LEN;
-    *payload = new struct ether_header[length];
-
-    if (*payload == nullptr) {
-        return -1;
-    }
-
-    /// copy the header 
-    if (dessert_msg_getext(message, &extension, DESSERT_EXT_ETH, 0) == -1) {
-        delete[] payload;
-        return -1;
-    }
-
-    /// TODO: 
-    std::copy(extension->data, extension->data + ETHER_HDR_LEN, reinterpret_cast<uint8_t*>(*payload));
-
-    std::copy((((uint8_t*) message) + ntohs(message->hlen)), 
-        (((uint8_t*) message) + ntohs(message->hlen)) + ntohs(message->plen), 
-         (uint8_t*)(*payload) + ETHER_HDR_LEN);
-
-    return length;
-}
-
-
 dessert_msg_t* TestbedPacketFactory::makeFANT(const Packet *packet){
+    return makeAntAgent(packet);
+}
+
+dessert_msg_t* TestbedPacketFactory::makeBANT(const Packet *packet){
     return makeAntAgent(packet);
 }
 
@@ -225,10 +143,6 @@ dessert_msg_t* TestbedPacketFactory::makeAntAgent(const Packet *packet){
     dessert_msg_dummy_payload(ant, 128);
 
     return ant;
-}
-
-dessert_msg_t* TestbedPacketFactory::makeBANT(const Packet *packet){
-    return makeAntAgent(packet);
 }
 
 TESTBED_NAMESPACE_END
