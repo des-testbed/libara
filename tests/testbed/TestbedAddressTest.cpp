@@ -1,7 +1,6 @@
 /*
  * $FU-Copyright$
  */
-
 #include "CppUTest/TestHarness.h"
 #include "testbed/CLibs.h"
 
@@ -50,7 +49,6 @@ TEST(TestbedAddressTest, notEquals) {
     CHECK_FALSE(address == otherAddress);
 }
 
-
 TEST(TestbedAddressTest, getDessertValue) {
     u_char macAddress[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
     TestbedAddress address(macAddress);
@@ -63,7 +61,6 @@ TEST(TestbedAddressTest, getDessertValue) {
     BYTES_EQUAL(4, dessertAddress[3]);
     BYTES_EQUAL(5, dessertAddress[4]);
     BYTES_EQUAL(6, dessertAddress[5]);
-
 }
 
 TESTBED_NAMESPACE_END
