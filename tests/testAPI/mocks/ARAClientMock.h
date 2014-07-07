@@ -1,7 +1,6 @@
 /*
  * $FU-Copyright$
  */
-
 #ifndef ARACLIENTMOCK_H_
 #define ARACLIENTMOCK_H_
 
@@ -40,7 +39,7 @@ public:
 
     void setMaxHopCount(int n);
     double getInitialPhi() const;
-    PacketTrap* getPacketTrap();
+    std::shared_ptr<PacketTrap> getPacketTrap();
     RoutingTable* getRoutingTable();
     NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "localhost");
     unsigned int getPacketDeliveryDelay() const;

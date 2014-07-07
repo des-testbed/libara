@@ -31,13 +31,13 @@ TEST_GROUP(ARAClientMockTest) {
 };
 
 TEST(ARAClientMockTest, getPacketTrap){
-    PacketTrap* packetTrap = client->getPacketTrap();
-    CHECK(packetTrap != NULL);
+    std::shared_ptr<PacketTrap> packetTrap = client->getPacketTrap();
+    CHECK(packetTrap != nullptr);
 }
 
 TEST(ARAClientMockTest, getRoutingTable){
     RoutingTable* routingTable = client->getRoutingTable();
-    CHECK(routingTable != NULL);
+    CHECK(routingTable != nullptr);
 }
 
 TEST(ARAClientMockTest, getNetworkInterfaceMock) {
