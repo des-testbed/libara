@@ -16,7 +16,7 @@
 
 OMNETARA_NAMESPACE_BEGIN
 
-OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTable, ::ARA::PacketFactory* packetFactory) {
+OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTable, ::ARA::PacketFactory* packetFactory, std::shared_ptr<PacketTrap> packetTrap) {
     // load parameters
     initialPheromoneValue = module->par("initialPhi").doubleValue();
     maxNrOfRouteDiscoveryRetries = module->par("nrOfRouteDiscoveryRetries").longValue();
@@ -48,6 +48,11 @@ OMNeTConfiguration::OMNeTConfiguration(cModule* module, RoutingTable* routingTab
         packetFactory = new PacketFactory(maxTTL);
     }
     this->packetFactory = packetFactory;
+
+    if (packetTrap == nullptr) {
+        packetTrap = std::make_shared<PacketTrap>(routingTable);
+    }
+    this->packetTrap = packetTrap;
 }
 
 void OMNeTConfiguration::setLogLevel(const char* logLevelParameter) {
@@ -86,6 +91,10 @@ ForwardingPolicy* OMNeTConfiguration::getForwardingPolicy() {
     OMNeTForwardingPolicy* forwardingPolicy = ModuleAccess<OMNeTForwardingPolicy>("forwardingPolicy").get();
     forwardingPolicy->setRoutingTable(routingTable);
     return forwardingPolicy;
+}
+
+std::shared_ptr<PacketTrap> OMNeTConfiguration::getPacketTrap() {
+    return packetTrap;
 }
 
 float OMNeTConfiguration::getInitialPheromoneValue() {
