@@ -7,7 +7,8 @@
 #include "TestbedARAClient.h"
 #include "TestbedPacketDispatcher.h"
 #include "BasicConfiguration.h"
-#include "SimpleLoggerExtended.h"
+//#include "SimpleLoggerExtended.h"
+#include "SimpleLogger.h"
 #include "Environment.h"
 #include "StandardClock.h"
 
@@ -17,7 +18,8 @@ TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARACl
     // set the clock to the standard clock (if it is not pre-set to the dummy clock, the tests fail)
     Environment::setClock(new StandardClock());
     //TODO Make configurable
-    Logger* logger = new SimpleLoggerExtended("ara");
+    //Logger* logger = new SimpleLoggerExtended("ara");
+    Logger* logger = new SimpleLogger("ara");
     setLogger(logger);
     logDebug("Initialized testbedARAClient");
     initializeNetworkInterfaces();
@@ -27,7 +29,8 @@ TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARACl
 TestbedARAClient::~TestbedARAClient() { }
 
 void TestbedARAClient::sendPacket(Packet* packet) {
-    logDebug("will send packet");
+    // DEBUG:
+    std::cerr << "[TestbedARAClient::sendPacket] pass packet to client" << std::endl;
     AbstractARAClient::sendPacket(packet);
 }
 
@@ -39,8 +42,27 @@ void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* inte
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
     logDebug("sending packet # %u to System via TAP", packet->getSequenceNumber());
-    std::cout << "deliverToSystem " << packet->getPayload() << " delivered to system." << std::endl;
-    dessert_syssend((void*) packet->getPayload(), packet->getPayloadLength());
+
+    /// cast it to a testbed packet
+    const TestbedPacket *testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
+
+    struct ether_header* payload = nullptr;
+    size_t payloadLength = dessert_msg_ethdecap(testbedPacket->getMessage(), &payload);
+
+    /// deliver the packet to the system
+    if (dessert_syssend(payload, payloadLength) == DESSERT_OK){
+        std::cerr << "[TestbedARAClient::deliverToSystem] sending packet to system was successful" << std::endl;
+    } else {
+        std::cerr << "[TestbedARAClient::deliverToSystem] sending packet to system failed" << std::endl;
+    }
+
+    /**
+     * FIXME: we have to use free, since it was allocated using malloc in
+     * dessert_msg_ethdecap
+     */
+    if (payload) {
+       free(payload);
+    }
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
@@ -59,12 +81,12 @@ void TestbedARAClient::initializeNetworkInterfaces() {
     }
 
     tapAddress = std::make_shared<TestbedAddress>(dessert_l25_defsrc);
-    std::cout << "[initializeNetworkInterfaces] tap address is: " << tapAddress->toString() << std::endl;
+    std::cerr << "[initializeNetworkInterfaces] tap address is: " << tapAddress->toString() << std::endl;
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
-    // DEBUG: std::cout << "address is "  << address->toString() << std::endl;
-    // DEBUG: std::cout << "other address is "  << tapAddress->toString() << std::endl;
+    // DEBUG: std::cerr << "address is "  << address->toString() << std::endl;
+    // DEBUG: std::cerr << "other address is "  << tapAddress->toString() << std::endl;
     return (address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
 }
 
@@ -102,6 +124,8 @@ void TestbedARAClient::stopRouteDiscoveryTimer(AddressPtr destination){
 }
 
 TestbedNetworkInterface* TestbedARAClient::getTestbedNetworkInterface(std::shared_ptr<TestbedAddress> address){
+    std::lock_guard<std::mutex> lock(networkInterfaceMutex);
+    
     if (interfaces.size() == 0) {
 
     } else if (interfaces.size() == 1) {
