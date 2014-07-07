@@ -26,7 +26,7 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(AbstractARAClientLoggerTest) {
     ARAClientMock* client;
-    PacketTrap* packetTrap;
+    std::shared_ptr<PacketTrap> packetTrap;
     RoutingTable* routingTable;
     LoggerMock* logger;
 
@@ -47,17 +47,18 @@ TEST_GROUP(AbstractARAClientLoggerTest) {
      * Checks if one of the logged messages equals the given text and log level
      */
     void checkHasLoggedMessage(string message, Logger::Level level) {
+        int result = 42;
         deque<LogMessage>* loggedMessages = logger->getLoggedMessages();
         for(auto& loggedMessage: *loggedMessages) {
-            if(loggedMessage.text == message) {
+            if((result = loggedMessage.text.compare(message)) == 0) {
                 if(loggedMessage.level == level) {
                     return;
-                }
-                else {
+                } else {
                     FAIL("Message has been logged but with wrong log level");
                     return;
                 }
             }
+            cout << "result is " << result << std::endl;
         }
 
         cout << endl << endl << "ERROR: Did not log expected message: " << endl << message << endl << endl;
@@ -109,7 +110,7 @@ TEST(AbstractARAClientLoggerTest, sendsLogMessageIfBANTReachedItsDestination) {
 
     // check that the log message is generated
     BYTES_EQUAL(5, client->getPacketDeliveryDelay());
-    checkHasLoggedMessage("First BANT 123 came back from destination via destination. Waiting 5ms until delivering the trapped packets", Logger::LEVEL_DEBUG);
+    checkHasLoggedMessage("First BANT 123 came back from destination via destination. Waiting 5 ms until delivering the trapped packets", Logger::LEVEL_DEBUG);
 }
 
 TEST(AbstractARAClientLoggerTest, sendsLogMessageIfAntPacketIsBroadcasted) {
