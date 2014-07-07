@@ -33,7 +33,7 @@ public:
     /**
      * Deletes the PacketTrap and especially all packets that are still trapped.
      */
-    ~PacketTrap();
+    virtual ~PacketTrap();
 
     /**
      * Stores the given packet in the packet trap until it is removed via
@@ -42,19 +42,19 @@ public:
      *
      * All packets that are still trapped when the PacketTrap destructor is called are deleted.
      */
-    void trapPacket(Packet* packet);
+    virtual void trapPacket(Packet* packet);
 
     /**
      * Returns true if this packet trap contains a given packet.
      * False otherwise.
      */
-    bool contains(Packet* packet);
+    virtual bool contains(Packet* packet);
 
     /**
      * Returns true if the number of trapped packets equals zero.
      * False otherwise.
      */
-    bool isEmpty();
+    virtual bool isEmpty();
 
     /**
      * Returns a new list of packets that are deliverable to a given destination
@@ -62,27 +62,27 @@ public:
      * The packets are in the same order as PacketTrap::trapPacket(..) has been
      * called on them. All returned packets are automatically untrapped.
      */
-    PacketQueue untrapDeliverablePackets(AddressPtr destination);
+    virtual PacketQueue untrapDeliverablePackets(AddressPtr destination);
 
     /**
      * This will remove all packets for the given destination address from this packet trap
      * and return them in a list object.
      */
-    PacketQueue removePacketsForDestination(AddressPtr destination);
+    virtual PacketQueue removePacketsForDestination(AddressPtr destination);
 
     /**
      * Returns the number of trapped packets for a given destination or the
      * total number of all trapped packets if destination is the nullptr.
      * This will most likely only be used for statistics and performance analysis.
      */
-    unsigned int getNumberOfTrappedPackets(AddressPtr destination=nullptr);
+    virtual unsigned int getNumberOfTrappedPackets(AddressPtr destination=nullptr);
 
     /**
      * Set the assigned routing table.
      * It is necessary to implement this function because some ARA implementations
      * might need to change their routing tables at runtime (e.g. OMNeT++)
      */
-    void setRoutingTable(RoutingTable* routingTable) {
+    virtual void setRoutingTable(RoutingTable* routingTable) {
         this->routingTable = routingTable;
     }
 
