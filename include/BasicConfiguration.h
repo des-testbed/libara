@@ -25,6 +25,7 @@ public:
                        EvaporationPolicy* evaporationPolicy,
                        PathReinforcementPolicy* reinforcementPolicy,
                        ForwardingPolicy* forwardingPolicy,
+                       std::shared_ptr<PacketTrap> packetTrap,
                        float initialPheromoneValue,
                        int maxNrOfRouteDiscoveryRetries=2,
                        unsigned int routeDiscoveryTimeoutInMilliSeconds=1000,
@@ -44,6 +45,8 @@ public:
     virtual unsigned int getPANTIntervalInMilliSeconds();
     virtual bool isPreviousHopFeatureActivated();
 
+    virtual std::shared_ptr<PacketTrap> getPacketTrap();
+
     void setMaximumHopCount(int maxTTL);
     void setNeighborActivityCheckInterval(unsigned int newIntervalInMilliSeconds);
     void setMaxNeighborInactivityTime(unsigned int newTimeInMilliSeconds);
@@ -57,6 +60,7 @@ protected:
     EvaporationPolicy* evaporationPolicy;
     PathReinforcementPolicy* reinforcementPolicy;
     ForwardingPolicy* forwardingPolicy;
+    std::shared_ptr<PacketTrap> packetTrap;
     float initialPheromoneValue;
     int maxNrOfRouteDiscoveryRetries;
     unsigned int routeDiscoveryTimeoutInMilliSeconds;

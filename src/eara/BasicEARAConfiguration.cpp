@@ -12,6 +12,7 @@ BasicEARAConfiguration::BasicEARAConfiguration(
         EvaporationPolicy* evaporationPolicy,
         PathReinforcementPolicy* reinforcementPolicy,
         EARAForwardingPolicy* forwardingPolicy,
+        std::shared_ptr<PacketTrap> packetTrap, 
         float initialPheromoneValue,
         int maxNrOfRouteDiscoveryRetries,
         unsigned int routeDiscoveryTimeoutInMilliSeconds,
@@ -20,7 +21,7 @@ BasicEARAConfiguration::BasicEARAConfiguration(
         unsigned int maximumBatteryCapacityInNetwork,
         float influenceOfMinimumEnergyValue,
         unsigned int routeDiscoveryDelayInMilliSeconds,
-        float peantEnergyThreshold) : BasicConfiguration(routingTable, packetFactory, evaporationPolicy, reinforcementPolicy, forwardingPolicy, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds, packetDeliveryDelayInMilliSeconds) {
+        float peantEnergyThreshold) : BasicConfiguration(routingTable, packetFactory, evaporationPolicy, reinforcementPolicy, forwardingPolicy, packetTrap, initialPheromoneValue, maxNrOfRouteDiscoveryRetries, routeDiscoveryTimeoutInMilliSeconds, packetDeliveryDelayInMilliSeconds) {
 
     this->routingTable = routingTable;
     this->packetFactory = packetFactory;

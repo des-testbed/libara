@@ -6,13 +6,18 @@
 #include <limits.h>
 ARA_NAMESPACE_BEGIN
 
-BasicConfiguration::BasicConfiguration(RoutingTable* routingTable, PacketFactory* packetFactory, EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, ForwardingPolicy* forwardingPolicy, float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, unsigned int routeDiscoveryTimeoutInMilliSeconds, unsigned int packetDeliveryDelayInMilliSeconds) {
+BasicConfiguration::BasicConfiguration(RoutingTable* routingTable, PacketFactory* packetFactory, 
+    EvaporationPolicy* evaporationPolicy, PathReinforcementPolicy* reinforcementPolicy, 
+    ForwardingPolicy* forwardingPolicy, std::shared_ptr<PacketTrap> packetTrap, 
+    float initialPheromoneValue, int maxNrOfRouteDiscoveryRetries, 
+    unsigned int routeDiscoveryTimeoutInMilliSeconds, unsigned int packetDeliveryDelayInMilliSeconds) {
     this->routingTable = routingTable;
     this->routingTable->setEvaporationPolicy(evaporationPolicy);
     this->packetFactory = packetFactory;
     this->evaporationPolicy = evaporationPolicy;
     this->reinforcementPolicy = reinforcementPolicy;
     this->forwardingPolicy = forwardingPolicy;
+    this->packetTrap = packetTrap;
     this->initialPheromoneValue = initialPheromoneValue;
     this->maxNrOfRouteDiscoveryRetries = maxNrOfRouteDiscoveryRetries;
     this->routeDiscoveryTimeoutInMilliSeconds = routeDiscoveryTimeoutInMilliSeconds;
@@ -47,6 +52,10 @@ PathReinforcementPolicy* BasicConfiguration::getReinforcementPolicy() {
 
 ForwardingPolicy* BasicConfiguration::getForwardingPolicy() {
     return forwardingPolicy;
+}
+
+std::shared_ptr<PacketTrap> BasicConfiguration::getPacketTrap() {
+    return packetTrap;
 }
 
 float BasicConfiguration::getInitialPheromoneValue() {

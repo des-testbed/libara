@@ -25,6 +25,7 @@ public:
                            EvaporationPolicy* evaporationPolicy,
                            PathReinforcementPolicy* reinforcementPolicy,
                            EARAForwardingPolicy* forwardingPolicy,
+                           std::shared_ptr<PacketTrap> packetTrap,
                            float initialPheromoneValue,
                            int maxNrOfRouteDiscoveryRetries=2,
                            unsigned int routeDiscoveryTimeoutInMilliSeconds=1000,
