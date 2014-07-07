@@ -40,7 +40,7 @@ public:
     // Mocking methods
     void setEnergy(unsigned int newEnergyLevel);
 
-    PacketTrap* getPacketTrap();
+    std::shared_ptr<PacketTrap> getPacketTrap();
     EnergyAwareRoutingTable* getRoutingTable();
     EARAPacketFactory* getPacketFactory();
     TimerMock* getEnergyDisseminationTimer();

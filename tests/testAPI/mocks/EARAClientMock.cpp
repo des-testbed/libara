@@ -37,6 +37,7 @@ BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
     unsigned int routeDiscoveryDelayInMilliSeconds = 2;
 
     EnergyAwareRoutingTable* routingTable = new EnergyAwareRoutingTable();
+    std::shared_ptr<PacketTrap> packetTrap = std::make_shared<PacketTrap>(routingTable);
 
     return BasicEARAConfiguration(
         routingTable,
@@ -44,6 +45,7 @@ BasicEARAConfiguration EARAClientMock::getStandardConfiguration() const {
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
         new EnergyAwareStochasticForwardingPolicy(routingTable),
+        packetTrap,
         initialPhi,
         maxNrOfRouteDiscoveryRetries,
         routeDiscoveryTimeoutInMilliSeconds,
@@ -87,7 +89,7 @@ void EARAClientMock::setEnergy(unsigned int newEnergyLevel) {
     currentEnergyLevel = newEnergyLevel;
 }
 
-PacketTrap* EARAClientMock::getPacketTrap() {
+std::shared_ptr<PacketTrap> EARAClientMock::getPacketTrap() {
     return packetTrap;
 }
 

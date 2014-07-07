@@ -29,12 +29,15 @@ BasicConfiguration ARAClientMock::getStandardConfiguration() const {
     float initialPhi = 5.0;
     float deltaPhi = 5.0;
     RoutingTable* routingTable = new RoutingTableMock();
+    std::shared_ptr<PacketTrap> packetTrap = std::make_shared<PacketTrap>(routingTable);
+
     return BasicConfiguration(
         routingTable,
         new PacketFactory(15),
         new ExponentialEvaporationPolicyMock(),
         new LinearPathReinforcementPolicy(deltaPhi),
         new BestPheromoneForwardingPolicy(routingTable),
+        packetTrap,
         initialPhi
     );
 }
@@ -63,7 +66,7 @@ NetworkInterfaceMock* ARAClientMock::createNewNetworkInterfaceMock(const std::st
     return mock;
 }
 
-PacketTrap* ARAClientMock::getPacketTrap() {
+std::shared_ptr<PacketTrap> ARAClientMock::getPacketTrap() {
     return packetTrap;
 }
 
