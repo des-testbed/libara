@@ -25,7 +25,7 @@ class StandardTimer : public Timer {
         virtual ~StandardTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
-	void sleep(unsigned long timeout);
+        void sleep(unsigned long timeout);
         virtual void interrupt();
 
         bool equals(const Timer* otherTimer) const;
@@ -33,12 +33,14 @@ class StandardTimer : public Timer {
 
         size_t getHashValue() const;
 
-	void setCallback(std::weak_ptr<StandardTimerProxy> callback);
+        //void setCallback(std::weak_ptr<StandardTimerProxy> callback);
+        void setCallback(std::shared_ptr<StandardTimerProxy> callback);
 
     private:
-	std::weak_ptr<StandardTimerProxy> callback;
-	std::condition_variable conditionVariable;
-	std::mutex conditionVariableMutex;
+//        std::weak_ptr<StandardTimerProxy> callback;
+        std::shared_ptr<StandardTimerProxy> callback;
+        std::condition_variable conditionVariable;
+        std::mutex conditionVariableMutex;
 };
 
 ARA_NAMESPACE_END

@@ -3,10 +3,13 @@
  */
 
 #include "StandardTimer.h"
+#include "StackTrace.h"
 
 ARA_NAMESPACE_BEGIN
 
-StandardTimer::StandardTimer(TimerType type, void* contextObject) : Timer(type, contextObject) { }
+StandardTimer::StandardTimer(TimerType type, void* contextObject) : Timer(type, contextObject) { 
+  printStacktrace(10);
+}
 
 StandardTimer::~StandardTimer(){ }
 
@@ -21,7 +24,8 @@ void StandardTimer::interrupt(){
     conditionVariable.notify_all();
 }
 
-void StandardTimer::setCallback(std::weak_ptr<StandardTimerProxy> proxy){
+//void StandardTimer::setCallback(std::weak_ptr<StandardTimerProxy> proxy){
+void StandardTimer::setCallback(std::shared_ptr<StandardTimerProxy> proxy){
     this->callback = proxy;
 }
 
@@ -30,13 +34,14 @@ void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
 
     try {
 	    if (conditionVariable.wait_for(lock, std::chrono::microseconds(timeoutInMicroseconds)) == std::cv_status::timeout){
-	        auto proxy = callback.lock();
+	        //auto proxy = callback.lock();
 
-	        if (proxy) {
-	            proxy->notify();
-	        } else {
-	            std::cerr << "shared_ptr expired and hence, no object to call for expired timer " << std::endl;
-	        }
+//	        if (proxy) {
+	            //proxy->notify();
+	            callback->notify();
+//	        } else {
+//	            std::cerr << "shared_ptr expired and hence, no object to call for expired timer " << std::endl;
+//	        }
 	    }
     } catch (const std::system_error& error) {
 	    std::cerr << "Caught system_error with code " << error.code() << " meaning " << error.what() << std::endl;

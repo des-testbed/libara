@@ -22,9 +22,10 @@ TimerPtr StandardClock::getNewTimer(TimerType timerType, void* contextObject){
     /// create a standard timer
     std::shared_ptr<StandardTimer> timer = std::make_shared<StandardTimer>(timerType);
     /// create a weak pointer to the proxy timer 
-    std::weak_ptr<StandardTimerProxy> callback = result;
+//    std::weak_ptr<StandardTimerProxy> callback = result;
     /// set the callback to the standard proxy
-    timer->setCallback(callback);
+    //timer->setCallback(callback);
+    timer->setCallback(result);
     /// save the timer to the timer list
     timerList.push_back(timer);
     /// return the proxy timer
