@@ -33,8 +33,8 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     maxNeighborInactivityTimeInMilliSeconds = configuration.getMaxNeighborInactivityTimeInMilliSeconds();
     pantIntervalInMilliSeconds = configuration.getPANTIntervalInMilliSeconds();
     isPreviousHopFeatureActivated = configuration.isPreviousHopFeatureActivated();
+    packetTrap = configuration.getPacketTrap();
 
-    packetTrap = new PacketTrap(routingTable);
     runningRouteDiscoveries = RunningRouteDiscoveriesMap();
 
     if (neighborActivityCheckIntervalInMilliSeconds > 0) {
@@ -96,6 +96,7 @@ void AbstractARAClient::startNeighborActivityTimer() {
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
+    std::cerr << "[AbstractARAClient::sendPacket] got packet" << std::endl;
     // at first we need to trigger the evaporation (this has no effect if this has been done before in receivePacket(..) )
     routingTable->triggerEvaporation();
 
@@ -145,6 +146,8 @@ float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, Address
 }
 
 void AbstractARAClient::startNewRouteDiscovery(Packet* packet) {
+    // DEBUG: 
+    std::cerr << "[AbstractARAClient::startNewRouteDiscovery] start new route discovery" << std::endl;
     AddressPtr destination = packet->getDestination();
     forgetKnownIntermediateHopsFor(destination);
     startRouteDiscoveryTimer(packet);
@@ -160,17 +163,26 @@ void AbstractARAClient::forgetKnownIntermediateHopsFor(AddressPtr destination) {
 
 void AbstractARAClient::broadcastFANT(AddressPtr destination) {
     unsigned int sequenceNr = getNextSequenceNumber();
+    // DEBUG: 
+    std::cerr << "[AbstractARAClient::broadcastFANT] get new sequence number " <<  sequenceNr << std::endl;
 
     for(auto& interface: interfaces) {
         Packet* fant = packetFactory->makeFANT(interface->getLocalAddress(), destination, sequenceNr);
+        // DEBUG: 
+        std::cerr << "[AbstractARAClient::broadcastFANT] broadcast fant" << std::endl;
         interface->broadcast(fant);
     }
 }
 
 void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
+    // DEBUG: 
+    std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] create new route discovery context object " << std::endl;
     RouteDiscoveryInfo* discoveryInfo = new RouteDiscoveryInfo(packet);
+    std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] get new timer " << std::endl;
     TimerPtr timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
+    std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] add client to listener " << std::endl;
     timer->addTimeoutListener(this);
+    std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] run timer " << std::endl;
     timer->run(routeDiscoveryTimeoutInMilliSeconds * 1001);
 
     AddressPtr destination = packet->getDestination();
@@ -466,6 +478,7 @@ void AbstractARAClient::broadcastBANT(Packet* fant) {
 
 void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
     AddressPtr routeDiscoveryDestination = bant->getSource();
+
     if(packetTrap->getNumberOfTrappedPackets(routeDiscoveryDestination) == 0) {
         logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str());
     } else {
