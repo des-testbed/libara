@@ -31,7 +31,7 @@ typedef std::deque<Pair<const Packet*, AddressPtr>*> SendPacketsList;
 
 TEST_GROUP(AbstractARAClientTest) {
     ARAClientMock* client;
-    PacketTrap* packetTrap;
+    std::shared_ptr<PacketTrap> packetTrap;
     RoutingTableMock* routingTable;
     PacketFactory* packetFactory;
 

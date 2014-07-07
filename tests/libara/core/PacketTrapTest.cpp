@@ -21,7 +21,7 @@ typedef std::shared_ptr<Address> AddressPtr;
 
 TEST_GROUP(PacketTrapTest) {
     ARAClientMock* client;
-    PacketTrap* packetTrap;
+    std::shared_ptr<PacketTrap> packetTrap;
     RoutingTable* routingTable;
     EvaporationPolicy* evaporationPolicy;
     NetworkInterfaceMock* interface;
