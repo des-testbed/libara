@@ -163,6 +163,7 @@ public:
 
     unsigned int getPayloadLength() const;
 
+
     /**
      * Two packets are defined to be equal if they have the same source and sequence number
      * TODO is it really okay to define equality this way? What about the payload, destination and type?

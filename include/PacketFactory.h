@@ -92,7 +92,7 @@ class PacketFactory {
           * Note: The result of this method is a newly created object which must be
           * deleted later by the calling class.
           */
-         Packet* makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender);
+         virtual Packet* makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender);
 
          /**
           * Creates a new route failure packet based on the given addresses and sequence number.
