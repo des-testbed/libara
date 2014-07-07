@@ -6,6 +6,9 @@
 #include "Environment.h"
 #include "Timer.h"
 
+
+#include <thread>
+
 using namespace std;
 
 namespace ARA {
@@ -26,21 +29,40 @@ ReliableNetworkInterface::~ReliableNetworkInterface() {
 }
 
 void ReliableNetworkInterface::send(const Packet* packet, AddressPtr recipient) {
+    // DEBUG: 
+    std::cout << "[ReliableNetworkInterface::send] send packt to  " << recipient->toString() << std::endl;
     unacknowledgedPackets.push_back(packet);
+    // DEBUG: 
+    std::cout << "[ReliableNetworkInterface::send] packet dump " << std::endl;
+    // DEBUG: 
+    std::cout << packet << std::endl;
     doSend(packet, recipient);
+    // DEBUG: 
+    std::cout << "[ReliableNetworkInterface::send] start acknowledgment timer " << std::endl;
     startAcknowledgmentTimer(packet, recipient);
 }
 
 void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, AddressPtr recipient) {
+    assert(packet != nullptr);
+    // DEBUG: 
+    std::cout << "[ReliableNetworkInterface::startAcknowledgmentTimer] get a new timer " << std::endl;
     TimerPtr ackTimer = Environment::getClock()->getNewTimer();
+    // DEBUG: 
+    std::cout << "[ReliableNetworkInterface::startAcknowledgmentTimer] add to timeout listener " << std::endl;
     ackTimer->addTimeoutListener(this);
+    // DEBUG: 
+    std::cout << "[ReliableNetworkInterface::startAcknowledgmentTimer] run timer " << std::endl;
     ackTimer->run(ackTimeoutInMicroSeconds);
 
     AckTimerData timerData;
     timerData.nrOfRetries = 0;
+    // DEBUG: 
+    std::cout << "[ReliableNetworkInterface::startAcknowledgmentTimer] store packet " << std::endl;
     timerData.packet = packet;
     timerData.recipient = recipient;
 
+    // DEBUG:
+    std::cout << "[ReliableNetworkInterface::startAcknowledgmentTimer] timer has id " << ackTimer << std::endl;
     runningTimers[ackTimer] = timerData;
 }
 
@@ -48,12 +70,17 @@ void ReliableNetworkInterface::timerHasExpired(std::weak_ptr<Timer> ackTimer) {
     AckTimerData timerData;
     std::shared_ptr<Timer> timer = ackTimer.lock();
 
+    std::cerr << "[ReliableNetworkInterface::timerHasExpired] timer has id " << timer << std::endl;
     // some acknowledgment timed out so we need to send the packet again or tell the client
     timerData = runningTimers[timer];
 
     if (timerData.nrOfRetries < maxNrOfRetransmissions) {
         timerData.nrOfRetries++;
         runningTimers[timer] = timerData;
+        std::thread::id this_id = std::this_thread::get_id();
+        std::cerr << "[ReliableNetworkInterface::timerHasExpired]  thread id " << this_id << std::endl;
+        std::cerr << "[ReliableNetworkInterface::timerHasExpired] waiting for something " << std::endl;
+        assert(timerData.packet != nullptr);
         doSend(timerData.packet, timerData.recipient);
         timer->run(ackTimeoutInMicroSeconds);
     } else {
@@ -78,15 +105,21 @@ void ReliableNetworkInterface::handleUndeliverablePacket(std::weak_ptr<Timer> ac
 }
 
 void ReliableNetworkInterface::broadcast(const Packet* packet) {
+    std::cout << "[ReliableNetworkInterface::broadcast] broadcast packet " << std::endl;
     doSend(packet, broadcastAddress);
     delete packet;
 }
 
 void ReliableNetworkInterface::receive(Packet* packet) {
+    assert(packet != nullptr);
+
     if (packet->getType() != PacketType::ACK) {
+        // DEBUG: 
+        std::cout << "[ReliableNetworkInterface::receive] handling non ach packet " << std::endl;
         handleNonAckPacket(packet);
-    }
-    else {
+    } else {
+        // DEBUG: 
+        std::cout << "[ReliableNetworkInterface::receive] handling non ach packet " << std::endl;
         handleAckPacket(packet);
     }
 }
