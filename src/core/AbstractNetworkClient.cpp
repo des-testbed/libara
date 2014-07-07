@@ -11,7 +11,6 @@ ARA_NAMESPACE_BEGIN
 AbstractNetworkClient::~AbstractNetworkClient() {
     /* The following members may have be deleted earlier, depending on the destructor of the implementing class */
     DELETE_IF_NOT_NULL(logger);
-    DELETE_IF_NOT_NULL(packetTrap);
     DELETE_IF_NOT_NULL(routingTable);
     DELETE_IF_NOT_NULL(packetFactory);
 }
