@@ -11,6 +11,8 @@
 #include "AbstractNetworkClient.h"
 #include "PacketFactory.h"
 
+#include <cassert>
+
 ARA_NAMESPACE_BEGIN
 
 /**
@@ -44,7 +46,7 @@ class ReliableNetworkInterface : public AbstractNetworkInterface, public Timeout
          * The Packet will be deleted as soon as the packet has been acknowledged by the client or
          * is reported undeliverable to the associated ARA client.
          */
-        void send(const Packet* packet, std::shared_ptr<Address> recipient);
+        virtual void send(const Packet* packet, std::shared_ptr<Address> recipient);
 
         /**
          * Broadcasts the packet using the broadcast address that was provided in the class
@@ -77,6 +79,7 @@ class ReliableNetworkInterface : public AbstractNetworkInterface, public Timeout
          */
         virtual void doSend(const Packet* packet, std::shared_ptr<Address> recipient) = 0;
 
+        void startAcknowledgmentTimer(const Packet* packet, std::shared_ptr<Address> recipient);
 
     protected:
         PacketFactory* packetFactory;
@@ -86,10 +89,10 @@ class ReliableNetworkInterface : public AbstractNetworkInterface, public Timeout
         int maxNrOfRetransmissions = 5;
 
     private:
-        void startAcknowledgmentTimer(const Packet* packet, std::shared_ptr<Address> recipient);
         void handleUndeliverablePacket(std::weak_ptr<Timer> ackTimer, AckTimerData& timerData);
         void handleNonAckPacket(Packet* packet);
         void handleAckPacket(Packet* packet);
+
 };
 
 ARA_NAMESPACE_END
