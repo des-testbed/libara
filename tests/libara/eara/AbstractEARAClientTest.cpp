@@ -22,7 +22,7 @@ typedef std::deque<Pair<const Packet*, AddressPtr>*> SendPacketsList;
 
 TEST_GROUP(AbstractEARAClientTest) {
     EARAClientMock* client;
-    PacketTrap* packetTrap;
+    std::shared_ptr<PacketTrap> packetTrap;
     EnergyAwareRoutingTable* routingTable;
     EARAPacketFactory* packetFactory;
 
@@ -67,8 +67,8 @@ TEST_GROUP(AbstractEARAClientTest) {
  */
 TEST(AbstractEARAClientTest, aggregateEnergyInformationOfFANT) {
     NetworkInterfaceMock* interface = client->createNewNetworkInterfaceMock();
-    AddressPtr source (new AddressMock("source"));
-    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr source = std::make_shared<AddressMock>(("source"));
+    AddressPtr destination = std::make_shared<AddressMock>(("destination"));
 
     client->setEnergy(40);
 
@@ -121,9 +121,9 @@ TEST(AbstractEARAClientTest, aggregateEnergyInformationOfFANT) {
  */
 TEST(AbstractEARAClientTest, initializeEnergyValues) {
     NetworkInterfaceMock* interface;
-    AddressPtr source (new AddressMock("source"));
-    AddressPtr nextHop (new AddressMock("nextHop"));
-    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr source = std::make_shared<AddressMock>(("source"));
+    AddressPtr nextHop = std::make_shared<AddressMock>(("nextHop"));
+    AddressPtr destination = std::make_shared<AddressMock>(("destination"));
     unsigned int seqNumber = 1;
 
     // start the test
