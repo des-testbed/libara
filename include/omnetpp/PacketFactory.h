@@ -17,6 +17,7 @@ OMNETARA_NAMESPACE_BEGIN
 class PacketFactory : public ::ARA::PacketFactory {
 public:
     PacketFactory(int maxHopCount) : ::ARA::PacketFactory(maxHopCount) {};
+    virtual ~PacketFactory(){};
 
 protected:
     virtual Packet* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);

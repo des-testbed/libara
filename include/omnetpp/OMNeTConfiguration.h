@@ -16,7 +16,7 @@ OMNETARA_NAMESPACE_BEGIN
 
 class OMNeTConfiguration : public virtual Configuration {
     public:
-        OMNeTConfiguration(cModule* module, RoutingTable* routingTable=nullptr, PacketFactory* packetFactory=nullptr);
+        OMNeTConfiguration(cModule* module, RoutingTable* routingTable=nullptr, PacketFactory* packetFactory=nullptr, std::shared_ptr<PacketTrap> packetTrap=nullptr);
 
         virtual RoutingTable* getRoutingTable();
         virtual PacketFactory* getPacketFactory();
@@ -32,6 +32,7 @@ class OMNeTConfiguration : public virtual Configuration {
         virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds();
         virtual unsigned int getPANTIntervalInMilliSeconds();
         virtual bool isPreviousHopFeatureActivated();
+        virtual std::shared_ptr<PacketTrap> getPacketTrap();
 
         Logger* getLogger();
 
@@ -44,6 +45,7 @@ class OMNeTConfiguration : public virtual Configuration {
         EvaporationPolicy* evaporationPolicy;
         PathReinforcementPolicy* reinforcementPolicy;
         PacketFactory* packetFactory;
+        std::shared_ptr<PacketTrap> packetTrap;
         float initialPheromoneValue;
         int maxNrOfRouteDiscoveryRetries;
         int maxTTL;
