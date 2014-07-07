@@ -15,6 +15,16 @@
 
 typedef u_char ara_address_t[ETHER_ADDR_LEN];
 
+/**
+ * Types used for ARA's DES-SERT extensions (from DES-ARA)
+ */
+enum _ARA_EXT_TYPES {
+    /// forward ant (FANT)
+    ARA_EXT_FANT = DESSERT_EXT_USER,    
+    /// backward ant (FANT)
+    ARA_EXT_BANT,                     
+};
+
 #include "TestbedAddress.h"
 class TestbedAddress;
 
