@@ -6,6 +6,7 @@
 #define CONFIGURATION_H_
 
 #include "ARAMacros.h"
+#include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "PacketFactory.h"
 #include "EvaporationPolicy.h"
@@ -35,6 +36,7 @@ public:
     virtual unsigned int getMaxNeighborInactivityTimeInMilliSeconds() = 0;
     virtual unsigned int getPANTIntervalInMilliSeconds() = 0;
     virtual bool isPreviousHopFeatureActivated() = 0;
+    virtual std::shared_ptr<PacketTrap> getPacketTrap() = 0;
 };
 
 ARA_NAMESPACE_END
