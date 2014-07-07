@@ -21,6 +21,7 @@ testbed/TestbedDaemon
 tests/TestResults.xml
 tests/runAllTests
 tests/runLibAraTests
+tests/runTestbedAraTests
 tests/runOmnetAraTests
 
 # CppUTest
