@@ -8,22 +8,16 @@
 #include "Address.h"
 #include "Testbed.h"
 
-#include "StackTrace.h" 
-
 #include <sstream>
 #include <iterator>
 #include <algorithm>
-
 
 TESTBED_NAMESPACE_BEGIN
 
 class TestbedAddress : public Address {
     public:
         TestbedAddress(u_char* address);
-        ~TestbedAddress(){
-//           printStacktrace();
-//           std::cout << "[TestbedAddress] destructor of " << this->toString() << " called " << std::endl;
-        }
+        ~TestbedAddress(){ }
 
         virtual std::string toString() const;
         virtual bool equals(const Address* otherAddress) const;
