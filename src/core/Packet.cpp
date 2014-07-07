@@ -6,6 +6,8 @@
 #include "PacketType.h"
 #include <cstring>
 
+#include "StackTrace.h"
+
 typedef std::shared_ptr<ARA::Address> AddressPtr;
 
 namespace ARA {
@@ -25,9 +27,9 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
         }
         char* tmpPayload = new char[payloadSize];
         memcpy(tmpPayload, payload, payloadSize);
+//        std::copy(payload, payload + payloadSize, tmpPayload);
         this->payload = tmpPayload;
-    }
-    else {
+    } else {
         this->payload = nullptr;
     }
 
@@ -36,6 +38,8 @@ Packet::Packet(AddressPtr source, AddressPtr destination, AddressPtr sender, cha
 }
 
 Packet::~Packet() {
+   printStacktrace();
+
    if(payload != nullptr) {
         delete[] payload;
    }
