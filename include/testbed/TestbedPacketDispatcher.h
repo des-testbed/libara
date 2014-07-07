@@ -23,7 +23,7 @@ dessert_cb_result toSys(dessert_msg_t* messageReceived, uint32_t length, dessert
 /**
  * Receives a Packet from an Interface and converts to a message, then sends it over selected interface (if NULL sends over all interfaces)
  */
-int _send(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddress, std::shared_ptr<Address> recipient);
+int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddress, std::shared_ptr<Address> recipient);
 
 /**
  *
@@ -33,13 +33,12 @@ dessert_cb_result toMesh(dessert_msg_t* message, uint32_t length, dessert_msg_pr
 /**
  *
  */
-void dumpDessertMessage(dessert_msg_t* message, uint32_t length, dessert_msg_proc_t *flags, dessert_sysif_t *interface, dessert_frameid_t id);
+void dumpDessertMessage(dessert_msg_t* message, uint32_t length, dessert_msg_proc_t *flags);
 
 /**
  *
  */
 dessert_cb_result packetFilter(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id);
-
 
 TESTBED_NAMESPACE_END
 

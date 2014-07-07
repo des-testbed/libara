@@ -31,20 +31,27 @@ typedef struct RoutingExtension RoutingExtension;
  */
 class TestbedPacketFactory : public PacketFactory {
     public:
+        /**
+         * @see PacketFactory::PacketFactory(int maxHopCount)
+         */
         TestbedPacketFactory(int maxHopCount);
+
         virtual ~TestbedPacketFactory() {};
 
         /**
          * @see PacketFactory::makeClone(const Packet* packet)
          */
-        Packet* makeClone(const Packet* packet);
+        TestbedPacket* makeClone(const TestbedPacket* packet);
 
         //TODO: refactor
         virtual TestbedPacket* makeNewPacket(dessert_msg_t* message);
 
         TestbedPacket* makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, dessert_msg_t* message, unsigned int payloadSize);
-        TestbedPacket* makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, 
-            const char* payload, unsigned int payloadSize);
+
+        /**
+         * @see PacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, const char* payload, unsigned int payloadSize);
+         */
+        TestbedPacket* makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, const char* payload, unsigned int payloadSize);
 
         /**
          * The method creates a dessert message (dessert_msg_t*) from a given
@@ -62,34 +69,33 @@ class TestbedPacketFactory : public PacketFactory {
         dessert_msg_t* makeDessertMessage(const Packet* packet, dessert_meshif_t* interface, AddressPtr nextHop);
 
         /**
-         * @see PacketFactory::makeFANT(const Packet* packet)
+         * @see PacketFactory::makeFANT(const Packet* packet, unsigned int
+         * sequenceNumber)
          */
-        dessert_msg_t* makeFANT(const Packet *packet);
+        TestbedPacket* makeFANT(TestbedAddressPtr source, TestbedAddressPtr destination, unsigned int sequenceNumber);
+
         /**
-         * @see PacketFactory::makeBANT(const Packet* packet)
+         * @see PacketFactory::makeBANT(const Packet* packet, unsigned int
+         * sequenceNumber)
          */
-        dessert_msg_t* makeBANT(const Packet *packet);
+        TestbedPacket* makeBANT(const Packet *packet, unsigned int sequenceNumber);
+
+        /**
+         * @see PacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender)
+         */
+        TestbedPacket* makeAcknowledgmentPacket(const Packet* originalPacket, TestbedAddressPtr sender);
 
     protected:
+        /**
+         *
+         */
         virtual TestbedPacket* makePacket(dessert_msg_t* message);
+
         /**
          * @see PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr)
          */
         virtual TestbedPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
 
-        virtual TestbedPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, dessert_msg_t* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
-        
-    private:
-        /**
-         * The method creates a forward or backward agent depending of the type
-         * of the packet.
-         *
-         * @args packet The (ant) packet which should be converted into a
-         * dessert_msg_t type.
-         *
-         * @return on success the dessert_msg_t representation of the packet
-         */
-        dessert_msg_t* makeAntAgent(const Packet *packet);
 };
 
 TESTBED_NAMESPACE_END

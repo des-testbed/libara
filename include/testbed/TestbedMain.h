@@ -10,6 +10,7 @@
 #include "PacketType.h"
 #include "TestbedAddress.h"
 #include "TestbedARAClient.h"
+#include "TestbedPacketTrap.h"
 #include "BasicConfiguration.h"
 #include "TestbedRoutingTable.h"
 #include "TestbedPacketFactory.h"

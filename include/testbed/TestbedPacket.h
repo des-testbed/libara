@@ -7,6 +7,7 @@
 
 #include "Testbed.h"
 #include "Address.h"
+#include "Exception.h"
 #include "Packet.h"
 
 #include <mutex>
@@ -21,16 +22,12 @@ TESTBED_NAMESPACE_BEGIN
  */
 class TestbedPacket : public Packet {
     public:
-        TestbedPacket(){};
-        TestbedPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
-        virtual ~TestbedPacket(){};
-
         /**
-         * The logical copy constructor makes a true copy of the TestbedPacket as
-         * well as its dynamic structures. This means that a copy holds new
-         * shared pointers to the addresses and a copy of the payload.
+         * @see Packet::TestbedPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
          */
-        TestbedPacket(const TestbedPacket& packet);
+        TestbedPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0);
+
+        virtual ~TestbedPacket(){};
 
         /**
          * @see Packet::getSource()
@@ -52,8 +49,25 @@ class TestbedPacket : public Packet {
          */
         AddressPtr getPreviousHop() const;
 
+        dessert_msg_t* getMessage() const;
+
+        void setMessage(dessert_msg_t* message);
+
+        void setPayloadLength(unsigned int newPayloadLength);
+
+        /**
+         * The method returs a libdessert representation of a 
+         * testbed packet (meaning a dessert_msg_t*)
+         *
+         * @return On success the method returns a dessert_msg_t*
+         * structure of a TestbedPacket
+         */
+        dessert_msg_t* toDessertMessage() const;
+
     private:
         mutable std::mutex mutex;
+        /// we simply store the message received over the wire/air
+        dessert_msg_t* message = nullptr;
 };
 
 TESTBED_NAMESPACE_END
