@@ -31,6 +31,10 @@ static void registerCommandLineInterfaceCommands(){
      cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("sys"), dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize tap interface"));
      cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("mesh"), dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize mesh interface"));
      cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("testSendMesh"), ARA::testbed::cli_test_send_mesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("send a test packet to mesh interface"));
+     //cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("list timers"), ARA::testbed::cli_list_active_timers, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("list active timers"));
+     cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("routing table"), ARA::testbed::cli_show_routing_table, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("displays the content of the routing table"));
+     cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("configuration"), ARA::testbed::cli_show_configuration, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("lists the current set configuration"));
+     cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("statistics"), ARA::testbed::cli_show_statistics, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("shows various statistics of the routing daemon"));
 }
 
 /**

@@ -17,15 +17,19 @@ TESTBED_NAMESPACE_BEGIN
 class TestbedARAClient : public AbstractARAClient {
     public:
         TestbedARAClient(){};
+
         /**
          * Creates a TestbedARAClient and runs initialize() with given configuration.
          */
         TestbedARAClient(Configuration &config);
 
         /**
-         * The standard virtual destructor of this abstract class.
+         * The standard virtual destructor of this class.
          */
         ~TestbedARAClient();
+
+
+        std::string toString();
 
         /**
          * Sends the packet to the packets destination.
@@ -91,22 +95,28 @@ class TestbedARAClient : public AbstractARAClient {
          */
         void broadcastFANT(AddressPtr destination);
 
+        /**
+         * 
+         */
         TestbedAddressPtr tapAddress;
 
 
     private:
         /**
-         * This mutex protects the access to the map which holds the delivery timers.
+         * This mutex protects the access to the map (runningDeliveryTimers)
+         * which holds the delivery timers.
          */
 	    std::mutex deliveryTimerMutex;
 
         /**
-         * This mutex protects the access to the map which holds the route discovery timers.
+         * This mutex protects the access to the map (runningRouteDiscoveries)
+         * which holds the route discovery timers.  
          */
         std::mutex routeDiscoveryTimerMutex;
 
         /**
-         * This mutex protects the access to the map which holds the pant timers.
+         * This mutex protects the access to the map (scheduledPANTs)
+         * which holds the pant timers.
          */
         std::mutex pantTimerMutex;
 
@@ -114,6 +124,8 @@ class TestbedARAClient : public AbstractARAClient {
          * This mutex protects the access to the network interface
          */
         std::mutex networkInterfaceMutex;
+
+        /***/
 };
 
 TESTBED_NAMESPACE_END

@@ -8,13 +8,14 @@
 #include "TestbedPacketDispatcher.h"
 #include "BasicConfiguration.h"
 //#include "SimpleLoggerExtended.h"
+#include "TimerAddressInfo.h"
 #include "SimpleLogger.h"
 #include "Environment.h"
 #include "StandardClock.h"
 
 TESTBED_NAMESPACE_BEGIN
 
-TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARAClient(configuration){
+TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARAClient(configuration) {
     // set the clock to the standard clock (if it is not pre-set to the dummy clock, the tests fail)
     Environment::setClock(new StandardClock());
     //TODO Make configurable
@@ -27,6 +28,25 @@ TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARACl
 }
 
 TestbedARAClient::~TestbedARAClient() { }
+
+
+std::string TestbedARAClient::toString() { 
+    std::ostringstream result;
+    result << std::endl;
+
+    result << "initial pheromone value:                     " << initialPheromoneValue << std::endl;
+    result << "maximum time to live:                        " << packetFactory->getMaximumNrOfHops() << std::endl;
+//    result << "evporation policy:                           " << evaporationPolicy->toString() << std::endl;
+
+    result << "max number of route discovery retries:       " << maxNrOfRouteDiscoveryRetries << std::endl;
+    result << "packet delivery delay [ms]:                  " << packetDeliveryDelayInMilliSeconds << std::endl;
+    result << "route discovery timeout [ms]:                " << routeDiscoveryTimeoutInMilliSeconds << std::endl;
+    result << "neighbor activity check interval [ms]:       " << neighborActivityCheckIntervalInMilliSeconds << std::endl;
+    result << "max neighbor inactivity check interval [ms]: " << maxNeighborInactivityTimeInMilliSeconds << std::endl;
+    result << "pant interval [ms]:                          " << pantIntervalInMilliSeconds << std::endl;
+
+    return result.str();
+}
 
 void TestbedARAClient::sendPacket(Packet* packet) {
     // DEBUG:
@@ -110,7 +130,27 @@ void TestbedARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> rou
 
 void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer){
     std::lock_guard<std::mutex> lock(deliveryTimerMutex);
-    AbstractARAClient::handleExpiredDeliveryTimer(deliveryTimer);
+    //AbstractARAClient::handleExpiredDeliveryTimer(deliveryTimer);
+    std::shared_ptr<Timer> timer = deliveryTimer.lock();
+    TimerAddressInfo* timerInfo = (TimerAddressInfo*) timer->getContextObject();
+    AddressPtr destination = timerInfo->destination;
+
+    RunningRouteDiscoveriesMap::const_iterator discovery;
+    // lock the access to the running route discovery map
+    std::lock_guard<std::mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
+    // find the destination in the running route discoverys map
+    discovery = runningRouteDiscoveries.find(destination);
+
+    if (discovery != runningRouteDiscoveries.end()) {
+        // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
+        runningRouteDiscoveries.erase(discovery);
+        runningDeliveryTimers.erase(timer);
+
+        delete timerInfo;
+        sendDeliverablePackets(destination);
+    } else {
+        logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
+    }
 }
 
 void TestbedARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer){
@@ -126,15 +166,15 @@ void TestbedARAClient::stopRouteDiscoveryTimer(AddressPtr destination){
 TestbedNetworkInterface* TestbedARAClient::getTestbedNetworkInterface(std::shared_ptr<TestbedAddress> address){
     std::lock_guard<std::mutex> lock(networkInterfaceMutex);
     
-    if (interfaces.size() == 0) {
-
-    } else if (interfaces.size() == 1) {
+    if (interfaces.size() == 1) {
         return dynamic_cast<TestbedNetworkInterface*>(interfaces[0]);
+    }
+
     /** 
      * if we really use at some point multiple interfaces, we have to improve
      * the management of the interfaces
      */
-    } else {
+    if (interfaces.size() > 1) {
         for (unsigned int i = 0; i < interfaces.size(); i++) {
             if (interfaces[i]->getLocalAddress() == address) {
                 return dynamic_cast<TestbedNetworkInterface*>(interfaces[i]);
