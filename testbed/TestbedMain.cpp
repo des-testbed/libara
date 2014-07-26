@@ -66,7 +66,8 @@ int main(int argc, char** argv) {
      FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
      /// initialize the routing daemin in dessert
-     dessert_init("ARA", 0x01, DESSERT_OPT_NODAEMONIZE);
+     dessert_init("ARAX", 0x01, DESSERT_OPT_NODAEMONIZE);
+     //dessert_init("ARA", 0x01, DESSERT_OPT_NODAEMONIZE);
      /// configuration options for the logging mechanisms provided by libdessert
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
      
