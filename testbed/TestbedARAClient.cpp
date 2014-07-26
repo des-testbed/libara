@@ -2,16 +2,8 @@
  * $FU-Copyright$
  */
 
-#include "Testbed.h"
-#include "CLibs.h"
 #include "TestbedARAClient.h"
-#include "TestbedPacketDispatcher.h"
-#include "BasicConfiguration.h"
-//#include "SimpleLoggerExtended.h"
-#include "TimerAddressInfo.h"
-#include "SimpleLogger.h"
-#include "Environment.h"
-#include "StandardClock.h"
+
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -130,26 +122,36 @@ void TestbedARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> rou
 
 void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer){
     std::lock_guard<std::mutex> lock(deliveryTimerMutex);
-    //AbstractARAClient::handleExpiredDeliveryTimer(deliveryTimer);
     std::shared_ptr<Timer> timer = deliveryTimer.lock();
-    TimerAddressInfo* timerInfo = (TimerAddressInfo*) timer->getContextObject();
-    AddressPtr destination = timerInfo->destination;
 
-    RunningRouteDiscoveriesMap::const_iterator discovery;
-    // lock the access to the running route discovery map
-    std::lock_guard<std::mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
-    // find the destination in the running route discoverys map
-    discovery = runningRouteDiscoveries.find(destination);
+    if (timer) {
+        // DEBUG:
+        std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] "<< std::endl;
+        TestbedTimerAddressInfo* timerInfo = (TestbedTimerAddressInfo*) timer->getContextObject();
+        //TestbedAddressPtr destination = timerInfo->getAddress();
+        AddressPtr destination = timerInfo->getAddress();
+        // DEBUG: 
+        std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] use count is: " << destination.use_count() << std::endl;
 
-    if (discovery != runningRouteDiscoveries.end()) {
-        // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
-        runningRouteDiscoveries.erase(discovery);
-        runningDeliveryTimers.erase(timer);
+        RunningRouteDiscoveriesMap::const_iterator discovery;
+        // lock the access to the running route discovery map
+        std::lock_guard<std::mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
+        // find the destination in the running route discoverys map
+        discovery = runningRouteDiscoveries.find(destination);
 
-        delete timerInfo;
-        sendDeliverablePackets(destination);
+        if (discovery != runningRouteDiscoveries.end()) {
+            // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
+            runningRouteDiscoveries.erase(discovery);
+            runningDeliveryTimers.erase(timer);
+
+            delete timerInfo;
+            sendDeliverablePackets(destination);
+        } else {
+            logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
+        }
     } else {
-        logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
+        // DEBUG:
+        std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] shared_ptr expired " << std::endl;
     }
 }
 
@@ -185,5 +187,12 @@ TestbedNetworkInterface* TestbedARAClient::getTestbedNetworkInterface(std::share
     return nullptr;
 }
 
+void TestbedARAClient::startDeliveryTimer(TestbedAddressPtr destination) {
+    TestbedTimerAddressInfo* contextObject = new TestbedTimerAddressInfo(destination);
+    TimerPtr timer = getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
+    timer->addTimeoutListener(this);
+    timer->run(packetDeliveryDelayInMilliSeconds * 1000);
+    runningDeliveryTimers.insert(timer);
+}
 
 TESTBED_NAMESPACE_END
