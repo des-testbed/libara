@@ -115,11 +115,11 @@ void ReliableNetworkInterface::receive(Packet* packet) {
 
     if (packet->getType() != PacketType::ACK) {
         // DEBUG: 
-        std::cout << "[ReliableNetworkInterface::receive] handling non ach packet " << std::endl;
+        std::cout << "[ReliableNetworkInterface::receive] handling non ack packet " << std::endl;
         handleNonAckPacket(packet);
     } else {
         // DEBUG: 
-        std::cout << "[ReliableNetworkInterface::receive] handling non ach packet " << std::endl;
+        std::cout << "[ReliableNetworkInterface::receive] handling ack packet " << std::endl;
         handleAckPacket(packet);
     }
 }

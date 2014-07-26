@@ -178,7 +178,7 @@ protected:
     virtual void handleNonSourceRouteDiscovery(Packet* packet);
     virtual void handlePacketWithZeroTTL(Packet* packet);
     virtual void stopRouteDiscoveryTimer(AddressPtr destination);
-    void startDeliveryTimer(AddressPtr destination);
+    virtual void startDeliveryTimer(AddressPtr destination);
     void sendDeliverablePackets(AddressPtr destination);
     virtual void createNewRouteFrom(Packet* packet, NetworkInterface* interface);
     bool hasPreviousNodeBeenSeenBefore(const Packet* packet);

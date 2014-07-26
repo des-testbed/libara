@@ -118,7 +118,7 @@ public:
     }
 
 private:
-    void applyEvaporation(Time* currentTime);
+    virtual void applyEvaporation(Time* currentTime);
 
 protected:
     bool hasTableBeenAccessedEarlier();
