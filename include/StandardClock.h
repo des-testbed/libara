@@ -29,6 +29,8 @@ class StandardClock : public Clock {
         void scheduleTimer(std::function<void()> timer);
         void interruptTimer(unsigned long identifier);
 
+//        std::string listActiveTimers();
+
     private:
         unsigned long identifier = 0;
 

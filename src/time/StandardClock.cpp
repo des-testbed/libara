@@ -32,6 +32,19 @@ TimerPtr StandardClock::getNewTimer(TimerType timerType, void* contextObject){
     return result;
 }
 
+/*
+std::string StandardClock::listActiveTimers() {
+    std::ostringstream result;
+
+    std::lock_guard<std::mutex> lock(mutex);
+    for (int i = 0; i < timerList.size(); i++) {
+        result << timerList[i] 
+    }
+
+    return result.str();
+}
+*/
+
 void StandardClock::scheduleTimer(unsigned long identifier, unsigned long timeoutInMicroseconds){
     std::lock_guard<std::mutex> lock(mutex);
 
