@@ -19,10 +19,11 @@ simsignal_t ARA::NEW_ROUTE_DISCOVERY = SIMSIGNAL_NULL;
 simsignal_t ARA::ROUTE_FAILURE_NEXT_HOP_IS_SENDER = SIMSIGNAL_NULL;
 
 ARA::~ARA() {
-    /* We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
+    /** 
+     * We set the policies to nullptr in order to prevent the AbstractARAClient from deleting those.
      * This is necessary because the surround omnetpp simulation will attempt to delete those modules
-     * because they are SimpleModules which are owned by other compound modules*/
-
+     * because they are SimpleModules which are owned by other compound modules
+     */
     forwardingPolicy = nullptr;
     evaporationPolicy = nullptr;
     pathReinforcementPolicy = nullptr;
