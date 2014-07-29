@@ -155,21 +155,24 @@ IPv4Address ARANetworkConfigurator::getIPAddressFromMAC(MACAddress address) {
 }
 
 void ARANetworkConfigurator::persistStartPositions(cTopology& topology) {
-    mkdir("results", 0777);
-    stringstream fileName;
-    ofstream file;
-    cConfigurationEx* config = ev.getConfigEx();
-    fileName << "results/" << config->getActiveConfigName() << "-" << config->getActiveRunNumber() << "-StartPositions.net";
-    file.open(fileName.str());
+    if (mkdir("results", 0777) == 0) {
+        stringstream fileName;
+        ofstream file;
+        cConfigurationEx* config = ev.getConfigEx();
+        fileName << "results/" << config->getActiveConfigName() << "-" << config->getActiveRunNumber() << "-StartPositions.net";
+        file.open(fileName.str());
 
-    int nrOfNodes = topology.getNumNodes();
-    for (int i=0; i < nrOfNodes; i++) {
-        Coord coordinations = nodeInfo[i].mobility->getCurrentPosition();
-        double receptionRadius = calculateMaximumRadioReceptionRadius(nodeInfo[i].radio);
-        file << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "] " : " ");
-        file << coordinations.x << " " << coordinations.y << " " << receptionRadius << endl;
+        int nrOfNodes = topology.getNumNodes();
+        for (int i=0; i < nrOfNodes; i++) {
+            Coord coordinations = nodeInfo[i].mobility->getCurrentPosition();
+            double receptionRadius = calculateMaximumRadioReceptionRadius(nodeInfo[i].radio);
+            file << nodeInfo[i].name << (nodeInfo[i].isVectorNode ? "] " : " ");
+            file << coordinations.x << " " << coordinations.y << " " << receptionRadius << endl;
+        }
+        file.close();
+    } else {
+        throw cRuntimeError("Error in creating results directory for persisting the nodes start positions");
     }
-    file.close();
 }
 
 /**
