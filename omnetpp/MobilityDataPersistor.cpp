@@ -92,14 +92,17 @@ string MobilityDataPersistor::getFileName(cModule* hostModule) const {
  */
 void MobilityDataPersistor::write(Coord position) {
     OMNeTTime* currentTime = dynamic_cast<OMNeTTime*>(Environment::getClock()->makeTime());
-    currentTime->setToCurrentTime();
-  
-    int64 rawTime = currentTime->getRawTime();
 
-    file.write((char*)&rawTime, sizeof(rawTime));
-    file.write((char*)&position.x, 8);
-    file.write((char*)&position.y, 8);
-    file.write((char*)&position.z, 8);
+    if (currentTime){
+        currentTime->setToCurrentTime();
+  
+        int64 rawTime = currentTime->getRawTime();
+
+        file.write((char*)&rawTime, sizeof(rawTime));
+        file.write((char*)&position.x, 8);
+        file.write((char*)&position.y, 8);
+        file.write((char*)&position.z, 8);
+    }
 }
 
 OMNETARA_NAMESPACE_END
