@@ -37,6 +37,8 @@ class OMNeTBattery : public BasicBattery {
             DeviceEntry(int nrOfActivities) {
                 ASSERT(nrOfActivities > 0);
 
+                currentEnergyDraw = .0;
+
                 numberOfActivities = nrOfActivities;
                 currentActivity = NO_ACTIVITY;
                 owner = NULL;
