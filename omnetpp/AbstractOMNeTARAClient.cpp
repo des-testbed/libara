@@ -190,21 +190,23 @@ void AbstractOMNeTARAClient::updatePacketRouteStatistics(cMessage* msg) {
 
 void AbstractOMNeTARAClient::deliverToSystem(const Packet* packet) {
     Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
-    cPacket* simPacket = dynamic_cast<cPacket*>(pckt);
-    ASSERT2(simPacket, "Model error: AbstractOMNeTARAClient tried to deliver packet to system, but it can not cast to Packet*..");
+    if (pckt) {
+        cPacket* simPacket = dynamic_cast<cPacket*>(pckt);
+        ASSERT2(simPacket, "Model error: AbstractOMNeTARAClient tried to deliver packet to system, but it can not cast to Packet*..");
 
-    cPacket* encapsulatedData = simPacket->decapsulate();
-    ASSERT(encapsulatedData);
+        cPacket* encapsulatedData = simPacket->decapsulate();
+        ASSERT(encapsulatedData);
 
-    TrafficControlInfo* controlInfo = new TrafficControlInfo();
-    int maxTTL = packetFactory->getMaximumNrOfHops();
-    controlInfo->setHopCount(maxTTL - packet->getTTL());
-    encapsulatedData->setControlInfo(controlInfo);
+        TrafficControlInfo* controlInfo = new TrafficControlInfo();
+        int maxTTL = packetFactory->getMaximumNrOfHops();
+        controlInfo->setHopCount(maxTTL - packet->getTTL());
+        encapsulatedData->setControlInfo(controlInfo);
 
-    send(encapsulatedData, "upperLayerGate$o");
+        send(encapsulatedData, "upperLayerGate$o");
 
-    nrOfDeliverablePackets++;
-    emit(PACKET_DELIVERED_SIGNAL, 1);
+        nrOfDeliverablePackets++;
+        emit(PACKET_DELIVERED_SIGNAL, 1);
+    }
 
     delete packet;
 }
