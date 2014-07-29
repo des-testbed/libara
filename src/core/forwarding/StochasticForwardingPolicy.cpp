@@ -18,9 +18,9 @@ NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet) {
     }
 
     unsigned int nrOfPossibleNextHops = possibleNextHops.size();
-    float cumulativeSum[nrOfPossibleNextHops];
-    float probabilities[nrOfPossibleNextHops];
-    float pheromoneValues[nrOfPossibleNextHops];
+    float cumulativeSum[nrOfPossibleNextHops] = { };
+    float probabilities[nrOfPossibleNextHops] = { };
+    float pheromoneValues[nrOfPossibleNextHops] = { };
 
     float sumOfPheromoneValues = 0;
     for(unsigned int i = 0; i < nrOfPossibleNextHops; i++){
