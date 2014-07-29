@@ -66,11 +66,11 @@ bool ARA::handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, Netw
 }
 
 void ARA::handlePacketWithZeroTTL(Packet* packet) {
-    AbstractARAClient::handlePacketWithZeroTTL(packet);
-
     if(packet->isDataPacket()) {
         emit(DROP_PACKET_WITH_ZERO_TTL, 1);
     }
+
+    AbstractARAClient::handlePacketWithZeroTTL(packet);
 }
 
 void ARA::handleNonSourceRouteDiscovery(Packet* packet) {
