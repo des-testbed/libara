@@ -1,4 +1,7 @@
-libARA [![Build Status](https://travis-ci.org/des-testbed/libara.png?branch=develop)](https://travis-ci.org/des-testbed/libara)
+libARA [![Build Status](https://travis-ci.org/des-testbed/libara.png?branch=develop)](https://travis-ci.org/des-testbed/libara) <a href="https://scan.coverity.com/projects/2662">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/2662/badge.svg"/>
+</a>
 =======
 An enhanceable framework for developing and testing the Ant Routing Algorithm (ARA) as proposed by M. Güneş, U. Sorges and I. Bouazizi in 2002.
 
