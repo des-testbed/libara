@@ -59,7 +59,7 @@ You are using libARA in a scientific context? Please cite libARA with publicatio
 
 License
 -------
-tba.
+libARA is licensed under the GNU GENERAL PUBLIC LICENSE (GPL) Version 3. For further information on the license please refer to the LICENSE file in the repository or the [website](https://www.gnu.org/licenses/gpl-3.0.txt).
 
 [1]: http://www.cpputest.org/
 [2]: https://github.com/FGrosse/cpputest
