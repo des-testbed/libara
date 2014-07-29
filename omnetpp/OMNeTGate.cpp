@@ -60,26 +60,28 @@ void OMNeTGate::send(const Packet* packet, AddressPtr recipient, double sendDela
     // first remove the control info from the lower level (Ieee802Ctrl)
     Packet* pckt = const_cast<Packet*>(packet);
     cPacket* simPacket = dynamic_cast<cPacket*>(pckt);
-    ASSERT2(simPacket, "Model error: OMNeTGate could not cast the packet to cPacket for sending it via the simulation");
-    simPacket->removeControlInfo();
 
-    // then fill in the control info (our routing decision)
-    MACAddress macOfNextHop;
-    if (isBroadcastAddress(nextHopAddress)) {
-        macOfNextHop = MACAddress::BROADCAST_ADDRESS;
+    if (simPacket) {
+        ASSERT2(simPacket, "Model error: OMNeTGate could not cast the packet to cPacket for sending it via the simulation");
+        simPacket->removeControlInfo();
+
+        // then fill in the control info (our routing decision)
+        MACAddress macOfNextHop;
+        if (isBroadcastAddress(nextHopAddress)) {
+            macOfNextHop = MACAddress::BROADCAST_ADDRESS;
+        } else {
+            macOfNextHop = networkConfig->getMACAddressByIP(*(nextHopAddress.get()));
+        }
+
+        Ieee802Ctrl* controlInfo = new Ieee802Ctrl();
+        controlInfo->setDest(macOfNextHop);
+        simPacket->setControlInfo(controlInfo);
+
+        collectStatistics(packet, simPacket);
+
+        // we might have switched the context from the OMNeTTimer
+        omnetARAModule->takeAndSend(simPacket, outGate, sendDelay);
     }
-    else {
-        macOfNextHop = networkConfig->getMACAddressByIP(*(nextHopAddress.get()));
-    }
-
-    Ieee802Ctrl* controlInfo = new Ieee802Ctrl();
-    controlInfo->setDest(macOfNextHop);
-    simPacket->setControlInfo(controlInfo);
-
-    collectStatistics(packet, simPacket);
-
-    // we might have switched the context from the OMNeTTimer
-    omnetARAModule->takeAndSend(simPacket, outGate, sendDelay);
 }
 
 void OMNeTGate::collectStatistics(const Packet* packet, cPacket* simPacket) {
@@ -136,13 +138,13 @@ void OMNeTGate::broadcast(const Packet* packet) {
 
 bool OMNeTGate::equals(NetworkInterface* otherInterface) {
     OMNeTGate* otherOMNeTInterface = dynamic_cast<OMNeTGate*>(otherInterface);
-    if(otherOMNeTInterface == NULL) {
-        return false;
-    }
-    else {
+
+    if(otherOMNeTInterface) {
         return strcmp(omnetARAModule->getFullName(), otherOMNeTInterface->omnetARAModule->getFullName()) == 0
             && strcmp(outGate->getFullName(), otherOMNeTInterface->outGate->getFullName()) == 0;
-    }
+    } 
+
+    return false;
 }
 
 OMNETARA_NAMESPACE_END
