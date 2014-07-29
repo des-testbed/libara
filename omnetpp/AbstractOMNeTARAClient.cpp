@@ -147,19 +147,22 @@ void AbstractOMNeTARAClient::handleUpperLayerMessage(cMessage* message) {
 
     Packet* packet = packetFactory->makeDataPacket(source, destination, sequenceNumber, payload, payloadSize);
     cPacket* simPacket = dynamic_cast<cPacket*>(packet);
-    ASSERT2(simPacket, "Model error: Something is wrong with the PacketFactory. It does not create cPacket compatible packets..");
-
-    simPacket->encapsulate(check_and_cast<cPacket*>(message));
+    if (simPacket) {
+        ASSERT2(simPacket, "Model error: Something is wrong with the PacketFactory. It does not create cPacket compatible packets..");
+        simPacket->encapsulate(check_and_cast<cPacket*>(message));
+    }
     sendPacket(packet);
 }
 
 void AbstractOMNeTARAClient::handleARAMessage(cMessage* message) {
     Packet* packet = dynamic_cast<Packet*>(message);
-    ASSERT2(packet, "Model error: AbstractOMNeTARAClient tried to handle ARA message but can not cast to Packet*..");
-    ASSERT(packet->getTTL() > 0);
+    if (packet) {
+        ASSERT2(packet, "Model error: AbstractOMNeTARAClient tried to handle ARA message but can not cast to Packet*..");
+        ASSERT(packet->getTTL() > 0);
 
-    OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(message->getArrivalGate()->getIndex());
-    arrivalGate->receive(packet);
+        OMNeTGate* arrivalGate = (OMNeTGate*) getNetworkInterface(message->getArrivalGate()->getIndex());
+        arrivalGate->receive(packet);
+    }
 }
 
 void AbstractOMNeTARAClient::persistRoutingTableData() {
