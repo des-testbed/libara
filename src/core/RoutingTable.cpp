@@ -10,6 +10,7 @@ ARA_NAMESPACE_BEGIN
 
 RoutingTable::RoutingTable() {
     lastAccessTime = nullptr;
+    evaporationPolicy = nullptr;
 }
 
 RoutingTable::~RoutingTable() {
