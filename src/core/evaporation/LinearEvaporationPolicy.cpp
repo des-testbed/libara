@@ -31,7 +31,7 @@ float LinearEvaporationPolicy::evaporate(float oldPheromoneValue, int millisecon
     if(millisecondsSinceLastEvaporation == 0) {
         return oldPheromoneValue;
     } else {
-        float multiplicator = millisecondsSinceLastEvaporation / timeInterval;
+        float multiplicator = ((float)millisecondsSinceLastEvaporation) / ((float)timeInterval);
         /// this corresponds to f(x) = -mx + b or f(multiplicator) = -1 * evaporationfactor * multiplicator + oldPheromoneValue
         float newPheromoneValue = ((-1) * this->evaporationFactor * multiplicator) + oldPheromoneValue;
 
