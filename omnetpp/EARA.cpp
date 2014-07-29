@@ -72,11 +72,11 @@ bool EARA::handleBrokenOMNeTLink(Packet* packet, AddressPtr receiverAddress, Net
 }
 
 void EARA::handlePacketWithZeroTTL(Packet* packet) {
-    AbstractEARAClient::handlePacketWithZeroTTL(packet);
-
     if(packet->isDataPacket()) {
         emit(DROP_PACKET_WITH_ZERO_TTL, 1);
     }
+
+    AbstractEARAClient::handlePacketWithZeroTTL(packet);
 }
 
 void EARA::handleNonSourceRouteDiscovery(Packet* packet) {
