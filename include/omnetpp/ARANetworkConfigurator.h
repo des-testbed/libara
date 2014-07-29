@@ -52,7 +52,7 @@ public:
 
 protected:
     struct NodeInfo {
-        NodeInfo() {hasInterfaceTable=false; interfaceTable=NULL;}
+        NodeInfo() {hasInterfaceTable=false; interfaceTable=nullptr;mobility=nullptr;radio=nullptr;}
         bool hasInterfaceTable;
         std::string name;
         IInterfaceTable* interfaceTable;
