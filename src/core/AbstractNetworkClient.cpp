@@ -35,6 +35,7 @@ void AbstractNetworkClient::logTrace(const std::string &text, ...) const {
         va_list args;
         va_start(args, text);
         logger->logMessageWithVAList(text, Logger::LEVEL_TRACE, args);
+        va_end(args);
     }
 }
 
@@ -43,6 +44,7 @@ void AbstractNetworkClient::logDebug(const std::string &text, ...) const {
         va_list args;
         va_start(args, text);
         logger->logMessageWithVAList(text, Logger::LEVEL_DEBUG, args);
+        va_end(args);
     }
 }
 
@@ -51,6 +53,7 @@ void AbstractNetworkClient::logInfo(const std::string &text, ...) const {
         va_list args;
         va_start(args, text);
         logger->logMessageWithVAList(text, Logger::LEVEL_INFO, args);
+        va_end(args);
     }
 }
 
@@ -59,6 +62,7 @@ void AbstractNetworkClient::logWarn(const std::string &text, ...) const {
         va_list args;
         va_start(args, text);
         logger->logMessageWithVAList(text, Logger::LEVEL_WARN, args);
+        va_end(args);
     }
 }
 
@@ -67,6 +71,7 @@ void AbstractNetworkClient::logError(const std::string &text, ...) const {
         va_list args;
         va_start(args, text);
         logger->logMessageWithVAList(text, Logger::LEVEL_ERROR, args);
+        va_end(args);
     }
 }
 
@@ -75,6 +80,7 @@ void AbstractNetworkClient::logFatal(const std::string &text, ...) const {
         va_list args;
         va_start(args, text);
         logger->logMessageWithVAList(text, Logger::LEVEL_FATAL, args);
+        va_end(args);
     }
 }
 
