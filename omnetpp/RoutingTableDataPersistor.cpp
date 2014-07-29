@@ -53,35 +53,42 @@ string RoutingTableDataPersistor::getFileName(cModule* hostModule) const {
  */
 void RoutingTableDataPersistor::write(RoutingTable* routingTable) {
     OMNeTTime* currentTime = dynamic_cast<OMNeTTime*>(Environment::getClock()->makeTime());
-    currentTime->setToCurrentTime();
 
-    if(lastWriteTime == nullptr
-    || currentTime->getDifferenceInMilliSeconds(lastWriteTime) >= updateIntervall) {
+    if (currentTime) {
+        currentTime->setToCurrentTime();
 
-        int64 rawTime = currentTime->getRawTime();
-        file.write((char*)&rawTime, sizeof(rawTime));
+        if (lastWriteTime == nullptr
+            || currentTime->getDifferenceInMilliSeconds(lastWriteTime) >= updateIntervall) {
 
-        int nrOfEntries = routingTable->getTotalNumberOfEntries();
-        file.write((char*)&nrOfEntries, 1);
+            int64 rawTime = currentTime->getRawTime();
+            file.write((char*)&rawTime, sizeof(rawTime));
 
-        for (int i = 0; i < nrOfEntries; i++) {
-            RoutingTableEntryTupel entryTupel = routingTable->getEntryAt(i); // FIXME getEntryAt is very inefficient. This function is called very often so it better use something with better performance
-            OMNeTAddress* destination = dynamic_cast<OMNeTAddress*>(entryTupel.destination.get());
-            uint32 destinationInt = destination->getInt();
+            int nrOfEntries = routingTable->getTotalNumberOfEntries();
+            file.write((char*)&nrOfEntries, 1);
 
-            RoutingTableEntry* entry = entryTupel.entry;
-            OMNeTAddress* nextHop = dynamic_cast<OMNeTAddress*>(entry->getAddress().get());
-            uint32 nextHopInt = nextHop->getInt();
+            for (int i = 0; i < nrOfEntries; i++) {
+                RoutingTableEntryTupel entryTupel = routingTable->getEntryAt(i); // FIXME getEntryAt is very inefficient. This function is called very often so it better use something with better performance
+                OMNeTAddress* destination = dynamic_cast<OMNeTAddress*>(entryTupel.destination.get());
+                if (destination) {
+                    uint32 destinationInt = destination->getInt();
 
-            float pheromoneValue = entry->getPheromoneValue();
+                    RoutingTableEntry* entry = entryTupel.entry;
+                    OMNeTAddress* nextHop = dynamic_cast<OMNeTAddress*>(entry->getAddress().get());
+                    if (nextHop) {
+                        uint32 nextHopInt = nextHop->getInt();
 
-            file.write((char*)&destinationInt, 4);
-            file.write((char*)&nextHopInt, 4);
-            file.write((char*)&pheromoneValue, sizeof(pheromoneValue));
+                        float pheromoneValue = entry->getPheromoneValue();
+
+                        file.write((char*)&destinationInt, 4);
+                        file.write((char*)&nextHopInt, 4);
+                        file.write((char*)&pheromoneValue, sizeof(pheromoneValue));
+                    }
+                }
+            } 
+
+            delete lastWriteTime;
+            lastWriteTime = currentTime;
         }
-
-        delete lastWriteTime;
-        lastWriteTime = currentTime;
     }
 }
 
