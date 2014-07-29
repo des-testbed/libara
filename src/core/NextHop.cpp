@@ -8,10 +8,6 @@ using namespace std;
 
 namespace ARA {
 
-NextHop::NextHop(){
-
-}
-
 NextHop::NextHop(shared_ptr<Address> address, NetworkInterface* interface) {
     this->address = shared_ptr<Address>(address);
     this->interface = interface;

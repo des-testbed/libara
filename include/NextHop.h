@@ -13,7 +13,6 @@ namespace ARA {
 
 class NextHop {
 public:
-    NextHop();
     NextHop(std::shared_ptr<Address> address, NetworkInterface* interface);
 
     std::shared_ptr<Address> getAddress();
