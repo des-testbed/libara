@@ -12,8 +12,7 @@ namespace ARA {
 
 class NoSuchElementException: public Exception {
 public:
-    NoSuchElementException() {};
-    NoSuchElementException(const char* message) : Exception(message) {};
+    NoSuchElementException(const char* message);
 };
 
 } /* namespace ARA */

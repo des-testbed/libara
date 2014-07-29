@@ -6,12 +6,6 @@
 
 ARA_NAMESPACE_BEGIN
 
-ThreadInterruptedException::ThreadInterruptedException() {
-
-}
-
-ThreadInterruptedException::ThreadInterruptedException(const char* message) : Exception(message) {
-
-}
+ThreadInterruptedException::ThreadInterruptedException(const char* message) : Exception(message) { }
 
 ARA_NAMESPACE_END

@@ -6,10 +6,6 @@
 
 namespace ARA {
 
-Exception::Exception() {
-    // nothing to do
-}
-
 Exception::Exception(const char* message) {
     this->message = message;
 }

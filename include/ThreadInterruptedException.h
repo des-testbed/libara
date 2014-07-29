@@ -12,7 +12,6 @@ ARA_NAMESPACE_BEGIN
 
 class ThreadInterruptedException : public Exception  {
     public:
-        ThreadInterruptedException();
         ThreadInterruptedException(const char* message);
 };
 
