@@ -570,13 +570,12 @@ void AbstractARAClient::timerHasExpired(Timer* responsibleTimer) {
 void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTimer) {
     RouteDiscoveryInfo* discoveryInfo = (RouteDiscoveryInfo*) routeDiscoveryTimer->getContextObject();
     AddressPtr destination = discoveryInfo->originalPacket->getDestination();
-    const char* destinationString = destination->toString().c_str();
-    logInfo("Route discovery for destination %s timed out", destinationString);
+    logInfo("Route discovery for destination %s timed out", destination->toString().c_str());
 
     if(discoveryInfo->nrOfRetries < maxNrOfRouteDiscoveryRetries) {
         // restart the route discovery
         discoveryInfo->nrOfRetries++;
-        logInfo("Restarting discovery for destination %s (%u/%u)", destinationString, discoveryInfo->nrOfRetries, maxNrOfRouteDiscoveryRetries);
+        logInfo("Restarting discovery for destination %s (%u/%u)", destination->toString().c_str(), discoveryInfo->nrOfRetries, maxNrOfRouteDiscoveryRetries);
         forgetKnownIntermediateHopsFor(destination);
         broadcastFANT(destination);
         routeDiscoveryTimer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
@@ -589,7 +588,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(Timer* routeDiscoveryTi
 
         forgetKnownIntermediateHopsFor(destination);
         deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);
-        logWarn("Route discovery for destination %s unsuccessful. Dropping %u packet(s)", destinationString, undeliverablePackets.size());
+        logWarn("Route discovery for destination %s unsuccessful. Dropping %u packet(s)", destination->toString().c_str(), undeliverablePackets.size());
         for(auto& packet: undeliverablePackets) {
             packetNotDeliverable(packet);
         }
