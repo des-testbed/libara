@@ -7,14 +7,13 @@ Installation from git
 ---------------------
 1. Clone the repository:
 
-		git clone git://github.com/des-testbed/Ara-Sim.git
+		git clone git://github.com/des-testbed/libara.git
 		
 2. Please install the required dependencies
 
 		clang >= 3.2
 		OMNeT++ >= 4.3
-		log4cxx-devel >= 0.10.0
-
+	
 3. After the checkout you can build the sources and simulation via 
 
 		make all
@@ -23,8 +22,8 @@ Installation from git
 
 		 make HEADLESS=TRUE
 
-5. Ara-Sim is developed with a test driven approach using the [CppUTest][1] framework. 
-You should can run the whole Ara-Sim regression test suit via the following command.
+5. libARA is developed with a test driven approach using the [CppUTest][1] framework. 
+You should can run the whole libARA regression test suit via the following command.
 This will automatically initialize and update the git submodule [tests/cpputest][2].
 
 		make test
@@ -44,7 +43,7 @@ Bug tracker
 -----------
 Have a bug or feature request? Please create an issue here on GitHub!
 
-https://github.com/des-testbed/ara-sim/issues
+https://github.com/des-testbed/libara/issues
 
 
 
