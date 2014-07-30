@@ -97,8 +97,6 @@ void TestbedARAClient::initializeNetworkInterfaces() {
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
-    // DEBUG: std::cerr << "address is "  << address->toString() << std::endl;
-    // DEBUG: std::cerr << "other address is "  << tapAddress->toString() << std::endl;
     return (address.get()->equals(tapAddress) || AbstractNetworkClient::isLocalAddress(address));
 }
 
@@ -128,16 +126,15 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
         // DEBUG:
         std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] "<< std::endl;
         TestbedTimerAddressInfo* timerInfo = (TestbedTimerAddressInfo*) timer->getContextObject();
-        //TestbedAddressPtr destination = timerInfo->getAddress();
         AddressPtr destination = timerInfo->getAddress();
-        // DEBUG: 
-        std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] use count is: " << destination.use_count() << std::endl;
+
+        // DEBUG: std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] use count is: " << destination.use_count() << std::endl;
 
         RunningRouteDiscoveriesMap::const_iterator discovery;
-        // lock the access to the running route discovery map
-        std::lock_guard<std::mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
         // find the destination in the running route discoverys map
+        std::lock_guard<std::mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
         discovery = runningRouteDiscoveries.find(destination);
+
 
         if (discovery != runningRouteDiscoveries.end()) {
             // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
@@ -150,9 +147,10 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
             logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
         }
     } else {
-        // DEBUG:
+        // DEBUG: 
         std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] shared_ptr expired " << std::endl;
     }
+
 }
 
 void TestbedARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer){
