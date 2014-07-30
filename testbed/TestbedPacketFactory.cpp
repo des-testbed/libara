@@ -11,23 +11,15 @@ TESTBED_NAMESPACE_BEGIN
 TestbedPacketFactory::TestbedPacketFactory(int maxHopCount) : PacketFactory(maxHopCount) {}
 
 TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
+    /// the destination address (if it is set)
+    ara_address_t address;
     /// obtain the ethernet header
     dessert_ext_t* extension = nullptr;
     dessert_msg_getext(message, &extension, DESSERT_EXT_ETH, 0);
     ether_header* ethernetFrame = (ether_header*) extension->data;
 
-    /// get the sender
-    TestbedAddressPtr source = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
-    TestbedAddressPtr destination = std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost);
-
-    /// get the ARA routing extension
-    /*
-    dessert_ext_t* routingExtension = nullptr;
-    dessert_msg_getext(message, &routingExtension, DESSERT_EXT_USER, 0);
-    RoutingExtension* araHeader = (RoutingExtension*) routingExtension->data;
-    TestbedAddressPtr source = std::make_shared<TestbedAddress>(araHeader->ara_shost);
-    TestbedAddressPtr destination = std::make_shared<TestbedAddress>(araHeader->ara_dhost);
-*/
+    TestbedPacket* packet = nullptr;
+//    RoutingExtension* routingExtension = getRoutingExtension(message);
 
     // TODO: check if we should do a ntohs/htons
     char packetType = message->u8;
@@ -35,14 +27,57 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     unsigned int sequenceNumber = ntohs(message->u16);
     // TODO: check if we should do a ntohs/htons
     int ttl = message->ttl;
-    // TODO: check the payloadsize (hlen, hlen + plen, ...?)
-    int payloadSize = message->hlen;
 
-    TestbedPacket* packet = new TestbedPacket(source, destination, source, packetType, sequenceNumber, ttl);
+    // TODO: check if that always make sense
+    // determine the sender of the packet
+    TestbedAddressPtr sender = std::make_shared<TestbedAddress>(message->l2h.ether_shost);
+
+/*
+    if (routingExtension != nullptr) {
+        TestbedAddressPtr source = std::make_shared<TestbedAddress>(routingExtension->ara_shost);
+        TestbedAddressPtr destination = std::make_shared<TestbedAddress>(routingExtension->ara_dhost);
+        TestbedAddressPtr sender = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
+        packet = new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl);
+    } else {
+    */
+    TestbedAddressPtr destination;
+
+    /// TODO: That's a bit complicated, let's make that easier
+    if ((packetType == PacketType::FANT) || (packetType == PacketType::BANT)) {
+        // get the destination address from the ant agent
+        if (packetType == PacketType::FANT) {
+            if (dessert_msg_getext(message, &extension, ARA_EXT_FANT, 0) > 0) {
+                memcpy(address, extension->data, sizeof(ara_address_t));
+            }
+        } else {
+            if (dessert_msg_getext(message, &extension, ARA_EXT_BANT, 0) > 0) {
+                memcpy(address, extension->data, sizeof(ara_address_t));
+            }
+        }
+
+        destination = std::make_shared<TestbedAddress>(address);
+        // DEBUG:
+        std::cerr << "[TestbedPacketFactory::makePaket] the destination address of the ant agent ist " << destination->toString() << std::endl;
+    } else {
+        destination = std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost);
+    }
+
+    TestbedAddressPtr source = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
+
+    packet = new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl);
     packet->setMessage(message);
-    packet->setPayloadLength(payloadSize);
 
     return packet;
+}
+
+RoutingExtension* TestbedPacketFactory::getRoutingExtension(dessert_msg_t* message) {
+    dessert_ext_t* extension = nullptr;
+
+    if (dessert_msg_getext(message, &extension, DESSERT_EXT_USER, 0) == 0) {
+        return nullptr;
+    }
+
+    return (RoutingExtension*)extension->data;
 }
 
 TestbedPacket* TestbedPacketFactory::makeNewPacket(dessert_msg_t* message) {
@@ -99,5 +134,31 @@ TestbedPacket* TestbedPacketFactory::makeBANT(const Packet *packet, unsigned int
 TestbedPacket* TestbedPacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, TestbedAddressPtr sender){
     return makePacket(originalPacket->getSource(), originalPacket->getDestination(), sender, PacketType::ACK, originalPacket->getSequenceNumber(), maxHopCount);
 }
+
+
+bool TestbedPacketFactory::checkDessertMessage(dessert_msg_t* message){
+    int result = -4;
+    /// determine the expected message length (header + payload)
+    int expectedMessageSize = ntohs(message->hlen) + ntohs(message->plen);
+
+    if ((result = dessert_msg_check(message, expectedMessageSize)) == DESSERT_OK) {
+        return true;
+    } else if(result == -1) {
+        // DEBUG: 
+        std::cerr << "[TestbedPacketFactory::checkDessertMessage] the message was too large for the buffer" << std::endl;
+    } else if(result == -2) {
+        // DEBUG: 
+        std::cerr << "[TestbedPacketFactory::checkDessertMessage] the message was not intended for this daemon" << std::endl;
+    } else if(result == -3) {
+        // DEBUG: 
+        std::cerr << "[TestbedPacketFactory::checkDessertMessage] an extension is not consistent" << std::endl;
+    } else {
+        // DEBUG: 
+        std::cerr << "[TestbedPacketFactory::checkDessertMessage] unknown error code" << std::endl;
+    }
+
+    return false;
+}
+
 
 TESTBED_NAMESPACE_END

@@ -5,6 +5,7 @@
 #ifndef TESTBED_PACKET_FACTORY_H_
 #define TESTBED_PACKET_FACTORY_H_
 
+#include "CLibs.h"
 #include "Testbed.h"
 #include "Exception.h"
 #include "PacketFactory.h"
@@ -85,6 +86,17 @@ class TestbedPacketFactory : public PacketFactory {
          */
         TestbedPacket* makeAcknowledgmentPacket(const Packet* originalPacket, TestbedAddressPtr sender);
 
+        /**
+         * The method checks if a dessert_msg_t is consistent. It wraps the
+         * functionality of dessert_msg_check() of libdessert.
+         *
+         * @param message The message which should be checked
+         *
+         * @return The method returns true if the message is consistent,
+         * otherwise false.
+         */
+        bool checkDessertMessage(dessert_msg_t* message);
+
     protected:
         /**
          *
@@ -95,6 +107,12 @@ class TestbedPacketFactory : public PacketFactory {
          * @see PacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr)
          */
         virtual TestbedPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
+
+    private:
+
+        RoutingExtension* getRoutingExtension(dessert_msg_t* message);
+
+
 
 };
 
