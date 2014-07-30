@@ -11,7 +11,8 @@ TestbedAddress::TestbedAddress(u_char* address){
 }
 
 std::string TestbedAddress::toString() const {
-    std::lock_guard<std::mutex> lock(addressMutex);
+    std::lock_guard<std::recursive_mutex> lock(addressMutex);
+    //std::lock_guard<std::mutex> lock(addressMutex);
     std::ostringstream result;
     /// set output to hex values
     result << std::hex;
@@ -24,7 +25,8 @@ std::string TestbedAddress::toString() const {
 }
 
 bool TestbedAddress::equals(const Address* otherAddress) const{
-    //std::lock_guard<std::mutex> lock(addressMutex);
+    std::lock_guard<std::recursive_mutex> lock(addressMutex);
+//    std::lock_guard<std::mutex> lock(addressMutex);
     const TestbedAddress* otherTestbedAddress = dynamic_cast<const TestbedAddress*>(otherAddress);
 
     if (otherTestbedAddress == nullptr) {
@@ -36,20 +38,22 @@ bool TestbedAddress::equals(const Address* otherAddress) const{
 }
 
 bool TestbedAddress::equals(const std::shared_ptr<Address> otherAddress) const {
-    //std::lock_guard<std::mutex> lock(addressMutex);
+    std::lock_guard<std::recursive_mutex> lock(addressMutex);
     return this->equals(otherAddress.get());
 }
 
 size_t TestbedAddress::getHashValue() const {
-    //std::lock_guard<std::mutex> lock(addressMutex);
+//    std::lock_guard<std::mutex> lock(addressMutex);
+    std::lock_guard<std::recursive_mutex> lock(addressMutex);
     int leastSignificantByte = address[5];
     int nextLeastSignificantByte = address[4];
     return leastSignificantByte * 256 + nextLeastSignificantByte;
 }
 
 u_int8_t* TestbedAddress::getDessertValue() const {
+    std::lock_guard<std::recursive_mutex> lock(addressMutex);
     // FIXME: we pass the pointer to something else ... (not good!)
-    //std::lock_guard<std::mutex> lock(addressMutex);
+  //  std::lock_guard<std::mutex> lock(addressMutex);
     //TODO: Find a better way to return acceptable value for cross platform
     return (u_int8_t*) this->address;
 }
