@@ -40,6 +40,12 @@ void dumpDessertMessage(dessert_msg_t* message, uint32_t length, dessert_msg_pro
  */
 dessert_cb_result packetFilter(dessert_msg_t* messageReceived, uint32_t length, dessert_msg_proc_t *processingFlags, dessert_sysif_t *interface, dessert_frameid_t id);
 
+/**
+ *
+ */
+std::string toString(dessert_msg_t* message);
+
+
 TESTBED_NAMESPACE_END
 
 #endif /*PACKET_DISPATCHER_H*/
