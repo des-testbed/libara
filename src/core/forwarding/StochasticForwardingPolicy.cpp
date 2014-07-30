@@ -54,7 +54,7 @@ void StochasticForwardingPolicy::initializeRandomNumberGenerator(unsigned int se
 }
 
 float StochasticForwardingPolicy::getRandomNumber() {
-    return (float)rand() / (float)RAND_MAX;
+    return (float)random() / (float)RAND_MAX;
 }
 
 ARA_NAMESPACE_END
