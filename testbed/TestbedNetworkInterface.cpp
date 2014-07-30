@@ -47,10 +47,9 @@ void TestbedNetworkInterface::send(const Packet* packet, AddressPtr recipient) {
 }
 
 void TestbedNetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> recipient){
-    std::thread::id this_id = std::this_thread::get_id();
-    std::cerr << "[TestbedNetworkInterface::doSend]  thread id " << this_id << std::endl;
-    // DEBUG:
-    std::cerr << "[TestbedNetworkInterface::doSend]  send packet " <<  packet->getSequenceNumber() << " to " << recipient->toString() << std::endl;
+    // DEBUG:  std::thread::id this_id = std::this_thread::get_id();
+    // DEBUG: std::cerr << "[TestbedNetworkInterface::doSend]  thread id " << this_id << std::endl;
+    // DEBUG: std::cerr << "[TestbedNetworkInterface::doSend]  send packet " <<  packet->getSequenceNumber() << " to " << recipient->toString() << std::endl;
     assert(packet != nullptr);
     std::unique_lock<std::mutex> lock(sendMutex);
     dispatch(packet, std::dynamic_pointer_cast<TestbedAddress>(localAddress), recipient);
