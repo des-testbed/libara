@@ -63,7 +63,8 @@ class TestbedAddress : public Address {
         /**
          * A mutex to protect the members of class TestbedAddress
          */
-        mutable std::mutex addressMutex;
+        //mutable std::mutex addressMutex;
+        mutable std::recursive_mutex addressMutex;
 };
 
 TESTBED_NAMESPACE_END

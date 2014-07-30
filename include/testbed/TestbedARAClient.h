@@ -1,14 +1,23 @@
 /*
-* $FU-Copyright$
+ * $FU-Copyright$
  */
 
 #ifndef _TESTBED_ARA_CLIENT_H_
 #define _TESTBED_ARA_CLIENT_H_
 
+#include "CLibs.h"
 #include "Testbed.h"
 #include "TestbedAddress.h"
+#include "TestbedTimerAddressInfo.h"
 #include "TestbedNetworkInterface.h"
+#include "TestbedPacketDispatcher.h"
+
+#include "Environment.h"
 #include "AbstractARAClient.h"
+#include "BasicConfiguration.h"
+#include "TimerAddressInfo.h"
+#include "SimpleLogger.h"
+#include "StandardClock.h"
 
 #include <mutex>
 
@@ -23,11 +32,7 @@ class TestbedARAClient : public AbstractARAClient {
          */
         TestbedARAClient(Configuration &config);
 
-        /**
-         * The standard virtual destructor of this class.
-         */
-        ~TestbedARAClient();
-
+        virtual ~TestbedARAClient();
 
         std::string toString();
 
@@ -73,6 +78,11 @@ class TestbedARAClient : public AbstractARAClient {
     
         void handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer);
 
+        /**
+         * @see AbstractARAClient::startDeliveryTimer(AddressPtr destination);
+         */
+        void startDeliveryTimer(TestbedAddressPtr destination);
+
         void stopRouteDiscoveryTimer(AddressPtr destination);
 
         std::string routingTableToString();
@@ -86,7 +96,7 @@ class TestbedARAClient : public AbstractARAClient {
         void initializeNetworkInterfaces();
 
         /**
-         * Extends AbstractNetworkClient isLocalAddress to check the MAC address of the TAP interface as well.
+         * @see AbstractNetworkClient::isLocalAddress(AddressPtr address) const;
          */
         virtual bool isLocalAddress(AddressPtr address) const;
 
@@ -124,8 +134,6 @@ class TestbedARAClient : public AbstractARAClient {
          * This mutex protects the access to the network interface
          */
         std::mutex networkInterfaceMutex;
-
-        /***/
 };
 
 TESTBED_NAMESPACE_END
