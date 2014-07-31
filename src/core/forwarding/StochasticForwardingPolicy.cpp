@@ -3,7 +3,6 @@
  */
 
 #include "StochasticForwardingPolicy.h"
-#include "Exception.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -18,15 +17,12 @@ NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet) {
         throw Exception("Could not determine next hop: there are no known routes to the destination");
     }
 
-    unsigned int nrOfPossibleNextHops = 0;
-    // clang complains about an (maybe) unitialized variable nrOfPossibleNextHops
-    nrOfPossibleNextHops = possibleNextHops.size();
+    unsigned int nrOfPossibleNextHops = possibleNextHops.size();
 
     if (nrOfPossibleNextHops > 0) {
-
-        float cumulativeSum[nrOfPossibleNextHops] = { };
-        float probabilities[nrOfPossibleNextHops] = { };
-        float pheromoneValues[nrOfPossibleNextHops] = { };
+        std::vector<float> cumulativeSum(nrOfPossibleNextHops);
+        std::vector<float> probabilities(nrOfPossibleNextHops);
+        std::vector<float> pheromoneValues(nrOfPossibleNextHops);
 
         float sumOfPheromoneValues = 0;
 
@@ -41,7 +37,7 @@ NextHop* StochasticForwardingPolicy::getNextHop(const Packet* packet) {
         }
 
         // compute the cumulative sum
-        std::partial_sum(probabilities, probabilities + nrOfPossibleNextHops, cumulativeSum);
+        std::partial_sum(probabilities.begin(), probabilities.end(), cumulativeSum.begin());
 
         // get a random number between 0.0 and 1.0
         float randomNumber = this->getRandomNumber();

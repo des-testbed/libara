@@ -24,11 +24,10 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
     unsigned int nrOfPossibleNextHops = possibleNextHops.size();
 
     if (nrOfPossibleNextHops > 0) {
-
         float sum = 0.0;
 
-        float products[nrOfPossibleNextHops] = {};
-        float probabilities[nrOfPossibleNextHops] = {};
+        std::vector<float> products(nrOfPossibleNextHops);
+        std::vector<float> probabilities(nrOfPossibleNextHops);
 
         for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
             EARARoutingTableEntry* entry = dynamic_cast<EARARoutingTableEntry*>(possibleNextHops.at(i));
@@ -49,8 +48,8 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
             probabilities[i] = products[i] / sum;
         }
 
-        float cumulativeSum[nrOfPossibleNextHops];
-        std::partial_sum(probabilities, probabilities + nrOfPossibleNextHops, cumulativeSum);
+        std::vector<float> cumulativeSum(nrOfPossibleNextHops);
+        std::partial_sum(probabilities.begin(), probabilities.end(), cumulativeSum.begin());
 
         int nodeIndex = getRandomNodeIndex(cumulativeSum);
         return possibleNextHops.at(nodeIndex)->getNextHop();
@@ -61,7 +60,7 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
     return nullptr;
 }
 
-int EnergyAwareStochasticForwardingPolicy::getRandomNodeIndex(float cumulativeSum[]) {
+int EnergyAwareStochasticForwardingPolicy::getRandomNodeIndex(std::vector<float> cumulativeSum) {
     float randomNumber = this->getRandomNumber();
     int nodeIndex = 0;
     while (randomNumber > cumulativeSum[nodeIndex]) {

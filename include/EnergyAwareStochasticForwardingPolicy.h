@@ -12,6 +12,8 @@
 #include "NextHop.h"
 #include "Packet.h"
 
+#include <vector>
+
 ARA_NAMESPACE_BEGIN
 
 /**
@@ -30,7 +32,7 @@ class EnergyAwareStochasticForwardingPolicy : public StochasticForwardingPolicy,
         void setEnergyWeight(float beta);
 
     private:
-        int getRandomNodeIndex(float cumulativeSum[]);
+        int getRandomNodeIndex(std::vector<float> cumulativeSum);
 
     protected:
         EnergyAwareRoutingTable* routingTable;

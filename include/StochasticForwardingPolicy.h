@@ -10,8 +10,10 @@
 #include "NextHop.h"
 #include "Packet.h"
 #include "RoutingTable.h"
+#include "Exception.h"
 
 #include <deque>
+#include <vector>
 #include <numeric>
 
 ARA_NAMESPACE_BEGIN
