@@ -12,20 +12,37 @@ StandardTimerProxy::~StandardTimerProxy(){ }
 
 void StandardTimerProxy::run(unsigned long timeoutInMicroSeconds){
     StandardClock* clock = dynamic_cast<StandardClock*>(Environment::getClock());
-    clock->scheduleTimer(timerIdentifier, timeoutInMicroSeconds);
+    
+    if (clock) {
+        clock->scheduleTimer(timerIdentifier, timeoutInMicroSeconds);
+    } else {
+        /// DEBUG
+        std::cerr << "[StandardTimerProxy::run] dynamic cast failed!" << std::endl;
+    }
 }
 
 void StandardTimerProxy::interrupt(){
     StandardClock* clock = dynamic_cast<StandardClock*>(Environment::getClock());
-    clock->interruptTimer(timerIdentifier);
+
+    if (clock) {
+        clock->interruptTimer(timerIdentifier);
+    } else {
+        /// DEBUG
+        std::cerr << "[StandardTimerProxy::interrupt] dynamic cast failed!" << std::endl;
+    }
 }
 
 bool StandardTimerProxy::equals(const Timer* otherTimer) const {
     const StandardTimerProxy* otherStandardTimerProxy = dynamic_cast<const StandardTimerProxy*>(otherTimer);
-    if (otherStandardTimerProxy == nullptr) {
-        return false;
-    } 
-    return (this->getHashValue() == otherStandardTimerProxy->getHashValue());
+
+    if (otherStandardTimerProxy) {
+        return (this->getHashValue() == otherStandardTimerProxy->getHashValue());
+    } else {
+        /// DEBUG
+        std::cerr << "[StandardTimerProxy::equals] dynamic cast failed!" << std::endl;
+    }
+
+    return false;
 }
 
 
