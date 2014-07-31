@@ -24,7 +24,7 @@ bool StandardTime::operator==(const StandardTime& otherTime) const {
 
 long StandardTime::getDifferenceInMilliSeconds(const Time* otherTime) const {
      const StandardTime* otherStandardTime = dynamic_cast<const StandardTime*>(otherTime);
-     if (otherStandardTime != 0) {
+     if (otherStandardTime) {
          long elapsedMilliSeconds = std::chrono::duration_cast<std::chrono::milliseconds>(otherStandardTime->getTimestamp() - this->time).count();
          return elapsedMilliSeconds;
      } else {
