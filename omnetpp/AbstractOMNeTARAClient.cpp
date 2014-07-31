@@ -97,18 +97,23 @@ int AbstractOMNeTARAClient::getNewNodePosition(const char* positionParameter, in
 
 void AbstractOMNeTARAClient::initializeNetworkInterfacesOf(AbstractARAClient* client, OMNeTConfiguration& config) {
     ASSERT(interfaceTable);
-    int nrOfInterfaces = interfaceTable->getNumInterfaces();
-    if(nrOfInterfaces > 2) { // loopback + 1 other NIC
-        // TODO remove this constraint
-        throw cRuntimeError("ARA does currently not implement handling of more than one network card.");
-    }
 
-    int nrOfAssignedInterfaces = 0;
-    for (int i=0; i < nrOfInterfaces; i++)         {
-        InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
-        if (interfaceEntry->isLoopback() == false) {
-            client->addNetworkInterface(new OMNeTGate(this, client, gate("ifOut", nrOfAssignedInterfaces), interfaceEntry));
-            nrOfAssignedInterfaces++;
+    if (interfaceTable) {
+        int nrOfInterfaces = interfaceTable->getNumInterfaces();
+
+        if (nrOfInterfaces > 2) { // loopback + 1 other NIC
+            // TODO remove this constraint
+            throw cRuntimeError("ARA does currently not implement handling of more than one network card.");
+        }
+
+        int nrOfAssignedInterfaces = 0;
+
+        for (int i=0; i < nrOfInterfaces; i++)         {
+            InterfaceEntry* interfaceEntry = interfaceTable->getInterface(i);
+            if (interfaceEntry->isLoopback() == false) {
+                client->addNetworkInterface(new OMNeTGate(this, client, gate("ifOut", nrOfAssignedInterfaces), interfaceEntry));
+                nrOfAssignedInterfaces++;
+            }
         }
     }
 }
@@ -195,20 +200,25 @@ void AbstractOMNeTARAClient::deliverToSystem(const Packet* packet) {
     Packet* pckt = const_cast<Packet*>(packet); // we need to cast away the constness because the OMNeT++ method decapsulate() is not declared as const
     if (pckt) {
         cPacket* simPacket = dynamic_cast<cPacket*>(pckt);
-        ASSERT2(simPacket, "Model error: AbstractOMNeTARAClient tried to deliver packet to system, but it can not cast to Packet*..");
+        if (simPacket) {
+            ASSERT2(simPacket, "Model error: AbstractOMNeTARAClient tried to deliver packet to system, but it can not cast to Packet*..");
 
-        cPacket* encapsulatedData = simPacket->decapsulate();
-        ASSERT(encapsulatedData);
+            cPacket* encapsulatedData = simPacket->decapsulate();
+            ASSERT(encapsulatedData);
 
-        TrafficControlInfo* controlInfo = new TrafficControlInfo();
-        int maxTTL = packetFactory->getMaximumNrOfHops();
-        controlInfo->setHopCount(maxTTL - packet->getTTL());
-        encapsulatedData->setControlInfo(controlInfo);
+            TrafficControlInfo* controlInfo = new TrafficControlInfo();
+            int maxTTL = packetFactory->getMaximumNrOfHops();
+            controlInfo->setHopCount(maxTTL - packet->getTTL());
 
-        send(encapsulatedData, "upperLayerGate$o");
+            if (encapsulatedData) {
+                encapsulatedData->setControlInfo(controlInfo);
 
-        nrOfDeliverablePackets++;
-        emit(PACKET_DELIVERED_SIGNAL, 1);
+                send(encapsulatedData, "upperLayerGate$o");
+
+                nrOfDeliverablePackets++;
+                emit(PACKET_DELIVERED_SIGNAL, 1);
+            }
+        }
     }
 
     delete packet;
