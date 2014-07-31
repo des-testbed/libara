@@ -17,7 +17,11 @@ void StandardTimer::run(unsigned long timeoutInMicroSeconds){
     std::function<void()> timer = std::bind(&StandardTimer::sleep, this, timeoutInMicroSeconds);
 
     StandardClock* clock = dynamic_cast<StandardClock*>(Environment::getClock());
-    clock->scheduleTimer(timer);
+    if (clock) {
+        clock->scheduleTimer(timer);
+    } else {
+        /// DEBUG
+        std::cerr << "[StandardTimer::run] dynamic cast failed!" << std::endl;
 }
 
 void StandardTimer::interrupt(){
