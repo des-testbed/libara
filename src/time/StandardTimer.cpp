@@ -22,6 +22,7 @@ void StandardTimer::run(unsigned long timeoutInMicroSeconds){
     } else {
         /// DEBUG
         std::cerr << "[StandardTimer::run] dynamic cast failed!" << std::endl;
+    }
 }
 
 void StandardTimer::interrupt(){

@@ -23,34 +23,41 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
     std::deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(packet);
     unsigned int nrOfPossibleNextHops = possibleNextHops.size();
 
-    float sum = 0.0;
-    float products[nrOfPossibleNextHops] = {};
+    if (nrOfPossibleNextHops > 0) {
 
-    for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
-        EARARoutingTableEntry* entry = dynamic_cast<EARARoutingTableEntry*>(possibleNextHops.at(i));
-        assert(entry);
+        float sum = 0.0;
+        float products[nrOfPossibleNextHops] = {};
 
-        float pheromoneValue = entry->getPheromoneValue();
-        float energyValue = entry->getEnergyValue();
+        for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
+            EARARoutingTableEntry* entry = dynamic_cast<EARARoutingTableEntry*>(possibleNextHops.at(i));
+            assert(entry);
 
-        float potentiatedPheromoneValue = pow(pheromoneValue, pheromoneWeight);
-        float potentiatedEnergyValue = pow(energyValue, energyWeight);
+            float pheromoneValue = entry->getPheromoneValue();
+            float energyValue = entry->getEnergyValue();
 
-        products[i] = potentiatedPheromoneValue * potentiatedEnergyValue;
-        sum += products[i];
+            float potentiatedPheromoneValue = pow(pheromoneValue, pheromoneWeight);
+            float potentiatedEnergyValue = pow(energyValue, energyWeight);
+
+            products[i] = potentiatedPheromoneValue * potentiatedEnergyValue;
+            sum += products[i];
+        }
+
+        float probabilities[nrOfPossibleNextHops] = {};
+
+        for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
+            probabilities[i] = products[i] / sum;
+        }
+
+        float cumulativeSum[nrOfPossibleNextHops];
+        std::partial_sum(probabilities, probabilities + nrOfPossibleNextHops, cumulativeSum);
+
+        int nodeIndex = getRandomNodeIndex(cumulativeSum);
+        return possibleNextHops.at(nodeIndex)->getNextHop();
     }
+    // DEBUG:
+    std::cerr << "[EnergyAwareStochasticForwardingPolicy::getNextHop] no next hop found" << std::endl;
 
-    float probabilities[nrOfPossibleNextHops] = {};
-
-    for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
-        probabilities[i] = products[i] / sum;
-    }
-
-    float cumulativeSum[nrOfPossibleNextHops];
-    std::partial_sum(probabilities, probabilities + nrOfPossibleNextHops, cumulativeSum);
-
-    int nodeIndex = getRandomNodeIndex(cumulativeSum);
-    return possibleNextHops.at(nodeIndex)->getNextHop();
+    return nullptr;
 }
 
 int EnergyAwareStochasticForwardingPolicy::getRandomNodeIndex(float cumulativeSum[]) {
