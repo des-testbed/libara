@@ -31,7 +31,7 @@ class StandardTimerProxy : public Timer {
 	void notify();
 
     private:
-        unsigned long timerIdentifier;
+        unsigned long timerIdentifier = -1;
 };
 
 ARA_NAMESPACE_END
