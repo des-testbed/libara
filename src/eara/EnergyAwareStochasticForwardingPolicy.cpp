@@ -54,6 +54,7 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
         int nodeIndex = getRandomNodeIndex(cumulativeSum);
         return possibleNextHops.at(nodeIndex)->getNextHop();
     }
+
     // DEBUG:
     std::cerr << "[EnergyAwareStochasticForwardingPolicy::getNextHop] no next hop found" << std::endl;
 
