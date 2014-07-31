@@ -26,7 +26,9 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
     if (nrOfPossibleNextHops > 0) {
 
         float sum = 0.0;
+
         float products[nrOfPossibleNextHops] = {};
+        float probabilities[nrOfPossibleNextHops] = {};
 
         for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
             EARARoutingTableEntry* entry = dynamic_cast<EARARoutingTableEntry*>(possibleNextHops.at(i));
@@ -42,7 +44,6 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
             sum += products[i];
         }
 
-        float probabilities[nrOfPossibleNextHops] = {};
 
         for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
             probabilities[i] = products[i] / sum;
