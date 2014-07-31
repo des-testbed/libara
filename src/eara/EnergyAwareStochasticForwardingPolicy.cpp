@@ -43,7 +43,6 @@ NextHop* EnergyAwareStochasticForwardingPolicy::getNextHop(const Packet* packet)
             sum += products[i];
         }
 
-
         for (unsigned int i = 0; i < nrOfPossibleNextHops; i++) {
             probabilities[i] = products[i] / sum;
         }
