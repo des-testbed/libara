@@ -12,7 +12,6 @@ ARA_NAMESPACE_BEGIN
 
 class ThreadTerminatedException : public Exception  {
     public:
-        ThreadTerminatedException();
         ThreadTerminatedException(const char* message);
 };
 

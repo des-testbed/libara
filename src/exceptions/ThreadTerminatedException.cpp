@@ -6,10 +6,6 @@
 
 ARA_NAMESPACE_BEGIN
 
-ThreadTerminatedException::ThreadTerminatedException() {
-
-}
-
 ThreadTerminatedException::ThreadTerminatedException(const char* message) : Exception(message) {
 
 }
