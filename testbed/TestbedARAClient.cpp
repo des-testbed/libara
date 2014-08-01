@@ -1,4 +1,4 @@
-*
+/*
  * $FU-Copyright$
  */
 
