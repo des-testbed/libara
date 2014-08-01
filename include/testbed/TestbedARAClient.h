@@ -82,7 +82,13 @@ class TestbedARAClient : public AbstractARAClient {
          * @see AbstractARAClient::startDeliveryTimer(AddressPtr destination);
          */
         void startDeliveryTimer(TestbedAddressPtr destination);
-
+        /**
+         * @see AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet);
+         */
+        void startRouteDiscoveryTimer(const Packet* packet);
+        /**
+         * @see AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination);
+         */
         void stopRouteDiscoveryTimer(AddressPtr destination);
 
         std::string routingTableToString();
@@ -116,7 +122,7 @@ class TestbedARAClient : public AbstractARAClient {
          * This mutex protects the access to the map (runningDeliveryTimers)
          * which holds the delivery timers.
          */
-	    std::mutex deliveryTimerMutex;
+        std::mutex deliveryTimerMutex;
 
         /**
          * This mutex protects the access to the map (runningRouteDiscoveries)

@@ -171,7 +171,7 @@ protected:
     virtual void handleDuplicateErrorPacket(Packet* packet, NetworkInterface* interface);
     void handleRouteFailurePacket(Packet* packet, NetworkInterface* interface);
     virtual void startNewRouteDiscovery(Packet* packet);
-    void startRouteDiscoveryTimer(const Packet* packet);
+    virtual void startRouteDiscoveryTimer(const Packet* packet);
     void forgetKnownIntermediateHopsFor(AddressPtr destination);
     void broadcastFANT(AddressPtr destination);
     bool isRouteDiscoveryRunning(AddressPtr destination);
