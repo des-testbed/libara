@@ -35,8 +35,6 @@ void AbstractARAClient::initialize(Configuration& configuration) {
     isPreviousHopFeatureActivated = configuration.isPreviousHopFeatureActivated();
     packetTrap = configuration.getPacketTrap();
 
-    runningRouteDiscoveries = RunningRouteDiscoveriesMap();
-
     if (neighborActivityCheckIntervalInMilliSeconds > 0) {
        neighborActivityTimer = getNewTimer(TimerType::NEIGHBOR_ACTIVITY_TIMER);
        neighborActivityTimer->addTimeoutListener(this);
