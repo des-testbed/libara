@@ -94,7 +94,7 @@ class TestbedARAClient : public AbstractARAClient {
         /**
          * @see AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination);
          */
-        bool TestbedARAClient::isRouteDiscoveryRunning(AddressPtr destination);
+        bool isRouteDiscoveryRunning(AddressPtr destination);
 
         std::string routingTableToString();
 
