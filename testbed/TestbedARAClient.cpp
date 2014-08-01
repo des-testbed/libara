@@ -119,7 +119,6 @@ void TestbedARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> rou
 }
 
 void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer){
-    std::lock_guard<std::mutex> lock(deliveryTimerMutex);
     std::shared_ptr<Timer> timer = deliveryTimer.lock();
 
     if (timer) {
@@ -142,6 +141,8 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
             if (discovery != runningRouteDiscoveries.end()) {
                 // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
                 runningRouteDiscoveries.erase(discovery);
+
+                std::lock_guard<std::mutex> lock(deliveryTimerMutex);
                 runningDeliveryTimers.erase(timer);
 
                 delete timerInfo;
@@ -204,6 +205,8 @@ void TestbedARAClient::startDeliveryTimer(TestbedAddressPtr destination) {
     TimerPtr timer = getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
     timer->addTimeoutListener(this);
     timer->run(packetDeliveryDelayInMilliSeconds * 1000);
+
+    std::lock_guard<std::mutex> lock(deliveryTimerMutex);
     runningDeliveryTimers.insert(timer);
 }
 
