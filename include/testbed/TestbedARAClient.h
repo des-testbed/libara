@@ -91,6 +91,11 @@ class TestbedARAClient : public AbstractARAClient {
          */
         void stopRouteDiscoveryTimer(AddressPtr destination);
 
+        /**
+         * @see AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination);
+         */
+        bool TestbedARAClient::isRouteDiscoveryRunning(AddressPtr destination);
+
         std::string routingTableToString();
 
         TestbedNetworkInterface* getTestbedNetworkInterface(std::shared_ptr<TestbedAddress> address);

@@ -174,7 +174,7 @@ protected:
     virtual void startRouteDiscoveryTimer(const Packet* packet);
     void forgetKnownIntermediateHopsFor(AddressPtr destination);
     void broadcastFANT(AddressPtr destination);
-    bool isRouteDiscoveryRunning(AddressPtr destination);
+    virtual bool isRouteDiscoveryRunning(AddressPtr destination);
     virtual void handleNonSourceRouteDiscovery(Packet* packet);
     virtual void handlePacketWithZeroTTL(Packet* packet);
     virtual void stopRouteDiscoveryTimer(AddressPtr destination);
