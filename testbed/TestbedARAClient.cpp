@@ -174,7 +174,7 @@ void TestbedARAClient::stopRouteDiscoveryTimer(AddressPtr destination){
 
 bool TestbedARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
     std::lock_guard<std::mutex> lock(routeDiscoveryTimerMutex);
-    return AbstractARAClient::isRouteDiscoveryRunning(AddressPtr destination);
+    return AbstractARAClient::isRouteDiscoveryRunning(destination);
 }
 
 TestbedNetworkInterface* TestbedARAClient::getTestbedNetworkInterface(std::shared_ptr<TestbedAddress> address){
