@@ -21,6 +21,10 @@ MobilityDataPersistor::MobilityDataPersistor(MobilityBase* mobility, cModule* ho
     mobility->subscribe("mobilityStateChanged", this);
 }
 
+void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, bool b){
+    throw("this method is not implemented since the mobility module does not create such a signal");
+}
+
 void MobilityDataPersistor::receiveSignal(cComponent *src, simsignal_t id, long l){
     throw("this method is not implemented since the mobility module does not create such a signal");
 }
