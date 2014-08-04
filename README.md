@@ -53,7 +53,7 @@ You are using libARA in a scientific context? Please cite libARA with publicatio
 
 1. Friedrich Grosse, **Optimization and Evaluation of Energy Aware Ant Routing Algorithm Strategies Based on Network Simulations**, Master Thesis, August 2013
 2. Michael Frey, Friedrich Grosse, Mesut Günes, **libARA: A framework for simulation and testbed based studies on ant routing algorithms in wireless multi-hop networks**, [7th International Conference on Performance Evaluation Methodologies and Tools](http://valuetools.org/2013/show/home), December 2013
-3. Michael Frey, Friedrich Grosse, Mesut Günes, **Energy Aware Ant Routing in Wireless Multi-Hop Networks**, [IEEE International Conference on Communications (ICC)](http://www.ieee-icc.org), June 2014 (to appear)
+3. Michael Frey, Friedrich Grosse, Mesut Günes, **Energy Aware Ant Routing in Wireless Multi-Hop Networks**, [IEEE International Conference on Communications (ICC)](http://www.ieee-icc.org), June 2014
 4. Michael Frey, Mesut Günes, **Attack of the Ants: Studying Ant Routing Algorithms in Simulation and Wireless Testbeds**, [OMNeT++ Community Summit 2014](http://summit.omnetpp.org/2014/), September 2014 (to appear)
 
 License
