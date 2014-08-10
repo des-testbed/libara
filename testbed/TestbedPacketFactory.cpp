@@ -65,7 +65,7 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     TestbedAddressPtr source = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
 
     packet = new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl);
-    packet->setMessage(message);
+    packet->addPayload(message);
 
     return packet;
 }
@@ -85,20 +85,12 @@ TestbedPacket* TestbedPacketFactory::makeNewPacket(dessert_msg_t* message) {
 }
 
 TestbedPacket* TestbedPacketFactory::makeClone(const TestbedPacket* packet) {
-    if (packet->getMessage() != nullptr){
-        TestbedPacket* result = this->makePacket(packet->getSource(), packet->getDestination(), packet->getSender(), packet->getType(), packet->getSequenceNumber(), packet->getTTL());
-        result->setPreviousHop(packet->getPreviousHop());
-        result->setMessage(packet->getMessage());
-        result->setPayloadLength(packet->getPayloadLength());
-        return result;
-    }
     return makePacket(packet->getSource(), packet->getDestination(), packet->getSender(), packet->getType(), packet->getSequenceNumber(), packet->getTTL(), packet->getPayload(), packet->getPayloadLength(), packet->getPreviousHop());
 }
 
 TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, dessert_msg_t* payload, unsigned int payloadSize) {
     TestbedPacket* packet = this->makePacket(source, destination, source, PacketType::DATA, sequenceNumber, maxHopCount);
-    packet->setMessage(payload);
-    packet->setPayloadLength(payloadSize);
+    packet->addPayload(payload);
     return packet;
 }
 
