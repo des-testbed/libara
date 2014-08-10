@@ -84,9 +84,9 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
     /// FIXME: 
     ara_address_t tmp; 
     /// FIXME: backup the address
-    memcpy(tmp, message->l2h.ether_dhost, sizeof(ara_address_t));
+    std::memcpy(tmp, message->l2h.ether_dhost, sizeof(ara_address_t));
     /// set the next hop as the destination host 
-    memcpy(message->l2h.ether_dhost, recipientAddress->getDessertValue(), sizeof(ara_address_t));
+    std::memcpy(message->l2h.ether_dhost, recipientAddress->getDessertValue(), sizeof(ara_address_t));
 
     // DEBUG:
     std::cerr << "[TestbedPacketDispatcher::dispatch] next hop is " << recipientAddress->toString() << std::endl;
