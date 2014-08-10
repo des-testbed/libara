@@ -54,7 +54,8 @@ dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_pro
         networkInterface->receive(packet);
     }
 
-    return DESSERT_MSG_DROP;
+    //return DESSERT_MSG_DROP;
+    return DESSERT_MSG_KEEP;
 }
 
 /**

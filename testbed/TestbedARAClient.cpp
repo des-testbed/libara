@@ -59,6 +59,7 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
     const TestbedPacket *testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
 
     struct ether_header* payload = nullptr;
+/*
     size_t payloadLength = dessert_msg_ethdecap(testbedPacket->getMessage(), &payload);
 
     /// deliver the packet to the system
@@ -68,13 +69,15 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
         std::cerr << "[TestbedARAClient::deliverToSystem] sending packet to system failed" << std::endl;
     }
 
+    */
+
     /**
      * FIXME: we have to use free, since it was allocated using malloc in
      * dessert_msg_ethdecap
-     */
     if (payload) {
        free(payload);
     }
+     */
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
