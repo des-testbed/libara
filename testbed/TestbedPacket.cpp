@@ -29,43 +29,33 @@ AddressPtr TestbedPacket::getPreviousHop() const {
     return Packet::getPreviousHop();
 }
 
-// TODO
-dessert_msg_t* TestbedPacket::getMessage() const {
-    std::lock_guard<std::mutex> lock(mutex);
-//    dessert_msg_t *result = new struct ether_header[payloadSize];
-    // create a copy
-  //  std::copy(dessertPayload, dessertPayload + payloadSize, result);
-    // we simply return a copy
-    //return result;
-    return message;
-}
-
-void TestbedPacket::setMessage(dessert_msg_t* newMessage) {
-    std::lock_guard<std::mutex> lock(mutex);
-
-    if (message != nullptr){
-       dessert_msg_destroy(message);
-       payloadSize = 0;
-    }
-
-    message = newMessage;
-
+void TestbedPacket::addPayload(dessert_msg_t* message) {
     /// check if the packet has actually payload  
-    if (newMessage->plen > 0) {
-        /// get the payload and update the size of the payload
-        if ((payloadSize = dessert_msg_getpayload(newMessage, &payload)) == 0) {
+    if (message->plen > 0) {
+        void* originalPayload = nullptr;
+
+        if (dessert_msg_getpayload(message, &originalPayload) == message->plen){
+            std::lock_guard<std::mutex> lock(mutex);
+
+            if (payload != nullptr) {
+                delete[] payload;
+                payloadSize = 0;
+            }
+
+            char* tmpPayload = new char[message->plen];
+            std::memcpy(tmpPayload, (char*)originalPayload, message->plen);
+
+            payload = tmpPayload;
+            payloadSize = message->plen;
+        } else {
             // DEBUG:
             std::cerr << "[TestbedPacket::setMessage] saving payload failed" << std::endl;
         }
+    } else {
+        // DEBUG:
+        std::cerr << "[TestbedPacket::setMessage] tried to save payload while there is actually none" << std::endl;
     }
 }
-
-void TestbedPacket::setPayloadLength(unsigned int newPayloadLength){
-    std::lock_guard<std::mutex> lock(mutex);
-    /// FIXME: add a check for payload and payloadlength
-    payloadSize = newPayloadLength;
-}
-
 
 dessert_msg_t* TestbedPacket::toDessertMessage() const {
     std::lock_guard<std::mutex> lock(mutex);

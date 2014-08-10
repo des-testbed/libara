@@ -49,11 +49,7 @@ class TestbedPacket : public Packet {
          */
         AddressPtr getPreviousHop() const;
 
-        dessert_msg_t* getMessage() const;
-
-        void setMessage(dessert_msg_t* message);
-
-        void setPayloadLength(unsigned int newPayloadLength);
+        void addPayload(dessert_msg_t* message);
 
         /**
          * The method returs a libdessert representation of a 
@@ -70,13 +66,6 @@ class TestbedPacket : public Packet {
 	    mutable std::mutex senderMutex;
 	    mutable std::mutex sourceMutex;
 	    mutable std::mutex destinationMutex;
-
-        dessert_msg_t* message = nullptr;
-
-        /**
-         * The payload of the packet.
-         */
-        void* payload = nullptr;
 };
 
 TESTBED_NAMESPACE_END
