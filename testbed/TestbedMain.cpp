@@ -22,19 +22,38 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
 }
 
 /**
+ * This is a wrapper function for initializing a mesh interface. This is
+ * necessary due to recent changes in the libcli API (the called function is 
+ * defined in libdessert).
+ * */
+int cli_setup_meshif(struct cli_def* cli, const char* command, char* argv[], int argc) {
+  return dessert_cli_cmd_addmeshif(cli, const_cast<char*>(command), argv, argc);
+}
+/**
+ * * This is a wrapper function for initializing a tap interface. This is
+ * necessary due to recent changes in the libcli API (the called function is 
+ * defined in libdessert).
+ * */
+int cli_setup_sysif(struct cli_def* cli, const char* command, char* argv[], int argc) {
+  return dessert_cli_cmd_addsysif(cli, const_cast<char*>(command), argv, argc);
+}
+
+/**
  * The function registers the callback functions for the remote shell provided
  * by libcli. The (callback) functions are defined in
  * TestbedCommandLineInterface.h and implemented in
  * TestbedCommandLineInterface.cpp
  */
 static void registerCommandLineInterfaceCommands(){
-     cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("sys"), dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize tap interface"));
-     cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("mesh"), dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize mesh interface"));
-     cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("testSendMesh"), ARA::testbed::cli_test_send_mesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("send a test packet to mesh interface"));
+    //cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("sys"), dessert_cli_cmd_addsysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize tap interface"));
+    cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", cli_setup_sysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize tap interface");
+//     cli_register_command(dessert_cli, dessert_cli_cfg_iface, const_cast<char*>("mesh"), dessert_cli_cmd_addmeshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, const_cast<char*>("initialize mesh interface"));
+    cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", cli_setup_meshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
+    // cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("testSendMesh"), ARA::testbed::cli_test_send_mesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("send a test packet to mesh interface"));
      //cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("list timers"), ARA::testbed::cli_list_active_timers, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("list active timers"));
-     cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("routing table"), ARA::testbed::cli_show_routing_table, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("displays the content of the routing table"));
-     cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("configuration"), ARA::testbed::cli_show_configuration, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("lists the current set configuration"));
-     cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("statistics"), ARA::testbed::cli_show_statistics, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("shows various statistics of the routing daemon"));
+ //    cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("routing table"), ARA::testbed::cli_show_routing_table, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("displays the content of the routing table"));
+   //  cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("configuration"), ARA::testbed::cli_show_configuration, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("lists the current set configuration"));
+   //  cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("statistics"), ARA::testbed::cli_show_statistics, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("shows various statistics of the routing daemon"));
 }
 
 /**
