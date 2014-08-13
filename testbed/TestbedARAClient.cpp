@@ -54,13 +54,9 @@ void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* inte
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
     logDebug("sending packet # %u to System via TAP", packet->getSequenceNumber());
-
-    /// cast it to a testbed packet
-    const TestbedPacket *testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
-
-    struct ether_header* payload = nullptr;
-/*
-    size_t payloadLength = dessert_msg_ethdecap(testbedPacket->getMessage(), &payload);
+   
+    int payloadLength = packet->getPayloadLength();
+    const void *payload = packet->getPayload();
 
     /// deliver the packet to the system
     if (dessert_syssend(payload, payloadLength) == DESSERT_OK){
@@ -68,16 +64,6 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
     } else {
         std::cerr << "[TestbedARAClient::deliverToSystem] sending packet to system failed" << std::endl;
     }
-
-    */
-
-    /**
-     * FIXME: we have to use free, since it was allocated using malloc in
-     * dessert_msg_ethdecap
-    if (payload) {
-       free(payload);
-    }
-     */
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
