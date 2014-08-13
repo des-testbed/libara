@@ -195,13 +195,11 @@ float AbstractEARAClient::calculateRouteFitness(int ttl, float energyFitness) {
 
 void AbstractEARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
     TimerPtr timer = responsibleTimer.lock();
-    TimerType timerType = timer->getType();
-    switch (timerType) {
-        case TimerType::ROUTE_DISCOVERY_DELAY_TIMER:
-            handleExpiredRouteDiscoveryDelayTimer(responsibleTimer);
-            return;
-        default:
-            AbstractARAClient::timerHasExpired(responsibleTimer);
+
+    if (timer->getType() == TimerType::ROUTE_DISCOVERY_DELAY_TIMER) {
+        handleExpiredRouteDiscoveryDelayTimer(responsibleTimer);
+    } else {
+        AbstractARAClient::timerHasExpired(responsibleTimer);
     }
 }
 

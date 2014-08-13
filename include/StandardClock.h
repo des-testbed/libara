@@ -23,7 +23,7 @@ class StandardClock : public Clock {
     public:
 
         Time* makeTime();
-        TimerPtr getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr);
+        TimerPtr getNewTimer(char timerType, void* contextObject=nullptr);
 
         void scheduleTimer(unsigned long identifier, unsigned long timeoutInMicroseconds);
         void scheduleTimer(std::function<void()> timer);

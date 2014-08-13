@@ -12,7 +12,7 @@ Time* DummyClock::makeTime(){
     return new StandardTime();
 }
 
-TimerPtr DummyClock::getNewTimer(TimerType timerType, void* contextObject){
+TimerPtr DummyClock::getNewTimer(char timerType, void* contextObject){
     return std::make_shared<StandardTimer>(timerType, contextObject);
 }
 

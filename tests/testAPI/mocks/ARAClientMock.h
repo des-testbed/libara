@@ -59,7 +59,7 @@ public:
     using AbstractARAClient::registerReceivedPacket;
     
     bool isPANTsTimerExpired(AddressPtr destination);
-	bool isPANTsTimerType(AddressPtr destination, TimerType type);
+	bool isPANTsTimerType(AddressPtr destination, char type);
     bool isPANTsTimerRunning(AddressPtr destination);
     void expirePANTsTimer(AddressPtr destination);
 };

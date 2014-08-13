@@ -11,7 +11,7 @@ using namespace ARA;
 TEST_GROUP(TimerMockTest) {};
 
 TEST(TimerMockTest, expire) {
-    TimerMock timer = TimerMock();
+    TimerMock timer(TimerType::INVALID_TIMER);
     timer.run(123);
     timer.expire();
 
@@ -19,7 +19,7 @@ TEST(TimerMockTest, expire) {
 }
 
 TEST(TimerMockTest, hasBeenInterrupted) {
-    TimerMock timer = TimerMock();
+    TimerMock timer(TimerType::INVALID_TIMER);
     CHECK_FALSE(timer.hasBeenInterrupted());
 
     timer.run(123);

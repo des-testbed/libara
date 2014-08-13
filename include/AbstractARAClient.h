@@ -199,7 +199,7 @@ protected:
     /**
      * A convenience method to retrieve a timer from the static Environment.
      */
-    TimerPtr getNewTimer(TimerType timerType, void* contextObject=nullptr) const;
+    TimerPtr getNewTimer(char timerType, void* contextObject=nullptr) const;
 
 protected:
     TimerPtr neighborActivityTimer;

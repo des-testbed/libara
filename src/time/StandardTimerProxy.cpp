@@ -6,7 +6,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-StandardTimerProxy::StandardTimerProxy(TimerType type, void* contextObject) : Timer(type, contextObject) { }
+StandardTimerProxy::StandardTimerProxy(char type, void* contextObject) : Timer(type, contextObject) { }
 
 StandardTimerProxy::~StandardTimerProxy(){ }
 

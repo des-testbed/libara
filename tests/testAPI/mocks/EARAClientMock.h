@@ -46,7 +46,7 @@ public:
     TimerMock* getEnergyDisseminationTimer();
 
     bool isRouteDiscoveryDelayTimerExpired(AddressPtr source);
-	bool isRouteDiscoveryDelayTimerType(AddressPtr destination, TimerType type);
+	bool isRouteDiscoveryDelayTimerType(AddressPtr destination, char type);
     bool isRouteDiscoveryDelayTimerRunning(AddressPtr destination);
     void expireRouteDiscoveryDelayTimer(AddressPtr destination);
 

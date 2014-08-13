@@ -110,7 +110,7 @@ bool EARAClientMock::isRouteDiscoveryDelayTimerExpired(AddressPtr destination) {
     return true;
 }
 
-bool EARAClientMock::isRouteDiscoveryDelayTimerType(AddressPtr destination, TimerType type) {
+bool EARAClientMock::isRouteDiscoveryDelayTimerType(AddressPtr destination, char type) {
     if (runningRouteDiscoveryDelayTimers.find(destination) != runningRouteDiscoveryDelayTimers.end()) {
         if ((runningRouteDiscoveryDelayTimers[destination])->getType() == type) {
             return true;

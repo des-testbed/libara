@@ -8,13 +8,13 @@
 
 using namespace ARA;
 
-Timer::Timer(TimerType type, void* contextObject) {
+Timer::Timer(char type, void* contextObject) {
     this->type = type;
     this->contextObject = contextObject;
     listeners = std::deque<TimeoutEventListener*>();
 }
 
-TimerType Timer::getType() const {
+char Timer::getType() const {
     return type;
 }
 
@@ -31,8 +31,10 @@ void Timer::addTimeoutListener(TimeoutEventListener* listener) {
 }
 
 void Timer::notifyAllListeners() {
-    std::thread::id this_id = std::this_thread::get_id();
-    std::cerr << "[Timer::notifyAllListeners] for timer type " << type << " and thread id " << this_id << " and object " << this << std::endl;
+    //std::thread::id this_id = std::this_thread::get_id();
+    
+    std::cerr << "[Timer::notifyAllListeners] for " <<  TimerType::getAsString(type) << std::endl;
+
     for(auto& listener: listeners) {
 	    std::weak_ptr<Timer> timer = this->getTimer();
         listener->timerHasExpired(timer);

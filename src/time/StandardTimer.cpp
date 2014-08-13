@@ -7,7 +7,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-StandardTimer::StandardTimer(TimerType type, void* contextObject) : Timer(type, contextObject) { 
+StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { 
   printStacktrace(10);
 }
 

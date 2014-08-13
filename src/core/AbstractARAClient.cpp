@@ -173,14 +173,13 @@ void AbstractARAClient::broadcastFANT(AddressPtr destination) {
 }
 
 void AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet) {
-    // DEBUG: 
-    std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] create new route discovery context object " << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] create new route discovery context object " << std::endl;
     RouteDiscoveryInfo* discoveryInfo = new RouteDiscoveryInfo(packet);
-    std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] get new timer " << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] get new timer " << std::endl;
     TimerPtr timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
-    std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] add client to listener " << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] add client to listener " << std::endl;
     timer->addTimeoutListener(this);
-    std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] run timer " << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::startRouteDiscoveryTimer] run timer " << std::endl;
     timer->run(routeDiscoveryTimeoutInMilliSeconds * 1001);
 
     AddressPtr destination = packet->getDestination();
@@ -259,7 +258,7 @@ void AbstractARAClient::updateRoutingTable(Packet* packet, NetworkInterface* int
 void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* interface) {
     float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
     routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
-    logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
+    // DEBUG: logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
 
     if(hasPreviousNodeBeenSeenBefore(packet) == false) {
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
@@ -590,24 +589,23 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
 
 void AbstractARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
     std::shared_ptr<Timer> timer = responsibleTimer.lock();
-    TimerType timerType = timer->getType();
-    switch (timerType) {
-        case TimerType::NEIGHBOR_ACTIVITY_TIMER:
-            checkInactiveNeighbors();
-            startNeighborActivityTimer();
-            return;
-        case TimerType::ROUTE_DISCOVERY_TIMER:
-            handleExpiredRouteDiscoveryTimer(responsibleTimer);
-            return;
-        case TimerType::PANTS_TIMER:
-            handleExpiredPANTTimer(responsibleTimer);
-            return;
-        case TimerType::DELIVERY_TIMER:
-            handleExpiredDeliveryTimer(responsibleTimer);
-            return;
-        default:
-            // if this happens its a bug in our code
-            logError("Could not identify expired timer");
+
+    if (timer->getType() == TimerType::NEIGHBOR_ACTIVITY_TIMER) {
+        checkInactiveNeighbors();
+        startNeighborActivityTimer();
+
+    } else if(timer->getType() == TimerType::ROUTE_DISCOVERY_TIMER) {
+        handleExpiredRouteDiscoveryTimer(responsibleTimer);
+
+    } else if(timer->getType() == TimerType::PANTS_TIMER) {
+        handleExpiredPANTTimer(responsibleTimer);
+
+    } else if(timer->getType() == TimerType::DELIVERY_TIMER) {
+        handleExpiredDeliveryTimer(responsibleTimer);
+
+    } else {
+       // if this happens its a bug in our code
+       logError("Could not identify expired timer");
     }
 }
 
@@ -806,7 +804,7 @@ int AbstractARAClient::getMaxTTL() const {
     return packetFactory->getMaximumNrOfHops();
 }
 
-TimerPtr AbstractARAClient::getNewTimer(TimerType timerType, void* contextObject) const {
+TimerPtr AbstractARAClient::getNewTimer(char timerType, void* contextObject) const {
     return Environment::getClock()->getNewTimer(timerType, contextObject);
 }
 

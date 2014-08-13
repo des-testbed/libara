@@ -114,7 +114,7 @@ bool ARAClientMock::isPANTsTimerExpired(AddressPtr destination) {
     return true;
 }
 
-bool ARAClientMock::isPANTsTimerType(AddressPtr destination, TimerType type) {
+bool ARAClientMock::isPANTsTimerType(AddressPtr destination, char type) {
     if (scheduledPANTs.find(destination) != scheduledPANTs.end()) {
         if ((scheduledPANTs[destination])->getType() == type) {
             return true;

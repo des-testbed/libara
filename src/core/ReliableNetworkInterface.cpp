@@ -46,7 +46,7 @@ void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, Ad
     assert(packet != nullptr);
     // DEBUG: 
     std::cout << "[ReliableNetworkInterface::startAcknowledgmentTimer] get a new timer " << std::endl;
-    TimerPtr ackTimer = Environment::getClock()->getNewTimer();
+    TimerPtr ackTimer = Environment::getClock()->getNewTimer(TimerType::ACK_TIMER);
     // DEBUG: 
     std::cout << "[ReliableNetworkInterface::startAcknowledgmentTimer] add to timeout listener " << std::endl;
     ackTimer->addTimeoutListener(this);

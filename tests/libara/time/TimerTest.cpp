@@ -11,7 +11,7 @@ using namespace ARA;
 TEST_GROUP(TimerTest) {};
 
 TEST(TimerTest, addTimeoutListener) {
-    std::shared_ptr<TimerMock> timer = std::make_shared<TimerMock>();
+    std::shared_ptr<TimerMock> timer = std::make_shared<TimerMock>(TimerType::INVALID_TIMER);
     TimeoutEventListenerMock listener1;
     TimeoutEventListenerMock listener2;
     TimeoutEventListenerMock listener3;
@@ -32,12 +32,12 @@ TEST(TimerTest, addTimeoutListener) {
 }
 
 TEST(TimerTest, defaultType) {
-    TimerMock timer;
-    BYTES_EQUAL(5, timer.getType());
+    TimerMock timer(TimerType::INVALID_TIMER);
+    BYTES_EQUAL(6, timer.getType());
 }
 
 TEST(TimerTest, defaultContextObject) {
-    TimerMock timer;
+    TimerMock timer(TimerType::INVALID_TIMER);
     CHECK(timer.getContextObject() == nullptr);
 }
 
@@ -53,7 +53,7 @@ TEST(TimerTest, getContextObject) {
 }
 
 TEST(TimerTest, setContextObject) {
-    TimerMock timer = TimerMock();
+    TimerMock timer(TimerType::INVALID_TIMER);
     CHECK(timer.getContextObject() == nullptr);
 
     const char* contextObject = "Hello World";

@@ -17,7 +17,7 @@ ARA_NAMESPACE_BEGIN
 class DummyClock : public Clock {
     public:
         Time* makeTime();
-        TimerPtr getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr);
+        TimerPtr getNewTimer(char timerType, void* contextObject=nullptr);
 };
 
 ARA_NAMESPACE_END

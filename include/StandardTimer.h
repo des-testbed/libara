@@ -21,7 +21,7 @@ class StandardTimerProxy;
 
 class StandardTimer : public Timer {
     public:
-        StandardTimer(TimerType type, void* contextObject=nullptr);
+        StandardTimer(char type, void* contextObject=nullptr);
         virtual ~StandardTimer();
 
         virtual void run(unsigned long timeoutInMicroSeconds);

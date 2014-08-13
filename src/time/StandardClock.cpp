@@ -13,7 +13,7 @@ Time* StandardClock::makeTime(){
     return new StandardTime();
 }
 
-TimerPtr StandardClock::getNewTimer(TimerType timerType, void* contextObject){
+TimerPtr StandardClock::getNewTimer(char timerType, void* contextObject){
     std::lock_guard<std::mutex> lock(mutex);
     /// create a proxy for the standard timer	    
     std::shared_ptr<StandardTimerProxy> result = std::make_shared<StandardTimerProxy>(timerType, contextObject);

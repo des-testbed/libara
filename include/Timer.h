@@ -25,7 +25,7 @@ class Timer : public std::enable_shared_from_this<Timer> {
          * The Timer can have a type and also an optional context object.
          * Both can be used by the TimeoutEventlisteners when the timer has expired.
          */
-        Timer(TimerType type, void* contextObject=nullptr);
+        Timer(char type, void* contextObject=nullptr);
 
         virtual ~Timer() {
            printStacktrace();
@@ -63,7 +63,7 @@ class Timer : public std::enable_shared_from_this<Timer> {
          * Returns the type of this timer. This is useful for objects to distinguish
          * several conceptually different timers.
          */
-        TimerType getType() const;
+        char getType() const;
 
         /**
          * Returns the context object.
@@ -88,7 +88,7 @@ class Timer : public std::enable_shared_from_this<Timer> {
         void notifyAllListeners();
 
     protected:
-        TimerType type;
+        char type;
         void* contextObject;
 
     private:

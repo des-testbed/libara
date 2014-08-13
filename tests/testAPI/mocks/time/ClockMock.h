@@ -14,7 +14,7 @@ namespace ARA {
     class ClockMock : public Clock {
         public:
             Time* makeTime();
-            TimerPtr getNewTimer(TimerType timerType=TimerType::INVALID_TIMER, void* contextObject=nullptr);
+            TimerPtr getNewTimer(char timerType,  void* contextObject=nullptr);
 
             std::weak_ptr<TimerMock> getLastTimer();
 

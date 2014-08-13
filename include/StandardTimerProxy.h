@@ -15,7 +15,7 @@ ARA_NAMESPACE_BEGIN
 
 class StandardTimerProxy : public Timer {
     public:
-        StandardTimerProxy(TimerType type, void* contextObject=nullptr);
+        StandardTimerProxy(char type, void* contextObject=nullptr);
         virtual ~StandardTimerProxy();
 
         virtual void run(unsigned long timeoutInMicroSeconds);
