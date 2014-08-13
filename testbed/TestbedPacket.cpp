@@ -31,22 +31,24 @@ AddressPtr TestbedPacket::getPreviousHop() const {
 
 void TestbedPacket::addPayload(dessert_msg_t* message) {
     /// check if the packet has actually payload  
-    if (message->plen > 0) {
+    if (ntohs(message->plen) > 0) {
         void* originalPayload = nullptr;
 
-        if (dessert_msg_getpayload(message, &originalPayload) == message->plen){
+        // DEBUG: std::cerr << "[TestbedPacket::addPayload] payload is " << message->plen << " and with ntohs(msg->plen) it is " << ntohs(message->plen) << std::endl;
+
+        if (ntohs(dessert_msg_getpayload(message, &originalPayload)) == ntohs(message->plen)){
             std::lock_guard<std::mutex> lock(mutex);
 
             if (payload != nullptr) {
                 delete[] payload;
                 payloadSize = 0;
             }
+            payloadSize = ntohs(message->plen);
 
-            char* tmpPayload = new char[message->plen];
-            std::memcpy(tmpPayload, (char*)originalPayload, message->plen);
+            char* tmpPayload = new char[payloadSize];
+            std::memcpy(tmpPayload, (char*)originalPayload, payloadSize);
 
             payload = tmpPayload;
-            payloadSize = message->plen;
         } else {
             // DEBUG:
             std::cerr << "[TestbedPacket::setMessage] saving payload failed" << std::endl;
