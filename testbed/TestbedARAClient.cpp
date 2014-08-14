@@ -103,7 +103,7 @@ std::string TestbedARAClient::routingTableToString() {
 }
 
 void TestbedARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer){
-    std::shared_ptr<Timer> timer = routeDiscoveryTimer.lock();
+    std::lock_guard<std::recursive_mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
     AbstractARAClient::handleExpiredRouteDiscoveryTimer(routeDiscoveryTimer);
 }
 
@@ -122,9 +122,7 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
                 " in running route discoveries " << std::endl;
 
             RunningRouteDiscoveriesMap::const_iterator discovery;
-            // acquire lock on the route discovery map
-            std::lock_guard<std::mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
-            // find the destination in the running route discoverys map
+            std::lock_guard<std::recursive_mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
             discovery = runningRouteDiscoveries.find(destination);
 
             if (discovery != runningRouteDiscoveries.end()) {
@@ -153,17 +151,21 @@ void TestbedARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer){
 }
 
 void TestbedARAClient::startRouteDiscoveryTimer(const Packet* packet){
-    std::lock_guard<std::mutex> lock(routeDiscoveryTimerMutex);
+    std::lock_guard<std::recursive_mutex> lock(routeDiscoveryTimerMutex);
     AbstractARAClient::startRouteDiscoveryTimer(packet);
 }
 
 void TestbedARAClient::stopRouteDiscoveryTimer(AddressPtr destination){
-    std::lock_guard<std::mutex> lock(routeDiscoveryTimerMutex);
+    std::lock_guard<std::recursive_mutex> lock(routeDiscoveryTimerMutex);
     AbstractARAClient::stopRouteDiscoveryTimer(destination);
 }
 
 bool TestbedARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
-    std::lock_guard<std::mutex> lock(routeDiscoveryTimerMutex);
+    // DEBUG: 
+    std::cerr << "[TestbedARAClient::isRouteDiscoveryTimerRunning] argh" << std::endl;
+    std::lock_guard<std::recursive_mutex> lock(routeDiscoveryTimerMutex);
+    // DEBUG: 
+    std::cerr << "[TestbedARAClient::isRouteDiscoveryTimerRunning] yay" << std::endl;
     return AbstractARAClient::isRouteDiscoveryRunning(destination);
 }
 

@@ -131,9 +131,11 @@ class TestbedARAClient : public AbstractARAClient {
 
         /**
          * This mutex protects the access to the map (runningRouteDiscoveries)
-         * which holds the route discovery timers.  
+         * which holds the route discovery timers. It is a recursive mutex since
+         * the handleExpiredDeliveryTimer() method calls other methods which
+         * access the route discovery timer map
          */
-        std::mutex routeDiscoveryTimerMutex;
+        std::recursive_mutex routeDiscoveryTimerMutex;
 
         /**
          * This mutex protects the access to the map (scheduledPANTs)
