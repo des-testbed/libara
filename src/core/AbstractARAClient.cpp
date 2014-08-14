@@ -98,25 +98,13 @@ void AbstractARAClient::sendPacket(Packet* packet) {
     // at first we need to trigger the evaporation (this has no effect if this has been done before in receivePacket(..) )
     routingTable->triggerEvaporation();
 
-    // DEBUG:
-    std::cerr << "[AbstractARAClient::sendPacket] ttl is " << packet->getTTL() << std::endl;
-
     if (packet->getTTL() > 0) {
-    // DEBUG:
-    std::cerr << "[AbstractARAClient::sendPacket] 1" << std::endl;
-
         AddressPtr destination = packet->getDestination();
-    std::cerr << "[AbstractARAClient::sendPacket] 1a" << std::endl;
 
         if (isRouteDiscoveryRunning(destination)) {
-    // DEBUG:
-    std::cerr << "[AbstractARAClient::sendPacket] 2" << std::endl;
-
             logDebug("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
             packetTrap->trapPacket(packet);
         } else if (routingTable->isDeliverable(packet)) {
-    // DEBUG:
-    std::cerr << "[AbstractARAClient::sendPacket] 3" << std::endl;
             NextHop* nextHop = forwardingPolicy->getNextHop(packet);
             NetworkInterface* interface = nextHop->getInterface();
             AddressPtr nextHopAddress = nextHop->getAddress();
@@ -128,24 +116,16 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
             sendUnicast(packet, interface, nextHopAddress);
         } else {
-    // DEBUG:
-    std::cerr << "[AbstractARAClient::sendPacket] 4" << std::endl;
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
-    // DEBUG:
-    std::cerr << "[AbstractARAClient::sendPacket] 5" << std::endl;
                 logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
                 packetTrap->trapPacket(packet);
                 startNewRouteDiscovery(packet);
             } else {
-    // DEBUG:
-    std::cerr << "[AbstractARAClient::sendPacket] 6" << std::endl;
                 handleNonSourceRouteDiscovery(packet);
             }
         }
     } else {
-    // DEBUG:
-    std::cerr << "[AbstractARAClient::sendPacket] 7" << std::endl;
         handlePacketWithZeroTTL(packet);
     }
 }
@@ -516,9 +496,7 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
          * the route discovery is not completely finished until the delivery timer expired.
          * only then is runningRouteDiscoveries.erase(discovery) called!
          */
-        if (!timer->getContextObject()) {
-            delete (RouteDiscoveryInfo*) timer->getContextObject();
-        }
+        delete (RouteDiscoveryInfo*) timer->getContextObject();
     } else {
         logError("Could not stop route discovery timer (not found for destination %s)", destination->toString().c_str());
     }
@@ -650,7 +628,10 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> ro
     } else {
         // delete the route discovery timer
         runningRouteDiscoveries.erase(destination);
-        delete discoveryInfo;
+
+        if (!discoveryInfo) {
+            delete discoveryInfo;
+        }
 
         forgetKnownIntermediateHopsFor(destination);
         deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);

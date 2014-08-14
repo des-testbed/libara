@@ -161,11 +161,7 @@ void TestbedARAClient::stopRouteDiscoveryTimer(AddressPtr destination){
 }
 
 bool TestbedARAClient::isRouteDiscoveryRunning(AddressPtr destination) {
-    // DEBUG: 
-    std::cerr << "[TestbedARAClient::isRouteDiscoveryTimerRunning] argh" << std::endl;
     std::lock_guard<std::recursive_mutex> lock(routeDiscoveryTimerMutex);
-    // DEBUG: 
-    std::cerr << "[TestbedARAClient::isRouteDiscoveryTimerRunning] yay" << std::endl;
     return AbstractARAClient::isRouteDiscoveryRunning(destination);
 }
 
