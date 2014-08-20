@@ -2,10 +2,11 @@
  * $FU-Copyright$
  */
 
-#ifndef PANT_TIMER_INFO_H_
-#define PANT_TIMER_INFO_H_
+#ifndef TIMER_ADDRESS_INFO_H_
+#define TIMER_ADDRESS_INFO_H_
 
 #include "ARAMacros.h"
+#include "Context.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -16,15 +17,20 @@ ARA_NAMESPACE_BEGIN
  * We can't just give it an ordinary AddressPtr instance, because those
  * are no real pointers by nature.
  */
-class TimerAddressInfo {
+class TimerAddressInfo : public Context {
     public:
-        TimerAddressInfo(AddressPtr destination) {
-            this->destination = destination;
-        }
+        TimerAddressInfo(AddressPtr destination);
 
+        /**
+         * The method returns an shared_ptr of type address.
+         * @return A shared_ptr of type Address
+         */
+        std::shared_ptr<Address> getDestination();
+
+    private:
         AddressPtr destination;
 };
 
 ARA_NAMESPACE_END
 
-#endif // ROUTE_DISCOVERY_INFO_H_
+#endif // TIMER_ADDRESS_INFO_H_

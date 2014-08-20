@@ -19,12 +19,13 @@ TESTBED_NAMESPACE_BEGIN
  * the TimerAddressInfo by means of a mutex which protexts the information
  * hold in the class.
  */
-class TestbedTimerAddressInfo : private TimerAddressInfo {
+class TestbedTimerAddressInfo : public TimerAddressInfo {
     public:
         TestbedTimerAddressInfo(std::shared_ptr<TestbedAddress> destination);
 
         //std::shared_ptr<TestbedAddress> getAddress();
-        std::shared_ptr<Address> getAddress();
+        std::shared_ptr<Address> getDestination();
+
     private:
         std::mutex addressMutex;
 };

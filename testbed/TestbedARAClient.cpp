@@ -114,7 +114,7 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
         // DEBUG:
         std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] "<< std::endl;
         TestbedTimerAddressInfo* timerInfo = (TestbedTimerAddressInfo*) timer->getContextObject();
-        AddressPtr destination = timerInfo->getAddress();
+        AddressPtr destination = timerInfo->getDestination();
 
         if (destination) {
             // DEBUG:

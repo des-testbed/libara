@@ -645,7 +645,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> ro
 void AbstractARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer) {
     std::shared_ptr<Timer> timer = deliveryTimer.lock();
     TimerAddressInfo* timerInfo = (TimerAddressInfo*) timer->getContextObject();
-    AddressPtr destination = timerInfo->destination;
+    AddressPtr destination = timerInfo->getDestination();
 
     RunningRouteDiscoveriesMap::const_iterator discovery;
     discovery = runningRouteDiscoveries.find(destination);
@@ -668,8 +668,8 @@ void AbstractARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> delivery
 void AbstractARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer) {
     std::shared_ptr<Timer> timer = pantTimer.lock();
     TimerAddressInfo* timerInfo = (TimerAddressInfo*)timer->getContextObject();
-    scheduledPANTs.erase(timerInfo->destination);
-    broadcastPANT(timerInfo->destination);
+    scheduledPANTs.erase(timerInfo->getDestination());
+    broadcastPANT(timerInfo->getDestination());
     delete timerInfo;
 }
 
