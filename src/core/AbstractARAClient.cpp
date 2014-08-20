@@ -94,7 +94,7 @@ void AbstractARAClient::startNeighborActivityTimer() {
 }
 
 void AbstractARAClient::sendPacket(Packet* packet) {
-    std::cerr << "[AbstractARAClient::sendPacket] got packet" << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::sendPacket] got packet" << std::endl;
     // at first we need to trigger the evaporation (this has no effect if this has been done before in receivePacket(..) )
     routingTable->triggerEvaporation();
 
@@ -160,13 +160,11 @@ void AbstractARAClient::forgetKnownIntermediateHopsFor(AddressPtr destination) {
 
 void AbstractARAClient::broadcastFANT(AddressPtr destination) {
     unsigned int sequenceNr = getNextSequenceNumber();
-    // DEBUG: 
-    std::cerr << "[AbstractARAClient::broadcastFANT] get new sequence number " <<  sequenceNr << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::broadcastFANT] get new sequence number " <<  sequenceNr << std::endl;
 
     for(auto& interface: interfaces) {
         Packet* fant = packetFactory->makeFANT(interface->getLocalAddress(), destination, sequenceNr);
-        // DEBUG: 
-        std::cerr << "[AbstractARAClient::broadcastFANT] broadcast fant" << std::endl;
+        // DEBUG: std::cerr << "[AbstractARAClient::broadcastFANT] broadcast fant" << std::endl;
         interface->broadcast(fant);
     }
 }
@@ -614,13 +612,15 @@ void AbstractARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
 void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer) {
     std::shared_ptr<Timer> timer = routeDiscoveryTimer.lock();
     RouteDiscoveryInfo* discoveryInfo = (RouteDiscoveryInfo*) timer->getContextObject();
-    AddressPtr destination = discoveryInfo->originalPacket->getDestination();
+    AddressPtr destination = discoveryInfo->getPacket()->getDestination();
     logInfo("Route discovery for destination %s timed out", destination->toString().c_str());
 
-    if (discoveryInfo->nrOfRetries < maxNrOfRouteDiscoveryRetries) {
+    int nrOfRetries = discoveryInfo->getNumberOfRetries();
+
+    if (nrOfRetries < maxNrOfRouteDiscoveryRetries) {
         // restart the route discovery
-        discoveryInfo->nrOfRetries++;
-        logInfo("Restarting discovery for destination %s (%u/%u)", destination->toString().c_str(), discoveryInfo->nrOfRetries, maxNrOfRouteDiscoveryRetries);
+        discoveryInfo->setNumberOfRetries(nrOfRetries++);
+        logInfo("Restarting discovery for destination %s (%u/%u)", destination->toString().c_str(), nrOfRetries, maxNrOfRouteDiscoveryRetries);
         forgetKnownIntermediateHopsFor(destination);
         broadcastFANT(destination);
 

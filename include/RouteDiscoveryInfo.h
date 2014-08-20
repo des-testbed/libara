@@ -7,19 +7,22 @@
 
 #include "ARAMacros.h"
 #include "Packet.h"
+#include "ContextObject.h"
 
 ARA_NAMESPACE_BEGIN
 
 /**
  * A RouteDiscoveryInfo object holds data about a running route discovery.
  */
-class RouteDiscoveryInfo {
+class RouteDiscoveryInfo : public ContextObject {
     public:
-        RouteDiscoveryInfo(const Packet* associatedPacket) {
-            originalPacket = associatedPacket;
-            nrOfRetries = 0;
-        }
+        RouteDiscoveryInfo(const Packet* associatedPacket);
 
+        const Packet* getPacket();
+        int getNumberOfRetries();
+        void setNumberOfRetries(int newNumberOfRetries);
+
+    private:
         int nrOfRetries;
         const Packet* originalPacket;
 };
