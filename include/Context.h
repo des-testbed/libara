@@ -2,8 +2,8 @@
  * $FU-Copyright$
  */
 
-#ifndef CONTEX_OBJECT_H__
-#define CONTEX_OBJECT_H__
+#ifndef CONTEX_H_
+#define CONTEX_H_
 
 #include "ARAMacros.h"
 #include "Packet.h"
@@ -13,10 +13,10 @@ ARA_NAMESPACE_BEGIN
 /**
  * A common base class for the context objects of the various timers.
  */
-class ContextObject {
+class Context {
     public:
-        ContextObject(){};
-        virtual ~ContextObject(){};
+        Context(){};
+        virtual ~Context(){};
 
         void setType(std::string typeName);
         virtual std::string toString();
@@ -27,4 +27,4 @@ class ContextObject {
 
 ARA_NAMESPACE_END
 
-#endif // CONTEXT_OBJECT_H_
+#endif // CONTEXT_H_
