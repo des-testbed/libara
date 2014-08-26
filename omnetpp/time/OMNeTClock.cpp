@@ -23,7 +23,7 @@ Time* OMNeTClock::makeTime(){
     return new OMNeTTime();
 }
 
-TimerPtr OMNeTClock::getNewTimer(TimerType timerType, void* contextObject) {
+TimerPtr OMNeTClock::getNewTimer(char timerType, void* contextObject) {
     unsigned int timerID = timerIDCounter++;
 
     /// TODO: This should be investigated - this does not look very smart
