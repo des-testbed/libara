@@ -20,7 +20,7 @@ void StandardTimer::run(unsigned long timeoutInMicroSeconds){
     if (clock) {
         clock->scheduleTimer(timer);
     } else {
-        /// DEBUG
+        // DEBUG:
         std::cerr << "[StandardTimer::run] dynamic cast failed!" << std::endl;
     }
 }
@@ -29,7 +29,6 @@ void StandardTimer::interrupt(){
     conditionVariable.notify_all();
 }
 
-//void StandardTimer::setCallback(std::weak_ptr<StandardTimerProxy> proxy){
 void StandardTimer::setCallback(std::shared_ptr<StandardTimerProxy> proxy){
     this->callback = proxy;
 }
@@ -38,18 +37,17 @@ void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
     std::unique_lock<std::mutex> lock(conditionVariableMutex);
 
     try {
-	    if (conditionVariable.wait_for(lock, std::chrono::microseconds(timeoutInMicroseconds)) == std::cv_status::timeout){
-	        //auto proxy = callback.lock();
-
-//	        if (proxy) {
-	            //proxy->notify();
-	            callback->notify();
-//	        } else {
-//	            std::cerr << "shared_ptr expired and hence, no object to call for expired timer " << std::endl;
-//	        }
+        if (conditionVariable.wait_for(lock, std::chrono::microseconds(timeoutInMicroseconds)) == std::cv_status::timeout){
+	        callback->notify();
+            // DEBUG:
+            std::cerr << "callback of timer type " << TimerType::getAsString(type) << " called" << std::endl;
 	    }
     } catch (const std::system_error& error) {
-	    std::cerr << "Caught system_error with code " << error.code() << " meaning " << error.what() << std::endl;
+	    std::cerr << "[StandardTimer] Caught system_error in " << TimerType::getAsString(type) << std::endl;
+        std::cerr << "Error:    " << error.what() << std::endl;
+        std::cerr << "Code:     " << error.code().value() << std::endl;
+        std::cerr << "Category: " << error.code().category().name() << std::endl;
+        std::cerr << "Message:  " << error.code().message() << std::endl;
     }
 }
 
