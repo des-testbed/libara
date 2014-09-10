@@ -81,7 +81,7 @@ class TestbedARAClient : public AbstractARAClient {
         /**
          * @see AbstractARAClient::startDeliveryTimer(AddressPtr destination);
          */
-        void startDeliveryTimer(TestbedAddressPtr destination);
+        void startDeliveryTimer(AddressPtr destination);
         /**
          * @see AbstractARAClient::startRouteDiscoveryTimer(const Packet* packet);
          */

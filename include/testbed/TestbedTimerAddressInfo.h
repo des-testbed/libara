@@ -10,21 +10,21 @@
 #include "TimerAddressInfo.h"
 
 #include <mutex>
+#include <system_error>
 
 TESTBED_NAMESPACE_BEGIN
 
 /**
  * This class stores information associated with a running timer object.
  * Typically, this is an address object. However, this class simply extends
- * the TimerAddressInfo by means of a mutex which protexts the information
+ * the TimerAddressInfo by means of a mutex which protects the information
  * hold in the class.
  */
 class TestbedTimerAddressInfo : public TimerAddressInfo {
     public:
-        TestbedTimerAddressInfo(std::shared_ptr<TestbedAddress> destination);
+        TestbedTimerAddressInfo(std::shared_ptr<Address> destination);
 
-        //std::shared_ptr<TestbedAddress> getAddress();
-        std::shared_ptr<Address> getDestination();
+        std::shared_ptr<TestbedAddress> getDestination();
 
     private:
         std::mutex addressMutex;

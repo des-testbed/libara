@@ -10,6 +10,8 @@
 #include "TimerType.h"
 #include "TimerAddressInfo.h"
 
+#include <system_error>
+
 using namespace std;
 
 ARA_NAMESPACE_BEGIN
@@ -589,6 +591,7 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
 
 void AbstractARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
     std::shared_ptr<Timer> timer = responsibleTimer.lock();
+
 
     if (timer->getType() == TimerType::NEIGHBOR_ACTIVITY_TIMER) {
         checkInactiveNeighbors();

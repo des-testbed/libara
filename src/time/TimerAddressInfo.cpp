@@ -12,7 +12,7 @@ TimerAddressInfo::TimerAddressInfo(AddressPtr destination) {
 }
 
 std::shared_ptr<Address> TimerAddressInfo::getDestination() {
-    return this->destination;
+    return destination;
 }
 
 ARA_NAMESPACE_END
