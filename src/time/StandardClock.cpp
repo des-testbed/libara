@@ -16,16 +16,13 @@ Time* StandardClock::makeTime(){
 TimerPtr StandardClock::getNewTimer(char timerType, void* contextObject){
     std::lock_guard<std::mutex> lock(mutex);
     /// create a proxy for the standard timer	    
-    std::shared_ptr<StandardTimerProxy> result = std::make_shared<StandardTimerProxy>(timerType, contextObject);
+    std::shared_ptr<StandardTimerProxy> callback = std::make_shared<StandardTimerProxy>(timerType, contextObject);
     /// set the identifier of the timer
     result->setTimerIdentifier(timerList.size());
     /// create a standard timer
     std::shared_ptr<StandardTimer> timer = std::make_shared<StandardTimer>(timerType);
-    /// create a weak pointer to the proxy timer 
-//    std::weak_ptr<StandardTimerProxy> callback = result;
     /// set the callback to the standard proxy
-    //timer->setCallback(callback);
-    timer->setCallback(result);
+    timer->setCallback(callback);
     /// save the timer to the timer list
     timerList.push_back(timer);
     /// return the proxy timer
