@@ -23,9 +23,7 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
 
 /**
  * The function registers the callback functions for the remote shell provided
- * by libcli. The (callback) functions are defined in
- * TestbedCommandLineInterface.h and implemented in
- * TestbedCommandLineInterface.cpp
+ * by libcli. 
  */
 static void registerCommandLineInterfaceCommands(){
     cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", ARA::testbed::cli_setup_sysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize tap interface");
@@ -67,7 +65,6 @@ int main(int argc, char** argv) {
 
      /// initialize the routing daemin in dessert
      dessert_init("ARAX", 0x01, DESSERT_OPT_NODAEMONIZE);
-     //dessert_init("ARA", 0x01, DESSERT_OPT_NODAEMONIZE);
      /// configuration options for the logging mechanisms provided by libdessert
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
      

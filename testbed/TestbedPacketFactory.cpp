@@ -18,14 +18,10 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     dessert_msg_getext(message, &extension, DESSERT_EXT_ETH, 0);
     ether_header* ethernetFrame = (ether_header*) extension->data;
 
-    TestbedPacket* packet = nullptr;
 //    RoutingExtension* routingExtension = getRoutingExtension(message);
 
-    // TODO: check if we should do a ntohs/htons
     char packetType = message->u8;
-    // 
     unsigned int sequenceNumber = ntohs(message->u16);
-    // TODO: check if we should do a ntohs/htons
     int ttl = message->ttl;
 
     // TODO: check if that always make sense
@@ -47,11 +43,11 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
         // get the destination address from the ant agent
         if (packetType == PacketType::FANT) {
             if (dessert_msg_getext(message, &extension, ARA_EXT_FANT, 0) > 0) {
-                memcpy(address, extension->data, sizeof(ara_address_t));
+                std::memcpy(address, extension->data, sizeof(ara_address_t));
             }
         } else {
             if (dessert_msg_getext(message, &extension, ARA_EXT_BANT, 0) > 0) {
-                memcpy(address, extension->data, sizeof(ara_address_t));
+                std::memcpy(address, extension->data, sizeof(ara_address_t));
             }
         }
 
@@ -64,8 +60,11 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
 
     TestbedAddressPtr source = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
 
-    packet = new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl);
-    packet->addPayload(message);
+    TestbedPacket* packet = new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl);
+
+    if (ntohs(message->plen) > 0) {
+        packet->addPayload(message);
+    }
 
     return packet;
 }

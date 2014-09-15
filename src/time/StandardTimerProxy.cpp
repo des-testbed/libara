@@ -63,4 +63,8 @@ void StandardTimerProxy::setTimerIdentifier(unsigned long identifier){
     timerIdentifier = identifier;
 }
 
+unsigned long StandardTimerProxy::getTimerIdentifier(){
+    return timerIdentifier;
+}
+
 ARA_NAMESPACE_END

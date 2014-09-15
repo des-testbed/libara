@@ -18,7 +18,7 @@ TESTBED_NAMESPACE_BEGIN
  */
 class TestbedRouteDiscoveryInfo : public RouteDiscoveryInfo {
     public:
-        TestbedRouteDiscoveryInfo(const TestbedPacket* associatedPacket);
+        TestbedRouteDiscoveryInfo(const Packet* associatedPacket);
 
         const TestbedPacket* getPacket();
         int getNumberOfRetries();

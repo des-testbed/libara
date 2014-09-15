@@ -7,9 +7,7 @@
 
 ARA_NAMESPACE_BEGIN
 
-StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { 
-  printStacktrace(10);
-}
+StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { }
 
 StandardTimer::~StandardTimer(){ }
 
@@ -17,6 +15,7 @@ void StandardTimer::run(unsigned long timeoutInMicroSeconds){
     std::function<void()> timer = std::bind(&StandardTimer::sleep, this, timeoutInMicroSeconds);
 
     StandardClock* clock = dynamic_cast<StandardClock*>(Environment::getClock());
+
     if (clock) {
         clock->scheduleTimer(timer);
     } else {
@@ -35,15 +34,16 @@ void StandardTimer::setCallback(std::shared_ptr<StandardTimerProxy> proxy){
 
 void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
     std::unique_lock<std::mutex> lock(conditionVariableMutex);
+    std::chrono::microseconds timeout(timeoutInMicroseconds);
 
     try {
-        if (conditionVariable.wait_for(lock, std::chrono::microseconds(timeoutInMicroseconds)) == std::cv_status::timeout){
+        if (conditionVariable.wait_for(lock, timeout) == std::cv_status::timeout){
 	        callback->notify();
-            // DEBUG:
+            // DEBUG: 
             std::cerr << "callback of timer type " << TimerType::getAsString(type) << " called" << std::endl;
 	    }
     } catch (const std::system_error& error) {
-	    std::cerr << "[StandardTimer] Caught system_error in " << TimerType::getAsString(type) << std::endl;
+	    std::cerr << "[StandardTimer] caught system_error in " << TimerType::getAsString(type) << std::endl;
         std::cerr << "Error:    " << error.what() << std::endl;
         std::cerr << "Code:     " << error.code().value() << std::endl;
         std::cerr << "Category: " << error.code().category().name() << std::endl;

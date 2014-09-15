@@ -151,8 +151,19 @@ void TestbedARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer){
 }
 
 void TestbedARAClient::startRouteDiscoveryTimer(const Packet* packet){
+    std::cerr << "[TBA] start route discovery timer" << std::endl; 
+
+    TestbedRouteDiscoveryInfo* discoveryInfo = new TestbedRouteDiscoveryInfo(packet);
+    TimerPtr timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
+    timer->addTimeoutListener(this);
+    timer->run(routeDiscoveryTimeoutInMilliSeconds * 1001);
+
+    std::cerr << "[TBA] type is " << discoveryInfo->toString() << std::endl; 
+
+    AddressPtr destination = packet->getDestination();
+
     std::lock_guard<std::recursive_mutex> lock(routeDiscoveryTimerMutex);
-    AbstractARAClient::startRouteDiscoveryTimer(packet);
+    runningRouteDiscoveries[destination] = timer;
 }
 
 void TestbedARAClient::stopRouteDiscoveryTimer(AddressPtr destination){
@@ -187,7 +198,7 @@ TestbedNetworkInterface* TestbedARAClient::getTestbedNetworkInterface(std::share
     return nullptr;
 }
 
-void TestbedARAClient::startDeliveryTimer(TestbedAddressPtr destination) {
+void TestbedARAClient::startDeliveryTimer(AddressPtr destination) {
     TestbedTimerAddressInfo* contextObject = new TestbedTimerAddressInfo(destination);
     TimerPtr timer = getNewTimer(TimerType::DELIVERY_TIMER, contextObject);
     timer->addTimeoutListener(this);

@@ -30,11 +30,11 @@ AddressPtr TestbedPacket::getPreviousHop() const {
 }
 
 void TestbedPacket::addPayload(dessert_msg_t* message) {
-    /// check if the packet has actually payload  
+    /**
+     * Check if the packet has actually payload  
+     */
     if (ntohs(message->plen) > 0) {
         void* originalPayload = nullptr;
-
-        // DEBUG: std::cerr << "[TestbedPacket::addPayload] payload is " << message->plen << " and with ntohs(msg->plen) it is " << ntohs(message->plen) << std::endl;
 
         if (ntohs(dessert_msg_getpayload(message, &originalPayload)) == ntohs(message->plen)){
             std::lock_guard<std::mutex> lock(mutex);
@@ -53,6 +53,10 @@ void TestbedPacket::addPayload(dessert_msg_t* message) {
             // DEBUG:
             std::cerr << "[TestbedPacket::setMessage] saving payload failed" << std::endl;
         }
+    /**
+     * This should actually never happen since we check the payload length in
+     * the packet factory (TestbedPacketFactory)
+     */
     } else {
         // DEBUG:
         std::cerr << "[TestbedPacket::setMessage] tried to save payload while there is actually none" << std::endl;
@@ -89,7 +93,7 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
         dessert_msg_addext(packet, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
         ethernetHeader = (struct ether_header*) extension->data;
         /// set the previous hop
-        memcpy(ethernetHeader->ether_shost, DESSERT_LOCAL_ADDRESS, ETHER_ADDR_LEN);
+        std::memcpy(ethernetHeader->ether_shost, DESSERT_LOCAL_ADDRESS, ETHER_ADDR_LEN);
 
         /*
         u_int8_t* src = sourceAddress->getDessertValue();
@@ -98,16 +102,16 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
 
         if ((type == PacketType::FANT) || (type == PacketType::BANT)) {
             /// set the destination 
-            memcpy(ethernetHeader->ether_dhost, DESSERT_BROADCAST_ADDRESS, ETHER_ADDR_LEN);
+            std::memcpy(ethernetHeader->ether_dhost, DESSERT_BROADCAST_ADDRESS, ETHER_ADDR_LEN);
 
             if (type == PacketType::FANT) {
                 dessert_msg_addext(packet, &extension, ARA_EXT_FANT, ETHER_ADDR_LEN + 4);
-                memcpy(extension->data, address, sizeof(ara_address_t));
-                memcpy(extension->data + ETHER_ADDR_LEN, "FANT", 4);
+                std::memcpy(extension->data, address, sizeof(ara_address_t));
+                std::memcpy(extension->data + ETHER_ADDR_LEN, "FANT", 4);
             } else {
                 dessert_msg_addext(packet, &extension, ARA_EXT_BANT, ETHER_ADDR_LEN + 4);
-                memcpy(extension->data, address, sizeof(ara_address_t));
-                memcpy(extension->data + ETHER_ADDR_LEN, "BANT", 4);
+                std::memcpy(extension->data, address, sizeof(ara_address_t));
+                std::memcpy(extension->data + ETHER_ADDR_LEN, "BANT", 4);
             }
         /*    
         dessert_ext_t* routingExtension = nullptr;
@@ -129,7 +133,7 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
              */
             if ((tempPayload = malloc(payloadSize)) != nullptr){
                 /// copy over the original payload
-                memcpy(tempPayload, payload, payloadSize);
+                std::memcpy(tempPayload, payload, payloadSize);
 
                 if (dessert_msg_addpayload(packet, &tempPayload, payloadSize) == DESSERT_OK) {
 

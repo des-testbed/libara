@@ -35,22 +35,19 @@ dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_pro
  //   }
  //
  //
-    // DEBUG: std::cerr << "[toSys] got a packet" << std::endl;
-
     // let's check if the received message is consistent
     if (packetFactory->checkDessertMessage(message)) {
         TestbedPacket* packet = packetFactory->makeNewPacket(message);
         // DEBUG: 
         std::cerr << "[toSys] packet dump " << std::endl;
-        // DEBUG: std::cerr << "received frame " << ((unsigned long)id) << " on interface " << interface->if_name << std::endl;
-        
         // DEBUG: 
         dumpDessertMessage(message, length, flags);
 
-        TestbedNetworkInterface* networkInterface = client->getTestbedNetworkInterface(std::make_shared<TestbedAddress>(interface->hwaddr));
-        // DEBUG:
-        std::cerr << "[toSys] will pass packet to network interface (receive)" << std::endl;
+        std::cerr << " and again! " << std::endl;
 
+        std::cerr << toString(message);
+
+        TestbedNetworkInterface* networkInterface = client->getTestbedNetworkInterface(std::make_shared<TestbedAddress>(interface->hwaddr));
         networkInterface->receive(packet);
     }
 
@@ -63,18 +60,16 @@ dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_pro
  */
 int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddress, std::shared_ptr<Address> recipient) {
     assert(packet != nullptr);
-
     /// determine the mesh interface
     dessert_meshif_t* interface = dessert_meshif_get_hwaddr(interfaceAddress->getDessertValue());
-    // DEBUG: std::cerr << "[TestbedPacketDispatcher::dispatch] ready to transmit a packet over interface " << interface->if_name << std::endl;
 
     const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
     // create a dessert message out of the packet
     dessert_msg_t* message = testbedPacket->toDessertMessage();
 
     // DEBUG:
-    std::cout << "[toMesh] packet dump " <<  std::endl;
-    std::cout << toString(message);
+    std::cerr << "[toMesh] packet dump " <<  std::endl;
+    std::cerr << toString(message);
 
     /// send the packet
     int result = 42;
@@ -128,14 +123,12 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
 dessert_cb_result toMesh(dessert_msg_t* message, uint32_t length, dessert_msg_proc_t *flags, dessert_sysif_t *interface, dessert_frameid_t id) {
     // DEBUG: std::cerr << "[toMesh] received frame " << ((unsigned long)id) << " on interface " << interface->if_name << std::endl;
     // DEBUG: dumpDessertMessage(message, length, flags);
-
     TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
     // DEBUG: std::cerr << "[toMesh] got a packet" << std::endl;
     TestbedPacket* packet = packetFactory->makeNewPacket(message);
     // DEBUG: std::cerr << "[toMesh] packet dump:" << std::endl;
     // DEBUG: std::cerr << *packet << std::endl;
     // DEBUG: std::cerr << "[toMesh] pass packet to client" << std::endl;
-
     client->sendPacket(packet);
 
     return DESSERT_MSG_DROP;
@@ -175,8 +168,10 @@ std::string toString(dessert_msg_t* message){
     result << "  " << "version:                   " << message->ver << std::endl;  
     result << std::endl;
 
+    result << std::dec;  
+
     result << "  " << "ttl:                       " << message->ttl << std::endl;  
-    result << "  " << "ara flags (u8):            " << message->u8 << std::endl;  
+    result << "  " << "ara flags (u8):            " << message->u8 << " (" << PacketType::getAsString(message->u8) << ")" << std::endl;  
     result << "  " << "ara sequence number (u16): " << message->u16 << std::endl;  
     result << "  " << "header length (hlen):      " << ntohs(message->hlen) << std::endl;  
     result << "  " << "payload length (plen):     " << ntohs(message->plen) << std::endl;  
@@ -188,10 +183,10 @@ std::string toString(dessert_msg_t* message){
         TestbedAddress source(l25h->ether_shost);
         TestbedAddress destination(l25h->ether_dhost);
 
-        result << "  " << "l25 proto: ethernet    " << std::endl;
-        result << "  " << "l25_dhost:             " << destination.toString() << std::endl;  
-        result << "  " << "l25_shost:             " << source.toString() << std::endl;  
-        result << "  " << "l25_type:              " << ntohs(l25h->ether_type) << std::endl;  
+        result << "  " << "l25 proto: ethernet        " << std::endl;
+        result << "  " << "l25_dhost:                 " << destination.toString() << std::endl;  
+        result << "  " << "l25_shost:                 " << source.toString() << std::endl;  
+        result << "  " << "l25_type:                  " << ntohs(l25h->ether_type) << std::endl;  
     }
 
     return result.str();

@@ -11,6 +11,7 @@
 #include "TestbedTimerAddressInfo.h"
 #include "TestbedNetworkInterface.h"
 #include "TestbedPacketDispatcher.h"
+#include "TestbedRouteDiscoveryInfo.h"
 
 #include "Environment.h"
 #include "AbstractARAClient.h"
