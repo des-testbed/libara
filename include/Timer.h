@@ -77,12 +77,12 @@ class Timer : public std::enable_shared_from_this<Timer> {
          */
         void setContextObject(void* contextObject);
 
-	/**
-	 * The method returns a shared_ptr of 'this'. However, prior to calling shared_from_this 
-	 * on an object t, there must be a std::shared_ptr that owns t, otherwise a bad_weak_ptr 
-	 * exception is thrown.
-	 */
-	std::shared_ptr<Timer> getTimer() { return shared_from_this(); }
+	    /**
+	     * The method returns a shared_ptr of 'this'. However, prior to calling shared_from_this 
+	     * on an object t, there must be a std::shared_ptr that owns t, otherwise a bad_weak_ptr 
+	     * exception is thrown.
+	     */
+	    std::shared_ptr<Timer> getTimer() { return shared_from_this(); }
 
     protected:
         void notifyAllListeners();
