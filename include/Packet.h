@@ -37,7 +37,7 @@ public:
      * @see Packet::getSender()
      * @see Packet::getPenultimateHop()
      */
-    AddressPtr getSource() const;
+    virtual AddressPtr getSource() const;
 
     /**
      * Returns the address of the node to whom the payload of this packet is directed.
@@ -48,7 +48,7 @@ public:
      * @see Packet::getSender()
      * @see Packet::getPenultimateHop()
      */
-    AddressPtr getDestination() const;
+    virtual AddressPtr getDestination() const;
 
     /**
      * Returns the address of the node from which this packet has been received (layer 2).
@@ -59,7 +59,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getPenultimateHop()
      */
-    AddressPtr getSender() const;
+    virtual AddressPtr getSender() const;
 
     /**
      * Returns the address of the node from which the sender has received this packet.
@@ -69,7 +69,7 @@ public:
      * @see Packet::getDestination()
      * @see Packet::getSender()
      */
-    AddressPtr getPreviousHop() const;
+    virtual AddressPtr getPreviousHop() const;
 
     /**
      * Returns the null-terminated string representation of the address of the source.
