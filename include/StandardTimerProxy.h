@@ -26,9 +26,10 @@ class StandardTimerProxy : public Timer {
 
         size_t getHashValue() const;
 
-	void setTimerIdentifier(unsigned long identifier);
+	    void setTimerIdentifier(unsigned long identifier);
+	    unsigned long getTimerIdentifier();
 
-	void notify();
+	    void notify();
 
     private:
         unsigned long timerIdentifier = -1;

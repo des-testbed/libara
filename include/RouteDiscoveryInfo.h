@@ -17,10 +17,11 @@ ARA_NAMESPACE_BEGIN
 class RouteDiscoveryInfo : public Context {
     public:
         RouteDiscoveryInfo(const Packet* associatedPacket);
+        virtual ~RouteDiscoveryInfo(){};
 
-        const Packet* getPacket();
-        int getNumberOfRetries();
-        void setNumberOfRetries(int newNumberOfRetries);
+        virtual const Packet* getPacket();
+        virtual int getNumberOfRetries();
+        virtual void setNumberOfRetries(int newNumberOfRetries);
 
     private:
         int nrOfRetries;

@@ -21,7 +21,6 @@ class StandardTimer;
 
 class StandardClock : public Clock {
     public:
-
         Time* makeTime();
         TimerPtr getNewTimer(char timerType, void* contextObject=nullptr);
 
@@ -32,23 +31,21 @@ class StandardClock : public Clock {
 //        std::string listActiveTimers();
 
     private:
-        unsigned long identifier = 0;
+	    /**
+	     * @brief The member manages the access to a thread pool implementation.
+	     */
+	    ThreadPool threadPool;
 
-	/**
-	 * @brief The member manages the access to a thread pool implementation.
-	 */
-	ThreadPool threadPool;
+	    /**
+	     *
+	     */
+	    std::vector<std::shared_ptr<StandardTimer>> timerList;
 
-	/**
-	 *
-	 */
-	std::vector<std::shared_ptr<StandardTimer>> timerList;
-
-	/**
-	 * The mutex protects the access to critical sections, such as the access to members
-	 * of this class.
-	 */
-	std::mutex mutex;
+	    /**
+	     * The mutex protects the access to critical sections, such as the access to members
+	     * of this class.
+	     */
+	    std::recursive_mutex mutex;
 };
 
 ARA_NAMESPACE_END
