@@ -36,6 +36,7 @@ log.txt
 testbed/*.conf
 *.default
 *.init
+*.log
 
 # valgrind core dumps
 *vgcore*
