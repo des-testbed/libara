@@ -33,11 +33,9 @@ class StandardTimer : public Timer {
 
         size_t getHashValue() const;
 
-        //void setCallback(std::weak_ptr<StandardTimerProxy> callback);
         void setCallback(std::shared_ptr<StandardTimerProxy> callback);
 
     private:
-//        std::weak_ptr<StandardTimerProxy> callback;
         std::shared_ptr<StandardTimerProxy> callback;
         std::condition_variable conditionVariable;
         std::mutex conditionVariableMutex;
