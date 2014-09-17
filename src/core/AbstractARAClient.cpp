@@ -12,6 +12,8 @@
 
 #include <system_error>
 
+#include "StandardTimerProxy.h"
+
 using namespace std;
 
 ARA_NAMESPACE_BEGIN
@@ -492,11 +494,22 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
         TimerPtr timer = discovery->second;
         timer->interrupt();
 
+        std::shared_ptr<StandardTimerProxy> proxy = std::dynamic_pointer_cast<StandardTimerProxy>(timer);
+
+        if (proxy) {
+            std::cerr << "[AbstractARAClient::stopRouteDiscoveryTimer] I'm going to delete route discovery for timer " << proxy->getTimerIdentifier() << std::endl;
+        } else {
+            std::cerr << "[AbstractARAClient::stopRouteDiscoveryTimer] I'm going to delete route discovery for timer, but the cast failed " << std::endl;
+        }
+
         /**
          * the route discovery is not completely finished until the delivery timer expired.
          * only then is runningRouteDiscoveries.erase(discovery) called!
          */
         delete (RouteDiscoveryInfo*) timer->getContextObject();
+
+        // set it explictely to null
+        timer->setContextObject(nullptr);
     } else {
         logError("Could not stop route discovery timer (not found for destination %s)", destination->toString().c_str());
     }
@@ -592,7 +605,6 @@ void AbstractARAClient::setMaxNrOfRouteDiscoveryRetries(int maxNrOfRouteDiscover
 void AbstractARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
     std::shared_ptr<Timer> timer = responsibleTimer.lock();
 
-
     if (timer->getType() == TimerType::NEIGHBOR_ACTIVITY_TIMER) {
         checkInactiveNeighbors();
         startNeighborActivityTimer();
@@ -614,34 +626,56 @@ void AbstractARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
 
 void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer) {
     std::shared_ptr<Timer> timer = routeDiscoveryTimer.lock();
-    RouteDiscoveryInfo* discoveryInfo = (RouteDiscoveryInfo*) timer->getContextObject();
-    AddressPtr destination = discoveryInfo->getPacket()->getDestination();
-    logInfo("Route discovery for destination %s timed out", destination->toString().c_str());
+    std::shared_ptr<StandardTimerProxy> proxy = std::dynamic_pointer_cast<StandardTimerProxy>(timer);
 
-    int nrOfRetries = discoveryInfo->getNumberOfRetries();
+        if (proxy) {
+            std::cerr << "[AbstractARAClient::handleExpiredRouteDiscovery] I'm going to handle route discovery for timer " << proxy->getTimerIdentifier() << std::endl;
+        } else {
+            std::cerr << "[AbstractARAClient::handleExpiredRouteDiscovery] I'm going to handle route discovery for timer, but the cast failed " << std::endl;
+        }
 
-    if (nrOfRetries < maxNrOfRouteDiscoveryRetries) {
-        // restart the route discovery
-        discoveryInfo->setNumberOfRetries(nrOfRetries++);
-        logInfo("Restarting discovery for destination %s (%u/%u)", destination->toString().c_str(), nrOfRetries, maxNrOfRouteDiscoveryRetries);
-        forgetKnownIntermediateHopsFor(destination);
-        broadcastFANT(destination);
+    if (timer->getContextObject() != nullptr) {
+        RouteDiscoveryInfo* discoveryInfo = (RouteDiscoveryInfo*) timer->getContextObject();
+        AddressPtr destination = discoveryInfo->getPacket()->getDestination();
+        logInfo("Route discovery for destination %s timed out", destination->toString().c_str());
 
-        timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
+        int nrOfRetries = discoveryInfo->getNumberOfRetries();
+
+        if (nrOfRetries < maxNrOfRouteDiscoveryRetries) {
+            // restart the route discovery
+            discoveryInfo->setNumberOfRetries(nrOfRetries++);
+            logInfo("Restarting discovery for destination %s (%u/%u)", destination->toString().c_str(), nrOfRetries, maxNrOfRouteDiscoveryRetries);
+            forgetKnownIntermediateHopsFor(destination);
+            broadcastFANT(destination);
+
+            timer->run(routeDiscoveryTimeoutInMilliSeconds * 1000);
+        } else {
+            // delete the route discovery timer
+            runningRouteDiscoveries.erase(destination);
+
+            if (!discoveryInfo) {
+                delete discoveryInfo;
+            }
+
+            forgetKnownIntermediateHopsFor(destination);
+            deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);
+            logWarn("Route discovery for destination %s unsuccessful. Dropping %u packet(s)", destination->toString().c_str(), undeliverablePackets.size());
+            for (auto& packet: undeliverablePackets) {
+                packetNotDeliverable(packet);
+            }
+        }
+    /**
+     * This is so unlikely that it should actually never happen. The route
+     * discovery timer is stopped if the route discovery never found a
+     * destination or if a BANT came back and initialized a delivery timer.
+     * In the latter case the route discovery object is removed but the timer
+     * still exists (and is interrupted). However, in some cases the timer
+     * continues to run, triggering at some point the callback which calls the
+     * handleExpiredRouteDiscoveryTimer(). 
+     */
     } else {
-        // delete the route discovery timer
-        runningRouteDiscoveries.erase(destination);
-
-        if (!discoveryInfo) {
-            delete discoveryInfo;
-        }
-
-        forgetKnownIntermediateHopsFor(destination);
-        deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);
-        logWarn("Route discovery for destination %s unsuccessful. Dropping %u packet(s)", destination->toString().c_str(), undeliverablePackets.size());
-        for(auto& packet: undeliverablePackets) {
-            packetNotDeliverable(packet);
-        }
+      // TODO: Urgent! We need to investigate this further! 
+      logWarn("A route discovery timer expired, but no route discovery info was found!");
     }
 }
 
