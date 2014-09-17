@@ -38,14 +38,10 @@ dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_pro
     // let's check if the received message is consistent
     if (packetFactory->checkDessertMessage(message)) {
         TestbedPacket* packet = packetFactory->makeNewPacket(message);
-        // DEBUG: 
-        std::cerr << "[toSys] packet dump " << std::endl;
-        // DEBUG: 
-        dumpDessertMessage(message, length, flags);
-
-        std::cerr << " and again! " << std::endl;
-
-        std::cerr << toString(message);
+        // DEBUG: std::cerr << "[toSys] packet dump " << std::endl;
+        // DEBUG: dumpDessertMessage(message, length, flags);
+        // DEBUG: std::cerr << " and again! " << std::endl;
+        // DEBUG: std::cerr << toString(message);
 
         TestbedNetworkInterface* networkInterface = client->getTestbedNetworkInterface(std::make_shared<TestbedAddress>(interface->hwaddr));
         networkInterface->receive(packet);
@@ -67,9 +63,8 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
     // create a dessert message out of the packet
     dessert_msg_t* message = testbedPacket->toDessertMessage();
 
-    // DEBUG:
-    std::cerr << "[toMesh] packet dump " <<  std::endl;
-    std::cerr << toString(message);
+    // DEBUG: std::cerr << "[toMesh] packet dump " <<  std::endl;
+    // DEBUG: std::cerr << toString(message);
 
     /// send the packet
     int result = 42;
@@ -83,8 +78,7 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
     /// set the next hop as the destination host 
     std::memcpy(message->l2h.ether_dhost, recipientAddress->getDessertValue(), sizeof(ara_address_t));
 
-    // DEBUG:
-    std::cerr << "[TestbedPacketDispatcher::dispatch] next hop is " << recipientAddress->toString() << std::endl;
+    // DEBUG: std::cerr << "[TestbedPacketDispatcher::dispatch] next hop is " << recipientAddress->toString() << std::endl;
 
     TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
 
