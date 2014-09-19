@@ -75,7 +75,7 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
     std::shared_ptr<TestbedAddress> destinationAddress = std::dynamic_pointer_cast<TestbedAddress>(destination);
     std::copy(destinationAddress->getDessertValue(), destinationAddress->getDessertValue() + ETHER_ADDR_LEN, address);
 
-    // get a libdessert representation of the destination address
+    // get a libdessert representation of the source address
     std::shared_ptr<TestbedAddress> sourceAddress = std::dynamic_pointer_cast<TestbedAddress>(source);
 
     /// create a new dessert_msg_t
@@ -123,6 +123,9 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
 */
             dessert_msg_dummy_payload(packet, antSize);
         } else if (type == PacketType::DATA){
+            /// set the destination in the ethernet extension
+            std::memcpy(ethernetHeader->ether_dhost, address, ETHER_ADDR_LEN);
+
             void* tempPayload = nullptr;
 
             /**
