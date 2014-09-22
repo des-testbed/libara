@@ -63,6 +63,7 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     TestbedPacket* packet = new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl);
 
     if (ntohs(message->plen) > 0) {
+        packet->setPayloadType(ethernetFrame->ether_type);
         packet->addPayload(message);
     }
 
