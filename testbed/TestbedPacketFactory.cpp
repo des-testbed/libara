@@ -13,12 +13,11 @@ TestbedPacketFactory::TestbedPacketFactory(int maxHopCount) : PacketFactory(maxH
 TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     /// the destination address (if it is set)
     ara_address_t address;
+
     /// obtain the ethernet header
     dessert_ext_t* extension = nullptr;
     dessert_msg_getext(message, &extension, DESSERT_EXT_ETH, 0);
     ether_header* ethernetFrame = (ether_header*) extension->data;
-
-//    RoutingExtension* routingExtension = getRoutingExtension(message);
 
     char packetType = message->u8;
     unsigned int sequenceNumber = ntohs(message->u16);
@@ -28,16 +27,7 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     // determine the sender of the packet
     TestbedAddressPtr sender = std::make_shared<TestbedAddress>(message->l2h.ether_shost);
 
-/*
-    if (routingExtension != nullptr) {
-        TestbedAddressPtr source = std::make_shared<TestbedAddress>(routingExtension->ara_shost);
-        TestbedAddressPtr destination = std::make_shared<TestbedAddress>(routingExtension->ara_dhost);
-        TestbedAddressPtr sender = std::make_shared<TestbedAddress>(ethernetFrame->ether_shost);
-        packet = new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl);
-    } else {
-    */
     TestbedAddressPtr destination;
-
     /// TODO: That's a bit complicated, let's make that easier
     if ((packetType == PacketType::FANT) || (packetType == PacketType::BANT)) {
         // get the destination address from the ant agent
@@ -52,8 +42,7 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
         }
 
         destination = std::make_shared<TestbedAddress>(address);
-        // DEBUG:
-        std::cerr << "[TestbedPacketFactory::makePaket] the destination address of the ant agent ist " << destination->toString() << std::endl;
+        // DEBUG: std::cerr << "[TestbedPacketFactory::makePaket] the destination address of the ant agent ist " << destination->toString() << std::endl;
     } else {
         destination = std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost);
     }
@@ -97,15 +86,6 @@ TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPt
 TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, const char* payload, unsigned int payloadSize) {
     return makePacket(source, destination, source, PacketType::DATA, sequenceNumber, this->maxHopCount, (const char*)payload, payloadSize);
 }
-/*
-TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, dessert_msg_t* payload, unsigned int payloadSize, AddressPtr previousHop) {
-    TestbedPacket* packet = new TestbedPacket(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
-    if(previousHop != nullptr) {
-        packet->setPreviousHop(previousHop);
-    }
-    return packet;
-}
-*/
 
 TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {
     TestbedPacket* packet = new TestbedPacket(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
