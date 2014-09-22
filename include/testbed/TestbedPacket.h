@@ -49,6 +49,18 @@ class TestbedPacket : public Packet {
          */
         AddressPtr getPreviousHop() const;
 
+        /**
+         * This method allows to set the payloadType member. The member holds the
+         * ethernet type field of the DESSERT_EXT_ETH extension of libdessert.
+         *
+         * @param type The ether_type field of a DESSERT_EXT_ETH extension
+         */
+        void setPayloadType(u_short type);
+
+        /**
+         * This sets the payloadType member, which holds the
+         * ethernet type field of the DESSERT_EXT_ETH
+         */
         void addPayload(dessert_msg_t* message);
 
         /**
@@ -66,6 +78,13 @@ class TestbedPacket : public Packet {
 	    mutable std::mutex senderMutex;
 	    mutable std::mutex sourceMutex;
 	    mutable std::mutex destinationMutex;
+
+        /**
+         * The tun/tap interface expects a ethernet frame and not the raw
+         * payload, so we have to safe the ethernet type of the ethernet
+         * header (DESSERT_EXT_ETH).
+         */
+        u_short payloadType;
 };
 
 TESTBED_NAMESPACE_END

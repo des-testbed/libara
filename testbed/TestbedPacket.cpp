@@ -29,6 +29,10 @@ AddressPtr TestbedPacket::getPreviousHop() const {
     return Packet::getPreviousHop();
 }
 
+void TestbedPacket::setPayloadType(u_short type){
+    payloadType = type;
+}
+
 void TestbedPacket::addPayload(dessert_msg_t* message) {
     /**
      * Check if the packet has actually payload  
@@ -123,11 +127,18 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
 */
             dessert_msg_dummy_payload(packet, antSize);
         } else if (type == PacketType::DATA){
-            /// set the destination in the ethernet extension
+            /// set the destination 
             std::memcpy(ethernetHeader->ether_dhost, address, ETHER_ADDR_LEN);
+            /// set the type
+            ethernetHeader->ether_type = htons(payloadType);
+/*
+            dessert_ext_t* ext = nullptr;
 
+            dessert_msg_addext(packet, &ext, DESSERT_EXT_ETH, 16);
+            ext->type = 1;
+            ext->len = 16;
+*/
             void* tempPayload = nullptr;
-
             /**
              * TODO: this might cause a lot of trouble, depending what is doing
              * the free or (delete). We assume that libdessert takes care of the
@@ -135,14 +146,18 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
              * called.
              */
             if ((tempPayload = malloc(payloadSize)) != nullptr){
-                /// copy over the original payload
-                std::memcpy(tempPayload, payload, payloadSize);
-
-                if (dessert_msg_addpayload(packet, &tempPayload, payloadSize) == DESSERT_OK) {
-
-                } else {
+                /**
+                 * This is so ridiculous! The function actually doesn't add the
+                 * payload to the message, but sets the pointer (tempPayload) to
+                 * the point in memory (((uint8_t*) msg + ntohs(msg->hlen))).
+                 * Sweet, 
+                 */
+                if (dessert_msg_addpayload(packet, &tempPayload, payloadSize) != DESSERT_OK) {
                    // DEBUG:
-                   std::cerr << "[TestbedPacket::toDessertMessage] adding payload failed" << std::endl;
+                   std::cerr << "[TestbedPacket::toDessertMessage] setting payload pointer failed" << std::endl;
+                } else {
+                   /// copy over the original payload
+                   std::memcpy(tempPayload, payload, payloadSize);
                 }
             } else {
                 // DEBUG:
