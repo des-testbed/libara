@@ -43,8 +43,19 @@ dessert_cb_result packetFilter(dessert_msg_t* messageReceived, uint32_t length, 
 /**
  *
  */
-std::string toString(dessert_msg_t* message);
+std::string toString(dessert_msg_t* message, bool isNetworkByteOrder);
 
+/**
+ * The function is based on libdesserts 'dessert_msg_trace_dump'. However,
+ * the function returns a string and has a slightly different behavior in
+ * terms of error codes
+ *
+ * @param message The dessert message to scan for extension
+ * @param type The type of extension which should be scanned for
+ *
+ * @return On success a string representation of the extension
+ */
+std::string toStringTrace(const dessert_msg_t* message, uint8_t type);
 
 TESTBED_NAMESPACE_END
 
