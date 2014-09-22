@@ -26,7 +26,7 @@ dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_pro
         // DEBUG: dumpDessertMessage(message, length, flags);
         // DEBUG: std::cerr << " and again! " << std::endl;
         // DEBUG: std::cerr << toString(message, true);
-        //
+        
         TestbedNetworkInterface* networkInterface = client->getTestbedNetworkInterface(std::make_shared<TestbedAddress>(interface->hwaddr));
         networkInterface->receive(packet);
     }
@@ -108,8 +108,7 @@ dessert_cb_result toMesh(dessert_msg_t* message, uint32_t length, dessert_msg_pr
         message->u16 = htons(client->getNextSequenceNumber());
     }
 
-    // DEBUG: 
-    dumpDessertMessage(message, length, flags);
+    // DEBUG: dumpDessertMessage(message, length, flags);
     TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
     // DEBUG: std::cerr << "[toMesh] got a packet" << std::endl;
     TestbedPacket* packet = packetFactory->makeNewPacket(message);
