@@ -17,39 +17,20 @@ TESTBED_NAMESPACE_BEGIN
  */
 dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_proc_t *flags, dessert_meshif_t* interface, dessert_frameid_t id) {
     TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
-    /// set the time to live
-//    message->ttl = packetFactory->getMaximumNrOfHops();
-    /// set the flags 
-    //ap->flags |= ARA_ORIG_LOCAL;
 
-    /* add trace header if packet is small broadcast/multicast packet
-       this helps to abuse such packets for better loop/duplicate detection */
-//    struct ether_header* ethernetHeader = nullptr;
-//    assert(dessert_msg_getpayload(message, (void**) &ethernetHeader));
-
-    /// TODO: 512 refers to ara_trace_broadcastlen from DES-ARA
- //   if((ethernetHeader->ether_dhost[0] & 0x01) && length < 512) {
- //       dessert_msg_trace_initiate(message, DESSERT_EXT_TRACE_REQ, DESSERT_MSG_TRACE_HOST);
- //   }
- //
- //
     // let's check if the received message is consistent
     if (packetFactory->checkDessertMessage(message)) {
         TestbedPacket* packet = packetFactory->makeNewPacket(message);
-        // DEBUG: 
-        std::cerr << "[toSys] packet dump " << std::endl;
-        // DEBUG: 
-        dumpDessertMessage(message, length, flags);
-        // DEBUG: 
-        std::cerr << " and again! " << std::endl;
-        // DEBUG: 
-        std::cerr << toString(message, true);
 
+        // DEBUG: std::cerr << "[toSys] packet dump " << std::endl;
+        // DEBUG: dumpDessertMessage(message, length, flags);
+        // DEBUG: std::cerr << " and again! " << std::endl;
+        // DEBUG: std::cerr << toString(message, true);
+        //
         TestbedNetworkInterface* networkInterface = client->getTestbedNetworkInterface(std::make_shared<TestbedAddress>(interface->hwaddr));
         networkInterface->receive(packet);
     }
 
-    //return DESSERT_MSG_DROP;
     return DESSERT_MSG_KEEP;
 }
 
@@ -79,10 +60,8 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
 
     // DEBUG: 
     std::cerr << "[TestbedPacketDispatcher::dispatch] next hop is " << recipientAddress->toString() << std::endl;
-    // DEBUG: 
-    std::cerr << "[toMesh] packet dump " <<  std::endl;
-    // DEBUG: 
-    std::cerr << toString(message, true);
+    // DEBUG: std::cerr << "[toMesh] packet dump " <<  std::endl;
+    // DEBUG: std::cerr << toString(message, true);
 
     TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
 
