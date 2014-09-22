@@ -11,7 +11,7 @@ using namespace std;
  * The function creates a basic configuration for the ARA routing daemon.
  */
 ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) {
-    int maxTTL = 15;
+    int maxTTL = 255;
     ARA::testbed::TestbedRoutingTable* routingTable = new ARA::testbed::TestbedRoutingTable();
     ARA::testbed::TestbedPacketFactory* packetFactory = new ARA::testbed::TestbedPacketFactory(maxTTL);
     ARA::EvaporationPolicy* evaporationPolicy = new ARA::ExponentialEvaporationPolicy(2.0, 100, 15.0);
