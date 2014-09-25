@@ -100,7 +100,6 @@ public:
     /**
      * The method provides an output stream for the routing table by overloading
      * the '<<' operator.
-     *
      */
     friend std::ostream& operator<<(std::ostream& out, RoutingTable& routingTable) {
         RoutingTableMap::const_iterator i;
@@ -110,7 +109,7 @@ public:
             std::shared_ptr<RoutingTableEntryList> entryList = i->second;
 
             for (auto& entry: *entryList) {
-              out << "[destination] " << destination << " " << entry;
+              out << "[destination] " << *destination << " " << *entry << std::endl;
             }
          }
 
