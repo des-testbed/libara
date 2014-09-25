@@ -36,6 +36,8 @@ class StandardTimer : public Timer {
         void setCallback(std::shared_ptr<StandardTimerProxy> callback);
 
     private:
+        bool interrupted;
+
         std::shared_ptr<StandardTimerProxy> callback;
         std::condition_variable conditionVariable;
         std::mutex conditionVariableMutex;

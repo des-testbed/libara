@@ -7,7 +7,9 @@
 
 ARA_NAMESPACE_BEGIN
 
-StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { }
+StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { 
+   interrupted = false;
+}
 
 StandardTimer::~StandardTimer(){ }
 
@@ -25,6 +27,8 @@ void StandardTimer::run(unsigned long timeoutInMicroSeconds){
 }
 
 void StandardTimer::interrupt(){
+    interrupted = true;
+    // DEBUG: std::cerr << "[StandardTimer::interrupt] interrupt timer" << std::endl;
     conditionVariable.notify_all();
 }
 
@@ -37,11 +41,21 @@ void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
     std::chrono::microseconds timeout(timeoutInMicroseconds);
 
     try {
-        if (conditionVariable.wait_for(lock, timeout) == std::cv_status::timeout){
-	        callback->notify();
+        std::cv_status result;
+
+        if ((result = conditionVariable.wait_for(lock, timeout)) == std::cv_status::timeout){
+            if (!interrupted) {
+	            callback->notify();
+            }
             // DEBUG: 
-            std::cerr << "callback of timer type " << TimerType::getAsString(type) << " called" << std::endl;
-	    }
+            std::cerr << "[StandardTimer] callback of timer type " << TimerType::getAsString(type) << " called" << std::endl;
+	    } else if (result == std::cv_status::no_timeout) {
+            // DEBUG: 
+            std::cerr << "[StandardTimer] callback of timer type " << TimerType::getAsString(type) << " cancelled " << std::endl;
+        } else {
+            // DEBUG: 
+            std::cerr << "[StandardTimer] don't know what happened to " << TimerType::getAsString(type) << std::endl;
+        }
     } catch (const std::system_error& error) {
 	    std::cerr << "[StandardTimer] caught system_error in " << TimerType::getAsString(type) << std::endl;
         std::cerr << "Error:    " << error.what() << std::endl;
