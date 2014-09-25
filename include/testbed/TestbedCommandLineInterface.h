@@ -17,20 +17,19 @@
 TESTBED_NAMESPACE_BEGIN
 
 /**
- *
+ * The CLI command prints the current content of the routing table 
  */
-int cli_show_routing_table(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_show_routing_table(struct cli_def* cli, const char* command, char* argv[], int argc);
 
 /**
  * The CLI command prints the current set configuration of the routing daemon
  */
-int cli_show_configuration(struct cli_def* cli, char* command, char* argv[], int argc);
-
+int cli_show_configuration(struct cli_def* cli, const char* command, char* argv[], int argc);
 
 /**
  * The CLI command displays various statistics of the routing daemon
  */
-int cli_show_statistics(struct cli_def* cli, char* command, char* argv[], int argc);
+int cli_show_statistics(struct cli_def* cli, const char* command, char* argv[], int argc);
 
 
 //int cli_list_active_timers(struct cli_def* cli, char* command, char* argv[], int argc);

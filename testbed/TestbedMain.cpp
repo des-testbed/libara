@@ -30,9 +30,9 @@ static void registerCommandLineInterfaceCommands(){
     cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", ARA::testbed::cli_setup_meshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
 //    cli_register_command(dessert_cli, dessert_cli_show, "testSendMesh", ARA::testbed::cli_test_send_mesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "send a test packet to mesh interface");
      //cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("list timers"), ARA::testbed::cli_list_active_timers, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("list active timers"));
- //    cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("routing table"), ARA::testbed::cli_show_routing_table, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("displays the content of the routing table"));
-//    cli_register_command(dessert_cli, dessert_cli_show, "configuration", ARA::testbed::cli_show_configuration, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "displays the current configuration");
-   //  cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("statistics"), ARA::testbed::cli_show_statistics, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("shows various statistics of the routing daemon"));
+    cli_register_command(dessert_cli, dessert_cli_show, "routing table", ARA::testbed::cli_show_routing_table, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("displays the content of the routing table"));
+    cli_register_command(dessert_cli, dessert_cli_show, "configuration", ARA::testbed::cli_show_configuration, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "displays the current configuration");
+    cli_register_command(dessert_cli, dessert_cli_show, "statistics", ARA::testbed::cli_show_statistics, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("shows various statistics of the routing daemon"));
 }
 
 /**

@@ -23,14 +23,14 @@ int cli_list_active_timers(struct cli_def* cli, char* command, char* argv[], int
 /*
 */
 
-int cli_show_configuration(struct cli_def* cli, char* command, char* argv[], int argc) {
+int cli_show_configuration(struct cli_def* cli, const char* command, char* argv[], int argc) {
     std::string configuration = client->toString();
     // print the configuration of the routing daemon
     cli_print(cli, "%s", configuration.c_str());
     return CLI_OK;
 }
 
-int cli_show_routing_table(struct cli_def* cli, char* command, char* argv[], int argc) {
+int cli_show_routing_table(struct cli_def* cli, const char* command, char* argv[], int argc) {
     // TODO: introduce semaphore for access to global client variable
     std::string routingTable = client->routingTableToString();
     // print the content of the routing table 
@@ -39,8 +39,8 @@ int cli_show_routing_table(struct cli_def* cli, char* command, char* argv[], int
     return CLI_OK;
 }
 
-int cli_show_statistics(struct cli_def* cli, char* command, char* argv[], int argc) {
-
+int cli_show_statistics(struct cli_def* cli, const char* command, char* argv[], int argc) {
+    /// dummy
 
     return CLI_OK;
 }
