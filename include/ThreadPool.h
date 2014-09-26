@@ -20,22 +20,33 @@ ARA_NAMESPACE_BEGIN
 class ThreadPool {
     public:
 	    /**
-	     *
+	     * The constructor of the thread pool. It initializes an array of
+         * working threads
+         *
+         * @param numberOfThreads The number of worker threads which should be
+         * created
 	     */
-        ThreadPool(size_t numberOfThreads = std::thread::hardware_concurrency());
+        ThreadPool(size_t numberOfThreads = 16);
 
 	    /**
-	     *
+	     * The destructor of the thread pool. It notifies the running threads
+         * and waits until the threads are finished.
 	     */
         virtual ~ThreadPool();
 
 	    /**
-	     *
+	     * The method is the actually executing method for a scheduled job. It
+         * checks if a job is available and executes the job and waits on a
+         * lock after it finishes. If a new job is available it is notified by
+         * the schedule method.
 	     */
         void worker();
 
 	    /**
-	     *
+	     * The method schedules a task. If a worker is available the task is
+         * executed in the worker() method.
+         *
+         * @param job The job to execute for a worker
 	     */
         void schedule(std::function<void()> job);
 
@@ -49,7 +60,7 @@ class ThreadPool {
         std::vector<std::unique_ptr<std::thread>> workers;
 	    /// A queue which holds jobs to be exectued by the worker threads
 	    std::queue<std::function<void()>> jobs;
-	    ///
+	    /// A lock for the job list
 	    std::mutex lockJobList;
 	     /// The condition variable signals that a job has been inserted in the queue
         std::condition_variable notifyJob;
