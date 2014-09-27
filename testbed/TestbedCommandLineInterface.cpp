@@ -40,7 +40,9 @@ int cli_show_routing_table(struct cli_def* cli, const char* command, char* argv[
 }
 
 int cli_show_statistics(struct cli_def* cli, const char* command, char* argv[], int argc) {
-    /// dummy
+    std::string statistics = client->getStatistics();
+    /// print the statistics of the routing daemon 
+    cli_print(cli, "%s", statistics.c_str());
 
     return CLI_OK;
 }
