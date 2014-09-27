@@ -37,6 +37,8 @@ class TestbedARAClient : public AbstractARAClient {
 
         std::string toString();
 
+        std::string getStatistics();
+
         /**
          * Sends the packet to the packets destination.
          *

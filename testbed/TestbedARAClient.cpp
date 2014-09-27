@@ -11,12 +11,11 @@ TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARACl
     // set the clock to the standard clock (if it is not pre-set to the dummy clock, the tests fail)
     Environment::setClock(new StandardClock());
     //TODO Make configurable
-    //Logger* logger = new SimpleLoggerExtended("ara");
     Logger* logger = new SimpleLogger("ara");
     setLogger(logger);
-    logDebug("Initialized testbedARAClient");
+    // DEBUG: logDebug("Initialized testbedARAClient");
     initializeNetworkInterfaces();
-    logDebug("Initialized testbedARAClient network Interfaces");
+    // DEBUG: logDebug("Initialized testbedARAClient network Interfaces");
 }
 
 TestbedARAClient::~TestbedARAClient() { }
@@ -40,9 +39,24 @@ std::string TestbedARAClient::toString() {
     return result.str();
 }
 
+std::string TestbedARAClient::getStatistics() { 
+    std::ostringstream result;
+   
+    // print network interface statistics
+    for (auto& interface: interfaces) {
+        TestbedNetworkInterface* testbedInterface = dynamic_cast<TestbedNetworkInterface*>(interface);
+
+        if (testbedInterface) {
+            result << "Network Interface Statistics [" << testbedInterface->getInterfaceName() << "]" << std::endl;
+            result << testbedInterface->getStatistics();
+        }
+    }
+   
+    return result.str();
+}
+
 void TestbedARAClient::sendPacket(Packet* packet) {
-    // DEBUG:
-    std::cerr << "[TestbedARAClient::sendPacket] pass packet to client" << std::endl;
+    // DEBUG: std::cerr << "[TestbedARAClient::sendPacket] pass packet to client" << std::endl;
     AbstractARAClient::sendPacket(packet);
 }
 
@@ -53,16 +67,19 @@ void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* inte
 }
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
-    logDebug("sending packet # %u to System via TAP", packet->getSequenceNumber());
-   
-    int payloadLength = packet->getPayloadLength();
-    const void *payload = packet->getPayload();
+    logDebug("attempting to send packet # %u to System via TAP", packet->getSequenceNumber());
 
-    /// deliver the packet to the system
-    if (dessert_syssend(payload, payloadLength) == DESSERT_OK){
-        std::cerr << "[TestbedARAClient::deliverToSystem] sending packet to system was successful" << std::endl;
-    } else {
-        std::cerr << "[TestbedARAClient::deliverToSystem] sending packet to system failed" << std::endl;
+    struct ether_header* payload;
+    const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
+    int payloadLength = dessert_msg_ethdecap(testbedPacket->toDessertMessage(), &payload); 
+
+    if (payloadLength != -1) {
+        /// send the payload to the system
+        if (dessert_syssend(payload, payloadLength) != DESSERT_OK){
+            logFatal("sending packet to system failed");
+        }
+        /// since the data was allocated using malloc indessert_msg_ethdecap()
+        free(payload);
     }
 }
 
@@ -105,14 +122,14 @@ std::string TestbedARAClient::routingTableToString() {
 void TestbedARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer){
     std::lock_guard<std::recursive_mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
     AbstractARAClient::handleExpiredRouteDiscoveryTimer(routeDiscoveryTimer);
+
+    // should come up with our own handling
 }
 
 void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer){
     std::shared_ptr<Timer> timer = deliveryTimer.lock();
 
     if (timer) {
-        // DEBUG:
-        std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] "<< std::endl;
         TestbedTimerAddressInfo* timerInfo = (TestbedTimerAddressInfo*) timer->getContextObject();
         AddressPtr destination = timerInfo->getDestination();
 
@@ -126,7 +143,10 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
             discovery = runningRouteDiscoveries.find(destination);
 
             if (discovery != runningRouteDiscoveries.end()) {
-                // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
+                /**
+                 * We delete the route discovery info first or else the client will 
+                 * always think the route discovery is still running and never send any packets
+                 */
                 runningRouteDiscoveries.erase(discovery);
 
                 std::lock_guard<std::mutex> lock(deliveryTimerMutex);
@@ -151,14 +171,12 @@ void TestbedARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer){
 }
 
 void TestbedARAClient::startRouteDiscoveryTimer(const Packet* packet){
-    std::cerr << "[TBA] start route discovery timer" << std::endl; 
+    std::cerr << "[TestbedARAClient::startRouteDiscoveryTimer] start route discovery timer" << std::endl; 
 
     TestbedRouteDiscoveryInfo* discoveryInfo = new TestbedRouteDiscoveryInfo(packet);
     TimerPtr timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
     timer->addTimeoutListener(this);
     timer->run(routeDiscoveryTimeoutInMilliSeconds * 1001);
-
-    std::cerr << "[TBA] type is " << discoveryInfo->toString() << std::endl; 
 
     AddressPtr destination = packet->getDestination();
 

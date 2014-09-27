@@ -24,6 +24,7 @@ class TestbedNetworkInterface : public ReliableNetworkInterface {
         bool equals(NetworkInterface* otherInterface);
 
         std::string getStatistics();
+        std::string getInterfaceName();
 
     protected:
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
@@ -45,6 +46,8 @@ class TestbedNetworkInterface : public ReliableNetworkInterface {
         std::map<std::string, unsigned long> receiveStatistics;
         /// we store the number of sent packets per packet type in a map
         std::map<std::string, unsigned long> sentStatistics;
+
+        std::string interfaceName;
 };
 
 TESTBED_NAMESPACE_END

@@ -13,6 +13,7 @@ TESTBED_NAMESPACE_BEGIN
 TestbedNetworkInterface::TestbedNetworkInterface(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds) 
   : ReliableNetworkInterface(client, ackTimeoutInMicroSeconds, std::make_shared<TestbedAddress>(dessertPointer->hwaddr), std::make_shared<TestbedAddress>(DESSERT_BROADCAST_ADDRESS)) { 
   numberOfReceivedPackets = numberOfSentPackets = 0;
+  interfaceName = std::string(dessertPointer->if_name);
   // DEBUG:  std::cerr << "[TestbedNetworkInterface] address: " << *localAddress << " broadcast address: " << *broadcastAddress << std::endl;  
 }
 
@@ -22,6 +23,10 @@ bool TestbedNetworkInterface::equals(NetworkInterface* otherInterface) {
     }
 
     return false;
+}
+
+std::string TestbedNetworkInterface::getInterfaceName(){
+    return interfaceName;
 }
 
 std::string TestbedNetworkInterface::getStatistics(){
