@@ -23,6 +23,13 @@ int cli_list_active_timers(struct cli_def* cli, char* command, char* argv[], int
 /*
 */
 
+int cli_set_ack_timeout(struct cli_def* cli, const char* command, char* argv[], int argc){
+
+    return CLI_OK;
+}
+
+//int cli_set_route_discovery_timeout(struct cli_def* cli, const char* command, char* argv[], int argc);
+
 int cli_show_configuration(struct cli_def* cli, const char* command, char* argv[], int argc) {
     std::string configuration = client->toString();
     // print the configuration of the routing daemon

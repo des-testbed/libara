@@ -25,14 +25,13 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
  * The function registers the callback functions for the remote shell provided
  * by libcli. 
  */
-static void registerCommandLineInterfaceCommands(){
+static void registerCommandLineInterfaceCommands() {
     cli_register_command(dessert_cli, dessert_cli_cfg_iface, "sys", ARA::testbed::cli_setup_sysif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize tap interface");
     cli_register_command(dessert_cli, dessert_cli_cfg_iface, "mesh", ARA::testbed::cli_setup_meshif, PRIVILEGE_PRIVILEGED, MODE_CONFIG, "initialize mesh interface");
-//    cli_register_command(dessert_cli, dessert_cli_show, "testSendMesh", ARA::testbed::cli_test_send_mesh, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "send a test packet to mesh interface");
-     //cli_register_command(dessert_cli, dessert_cli_show, const_cast<char*>("list timers"), ARA::testbed::cli_list_active_timers, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("list active timers"));
-    cli_register_command(dessert_cli, dessert_cli_show, "routing table", ARA::testbed::cli_show_routing_table, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("displays the content of the routing table"));
+    cli_register_command(dessert_cli, dessert_cli_show, "ack timeout", ARA::testbed::cli_set_ack_timeout, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "set acknowledgement timer timeout [ms]");
+    cli_register_command(dessert_cli, dessert_cli_show, "routing table", ARA::testbed::cli_show_routing_table, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "displays the content of the routing table");
     cli_register_command(dessert_cli, dessert_cli_show, "configuration", ARA::testbed::cli_show_configuration, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "displays the current configuration");
-    cli_register_command(dessert_cli, dessert_cli_show, "statistics", ARA::testbed::cli_show_statistics, PRIVILEGE_UNPRIVILEGED, MODE_ANY, const_cast<char*>("shows various statistics of the routing daemon"));
+    cli_register_command(dessert_cli, dessert_cli_show, "statistics", ARA::testbed::cli_show_statistics, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "shows various statistics of the routing daemon");
 }
 
 /**
@@ -41,7 +40,7 @@ static void registerCommandLineInterfaceCommands(){
  * TestbedPacketDispatcher.cpp. The naming of the functions follows the example
  * routing daemon in the libdessert documentation.
  */
-static void registerCallbacks(){
+static void registerCallbacks() {
      /// send with dessert_meshsend() data over a registered mesh interface
      dessert_cb_result (*fromTAP)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &ARA::testbed::toMesh;
      ///
