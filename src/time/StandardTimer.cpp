@@ -49,7 +49,7 @@ void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
             }
             // DEBUG: 
             std::cerr << "[StandardTimer] callback of timer type " << TimerType::getAsString(type) << " called" << std::endl;
-	    } else if (result == std::cv_status::no_timeout) {
+        } else if (result == std::cv_status::no_timeout) {
             // DEBUG: 
             std::cerr << "[StandardTimer] callback of timer type " << TimerType::getAsString(type) << " cancelled " << std::endl;
         } else {
