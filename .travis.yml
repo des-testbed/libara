@@ -21,7 +21,7 @@ compiler:
 
 script: 
    - $CXX --version
-   "make test NO_OMNET=TRUE"
+   - make test NO_OMNET=TRUE
 
 before_install:
   # g++4.8.1
