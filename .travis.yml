@@ -1,5 +1,19 @@
 # Configuration for Travis CI
 # See http://about.travis-ci.org/docs/user/getting-started/
+env:
+  global:
+   - secure: "Xd8Rv317Ur9+Bu33+ugBDKus66MJ8uENlE0uYNqyCk+vU0N0+5/JEQMLNdi+jP4DskZ7S75GdYshT2A4CdLvBj3ZxGyw6vhlnSKAVVLE69B1H2V2+uRKq1T13qeqfEW1RrvwJv7mfN/B4AeytluugE9DCJC5hdB8owYHBq6TEa0="
+
+addons:
+  coverity_scan:
+    project:
+      name: "des-testbed/libara"
+      description: "build submitted via Travis CI"
+    notification_email: mail@mfrey.net
+#    build_command_prepend: "<Your build preprocessing command here>"
+    build_command:   "make NO_OMNET=TRUE"
+    branch_pattern: master
+
 language: cpp
 compiler:
   - clang
@@ -13,11 +27,15 @@ branches:
   only:
     - master
     - develop
+
 git:
   submodules: false
+
 notifications:
-  recipients: "friedrich.grosse@gmail.com"
-  email:
-    on_success: change
-    on_failure: always
+  recipients: 
+    - friedrich.grosse@gmail.com
+    - mail@mfrey.net
+  email:
+    on_success: change
+    on_failure: always
 
