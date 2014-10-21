@@ -19,7 +19,7 @@ compiler:
   - clang
   - gcc
 
-script: "make test NO_OMNET=TRUE"
+script: "pwd ; make test NO_OMNET=TRUE"
 
 before_install:
   # g++4.8.1
