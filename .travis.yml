@@ -19,7 +19,7 @@ compiler:
   - clang
   - gcc
 
-script: "pwd ; make test NO_OMNET=TRUE"
+script: "pwd ; cd /home/travis/build/des-testbed/libara; pwd ; make test NO_OMNET=TRUE"
 
 before_install:
   # g++4.8.1
@@ -47,7 +47,6 @@ install:
   - if [ "$CXX" == "clang++" ]; then sudo ln -sf libc++.so.1.0 libc++.so.1 && cd $cwd; fi
 
   - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.4"; fi
-  - if [ "$CXX" == "clang++" ]; then cd /home/travis/build/des-testbed/libara; fi
 
 
 branches:
