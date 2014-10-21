@@ -47,7 +47,7 @@ install:
   - if [ "$CXX" == "clang++" ]; then sudo ln -sf libc++.so.1.0 libc++.so.1 && cd $cwd; fi
 
   - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.4"; fi
-
+  - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-stdlib=libc++"; fi
 
 branches:
   only:
