@@ -95,7 +95,6 @@ class TestbedRoutingTable : public RoutingTable {
         std::string toString(int position=-1);
 
     private:
-
         /**
          * This derived method does the same as the method in the base class, but uses
          * locks and mutexes in order to protect critical sections. The method is

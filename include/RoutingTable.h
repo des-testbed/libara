@@ -27,6 +27,9 @@ struct RoutingTableEntryTupel {
 #define RoutingTableEntryList std::deque<RoutingTableEntry*>
 typedef std::unordered_map<AddressPtr, std::shared_ptr<RoutingTableEntryList>, AddressHash, AddressPredicate> RoutingTableMap;
 
+/**
+ *
+ */
 class RoutingTable {
 
 public:
@@ -36,7 +39,7 @@ public:
     /**
      * Get the pheromone value for a specific route in this routing table.
      */
-    float getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
+    virtual float getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);
    
     virtual void update(AddressPtr destination, RoutingTableEntry* entry);
     virtual void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
