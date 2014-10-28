@@ -22,6 +22,9 @@ void StandardTimerProxy::run(unsigned long timeoutInMicroSeconds){
 }
 
 void StandardTimerProxy::interrupt(){
+    // DEBUG:
+    std::cerr << "[StandardTimer::interrupt] interrupt timer " <<  timerIdentifier << std::endl;
+
     StandardClock* clock = dynamic_cast<StandardClock*>(Environment::getClock());
 
     if (clock) {

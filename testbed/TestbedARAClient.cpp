@@ -51,6 +51,8 @@ std::string TestbedARAClient::getStatistics() {
             result << testbedInterface->getStatistics();
         }
     }
+
+    result << AbstractARAClient::getStatistics();
    
     return result.str();
 }

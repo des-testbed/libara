@@ -74,9 +74,10 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
      * otherwise).
      */
     if (packetFactory->checkDessertMessage(message)) {
+        std::cerr << "[TestbedPacketDispatcher::dispatch] send message with sequence nr. " << ntohs(message->u16) << 
+          " and type " << PacketType::getAsString(testbedPacket->getType()) << std::endl;
         if ((result = dessert_meshsend_fast(message, interface)) == DESSERT_OK) {
-            // DEBUG: 
-            std::cerr << "[TestbedPacketDispatcher::dispatch] sending message was successful" << std::endl;
+            // DEBUG: std::cerr << "[TestbedPacketDispatcher::dispatch] sending message was successful" << std::endl;
         } else if(result == EINVAL) {
              // DEBUG: 
              std::cerr << "[TestbedPacketDispatcher::dispatch] message was broken" << std::endl;
@@ -100,13 +101,13 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
 dessert_cb_result toMesh(dessert_msg_t* message, uint32_t length, dessert_msg_proc_t *flags, dessert_sysif_t *interface, dessert_frameid_t id) {
     // TODO: check if this might become a problem if the sequence number is
     // actually going to be 48879/0xBEEF
-    if (ntohs(message->u16) == 48879) {
+    //if (ntohs(message->u16) == 48879) {
         /**
          * we set our own sequence number since it is the default sequence
          * number of libdessert (48879 == 0xBEEF)
          */
         message->u16 = htons(client->getNextSequenceNumber());
-    }
+    //}
 
     // DEBUG: dumpDessertMessage(message, length, flags);
     TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());

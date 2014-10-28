@@ -21,9 +21,7 @@ TimerPtr StandardClock::getNewTimer(char timerType, void* contextObject){
     std::shared_ptr<StandardTimerProxy> callback = std::make_shared<StandardTimerProxy>(timerType, contextObject);
     /// set the identifier of the timer
     callback->setTimerIdentifier(timerList.size());
-
-    std::cerr << "[SC] timer identifier has been set to " << callback->getTimerIdentifier() << " for timer " << PacketType::getAsString(timerType) << std::endl;
-
+    // DEBUG: std::cerr << "[StandardClock::getNewTimer] timer identifier has been set to " << callback->getTimerIdentifier() << " for timer " << TimerType::getAsString(timerType) << std::endl;
     /// create a standard timer
     std::shared_ptr<StandardTimer> timer = std::make_shared<StandardTimer>(timerType);
     /// set the callback to the standard proxy
@@ -65,6 +63,8 @@ void StandardClock::scheduleTimer(std::function<void()> timer){
 
 void StandardClock::interruptTimer(unsigned long identifier){
     std::lock_guard<std::recursive_mutex> lock(mutex);
+
+    // DEBUG: std::cerr << "[StandardClock::interruptTimer] interrupt timer with id " << identifier <<  std::endl;
 
     try {
         std::shared_ptr<StandardTimer> timer = timerList[identifier]; 
