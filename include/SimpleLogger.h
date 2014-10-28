@@ -7,6 +7,8 @@
 
 #include "Logger.h"
 
+#include <iostream>
+
 namespace ARA {
 
     class SimpleLogger : public Logger {
