@@ -66,7 +66,7 @@ class ReliableNetworkInterface : public AbstractNetworkInterface, public Timeout
 
         void setMaxNrOfRetransmissions(int n);
 
-        void timerHasExpired(std::weak_ptr<Timer> responsibleTimer);
+        virtual void timerHasExpired(std::weak_ptr<Timer> responsibleTimer);
 
     protected:
 
