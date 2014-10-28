@@ -14,22 +14,49 @@
 
 TESTBED_NAMESPACE_BEGIN
 
+/**
+ *
+ */
 class TestbedNetworkInterface : public ReliableNetworkInterface {
     public:
         TestbedNetworkInterface(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
-        ~TestbedNetworkInterface(){};
+        virtual ~TestbedNetworkInterface(){};
 
+        /**
+         *
+         */
         void send(const Packet* packet, AddressPtr recipient);
+        /**
+         *
+         */
         void receive(Packet* packet);
+        /**
+         *
+         */
         bool equals(NetworkInterface* otherInterface);
 
+        /**
+         *
+         */
         std::string getStatistics();
+
+        /**
+         *
+         */
         std::string getInterfaceName();
+
+        /**
+         * @see ReliableNetworkInterface::timerHasExpired(std::weak_ptr<Timer> ackTimer)
+         */
+        void timerHasExpired(std::weak_ptr<Timer> ackTimer);
 
     protected:
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
 
     private:
+        /**
+         *
+         */
         void packetCounter(char type, bool isReceivedPacket);
 
         std::mutex unacknowledgedPacketsMutex;

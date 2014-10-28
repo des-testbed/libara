@@ -31,17 +31,20 @@ std::string TestbedNetworkInterface::getInterfaceName(){
 
 std::string TestbedNetworkInterface::getStatistics(){
     std::ostringstream result;
+    float percentage = .0;
  
     // print the received packet statistics
     for (auto metric = receiveStatistics.begin(); metric != receiveStatistics.end(); ++metric) {
-         result << metric->first << ": " << metric->second << " ("  << (metric->second/numberOfReceivedPackets) * 100 << " %)" << std::endl; 
+         percentage = ((float)metric->second/(float)numberOfReceivedPackets) * 100.0;
+         result << metric->first << ": " << metric->second << " ("  << percentage <<  " %)" << std::endl; 
     }
     result << "total number of received packets: " << numberOfReceivedPackets << std::endl;
     result << std::endl;
 
     // print the sent packet statistics
     for (auto metric = sentStatistics.begin(); metric != sentStatistics.end(); ++metric) {
-         result << metric->first << ": " << metric->second << " ("  << (metric->second/numberOfSentPackets) * 100 << " %)" << std::endl; 
+         percentage = ((float)metric->second/(float)numberOfSentPackets) * 100.0;
+         result << metric->first << ": " << metric->second << " ("  << percentage <<  " %)" << std::endl; 
     }
     result << "total number of sent packets: " << numberOfSentPackets << std::endl;
     result << std::endl;
@@ -89,12 +92,17 @@ void TestbedNetworkInterface::packetCounter(char type, bool isReceivedPacket){
     std::string key = PacketType::getAsString(type);
 
     if (isReceivedPacket) {
-        receiveStatistics[key] = receiveStatistics[key]++;
+        receiveStatistics[key] = ++receiveStatistics[key];
         numberOfReceivedPackets++;
     } else {
-        sentStatistics[key] = sentStatistics[key]++;
+        sentStatistics[key] = ++sentStatistics[key];
         numberOfSentPackets++;
     }
+}
+
+void TestbedNetworkInterface::timerHasExpired(std::weak_ptr<Timer> ackTimer) {
+    std::unique_lock<std::mutex> timerLock(acknowledgmentTimerMutex);
+    ReliableNetworkInterface::timerHasExpired(ackTimer);
 }
 
 TESTBED_NAMESPACE_END
