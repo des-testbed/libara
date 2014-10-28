@@ -118,6 +118,8 @@ public:
     
     void logAllRoutingTableEntries();
 
+    std::string getStatistics();
+
 protected:
 
     virtual void sendUnicast(Packet* packet, NetworkInterface* interface, AddressPtr receiver);
@@ -243,6 +245,12 @@ protected:
      * the packets source we know so far.
      */
     LastRouteDiscoveriesMap lastRouteDiscoverySeqNumbers;
+
+private:
+    /** Statistics */
+    unsigned int onlyOneRouteFailure;
+    unsigned int allRoutesHaveCollapsedFailure;
+    unsigned int routingLoopFailure;
 };
 
 ARA_NAMESPACE_END
