@@ -52,7 +52,7 @@ class PacketFactory {
          * Note: The result of this method is a newly created object which must be
          * deleted later by the calling class.
          */
-        Packet* makeFANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber);
+        virtual Packet* makeFANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber);
 
         /**
          * Creates a new BANT based on the given packet. This BANT has the destination of
@@ -62,7 +62,7 @@ class PacketFactory {
          * Note: The result of this method is a newly created object which must be
          * deleted later by the calling class.
          */
-         Packet* makeBANT(const Packet* originalPacket, unsigned int sequenceNumber);
+         virtual Packet* makeBANT(const Packet* originalPacket, unsigned int sequenceNumber);
 
          /**
            * Creates a new HELLO packet with the given addresses.
