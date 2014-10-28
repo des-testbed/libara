@@ -14,7 +14,7 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
     int maxTTL = 255;
     ARA::testbed::TestbedRoutingTable* routingTable = new ARA::testbed::TestbedRoutingTable();
     ARA::testbed::TestbedPacketFactory* packetFactory = new ARA::testbed::TestbedPacketFactory(maxTTL);
-    ARA::EvaporationPolicy* evaporationPolicy = new ARA::ExponentialEvaporationPolicy(2.0, 100, 15.0);
+    ARA::EvaporationPolicy* evaporationPolicy = new ARA::ExponentialEvaporationPolicy(0.05, 100, 5.0);
     ARA::PathReinforcementPolicy* reinforcementPolicy = new ARA::LinearPathReinforcementPolicy(deltaPhi);
     ARA::ForwardingPolicy* forwardingPolicy = new ARA::BestPheromoneForwardingPolicy(routingTable);
     std::shared_ptr<ARA::testbed::TestbedPacketTrap> packetTrap = std::make_shared<ARA::testbed::TestbedPacketTrap>(routingTable);
