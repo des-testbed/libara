@@ -95,14 +95,10 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
         int antSize = 128;
 
         dessert_msg_addext(packet, &extension, DESSERT_EXT_ETH, ETHER_HDR_LEN);
+
         ethernetHeader = (struct ether_header*) extension->data;
         /// set the previous hop
         std::memcpy(ethernetHeader->ether_shost, DESSERT_LOCAL_ADDRESS, ETHER_ADDR_LEN);
-
-        /*
-        u_int8_t* src = sourceAddress->getDessertValue();
-        u_int8_t* dest = destinationAddress->getDessertValue();
-        */
 
         if ((type == PacketType::FANT) || (type == PacketType::BANT)) {
             /// set the destination 
@@ -117,14 +113,7 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
                 std::memcpy(extension->data, address, sizeof(ara_address_t));
                 std::memcpy(extension->data + ETHER_ADDR_LEN, "BANT", 4);
             }
-        /*    
-        dessert_ext_t* routingExtension = nullptr;
-        dessert_msg_addext(packet, &routingExtension, DESSERT_EXT_USER, ETHER_HDR_LEN);
-        RoutingExtension* araRoutingExtension = (RoutingExtension*)routingExtension->data;
-        /// TODO: and again better check this
-        memcpy(araRoutingExtension->ara_shost, src, ETHER_ADDR_LEN);
-        memcpy(araRoutingExtension->ara_dhost, dest, ETHER_ADDR_LEN);
-*/
+
             dessert_msg_dummy_payload(packet, antSize);
         } else if (type == PacketType::DATA){
             /// set the destination 
@@ -166,11 +155,36 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
         } else if (type == PacketType::PANT){
 
         } else if (type == PacketType::ACK){
+            /// temporarily copy over the source address
+            std::copy(sourceAddress->getDessertValue(), sourceAddress->getDessertValue() + ETHER_ADDR_LEN, address);
+            /// set the source 
+            std::memcpy(ethernetHeader->ether_shost, address, ETHER_ADDR_LEN);
+
+            /// copy over the destination address
+            std::copy(destinationAddress->getDessertValue(), destinationAddress->getDessertValue() + ETHER_ADDR_LEN, address);
+            /// set the destination
+            std::memcpy(ethernetHeader->ether_dhost, address, ETHER_ADDR_LEN);
 
         } else if (type == PacketType::DUPLICATE_ERROR){
+            /// temporarily copy over the source address
+            std::copy(sourceAddress->getDessertValue(), sourceAddress->getDessertValue() + ETHER_ADDR_LEN, address);
+            /// set the source 
+            std::memcpy(ethernetHeader->ether_shost, address, ETHER_ADDR_LEN);
 
+            /// copy over the destination address
+            std::copy(destinationAddress->getDessertValue(), destinationAddress->getDessertValue() + ETHER_ADDR_LEN, address);
+            /// set the destination
+            std::memcpy(ethernetHeader->ether_dhost, address, ETHER_ADDR_LEN);
         } else if (type == PacketType::ROUTE_FAILURE){
+            /// temporarily copy over the source address
+            std::copy(sourceAddress->getDessertValue(), sourceAddress->getDessertValue() + ETHER_ADDR_LEN, address);
+            /// set the source 
+            std::memcpy(ethernetHeader->ether_shost, address, ETHER_ADDR_LEN);
 
+            /// copy over the destination address
+            std::copy(destinationAddress->getDessertValue(), destinationAddress->getDessertValue() + ETHER_ADDR_LEN, address);
+            /// set the destination
+            std::memcpy(ethernetHeader->ether_dhost, address, ETHER_ADDR_LEN);
         } else if (type == PacketType::HELLO){
 
         } else if (type == PacketType::PEANT){
