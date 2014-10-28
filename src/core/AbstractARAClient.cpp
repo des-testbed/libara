@@ -23,6 +23,9 @@ AbstractARAClient::AbstractARAClient(Configuration& configuration) {
 }
 
 void AbstractARAClient::initialize(Configuration& configuration) {
+    onlyOneRouteFailure = allRoutesHaveCollapsedFailure = 0;
+    routingLoopFailure = 0;
+
     routingTable = configuration.getRoutingTable();
     packetFactory = configuration.getPacketFactory();
     packetFactory->setPreviousHopFeature(isPreviousHopFeatureActivated);
@@ -120,6 +123,9 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
             sendUnicast(packet, interface, nextHopAddress);
         } else {
+            // DEBUG:
+            std::cerr << "[AbstractARAClient::sendPacket]: packet source address is: " << packet->getSource()->toString() << std::endl;
+
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
                 logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
@@ -206,7 +212,7 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
     updateRoutingTable(packet, interface);
     packet->decreaseTTL();
 
-    if(hasBeenReceivedEarlier(packet)) {
+    if (hasBeenReceivedEarlier(packet)) {
         handleDuplicatePacket(packet, interface);
     } else {
         registerReceivedPacket(packet);
@@ -217,8 +223,7 @@ void AbstractARAClient::receivePacket(Packet* packet, NetworkInterface* interfac
 void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* interface) {
     if(packet->isDataPacket()) {
         sendDuplicateWarning(packet, interface);
-    }
-    else if(packet->getType() == PacketType::BANT && isDirectedToThisNode(packet)) {
+    } else if(packet->getType() == PacketType::BANT && isDirectedToThisNode(packet)) {
         logDebug("Another BANT %u came back from %s via %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
     }
 
@@ -226,6 +231,7 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
 }
 
 void AbstractARAClient::sendDuplicateWarning(Packet* packet, NetworkInterface* interface) {
+    routingLoopFailure++;
     logWarn("Routing loop for packet %u from %s detected. Sending duplicate warning back to %s", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
     AddressPtr localhost = interface->getLocalAddress();
     Packet* duplicateWarningPacket = packetFactory->makeDuplicateWarningPacket(packet, localhost, getNextSequenceNumber());
@@ -272,6 +278,10 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
     }
     //logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
     //logAllRoutingTableEntries();
+
+    std::cerr << "[AbstractARAClient::createNewRouteFrom] dump routing table " << std::endl;
+    std::cerr << *routingTable;
+    std::cerr << std::endl;
 }
 /*
 void AbstractARAClient::logAllRoutingTableEntries() {
@@ -393,6 +403,9 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 }
 
 void AbstractARAClient::handleDataPacket(Packet* packet) {
+    // DEBUG: 
+    std::cerr << "[AbstractARAClient::handleDataPacket] source " << packet->getSource()->toString() << " destination " << packet->getDestination()->toString() << std::endl;
+
     if(isDirectedToThisNode(packet)) {
         handleDataPacketForThisNode(packet);
     } else {
@@ -493,15 +506,6 @@ void AbstractARAClient::stopRouteDiscoveryTimer(AddressPtr destination) {
     if(discovery != runningRouteDiscoveries.end()) {
         TimerPtr timer = discovery->second;
         timer->interrupt();
-
-        std::shared_ptr<StandardTimerProxy> proxy = std::dynamic_pointer_cast<StandardTimerProxy>(timer);
-
-        if (proxy) {
-            std::cerr << "[AbstractARAClient::stopRouteDiscoveryTimer] I'm going to delete route discovery for timer " << proxy->getTimerIdentifier() << std::endl;
-        } else {
-            std::cerr << "[AbstractARAClient::stopRouteDiscoveryTimer] I'm going to delete route discovery for timer, but the cast failed " << std::endl;
-        }
-
         /**
          * the route discovery is not completely finished until the delivery timer expired.
          * only then is runningRouteDiscoveries.erase(discovery) called!
@@ -805,6 +809,7 @@ void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressP
 
         deque<RoutingTableEntry*> possibleNextHops = routingTable->getPossibleNextHops(destination);
         if (possibleNextHops.size() == 1) {
+            onlyOneRouteFailure++;
             RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
             AddressPtr remainingNextHop = lastRemainingRoute->getAddress();
             logDebug("Only one last route is known to %s. Notifying %s with ROUTE_FAILURE packet", destination->toString().c_str(), remainingNextHop->toString().c_str());
@@ -814,6 +819,7 @@ void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressP
             lastRemainingRoute->getNetworkInterface()->send(routeFailurePacket, remainingNextHop);
         }
         else if (possibleNextHops.empty()) {
+            allRoutesHaveCollapsedFailure++;
             logInfo("All known routes to %s have collapsed. Sending ROUTE_FAILURE packet", destination->toString().c_str());
             broadcastRouteFailure(destination);
         }
@@ -850,6 +856,19 @@ int AbstractARAClient::getMaxTTL() const {
 
 TimerPtr AbstractARAClient::getNewTimer(char timerType, void* contextObject) const {
     return Environment::getClock()->getNewTimer(timerType, contextObject);
+}
+
+std::string AbstractARAClient::getStatistics() {
+    std::ostringstream result;
+
+    result << "General ARA Statistics:" << std::endl;
+    result << " Route Failures" << std::endl;
+    result << "   only one last route:             " << onlyOneRouteFailure << std::endl;
+    result << "   all known routes have collapsed: " << allRoutesHaveCollapsedFailure << std::endl;
+
+    result << " Duplicate Warnings" << std::endl;
+    result << "   routing loops:                   " << routingLoopFailure << std::endl;
+    return result.str();
 }
 
 ARA_NAMESPACE_END
