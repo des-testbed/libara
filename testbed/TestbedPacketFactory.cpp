@@ -19,8 +19,11 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     dessert_msg_getext(message, &extension, DESSERT_EXT_ETH, 0);
     ether_header* ethernetFrame = (ether_header*) extension->data;
 
+    /// set packet type
     char packetType = message->u8;
+    /// set sequence number
     unsigned int sequenceNumber = ntohs(message->u16);
+    /// set time to live
     int ttl = message->ttl;
 
     // TODO: check if that always make sense
@@ -52,6 +55,10 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     TestbedPacket* packet = new TestbedPacket(source, destination, sender, packetType, sequenceNumber, ttl);
 
     if (ntohs(message->plen) > 0) {
+        /**
+         * the ethernet type is always to be 0x0800 (IPv4), but let's leave 
+         * us options open
+         */
         packet->setPayloadType(ethernetFrame->ether_type);
         packet->addPayload(message);
     }
@@ -95,7 +102,8 @@ TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr de
     return packet;
 }
 
-TestbedPacket* TestbedPacketFactory::makeFANT(TestbedAddressPtr source, TestbedAddressPtr destination, unsigned int sequenceNumber){
+TestbedPacket* TestbedPacketFactory::makeFANT(TestbedAddressPtr source, TestbedAddressPtr destination, unsigned int sequenceNumber) {
+    std::cerr << "[TestbedPacketFactory::makeFANT] seq nr is " << sequenceNumber << std::endl; 
     return this->makePacket(source, destination, source, PacketType::FANT, sequenceNumber, maxHopCount);
 }
 
@@ -106,7 +114,6 @@ TestbedPacket* TestbedPacketFactory::makeBANT(const Packet *packet, unsigned int
 TestbedPacket* TestbedPacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, TestbedAddressPtr sender){
     return makePacket(originalPacket->getSource(), originalPacket->getDestination(), sender, PacketType::ACK, originalPacket->getSequenceNumber(), maxHopCount);
 }
-
 
 bool TestbedPacketFactory::checkDessertMessage(dessert_msg_t* message){
     int result = -4;
