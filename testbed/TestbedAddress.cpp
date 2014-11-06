@@ -12,16 +12,15 @@ TestbedAddress::TestbedAddress(u_char* address){
 
 std::string TestbedAddress::toString() const {
     std::lock_guard<std::recursive_mutex> lock(addressMutex);
-    //std::lock_guard<std::mutex> lock(addressMutex);
+
     std::ostringstream result;
-    /// set output to hex values
-    result << std::hex;
-    /// insert colons between hex values
-    std::copy(this->address, this->address+6, std::ostream_iterator<short>(result, ":"));
-    /// the 'substr' workaround does not work if there are hex values with one digit in the address (so we have to determine the size)
-    short length = result.str().size() - 1;
-    /// since we don't want to write an infix operator and get rid of the last colon we return a substring
-    return result.str().substr(0, length);
+
+    for (short i = 0; i < 5; i++) {
+       result << std::setw(2) << std::setfill('0') << std::hex << (int)address[i] << ':';
+    }
+    result << std::setw(2) << std::setfill('0') << std::hex << (int)address[5];
+
+    return result.str();
 }
 
 bool TestbedAddress::equals(const Address* otherAddress) const{
