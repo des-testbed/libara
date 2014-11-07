@@ -3,60 +3,69 @@
  */
 
 #include "CppUTest/TestHarness.h"
-#include "testbed/CLibs.h"
-#include "testbed/TestbedMain.h"
+#include "CLibs.h"
 
-#include "testAPI/mocks/TestbedNetworkInterfaceMock.h"
+#include "TestbedNetworkInterface.h"
+
 #include "testAPI/mocks/ARAClientMock.h"
 
 TESTBED_NAMESPACE_BEGIN
 
 TEST_GROUP(TestbedNetworkInterfaceTest) {
     ARAClientMock* client;
-    dessert_meshif_t* meshInterface;
-    dessert_meshif_t* anotherMeshInterface;
-    TestbedNetworkInterfaceMock* interface;
+    TestbedNetworkInterface* interface;
+    /// dessert interface
+    dessert_meshif_t* wifi;
 
     void setup() {
+        /// setup the dessert interface
+        u_char mac[ETHER_ADDR_LEN] = {0x00,0x1f,0x1f,0x09,0x09,0xe2};
+        char name[6] = "wlan0";
+        wifi = new dessert_meshif_t();
+        
+        std::copy(mac, mac + ETHER_ADDR_LEN, wifi->hwaddr);
+        std::copy(name, name + 6, wifi->if_name);
+
+
         client = new ARAClientMock();
-
-        u_char address[ETHER_ADDR_LEN] = {1,2,3,4,5,6};
-        meshInterface = new dessert_meshif_t();
-        std::copy(address, address+6, meshInterface->hwaddr);
-
-        u_char otherAddress[ETHER_ADDR_LEN] = {6,5,4,3,2,1};
-        anotherMeshInterface = new dessert_meshif_t();
-        std::copy(otherAddress, otherAddress + 6, anotherMeshInterface->hwaddr);
-
-        interface = new TestbedNetworkInterfaceMock(meshInterface, client);
+        interface = new TestbedNetworkInterface(wifi, client, client->getPacketFactory(), 400);
     }
 
     void teardown() {
         delete client;
-        delete meshInterface;
-        delete anotherMeshInterface;
         delete interface;
+        delete wifi;
     }
 };
 
 TEST(TestbedNetworkInterfaceTest, equals) {
-    TestbedNetworkInterfaceMock* otherInterface = new TestbedNetworkInterfaceMock(meshInterface, client);
+    TestbedNetworkInterface* otherInterface = new TestbedNetworkInterface(wifi, client, client->getPacketFactory(), 600);
     CHECK(interface->equals(otherInterface));
     delete otherInterface;
 }
 
 TEST(TestbedNetworkInterfaceTest, notEquals) {
-    TestbedNetworkInterfaceMock* otherInterface = new TestbedNetworkInterfaceMock(anotherMeshInterface, client);
-    CHECK_FALSE(interface->equals(otherInterface));
-    delete otherInterface;
+    /// setup another dessert interface
+    u_char mac[ETHER_ADDR_LEN] = {0x00,0x1f,0x1f,0x09,0x06,0xe9};
+    dessert_meshif_t* anotherDessertInterface = new dessert_meshif_t();
+    std::copy(mac, mac + ETHER_ADDR_LEN, anotherDessertInterface->hwaddr);
+
+    TestbedNetworkInterface* anotherInterface = new TestbedNetworkInterface(anotherDessertInterface, client, client->getPacketFactory(), 400);
+    CHECK_FALSE(interface->equals(anotherInterface));
+
+    delete anotherInterface;
+    delete anotherDessertInterface;
 }
 
-TEST(TestbedNetworkInterfaceTest, send) {
-  //(const Packet* packet, AddressPtr recipient);
+TEST(TestbedNetworkInterfaceTest, getInterfaceName) {
+    std::string name("wlan0");
+    CHECK(interface->getInterfaceName().compare(name) == 0);
 }
 
-TEST(TestbedNetworkInterfaceTest, receive) {
-  //void receive(Packet* packet);
+/*
+TEST(TestbedNetworkInterfaceTest, registration) {
+    CHECK(interface->isRegistered());
 }
+*/
 
 TESTBED_NAMESPACE_END
