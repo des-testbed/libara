@@ -16,9 +16,9 @@ std::string TestbedAddress::toString() const {
     std::ostringstream result;
 
     for (short i = 0; i < 5; i++) {
-       result << std::setw(2) << std::setfill('0') << std::hex << (int)address[i] << ':';
+       result << std::setw(2) << std::setfill('0') << std::hex << (0xFF & address[i]) << ':';
     }
-    result << std::setw(2) << std::setfill('0') << std::hex << (int)address[5];
+    result << std::setw(2) << std::setfill('0') << std::hex << (0xFF & address[5]);
 
     return result.str();
 }
