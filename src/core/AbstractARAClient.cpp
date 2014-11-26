@@ -630,13 +630,6 @@ void AbstractARAClient::timerHasExpired(std::weak_ptr<Timer> responsibleTimer) {
 
 void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> routeDiscoveryTimer) {
     std::shared_ptr<Timer> timer = routeDiscoveryTimer.lock();
-    std::shared_ptr<StandardTimerProxy> proxy = std::dynamic_pointer_cast<StandardTimerProxy>(timer);
-
-        if (proxy) {
-            std::cerr << "[AbstractARAClient::handleExpiredRouteDiscovery] I'm going to handle route discovery for timer " << proxy->getTimerIdentifier() << std::endl;
-        } else {
-            std::cerr << "[AbstractARAClient::handleExpiredRouteDiscovery] I'm going to handle route discovery for timer, but the cast failed " << std::endl;
-        }
 
     if (timer->getContextObject() != nullptr) {
         RouteDiscoveryInfo* discoveryInfo = (RouteDiscoveryInfo*) timer->getContextObject();
@@ -646,8 +639,9 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> ro
         int nrOfRetries = discoveryInfo->getNumberOfRetries();
 
         if (nrOfRetries < maxNrOfRouteDiscoveryRetries) {
+            nrOfRetries++;
             // restart the route discovery
-            discoveryInfo->setNumberOfRetries(nrOfRetries++);
+            discoveryInfo->setNumberOfRetries(nrOfRetries);
             logInfo("Restarting discovery for destination %s (%u/%u)", destination->toString().c_str(), nrOfRetries, maxNrOfRouteDiscoveryRetries);
             forgetKnownIntermediateHopsFor(destination);
             broadcastFANT(destination);
