@@ -13,7 +13,7 @@
 #include "NetworkInterfaceMock.h"
 #include "PacketTrap.h"
 #include "EnergyAwareRoutingTable.h"
-#include "testAPI/mocks/time/TimerMock.h"
+#include "testAPI/mocks/libara/time/TimerMock.h"
 
 #include <string>
 

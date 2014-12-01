@@ -3,7 +3,7 @@
  */
 
 #include "CppUTest/TestHarness.h"
-#include "testAPI/mocks/LoggerMock.h"
+#include "testAPI/mocks/libara/LoggerMock.h"
 
 using namespace ARA;
 using namespace std;

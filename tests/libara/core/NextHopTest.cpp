@@ -4,9 +4,9 @@
 
 #include "CppUTest/TestHarness.h"
 #include "NextHop.h"
-#include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/ARAClientMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
+#include "testAPI/mocks/libara/NetworkInterfaceMock.h"
+#include "testAPI/mocks/libara/ARAClientMock.h"
 #include <memory>
 
 using namespace ARA;

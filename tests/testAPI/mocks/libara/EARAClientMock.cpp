@@ -8,8 +8,8 @@
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
 #include "EnergyAwareStochasticForwardingPolicy.h"
-#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
-#include "testAPI/mocks/time/ClockMock.h"
+#include "testAPI/mocks/libara/ExponentialEvaporationPolicyMock.h"
+#include "testAPI/mocks/libara/time/ClockMock.h"
 
 ARA_NAMESPACE_BEGIN
 

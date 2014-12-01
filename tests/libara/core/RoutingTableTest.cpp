@@ -7,12 +7,12 @@
 #include "ExponentialEvaporationPolicy.h"
 #include "RoutingTableEntry.h"
 #include "PacketType.h"
-#include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/PacketMock.h"
-#include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
-#include "testAPI/mocks/time/TimeMock.h"
-#include "testAPI/mocks/ARAClientMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
+#include "testAPI/mocks/libara/PacketMock.h"
+#include "testAPI/mocks/libara/NetworkInterfaceMock.h"
+#include "testAPI/mocks/libara/ExponentialEvaporationPolicyMock.h"
+#include "testAPI/mocks/libara/time/TimeMock.h"
+#include "testAPI/mocks/libara/ARAClientMock.h"
 
 #include <deque>
 

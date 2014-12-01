@@ -6,11 +6,11 @@
 #include "EnergyAwareRoutingTable.h"
 #include "EvaporationPolicy.h"
 #include "NextHop.h"
-#include "testAPI/mocks/EARAClientMock.h"
-#include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/PacketMock.h"
-#include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/EnergyAwareStochasticForwardingPolicyMock.h"
+#include "testAPI/mocks/libara/EARAClientMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
+#include "testAPI/mocks/libara/PacketMock.h"
+#include "testAPI/mocks/libara/NetworkInterfaceMock.h"
+#include "testAPI/mocks/libara/EnergyAwareStochasticForwardingPolicyMock.h"
 
 using namespace ARA;
 

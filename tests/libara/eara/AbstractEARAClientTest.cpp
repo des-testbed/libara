@@ -10,7 +10,7 @@
 #include "EARAPacket.h"
 #include "TimerType.h"
 
-#include "testAPI/mocks/EARAClientMock.h"
+#include "testAPI/mocks/libara/EARAClientMock.h"
 #include <iostream>
 #include <climits>
 

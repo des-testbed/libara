@@ -8,9 +8,9 @@
 #include "PacketFactory.h"
 #include "BestPheromoneForwardingPolicy.h"
 #include "LinearPathReinforcementPolicy.h"
-#include "testAPI/mocks/RoutingTableMock.h"
-#include "testAPI/mocks/ExponentialEvaporationPolicyMock.h"
-#include "testAPI/mocks/time/ClockMock.h"
+#include "testAPI/mocks/libara/RoutingTableMock.h"
+#include "testAPI/mocks/libara/ExponentialEvaporationPolicyMock.h"
+#include "testAPI/mocks/libara/time/ClockMock.h"
 
 #include <sstream>
 

@@ -6,7 +6,7 @@
 #include "EARAPacketFactory.h"
 #include "EARAPacket.h"
 
-#include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
 #include "PacketType.h"
 
 #include <cstring>

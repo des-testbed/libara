@@ -3,7 +3,7 @@
  */
 
 #include "CppUTest/TestHarness.h"
-#include "testAPI/mocks/EARAClientMock.h"
+#include "testAPI/mocks/libara/EARAClientMock.h"
 #include "EnergyAwareRoutingTable.h"
 
 using namespace ARA;

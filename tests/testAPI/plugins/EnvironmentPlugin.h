@@ -5,7 +5,7 @@
 #define ENVIRONMENT_PLUGIN_H_
 
 #include "Environment.h"
-#include "testAPI/mocks/time/ClockMock.h"
+#include "testAPI/mocks/libara/time/ClockMock.h"
 
 #include "CppUTest/TestHarness.h"
 

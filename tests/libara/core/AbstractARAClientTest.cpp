@@ -14,13 +14,13 @@
 #include "Environment.h"
 #include "TimerType.h"
 
-#include "testAPI/mocks/ARAClientMock.h"
-#include "testAPI/mocks/RoutingTableMock.h"
-#include "testAPI/mocks/PacketMock.h"
-#include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/LoggerMock.h"
-#include "testAPI/mocks/time/ClockMock.h"
+#include "testAPI/mocks/libara/ARAClientMock.h"
+#include "testAPI/mocks/libara/RoutingTableMock.h"
+#include "testAPI/mocks/libara/PacketMock.h"
+#include "testAPI/mocks/libara/NetworkInterfaceMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
+#include "testAPI/mocks/libara/LoggerMock.h"
+#include "testAPI/mocks/libara/time/ClockMock.h"
 
 #include <iostream>
 

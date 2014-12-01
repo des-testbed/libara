@@ -3,7 +3,7 @@
  */
 
 #include "CppUTest/TestHarness.h"
-#include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
 
 using namespace ARA;
 

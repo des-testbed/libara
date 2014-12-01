@@ -4,8 +4,8 @@
 
 #include "CppUTest/TestHarness.h"
 #include <cstring>
-#include "testAPI/mocks/PacketMock.h"
-#include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/libara/PacketMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
 
 using namespace ARA;
 

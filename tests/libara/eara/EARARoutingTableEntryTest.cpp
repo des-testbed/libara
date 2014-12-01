@@ -6,9 +6,9 @@
 #include "EARARoutingTableEntry.h"
 #include "NextHop.h"
 #include "Exception.h"
-#include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/EARAClientMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
+#include "testAPI/mocks/libara/NetworkInterfaceMock.h"
+#include "testAPI/mocks/libara/EARAClientMock.h"
 
 using namespace ARA;
 

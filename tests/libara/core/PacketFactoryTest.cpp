@@ -4,7 +4,7 @@
 
 #include "CppUTest/TestHarness.h"
 #include "PacketFactory.h"
-#include "testAPI/mocks/AddressMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
 #include "Packet.h"
 #include "PacketType.h"
 

@@ -3,7 +3,7 @@
  */
 
 #include "CppUTest/TestHarness.h"
-#include "testAPI/mocks/time/TimeMock.h"
+#include "testAPI/mocks/libara/time/TimeMock.h"
 
 using namespace ARA;
 

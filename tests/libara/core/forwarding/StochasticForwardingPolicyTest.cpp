@@ -6,11 +6,11 @@
 #include "RoutingTable.h"
 #include "RoutingTableEntry.h"
 #include "NextHop.h"
-#include "testAPI/mocks/ARAClientMock.h"
-#include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/PacketMock.h"
-#include "testAPI/mocks/NetworkInterfaceMock.h"
-#include "testAPI/mocks/StochasticForwardingPolicyMock.h"
+#include "testAPI/mocks/libara/ARAClientMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
+#include "testAPI/mocks/libara/PacketMock.h"
+#include "testAPI/mocks/libara/NetworkInterfaceMock.h"
+#include "testAPI/mocks/libara/StochasticForwardingPolicyMock.h"
 
 using namespace ARA;
 

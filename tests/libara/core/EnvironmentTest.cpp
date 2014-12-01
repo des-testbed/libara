@@ -6,8 +6,8 @@
 #include "Environment.h"
 #include "Clock.h"
 #include "PacketFactory.h"
-#include "testAPI/mocks/time/ClockMock.h"
-#include "testAPI/mocks/PacketMock.h"
+#include "testAPI/mocks/libara/time/ClockMock.h"
+#include "testAPI/mocks/libara/PacketMock.h"
 
 using namespace ARA;
 

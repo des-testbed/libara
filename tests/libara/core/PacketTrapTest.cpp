@@ -6,10 +6,10 @@
 #include "PacketTrap.h"
 #include "RoutingTable.h"
 #include "EvaporationPolicy.h"
-#include "testAPI/mocks/ARAClientMock.h"
-#include "testAPI/mocks/PacketMock.h"
-#include "testAPI/mocks/AddressMock.h"
-#include "testAPI/mocks/NetworkInterfaceMock.h"
+#include "testAPI/mocks/libara/ARAClientMock.h"
+#include "testAPI/mocks/libara/PacketMock.h"
+#include "testAPI/mocks/libara/AddressMock.h"
+#include "testAPI/mocks/libara/NetworkInterfaceMock.h"
 
 #include <memory>
 #include <deque>
