@@ -4,7 +4,8 @@
 
 #include "TestbedPacketFactory.h"
 
-extern std::shared_ptr<ARA::testbed::TestbedARAClient> client;
+//extern std::shared_ptr<ARA::testbed::TestbedARAClient> client;
+extern ARA::testbed::TestbedARAClient* client;
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -103,7 +104,7 @@ TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr de
 }
 
 TestbedPacket* TestbedPacketFactory::makeFANT(TestbedAddressPtr source, TestbedAddressPtr destination, unsigned int sequenceNumber) {
-    std::cerr << "[TestbedPacketFactory::makeFANT] seq nr is " << sequenceNumber << std::endl; 
+    // DEBUG: std::cerr << "[TestbedPacketFactory::makeFANT] seq nr is " << sequenceNumber << std::endl; 
     return this->makePacket(source, destination, source, PacketType::FANT, sequenceNumber, maxHopCount);
 }
 

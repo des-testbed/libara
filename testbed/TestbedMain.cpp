@@ -21,6 +21,18 @@ ARA::BasicConfiguration createConfiguration(double deltaPhi, double initialPhi) 
     return ARA::BasicConfiguration(routingTable, packetFactory, evaporationPolicy, reinforcementPolicy, forwardingPolicy, packetTrap, initialPhi);
 }
 
+void initializeClient(ARA::BasicConfiguration configuration){
+    if (!client) {
+        client = new ARA::testbed::TestbedARAClient(configuration);
+    } 
+}
+
+void destroyClient(){
+    if (client) {
+        delete client;
+    } 
+}
+
 /**
  * The function registers the callback functions for the remote shell provided
  * by libcli. 
@@ -43,12 +55,12 @@ static void registerCommandLineInterfaceCommands() {
 static void registerCallbacks() {
      /// send with dessert_meshsend() data over a registered mesh interface
      dessert_cb_result (*fromTAP)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &ARA::testbed::toMesh;
-     ///
+     /// 
      dessert_cb_result (*packetFilter)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_sysif_t*, dessert_frameid_t) = &ARA::testbed::packetFilter;
      ///
      dessert_cb_result (*fromMesh)(dessert_msg_t*, uint32_t, dessert_msg_proc_t*, dessert_meshif_t*, dessert_frameid_t) = &ARA::testbed::toSys;
 
-     ///
+     /// 
      dessert_sysrxcb_add(packetFilter, 5);
      ///
      dessert_sysrxcb_add(fromTAP, 15);
@@ -66,7 +78,7 @@ int main(int argc, char** argv) {
      dessert_init("ARAX", 0x01, DESSERT_OPT_NODAEMONIZE);
      /// configuration options for the logging mechanisms provided by libdessert
      dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
-     
+    
      /// register the remote shell commands
      registerCommandLineInterfaceCommands();
 
@@ -77,13 +89,17 @@ int main(int argc, char** argv) {
 
      // create a new configuration for ARA and pass it to the client
      ARA::BasicConfiguration configuration = createConfiguration(5.0, 5.0);
-     client = std::make_shared<ARA::testbed::TestbedARAClient>(configuration);
+     //client = std::make_shared<ARA::testbed::TestbedARAClient>(configuration);
+     initializeClient(configuration);
 
      /// register the callbacks for the packet dispatching mechanisms
      registerCallbacks();
 
      dessert_cli_run();
      dessert_run();
+
+     /// clean up (destroying the client instance)
+     destroyClient();
 
      return 0;
 }

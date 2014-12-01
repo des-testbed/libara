@@ -8,7 +8,8 @@
 #include "TestbedARAClient.h"
 #include "TestbedCommandLineInterface.h"
 
-extern std::shared_ptr<ARA::testbed::TestbedARAClient> client;
+//extern std::shared_ptr<ARA::testbed::TestbedARAClient> client;
+extern ARA::testbed::TestbedARAClient* client;
 
 TESTBED_NAMESPACE_BEGIN
 

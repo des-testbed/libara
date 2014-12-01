@@ -8,7 +8,8 @@
 
 #include <netinet/in.h>
 
-extern std::shared_ptr<ARA::testbed::TestbedARAClient> client;
+//extern std::shared_ptr<ARA::testbed::TestbedARAClient> client;
+extern ARA::testbed::TestbedARAClient* client;
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -35,7 +36,7 @@ dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_pro
 }
 
 /**
- * SEND
+* SEND
  */
 int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddress, std::shared_ptr<Address> recipient) {
     assert(packet != nullptr);
