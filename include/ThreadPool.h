@@ -26,7 +26,7 @@ class ThreadPool {
          * @param numberOfThreads The number of worker threads which should be
          * created
 	     */
-        ThreadPool(size_t numberOfThreads = 16);
+        ThreadPool(size_t numberOfThreads = 6);
 
 	    /**
 	     * The destructor of the thread pool. It notifies the running threads
