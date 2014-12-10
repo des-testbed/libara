@@ -5,15 +5,18 @@
 #include "CppUTest/TestHarness.h"
 #include "CLibs.h"
 
-#include "TestbedNetworkInterface.h"
+#include "TestbedPacket.h"
 
-#include "testAPI/mocks/ARAClientMock.h"
+#include "testAPI/mocks/libara/ARAClientMock.h"
+
+#include "testAPI/mocks/testbed/TestbedNetworkInterfaceMock.h"
 
 TESTBED_NAMESPACE_BEGIN
 
 TEST_GROUP(TestbedNetworkInterfaceTest) {
     ARAClientMock* client;
-    TestbedNetworkInterface* interface;
+    //NetworkInterfaceMock* interface;
+    TestbedNetworkInterfaceMock* interface;
     /// dessert interface
     dessert_meshif_t* wifi;
 
@@ -26,9 +29,8 @@ TEST_GROUP(TestbedNetworkInterfaceTest) {
         std::copy(mac, mac + ETHER_ADDR_LEN, wifi->hwaddr);
         std::copy(name, name + 6, wifi->if_name);
 
-
         client = new ARAClientMock();
-        interface = new TestbedNetworkInterface(wifi, client, client->getPacketFactory(), 400);
+        interface = new TestbedNetworkInterfaceMock(wifi, client, client->getPacketFactory(), 400);
     }
 
     void teardown() {
@@ -60,6 +62,22 @@ TEST(TestbedNetworkInterfaceTest, notEquals) {
 TEST(TestbedNetworkInterfaceTest, getInterfaceName) {
     std::string name("wlan0");
     CHECK(interface->getInterfaceName().compare(name) == 0);
+}
+
+
+//
+TEST(TestbedNetworkInterfaceTest, doNotAcknowledgeAckPackets) {
+    std::shared_ptr<AddressMock> source = std::make_shared<AddressMock>("source");
+    std::shared_ptr<AddressMock> destination = std::make_shared<AddressMock>("destination");
+    std::shared_ptr<AddressMock> sender = std::make_shared<AddressMock>("sender");
+
+    unsigned int sequenceNr = 123;
+
+    TestbedPacket* packet = new TestbedPacket(source, destination, sender, PacketType::ACK, sequenceNr, 1);
+
+    interface->receive(packet);
+    // we should never acknowledge acknowledgment packets
+    BYTES_EQUAL(0, interface->getNumberOfSentPackets());
 }
 
 /*
