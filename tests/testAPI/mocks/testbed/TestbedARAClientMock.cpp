@@ -7,13 +7,19 @@
 TESTBED_NAMESPACE_BEGIN
 
 TestbedARAClientMock::TestbedARAClientMock() {
+    BasicConfiguration configuration = getStandardConfiguration();
+    initialize(configuration);
+}
 
+TestbedARAClientMock::TestbedARAClientMock(Configuration& configuration) {
+    initialize(configuration);
 }
 
 BasicConfiguration TestbedARAClientMock::getStandardConfiguration() const {
     float initialPhi = 5.0;
     float deltaPhi = 5.0;
-    TestbedRoutingTable* routingTable = new RoutingTableMock();
+    //TestbedRoutingTable* routingTable = new RoutingTableMock();
+    RoutingTable* routingTable = new RoutingTableMock();
     std::shared_ptr<TestbedPacketTrap> packetTrap = std::make_shared<TestbedPacketTrap>(routingTable);
 
     return BasicConfiguration(
@@ -24,6 +30,26 @@ BasicConfiguration TestbedARAClientMock::getStandardConfiguration() const {
         new BestPheromoneForwardingPolicy(routingTable),
         packetTrap,
         initialPhi
+    );
 }
 
+std::shared_ptr<TestbedPacketTrap> TestbedARAClientMock::getPacketTrap(){
+    return std::dynamic_pointer_cast<TestbedPacketTrap>(packetTrap);
+}
+/*
+TestbedPacketFactory* TestbedARAClientMock::getPacketFactory() const {
+    return dynamic_cast<TestbedPacketFactory*>(packetFactory);
+}*/
+
+NetworkInterfaceMock* TestbedARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
+    NetworkInterfaceMock* mock = AbstractClientMockBase::createNewNetworkInterfaceMock(localAddressName);
+    // FIXMETestbedNetworkInterfaceMock* mock = AbstractClientMockBase::createNewNetworkInterfaceMock(localAddressName);
+    addNetworkInterface(mock);
+    return mock;
+}
+
+//FIXME
+RoutingTable* TestbedARAClientMock::getRoutingTable() {
+    return routingTable;
+}
 TESTBED_NAMESPACE_END
