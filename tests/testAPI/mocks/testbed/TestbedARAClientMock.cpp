@@ -18,8 +18,7 @@ TestbedARAClientMock::TestbedARAClientMock(Configuration& configuration) {
 BasicConfiguration TestbedARAClientMock::getStandardConfiguration() const {
     float initialPhi = 5.0;
     float deltaPhi = 5.0;
-    //TestbedRoutingTable* routingTable = new RoutingTableMock();
-    RoutingTable* routingTable = new RoutingTableMock();
+    TestbedRoutingTable* routingTable = new TestbedRoutingTableMock();
     std::shared_ptr<TestbedPacketTrap> packetTrap = std::make_shared<TestbedPacketTrap>(routingTable);
 
     return BasicConfiguration(
@@ -49,7 +48,7 @@ NetworkInterfaceMock* TestbedARAClientMock::createNewNetworkInterfaceMock(const 
 }
 
 //FIXME
-RoutingTable* TestbedARAClientMock::getRoutingTable() {
-    return routingTable;
+TestbedRoutingTable* TestbedARAClientMock::getRoutingTable() {
+    return dynamic_cast<TestbedRoutingTable*>(routingTable);
 }
 TESTBED_NAMESPACE_END

@@ -15,10 +15,10 @@
 #include "LinearPathReinforcementPolicy.h"
 
 #include "testAPI/mocks/libara/time/ClockMock.h"
-#include "testAPI/mocks/libara/RoutingTableMock.h"
 #include "testAPI/mocks/libara/AbstractClientMockBase.h"
 #include "testAPI/mocks/libara/ExponentialEvaporationPolicyMock.h"
 
+#include "testAPI/mocks/testbed/TestbedRoutingTableMock.h"
 #include "testAPI/mocks/testbed/TestbedNetworkInterfaceMock.h"
 
 
@@ -33,7 +33,7 @@ class TestbedARAClientMock: public TestbedARAClient, public AbstractClientMockBa
         std::shared_ptr<TestbedPacketTrap> getPacketTrap();
 //        TestbedPacketFactory* getPacketFactory() const;
         NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "localhost");
-        RoutingTable* getRoutingTable();
+        TestbedRoutingTable* getRoutingTable();
 };
 
 TESTBED_NAMESPACE_END
