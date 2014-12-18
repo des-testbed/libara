@@ -30,6 +30,11 @@ class TestbedRoutingTable : public RoutingTable {
         virtual ~TestbedRoutingTable();
 
         /**
+         * @see RoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
+         */
+        void update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue);
+
+        /**
          * @see RoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface)
          */
         float getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface);

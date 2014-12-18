@@ -14,6 +14,11 @@ void TestbedRoutingTable::update(AddressPtr destination, RoutingTableEntry* newE
     RoutingTable::update(destination, newEntry);
 }
 
+void TestbedRoutingTable::update(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface, float pheromoneValue) {
+//    std::lock_guard<std::mutex> lock(mutex);
+    RoutingTable::update(destination, nextHop, interface, pheromoneValue);
+}
+
 float TestbedRoutingTable::getPheromoneValue(AddressPtr destination, AddressPtr nextHop, NetworkInterface* interface) {
     std::lock_guard<std::mutex> lock(mutex);
     float result = RoutingTable::getPheromoneValue(destination, nextHop, interface);
