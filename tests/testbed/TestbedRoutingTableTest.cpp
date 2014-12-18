@@ -528,8 +528,8 @@ TEST(TestbedRoutingTableTest, evporateCanRemoveEntries) {
 }
 
 TEST(TestbedRoutingTableTest, notDeliverableifOnlyRouteLeadsOverSourceNode) {
-    AddressPtr source (new AddressMock("source"));
-    AddressPtr destination (new AddressMock("destination"));
+    AddressPtr source = std::make_shared<AddressMock>("source");
+    AddressPtr destination = std::make_shared<AddressMock>("destination");
 
     routingTable->update(destination, source, interface, 10);
 
