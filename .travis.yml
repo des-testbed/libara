@@ -34,9 +34,10 @@ install:
   - if [ "$CXX" == "g++" ]; then export CXX="g++-4.8"; fi
 
   # clang 3.4
-  - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-3.4; fi
-  - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-std=c++0x -stdlib=libc++"; fi
-  - if [ "$CXX" == "clang++" ]; then svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk libcxx; fi
+  - if [ "$CXX" == "clang++" ]; then sudo apt-get install --allow-unauthenticated -qq clang-3.4; fi 
+  #- if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-std=c++0x -stdlib=libc++"; fi
+  #- if [ "$CXX" == "clang++" ]; then svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk libcxx; fi
+  - if [ "$CXX" == "clang++" ]; then svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk@201601 libcxx; fi
 
   - if [ "$CXX" == "clang++" ]; then cd libcxx/lib && bash buildit; fi
   - if [ "$CXX" == "clang++" ]; then sudo cp ./libc++.so.1.0 /usr/lib/; fi
@@ -45,7 +46,7 @@ install:
   - if [ "$CXX" == "clang++" ]; then cd /usr/lib && sudo ln -sf libc++.so.1.0 libc++.so; fi
   - if [ "$CXX" == "clang++" ]; then sudo ln -sf libc++.so.1.0 libc++.so.1 && cd $cwd; fi
 
-  - if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-stdlib=libc++"; fi
+  #- if [ "$CXX" == "clang++" ]; then export CXXFLAGS="-stdlib=libc++"; fi
   - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.4"; fi
 
 branches:
