@@ -10,8 +10,7 @@ addons:
       name: "des-testbed/libara"
       description: "build submitted via Travis CI"
     notification_email: mail@mfrey.net
-#    build_command_prepend: "<Your build preprocessing command here>"
-    build_command:   "make NO_OMNET=TRUE"
+    build_command: "make NO_OMNET=TRUE"
     branch_pattern: master
 
 language: cpp
