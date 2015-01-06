@@ -70,10 +70,10 @@ class TestbedPacketFactory : public PacketFactory {
         dessert_msg_t* makeDessertMessage(const Packet* packet, dessert_meshif_t* interface, AddressPtr nextHop);
 
         /**
-         * @see PacketFactory::makeFANT(const Packet* packet, unsigned int
+         * @see PacketFactory::makeFANT(AddressPtr source, AddressPtr destination, unsigned int
          * sequenceNumber)
          */
-        TestbedPacket* makeFANT(TestbedAddressPtr source, TestbedAddressPtr destination, unsigned int sequenceNumber);
+        TestbedPacket* makeFANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber);
 
         /**
          * @see PacketFactory::makeBANT(const Packet* packet, unsigned int

@@ -104,7 +104,7 @@ TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr de
     return packet;
 }
 
-TestbedPacket* TestbedPacketFactory::makeFANT(TestbedAddressPtr source, TestbedAddressPtr destination, unsigned int sequenceNumber) {
+TestbedPacket* TestbedPacketFactory::makeFANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
     // DEBUG: std::cerr << "[TestbedPacketFactory::makeFANT] seq nr is " << sequenceNumber << std::endl; 
     return this->makePacket(source, destination, source, PacketType::FANT, sequenceNumber, maxHopCount);
 }
