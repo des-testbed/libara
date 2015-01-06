@@ -42,7 +42,7 @@ class TestbedPacketFactory : public PacketFactory {
         /**
          * @see PacketFactory::makeClone(const Packet* packet)
          */
-        TestbedPacket* makeClone(const TestbedPacket* packet);
+        TestbedPacket* makeClone(const Packet* packet);
 
         //TODO: refactor
         virtual TestbedPacket* makeNewPacket(dessert_msg_t* message);

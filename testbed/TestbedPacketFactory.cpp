@@ -81,8 +81,9 @@ TestbedPacket* TestbedPacketFactory::makeNewPacket(dessert_msg_t* message) {
     return this->makePacket(message);
 }
 
-TestbedPacket* TestbedPacketFactory::makeClone(const TestbedPacket* packet) {
-    return makePacket(packet->getSource(), packet->getDestination(), packet->getSender(), packet->getType(), packet->getSequenceNumber(), packet->getTTL(), packet->getPayload(), packet->getPayloadLength(), packet->getPreviousHop());
+TestbedPacket* TestbedPacketFactory::makeClone(const Packet* packet) {
+    const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
+    return makePacket(testbedPacket->getSource(), testbedPacket->getDestination(), testbedPacket->getSender(), testbedPacket->getType(), testbedPacket->getSequenceNumber(), testbedPacket->getTTL(), testbedPacket->getPayload(), testbedPacket->getPayloadLength(), testbedPacket->getPreviousHop());
 }
 
 TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, dessert_msg_t* payload, unsigned int payloadSize) {
