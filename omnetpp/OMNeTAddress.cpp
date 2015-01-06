@@ -3,7 +3,7 @@
  */
 
 #include "omnetpp/OMNeTAddress.h"
-#include <hash_fun.h>
+//#include <hash_fun.h>
 
 using namespace std;
 
