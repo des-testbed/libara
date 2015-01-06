@@ -42,6 +42,10 @@ ARA_LIB_NAME = lib$(ARA_TARGET_NAME).so
 ARA_SONAME = $(ARA_LIB_NAME).$(ARA_MAJOR_VERSION)
 
 # Various tools and options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CFLAGS_DEBUG = -g -Wall
+CFLAGS_RELEASE = -O2 -DNDEBUG=1
+
+
 ifeq ($(MODE),debug)
     CFLAGS=$(CFLAGS_DEBUG)
     D=d
@@ -50,8 +54,11 @@ else
     D=
 endif
 
-CFLAGS_DEBUG = -g -Wall
-CFLAGS_RELEASE = -O2 -DNDEBUG=1
+#ifeq ($(CXX), clang++)
+#    CFLAGS += -stdlib=libc++ 
+#    LDFLAGS += -v -lc++abi
+#    LINKFLAGS += -v -lc++abi
+#endif
 
 MKPATH = mkdir -p
 
