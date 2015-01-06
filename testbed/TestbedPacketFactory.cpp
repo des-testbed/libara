@@ -113,7 +113,8 @@ TestbedPacket* TestbedPacketFactory::makeBANT(const Packet *packet, unsigned int
     return this->makePacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::BANT, sequenceNumber, maxHopCount);
 }
 
-TestbedPacket* TestbedPacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, TestbedAddressPtr sender){
+TestbedPacket* TestbedPacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender){
+    std::shared_ptr<TestbedAddress> testbedSender = std::dynamic_pointer_cast<TestbedAddress>(sender);
     return makePacket(originalPacket->getSource(), originalPacket->getDestination(), sender, PacketType::ACK, originalPacket->getSequenceNumber(), maxHopCount);
 }
 

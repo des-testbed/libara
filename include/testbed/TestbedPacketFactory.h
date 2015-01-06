@@ -84,7 +84,7 @@ class TestbedPacketFactory : public PacketFactory {
         /**
          * @see PacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender)
          */
-        TestbedPacket* makeAcknowledgmentPacket(const Packet* originalPacket, TestbedAddressPtr sender);
+        TestbedPacket* makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender);
 
         /**
          * The method checks if a dessert_msg_t is consistent. It wraps the
