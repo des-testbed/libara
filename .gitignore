@@ -34,3 +34,6 @@ log.txt
 
 # valgrind core dumps
 *vgcore*
+
+# default coverity directory
+cov-int
