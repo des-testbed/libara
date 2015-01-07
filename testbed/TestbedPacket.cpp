@@ -7,7 +7,10 @@
 
 TESTBED_NAMESPACE_BEGIN
 
-TestbedPacket::TestbedPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) : Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize) { }
+TestbedPacket::TestbedPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) : Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize) { 
+    // set the payload type 
+    payloadType = 0x0800;
+}
 
 AddressPtr TestbedPacket::getSource() const {
     std::lock_guard<std::mutex> lock(sourceMutex);

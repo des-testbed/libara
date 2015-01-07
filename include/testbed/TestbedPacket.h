@@ -79,6 +79,8 @@ class TestbedPacket : public Packet {
 	    mutable std::mutex sourceMutex;
 	    mutable std::mutex destinationMutex;
 
+        // FIXME: get rid of the payload type since it doesn't change
+
         /**
          * The tun/tap interface expects a ethernet frame and not the raw
          * payload, so we have to safe the ethernet type of the ethernet
