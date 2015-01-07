@@ -83,7 +83,14 @@ TestbedPacket* TestbedPacketFactory::makeNewPacket(dessert_msg_t* message) {
 
 TestbedPacket* TestbedPacketFactory::makeClone(const Packet* packet) {
     const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
-    return makePacket(testbedPacket->getSource(), testbedPacket->getDestination(), testbedPacket->getSender(), testbedPacket->getType(), testbedPacket->getSequenceNumber(), testbedPacket->getTTL(), testbedPacket->getPayload(), testbedPacket->getPayloadLength(), testbedPacket->getPreviousHop());
+    if (testbedPacket) {
+        return makePacket(testbedPacket->getSource(), testbedPacket->getDestination(), testbedPacket->getSender(), testbedPacket->getType(), testbedPacket->getSequenceNumber(), testbedPacket->getTTL(), testbedPacket->getPayload(), testbedPacket->getPayloadLength(), testbedPacket->getPreviousHop());
+    } else {
+        std::cerr << "TestbedPacketFactory::makeClone - dynamic cast on packet failed" << std::endl;
+    }
+
+    // fixme
+    return nullptr;
 }
 
 TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, dessert_msg_t* payload, unsigned int payloadSize) {
