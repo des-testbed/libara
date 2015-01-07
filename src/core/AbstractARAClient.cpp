@@ -650,10 +650,7 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> ro
         } else {
             // delete the route discovery timer
             runningRouteDiscoveries.erase(destination);
-
-            if (!discoveryInfo) {
-                delete discoveryInfo;
-            }
+            delete discoveryInfo;
 
             forgetKnownIntermediateHopsFor(destination);
             deque<Packet*> undeliverablePackets = packetTrap->removePacketsForDestination(destination);
@@ -680,23 +677,23 @@ void AbstractARAClient::handleExpiredRouteDiscoveryTimer(std::weak_ptr<Timer> ro
 void AbstractARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryTimer) {
     std::shared_ptr<Timer> timer = deliveryTimer.lock();
     TimerAddressInfo* timerInfo = (TimerAddressInfo*) timer->getContextObject();
-    AddressPtr destination = timerInfo->getDestination();
 
-    RunningRouteDiscoveriesMap::const_iterator discovery;
-    discovery = runningRouteDiscoveries.find(destination);
+    if (timerInfo) {
+        AddressPtr destination = timerInfo->getDestination();
 
-    if (discovery != runningRouteDiscoveries.end()) {
-        // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
-        runningRouteDiscoveries.erase(discovery);
-        runningDeliveryTimers.erase(timer);
+        RunningRouteDiscoveriesMap::const_iterator discovery;
+        discovery = runningRouteDiscoveries.find(destination);
 
-        if (!timerInfo) {
+        if (discovery != runningRouteDiscoveries.end()) {
+            // its important to delete the discovery info first or else the client will always think the route discovery is still running and never send any packets
+            runningRouteDiscoveries.erase(discovery);
+            runningDeliveryTimers.erase(timer);
             delete timerInfo;
-        }
 
-        sendDeliverablePackets(destination);
-    } else {
-        logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
+            sendDeliverablePackets(destination);
+        } else {
+            logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
+        }
     }
 }
 
