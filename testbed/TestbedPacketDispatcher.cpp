@@ -19,20 +19,26 @@ TESTBED_NAMESPACE_BEGIN
 dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_proc_t *flags, dessert_meshif_t* interface, dessert_frameid_t id) {
     TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
 
-    // let's check if the received message is consistent
-    if (packetFactory->checkDessertMessage(message)) {
-        TestbedPacket* packet = packetFactory->makeNewPacket(message);
+    if (packetFactory) {
+        // let's check if the received message is consistent
+        if (packetFactory->checkDessertMessage(message)) {
+            TestbedPacket* packet = packetFactory->makeNewPacket(message);
 
-        // DEBUG: std::cerr << "[toSys] packet dump " << std::endl;
-        // DEBUG: dumpDessertMessage(message, length, flags);
-        // DEBUG: std::cerr << " and again! " << std::endl;
-        // DEBUG: std::cerr << toString(message, true);
-        
-        TestbedNetworkInterface* networkInterface = client->getTestbedNetworkInterface(std::make_shared<TestbedAddress>(interface->hwaddr));
-        networkInterface->receive(packet);
+            // DEBUG: std::cerr << "[toSys] packet dump " << std::endl;
+            // DEBUG: dumpDessertMessage(message, length, flags);
+            // DEBUG: std::cerr << " and again! " << std::endl;
+            // DEBUG: std::cerr << toString(message, true);
+            //
+            TestbedNetworkInterface* networkInterface = client->getTestbedNetworkInterface(std::make_shared<TestbedAddress>(interface->hwaddr));
+            networkInterface->receive(packet);
+        }
+
+        return DESSERT_MSG_KEEP;
+    } else {
+        std::cerr << "toSys: dynamic cast on packet factory failed" << std::endl;
     }
 
-    return DESSERT_MSG_KEEP;
+    return DESSERT_MSG_DROP;
 }
 
 /**
@@ -44,54 +50,59 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
     dessert_meshif_t* interface = dessert_meshif_get_hwaddr(interfaceAddress->getDessertValue());
 
     const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
-    // create a dessert message out of the packet
-    dessert_msg_t* message = testbedPacket->toDessertMessage();
 
-    /// send the packet
-    int result = 42;
+    if (testbedPacket) {
+        // create a dessert message out of the packet
+        dessert_msg_t* message = testbedPacket->toDessertMessage();
 
-    TestbedAddressPtr recipientAddress = std::dynamic_pointer_cast<TestbedAddress>(recipient);
+        /// send the packet
+        int result = 42;
 
-    /// FIXME: 
-    ara_address_t tmp; 
-    /// FIXME: backup the address
-    std::memcpy(tmp, message->l2h.ether_dhost, sizeof(ara_address_t));
-    /// set the next hop as the destination host 
-    std::memcpy(message->l2h.ether_dhost, recipientAddress->getDessertValue(), sizeof(ara_address_t));
+        TestbedAddressPtr recipientAddress = std::dynamic_pointer_cast<TestbedAddress>(recipient);
 
-    // DEBUG: 
-    std::cerr << "[TestbedPacketDispatcher::dispatch] next hop is " << recipientAddress->toString() << std::endl;
-    // DEBUG: std::cerr << "[toMesh] packet dump " <<  std::endl;
-    // DEBUG: std::cerr << toString(message, true);
+        /// FIXME: 
+        ara_address_t tmp; 
+        /// FIXME: backup the address
+        std::memcpy(tmp, message->l2h.ether_dhost, sizeof(ara_address_t));
+        /// set the next hop as the destination host 
+        std::memcpy(message->l2h.ether_dhost, recipientAddress->getDessertValue(), sizeof(ara_address_t));
 
-    TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
+        // DEBUG: 
+        std::cerr << "[TestbedPacketDispatcher::dispatch] next hop is " << recipientAddress->toString() << std::endl;
+        // DEBUG: std::cerr << "[toMesh] packet dump " <<  std::endl;
+        // DEBUG: std::cerr << toString(message, true);
 
-    /**
-     * We have to perform the message consistent check by ourselves. The
-     * dessert_meshsend() function performs a check, but expects the header and
-     * payload length to be in host byte order. That would be fine if the
-     * function would transform the values afterwards in network byte order.
-     * That appears to be a bug in libdessert (doesn't make that much sense
-     * otherwise).
-     */
-    if (packetFactory->checkDessertMessage(message)) {
-        std::cerr << "[TestbedPacketDispatcher::dispatch] send message with sequence nr. " << ntohs(message->u16) << 
-          " and type " << PacketType::getAsString(testbedPacket->getType()) << std::endl;
-        if ((result = dessert_meshsend_fast(message, interface)) == DESSERT_OK) {
-            // DEBUG: std::cerr << "[TestbedPacketDispatcher::dispatch] sending message was successful" << std::endl;
-        } else if(result == EINVAL) {
-             // DEBUG: 
-             std::cerr << "[TestbedPacketDispatcher::dispatch] message was broken" << std::endl;
-        } else if(result == EIO) {
-             // DEBUG: 
-             std::cerr << "[TestbedPacketDispatcher::dispatch] message was not sent succesfully" << std::endl;
+        TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
+
+        /**
+         * We have to perform the message consistent check by ourselves. The
+         * dessert_meshsend() function performs a check, but expects the header and
+         * payload length to be in host byte order. That would be fine if the
+         * function would transform the values afterwards in network byte order.
+         * That appears to be a bug in libdessert (doesn't make that much sense
+         * otherwise).
+         */
+        if (packetFactory->checkDessertMessage(message)) {
+            std::cerr << "[TestbedPacketDispatcher::dispatch] send message with sequence nr. " << ntohs(message->u16) << 
+                " and type " << PacketType::getAsString(testbedPacket->getType()) << std::endl;
+            if ((result = dessert_meshsend_fast(message, interface)) == DESSERT_OK) {
+                // DEBUG: std::cerr << "[TestbedPacketDispatcher::dispatch] sending message was successful" << std::endl;
+            } else if(result == EINVAL) {
+                // DEBUG: 
+                std::cerr << "[TestbedPacketDispatcher::dispatch] message was broken" << std::endl;
+            } else if(result == EIO) {
+                // DEBUG: 
+                std::cerr << "[TestbedPacketDispatcher::dispatch] message was not sent succesfully" << std::endl;
+            } else {
+                // DEBUG: 
+                std::cerr << "[TestbedPacketDispatcher::dispatch] unknown error code" << std::endl;
+            }
         } else {
-             // DEBUG: 
-             std::cerr << "[TestbedPacketDispatcher::dispatch] unknown error code" << std::endl;
+            // DEBUG: 
+            std::cerr << "[TestbedPacketDispatcher::dispatch] The message check failed and hence, the message was not sent" << std::endl;
         }
     } else {
-        // DEBUG: 
-        std::cerr << "[TestbedPacketDispatcher::dispatch] The message check failed and hence, the message was not sent" << std::endl;
+        std::cerr << "dispatch: dynamic cast on packet failed" << std::endl;
     }
 
     return DESSERT_MSG_DROP;
@@ -112,12 +123,17 @@ dessert_cb_result toMesh(dessert_msg_t* message, uint32_t length, dessert_msg_pr
 
     // DEBUG: dumpDessertMessage(message, length, flags);
     TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
-    // DEBUG: std::cerr << "[toMesh] got a packet" << std::endl;
-    TestbedPacket* packet = packetFactory->makeNewPacket(message);
-    // DEBUG: std::cerr << "[toMesh] packet dump:" << std::endl;
-    // DEBUG: std::cerr << *packet << std::endl;
-    // DEBUG: std::cerr << "[toMesh] pass packet to client" << std::endl;
-    client->sendPacket(packet);
+
+    if (packetFactory) {
+        // DEBUG: std::cerr << "[toMesh] got a packet" << std::endl;
+        TestbedPacket* packet = packetFactory->makeNewPacket(message);
+        // DEBUG: std::cerr << "[toMesh] packet dump:" << std::endl;
+        // DEBUG: std::cerr << *packet << std::endl;
+        // DEBUG: std::cerr << "[toMesh] pass packet to client" << std::endl;
+        client->sendPacket(packet);
+    } else {
+        std::cerr << "toMesh: dynamic cast on packet factory failed" << std::endl;
+    }
 
     return DESSERT_MSG_DROP;
 }
