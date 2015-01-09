@@ -33,7 +33,7 @@ void Timer::addTimeoutListener(TimeoutEventListener* listener) {
 }
 
 void Timer::notifyAllListeners() {
-    std::cerr << "[Timer::notifyAllListeners] for " <<  TimerType::getAsString(type) << std::endl;
+    // DEBUG: std::cerr << "[Timer::notifyAllListeners] for " <<  TimerType::getAsString(type) << std::endl;
 
     for(auto& listener: listeners) {
 	    std::weak_ptr<Timer> timer = this->getTimer();
