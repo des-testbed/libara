@@ -43,4 +43,4 @@ testbed/*.conf
 *vgcore*
 
 # core dumps
-core*
+core

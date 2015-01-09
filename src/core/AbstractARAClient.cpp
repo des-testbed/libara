@@ -123,8 +123,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
 
             sendUnicast(packet, interface, nextHopAddress);
         } else {
-            // DEBUG:
-            std::cerr << "[AbstractARAClient::sendPacket]: packet source address is: " << packet->getSource()->toString() << std::endl;
+            // DEBUG: std::cerr << "[AbstractARAClient::sendPacket]: packet source address is: " << packet->getSource()->toString() << std::endl;
 
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
@@ -153,8 +152,7 @@ float AbstractARAClient::reinforcePheromoneValue(AddressPtr destination, Address
 }
 
 void AbstractARAClient::startNewRouteDiscovery(Packet* packet) {
-    // DEBUG: 
-    std::cerr << "[AbstractARAClient::startNewRouteDiscovery] start new route discovery" << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::startNewRouteDiscovery] start new route discovery" << std::endl;
     AddressPtr destination = packet->getDestination();
     forgetKnownIntermediateHopsFor(destination);
     startRouteDiscoveryTimer(packet);
@@ -279,9 +277,9 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
     //logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
     //logAllRoutingTableEntries();
 
-    std::cerr << "[AbstractARAClient::createNewRouteFrom] dump routing table " << std::endl;
-    std::cerr << *routingTable;
-    std::cerr << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::createNewRouteFrom] dump routing table " << std::endl;
+    // DEBUG: std::cerr << *routingTable;
+    // DEBUG: std::cerr << std::endl;
 }
 /*
 void AbstractARAClient::logAllRoutingTableEntries() {
@@ -403,8 +401,7 @@ void AbstractARAClient::handlePacket(Packet* packet, NetworkInterface* interface
 }
 
 void AbstractARAClient::handleDataPacket(Packet* packet) {
-    // DEBUG: 
-    std::cerr << "[AbstractARAClient::handleDataPacket] source " << packet->getSource()->toString() << " destination " << packet->getDestination()->toString() << std::endl;
+    // DEBUG: std::cerr << "[AbstractARAClient::handleDataPacket] source " << packet->getSource()->toString() << " destination " << packet->getDestination()->toString() << std::endl;
 
     if(isDirectedToThisNode(packet)) {
         handleDataPacketForThisNode(packet);

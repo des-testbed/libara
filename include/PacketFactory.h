@@ -125,6 +125,7 @@ class PacketFactory {
 
          void setMaxHopCount(int n);
          int getMaximumNrOfHops();
+
     protected:
          /**
           * This method is responsible for creating the actual packet instance.

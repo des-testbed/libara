@@ -33,8 +33,6 @@ class TestbedARAClient : public AbstractARAClient {
          */
         TestbedARAClient(Configuration &config);
 
-        virtual ~TestbedARAClient();
-
         std::string toString();
 
         std::string getStatistics();
