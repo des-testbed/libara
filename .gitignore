@@ -14,6 +14,7 @@ omnetpp/ara-sim
 doc/doxygen/html
 include/inetmanet/*
 *_m.cpp
+*_m.cc
 *_m.h
 testbed/TestbedDaemon
 
@@ -40,3 +41,6 @@ testbed/*.conf
 
 # valgrind core dumps
 *vgcore*
+
+# core dumps
+core*
