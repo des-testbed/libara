@@ -18,9 +18,6 @@ TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARACl
     // DEBUG: logDebug("Initialized testbedARAClient network Interfaces");
 }
 
-TestbedARAClient::~TestbedARAClient() { }
-
-
 std::string TestbedARAClient::toString() { 
     std::ostringstream result;
     result << std::endl;

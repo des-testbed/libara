@@ -41,6 +41,3 @@ testbed/*.conf
 
 # valgrind core dumps
 *vgcore*
-
-# core dumps
-core

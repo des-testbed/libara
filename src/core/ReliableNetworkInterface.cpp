@@ -53,8 +53,7 @@ void ReliableNetworkInterface::startAcknowledgmentTimer(const Packet* packet, Ad
     timerData.packet = packet;
     timerData.recipient = recipient;
 
-    // DEBUG: 
-    std::cerr << "[ReliableNetworkInterface::startAcknowledgmentTimer] start ack timer for " << packet->getSource()->toString() << " and seq nr " << packet->getSequenceNumber() << std::endl;
+    // DEBUG: std::cerr << "[ReliableNetworkInterface::startAcknowledgmentTimer] start ack timer for " << packet->getSource()->toString() << " and seq nr " << packet->getSequenceNumber() << std::endl;
     runningTimers[ackTimer] = timerData;
 }
 
@@ -126,8 +125,8 @@ void ReliableNetworkInterface::handleNonAckPacket(Packet* packet) {
 }
 
 void ReliableNetworkInterface::handleAckPacket(Packet* ackPacket) {
-    std::cerr << "[ReliableNetworkInterface::handleAckPacket] trying to find packet. the content of the ack packet is" << std::endl;
-    std::cerr << ackPacket->toString();
+    // DEBUG: std::cerr << "[ReliableNetworkInterface::handleAckPacket] trying to find packet. the content of the ack packet is" << std::endl;
+    // DEBUG: std::cerr << ackPacket->toString();
 
     unsigned int acknowledgedSeqNr = ackPacket->getSequenceNumber();
     AddressPtr acknowledgedSource = ackPacket->getSource();
