@@ -93,7 +93,7 @@ public:
     /**
      * Returns the packet factory of this node.
      */
-    PacketFactory* getPacketFactory() const;
+    virtual PacketFactory* getPacketFactory() const;
 
     /**
      * Assigns a new RoutingTable object to this NetworkClient
