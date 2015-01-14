@@ -11,17 +11,14 @@
 #include "TestbedAddress.h"
 #include "TestbedPacketFactory.h"
 #include "TestbedNetworkInterface.h"
-#include "TestbedNetworkInterfaceMock.h"
 
 #include <utility>
-  
-
 
 TESTBED_NAMESPACE_BEGIN
 
 class TestbedNetworkInterfaceMock: public TestbedNetworkInterface {
     public:
-        TestbedNetworkInterfaceMock(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
+        TestbedNetworkInterfaceMock(std::string interfaceName, AbstractNetworkClient* client, std::shared_ptr<TestbedAddress> local, std::shared_ptr<TestbedAddress> broadcast, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
         /*
         TestbedNetworkInterfaceMock(AbstractNetworkClient* client);
         TestbedNetworkInterfaceMock(const std::string interfaceName, AbstractNetworkClient* client);
@@ -39,7 +36,6 @@ class TestbedNetworkInterfaceMock: public TestbedNetworkInterface {
         unsigned int getNumberOfSentPackets();
 
     private:
-        //std::string name;
         std::deque<std::pair<const Packet*, std::shared_ptr<Address>> > sentPackets;
         std::deque<const Packet*> broadcastedPackets;
 };

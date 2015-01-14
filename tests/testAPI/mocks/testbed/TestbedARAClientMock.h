@@ -21,7 +21,6 @@
 #include "testAPI/mocks/testbed/TestbedRoutingTableMock.h"
 #include "testAPI/mocks/testbed/TestbedNetworkInterfaceMock.h"
 
-
 TESTBED_NAMESPACE_BEGIN
 
 class TestbedARAClientMock: public TestbedARAClient, public AbstractClientMockBase {
@@ -32,7 +31,16 @@ class TestbedARAClientMock: public TestbedARAClient, public AbstractClientMockBa
         BasicConfiguration getStandardConfiguration() const;
         std::shared_ptr<TestbedPacketTrap> getPacketTrap();
 //        TestbedPacketFactory* getPacketFactory() const;
+
         NetworkInterfaceMock* createNewNetworkInterfaceMock(const std::string localAddressName = "localhost");
+        /**
+         * FIXME: This is actually a design issue. We can't simply return a TestbedNetworkInterfaceMock over
+         * a NetworkInterfaceMock since these types are not covariant. If we would return the base clase of
+         * these types (ReliableNetworkInterface) we would have to introduce dynamic_casts in affected unit
+         * tests (which is a task for a rainy sunday). Hence, as a simple workaround we rename the method
+         * to "createNewTestbedNetworkInterfaceMock".
+         */ 
+        TestbedNetworkInterfaceMock* createNewTestbedNetworkInterfaceMock(const std::string localAddressName = "localhost");
         TestbedRoutingTable* getRoutingTable();
 };
 

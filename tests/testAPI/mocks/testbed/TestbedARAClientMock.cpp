@@ -42,7 +42,20 @@ TestbedPacketFactory* TestbedARAClientMock::getPacketFactory() const {
 
 NetworkInterfaceMock* TestbedARAClientMock::createNewNetworkInterfaceMock(const std::string localAddressName) {
     NetworkInterfaceMock* mock = AbstractClientMockBase::createNewNetworkInterfaceMock(localAddressName);
-    // FIXMETestbedNetworkInterfaceMock* mock = AbstractClientMockBase::createNewNetworkInterfaceMock(localAddressName);
+    addNetworkInterface(mock);
+    return mock;
+}
+
+TestbedNetworkInterfaceMock* TestbedARAClientMock::createNewTestbedNetworkInterfaceMock(const std::string localAddressName) {
+    std::stringstream mockName;
+    mockName << "InterfaceMock" << (interfaceMocks.size() + 1);
+
+    std::string interface = mockName.str();
+
+    std::shared_ptr<TestbedAddress> local = std::make_shared<TestbedAddress>(DESSERT_BROADCAST_ADDRESS);
+    std::shared_ptr<TestbedAddress> broadcast = std::make_shared<TestbedAddress>(DESSERT_BROADCAST_ADDRESS);
+
+    TestbedNetworkInterfaceMock* mock = new TestbedNetworkInterfaceMock(interface, this, local, broadcast, this->getPacketFactory(), 600);
     addNetworkInterface(mock);
     return mock;
 }
@@ -51,4 +64,5 @@ NetworkInterfaceMock* TestbedARAClientMock::createNewNetworkInterfaceMock(const 
 TestbedRoutingTable* TestbedARAClientMock::getRoutingTable() {
     return dynamic_cast<TestbedRoutingTable*>(routingTable);
 }
+
 TESTBED_NAMESPACE_END
