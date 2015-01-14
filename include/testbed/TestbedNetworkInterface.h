@@ -19,7 +19,8 @@ TESTBED_NAMESPACE_BEGIN
  */
 class TestbedNetworkInterface : public ReliableNetworkInterface {
     public:
-        TestbedNetworkInterface(dessert_meshif_t* dessertPointer, AbstractNetworkClient* client, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
+        TestbedNetworkInterface(std::string interfaceName, AbstractNetworkClient* client, std::shared_ptr<TestbedAddress> localAddress, std::shared_ptr<TestbedAddress> broadcastAddress, PacketFactory* packetFactory, int ackTimeoutInMicroSeconds);
+
         virtual ~TestbedNetworkInterface(){};
 
         /**

@@ -90,8 +90,17 @@ void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
 void TestbedARAClient::initializeNetworkInterfaces() {
     dessert_meshif_t* dessertInterfaces = dessert_meshiflist_get();
 
+    // the broadcast address of the interface (FIXME: might cause trouble)
+    std::shared_ptr<TestbedAddress> broadcastAddress = std::make_shared<TestbedAddress>(DESSERT_BROADCAST_ADDRESS); 
+
     while(dessertInterfaces != nullptr) {
-        TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(dessertInterfaces, this, packetFactory, 400000);
+        // the name of the interface
+        std::string interfaceName(dessertInterfaces->if_name);
+        // the hardware address of the interface 
+        std::shared_ptr<TestbedAddress> hardwareAddress = std::make_shared<TestbedAddress>(dessertInterfaces->hwaddr);
+
+        TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(interfaceName, this, hardwareAddress, broadcastAddress, packetFactory, 400000);
+
         addNetworkInterface(newInterface);
         logDebug("initialized network interface: %s", dessertInterfaces->if_name);
         dessertInterfaces = dessertInterfaces->next;
