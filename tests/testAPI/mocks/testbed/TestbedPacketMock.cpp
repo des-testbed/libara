@@ -10,4 +10,12 @@ TestbedPacketMock::TestbedPacketMock(AddressPtr source, AddressPtr destination, 
 
 }
 
+void TestbedPacketMock::setSender(std::shared_ptr<Address> newSenderAddress) {
+    sender = newSenderAddress;
+}
+
+void TestbedPacketMock::setSource(std::shared_ptr<Address> newSourceAddress) {
+    source = newSourceAddress;
+}
+
 TESTBED_NAMESPACE_END
