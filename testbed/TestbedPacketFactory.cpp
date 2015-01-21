@@ -82,15 +82,7 @@ TestbedPacket* TestbedPacketFactory::makeNewPacket(dessert_msg_t* message) {
 }
 
 TestbedPacket* TestbedPacketFactory::makeClone(const Packet* packet) {
-    const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
-    if (testbedPacket) {
-        return makePacket(testbedPacket->getSource(), testbedPacket->getDestination(), testbedPacket->getSender(), testbedPacket->getType(), testbedPacket->getSequenceNumber(), testbedPacket->getTTL(), testbedPacket->getPayload(), testbedPacket->getPayloadLength(), testbedPacket->getPreviousHop());
-    } else {
-        std::cerr << "TestbedPacketFactory::makeClone - dynamic cast on packet failed" << std::endl;
-    }
-
-    // fixme
-    return nullptr;
+    return this->makePacket(packet->getSource(), packet->getDestination(), packet->getSender(), packet->getType(), packet->getSequenceNumber(), packet->getTTL(), packet->getPayload(), packet->getPayloadLength(), packet->getPreviousHop());
 }
 
 TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber, dessert_msg_t* payload, unsigned int payloadSize) {
@@ -105,9 +97,11 @@ TestbedPacket* TestbedPacketFactory::makeDataPacket(AddressPtr source, AddressPt
 
 TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize, AddressPtr previousHop) {
     TestbedPacket* packet = new TestbedPacket(source, destination, sender, type, seqNr, ttl, payload, payloadSize);
+
     if(previousHop != nullptr) {
         packet->setPreviousHop(previousHop);
     }
+
     return packet;
 }
 
@@ -121,8 +115,9 @@ TestbedPacket* TestbedPacketFactory::makeBANT(const Packet *packet, unsigned int
 }
 
 TestbedPacket* TestbedPacketFactory::makeAcknowledgmentPacket(const Packet* originalPacket, AddressPtr sender){
+    // TODO: check if this is necessary
     std::shared_ptr<TestbedAddress> testbedSender = std::dynamic_pointer_cast<TestbedAddress>(sender);
-    return makePacket(originalPacket->getSource(), originalPacket->getDestination(), sender, PacketType::ACK, originalPacket->getSequenceNumber(), maxHopCount);
+    return this->makePacket(originalPacket->getSource(), originalPacket->getDestination(), sender, PacketType::ACK, originalPacket->getSequenceNumber(), maxHopCount);
 }
 
 bool TestbedPacketFactory::checkDessertMessage(dessert_msg_t* message){
