@@ -6,7 +6,6 @@
 
 using namespace std;
 
-
 /**
  * The function creates a basic configuration for the ARA routing daemon.
  */
@@ -71,35 +70,47 @@ static void registerCallbacks() {
 }
 
 int main(int argc, char** argv) {
-     /// get a file pointer to the configuration file
-     FILE* cfg = dessert_cli_get_cfg(argc, argv);
+    namespace spd = spdlog;
 
-     /// initialize the routing daemin in dessert
-     dessert_init("ARAX", 0x01, DESSERT_OPT_NODAEMONIZE);
-     /// configuration options for the logging mechanisms provided by libdessert
-     dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
+    try {
+        /// set log level of all loggers to debug and above
+        spd::set_level(spd::level::debug);
+
+        /// get a file pointer to the configuration file
+        FILE* cfg = dessert_cli_get_cfg(argc, argv);
+
+        /// initialize the routing daemin in dessert
+        dessert_init("ARAX", 0x01, DESSERT_OPT_NODAEMONIZE);
+        /// configuration options for the logging mechanisms provided by libdessert
+        dessert_logcfg(DESSERT_LOG_STDERR | DESSERT_LOG_GZ); 
+
+        /// register the remote shell commands
+        registerCommandLineInterfaceCommands();
+
+	    /// apply the routing daemon configuration
+        dessert_debug("applying configuration");
+        cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
+        dessert_debug("configuration applied");
+
+        // create a new configuration for ARA and pass it to the client
+        ARA::BasicConfiguration configuration = createConfiguration(5.0, 5.0);
+        initializeClient(configuration);
+
+	    /// register the callbacks for the packet dispatching mechanisms
+	    registerCallbacks();
+
+        /// start the cli and libdessert
+        dessert_cli_run();
+        dessert_run();
+
+	    /// clean up (destroying the client instance)
+	    destroyClient();
+
+        return 0;
+
+    } catch (const spd::spdlog_ex& ex) {
+        std::cout << "Log failed: " << ex.what() << std::endl;
+    }
     
-     /// register the remote shell commands
-     registerCommandLineInterfaceCommands();
-
-     /// apply the routing daemon configuration
-     dessert_debug("applying configuration");
-     cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
-     dessert_debug("configuration applied");
-
-     // create a new configuration for ARA and pass it to the client
-     ARA::BasicConfiguration configuration = createConfiguration(5.0, 5.0);
-     //client = std::make_shared<ARA::testbed::TestbedARAClient>(configuration);
-     initializeClient(configuration);
-
-     /// register the callbacks for the packet dispatching mechanisms
-     registerCallbacks();
-
-     dessert_cli_run();
-     dessert_run();
-
-     /// clean up (destroying the client instance)
-     destroyClient();
-
-     return 0;
+    return -1;
 }

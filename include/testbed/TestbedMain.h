@@ -19,6 +19,8 @@
 #include "LinearPathReinforcementPolicy.h"
 #include "BestPheromoneForwardingPolicy.h"
 
+#include "spdlog/spdlog.h"
+
 #include <mutex>
 
 //std::shared_ptr<ARA::testbed::TestbedARAClient> client;
