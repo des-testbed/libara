@@ -9,6 +9,8 @@
 #include "AbstractNetworkClient.h"
 #include "ReliableNetworkInterface.h"
 
+#include "spdlog/spdlog.h"
+
 #include <map>
 #include <mutex>
 
@@ -55,6 +57,8 @@ class TestbedNetworkInterface : public ReliableNetworkInterface {
         void doSend(const Packet* packet, std::shared_ptr<Address> recipient);
 
     private:
+        std::shared_ptr<spdlog::logger> logger;
+
         /**
          *
          */

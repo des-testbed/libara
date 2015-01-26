@@ -14,7 +14,13 @@ TestbedNetworkInterface::TestbedNetworkInterface(std::string name, AbstractNetwo
   : ReliableNetworkInterface(client, ackTimeoutInMicroSeconds, localAddress, broadcastAddress) { 
   numberOfReceivedPackets = numberOfSentPackets = 0;
   interfaceName = name;
-  // DEBUG:  std::cerr << "[TestbedNetworkInterface] address: " << *localAddress << " broadcast address: " << *broadcastAddress << std::endl;  
+    try {
+        logger = spdlog::get("file_logger");
+    } catch (const spdlog::spdlog_ex& exception) {
+        std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
+    }
+
+    logger->trace() << "address: " << localAddress->toString() << " broadcast address: " << broadcastAddress->toString();  
 }
 
 bool TestbedNetworkInterface::equals(NetworkInterface* otherInterface) {
@@ -80,9 +86,7 @@ void TestbedNetworkInterface::send(const Packet* packet, AddressPtr recipient) {
 
 void TestbedNetworkInterface::doSend(const Packet* packet, std::shared_ptr<Address> recipient){
     assert(packet != nullptr);
-    // DEBUG:  std::thread::id this_id = std::this_thread::get_id();
-    // DEBUG: std::cerr << "[TestbedNetworkInterface::doSend]  thread id " << this_id << std::endl;
-    // DEBUG: std::cerr << "[TestbedNetworkInterface::doSend]  send packet " <<  packet->getSequenceNumber() << " to " << recipient->toString() << std::endl;
+    logger->trace() << " send packet " <<  packet->getSequenceNumber() << " to " << recipient->toString();
     std::unique_lock<std::mutex> lock(sendMutex);
     dispatch(packet, std::dynamic_pointer_cast<TestbedAddress>(localAddress), recipient);
 }
