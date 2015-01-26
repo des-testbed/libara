@@ -75,17 +75,22 @@ void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* inte
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
     logger->trace() << "attempting to send packet #" << packet->getSequenceNumber() << " to System via TAP";
 
-    struct ether_header* payload;
     const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
-    int payloadLength = dessert_msg_ethdecap(testbedPacket->toDessertMessage(), &payload); 
 
-    if (payloadLength != -1) {
-        /// send the payload to the system
-        if (dessert_syssend(payload, payloadLength) != DESSERT_OK){
-            logger->error() << "sending packet to system failed";
+    if (testbedPacket) {
+        struct ether_header* payload;
+        int payloadLength = dessert_msg_ethdecap(testbedPacket->toDessertMessage(), &payload); 
+
+        if (payloadLength != -1) {
+            /// send the payload to the system
+            if (dessert_syssend(payload, payloadLength) != DESSERT_OK){
+                logFatal("sending packet to system failed");
+            }
+            /// since the data was allocated using malloc indessert_msg_ethdecap()
+            free(payload);
         }
-        /// since the data was allocated using malloc indessert_msg_ethdecap()
-        free(payload);
+    } else {
+        std::cerr << "TestbedARAClient::deliverToSystem - error in dynamic_cast on packet " << std::endl;
     }
 }
 
