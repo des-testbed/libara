@@ -67,6 +67,7 @@ TESTS_FOLDER = tests
 OMNETARA_SRC_FOLDER = omnetpp
 TESTBEDARA_SRC_FOLDER = testbed
 INETMANET_FOLDER = inetmanet
+SPDLOG_FOLDER = spdlog
 OUTPUT_DIR = out/$(CONFIGNAME)
 INCLUDE_DIR = include
 
@@ -135,7 +136,7 @@ else
                     -I$(OMNETPP_INCL_DIR) \
                     -I$(INETMANET_SRC_FOLDER)
 endif
-INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include
+INCLUDE_PATH += -I$(TESTS_FOLDER) -I$(CPPUTEST_BASE_DIR)/include -I$(SPDLOG_FOLDER)/include
 LINK_TO_LIB_ARA = -L$(LIBARA_SRC_FOLDER) -l$(ARA_TARGET_NAME)
 
 # Tests configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
