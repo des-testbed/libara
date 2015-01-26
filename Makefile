@@ -126,7 +126,7 @@ TESTBED_ARA_TEST_EXECUTABLE = runTestbedAraTests
 # Compiler options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CFLAGS += -std=c++11 -fPIC -D_GLIBCXX_USE_NANOSLEEP
 ifeq ("$(NO_OMNET)", "TRUE")
-    INCLUDE_PATH = -I$(INCLUDE_DIR)
+    INCLUDE_PATH = -I$(INCLUDE_DIR) 
 else
     INCLUDE_PATH += -I. \
                     -I$(INCLUDE_DIR) \
@@ -167,7 +167,7 @@ libARA: $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)
 #
 # Build the ARA library (libARA)
 #
-$(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O)
+$(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O) $(SPDLOG_FOLDER)/.git
 	@echo "Linking $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)"
 	@$(CXX) -shared $(CFLAGS) $(INCLUDE_PATH) $(LINKFLAGS) $(LIBARA_O) \
 		-o $(OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
@@ -251,6 +251,16 @@ $(TESTBEDARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(TESTBEDARA_O) $
 	@echo "Linking $@"
 	@$(CXX) $(TESTBEDARA_O) $(TESTBEDARA_SRC_MAIN_O) -o $(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_LINKFLAGS) $(LINK_TO_LIB_ARA)
 	@cd $(TESTBEDARA_SRC_FOLDER) && ln -s -f ../$(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_EXECUTABLE_NAME)
+
+# spdlog ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#
+# Checkout the spdlog submodule (we don't need to build it, since it consists only of header files)
+#
+$(SPDLOG_FOLDER)/.git:
+	@echo -e "\n~~~ INITIALIZING SPDLOG SUBMODULE ~~~\n"
+	git submodule init $(SPDLOG_FOLDER)
+	git submodule update $(SPDLOG_FOLDER)
 
 
 # Test targets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
