@@ -4,69 +4,76 @@
 
 #include "TestbedARAClient.h"
 
-
 TESTBED_NAMESPACE_BEGIN
 
 TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARAClient(configuration) {
     // set the clock to the standard clock (if it is not pre-set to the dummy clock, the tests fail)
     Environment::setClock(new StandardClock());
-    //TODO Make configurable
-    Logger* logger = new SimpleLogger("ara");
-    setLogger(logger);
-    // DEBUG: logDebug("Initialized testbedARAClient");
+
+    try {
+        logger = spdlog::get("file_logger");
+    } catch (const spdlog::spdlog_ex& exception) {
+        std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
+    }
+
+    logger->trace() << "Initialized testbedARAClient" << "\n";
+
     initializeNetworkInterfaces();
-    // DEBUG: logDebug("Initialized testbedARAClient network Interfaces");
+
+    logger->trace() << "Initialized testbedARAClient network Interfaces" << "\n";
 }
 
 std::string TestbedARAClient::toString() { 
-    std::ostringstream result;
-    result << std::endl;
+    std::ostringstream data;
+    data << std::endl;
 
-    result << "initial pheromone value:                     " << initialPheromoneValue << std::endl;
-    result << "maximum time to live:                        " << packetFactory->getMaximumNrOfHops() << std::endl;
-//    result << "evporation policy:                           " << evaporationPolicy->toString() << std::endl;
+    data << "initial pheromone value:                     " << initialPheromoneValue << std::endl;
+    data << "maximum time to live:                        " << packetFactory->getMaximumNrOfHops() << std::endl;
 
-    result << "max number of route discovery retries:       " << maxNrOfRouteDiscoveryRetries << std::endl;
-    result << "packet delivery delay [ms]:                  " << packetDeliveryDelayInMilliSeconds << std::endl;
-    result << "route discovery timeout [ms]:                " << routeDiscoveryTimeoutInMilliSeconds << std::endl;
-    result << "neighbor activity check interval [ms]:       " << neighborActivityCheckIntervalInMilliSeconds << std::endl;
-    result << "max neighbor inactivity check interval [ms]: " << maxNeighborInactivityTimeInMilliSeconds << std::endl;
-    result << "pant interval [ms]:                          " << pantIntervalInMilliSeconds << std::endl;
+    data << "max number of route discovery retries:       " << maxNrOfRouteDiscoveryRetries << std::endl;
+    data << "packet delivery delay [ms]:                  " << packetDeliveryDelayInMilliSeconds << std::endl;
+    data << "route discovery timeout [ms]:                " << routeDiscoveryTimeoutInMilliSeconds << std::endl;
+    data << "neighbor activity check interval [ms]:       " << neighborActivityCheckIntervalInMilliSeconds << std::endl;
+    data << "max neighbor inactivity check interval [ms]: " << maxNeighborInactivityTimeInMilliSeconds << std::endl;
+    data << "pant interval [ms]:                          " << pantIntervalInMilliSeconds << std::endl;
 
-    return result.str();
+    std::string result = data.str();
+    return result;
 }
 
 std::string TestbedARAClient::getStatistics() { 
-    std::ostringstream result;
+    std::ostringstream data;
    
     // print network interface statistics
     for (auto& interface: interfaces) {
         TestbedNetworkInterface* testbedInterface = dynamic_cast<TestbedNetworkInterface*>(interface);
 
         if (testbedInterface) {
-            result << "Network Interface Statistics [" << testbedInterface->getInterfaceName() << "]" << std::endl;
-            result << testbedInterface->getStatistics();
+            data << "Network Interface Statistics [" << testbedInterface->getInterfaceName() << "]" << std::endl;
+            data << testbedInterface->getStatistics();
         }
     }
 
-    result << AbstractARAClient::getStatistics();
-   
-    return result.str();
+    data << AbstractARAClient::getStatistics();
+
+    std::string result = data.str();
+    return result;
 }
 
 void TestbedARAClient::sendPacket(Packet* packet) {
-    // DEBUG: std::cerr << "[TestbedARAClient::sendPacket] pass packet to client" << std::endl;
+    logger->trace() << "pass packet to client" << "\n";
     AbstractARAClient::sendPacket(packet);
 }
 
 void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* interface) {
-    logDebug("receiving packet # %u type %s over interface at %s", packet->getSequenceNumber(), PacketType::getAsString(packet->getType()).c_str(), interface->getLocalAddress()->toString().c_str());
+    logger->trace() << "receiving packet #" << packet->getSequenceNumber() << " type " << PacketType::getAsString(packet->getType()).c_str() << "over interface at " << interface->getLocalAddress()->toString().c_str() << "\n";
+
     AbstractARAClient::receivePacket(packet, interface);
     //TODO: persistRoutingTableData
 }
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
-    logDebug("attempting to send packet # %u to System via TAP", packet->getSequenceNumber());
+    logger->trace() << "attempting to send packet #" << packet->getSequenceNumber() << " to System via TAP" << "\n";
 
     struct ether_header* payload;
     const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
@@ -75,7 +82,7 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
     if (payloadLength != -1) {
         /// send the payload to the system
         if (dessert_syssend(payload, payloadLength) != DESSERT_OK){
-            logFatal("sending packet to system failed");
+            logger->error() << "sending packet to system failed" << "\n";
         }
         /// since the data was allocated using malloc indessert_msg_ethdecap()
         free(payload);
@@ -83,7 +90,7 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
-    logDebug("packet # %u is undeliverable", packet->getSequenceNumber());
+    logger->trace() << "packet # " << packet->getSequenceNumber() << " is undeliverable" << "\n";
     delete packet;
 }
 
@@ -102,12 +109,12 @@ void TestbedARAClient::initializeNetworkInterfaces() {
         TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(interfaceName, this, hardwareAddress, broadcastAddress, packetFactory, 400000);
 
         addNetworkInterface(newInterface);
-        logDebug("initialized network interface: %s", dessertInterfaces->if_name);
+        logger->trace() << "initialized network interface: " << dessertInterfaces->if_name << "\n";
         dessertInterfaces = dessertInterfaces->next;
     }
 
     tapAddress = std::make_shared<TestbedAddress>(dessert_l25_defsrc);
-    std::cerr << "[initializeNetworkInterfaces] tap address is: " << tapAddress->toString() << std::endl;
+    logger->trace() << "tap address is: " << tapAddress->toString() << "\n";
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
@@ -143,8 +150,8 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
 
         if (destination) {
             // DEBUG:
-            std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] trying to find destination " <<  destination->toString() << 
-                " in running route discoveries " << std::endl;
+            logger->trace() << "trying to find destination " <<  destination->toString() << 
+                " in running route discoveries " << "\n";
 
             RunningRouteDiscoveriesMap::const_iterator discovery;
             std::lock_guard<std::recursive_mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
@@ -163,12 +170,12 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
                 delete timerInfo;
                 sendDeliverablePackets(destination);
             } else {
-                logError("Could not find running route discovery object for destination %s)", destination->toString().c_str());
+                logger->error() << "Could not find running route discovery object for destination " << destination->toString().c_str() << "\n";
             }
         }
     } else {
         // DEBUG: 
-        std::cerr << "[TestbedARAClient::handleExpiredDeliveryTimer] shared_ptr expired " << std::endl;
+        logger->error() << "shared_ptr expired " << "\n";
     }
 
 }
@@ -179,7 +186,7 @@ void TestbedARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer){
 }
 
 void TestbedARAClient::startRouteDiscoveryTimer(const Packet* packet){
-    std::cerr << "[TestbedARAClient::startRouteDiscoveryTimer] start route discovery timer" << std::endl; 
+    logger->trace() << "start route discovery timer" << "\n"; 
 
     TestbedRouteDiscoveryInfo* discoveryInfo = new TestbedRouteDiscoveryInfo(packet);
     TimerPtr timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);

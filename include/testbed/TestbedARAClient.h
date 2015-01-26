@@ -20,6 +20,8 @@
 #include "SimpleLogger.h"
 #include "StandardClock.h"
 
+#include "spdlog/spdlog.h"
+
 #include <mutex>
 
 TESTBED_NAMESPACE_BEGIN
@@ -124,6 +126,8 @@ class TestbedARAClient : public AbstractARAClient {
 
 
     private:
+        std::shared_ptr<spdlog::logger> logger;
+
         /**
          * This mutex protects the access to the map (runningDeliveryTimers)
          * which holds the delivery timers.
