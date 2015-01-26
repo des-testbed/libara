@@ -16,11 +16,11 @@ TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARACl
         std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
     }
 
-    logger->trace() << "Initialized testbedARAClient" << "\n";
+    logger->trace() << "Initialized testbedARAClient";
 
     initializeNetworkInterfaces();
 
-    logger->trace() << "Initialized testbedARAClient network Interfaces" << "\n";
+    logger->trace() << "Initialized testbedARAClient network Interfaces";
 }
 
 std::string TestbedARAClient::toString() { 
@@ -61,19 +61,19 @@ std::string TestbedARAClient::getStatistics() {
 }
 
 void TestbedARAClient::sendPacket(Packet* packet) {
-    logger->trace() << "pass packet to client" << "\n";
+    logger->trace() << "pass packet to client";
     AbstractARAClient::sendPacket(packet);
 }
 
 void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* interface) {
-    logger->trace() << "receiving packet #" << packet->getSequenceNumber() << " type " << PacketType::getAsString(packet->getType()).c_str() << "over interface at " << interface->getLocalAddress()->toString().c_str() << "\n";
+    logger->trace() << "receiving packet #" << packet->getSequenceNumber() << " type " << PacketType::getAsString(packet->getType()).c_str() << "over interface at " << interface->getLocalAddress()->toString().c_str();
 
     AbstractARAClient::receivePacket(packet, interface);
     //TODO: persistRoutingTableData
 }
 
 void TestbedARAClient::deliverToSystem(const Packet* packet) {
-    logger->trace() << "attempting to send packet #" << packet->getSequenceNumber() << " to System via TAP" << "\n";
+    logger->trace() << "attempting to send packet #" << packet->getSequenceNumber() << " to System via TAP";
 
     struct ether_header* payload;
     const TestbedPacket* testbedPacket = dynamic_cast<const TestbedPacket*>(packet);
@@ -82,7 +82,7 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
     if (payloadLength != -1) {
         /// send the payload to the system
         if (dessert_syssend(payload, payloadLength) != DESSERT_OK){
-            logger->error() << "sending packet to system failed" << "\n";
+            logger->error() << "sending packet to system failed";
         }
         /// since the data was allocated using malloc indessert_msg_ethdecap()
         free(payload);
@@ -90,7 +90,7 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
 }
 
 void TestbedARAClient::packetNotDeliverable(const Packet* packet) {
-    logger->trace() << "packet # " << packet->getSequenceNumber() << " is undeliverable" << "\n";
+    logger->trace() << "packet # " << packet->getSequenceNumber() << " is undeliverable";
     delete packet;
 }
 
@@ -109,12 +109,12 @@ void TestbedARAClient::initializeNetworkInterfaces() {
         TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(interfaceName, this, hardwareAddress, broadcastAddress, packetFactory, 400000);
 
         addNetworkInterface(newInterface);
-        logger->trace() << "initialized network interface: " << dessertInterfaces->if_name << "\n";
+        logger->trace() << "initialized network interface: " << dessertInterfaces->if_name;
         dessertInterfaces = dessertInterfaces->next;
     }
 
     tapAddress = std::make_shared<TestbedAddress>(dessert_l25_defsrc);
-    logger->trace() << "tap address is: " << tapAddress->toString() << "\n";
+    logger->trace() << "tap address is: " << tapAddress->toString();
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
@@ -151,7 +151,7 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
         if (destination) {
             // DEBUG:
             logger->trace() << "trying to find destination " <<  destination->toString() << 
-                " in running route discoveries " << "\n";
+                " in running route discoveries";
 
             RunningRouteDiscoveriesMap::const_iterator discovery;
             std::lock_guard<std::recursive_mutex> routeDiscoveryTimerLock(routeDiscoveryTimerMutex);
@@ -170,12 +170,12 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
                 delete timerInfo;
                 sendDeliverablePackets(destination);
             } else {
-                logger->error() << "Could not find running route discovery object for destination " << destination->toString().c_str() << "\n";
+                logger->error() << "Could not find running route discovery object for destination " << destination->toString().c_str();
             }
         }
     } else {
         // DEBUG: 
-        logger->error() << "shared_ptr expired " << "\n";
+        logger->error() << "shared_ptr expired";
     }
 
 }
@@ -186,7 +186,7 @@ void TestbedARAClient::handleExpiredPANTTimer(std::weak_ptr<Timer> pantTimer){
 }
 
 void TestbedARAClient::startRouteDiscoveryTimer(const Packet* packet){
-    logger->trace() << "start route discovery timer" << "\n"; 
+    logger->trace() << "start route discovery timer"; 
 
     TestbedRouteDiscoveryInfo* discoveryInfo = new TestbedRouteDiscoveryInfo(packet);
     TimerPtr timer = getNewTimer(TimerType::ROUTE_DISCOVERY_TIMER, discoveryInfo);
