@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 
     try {
         /// set log level of all loggers to debug and above
-        spd::set_level(spd::level::debug);
+        spd::set_level(spd::level::trace);
 
         char hostName[64];
 
@@ -87,12 +87,16 @@ int main(int argc, char** argv) {
 
         /// construct log file name
         std::stringstream logFileName;
-        logFileName << "logs/" << hostName << ".log";
+        logFileName << "logs/" << hostName;
 
         std::string logFile = logFileName.str();
 
         /// Create a file rotating logger with 5mb size max and 3 rotated files
         auto file_logger = spd::rotating_logger_mt("file_logger", logFile, 1048576 * 5, 3);
+        file_logger->set_level(spd::level::trace);
+        spd::set_pattern("*** [%H:%M:%S %z] [thread %t] %v ***");
+
+        file_logger->trace("initialized");
 
         /// get a file pointer to the configuration file
         FILE* cfg = dessert_cli_get_cfg(argc, argv);
