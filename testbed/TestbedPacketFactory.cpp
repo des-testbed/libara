@@ -9,7 +9,15 @@ extern ARA::testbed::TestbedARAClient* client;
 
 TESTBED_NAMESPACE_BEGIN
 
-TestbedPacketFactory::TestbedPacketFactory(int maxHopCount) : PacketFactory(maxHopCount) {}
+TestbedPacketFactory::TestbedPacketFactory(int maxHopCount) : PacketFactory(maxHopCount) {
+    try {
+        logger = spdlog::get("file_logger");
+    } catch (const spdlog::spdlog_ex& exception) {
+        std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
+    }
+
+    logger->trace() << "initialized TestbedPacketFactory";
+}
 
 TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
     /// the destination address (if it is set)
@@ -46,7 +54,7 @@ TestbedPacket* TestbedPacketFactory::makePacket(dessert_msg_t* message) {
         }
 
         destination = std::make_shared<TestbedAddress>(address);
-        // DEBUG: std::cerr << "[TestbedPacketFactory::makePaket] the destination address of the ant agent ist " << destination->toString() << std::endl;
+        logger->trace() << "the destination address of the ant agent ist " << destination->toString();
     } else {
         destination = std::make_shared<TestbedAddress>(ethernetFrame->ether_dhost);
     }
@@ -106,11 +114,12 @@ TestbedPacket* TestbedPacketFactory::makePacket(AddressPtr source, AddressPtr de
 }
 
 TestbedPacket* TestbedPacketFactory::makeFANT(AddressPtr source, AddressPtr destination, unsigned int sequenceNumber) {
-    // DEBUG: std::cerr << "[TestbedPacketFactory::makeFANT] seq nr is " << sequenceNumber << std::endl; 
+    logger->trace() << "seq nr of FANT is " << sequenceNumber; 
     return this->makePacket(source, destination, source, PacketType::FANT, sequenceNumber, maxHopCount);
 }
 
 TestbedPacket* TestbedPacketFactory::makeBANT(const Packet *packet, unsigned int sequenceNumber){
+    logger->trace() << "seq nr of BANT is " << sequenceNumber; 
     return this->makePacket(packet->getDestination(), packet->getSource(), packet->getDestination(), PacketType::BANT, sequenceNumber, maxHopCount);
 }
 
@@ -128,17 +137,13 @@ bool TestbedPacketFactory::checkDessertMessage(dessert_msg_t* message){
     if ((result = dessert_msg_check(message, expectedMessageSize)) == DESSERT_OK) {
         return true;
     } else if(result == -1) {
-        // DEBUG: 
-        std::cerr << "[TestbedPacketFactory::checkDessertMessage] the message was too large for the buffer" << std::endl;
+        logger->error() << "error in dessert_msg_check(): the message was too large for the buffer";
     } else if(result == -2) {
-        // DEBUG: 
-        std::cerr << "[TestbedPacketFactory::checkDessertMessage] the message was not intended for this daemon" << std::endl;
+        logger->error() << "error in dessert_msg_check(): the message was not intended for this daemon";
     } else if(result == -3) {
-        // DEBUG: 
-        std::cerr << "[TestbedPacketFactory::checkDessertMessage] an extension is not consistent" << std::endl;
+        logger->error() << "error in dessert_msg_check(): an extension is not consistent";
     } else {
-        // DEBUG: 
-        std::cerr << "[TestbedPacketFactory::checkDessertMessage] unknown error code" << std::endl;
+        logger->error() << "error in dessert_msg_check(): unknown error code";
     }
 
     return false;

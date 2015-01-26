@@ -12,6 +12,8 @@
 #include "TestbedPacket.h"
 #include "TestbedARAClient.h"
 
+#include "spdlog/spdlog.h"
+
 TESTBED_NAMESPACE_BEGIN
 
 struct RoutingExtension {
@@ -109,6 +111,7 @@ class TestbedPacketFactory : public PacketFactory {
         virtual TestbedPacket* makePacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload=nullptr, unsigned int payloadSize=0, AddressPtr previousHop=nullptr);
 
     private:
+        std::shared_ptr<spdlog::logger> logger;
 
         RoutingExtension* getRoutingExtension(dessert_msg_t* message);
 

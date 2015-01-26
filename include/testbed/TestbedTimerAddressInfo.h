@@ -9,6 +9,8 @@
 #include "TestbedAddress.h"
 #include "TimerAddressInfo.h"
 
+#include "spdlog/spdlog.h"
+
 #include <mutex>
 #include <system_error>
 
@@ -28,6 +30,8 @@ class TestbedTimerAddressInfo : public TimerAddressInfo {
 
     private:
         std::mutex addressMutex;
+
+        std::shared_ptr<spdlog::logger> logger;
 };
 
 TESTBED_NAMESPACE_END
