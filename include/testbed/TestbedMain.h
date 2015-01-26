@@ -22,6 +22,8 @@
 #include "spdlog/spdlog.h"
 
 #include <mutex>
+#include <cerrno>
+#include <sstream>
 
 //std::shared_ptr<ARA::testbed::TestbedARAClient> client;
 ARA::testbed::TestbedARAClient *client;

@@ -76,6 +76,23 @@ int main(int argc, char** argv) {
         /// set log level of all loggers to debug and above
         spd::set_level(spd::level::debug);
 
+        char hostName[64];
+
+        /// determine host name 
+        if (gethostname(hostName, sizeof(hostName)) != 0) {
+            auto console = spd::stdout_logger_mt("console");
+            console->error() << "could not get host name! errno " << errno << ": ";
+            console->error() << strerror(errno) << 1;
+        } 
+
+        std::stringstream logFileName;
+        logFileName << "logs/" << hostName << ".log";
+
+        std::string logFile = logFileName.str();
+
+        /// Create a file rotating logger with 5mb size max and 3 rotated files
+        auto file_logger = spd::rotating_logger_mt("file_logger", logFile, 1048576 * 5, 3);
+
         /// get a file pointer to the configuration file
         FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
