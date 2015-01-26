@@ -10,6 +10,8 @@
 #include "Exception.h"
 #include "Packet.h"
 
+#include "spdlog/spdlog.h"
+
 #include <mutex>
 
 TESTBED_NAMESPACE_BEGIN
@@ -87,6 +89,8 @@ class TestbedPacket : public Packet {
          * header (DESSERT_EXT_ETH).
          */
         u_short payloadType;
+
+        std::shared_ptr<spdlog::logger> logger;
 };
 
 TESTBED_NAMESPACE_END

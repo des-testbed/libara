@@ -10,6 +10,14 @@ TESTBED_NAMESPACE_BEGIN
 TestbedPacket::TestbedPacket(AddressPtr source, AddressPtr destination, AddressPtr sender, char type, unsigned int seqNr, int ttl, const char* payload, unsigned int payloadSize) : Packet(source, destination, sender, type, seqNr, ttl, payload, payloadSize) { 
     // set the payload type 
     payloadType = 0x0800;
+
+    try {
+        logger = spdlog::get("file_logger");
+    } catch (const spdlog::spdlog_ex& exception) {
+        std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
+    }
+
+    logger->trace() << "initialized TestbedPacket";
 }
 
 AddressPtr TestbedPacket::getSource() const {
@@ -57,16 +65,14 @@ void TestbedPacket::addPayload(dessert_msg_t* message) {
 
             payload = tmpPayload;
         } else {
-            // DEBUG:
-            std::cerr << "[TestbedPacket::setMessage] saving payload failed" << std::endl;
+            logger->error() << "setMessage: saving payload failed";
         }
     /**
      * This should actually never happen since we check the payload length in
      * the packet factory (TestbedPacketFactory)
      */
     } else {
-        // DEBUG:
-        std::cerr << "[TestbedPacket::setMessage] tried to save payload while there is actually none" << std::endl;
+        logger->error() << "setMessager: tried to save payload while there is actually none";
     }
 }
 
@@ -145,15 +151,14 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
                  * Sweet, 
                  */
                 if (dessert_msg_addpayload(packet, &tempPayload, payloadSize) != DESSERT_OK) {
-                   // DEBUG:
-                   std::cerr << "[TestbedPacket::toDessertMessage] setting payload pointer failed" << std::endl;
+                   logger->error() << "toDessertMessage: setting payload pointer failed";
                 } else {
                    /// copy over the original payload
                    std::memcpy(tempPayload, payload, payloadSize);
                 }
             } else {
                 // DEBUG:
-                std::cerr << "[TestbedPacket::toDessertMessage] memory allocation for payload failed" << std::endl;
+                logger->error() << "toDessertMessage: memory allocation for payload failed";
             }
         } else if (type == PacketType::PANT){
 
@@ -193,12 +198,13 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
         } else if (type == PacketType::PEANT){
 
         } else {
-            throw Exception("Unsupported packet type in makeAntAgent() method");
+            logger->error() << "toDessertMessage: unsupported packet type";
+            throw Exception("unsupported packet type in toDessertMessage() method");
         }
     /// creating a dessert_msg_t failed
     } else {
         // DEBUG:
-        std::cerr << "[TestbedPacket::toDessertMessage] creating a new dessert message failed" << std::endl;
+        logger->error() << "toDessertMessage: creating a new dessert message failed";
     }
 
     return packet;
