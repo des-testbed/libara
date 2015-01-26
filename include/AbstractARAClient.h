@@ -23,6 +23,8 @@
 #include "Timer.h"
 #include "Time.h"
 
+#include "spdlog/spdlog.h"
+
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
@@ -247,6 +249,7 @@ protected:
     LastRouteDiscoveriesMap lastRouteDiscoverySeqNumbers;
 
 private:
+    std::shared_ptr<spdlog::logger> logger;
     /** Statistics */
     unsigned int onlyOneRouteFailure;
     unsigned int allRoutesHaveCollapsedFailure;

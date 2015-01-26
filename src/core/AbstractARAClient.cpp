@@ -20,6 +20,14 @@ ARA_NAMESPACE_BEGIN
 
 AbstractARAClient::AbstractARAClient(Configuration& configuration) {
     initialize(configuration);
+
+    try {
+        logger = spdlog::get("file_logger");
+    } catch (const spdlog::spdlog_ex& exception) {
+        std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
+    }
+
+    logger->trace() << "initialized AbstractARAClient";
 }
 
 void AbstractARAClient::initialize(Configuration& configuration) {
@@ -109,7 +117,7 @@ void AbstractARAClient::sendPacket(Packet* packet) {
         AddressPtr destination = packet->getDestination();
 
         if (isRouteDiscoveryRunning(destination)) {
-            logDebug("Route discovery for %s is already running. Trapping packet %u", destination->toString().c_str(), packet->getSequenceNumber());
+            logger->trace() << "Route discovery for " << destination->toString() << " is already running. Trapping packet " << packet->getSequenceNumber();
             packetTrap->trapPacket(packet);
         } else if (routingTable->isDeliverable(packet)) {
             NextHop* nextHop = forwardingPolicy->getNextHop(packet);
@@ -119,15 +127,15 @@ void AbstractARAClient::sendPacket(Packet* packet) {
             packet->setSender(interface->getLocalAddress());
 
             float newPheromoneValue = reinforcePheromoneValue(destination, nextHopAddress, interface);
-            logDebug("Forwarding DATA packet %u from %s to %s via %s (phi=%.2f)", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), nextHopAddress->toString().c_str(), newPheromoneValue);
+            logger->trace() << "Forwarding DATA packet " <<  packet->getSequenceNumber() << " from " << packet->getSourceString() << " to " << packet->getDestinationString() << " via " << nextHopAddress->toString() << "(phi=" << newPheromoneValue << ")";
 
             sendUnicast(packet, interface, nextHopAddress);
         } else {
-            // DEBUG: std::cerr << "[AbstractARAClient::sendPacket]: packet source address is: " << packet->getSource()->toString() << std::endl;
+            logger->trace() << "sendPacket: packet source address is: " << packet->getSource()->toString();
 
             // packet is not deliverable and no route discovery is yet running
             if(isLocalAddress(packet->getSource())) {
-                logDebug("Packet %u from %s to %s is not deliverable. Starting route discovery phase", packet->getSequenceNumber(), packet->getSourceString().c_str(), destination->toString().c_str());
+                logger->trace() << "Packet " << packet->getSequenceNumber() << "from " << packet->getSourceString() << " to " << destination->toString() << " is not deliverable. Starting route discovery phase.";
                 packetTrap->trapPacket(packet);
                 startNewRouteDiscovery(packet);
             } else {
@@ -222,7 +230,7 @@ void AbstractARAClient::handleDuplicatePacket(Packet* packet, NetworkInterface* 
     if(packet->isDataPacket()) {
         sendDuplicateWarning(packet, interface);
     } else if(packet->getType() == PacketType::BANT && isDirectedToThisNode(packet)) {
-        logDebug("Another BANT %u came back from %s via %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getSenderString().c_str());
+        logger->trace() << "Another BANT " << packet->getSequenceNumber() << " came back from " << packet->getSourceString() << " via "<< packet->getSenderString() << ".";
     }
 
     delete packet;
@@ -269,8 +277,8 @@ void AbstractARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* int
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
         routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
         logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
-        //logDebug("Routing Table:");
-        //logDebug("%s", routingTable->toString().c_str());
+        //logger->trace() <<("Routing Table:");
+        //logger->trace() <<("%s", routingTable->toString().c_str());
     } else {
         logTrace("Did not create new route to %s via %s (prevHop %s or sender has been seen before)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), packet->getPreviousHop()->toString().c_str());
     }
@@ -292,14 +300,14 @@ void AbstractARAClient::logAllRoutingTableEntries() {
         std::string destination = routingTableEntry.destination->toString();
         std::string nextHop = routingTableEntry.entry->getNextHop()->getAddress()->toString();
         float phi = routingTableEntry.entry->getPheromoneValue();
-        logDebug("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
+        logger->trace() <<("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
     }    
     //logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
     if(hasPreviousNodeBeenSeenBefore(packet) == false) {
         float initialPheromoneValue = calculateInitialPheromoneValue(packet->getTTL());
         routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue);
        // logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
-       // logDebug("Routing Table:");
+       // logger->trace() <<("Routing Table:");
         RoutingTableEntryTupel routingTableEntry;
         for (int i = 0; i < routingTable->getTotalNumberOfEntries(); ++i) {
             routingTableEntry = routingTable->getEntryAt(i);
@@ -310,7 +318,7 @@ void AbstractARAClient::logAllRoutingTableEntries() {
             /// get the pheromone value
             float phi = routingTableEntry.entry->getPheromoneValue();
 
-            //logDebug("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
+            //logger->trace() <<("[%d] next hop: %s, destination %s, phi: %f", i, nextHop.c_str(), destination.c_str(), phi);
         }
     }
     else {
@@ -423,7 +431,7 @@ void AbstractARAClient::checkPantTimer(const Packet* packet) {
         AddressPtr pantDestination = packet->getSource();
         if (scheduledPANTs.find(pantDestination) == scheduledPANTs.end()) {
             // only start PANT if no timer is already running
-            logDebug("Scheduled PANT to be sent in %u ms", pantIntervalInMilliSeconds);
+            logger->trace() << "Scheduled PANT to be sent in " << pantIntervalInMilliSeconds << " ms";
 
             Clock* clock = Environment::getClock();
             TimerPtr pantTimer = clock->getNewTimer(TimerType::PANTS_TIMER, new TimerAddressInfo(pantDestination));
@@ -446,7 +454,7 @@ void AbstractARAClient::handleAntPacket(Packet* packet, NetworkInterface* interf
         handleAntPacketForThisNode(packet);
     }
     else if (packet->getTTL() > 0) {
-        logDebug("Broadcasting %s %u from %s to %s (came from %s)", PacketType::getAsString(packet->getType()).c_str(), packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str(), packet->getSenderString().c_str());
+        logger->trace() << "Broadcasting " << PacketType::getAsString(packet->getType()) << " " << packet->getSequenceNumber() << "from " << packet->getSourceString() << "to " <<  packet->getDestinationString() << " (came from " << packet->getSenderString().c_str() << ")";
         broadCast(packet);
     }
     else {
@@ -459,7 +467,7 @@ void AbstractARAClient::handleAntPacketForThisNode(Packet* packet) {
     char packetType = packet->getType();
 
     if(packetType == PacketType::FANT) {
-        logDebug("FANT %u from %s reached its destination. Broadcasting BANT", packet->getSequenceNumber(), packet->getSourceString().c_str());
+        logger->trace() << "FANT " << packet->getSequenceNumber() << "from " << packet->getSourceString() << "reached its destination. Broadcasting BANT";
         broadcastBANT(packet);
     }
     else if(packetType == PacketType::BANT) {
@@ -490,7 +498,7 @@ void AbstractARAClient::handleBANTForThisNode(Packet* bant) {
     if(packetTrap->getNumberOfTrappedPackets(routeDiscoveryDestination) == 0) {
         logWarn("Received BANT %u from %s via %s but there are no trapped packets for this destination.", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str());
     } else {
-        logDebug("First BANT %u came back from %s via %s. Waiting %u ms until delivering the trapped packets", bant->getSequenceNumber(), bant->getSourceString().c_str(), bant->getSenderString().c_str(), packetDeliveryDelayInMilliSeconds);
+        logger->trace() << "First BANT " <<  bant->getSequenceNumber() << " came back from " << bant->getSourceString() << " via " << bant->getSenderString() << ". Waiting " << packetDeliveryDelayInMilliSeconds << " ms until delivering the trapped packets";
         stopRouteDiscoveryTimer(routeDiscoveryDestination);
         startDeliveryTimer(routeDiscoveryDestination);
     }
@@ -720,16 +728,16 @@ bool AbstractARAClient::handleBrokenLink(Packet* packet, AddressPtr nextHop, Net
 
     // Try to deliver the packet on an alternative route
     if (routingTable->isDeliverable(packet)) {
-        logDebug("Sending %u from %s over alternative route", packet->getSequenceNumber(), packet->getSourceString().c_str());
+        logger->trace() << "Sending " << packet->getSequenceNumber() << "from " << packet->getSourceString() << " over alternative route";
         sendPacket(packet);
         return true;
     } else if(packet->isDataPacket() && isLocalAddress(packet->getSource())) {
         packetTrap->trapPacket(packet);
 
         if (isRouteDiscoveryRunning(packet->getDestination())) {
-            logDebug("No alternative route is available. Trapping packet %u from %s because route discovery is already running for destination %s.", packet->getSequenceNumber(), packet->getSourceString().c_str(), packet->getDestinationString().c_str());
+        logger->trace() << "No alternative route is available. Trapping packet " << packet->getSequenceNumber() << "from " << packet->getSourceString() << "because route discovery is already running for destination " << packet->getDestinationString() << ".";
         } else {
-            logDebug("No alternative route is available. Starting new route discovery for packet %u from %s.", packet->getSequenceNumber(), packet->getSourceString().c_str());
+            logger->trace() << "No alternative route is available. Starting new route discovery for packet " << packet->getSequenceNumber() << " from " << packet->getSourceString() << ".";
             startNewRouteDiscovery(packet);
         }
         return true;
@@ -771,7 +779,7 @@ void AbstractARAClient::checkInactiveNeighbors() {
             NetworkInterface* interface = entryPair.second.second;
             unsigned int sequenceNumber = getNextSequenceNumber();
             Packet* helloPacket = packetFactory->makeHelloPacket(interface->getLocalAddress(), addressofNeighbor, sequenceNumber);
-            logDebug("Sending HELLO packet to inactive neighbor %s", addressofNeighbor->toString().c_str());
+            logger->trace() << "Sending HELLO packet to inactive neighbor " << addressofNeighbor->toString();
             sendUnicast(helloPacket, interface, addressofNeighbor);
         }
     }
@@ -800,7 +808,7 @@ void AbstractARAClient::deleteRoutingTableEntry(AddressPtr destination, AddressP
             onlyOneRouteFailure++;
             RoutingTableEntry* lastRemainingRoute = possibleNextHops.front();
             AddressPtr remainingNextHop = lastRemainingRoute->getAddress();
-            logDebug("Only one last route is known to %s. Notifying %s with ROUTE_FAILURE packet", destination->toString().c_str(), remainingNextHop->toString().c_str());
+            logger->trace() << "Only one last route is known to " << destination->toString() << ". Notifying " << remainingNextHop->toString() << " with ROUTE_FAILURE packet";
             AddressPtr source = interface->getLocalAddress();
             unsigned int sequenceNr = getNextSequenceNumber();
             Packet* routeFailurePacket = packetFactory->makeRouteFailurePacket(source, destination, sequenceNr);
@@ -824,7 +832,7 @@ void AbstractARAClient::broadcastRouteFailure(AddressPtr destination) {
 }
 
 void AbstractARAClient::broadcastPANT(AddressPtr destination) {
-    logDebug("Sending new PANT over all interfaces");
+    logger->trace() << "sending new PANT over all interfaces";
     for(auto& interface: interfaces) {
         AddressPtr source = interface->getLocalAddress();
         unsigned int sequenceNr = getNextSequenceNumber();
@@ -847,16 +855,18 @@ TimerPtr AbstractARAClient::getNewTimer(char timerType, void* contextObject) con
 }
 
 std::string AbstractARAClient::getStatistics() {
-    std::ostringstream result;
+    std::ostringstream data;
 
-    result << "General ARA Statistics:" << std::endl;
-    result << " Route Failures" << std::endl;
-    result << "   only one last route:             " << onlyOneRouteFailure << std::endl;
-    result << "   all known routes have collapsed: " << allRoutesHaveCollapsedFailure << std::endl;
+    data << "General ARA Statistics:" << std::endl;
+    data << " Route Failures" << std::endl;
+    data << "   only one last route:             " << onlyOneRouteFailure << std::endl;
+    data << "   all known routes have collapsed: " << allRoutesHaveCollapsedFailure << std::endl;
 
-    result << " Duplicate Warnings" << std::endl;
-    result << "   routing loops:                   " << routingLoopFailure << std::endl;
-    return result.str();
+    data << " Duplicate Warnings" << std::endl;
+    data << "   routing loops:                   " << routingLoopFailure << std::endl;
+
+    std::string result = data.str();
+    return result;
 }
 
 ARA_NAMESPACE_END
