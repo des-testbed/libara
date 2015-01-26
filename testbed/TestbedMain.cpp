@@ -85,6 +85,7 @@ int main(int argc, char** argv) {
             console->error() << strerror(errno) << 1;
         } 
 
+        /// construct log file name
         std::stringstream logFileName;
         logFileName << "logs/" << hostName << ".log";
 
@@ -125,8 +126,8 @@ int main(int argc, char** argv) {
 
         return 0;
 
-    } catch (const spd::spdlog_ex& ex) {
-        std::cout << "Log failed: " << ex.what() << std::endl;
+    } catch (const spd::spdlog_ex& exception) {
+        std::cerr<< "creating log failed: " << exception.what() << std::endl;
     }
     
     return -1;
