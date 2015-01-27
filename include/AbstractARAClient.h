@@ -9,7 +9,6 @@
 #include "AbstractNetworkClient.h"
 #include "TimeoutEventListener.h"
 #include "Configuration.h"
-#include "Logger.h"
 #include "Address.h"
 #include "NextHop.h"
 #include "NetworkInterface.h"
