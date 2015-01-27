@@ -12,6 +12,12 @@ ARA_NAMESPACE_BEGIN
 
 AbstractEARAClient::AbstractEARAClient(EARAConfiguration& configuration) {
     initializeEARA(configuration);
+
+    try {
+        logger = spdlog::get("file_logger");
+    } catch (const spdlog::spdlog_ex& exception) {
+        std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
+    }
 }
 
 void AbstractEARAClient::initializeEARA(EARAConfiguration& configuration) {
@@ -43,7 +49,8 @@ void AbstractEARAClient::createNewRouteFrom(Packet* packet, NetworkInterface* in
     float initialEnergyValue = calculateInitialEnergyValue(static_cast<EARAPacket*>(packet));
     routingTable->update(packet->getSource(), packet->getSender(), interface, initialPheromoneValue, initialEnergyValue);
     //TODO log energy value (in percent)
-    logTrace("Created new route to %s via %s (phi=%.2f)", packet->getSourceString().c_str(), packet->getSenderString().c_str(), initialPheromoneValue);
+    logger->trace() << "Created new route to " << packet->getSourceString() << " via " << packet->getSenderString() << "(phi=" <<
+ initialPheromoneValue << ")";
 }
 
 void AbstractEARAClient::updateRoutingTable(Packet* packet, NetworkInterface* interface) {
@@ -142,7 +149,7 @@ float AbstractEARAClient::calculateInitialEnergyValue(EARAPacket* packet) {
 
 float AbstractEARAClient::normalizeEnergyValue(float energyValue) const {
     if (energyValue > maximumBatteryCapacityInNetwork) {
-        logError("Configuration error: Evaluating an energy value which is greater than the maximum configured energy capacity of a nodes battery in the network");
+        logger->error() << "Configuration error: Evaluating an energy value which is greater than the maximum configured energy capacity of a nodes battery in the network";
         energyValue = maximumBatteryCapacityInNetwork;
     }
     // the returned value lies in the interval (1, 10)
@@ -223,7 +230,7 @@ void AbstractEARAClient::handleDataPacketForThisNode(Packet* packet) {
 }
 
 void AbstractEARAClient::broadcastPEANT() {
-    logDebug("Sending new PEANT over all interfaces");
+    logger->debug() << "Sending new PEANT over all interfaces";
     for(auto& interface: interfaces) {
         AddressPtr source = interface->getLocalAddress();
         unsigned int sequenceNr = getNextSequenceNumber();
