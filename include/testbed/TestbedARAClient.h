@@ -17,7 +17,6 @@
 #include "AbstractARAClient.h"
 #include "BasicConfiguration.h"
 #include "TimerAddressInfo.h"
-#include "SimpleLogger.h"
 #include "StandardClock.h"
 
 #include "spdlog/spdlog.h"
