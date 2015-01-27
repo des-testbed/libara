@@ -121,6 +121,7 @@ protected:
     void addEnergyInformationToPacket(Packet* packet);
 
 private:
+    std::shared_ptr<spdlog::logger> logger;
     /**
      * This method is private to prevent anyone from using it because we slightly changed
      * the method signature to require an instance of EARAConfiguration.
