@@ -10,7 +10,6 @@ ARA_NAMESPACE_BEGIN
 
 AbstractNetworkClient::~AbstractNetworkClient() {
     /* The following members may have be deleted earlier, depending on the destructor of the implementing class */
-    DELETE_IF_NOT_NULL(logger);
     DELETE_IF_NOT_NULL(routingTable);
     DELETE_IF_NOT_NULL(packetFactory);
 }
@@ -23,64 +22,6 @@ void AbstractNetworkClient::setRoutingTable(RoutingTable* newRoutingTable){
 
     // set new routing table
     routingTable = newRoutingTable;
-}
-
-void AbstractNetworkClient::setLogger(Logger* logger) {
-    this->logger = logger;
-}
-
-void AbstractNetworkClient::logTrace(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_TRACE, args);
-        va_end(args);
-    }
-}
-
-void AbstractNetworkClient::logDebug(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_DEBUG, args);
-        va_end(args);
-    }
-}
-
-void AbstractNetworkClient::logInfo(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_INFO, args);
-        va_end(args);
-    }
-}
-
-void AbstractNetworkClient::logWarn(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_WARN, args);
-        va_end(args);
-    }
-}
-
-void AbstractNetworkClient::logError(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_ERROR, args);
-        va_end(args);
-    }
-}
-
-void AbstractNetworkClient::logFatal(const std::string &text, ...) const {
-    if(logger != nullptr) {
-        va_list args;
-        va_start(args, text);
-        logger->logMessageWithVAList(text, Logger::LEVEL_FATAL, args);
-        va_end(args);
-    }
 }
 
 void AbstractNetworkClient::addNetworkInterface(NetworkInterface* newInterface) {

@@ -84,7 +84,7 @@ void TestbedARAClient::deliverToSystem(const Packet* packet) {
         if (payloadLength != -1) {
             /// send the payload to the system
             if (dessert_syssend(payload, payloadLength) != DESSERT_OK){
-                logFatal("sending packet to system failed");
+                logger->critical() << "sending packet to system failed";
             }
             /// since the data was allocated using malloc indessert_msg_ethdecap()
             free(payload);
