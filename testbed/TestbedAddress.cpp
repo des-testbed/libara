@@ -6,6 +6,7 @@
 
 TESTBED_NAMESPACE_BEGIN
 
+
 TestbedAddress::TestbedAddress(u_char* address){
     std::copy(address, address + 6, this->address);
 }
@@ -20,7 +21,10 @@ std::string TestbedAddress::toString() const {
     }
     result << std::setw(2) << std::setfill('0') << std::hex << (0xFF & address[5]);
 
-    return result.str();
+    // TODO: check
+    std::string resultString = result.str(); 
+
+    return resultString;
 }
 
 bool TestbedAddress::equals(const Address* otherAddress) const{
