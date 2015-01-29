@@ -11,6 +11,8 @@
 #include "StandardClock.h"
 #include "StandardTimerProxy.h"
 
+#include "spdlog/spdlog.h"
+
 #include <chrono>
 #include <thread>
 #include <functional>
@@ -41,6 +43,8 @@ class StandardTimer : public Timer {
         std::shared_ptr<StandardTimerProxy> callback;
         std::condition_variable conditionVariable;
         std::mutex conditionVariableMutex;
+
+        std::shared_ptr<spdlog::logger> logger;
 };
 
 ARA_NAMESPACE_END

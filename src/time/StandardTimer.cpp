@@ -8,7 +8,15 @@
 ARA_NAMESPACE_BEGIN
 
 StandardTimer::StandardTimer(char type, void* contextObject) : Timer(type, contextObject) { 
-   interrupted = false;
+    interrupted = false;
+
+    try {
+        logger = spdlog::get("file_logger");
+    } catch (const spdlog::spdlog_ex& exception) {
+        std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
+    }
+
+    logger->trace() << "[StandardTimer::StandardTimer] " << "timer of type " << TimerType::getAsString(type) << " initialized";
 }
 
 StandardTimer::~StandardTimer(){ }
@@ -22,13 +30,13 @@ void StandardTimer::run(unsigned long timeoutInMicroSeconds){
         clock->scheduleTimer(timer);
     } else {
         // DEBUG:
-        std::cerr << "[StandardTimer::run] dynamic cast failed!" << std::endl;
+        logger->error() << "[StandardTimer::run] " << "dynamic cast failed!";
     }
 }
 
 void StandardTimer::interrupt(){
     interrupted = true;
-    // DEBUG: std::cerr << "[StandardTimer::interrupt] interrupt timer" << std::endl;
+    logger->trace() << "[StandardTimer::interrupt] " << "interrupt timer";
     conditionVariable.notify_all();
 }
 
@@ -47,21 +55,19 @@ void StandardTimer::sleep(unsigned long timeoutInMicroseconds){
             if (!interrupted) {
 	            callback->notify();
             }
-            // DEBUG: 
-            std::cerr << "[StandardTimer] callback of timer type " << TimerType::getAsString(type) << " called" << std::endl;
+
+            logger->trace() << "[StandardTimer::sleep] " << "callback of timer type " << TimerType::getAsString(type) << " called";
         } else if (result == std::cv_status::no_timeout) {
-            // DEBUG: 
-            std::cerr << "[StandardTimer] callback of timer type " << TimerType::getAsString(type) << " cancelled " << std::endl;
+            logger->trace() << "[StandardTimer::sleep] " << "callback of timer type " << TimerType::getAsString(type) << " cancelled";
         } else {
-            // DEBUG: 
-            std::cerr << "[StandardTimer] don't know what happened to " << TimerType::getAsString(type) << std::endl;
+            logger->error() << "[StandardTimer::sleep] " << "don't know what happened to " << TimerType::getAsString(type);
         }
     } catch (const std::system_error& error) {
-	    std::cerr << "[StandardTimer] caught system_error in " << TimerType::getAsString(type) << std::endl;
-        std::cerr << "Error:    " << error.what() << std::endl;
-        std::cerr << "Code:     " << error.code().value() << std::endl;
-        std::cerr << "Category: " << error.code().category().name() << std::endl;
-        std::cerr << "Message:  " << error.code().message() << std::endl;
+	    logger->error() << "[StandardTimer] caught system_error in " << TimerType::getAsString(type);
+        logger->error() << " Error:    " << error.what();
+        logger->error() << " Code:     " << error.code().value();
+        logger->error() << " Category: " << error.code().category().name();
+        logger->error() << " Message:  " << error.code().message();
     }
 }
 

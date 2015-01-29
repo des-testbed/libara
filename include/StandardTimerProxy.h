@@ -10,6 +10,7 @@
 #include "Environment.h"
 #include "StandardClock.h"
 
+#include "spdlog/spdlog.h"
 
 ARA_NAMESPACE_BEGIN
 
@@ -33,6 +34,8 @@ class StandardTimerProxy : public Timer {
 
     private:
         unsigned long timerIdentifier = -1;
+
+        std::shared_ptr<spdlog::logger> logger;
 };
 
 ARA_NAMESPACE_END

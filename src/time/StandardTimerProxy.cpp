@@ -6,7 +6,15 @@
 
 ARA_NAMESPACE_BEGIN
 
-StandardTimerProxy::StandardTimerProxy(char type, void* contextObject) : Timer(type, contextObject) { }
+StandardTimerProxy::StandardTimerProxy(char type, void* contextObject) : Timer(type, contextObject) { 
+    try {
+        logger = spdlog::get("file_logger");
+    } catch (const spdlog::spdlog_ex& exception) {
+        std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
+    }
+
+    logger->trace() << "[StandardTimerProxy::StandardTimerProxy] " << "proxy for timer of type " << TimerType::getAsString(type) << " initialized";
+}
 
 StandardTimerProxy::~StandardTimerProxy(){ }
 
@@ -16,22 +24,19 @@ void StandardTimerProxy::run(unsigned long timeoutInMicroSeconds){
     if (clock) {
         clock->scheduleTimer(timerIdentifier, timeoutInMicroSeconds);
     } else {
-        /// DEBUG
-        std::cerr << "[StandardTimerProxy::run] dynamic cast failed!" << std::endl;
+        logger->error() << "[StandardTimerProxy::run] " << "dynamic cast failed!";
     }
 }
 
 void StandardTimerProxy::interrupt(){
-    // DEBUG:
-    std::cerr << "[StandardTimer::interrupt] interrupt timer " <<  timerIdentifier << std::endl;
+    logger->trace() << "[StandardTimerProxy::interrupt] " << "interrupt timer " <<  timerIdentifier;
 
     StandardClock* clock = dynamic_cast<StandardClock*>(Environment::getClock());
 
     if (clock) {
         clock->interruptTimer(timerIdentifier);
     } else {
-        /// DEBUG
-        std::cerr << "[StandardTimerProxy::interrupt] dynamic cast failed!" << std::endl;
+        logger->error() << "[StandardTimerProxy::interrupt] " << "dynamic cast failed!";
     }
 }
 
@@ -41,8 +46,7 @@ bool StandardTimerProxy::equals(const Timer* otherTimer) const {
     if (otherStandardTimerProxy) {
         return (this->getHashValue() == otherStandardTimerProxy->getHashValue());
     } else {
-        /// DEBUG
-        std::cerr << "[StandardTimerProxy::equals] dynamic cast failed!" << std::endl;
+        logger->error() << "[StandardTimerProxy::equals] " << "dynamic cast failed!";
     }
 
     return false;
