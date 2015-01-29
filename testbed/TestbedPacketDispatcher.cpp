@@ -28,8 +28,7 @@ dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_pro
             if (packetFactory->checkDessertMessage(message)) {
                 TestbedPacket* packet = packetFactory->makeNewPacket(message);
 
-                // DEBUG: 
-                logger->trace() << "toSys: packet dump:";
+                logger->trace() << "[TestbedPacketDispatcher::toSys] " << "packet dump:";
                 logger->trace() << toString(message, true);
                 
                 TestbedNetworkInterface* networkInterface = client->getTestbedNetworkInterface(std::make_shared<TestbedAddress>(interface->hwaddr));
@@ -38,7 +37,7 @@ dessert_cb_result toSys(dessert_msg_t* message, uint32_t length, dessert_msg_pro
 
             return DESSERT_MSG_KEEP;
         } else {
-            std::cerr << "toSys: dynamic cast on packet factory failed" << std::endl;
+            std::cerr << "[TestbedPacketDispatcher::toSys] " << "dynamic cast on packet factory failed" << std::endl;
         }
 
     } catch (const spdlog::spdlog_ex& exception) {
@@ -76,8 +75,8 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
             /// set the next hop as the destination host 
             std::memcpy(message->l2h.ether_dhost, recipientAddress->getDessertValue(), sizeof(ara_address_t));
 
-            logger->trace() << "dispatch: next hop is " << recipientAddress->toString();
-            logger->trace() << "dispatch: packet dump ";
+            logger->trace() << "[TestbedPacketDispatcher::dispatch] " << "next hop is " << recipientAddress->toString();
+            logger->trace() << "[TestbedPacketDispatcher::dispatch] " << "packet dump ";
             logger->trace() << toString(message, true);
 
             TestbedPacketFactory* packetFactory = dynamic_cast<TestbedPacketFactory*>(client->getPacketFactory());
@@ -91,23 +90,22 @@ int dispatch(const Packet* packet, std::shared_ptr<TestbedAddress> interfaceAddr
              * otherwise).
              */
             if (packetFactory->checkDessertMessage(message)) {
-                std::cerr << "[TestbedPacketDispatcher::dispatch] send message with sequence nr. " << ntohs(message->u16) << 
-                    " and type " << PacketType::getAsString(testbedPacket->getType()) << std::endl;
+                logger->trace() << "[TestbedPacketDispatcher::dispatch] " << "send message with sequence nr. " << ntohs(message->u16) << 
+                    " and type " << PacketType::getAsString(testbedPacket->getType());
                 if ((result = dessert_meshsend_fast(message, interface)) == DESSERT_OK) {
-                    // DEBUG: 
-                    logger->trace() << "sending message was successful";
+                    logger->trace() << "[TestbedPacketDispatcher::dispatch] " << "sending message was successful";
                 } else if(result == EINVAL) {
-                    logger->error() << "error in dessert_mesh_send(): message was broken";
+                    logger->error() << "[TestbedPacketDispatcher::dispatch] " << "error in dessert_mesh_send(): message was broken";
                 } else if(result == EIO) {
-                    logger->error() << "error in dessert_mesh_send(): message was not sent succesfully";
+                    logger->error() << "[TestbedPacketDispatcher::dispatch] " << "error in dessert_mesh_send(): message was not sent succesfully";
                 } else {
-                    logger->error() << "error in dessert_mesh_send():  unknown error code";
+                    logger->error() << "[TestbedPacketDispatcher::dispatch] " << "error in dessert_mesh_send():  unknown error code";
                 }
             } else {
-                logger->error() << "the message check failed and hence, the message was not sent";
+                logger->error() << "[TestbedPacketDispatcher::dispatch] " << "the message check failed and hence, the message was not sent";
             }
         } else {
-            logger->error() << "dispatch: dynamic cast on packet failed";
+            logger->error() << "[TestbedPacketDispatcher::dispatch] " << "dynamic cast on packet failed";
         }
     } catch (const spdlog::spdlog_ex& exception) {
         std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
@@ -136,12 +134,12 @@ dessert_cb_result toMesh(dessert_msg_t* message, uint32_t length, dessert_msg_pr
         if (packetFactory) {
             TestbedPacket* packet = packetFactory->makeNewPacket(message);
 
-            logger->trace() << "toMesh: packet dump ";
+            logger->trace() << "[TestbedPacketDispatcher::toMesh] " << "packet dump ";
             logger->trace() << packet->toString();
 
             client->sendPacket(packet);
         } else {
-            logger->error() << "dynamic cast on packet factory failed";
+            logger->error() << "[TestbedPacketDispatcher::toMesh] " << "dynamic cast on packet factory failed";
         }
 
     } catch (const spdlog::spdlog_ex& exception) {

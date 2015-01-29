@@ -156,7 +156,6 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
                    std::memcpy(tempPayload, payload, payloadSize);
                 }
             } else {
-                // DEBUG:
                 logger->error() << "toDessertMessage: memory allocation for payload failed";
             }
         } else if (type == PacketType::PANT){
@@ -202,7 +201,6 @@ dessert_msg_t* TestbedPacket::toDessertMessage() const {
         }
     /// creating a dessert_msg_t failed
     } else {
-        // DEBUG:
         logger->error() << "toDessertMessage: creating a new dessert message failed";
     }
 

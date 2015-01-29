@@ -12,15 +12,12 @@ TestbedTimerAddressInfo::TestbedTimerAddressInfo(std::shared_ptr<Address> destin
     } catch (const spdlog::spdlog_ex& exception) {
         std::cerr << "getting file logger failed: " << exception.what() << std::endl;
     }
-
-
 }
 
 std::shared_ptr<TestbedAddress> TestbedTimerAddressInfo::getDestination() {
     try {
         std::lock_guard<std::mutex> lock(addressMutex);
     } catch (const std::system_error& error) {
-        // DEBUG:
         logger->error() << "caught system_error:";
         logger->error() << " Error:    " << error.what();
         logger->error() << " Code:     " << error.code().value();
