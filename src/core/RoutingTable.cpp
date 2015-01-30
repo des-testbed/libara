@@ -284,7 +284,7 @@ std::deque<RoutingTableEntryTupel> RoutingTable::getAllRoutesThatLeadOver(Addres
 
 std::string RoutingTable::toString(int position) {
     int currentPosition = 0;
-    std::ostringstream result;
+    std::ostringstream data;
     RoutingTableMap::const_iterator i;
 
     for (i = table.begin(); i !=table.end(); i++) {
@@ -293,11 +293,12 @@ std::string RoutingTable::toString(int position) {
 
         for (auto& entry: *entryList) {
 	        if (position < 0) {
-	            result << "[destination] " << *destination << " " << *entry << std::endl;
+	            data << "[destination] " << *destination << " " << *entry << std::endl;
 	        } else {
 	            if (currentPosition == position) {
-	                result << "[destination] " << *destination << " " << *entry << std::endl;
-		            return result.str();
+	                data << "[destination] " << *destination << " " << *entry << std::endl;
+                    std::string result = data.str();
+		            return result;
 	            } else {
 	                currentPosition++;
 	            }
@@ -305,7 +306,8 @@ std::string RoutingTable::toString(int position) {
         }
     }
 
-    return result.str();
+    std::string result = data.str();
+    return result;
 }
 
 ARA_NAMESPACE_END
