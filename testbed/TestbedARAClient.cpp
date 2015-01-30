@@ -16,11 +16,11 @@ TestbedARAClient::TestbedARAClient(Configuration& configuration) : AbstractARACl
         std::cerr<< "getting file logger failed: " << exception.what() << std::endl;
     }
 
-    logger->trace() << "Initialized testbedARAClient";
+    logger->trace() << "TestbedARAClient::TestbedARAClient " << "initialized TestbedARAClient";
 
     initializeNetworkInterfaces();
 
-    logger->trace() << "Initialized testbedARAClient network Interfaces";
+    logger->trace() << "TestbedARAClient::TestbedARAClient " << "initialized TestbedARAClient network interfaces";
 }
 
 std::string TestbedARAClient::toString() { 
@@ -66,7 +66,7 @@ void TestbedARAClient::sendPacket(Packet* packet) {
 }
 
 void TestbedARAClient::receivePacket(Packet* packet, ARA::NetworkInterface* interface) {
-    logger->trace() << "receiving packet #" << packet->getSequenceNumber() << " type " << PacketType::getAsString(packet->getType()).c_str() << "over interface at " << interface->getLocalAddress()->toString().c_str();
+    logger->trace() << "[TestbedARAClient::receivePacket] " << "receiving packet #" << packet->getSequenceNumber() << " type " << PacketType::getAsString(packet->getType()).c_str() << " over interface at " << interface->getLocalAddress()->toString().c_str();
 
     AbstractARAClient::receivePacket(packet, interface);
     //TODO: persistRoutingTableData
@@ -114,12 +114,12 @@ void TestbedARAClient::initializeNetworkInterfaces() {
         TestbedNetworkInterface* newInterface = new TestbedNetworkInterface(interfaceName, this, hardwareAddress, broadcastAddress, packetFactory, 400000);
 
         addNetworkInterface(newInterface);
-        logger->trace() << "initialized network interface: " << dessertInterfaces->if_name;
+        logger->trace() << "TestbedARAClient::initializeNetworkInterface " << "initialized network interface: " << dessertInterfaces->if_name;
         dessertInterfaces = dessertInterfaces->next;
     }
 
     tapAddress = std::make_shared<TestbedAddress>(dessert_l25_defsrc);
-    logger->trace() << "tap address is: " << tapAddress->toString();
+    logger->trace() << "TestbedARAClient::initializeNetworkInterface " << "tap address is: " << tapAddress->toString();
 }
 
 bool TestbedARAClient::isLocalAddress(AddressPtr address) const {
@@ -154,7 +154,6 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
         AddressPtr destination = timerInfo->getDestination();
 
         if (destination) {
-            // DEBUG:
             logger->trace() << "trying to find destination " <<  destination->toString() << 
                 " in running route discoveries";
 
@@ -179,7 +178,6 @@ void TestbedARAClient::handleExpiredDeliveryTimer(std::weak_ptr<Timer> deliveryT
             }
         }
     } else {
-        // DEBUG: 
         logger->error() << "shared_ptr expired";
     }
 
