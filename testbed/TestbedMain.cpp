@@ -6,6 +6,7 @@
 
 using namespace std;
 
+
 /**
  * The function creates a basic configuration for the ARA routing daemon.
  */
@@ -43,6 +44,9 @@ static void registerCommandLineInterfaceCommands() {
     cli_register_command(dessert_cli, dessert_cli_show, "routing table", ARA::testbed::cli_show_routing_table, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "displays the content of the routing table");
     cli_register_command(dessert_cli, dessert_cli_show, "configuration", ARA::testbed::cli_show_configuration, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "displays the current configuration");
     cli_register_command(dessert_cli, dessert_cli_show, "statistics", ARA::testbed::cli_show_statistics, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "shows various statistics of the routing daemon");
+
+    /// the function sets the logfilename for the spdlogger
+    cli_register_command(dessert_cli, dessert_cli_set, "logfile", ARA::testbed::cli_set_logfile, PRIVILEGE_UNPRIVILEGED, MODE_ANY, "set the log filename");
 }
 
 /**
@@ -76,24 +80,6 @@ int main(int argc, char** argv) {
         /// set log level of all loggers to trace and above
         spd::set_level(spd::level::trace);
 
-        char hostName[64];
-
-        /// determine host name 
-        if (gethostname(hostName, sizeof(hostName)) != 0) {
-            std::cerr << "could not get host name! errno " << errno << ": " << strerror(errno) << std::endl;
-        } 
-
-        /// construct log file name
-        std::stringstream logFileName;
-        logFileName << "logs/" << hostName;
-
-        std::string logFile = logFileName.str();
-
-        /// Create a file rotating logger with 5mb size max and 3 rotated files
-        auto file_logger = spd::rotating_logger_mt("file_logger", logFile, 1048576 * 5, 3, true);
-        file_logger->set_level(spd::level::trace);
-        spd::set_pattern("*** [%H:%M:%S:%e] [thread %t] %v ***");
-
         /// get a file pointer to the configuration file
         FILE* cfg = dessert_cli_get_cfg(argc, argv);
 
@@ -109,6 +95,14 @@ int main(int argc, char** argv) {
         dessert_debug("applying configuration");
         cli_file(dessert_cli, cfg, PRIVILEGE_PRIVILEGED, MODE_CONFIG);
         dessert_debug("configuration applied");
+
+        /// construct log file name
+        std::string logFile = logFileName.str();
+
+        /// Create a file rotating logger with 5mb size max and 3 rotated files
+        auto file_logger = spd::rotating_logger_mt("file_logger", logFile, 1048576 * 5, 3, true);
+        file_logger->set_level(spd::level::trace);
+        spd::set_pattern("*** [%H:%M:%S:%e] [thread %t] %v ***");
 
         // create a new configuration for ARA and pass it to the client
         ARA::BasicConfiguration configuration = createConfiguration(5.0, 5.0);

@@ -3,12 +3,10 @@
  */
 
 #include "CLibs.h"
-#include "Packet.h"
-#include "Testbed.h"
-#include "TestbedARAClient.h"
+
 #include "TestbedCommandLineInterface.h"
 
-//extern std::shared_ptr<ARA::testbed::TestbedARAClient> client;
+extern std::stringstream logFileName;
 extern ARA::testbed::TestbedARAClient* client;
 
 TESTBED_NAMESPACE_BEGIN
@@ -30,6 +28,25 @@ int cli_set_ack_timeout(struct cli_def* cli, const char* command, char* argv[], 
 }
 
 //int cli_set_route_discovery_timeout(struct cli_def* cli, const char* command, char* argv[], int argc);
+//
+
+/**
+ *
+ */
+int cli_set_logfile(struct cli_def* cli, const char* command, char* argv[], int argc){
+    if (argc != 1) {
+        cli_print(cli, "usage %s logfilename", command);
+        return CLI_ERROR;
+    }
+    // clear it first
+    logFileName.str("");
+    logFileName.clear();
+
+    // we can only set it once (which makes sense)
+    logFileName << argv[0];
+
+    return CLI_OK;
+}
 
 int cli_show_configuration(struct cli_def* cli, const char* command, char* argv[], int argc) {
     std::string configuration = client->toString();

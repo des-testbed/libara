@@ -8,6 +8,7 @@
 #include "ARAMacros.h"
 
 #include "CLibs.h"
+
 #include <memory>
 
 #define TESTBED_NAMESPACE_BEGIN namespace ARA { namespace testbed {
@@ -24,6 +25,7 @@ enum _ARA_EXT_TYPES {
     /// backward ant (FANT)
     ARA_EXT_BANT,                     
 };
+
 
 #include "TestbedAddress.h"
 class TestbedAddress;

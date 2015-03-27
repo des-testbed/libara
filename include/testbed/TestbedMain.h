@@ -25,12 +25,10 @@
 #include <cerrno>
 #include <sstream>
 
-//std::shared_ptr<ARA::testbed::TestbedARAClient> client;
 ARA::testbed::TestbedARAClient *client;
+std::stringstream logFileName;
 
 TESTBED_NAMESPACE_BEGIN
-
-//std::mutex clientMutex;
 
 /**
  * The function allocates memory for TestbedARAClient global
@@ -40,9 +38,7 @@ TESTBED_NAMESPACE_BEGIN
  */
 void initializeClient(ARA::BasicConfiguration configuration);
 
-
 void destroyClient();
-
 
 TESTBED_NAMESPACE_END
 

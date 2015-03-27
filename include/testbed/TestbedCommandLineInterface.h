@@ -8,11 +8,12 @@
 #include "Packet.h"
 #include "StandardClock.h"
 
-#include "CLibs.h"
 #include "Testbed.h"
 #include "Environment.h"
 #include "TestbedARAClient.h"
 #include "TestbedNetworkInterface.h"
+
+#include <sstream>
 
 TESTBED_NAMESPACE_BEGIN
 
@@ -31,12 +32,11 @@ int cli_show_configuration(struct cli_def* cli, const char* command, char* argv[
  */
 int cli_show_statistics(struct cli_def* cli, const char* command, char* argv[], int argc);
 
-
 //int cli_list_active_timers(struct cli_def* cli, char* command, char* argv[], int argc);
 
 int cli_set_ack_timeout(struct cli_def* cli, const char* command, char* argv[], int argc);
 //int cli_set_route_discovery_timeout(struct cli_def* cli, const char* command, char* argv[], int argc);
-
+int cli_set_logfile(struct cli_def* cli, const char* command, char* argv[], int argc);
 
 // TODO: check if this is still required
 int cli_setup_meshif(struct cli_def* cli, const char* command, char* argv[], int argc);
