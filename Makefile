@@ -167,7 +167,7 @@ libARA: $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)
 #
 # Build the ARA library (libARA)
 #
-$(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(LIBARA_O) $(SPDLOG_FOLDER)/.git
+$(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME): $(SPDLOG_FOLDER)/.git $(LIBARA_O) 
 	@echo "Linking $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME)"
 	@$(CXX) -shared $(CFLAGS) $(INCLUDE_PATH) $(LINKFLAGS) $(LIBARA_O) \
 		-o $(OUTPUT_DIR)/$(ARA_SONAME).$(ARA_MINOR_VERSION)
@@ -253,7 +253,6 @@ $(TESTBEDARA_EXECUTABLE): $(LIBARA_SRC_FOLDER)/$(ARA_LIB_NAME) $(TESTBEDARA_O) $
 	@cd $(TESTBEDARA_SRC_FOLDER) && ln -s -f ../$(TESTBEDARA_EXECUTABLE) $(TESTBEDARA_EXECUTABLE_NAME)
 
 # spdlog ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 #
 # Checkout the spdlog submodule (we don't need to build it, since it consists only of header files)
 #
